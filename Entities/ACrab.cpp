@@ -23,13 +23,15 @@
 #include "HDFirearm.h"
 #include "PieMenuGUI.h"
 #include "Scene.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(ACrab, Actor, 20)
+ConcreteClassInfo(ACrab, Actor, 20);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -46,13 +48,19 @@ void ACrab::Clear()
     m_pRFGLeg = 0;
     m_pRBGLeg = 0;
     m_pLFGFootGroup = 0;
+    m_BackupLFGFootGroup = nullptr;
     m_pLBGFootGroup = 0;
+    m_BackupLBGFootGroup = nullptr;
     m_pRFGFootGroup = 0;
+    m_BackupRFGFootGroup = nullptr;
     m_pRBGFootGroup = 0;
-    m_StrideSound.Reset();
+    m_BackupRBGFootGroup = nullptr;
+    m_StrideSound = nullptr;
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetReplenishRate = 1.0F;
+	m_JetAngleRange = 0.25F;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
@@ -161,67 +169,56 @@ int ACrab::Create(BITMAP *pSprite,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACrab to be identical to another, by deep copy.
 
-int ACrab::Create(const ACrab &reference)
-{
+int ACrab::Create(const ACrab &reference) {
+    if (reference.m_pLBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLBGLeg->GetUniqueID()); }
+    if (reference.m_pRBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRBGLeg->GetUniqueID()); }
+    if (reference.m_pJetpack) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID()); }
+    if (reference.m_pTurret) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pTurret->GetUniqueID()); }
+    if (reference.m_pLFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLFGLeg->GetUniqueID()); }
+    if (reference.m_pRFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRFGLeg->GetUniqueID()); }
+
     Actor::Create(reference);
 
-    if (reference.m_pTurret)
-    {
-        m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-		m_pTurret->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pTurret, true);
-    }
-
-    if (reference.m_pJetpack)
-    {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pLBGLeg) { SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone())); }
+    if (reference.m_pRBGLeg) { SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pTurret) { SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone())); }
+    if (reference.m_pLFGLeg) { SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone())); }
+    if (reference.m_pRFGLeg) { SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone())); }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
-
-    if (reference.m_pLFGLeg)
-    {
-        m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        AddAttachable(m_pLFGLeg, true);
-    }
-
-    if (reference.m_pLBGLeg)
-    {
-        m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        AddAttachable(m_pLBGLeg, true);
-    }
-
-    if (reference.m_pRFGLeg)
-    {
-        m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        AddAttachable(m_pRFGLeg, true);
-    }
-
-    if (reference.m_pRBGLeg)
-    {
-        m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        AddAttachable(m_pRBGLeg, true);
-    }
+	m_JetReplenishRate = reference.m_JetReplenishRate;
+	m_JetAngleRange = reference.m_JetAngleRange;
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
     m_pLFGFootGroup->SetOwner(this);
+    m_BackupLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLFGFootGroup->Clone());
+    m_BackupLFGFootGroup->SetOwner(this);
+    m_BackupLFGFootGroup->SetLimbPos(reference.m_BackupLFGFootGroup->GetLimbPos());
     m_pLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLBGFootGroup->Clone());
     m_pLBGFootGroup->SetOwner(this);
+    m_BackupLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLBGFootGroup->Clone());
+    m_BackupLBGFootGroup->SetOwner(this);
+    m_BackupLBGFootGroup->SetLimbPos(reference.m_BackupLBGFootGroup->GetLimbPos());
     m_pRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRFGFootGroup->Clone());
     m_pRFGFootGroup->SetOwner(this);
+    m_BackupRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRFGFootGroup->Clone());
+    m_BackupRFGFootGroup->SetOwner(this);
+    m_BackupRFGFootGroup->SetLimbPos(reference.m_BackupRFGFootGroup->GetLimbPos());
     m_pRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRBGFootGroup->Clone());
     m_pRBGFootGroup->SetOwner(this);
+    m_BackupRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRBGFootGroup->Clone());
+    m_BackupRBGFootGroup->SetOwner(this);
+    m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_MoveState = reference.m_MoveState;
 
-    for (int side = 0; side < SIDECOUNT; ++side)
-    {
-        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-        {
+    for (int side = 0; side < SIDECOUNT; ++side) {
+        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
             m_Paths[side][FGROUND][i].Create(reference.m_Paths[side][FGROUND][i]);
             m_Paths[side][BGROUND][i].Create(reference.m_Paths[side][BGROUND][i]);
         }
@@ -253,54 +250,28 @@ int ACrab::Create(const ACrab &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACrab::ReadProperty(std::string propName, Reader &reader)
+int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "Turret")
-    {
-        delete m_pTurret;
-        m_pTurret = new Turret;
-        reader >> m_pTurret;
-		if (!m_pTurret->IsDamageMultiplierRedefined())
-			m_pTurret->SetDamageMultiplier(5);
-    }
-    else if (propName == "Jetpack")
-    {
-        delete m_pJetpack;
-        m_pJetpack = new AEmitter;
-        reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+    if (propName == "Turret") {
+        SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "Jetpack") {
+        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+	} else if (propName == "JumpTime" || propName == "JetTime") {
         reader >> m_JetTimeTotal;
-        // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "LFGLeg")
-    {
-        delete m_pLFGLeg;
-        m_pLFGLeg = new Leg;
-        reader >> m_pLFGLeg;
-    }
-    else if (propName == "LBGLeg")
-    {
-        delete m_pLBGLeg;
-        m_pLBGLeg = new Leg;
-        reader >> m_pLBGLeg;
-    }
-    else if (propName == "RFGLeg")
-    {
-        delete m_pRFGLeg;
-        m_pRFGLeg = new Leg;
-        reader >> m_pRFGLeg;
-    }
-    else if (propName == "RBGLeg")
-    {
-        delete m_pRBGLeg;
-        m_pRBGLeg = new Leg;
-        reader >> m_pRBGLeg;
-    }
-    else if (propName == "LFootGroup")
-    {
+	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
+		reader >> m_JetReplenishRate;
+	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
+		reader >> m_JetAngleRange;
+    } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
+        SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "LBGLeg" || propName == "LeftBGLeg") {
+        SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RFGLeg" || propName == "RightFGLeg") {
+        SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RBGLeg" || propName == "RightBGLeg") {
+        SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -309,9 +280,10 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLBGFootGroup->Create(*m_pLFGFootGroup);
         m_pLFGFootGroup->SetOwner(this);
         m_pLBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "RFootGroup")
-    {
+        m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
+        m_BackupLFGFootGroup->RemoveAllAtoms();
+        m_BackupLBGFootGroup = new AtomGroup(*m_BackupLFGFootGroup);
+    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -320,27 +292,31 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pRBGFootGroup->Create(*m_pRFGFootGroup);
         m_pRFGFootGroup->SetOwner(this);
         m_pRBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+        m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
+        m_BackupRFGFootGroup->RemoveAllAtoms();
+        m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
+    } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    else if (propName == "LStandLimbPath")
+    } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    else if (propName == "LWalkLimbPath")
+    } else if (propName == "LWalkLimbPath" || propName == "LeftWalkLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    else if (propName == "LDislodgeLimbPath")
+    } else if (propName == "LDislodgeLimbPath" || propName == "LeftDislodgeLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    else if (propName == "RStandLimbPath")
+    } else if (propName == "RStandLimbPath" || propName == "RightStandLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    else if (propName == "RWalkLimbPath")
+    } else if (propName == "RWalkLimbPath" || propName == "RightWalkLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    else if (propName == "RDislodgeLimbPath")
+    } else if (propName == "RDislodgeLimbPath" || propName == "RightDislodgeLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-    else if (propName == "AimRangeUpperLimit")
+    } else if (propName == "AimRangeUpperLimit") {
         reader >> m_AimRangeUpperLimit;
-    else if (propName == "AimRangeLowerLimit")
+    } else if (propName == "AimRangeLowerLimit") {
         reader >> m_AimRangeLowerLimit;
-    else
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -363,6 +339,10 @@ int ACrab::Save(Writer &writer) const
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpReplenishRate");
+	writer << m_JetReplenishRate;
+	writer.NewProperty("JumpAngleRange");
+	writer << m_JetAngleRange;
     writer.NewProperty("LFGLeg");
     writer << m_pLFGLeg;
     writer.NewProperty("LBGLeg");
@@ -403,47 +383,6 @@ int ACrab::Save(Writer &writer) const
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ACrab object ready for use.
-
-int ACrab::Create(istream &stream, bool checkType)
-{
-    if (checkType)
-    {
-        string name;
-        stream >> name;
-        if (name != m_sClass.GetName())
-        {
-           RTEAbort("Wrong type in stream when passed to Create");
-           return -1;
-        }
-    }
-
-    Actor::Create(stream);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACrab to an output stream for
-//                  later recreation with Create(istream &stream);
-
-int ACrab::Save(ostream &stream) const
-{
-    stream << m_sClass.GetName() << " ";
-
-    Actor::Save(stream);
-//    stream << " ";
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -452,16 +391,12 @@ int ACrab::Save(ostream &stream) const
 
 void ACrab::Destroy(bool notInherited)
 {
-    delete m_pTurret;
-    delete m_pLFGLeg;
-    delete m_pLBGLeg;
-    delete m_pRFGLeg;
-    delete m_pRBGLeg;
-    delete m_pJetpack;
     delete m_pLFGFootGroup;
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;
     delete m_pRBGFootGroup;
+
+	delete m_StrideSound;
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
 //        delete *itr;
@@ -469,29 +404,6 @@ void ACrab::Destroy(bool notInherited)
     if (!notInherited)
         Actor::Destroy();
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACrab, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACrab::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pTurret)
-        totalMass += m_pTurret->GetMass();
-    if (m_pLFGLeg)
-        totalMass += m_pLFGLeg->GetMass();
-    if (m_pLBGLeg)
-        totalMass += m_pLBGLeg->GetMass();
-    if (m_pRFGLeg)
-        totalMass += m_pRFGLeg->GetMass();
-    if (m_pRBGLeg)
-        totalMass += m_pRBGLeg->GetMass();
-    return totalMass;
 }
 
 /*
@@ -531,33 +443,141 @@ Vector ACrab::GetCPUPos() const
 
 Vector ACrab::GetEyePos() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->GetMountedMO())
-        return m_pTurret->GetMountedMO()->GetPos();
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
+        return m_pTurret->GetFirstMountedDevice()->GetPos();
 
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
+void ACrab::SetTurret(Turret *newTurret) {
+    if (m_pTurret && m_pTurret->IsAttached()) { RemoveAndDeleteAttachable(m_pTurret); }
+    if (newTurret == nullptr) {
+        m_pTurret = nullptr;
+    } else {
+        m_pTurret = newTurret;
+        AddAttachable(newTurret);
 
-void ACrab::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pTurret)
-        m_pTurret->SetID(newID);
-    if (m_pLFGLeg)
-        m_pLFGLeg->SetID(newID);
-    if (m_pLBGLeg)
-        m_pLBGLeg->SetID(newID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->SetID(newID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->SetID(newID);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newTurret->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Turret *castedAttachable = dynamic_cast<Turret *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetTurret");
+            dynamic_cast<ACrab *>(parent)->SetTurret(castedAttachable);
+        }});
+
+        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetJetpack(AEmitter *newJetpack) {
+    if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
+    if (newJetpack == nullptr) {
+        m_pJetpack = nullptr;
+    } else {
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
+        }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftFGLeg(Leg *newLeg) {
+    if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLFGLeg); }
+    if (newLeg == nullptr) {
+        m_pLFGLeg = nullptr;
+    } else {
+        m_pLFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(castedAttachable);
+        }});
+
+        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        m_pLFGLeg->SetInheritsHFlipped(-1);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftBGLeg(Leg *newLeg) {
+    if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLBGLeg); }
+    if (newLeg == nullptr) {
+        m_pLBGLeg = nullptr;
+    } else {
+        m_pLBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(castedAttachable);
+        }});
+
+        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        m_pLBGLeg->SetInheritsHFlipped(-1);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetRightFGLeg(Leg *newLeg) {
+    if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRFGLeg); }
+    if (newLeg == nullptr) {
+        m_pRFGLeg = nullptr;
+    } else {
+        m_pRFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightFGLeg(castedAttachable);
+        }});
+
+        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetRightBGLeg(Leg *newLeg) {
+    if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRBGLeg); }
+    if (newLeg == nullptr) {
+        m_pRBGLeg = nullptr;
+    } else {
+        m_pRBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightBGLeg(castedAttachable);
+        }});
+
+        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP * ACrab::GetGraphicalIcon() const {
+	return m_GraphicalIcon ? m_GraphicalIcon : (m_pTurret ? m_pTurret->GetSpriteFrame(0) : GetSpriteFrame(0));
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
@@ -638,34 +658,34 @@ bool ACrab::OnSink(const Vector &pos)
 
 bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieMenuGUI::Slice reloadSlice("Reload", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP);
+	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, !FirearmsAreFull() && m_Status != INACTIVE);
     pPieMenu->AddSlice(reloadSlice);
 
-	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
+	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(sentryAISlice);
 
     if (!HasObjectInGroup("Turrets"))
     {
-	    PieMenuGUI::Slice aiModeSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
+	    PieSlice aiModeSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
         pPieMenu->AddSlice(aiModeSlice);
     }
 
-	PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+	PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
 
     if (!HasObjectInGroup("Turrets"))
     {
-	    PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
+	    PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
         pPieMenu->AddSlice(formSquadSlice);
     }
 
-//    pPieMenu->AddSlice(PieMenuGUI::Slice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN));
+//    pPieMenu->AddSlice(PieSlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieSlice::DOWN));
 
     Actor::AddPieMenuSlices(pPieMenu);
 
     // Add any custom slices from a currently held device
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
-        m_pTurret->GetMountedDevice()->AddPieMenuSlices(pPieMenu);
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
+        m_pTurret->GetFirstMountedDevice()->AddPieMenuSlices(pPieMenu); //TODO This should care about all devices but all this will be redone soon so I'm leaving it as-is.
 
     return true;
 }
@@ -677,23 +697,23 @@ bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 // Description:     Handles and does whatever a specific activated Pie Menu slice does to
 //                  this.
 
-bool ACrab::HandlePieCommand(int pieSliceIndex)
+bool ACrab::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_RELOAD)
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieMenuGUI::PSI_SENTRY)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieMenuGUI::PSI_PATROL)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieMenuGUI::PSI_BRAINHUNT)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
         {
             m_AIMode = AIMODE_BRAINHUNT;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOTO)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
         {
             m_AIMode = AIMODE_GOTO;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
@@ -711,31 +731,15 @@ bool ACrab::HandlePieCommand(int pieSliceIndex)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetTurret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns any attached turret.
-
-Attachable * ACrab::GetTurret() const
-{
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        return dynamic_cast<Attachable *>(m_pTurret);
-    }
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * ACrab::GetEquippedItem() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        return m_pTurret->GetMountedMO();
+        return m_pTurret->GetFirstMountedDevice();
     }
 
     return 0;
@@ -748,13 +752,13 @@ MovableObject * ACrab::GetEquippedItem() const
 // Description:     Indicates whether the currently held device's current mag is empty on
 //                  ammo or not.
 
-bool ACrab::FirearmIsReady() const
-{
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
-        if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
-            return true;
+bool ACrab::FirearmIsReady() const {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && mountedFirearm->GetRoundInMagCount() != 0) {
+                return true;
+            }
+        }
     }
 
     return false;
@@ -766,16 +770,8 @@ bool ACrab::FirearmIsReady() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is out of ammo.
 
-bool ACrab::FirearmIsEmpty() const
-{
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
-        if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
-            return true;
-    }
-
-    return false;
+bool ACrab::FirearmIsEmpty() const {
+    return !FirearmIsReady() && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice();
 }
 
 
@@ -784,13 +780,26 @@ bool ACrab::FirearmIsEmpty() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
 
-bool ACrab::FirearmNeedsReload() const
-{
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
-        if (pWeapon && pWeapon->NeedsReloading())
-            return true;
+bool ACrab::FirearmsAreFull() const {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && !mountedFirearm->IsFull()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool ACrab::FirearmNeedsReload() const {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && mountedFirearm->NeedsReloading()) {
+                return true;
+            }
+        }
     }
 
     return false;
@@ -804,9 +813,9 @@ bool ACrab::FirearmNeedsReload() const
 
 bool ACrab::FirearmIsSemiAuto() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetFirstMountedDevice());
         return pWeapon && !pWeapon->IsFullAuto();
     }
     return false;
@@ -814,22 +823,21 @@ bool ACrab::FirearmIsSemiAuto() const
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  ReloadFirearm
+// Virtual Method:  ReloadFirearms
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the currently held firearm, if any.
+// Description:     Reloads the currently held firearms, if any.
 // Arguments:       None.
 // Return value:    None.
 
-void ACrab::ReloadFirearm()
-{
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
-        if (pWeapon)
-            pWeapon->Reload();
+void ACrab::ReloadFirearms() {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice)) {
+                mountedFirearm->Reload();
+            }
+        }
     }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  FirearmActivationDelay
@@ -840,9 +848,9 @@ void ACrab::ReloadFirearm()
 int ACrab::FirearmActivationDelay() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetFirstMountedDevice());
         if (pWeapon)
             return pWeapon->GetActivationDelay();
     }
@@ -873,9 +881,9 @@ bool ACrab::IsWithinRange(Vector &point) const
     float range = m_AimDistance;
 
     // Add the sharp range of the equipped weapon
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        range += m_pTurret->GetMountedDevice()->GetSharpLength() * m_SharpAimProgress;
+        range += m_pTurret->GetFirstMountedDevice()->GetSharpLength() * m_SharpAimProgress;
     }
 
     return distance <= range;
@@ -899,10 +907,10 @@ bool ACrab::Look(float FOVSpread, float range)
     Vector aimPos = GetCPUPos();
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        aimPos = m_pTurret->GetMountedDevice()->GetPos();
-        aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
+        aimPos = m_pTurret->GetFirstMountedDevice()->GetPos();
+        aimDistance += m_pTurret->GetFirstMountedDevice()->GetSharpLength();
     }
     // If just looking, use the sensors on the turret instead
     else if (m_pTurret && m_pTurret->IsAttached())
@@ -941,10 +949,10 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     float aimDistance = m_AimDistance + g_FrameMan.GetPlayerScreenWidth() * 0.51;   // Set the length of the look vector
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        aimPos = m_pTurret->GetMountedDevice()->GetPos();
-        aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
+        aimPos = m_pTurret->GetFirstMountedDevice()->GetPos();
+        aimDistance += m_pTurret->GetFirstMountedDevice()->GetSharpLength();
     }
     // If just looking, use the sensors on the turret instead
     else if (m_pTurret && m_pTurret->IsAttached())
@@ -968,86 +976,6 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
         return pSeenMO->GetRootParent();
 
     return pSeenMO;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Detach all limbs and let loose
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
-        m_pTurret->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pTurret);
-        m_pTurret = 0;
-    }
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Jetpacks are really nothing, so just delete them safely
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack->SetToDelete(true);
-        g_MovableMan.AddParticle(m_pJetpack);
-        m_pJetpack = 0;
-    }
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
-        m_pLFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pLFGLeg);
-        m_pLFGLeg = 0;
-    }
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
-        m_pLBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pLBGLeg);
-        m_pLBGLeg = 0;
-    }
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
-        m_pRFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pRFGLeg);
-        m_pRFGLeg = 0;
-    }
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
-        m_pRBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pRBGLeg);
-        m_pRBGLeg = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool ACrab::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pTurret && m_pTurret->IsOnScenePoint(scenePoint)) ||
-            (m_pLFGLeg && m_pLFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRFGLeg && m_pRFGLeg->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pLBGLeg && m_pLBGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRBGLeg && m_pRBGLeg->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -1196,14 +1124,13 @@ void ACrab::UpdateAI()
         }
         else
         {
-            // Stop and then turn around after a period of time, or if bumped into another actor (like a rocket)
-            if (m_PatrolTimer.IsPastSimMS(8000) ||
-                /*g_SceneMan.CastNotMaterialRay(m_Pos, Vector(m_CharHeight / 4, 0), g_MaterialAir, Vector(), 4, false)*/
-                g_SceneMan.CastMORay(m_Pos, Vector((m_LateralMoveState == LAT_RIGHT ? m_CharHeight : -m_CharHeight) / 3, 0), m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 4) != g_NoMOID)
-            {
-                m_PatrolTimer.Reset();
-                m_LateralMoveState = LAT_STILL;
-            }
+			Vector hitPos;
+			Vector trace((m_LateralMoveState == LAT_RIGHT ? GetRadius() : -GetRadius()) * 0.5F, 0);
+			// Stop and turn around after a period of time, or if bumped into another actor (like a rocket), or if walking off a ledge.
+			if (m_PatrolTimer.IsPastSimMS(8000) || g_SceneMan.CastMORay(m_Pos, trace, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 5) != g_NoMOID || !g_SceneMan.CastStrengthRay(m_Pos + trace, Vector(0, GetRadius()), 5.0F, hitPos, 5, g_MaterialGrass)) {
+				m_PatrolTimer.Reset();
+				m_LateralMoveState = LAT_STILL;
+			}
         }
     }
     // Going to a goal, potentially through a set of waypoints
@@ -2194,6 +2121,7 @@ void ACrab::Update()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
+	Vector analogAim = m_Controller.GetAnalogAim();
 
     // Set Default direction of all the paths!
     for (int side = 0; side < SIDECOUNT; ++side)
@@ -2210,68 +2138,62 @@ void ACrab::Update()
 
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
-        // Start Jetpack burn
-        if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0)
-        {
-            m_pJetpack->TriggerBurst();
-            // This is to make sure se get loose from being stuck
-            m_ForceDeepCheck = true;
-            m_pJetpack->EnableEmission(true);
-            // Quadruple this for the burst
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
-            if (m_JetTimeLeft < 0)
-                m_JetTimeLeft = 0;
-        }
-        // Jetpack is burning
-        else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
-        {
+		if (m_JetTimeTotal > 0) {
+			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
+			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
+			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+		}
+		// Start Jetpack burn
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
+		{
+			m_pJetpack->TriggerBurst();
+			// This is to make sure se get loose from being stuck
+			m_ForceDeepCheck = true;
+			m_pJetpack->EnableEmission(true);
+			// Quadruple this for the burst
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
+		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
             m_pJetpack->EnableEmission(true);
             // Jetpacks are noisy!
             m_pJetpack->AlarmOnEmit(m_Team);
             // Deduct from the jetpack time
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
+            m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
             m_MoveState = JUMP;
         }
         // Jetpack is off/turning off
-        else
-        {
+        else {
             m_pJetpack->EnableEmission(false);
-            if (m_MoveState == JUMP)
-                m_MoveState = STAND;
+			if (m_MoveState == JUMP) { m_MoveState = STAND; }
 
-            // Replenish the jetpack time, twice as fast
-            m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-            if (m_JetTimeLeft >= m_JetTimeTotal)
-                m_JetTimeLeft = m_JetTimeTotal;
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
         }
 
-        // Direct the jetpack nozzle according to movement stick if analog input is present
-        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
-        {
-            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + c_PI;
-            // Clamp the angle to 45 degrees down cone with centr straight down on body
-            if (jetAngle > c_PI + c_HalfPI + c_QuarterPI)// - c_SixteenthPI)
-                jetAngle = c_PI + c_HalfPI + c_QuarterPI;// - c_SixteenthPI;
-            else if (jetAngle < c_PI + c_QuarterPI)// + c_SixteenthPI)
-                jetAngle = c_PI + c_QuarterPI;// + c_SixteenthPI;
-
-            m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
-        }
-        // Or just use the aim angle if we're getting digital input
-        else
-        {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
-            // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
-            m_pJetpack->SetEmitAngle(jetAngle);
-        }
+		float maxAngle = c_HalfPI * m_JetAngleRange;
+		// If pie menu is on, keep the angle to what it was before.
+		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+			// Direct the jetpack nozzle according to movement stick if analog input is present.
+			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
+				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
+			// Use the aim angle if we're getting digital input.
+			} else {
+				// Thrust in the opposite direction when strafing.
+				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
+                // TODO: don't hardcode this ratio?
+				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
+				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
+				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);
+			}
+		}
     }
 
     ////////////////////////////////////
     // Movement direction
 
-    if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP)
-    {
+	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+
+	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
         {
             // Restart the stride if we're just starting to walk or crawl
@@ -2291,22 +2213,14 @@ void ACrab::Update()
             }
         }
 
-        // Walk backwards if the aiming is done in the opposite direction of travel
-        if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
-        {
-            // Walk backwards if necessary
-            for (int side = 0; side < SIDECOUNT; ++side)
-            {
+		// Walk backwards if the aiming is already focused in the opposite direction of travel.
+		if (std::abs(analogAim.m_X) > 0 || m_Controller.IsState(AIM_SHARP)) {
+			for (int side = 0; side < SIDECOUNT; ++side) {
                 m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
                 m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
             }
-        }
-        // Flip if we're moving in the opposite direction
-        else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
-        {
+		} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
             m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
             m_CheckTerrIntersection = true;
             MoveOutOfTerrain(g_MaterialGrass);
             for (int side = 0; side < SIDECOUNT; ++side)
@@ -2327,24 +2241,14 @@ void ACrab::Update()
     ////////////////////////////////////
     // Reload held MO, if applicable
 
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        HeldDevice *pDevice = m_pTurret->GetMountedDevice();
+	if (m_Controller.IsState(WEAPON_RELOAD) && !FirearmsAreFull() && m_Status != INACTIVE) {
+        ReloadFirearms();
 
-        // Holds device, check if we are commanded to reload, or do other related stuff
-        if (pDevice)
-        {
-            // Only reload if no other pickuppable item is in reach
-            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
-            {
-                pDevice->Reload();
-                m_DeviceSwitchSound.Play(m_Pos);
+        if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
-                // Interrupt sharp aiming
-                m_SharpAimTimer.Reset();
-                m_SharpAimProgress = 0;
-            }
-        }
+        // Interrupt sharp aiming
+        m_SharpAimTimer.Reset();
+        m_SharpAimProgress = 0;
     }
 
     ////////////////////////////////////
@@ -2357,34 +2261,25 @@ void ACrab::Update()
     float adjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - rotAngle : m_AimRangeUpperLimit + rotAngle;
     float adjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - rotAngle : -m_AimRangeLowerLimit + rotAngle;
 
-    if (m_Controller.IsState(AIM_UP))
-    {
-        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
-        if (m_AimState != AIMUP)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMUP;
-        m_AimAngle += m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-    }
-    else if (m_Controller.IsState(AIM_DOWN))
-    {
-        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
-        if (m_AimState != AIMDOWN)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMDOWN;
-        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-    }
-    // Analog aim
-    else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
-    {
-        Vector aim = m_Controller.GetAnalogAim();
+	if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE) {
+		// Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMUP) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMUP;
+		m_AimAngle += m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+
+	} else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE) {
+		// Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMDOWN) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMDOWN;
+		m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+
+	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
         // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
-        if (aim.m_X == 0)
-            aim.m_X += m_HFlipped ? -0.01 : 0.01;
-        m_AimAngle = aim.GetAbsRadAngle();
+		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
+        m_AimAngle = analogAim.GetAbsRadAngle();
 
         // Check for flip change
-        if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
-        {
+		if ((analogAim.m_X > 0 && m_HFlipped) || (analogAim.m_X < 0 && !m_HFlipped)) {
             m_HFlipped = !m_HFlipped;
             // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
             //m_ForceDeepCheck = true;
@@ -2413,58 +2308,38 @@ void ACrab::Update()
     //////////////////////////////
     // Sharp aim calculation
 
-// TODO: make the delay data driven by both the actor and the device!
-    // 
-    if (m_Controller.IsState(AIM_SHARP) && m_MoveState == STAND && m_Vel.GetMagnitude() < 5.0)
-    {
-/*
-        float halfDelay = m_SharpAimDelay / 2;
-        // Accelerate for first half
-        if (!m_SharpAimTimer.IsPastSimMS(halfDelay))
-            m_SharpAimProgress = (float)m_SharpAimTimer.GetElapsedSimTimeMS() / (float)m_SharpAimDelay;
-        // Decelerate for second half
-        else if (!m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)
-            m_SharpAimProgress
-        // At max
-        else
-            m_SharpAimProgress = 1.0;
-*/
-        float aimMag = m_Controller.GetAnalogAim().GetMagnitude();
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetMagnitude() < 5.0F) {
+        float aimMag = analogAim.GetMagnitude();
 
-        // If aim sharp is being done digitally, then translate to full analog aim mag
-        if (aimMag < 0.1)
-            aimMag = 1.0;
+		// If aim sharp is being done digitally, then translate to full magnitude.
+		if (aimMag < 0.1F) { aimMag = 1.0F; }
+		if (m_MoveState == WALK) { aimMag *= 0.3F; }
 
-        if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay))
-        {
-            // Only go slower outward
-            if (m_SharpAimProgress < aimMag)
-                m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
-            else
-                m_SharpAimProgress = aimMag;
-        }
-        else
-            m_SharpAimProgress = 0;
-    }
-    else
-    {
-        m_SharpAimProgress = 0;
-        m_SharpAimTimer.Reset();
-    }
+		if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)) {
+			// Only go slower outward.
+			if (m_SharpAimProgress < aimMag) {
+				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035F;
+			} else {
+				m_SharpAimProgress = aimMag;
+			}
+		} else {
+			m_SharpAimProgress *= 0.95F;
+		}
+	} else {
+		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+	}
 
     ////////////////////////////////////
     // Fire/Activate held devices
 
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        // Activate held device, if a device is held.
-        if (m_pTurret->IsHeldDeviceMounted())
-        {
-            m_pTurret->GetMountedDevice()->SetSharpAim(m_SharpAimProgress);
-            if (m_Controller.IsState(WEAPON_FIRE))
-                m_pTurret->GetMountedDevice()->Activate();
-            else
-                m_pTurret->GetMountedDevice()->Deactivate();
+    if (m_pTurret && m_pTurret->IsAttached() && m_Status != INACTIVE) {
+        for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            mountedDevice->SetSharpAim(m_SharpAimProgress);
+            if (m_Controller.IsState(WEAPON_FIRE)) {
+                mountedDevice->Activate();
+            } else {
+                mountedDevice->Deactivate();
+            }
         }
     }
 
@@ -2485,6 +2360,24 @@ void ACrab::Update()
 
     if (m_Status == STABLE)
     {
+        // This exists to support disabling foot collisions if the limbpath has that flag set.
+        if ((m_pLFGFootGroup->GetAtomCount() == 0 && m_BackupLFGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLFGFootGroup->SetLimbPos(m_pLFGFootGroup->GetLimbPos());
+            std::swap(m_pLFGFootGroup, m_BackupLFGFootGroup);
+        }
+        if ((m_pLBGFootGroup->GetAtomCount() == 0 && m_BackupLBGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLBGFootGroup->SetLimbPos(m_pLBGFootGroup->GetLimbPos());
+            std::swap(m_pLBGFootGroup, m_BackupLBGFootGroup);
+        }
+        if ((m_pRFGFootGroup->GetAtomCount() == 0 && m_BackupRFGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRFGFootGroup->SetLimbPos(m_pRFGFootGroup->GetLimbPos());
+            std::swap(m_pRFGFootGroup, m_BackupRFGFootGroup);
+        }
+        if ((m_pRBGFootGroup->GetAtomCount() == 0 && m_BackupRBGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRBGFootGroup->SetLimbPos(m_pRBGFootGroup->GetLimbPos());
+            std::swap(m_pRBGFootGroup, m_BackupRBGFootGroup);
+        }
+
         // WALKING
         if (m_MoveState == WALK)
         {
@@ -2497,218 +2390,115 @@ void ACrab::Update()
             float RFGLegProg = m_Paths[RIGHTSIDE][FGROUND][WALK].GetRegularProgress();
             float RBGLegProg = m_Paths[RIGHTSIDE][BGROUND][WALK].GetRegularProgress();
 
-            bool playStride = false;
+            bool restarted = false;
 
-            // Make sure we are starting a stride if we're basically stopped
-            if (fabs(m_Vel.GetLargest()) < 0.25)
-                m_StrideStart[LEFTSIDE] = true;
+			// Make sure we are starting a stride if we're basically stopped.
+			if (isStill) { m_StrideStart[LEFTSIDE] = true; }
 
             //////////////////
             // LEFT LEGS
 
-            if (m_pLFGLeg && (!m_pLBGLeg || (!(m_Paths[LEFTSIDE][FGROUND][WALK].PathEnded() && LBGLegProg < 0.5) || m_StrideStart[LEFTSIDE])))
-            {
-//                m_StrideStart[LEFTSIDE] = false;
-                m_StrideTimer[LEFTSIDE].Reset();
-                m_pLFGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pLFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][FGROUND][WALK],
-//                                            mass,
-                                            deltaTime,
-                                            &playStride);
-            }
+			if (m_pLFGLeg && (!m_pLBGLeg || (!(m_Paths[LEFTSIDE][FGROUND][WALK].PathEnded() && LBGLegProg < 0.5F) || m_StrideStart[LEFTSIDE]))) {
+				m_StrideTimer[LEFTSIDE].Reset();
+				m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][WALK], deltaTime, &restarted);
+			}
 
-            if (m_pLBGLeg && (!m_pLFGLeg || !(m_Paths[LEFTSIDE][BGROUND][WALK].PathEnded() && LFGLegProg < 0.5)))
-            {
-                m_StrideStart[LEFTSIDE] = false;
-                m_StrideTimer[LEFTSIDE].Reset();
-                m_pLBGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pLBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][BGROUND][WALK],
-//                                            mass,
-                                            deltaTime);
-            }
+			if (m_pLBGLeg) {
+				if (!m_pLFGLeg || !(m_Paths[LEFTSIDE][BGROUND][WALK].PathEnded() && LFGLegProg < 0.5F)) {
+					m_StrideStart[LEFTSIDE] = false;
+					m_StrideTimer[LEFTSIDE].Reset();
+					m_pLBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][WALK], deltaTime);
+				} else {
+					m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pLBGLeg->GetMass(), deltaTime);
+				}
+			}
 
-            // Restart the left stride if the current one seems to be taking too long
-            if (m_StrideTimer[LEFTSIDE].IsPastSimMS(m_Paths[LEFTSIDE][FGROUND][WALK].GetTotalPathTime()))
-                m_StrideStart[LEFTSIDE] = true;
+			// Reset the left-side walking stride if it's taking longer than it should.
+			if (m_StrideTimer[LEFTSIDE].IsPastSimMS(static_cast<double>(m_Paths[LEFTSIDE][FGROUND][WALK].GetTotalPathTime() * 1.1F))) { m_StrideStart[LEFTSIDE] = true; }
 
             ///////////////////
             // RIGHT LEGS
 
-            if (m_pRFGLeg && (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5)))
-            {
-                m_StrideStart[RIGHTSIDE] = false;
-                m_StrideTimer[RIGHTSIDE].Reset();
-                m_pRFGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][FGROUND][WALK],
-//                                            mass,
-                                            deltaTime,
-                                            &playStride);
-            }
+			if (m_pRFGLeg) { 
+				if (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5F)) {
+					m_StrideStart[RIGHTSIDE] = false;
+					m_StrideTimer[RIGHTSIDE].Reset();
+					m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][WALK], deltaTime, &restarted);
+				} else {
+					m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRFGLeg->GetMass(), deltaTime);
+				}
+			}
 
-            if (m_pRBGLeg && (!m_pRFGLeg || (!(m_Paths[RIGHTSIDE][BGROUND][WALK].PathEnded() && RFGLegProg < 0.5) || m_StrideStart[RIGHTSIDE])))
-            {
-//                m_StrideStart[RIGHTSIDE] = false;
-                m_StrideTimer[RIGHTSIDE].Reset();
-                m_pRBGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][BGROUND][WALK],
-//                                            mass,
-                                            deltaTime);
-            }
+			if (m_pRBGLeg && (!m_pRFGLeg || (!(m_Paths[RIGHTSIDE][BGROUND][WALK].PathEnded() && RFGLegProg < 0.5F) || m_StrideStart[RIGHTSIDE]))) {
+				m_StrideTimer[RIGHTSIDE].Reset();
+				m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][WALK], deltaTime);
+			}
 
-            // Restart the right stride if the current one seems to be taking too long
-            if (m_StrideTimer[RIGHTSIDE].IsPastSimMS(m_Paths[RIGHTSIDE][FGROUND][WALK].GetTotalPathTime()))
-                m_StrideStart[RIGHTSIDE] = true;
+			// Reset the right-side walking stride if it's taking longer than it should.
+			if (m_StrideTimer[RIGHTSIDE].IsPastSimMS(static_cast<double>(m_Paths[RIGHTSIDE][FGROUND][WALK].GetTotalPathTime() * 1.1F))) { m_StrideStart[RIGHTSIDE] = true; }
 
-            // Play the stride sound, if applicable
-            if (playStride)
-                m_StrideSound.Play(m_Pos);
-        }
-        // JUMPING
-        else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)
-        {
-/*
-            if (m_pRFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                      m_Vel,
-                                      m_Rotation,
-                                      m_Paths[FGROUND][m_MoveState],
-    //                                  mass / 2,
-                                      deltaTime);
-            }
-            if (m_pRBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                      m_Vel,
-                                      m_Rotation,
-                                      m_Paths[BGROUND][m_MoveState],
-    //                                mass / 2,
-                                      deltaTime);
-            }
+			if (restarted && m_StrideSound) { m_StrideSound->Play(m_Pos); }
+		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
+			if (m_MoveState == JUMP) {
+				// TODO: Utilize jump paths in an intuitive way?
+			} else {
+				for (int side = 0; side < SIDECOUNT; ++side) {
+					for (int layer = 0; layer < LAYERCOUNT; ++layer) {
+						m_Paths[side][layer][WALK].Terminate();
+					}
+				}
+				if (m_pLFGLeg) { m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][STAND], deltaTime); }
 
-            if (m_JetTimeLeft <= 0)
-            {
-                m_MoveState = STAND;
-                m_Paths[FGROUND][JUMP].Terminate();
-                m_Paths[BGROUND][JUMP].Terminate();
-                m_Paths[FGROUND][STAND].Terminate();
-                m_Paths[BGROUND][STAND].Terminate();
-                m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-            }
-*/
-        }
-        // STANDING
-        else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg)
-        {
-            for (int side = 0; side < SIDECOUNT; ++side)
-                for (int layer = 0; layer < LAYERCOUNT; ++layer)
-                    m_Paths[side][layer][WALK].Terminate();
+				if (m_pLBGLeg) { m_pLBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][STAND], deltaTime); }
 
-            if (m_pLFGLeg)
-                m_pLFGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][FGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
+				if (m_pRFGLeg) { m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][STAND], deltaTime); }
 
-            if (m_pLBGLeg)
-                m_pLBGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][BGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
+				if (m_pRBGLeg) { m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][STAND], deltaTime); }
+			}
+		}
+	} else {
+		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
+		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.
+		if (m_pLFGLeg) { m_pLFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLFGLeg->GetParentOffset()), m_pLFGLeg->GetMaxLength(), m_PrevVel * m_pLFGLeg->GetJointStiffness(), m_AngularVel, m_pLFGLeg->GetMass(), deltaTime); }
 
-            if (m_pRFGLeg)
-                m_pRFGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][FGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
+		if (m_pLBGLeg) { m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel * m_pLBGLeg->GetJointStiffness(), m_AngularVel, m_pLBGLeg->GetMass(), deltaTime); }
 
-            if (m_pRBGLeg)
-                m_pRBGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][BGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
+		if (m_pRFGLeg) { m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel * m_pRFGLeg->GetJointStiffness(), m_AngularVel, m_pRFGLeg->GetMass(), deltaTime); }
 
-        }
+		if (m_pRBGLeg) { m_pRBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRBGLeg->GetParentOffset()), m_pRBGLeg->GetMaxLength(), m_PrevVel * m_pRBGLeg->GetJointStiffness(), m_AngularVel, m_pRBGLeg->GetMass(), deltaTime); }
+	}
+
+    /////////////////////////////////
+    // Manage Attachable:s
+    if (m_pTurret && m_pTurret->IsAttached()) {
+        m_pTurret->SetMountedDeviceRotationOffset((m_AimAngle * GetFlipFactor()) - m_Rotation.GetRadAngle());
     }
-    // Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion
-    else
-    {
-// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc
-        bool wrapped = false;
-        Vector limbPos;
-        if (m_pLFGLeg)
-        {
-//            m_pLFGFootGroup->SetLimbPos(m_pLFGLeg->GetAnklePos(), m_HFlipped);
-            m_pLFGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pLFGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pLFGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pLBGLeg)
-        {
-//            m_pLBGFootGroup->SetLimbPos(m_pLBGLeg->GetAnklePos(), m_HFlipped);
-            m_pLBGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pLBGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pLBGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pRFGLeg)
-        {
-//            m_pRFGFootGroup->SetLimbPos(m_pRFGLeg->GetAnklePos(), m_HFlipped);
-            m_pRFGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pRFGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pRFGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pRBGLeg)
-        {
-//            m_pRBGFootGroup->SetLimbPos(m_pRBGLeg->GetAnklePos(), m_HFlipped);
-            m_pRBGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pRBGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pRBGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
+
+    if (m_pLFGLeg && m_pLFGLeg->IsAttached()) {
+        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLFGLeg->SetTargetPosition(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
     }
+
+    if (m_pLBGLeg && m_pLBGLeg->IsAttached()) {
+        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLBGLeg->SetTargetPosition(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRFGLeg && m_pRFGLeg->IsAttached()) {
+        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRFGLeg->SetTargetPosition(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRBGLeg && m_pRBGLeg->IsAttached()) {
+        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRBGLeg->SetTargetPosition(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
 
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
-
 
     ////////////////////////////////////
     // Update viewpoint
@@ -2720,9 +2510,9 @@ void ACrab::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        float maxLength = m_pTurret->GetMountedDevice()->GetSharpLength();
+        float maxLength = m_pTurret->GetFirstMountedDevice()->GetSharpLength();
 
         // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
         if (m_SharpAimProgress > 0)
@@ -2732,8 +2522,8 @@ void ACrab::Update()
             sharpAimVector *= aimMatrix;
 
             // See how far along the sharp aim vector there is opaque air
-//            float result = g_SceneMan.CastNotMaterialRay(m_pLFGLeg->GetMountedDevice()->GetMuzzlePos(), sharpAimVector, g_MaterialAir, 5);
-            float result = g_SceneMan.CastObstacleRay(m_pTurret->GetMountedDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
+//            float result = g_SceneMan.CastNotMaterialRay(m_pLFGLeg->GetFirstMountedDevice()->GetMuzzlePos(), sharpAimVector, g_MaterialAir, 5);
+            float result = g_SceneMan.CastObstacleRay(m_pTurret->GetFirstMountedDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
             // If we didn't find anything but air before the sharpdistance, then don't alter the sharp distance
             if (result >= 0 && result < (maxLength * m_SharpAimProgress))
             {
@@ -2755,99 +2545,8 @@ void ACrab::Update()
 
     // Add velocity also so the viewpoint moves ahead at high speeds
     if (m_Vel.GetMagnitude() > 10.0)
-        m_ViewPoint += m_Vel * 6;
+        m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F);
 
-
-    /////////////////////////////////
-    // Update Attachable:s
-
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        m_pTurret->SetHFlipped(m_HFlipped);
-        m_pTurret->SetJointPos(m_Pos + m_pTurret->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pTurret->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pTurret->SetMountedRotOffset((m_HFlipped ? -m_AimAngle : m_AimAngle) - m_Rotation.GetRadAngle());
-        m_pTurret->Update();
-        // Update the Atoms' offsets in the parent group
-//        Matrix atomRot(FacingAngle(m_pTurret->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-//        m_pAtomGroup->UpdateSubAtoms(m_pTurret->GetAtomSubgroupID(), m_pTurret->GetParentOffset() - (m_pTurret->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pTurret->CollectDamage();// * 5;
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLFGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLFGLeg->SetJointPos(m_Pos + m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLFGLeg->ReachToward(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLFGLeg->Update();
-        m_Health -= m_pLFGLeg->CollectDamage();
-    }
-
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLBGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLBGLeg->SetJointPos(m_Pos + m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLBGLeg->ReachToward(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLBGLeg->Update();
-        m_Health -= m_pLBGLeg->CollectDamage();
-    }
-
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        m_pRFGLeg->SetHFlipped(m_HFlipped);
-        m_pRFGLeg->SetJointPos(m_Pos + m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRFGLeg->ReachToward(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRFGLeg->Update();
-        m_Health -= m_pRFGLeg->CollectDamage();
-    }
-
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        m_pRBGLeg->SetHFlipped(m_HFlipped);
-        m_pRBGLeg->SetJointPos(m_Pos + m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRBGLeg->ReachToward(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRBGLeg->Update();
-        m_Health -= m_pRBGLeg->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pTurret))
-        m_pTurret = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pLFGLeg))
-        m_pLFGLeg = 0;
-    if (!ApplyAttachableForces(m_pLBGLeg))
-        m_pLBGLeg = 0;
-    if (!ApplyAttachableForces(m_pRFGLeg))
-        m_pRFGLeg = 0;
-    if (!ApplyAttachableForces(m_pRBGLeg))
-        m_pRBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting
@@ -2891,8 +2590,7 @@ void ACrab::Update()
     {
         rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
-		if (m_Status != DYING && m_Status != DEAD)
-			m_Status = UNSTABLE;
+		if (m_Status == STABLE) { m_Status = UNSTABLE; }
         m_StableRecoverTimer.Reset();
     }
 
@@ -2900,11 +2598,7 @@ void ACrab::Update()
     if (m_Status == STABLE)
     {
         // Upright body posture
-        // Break the spring if close to target angle.
-        if (fabs(rot) > (c_HalfPI - c_SixteenthPI))
-            m_AngularVel -= rot * 0.5;//fabs(rot);
-        else if (fabs(m_AngularVel) > 0.3)
-            m_AngularVel *= 0.85;
+		m_AngularVel = m_AngularVel * 0.9F - (rot * 0.3F);
     }
     // While dying, pull body quickly toward down toward horizontal
     else if (m_Status == DYING)
@@ -2940,201 +2634,24 @@ void ACrab::Update()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                         MOID rootMOID,
-                         bool makeNewMOID)
-{
-    if (m_pLBGLeg)
-        m_pLBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pLFGLeg)
-        m_pLFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pTurret)
-        m_pTurret->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void ACrab::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pLBGLeg)
-		m_pLBGLeg->GetMOIDs(MOIDs);
-	if (m_pRBGLeg)
-		m_pRBGLeg->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pLFGLeg)
-		m_pLFGLeg->GetMOIDs(MOIDs);
-	if (m_pRFGLeg)
-		m_pRFGLeg->GetMOIDs(MOIDs);
-	if (m_pTurret)
-		m_pTurret->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int ACrab::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pLBGLeg && m_pLBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pLBGLeg);
-		if (m_pRBGLeg && m_pRBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pRBGLeg);
-		if (m_pJetpack && m_pJetpack->GetWoundCount())
-			bodyParts.push_back(m_pJetpack);
-		if (m_pLFGLeg && m_pLFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pLFGLeg);
-		if (m_pRFGLeg && m_pRFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pRFGLeg);
-		if (m_pTurret && m_pTurret->GetWoundCount())
-			bodyParts.push_back(m_pTurret);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int ACrab::GetTotalWoundCount() const
-{
-	int count = Actor::GetWoundCount();
-
-    if (m_pLBGLeg)
-        count += m_pLBGLeg->GetWoundCount();
-    if (m_pRBGLeg)
-        count += m_pRBGLeg->GetWoundCount();
-    if (m_pJetpack)
-        count += m_pJetpack->GetWoundCount();
-    if (m_pLFGLeg)
-        count += m_pLFGLeg->GetWoundCount();
-    if (m_pRFGLeg)
-        count += m_pRFGLeg->GetWoundCount();
-    if (m_pTurret)
-        count += m_pTurret->GetWoundCount();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-
-int ACrab::GetTotalWoundLimit() const
-{ 
-	int count = Actor::GetGibWoundLimit();
-
-    if (m_pLBGLeg)
-        count += m_pLBGLeg->GetGibWoundLimit();
-    if (m_pRBGLeg)
-        count += m_pRBGLeg->GetGibWoundLimit();
-    if (m_pJetpack)
-        count += m_pJetpack->GetGibWoundLimit();
-    if (m_pLFGLeg)
-        count += m_pLFGLeg->GetGibWoundLimit();
-    if (m_pRFGLeg)
-        count += m_pRFGLeg->GetGibWoundLimit();
-    if (m_pTurret)
-        count += m_pTurret->GetGibWoundLimit();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACrab's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACrab::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-    if (m_pLBGLeg)
-        m_pLBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRBGLeg)
-        m_pRBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pTurret && !m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
+void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pTurret && m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRFGLeg)
-        m_pRFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pLFGLeg)
-        m_pLFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
-#ifdef DEBUG_BUILD
-//    if (mode == g_DrawDebug)
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
-
-        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pLFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
+        m_Paths[LEFTSIDE][BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[LEFTSIDE][FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[RIGHTSIDE][BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[RIGHTSIDE][FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+    }
 }
 
 
@@ -3144,8 +2661,9 @@ void ACrab::Draw(BITMAP *pTargetBitmap,
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
 //                  BITMAP of choice.
 
-void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
-{
+void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -3153,13 +2671,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
+		return;
+	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 /*
@@ -3188,10 +2704,9 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Player AI drawing
 
-    // Device aiming reticule
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
-        m_pTurret->GetMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-
+	if ((m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+		m_pTurret->GetFirstMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
+	}
     //////////////////////////////////////
     // Draw stat info HUD
     char str[64];
@@ -3229,50 +2744,53 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
         }
 
-        // Weight and jetpack energy
-        if (m_pJetpack && m_pJetpack->IsAttached() && m_MoveState == JUMP)
-        {
-            float mass = GetMass();
-// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
-            str[0] = mass < 135 ? -31 : (mass < 160 ? -30 : -29); str[1] = 0;
-            // Do the blinky blink
-            if ((str[0] == -29 || str[0] == -30) && m_IconBlinkTimer.AlternateSim(250))
-                str[0] = -28;
+		// Weight and jetpack energy
+		if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP)) {
+			float mass = GetMass();
+			if (m_JetTimeLeft < 100) {
+				// Draw empty fuel indicator
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else {
+				// Display normal jet icons
+				// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
+				str[0] = mass < 135 ? -31 : (mass < 150 ? -30 : (mass < 165 ? -29 : -28));
+				// Do the blinky blink
+				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
+			}
+			str[1] = 0;
             pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
 
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-// TODO: Don't hardcode this shit
-            char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
-//                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
-//                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
             m_HUDStack += -10;
         }
         // Held-related GUI stuff
-        else if (m_pTurret && m_pTurret->IsAttached())
-        {
-            HDFirearm *pHeldFirearm = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
-
-            // Ammo
-            if (pHeldFirearm)
-            {
+        else if (m_pTurret && m_pTurret->IsAttached()) {
+            std::string textString;
+            for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+                if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice)) {
+                    if (!textString.empty()) { textString += " | "; }
+					int totalTextWidth = pSmallFont->CalculateWidth(textString);
+                    if (mountedFirearm->IsReloading()) {
+                        textString += "Reloading";
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * mountedFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+                    } else {
+						textString += mountedFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(mountedFirearm->GetRoundInMagCount());
+                    }
+                }
+            }
+            if (!textString.empty()) {
                 str[0] = -56; str[1] = 0;
-                pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                if (pHeldFirearm->IsReloading())
-                    std::snprintf(str, sizeof(str), "%s", "Reloading...");
-                else if (pHeldFirearm->GetRoundInMagCount() >= 0)
-                    std::snprintf(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
-                else
-                    std::snprintf(str, sizeof(str), "%s", "INF");
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-
+                pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 10, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
+                pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 3, textString, GUIFont::Left);
                 m_HUDStack += -10;
             }
-        }
-        else
-        {
+
+        } else {
             std::snprintf(str, sizeof(str), "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;

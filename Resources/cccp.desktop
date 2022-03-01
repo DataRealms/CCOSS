@@ -2,6 +2,6 @@
 Categories=Game;
 Type=Application
 Icon=cccp
-Name=cccp
-Exec=CCCP.x86_64
-
+Name=Cortex Command (Community Project)
+Comment=Choose between different factions, with their own set of expendable soldiers, mechas, and weapons. Protect your brain, mine gold, and destroy the enemy cortex in his bunker complex!
+Exec=@EXERUNNER@

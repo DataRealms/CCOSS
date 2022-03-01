@@ -17,7 +17,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(TerrainObject, SceneObject, 0)
+ConcreteClassInfo(TerrainObject, SceneObject, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ int TerrainObject::Create(const TerrainObject &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int TerrainObject::ReadProperty(std::string propName, Reader &reader)
+int TerrainObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "FGColorFile")
     {
@@ -261,7 +261,7 @@ void TerrainObject::Destroy(bool notInherited)
 // Description:     Gets a bitmap showing a good identifyable icon of this, for use in
 //                  GUI lists etc.
 
-BITMAP * TerrainObject::GetGraphicalIcon()
+BITMAP * TerrainObject::GetGraphicalIcon() const
 {
     if (!m_pFGColor)
         return m_pBGColor;

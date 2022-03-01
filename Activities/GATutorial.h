@@ -30,9 +30,7 @@ class Actor;
 // Parent(s):       GameActivity.
 // Class history:   10/13/2007 GATutorial created.
 
-class GATutorial:
-    public GameActivity
-{
+class GATutorial : public GameActivity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -42,9 +40,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GATutorial)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GATutorial);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GATutorial
@@ -120,7 +118,7 @@ ClassInfoGetters
 //                  but only for a limited number of teams. If -1, not applicable.
 // Return value:    Whether the Scene has the right stuff.
 
-	bool SceneIsCompatible(Scene *pScene, short teams = -1) override;
+	bool SceneIsCompatible(Scene *pScene, int teams = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

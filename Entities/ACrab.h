@@ -16,17 +16,15 @@
 
 #include "Actor.h"
 #include "LimbPath.h"
+#include "Leg.h"
 
 struct BITMAP;
 
 namespace RTE
 {
 
-class Attachable;
 class Turret;
-class Leg;
 class AEmitter;
-//class LimbPath;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -36,8 +34,8 @@ class AEmitter;
 // Parent(s):       Actor.
 // Class history:   10/24/2007 ACrab created.
 
-class ACrab :
-	public Actor {
+class ACrab : public Actor {
+	friend struct EntityLuaBindings;
 
 
 	enum MovementState {
@@ -48,13 +46,13 @@ class ACrab :
 		MOVEMENTSTATECOUNT
 	};
 
-	enum {
+	enum Side {
 		LEFTSIDE = 0,
 		RIGHTSIDE,
 		SIDECOUNT
 	};
 
-	enum {
+	enum Layer {
 		FGROUND = 0,
 		BGROUND,
 		LAYERCOUNT
@@ -68,18 +66,18 @@ public:
 
 
 // Concrete allocation and cloning definitions
-	EntityAllocation(ACrab)
-		SerializableOverrideMethods
-		ClassInfoGetters
+	EntityAllocation(ACrab);
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Constructor:     ACrab
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Constructor method used to instantiate a ACrab object in system
-		//                  memory. Create() should be called before using the object.
-		// Arguments:       None.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Constructor:     ACrab
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Constructor method used to instantiate a ACrab object in system
+	//                  memory. Create() should be called before using the object.
+	// Arguments:       None.
 
-		ACrab() { Clear(); }
+	ACrab() { Clear(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -137,17 +135,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACrab, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-	float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGoldCarried
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets how many ounces of gold this Actor is carrying.
@@ -167,54 +154,77 @@ public:
 	Vector GetEyePos() const override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+	/// <summary>
+	/// Gets the Turret of this ACrab.
+	/// </summary>
+	/// <returns>A pointer to Turret of this ACrab. Ownership is NOT transferred!</returns>
+	Turret * GetTurret() const { return m_pTurret; }
 
-	Attachable * GetLFGLeg() const { return (Attachable *)m_pLFGLeg; }
+	/// <summary>
+	/// Sets the Turret for this ACrab. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newTurret">The new Turret to use.</param>
+	void SetTurret(Turret *newTurret);
 
+	/// <summary>
+	/// Gets the jetpack of this ACrab.
+	/// </summary>
+	/// <returns>A pointer to the jetpack of this ACrab. Ownership is NOT transferred!</returns>
+	AEmitter * GetJetpack() const { return m_pJetpack; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLBGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+	/// <summary>
+	/// Sets the jetpack for this ACrab. Ownership IS Transferred!
+	/// </summary>
+	/// <param name="newJetpack">The new jetpack to use.</param>
+	void SetJetpack(AEmitter *newJetpack);
 
-	Attachable * GetLBGLeg() const { return (Attachable *)m_pLBGLeg; }
+    /// <summary>
+    /// Gets the left foreground Leg of this ACrab.
+    /// </summary>
+    /// <returns>A pointer to the left foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Leg * GetLeftFGLeg() const { return m_pLFGLeg; }
 
+    /// <summary>
+    /// Sets the left foreground Leg for this ACrab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetLeftFGLeg(Leg *newLeg);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the left background Leg of this ACrab.
+    /// </summary>
+    /// <returns>A pointer to the left background Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Leg * GetLeftBGLeg() const { return m_pLBGLeg; }
 
-	Attachable * GetRFGLeg() const { return (Attachable *)m_pRFGLeg; }
+    /// <summary>
+    /// Sets the left background Leg for this ACrab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetLeftBGLeg(Leg *newLeg);
 
+    /// <summary>
+    /// Gets the right foreground Leg of this ACrab.
+    /// </summary>
+    /// <returns>A pointer to the right foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Leg * GetRightFGLeg() const { return m_pRFGLeg; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+    /// <summary>
+    /// Sets the right foreground Leg for this ACrab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetRightFGLeg(Leg *newLeg);
 
-	Attachable * GetRBGLeg() const { return (Attachable *)m_pRBGLeg; }
+    /// <summary>
+    /// Gets the right BG Leg of this ACrab.
+    /// </summary>
+    /// <returns>A pointer to the right background Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Leg * GetRightBGLeg() const { return m_pRBGLeg; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetpack
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the jetpack as an emitter. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
-
-	AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
+    /// <summary>
+    /// Sets the right background Leg for this ACrab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetRightBGLeg(Leg *newLeg);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +236,7 @@ public:
 
 	float GetJetTimeTotal() const { return m_JetTimeTotal; }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetJetTimeTotal
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -234,6 +245,7 @@ public:
 // Return value:    None.
 
 	void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetJetTimeLeft
@@ -245,15 +257,30 @@ public:
 	float GetJetTimeLeft() const { return m_JetTimeLeft; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A MOID specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
+	/// <summary>
+	/// Gets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <returns>The rate at which the jetpack is replenished.</returns>
+	float GetJetReplenishRate() const { return m_JetReplenishRate; }
 
-	void SetID(const MOID newID) override;
+	/// <summary>
+	/// Sets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
+	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
+
+	/// <summary>
+	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
+	float GetJetAngleRange() const { return m_JetAngleRange; }
+
+
+	/// <summary>
+	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
+	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,17 +316,7 @@ public:
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-	bool HandlePieCommand(int pieSliceIndex) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetEquippedItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns any equipped turret.
-// Arguments:       None.
-// Return value:    A pointer to an attachable.
-
-	Attachable * GetTurret() const;
+	bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,6 +359,12 @@ public:
 
 	bool FirearmNeedsReload() const;
 
+	/// <summary>
+	/// Gets whether or not all of this ACrab's Turret's HDFirearms are full.
+	/// </summary>
+	/// <returns>Whether or not all of this ACrab's Turret's HDFirearms are full. Will return true if there is no Turret or no HDFirearms.</returns>
+	bool FirearmsAreFull() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  FirearmIsSemiAuto
@@ -365,13 +388,13 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  ReloadFirearm
+// Method:  ReloadFirearms
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the currently held firearm, if any.
+// Description:     Reloads the currently held firearms, if any.
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm();
+	void ReloadFirearms();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -412,28 +435,11 @@ int FirearmActivationDelay() const;
 	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-	bool IsOnScenePoint(Vector &scenePoint) const override;
+	/// <summary>
+	/// Gets the GUI representation of this ACrab, only defaulting to its Turret or body if no GraphicalIcon has been defined.
+	/// </summary>
+	/// <returns>The graphical representation of this ACrab as a BITMAP.</returns>
+	BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -468,25 +474,6 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	int GetTotalWoundCount() const override;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	int GetTotalWoundLimit() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this ACrab's current graphical representation to a
@@ -515,24 +502,14 @@ int FirearmActivationDelay() const;
 	void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	int RemoveAnyRandomWounds(int amount) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+	/// <summary>
+	/// Gets the LimbPath corresponding to the passed in Side, Layer and MovementState values.
+	/// </summary>
+	/// <param name="side">Whether to get the left or right side.</param>
+	/// <param name="layer">Whether to get foreground or background LimbPath.</param>
+	/// <param name="movementState">Which movement state to get the LimbPath for.</param>
+	/// <returns>The LimbPath corresponding to the passed in Layer and MovementState values.</returns>
+	LimbPath *GetLimbPath(Side side, Layer layer, MovementState movementState) { return &m_Paths[side][layer][movementState]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -577,24 +554,22 @@ int FirearmActivationDelay() const;
 	void SetLimbPathPushForce(float force);
 
 
+	/// <summary>
+	/// Gets this ACrab's stride sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACrab's stride sound.</returns>
+	SoundContainer * GetStrideSound() const { return m_StrideSound; }
+
+	/// <summary>
+	/// Sets this ACrab's stride sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
+	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-	void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
 	// Member variables
@@ -602,6 +577,7 @@ protected:
 
 	// Turret which can be mounted with a weapon
 	Turret *m_pTurret;
+	//TODO when this class is cleaned up these legs and footgroups should probably be renamed. L and R should be expanded to Left and Right. I think FG and BG can stay as is cause they're everywhere.
 	// Left Foreground leg.
 	Leg *m_pLFGLeg;
 	// Left Background leg.
@@ -612,17 +588,24 @@ protected:
 	Leg *m_pRBGLeg;
 	// Limb AtomGroups.
 	AtomGroup *m_pLFGFootGroup;
+	AtomGroup *m_BackupLFGFootGroup;
 	AtomGroup *m_pLBGFootGroup;
+	AtomGroup *m_BackupLBGFootGroup;
 	AtomGroup *m_pRFGFootGroup;
+	AtomGroup *m_BackupRFGFootGroup;
 	AtomGroup *m_pRBGFootGroup;
+	AtomGroup *m_BackupRBGFootGroup;
 	// The sound of the actor taking a step (think robot servo)
-	SoundContainer m_StrideSound;
+	SoundContainer *m_StrideSound;
 	// Jetpack booster.
 	AEmitter *m_pJetpack;
 	// The max total time, in ms, that the jetpack can be used without pause
 	float m_JetTimeTotal;
 	// How much time left the jetpack can go, in ms
 	float m_JetTimeLeft;
+	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
+	// Ratio at which the jetpack angle follows aim angle
+	float m_JetAngleRange;
 	// Blink timer
 	Timer m_IconBlinkTimer;
 	// Current movement state.

@@ -34,9 +34,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   08/23/2002 TerrainObject created.
 
-class TerrainObject:
-    public SceneObject
-{
+class TerrainObject : public SceneObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -46,9 +44,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(TerrainObject)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(TerrainObject);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +231,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override;
+    BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

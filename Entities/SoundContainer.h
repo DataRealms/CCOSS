@@ -15,9 +15,9 @@ namespace RTE {
 		
 	public:
 
-		EntityAllocation(SoundContainer)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(SoundContainer);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 		/// <summary>
 		/// How the SoundContainer should behave when it tries to play again while already playing.
@@ -87,6 +87,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A reference to the top level SoundSet of this SoundContainer.</returns>
 		SoundSet & GetTopLevelSoundSet() { return m_TopLevelSoundSet; }
+
+		/// <summary>
+		/// Copies the passed in SoundSet reference into the top level SoundSet of this SoundContainer, effectively making that the new top level SoundSet.
+		/// </summary>
+		/// <param name="newTopLevelSoundSet">A reference to the new top level SoundSet for this SoundContainer.</param>
+		void SetTopLevelSoundSet(const SoundSet &newTopLevelSoundSet) { m_TopLevelSoundSet = newTopLevelSoundSet; m_SoundPropertiesUpToDate = false; }
 
 		/// <summary>
 		/// Gets a vector of hashes of the sounds selected to be played next in this SoundContainer.
@@ -192,7 +198,7 @@ namespace RTE {
 		/// Sets the current playback priority. Higher priority (lower value) will make this more likely to make it into mixing on playback. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="priority">The new priority. See AudioMan::PRIORITY_* enumeration.</param>
-		void SetPriority(int priority) { m_Priority = std::clamp(priority, 0, 255); }
+		void SetPriority(int priority) { m_Priority = std::clamp(priority, 0, 256); }
 
 		/// <summary>
 		/// Gets whether the sounds in this SoundContainer are affected by global pitch changes or not.
@@ -229,7 +235,7 @@ namespace RTE {
 		/// Sets the volume sounds in this SoundContainer should be played at. Note that this does not factor volume changes due to the SoundContainer's position. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at. Limited between 0 and 10.</param>
-		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); m_Volume = newVolume; } }
+		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); } m_Volume = newVolume; }
 
 		/// <summary>
 		/// Gets the pitch the sounds in this SoundContainer are played at. Note that this does not factor in global pitch.
@@ -242,6 +248,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPitch">The new pitch sounds in this SoundContainer should be played at. Limited between 0.125 and 8 (8 octaves up or down).</param>
 		void SetPitch(float newPitch) { m_Pitch = std::clamp(newPitch, 0.125F, 8.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsPitch(this); } }
+
+		/// <summary>
+		/// Gets the pitch variation the sounds in this SoundContainer are played at.
+		/// </summary>
+		/// <returns>The pitch variation the sounds in this SoundContainer are played at.</returns>
+		float GetPitchVariation() const { return m_PitchVariation; }
+
+		/// <summary>
+		/// Sets the pitch variation the sounds in this SoundContainer are played at.
+		/// </summary>
+		/// <param name="newValue">The pitch variation the sounds in this SoundContainer are played at.</param>
+		void SetPitchVariation(float newValue) { m_PitchVariation = newValue; }
 #pragma endregion
 
 #pragma region Playback Controls
@@ -284,7 +302,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to stop playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
-		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) : false; }
+		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) : false; }
 
 		/// <summary>
 		/// Restarts playback of this SoundContainer for all players.
@@ -297,13 +315,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to restart playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully restarted its playback.</returns>
-		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
+		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
 
 		/// <summary>
 		/// Fades out playback of the SoundContainer to 0 volume.
 		/// </summary>
 		/// <param name="fadeOutTime">How long the fadeout should take.</param>
-		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSound(this, fadeOutTime); } }
+		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSoundContainerPlayingChannels(this, fadeOutTime); } }
 #pragma endregion
 
 #pragma region Miscellaneous
@@ -335,6 +353,7 @@ namespace RTE {
 		
 		Vector m_Pos; //!< The current position of this SoundContainer's sounds.
 		float m_Pitch; //!< The current natural pitch of this SoundContainer's sounds.
+		float m_PitchVariation; //!< The randomized pitch variation of this SoundContainer's sounds. 1 means the sound will vary a full octave both ways.
 		float m_Volume; //!< The current natural volume of this SoundContainer's sounds.
 
 		/// <summary>

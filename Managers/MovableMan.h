@@ -16,6 +16,7 @@
 
 #include "Serializable.h"
 #include "Entity.h"
+#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
 #include "Singleton.h"
@@ -39,11 +40,11 @@ class SceneLayer;
 // Parent(s):       None.
 // Class history:   10/3/2008  AlarmEvent created.
 
-struct AlarmEvent
-{
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
-    
+struct AlarmEvent {
+	AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1.0F; }
+	// TODO: Stop relying on screen width for this shit!
+	AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1.0F) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range * g_FrameMan.GetPlayerScreenWidth() * 0.51F; }
+
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event
@@ -60,11 +61,9 @@ struct AlarmEvent
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 MovableMan created.
 
-class MovableMan:
-    public Singleton<MovableMan>,
-    public Serializable
-{
-    friend class LuaMan;
+class MovableMan : public Singleton<MovableMan>, public Serializable {
+	friend class SettingsMan;
+    friend struct ManagerLuaBindings;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +71,8 @@ class MovableMan:
 
 public:
 
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int Create() override;
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,16 +125,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +255,7 @@ public:
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
 
-    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis = 0);
+    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +266,7 @@ public:
 // Arguments:       Which team to try to get an enemy Actor for. NoTeam means all teams.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
-//                  A vector to be filled out with the distance of the returned closest to
+//                  A Vector to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
 // Return value:    An Actor pointer to the enemy closest to the Scene
 //                  point, but not outside the max radius. If no Actor
@@ -295,7 +285,7 @@ public:
 // Return value:    An Actor pointer to the first one of the requested team. If no Actor
 //                  is in that team, 0 is returned.
 
-    Actor * GetFirstTeamActor(int team, int player) { float temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
+	Actor * GetFirstTeamActor(int team, int player) { Vector temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -306,14 +296,14 @@ public:
 // Arguments:       Which team to try to get an Actor for. 0 means first team, 1 means 2nd.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
-//                  A float to be filled out with the distance of the returned closest to
+//                  A Vector to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
 //                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
 
-    Actor * GetClosestActor(Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis = 0);
+    Actor * GetClosestActor(const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -645,15 +635,19 @@ public:
 
     bool RemoveMO(MovableObject *pMOToRem);
 
+    /// <summary>
+    /// Kills and destroys all Actors of a specific Team.
+    /// </summary>
+    /// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
+    /// <returns>How many Actors were killed.</returns>
+    int KillAllTeamActors(int teamToKill) const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all actors of a specific team.
-// Arguments:       The team to NOT annihilate, if NoTeam, then ALL actors die.
-// Return value:    How many Actors were killed.
-
-    int KillAllActors(int exceptTeam = -1);
+	/// <summary>
+	/// Kills and destroys all enemy Actors of a specific Team.
+	/// </summary>
+	/// <param name="teamNotToKill">The team to NOT annihilate. If NoTeam is passed in, then ALL Actors die.</param>
+	/// <returns>How many Actors were killed.</returns>
+	int KillAllEnemyActors(int teamNotToKill = Activity::NoTeam) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -919,9 +913,6 @@ public:
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
-
     // All actors in the scene
     std::deque<Actor *> m_Actors;
     // List of items that are pickup-able by actors
@@ -983,6 +974,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

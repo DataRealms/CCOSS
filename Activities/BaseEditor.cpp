@@ -29,29 +29,25 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "SceneEditorGUI.h"
-#include "PieMenuGUI.h"
-#include "GABaseDefense.h"
-
-extern bool g_ResetActivity;
 
 namespace RTE {
 
-ConcreteClassInfo(BaseEditor, Activity, 0)
+ConcreteClassInfo(BaseEditor, Activity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +102,7 @@ int BaseEditor::Create(const BaseEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BaseEditor::ReadProperty(std::string propName, Reader &reader)
+int BaseEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -129,18 +125,9 @@ int BaseEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this BaseEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int BaseEditor::Save(Writer &writer) const
-{
-    Activity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int BaseEditor::Save(Writer &writer) const {
+	Activity::Save(writer);
+	return 0;
 }
 
 
@@ -211,7 +198,7 @@ int BaseEditor::Start()
         g_SceneMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
         g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
-        m_PlayerController[editingPlayer].Destroy();
+        m_PlayerController[editingPlayer].Reset();
         m_PlayerController[editingPlayer].Create(Controller::CIM_PLAYER, editingPlayer);
         m_PlayerController[editingPlayer].SetTeam(m_Team[editingPlayer]);
 
@@ -219,7 +206,7 @@ int BaseEditor::Start()
 //    }
 
     // Kill off any actors not of this player's team.. they're not supposed to be here
-    g_MovableMan.KillAllActors(GetTeamOfPlayer(editingPlayer));
+    g_MovableMan.KillAllEnemyActors(GetTeamOfPlayer(editingPlayer));
 
     //////////////////////////////////////////////
     // Allocate and (re)create the Editor GUI
@@ -334,7 +321,7 @@ void BaseEditor::Update()
 
     // Get any mode change commands that the user gave the Editor GUI
     // Done with editing for now; save and return to campaign screen
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_DONE)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_DONE)
     {
         m_pEditorGUI->SetEditorGUIMode(SceneEditorGUI::INACTIVE);
 

@@ -299,14 +299,11 @@ public:
     float GetTotalOrderCost();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalOrderMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total mass of everything listed in the order box.
-// Arguments:       None.
-// Return value:    The total mass in kg.
-
-	float GetTotalOrderMass();
+	/// <summary>
+	/// Return the total mass of all items listed in the order box.
+	/// </summary>
+	/// <returns>The total mass (in kg) of the BuyMenu's cart.</returns>
+	float GetTotalOrderMass() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +323,13 @@ public:
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
-	int GetTotalOrderPassengers();
+	int GetTotalOrderPassengers() const;
+
+    /// <summary>
+    /// Enable or disable the equipment selection mode for this BuyMenuGUI.
+    /// </summary>
+	/// <param name="enabled">Whether or not equipment selection mode should be enabled.</param>
+    void EnableEquipmentSelection(bool enabled);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -659,11 +662,11 @@ protected:
 // Method:          UpdateTotalMassLabel
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the text of the specified label to reflect the total mass of
-//                  all the items in teh order box.
+//                  all the items in the order box.
 // Arguments:       Craft to read MaxMass from. Label to update.
 // Return value:    None.
 
-	void UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel);
+	void UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -674,7 +677,7 @@ protected:
 // Arguments:       Craft to read MaxPassengers from. Label to update.
 // Return value:    None.
 
-	void UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel);
+	void UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -770,6 +773,16 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
+    bool m_SelectingEquipment; //!< Whether or not the menu is in equipment mode.
+    MenuCategory m_LastVisitedEquipmentTab; //!< The last tab visited while in equipment mode.
+    MenuCategory m_LastVisitedMainTab; //!< The last tab visited while not in equipment mode.
+    int m_LastEquipmentScrollPosition; //!< The last scroll position while in equipment mode.
+    int m_LastMainScrollPosition; //!< The last scroll position while not in equipment mode.
+    MenuCategory m_FirstMainTab; //!< The first enabled tab when not in equipment mode.
+    MenuCategory m_LastMainTab; //!< The last enabled tab when not in equipment mode.
+    MenuCategory m_FirstEquipmentTab; //!< The first enabled tab when in equipment mode.
+    MenuCategory m_LastEquipmentTab; //!< The last enabled tab when in equipment mode.
+
     // Collection box of the buy GUIs
     GUICollectionBox *m_pParentBox;
     // Collection box of the buy popups that contain information about items
@@ -845,6 +858,11 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+    /// <summary>
+    /// Refresh tab disabled states, so tabs get properly enabled/disabled based on whether or not equipment selection mode is enabled.
+    /// </summary>
+    void RefreshTabDisabledStates();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

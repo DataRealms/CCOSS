@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(MetaPlayer, Entity, 0)
+	ConcreteClassInfo(MetaPlayer, Entity, 0);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int MetaPlayer::ReadProperty(std::string propName, Reader &reader) {
+	int MetaPlayer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Name") {
 			reader >> m_Name;
 		} else if (propName == "Team") {

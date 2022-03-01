@@ -7,22 +7,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float GetMPP() { return c_MPP; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float GetPPM() { return c_PPM; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float GetLPP() { return c_LPP; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float GetPPL() { return c_PPL; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void SeedRNG() {
 		// Pre-Seed generation
 		std::array<int, 624> seedData;
@@ -31,12 +15,6 @@ namespace RTE {
 
 		std::seed_seq sequence(std::begin(seedData), std::end(seedData));
 		g_RNG.seed(sequence);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SeedRNG(unsigned int seed) {
-		g_RNG.seed(seed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,62 +110,31 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float GetAllegroAngle(float angleDegrees) { return (angleDegrees / 360) * 256; }
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode) {
+		if (roundingMode == 0) {
+			std::stringstream floatStream;
+			floatStream << std::fixed << std::setprecision(precision) << input;
+			return floatStream.str();
+		} else {
+			float precisionMagnitude = std::pow(10.0F, static_cast<float>(precision));
+			RTEAssert(precisionMagnitude < std::numeric_limits<float>::max(), "Precision set greater than able to display (exponent too high)!");
+			RTEAssert(precisionMagnitude > 0, "Negative precision will yield divide by zero error!");
+			RTEAssert(input < (std::numeric_limits<float>::max() / precisionMagnitude), "Value will exceed numeric limits with precision " + std::to_string(precision));
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			float roundingBuffer = input * precisionMagnitude;
 
-	void OpenBrowserToURL(std::string goToURL) {
-		system(std::string("start ").append(goToURL).c_str());
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
-		// Open the script file so we can check it out
-		std::ifstream *file = new std::ifstream(filePath.c_str());
-		if (!file->good()) {
-			return false;
-		}
-		char rawLine[1024];
-		std::string line;
-		std::string::size_type pos = 0;
-		std::string::size_type endPos = 0;
-		std::string::size_type commentPos = std::string::npos;
-		bool blockCommented = false;
-
-		while (!file->eof()) {
-			// Go through the script file, line by line
-			file->getline(rawLine, 1024);
-			line = rawLine;
-			pos = endPos = 0;
-
-			// Check for block comments
-			if ((commentPos = line.find("/*", 0) != std::string::npos) && !blockCommented) { blockCommented = true; }
-
-			// Find the end of the block comment
-			if (((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) && blockCommented) {
-				blockCommented = false;
-				pos = commentPos;
+			switch (roundingMode) {
+				case 1:
+					roundingBuffer = std::floor(roundingBuffer);
+					break;
+				case 2:
+					roundingBuffer = std::ceil(roundingBuffer);
+					break;
+				default:
+					RTEAbort("Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+					break;
 			}
-			// Process the line as usual
-			if (!blockCommented) {
-				// See if this line is commented out anywhere
-				commentPos = line.find("//", 0);
-				// Find the string
-				do {
-					pos = line.find(findString.c_str(), pos);
-					if (pos != std::string::npos && pos < commentPos) {
-						// Found it!
-						delete file;
-						file = 0;
-						return true;
-					}
-				} while (pos != std::string::npos && pos < commentPos);
-			}
+			return RoundFloatToPrecision((roundingBuffer / precisionMagnitude), precision);
 		}
-		// Didn't find the search string
-		delete file;
-		file = 0;
-		return false;
 	}
 }

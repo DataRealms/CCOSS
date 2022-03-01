@@ -26,31 +26,26 @@
 #include "HeldDevice.h"
 #include "Scene.h"
 #include "DataModule.h"
-#include "System.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "GibEditorGUI.h"
-#include "PieMenuGUI.h"
-#include "GABaseDefense.h"
-
-extern bool g_ResetActivity;
 
 namespace RTE {
 
-ConcreteClassInfo(GibEditor, EditorActivity, 0)
+ConcreteClassInfo(GibEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +104,7 @@ int GibEditor::Create(const GibEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GibEditor::ReadProperty(std::string propName, Reader &reader)
+int GibEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -132,18 +127,9 @@ int GibEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GibEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GibEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int GibEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -393,7 +379,7 @@ void GibEditor::Update()
     m_NeedSave = m_NeedSave || m_pEditorGUI->EditMade();
 
     // Get any mode change commands that the user gave the Editor GUI
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_NEW && m_EditorMode != NEWDIALOG)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_NEW && m_EditorMode != NEWDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(GibEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::NEWDIALOG;
@@ -407,14 +393,14 @@ void GibEditor::Update()
         m_EditorMode = EditorActivity::LOADDIALOG;
         m_ModeChange = true;
     }
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_SAVE && m_EditorMode != SAVEDIALOG)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_SAVE && m_EditorMode != SAVEDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(GibEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::SAVEDIALOG;
         m_ModeChange = true;
     }
     // Test the object by allowing the player to gib temporary test copy instances of the edited object
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_DONE)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_DONE)
     {
         // Make the copy of the current edited object
         delete m_pTestingObject;
@@ -749,7 +735,7 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
 	// Try to create NewData directory if file does not exist
 	if (!newDataFileExisted)
 	{
-		g_System.MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
+		System::MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
 	}
 
     if (g_PresetMan.AddEntityPreset(m_pEditedObject, m_ModuleSpaceID, forceOverwrite, objectFilePath))

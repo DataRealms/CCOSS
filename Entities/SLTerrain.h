@@ -33,9 +33,7 @@ class TerrainDebris;
 // Parent(s):       SceneLayer
 // Class history:   01/08/2002 SLTerrain created.
 
-class SLTerrain:
-    public SceneLayer
-{
+class SLTerrain : public SceneLayer {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Nested class:    TerrainFrosting
@@ -55,7 +53,8 @@ class SLTerrain:
 
     public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,16 +97,6 @@ class SLTerrain:
     // Return value:    None.
 
         void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,8 +146,6 @@ class SLTerrain:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The material this frosting will sit on top in the terrain
         Material m_TargetMaterial;
         // Material of this frosting that will be piled on top of the target
@@ -175,6 +162,8 @@ class SLTerrain:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear

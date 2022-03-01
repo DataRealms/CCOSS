@@ -50,14 +50,13 @@ class GAScripted;
 // Parent(s):       Serializable.
 // Class history:   8/22/2008 MetagameGUI Created.
 
-class MetagameGUI:
-    public Serializable
-{
+class MetagameGUI : public Serializable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
+	SerializableClassNameGetter
 	SerializableOverrideMethods
 
 public:
@@ -225,16 +224,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -447,6 +436,11 @@ public:
 // Return value:    None.
 	void SetToStartNewGame();
 
+	/// <summary>
+	/// Sets where the station is located on the planet orbit.
+	/// </summary>
+	/// <param name="newStationPos">The position of the station on the planet orbit.</param>
+	void SetStationOrbitPos(const Vector &newStationPos) { m_StationPosOnOrbit = newStationPos; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1021,8 +1015,6 @@ protected:
         ANIMMODECOUNT
     };
 
-    // Member variables
-    static const std::string m_ClassName;
 
     // Controller which controls this menu. Not owned
     Controller *m_pController;
@@ -1259,11 +1251,15 @@ protected:
     // Player selected to quit the program
     bool m_Quit;
 
+	Vector m_StationPosOnOrbit; //!< The position of the station on the planet orbit.
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

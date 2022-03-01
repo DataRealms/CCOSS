@@ -28,9 +28,7 @@ namespace RTE {
 // Parent(s):       Attachable.
 // Class history:   07/03/2002 Magazine created.
 
-class Magazine:
-    public Attachable
-{
+class Magazine : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -40,9 +38,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Magazine)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Magazine);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Magazine
@@ -94,7 +92,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    void Reset() override { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); m_CollidesWithTerrainWhileAttached = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +155,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether this Magazine is out of rounds or not.
 
-    bool IsEmpty() const { return m_FullCapacity > 0 ? m_RoundCount == 0 : !(m_FullCapacity < 0); }
+	bool IsEmpty() const { return m_FullCapacity >= 0 && m_RoundCount == 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

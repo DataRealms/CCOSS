@@ -31,9 +31,7 @@ class Actor;
 // Parent(s):       GameActivity.
 // Class history:   07/03/2008 GAScripted created.
 
-class GAScripted:
-    public GameActivity
-{
+class GAScripted : public GameActivity {
 
     friend class LuaMan;
     friend class ActivityMan;
@@ -45,9 +43,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GAScripted)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GAScripted);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GAScripted
@@ -159,7 +157,7 @@ ClassInfoGetters
 //                  but only for a limited number of teams. If -1, not applicable.
 // Return value:    Whether the Scene has the right stuff.
 
-	bool SceneIsCompatible(Scene *pScene, short teams = -1) override;
+	bool SceneIsCompatible(Scene *pScene, int teams = -1) override;
 
 
     /// <summary>

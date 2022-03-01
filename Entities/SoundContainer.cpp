@@ -1,4 +1,5 @@
 #include "SoundContainer.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -29,6 +30,7 @@ namespace RTE {
 		m_Pos = Vector();
 		m_Volume = 1.0F;
 		m_Pitch = 1.0F;
+		m_PitchVariation = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,13 +53,14 @@ namespace RTE {
 		m_Pos = reference.m_Pos;
 		m_Volume = reference.m_Volume;
 		m_Pitch = reference.m_Pitch;
+		m_PitchVariation = reference.m_PitchVariation;
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
+	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
@@ -94,6 +97,8 @@ namespace RTE {
 			reader >> m_Volume;
 		} else if (propName == "Pitch") {
 			reader >> m_Pitch;
+		} else if (propName == "PitchVariation") {
+			reader >> m_PitchVariation;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -112,7 +117,7 @@ namespace RTE {
 		SoundSet::SaveSoundSelectionCycleMode(writer, m_TopLevelSoundSet.GetSoundSelectionCycleMode());
 
 		writer.NewProperty("SoundOverlapMode");
-		std::list<std::pair<const std::string, SoundOverlapMode>>::const_iterator overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
+		auto overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
 		if (overlapModeMapEntry != c_SoundOverlapModeMap.end()) {
 			writer << overlapModeMapEntry->first;
 		} else {
@@ -137,6 +142,8 @@ namespace RTE {
 		writer << m_Volume;
 		writer.NewProperty("Pitch");
 		writer << m_Pitch;
+		writer.NewProperty("PitchVariation");
+		writer << m_PitchVariation;
 
 		return 0;
 	}
@@ -172,7 +179,7 @@ namespace RTE {
 		if (HasAnySounds()) {
 			if (IsBeingPlayed()) {
 				if (m_SoundOverlapMode == SoundOverlapMode::RESTART) {
-					Restart(player);
+					return Restart(player);
 				} else if (m_SoundOverlapMode == SoundOverlapMode::IGNORE_PLAY) {
 					return false;
 				}
@@ -195,13 +202,16 @@ namespace RTE {
 			if (m_Immobile) {
 				soundMode |= FMOD_3D_HEADRELATIVE;
 				m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
-			} else {
+			} else if (g_AudioMan.GetSoundPanningEffectStrength() == 1.0F) {
 				soundMode |= FMOD_3D_INVERSEROLLOFF;
+			} else {
+				soundMode |= FMOD_3D_CUSTOMROLLOFF;
 			}
 
 			result = (result == FMOD_OK) ? soundData->SoundObject->setMode(soundMode) : result;
 			result = (result == FMOD_OK) ? soundData->SoundObject->setLoopCount(m_Loops) : result;
-			result = (result == FMOD_OK) ? soundData->SoundObject->set3DMinMaxDistance(soundData->MinimumAudibleDistance + std::max(0.0F, m_AttenuationStartDistance), c_SoundMaxAudibleDistance) : result;
+			m_AttenuationStartDistance = std::clamp(m_AttenuationStartDistance, 0.0F, static_cast<float>(c_SoundMaxAudibleDistance) - soundData->MinimumAudibleDistance);
+			result = (result == FMOD_OK) ? soundData->SoundObject->set3DMinMaxDistance(soundData->MinimumAudibleDistance + m_AttenuationStartDistance, c_SoundMaxAudibleDistance) : result;
 		}
 		m_SoundPropertiesUpToDate = result == FMOD_OK;
 

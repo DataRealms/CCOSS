@@ -29,6 +29,7 @@ namespace RTE
 class Actor;
 class ACraft;
 class PieMenuGUI;
+class InventoryMenuGUI;
 class BuyMenuGUI;
 class SceneEditorGUI;
 class GUIBanner;
@@ -42,11 +43,9 @@ class Loadout;
 // Parent(s):       Activity.
 // Class history:   8/7/2007 GameActivity created.
 
-class GameActivity:
-    public Activity
-{
+class GameActivity : public Activity {
 
-    friend class LuaMan;
+    friend struct ActivityLuaBindings;
 
     // Keeps track of everything about a delivery in transit after purchase has been made with the menu
     struct Delivery
@@ -57,6 +56,8 @@ class GameActivity:
         int orderedByPlayer;
         // Where to land
         Vector landingZone;
+		// How much this delivery was offset upwards for multi-ordering, stored to help with delivery icons. If 0, this was presumably not a multi-order.
+		float multiOrderYOffset;
         // How long left until entry, in ms
         long delay;
         // Times how long we've been in transit
@@ -69,8 +70,8 @@ class GameActivity:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
     enum ObjectiveArrowDir
     {
@@ -235,6 +236,12 @@ public:
 
     BuyMenuGUI * GetBuyGUI(unsigned int which = 0) const { return m_pBuyGUI[which]; }
 
+    /// <summary>
+    /// Checks if the in-game GUI Object is visible for a specific player.
+    /// </summary>
+    /// <param name="which">Which player to check the GUI for. -1 will check all players.</param>
+    /// <returns>Whether or not the BuyMenuGUI is visible for input player(s).</returns>
+    bool IsBuyGUIVisible(int which = 0) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEditorGUI
@@ -256,7 +263,7 @@ public:
 //                  be added to MovableMan already.
 // Return value:    Whether the focus switch was successful or not.
 
-	bool SwitchToActor(Actor *pActor, short player = 0, short team = 0) override;
+	bool SwitchToActor(Actor *pActor, int player = 0, int team = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +275,7 @@ public:
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-	void SwitchToNextActor(short player, short team, Actor *pSkip = 0) override;
+	void SwitchToNextActor(int player, int team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +287,7 @@ public:
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-	void SwitchToPrevActor(short player, short team, Actor *pSkip = 0) override;
+	void SwitchToPrevActor(int player, int team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -864,33 +871,33 @@ public:
 
     virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
-	void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{ 
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AddPieSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterPieSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
+    PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
-		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, 0, false);
+			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemovePieSliceLua(description, functionName);
+		return PieSlice("", PieSlice::PieSliceIndex::PSI_NONE, PieSlice::SliceDirection::NONE, false);
 	};
 
-	std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
+	std::vector<PieSlice *> GetCurrentPieMenuSlices(int player) const
 	{ 
 		//if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return m_pPieMenu[player]->GetCurrentSlices();
 		//return 0;
 	}
 
-	/*std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
+	/*std::vector<PieSlice> * GetAvailablePieMenuSlices(int player) const 
 	{ 
 		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return &m_pPieMenu[player]->GetAvailableSlices();
@@ -1053,6 +1060,8 @@ protected:
     bool m_AIReturnCraft[Players::MaxPlayerCount];
     // The pie menus for each player
     PieMenuGUI *m_pPieMenu[Players::MaxPlayerCount];
+    // The inventory menu gui for each player
+    InventoryMenuGUI *m_InventoryMenuGUI[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player
     BuyMenuGUI *m_pBuyGUI[Players::MaxPlayerCount];
     // The in-game scene editor GUI for each player
@@ -1107,9 +1116,9 @@ protected:
 	bool m_BuyMenuEnabled;
 
     // The cursor animations for the LZ indicators
-    BITMAP **m_aLZCursor[4];
+    std::vector<BITMAP *> m_aLZCursor[4];
     // The cursor animations for the objective indications
-    BITMAP **m_aObjCursor[4];
+    std::vector<BITMAP *> m_aObjCursor[4];
 
     // Time it takes for a delivery to be made, in ms
     long m_DeliveryDelay;
@@ -1124,7 +1133,7 @@ protected:
     // The winning team number, when the game is over
     int m_WinnerTeam;
 
-	std::vector<PieMenuGUI::Slice *> m_CurrentPieMenuSlices;
+	std::vector<PieSlice *> m_CurrentPieMenuSlices;
 
 	int m_CurrentPieMenuPlayer;
 

@@ -41,9 +41,7 @@ class GUIComboBox;
 // Parent(s):       Activity.
 // Class history:   04/30/2010 Created BaseEditor for the campaign base blueprint editing.
 
-class BaseEditor:
-    public Activity
-{
+class BaseEditor : public Activity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -52,9 +50,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(BaseEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(BaseEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     BaseEditor

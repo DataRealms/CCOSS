@@ -41,9 +41,7 @@ class GUIComboBox;
 // Parent(s):       EditorActivity.
 // Class history:   9/17/2007 GibEditor Created.
 
-class GibEditor:
-    public EditorActivity
-{
+class GibEditor : public EditorActivity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -52,9 +50,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GibEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GibEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

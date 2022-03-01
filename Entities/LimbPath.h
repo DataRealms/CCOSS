@@ -40,9 +40,7 @@ enum Speed
 // Parent(s):       Entity.
 // Class history:   05/25/2001 LimbPath created.
 
-class LimbPath:
-    public Entity
-{
+class LimbPath : public Entity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -52,9 +50,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(LimbPath)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(LimbPath);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LimbPath
@@ -139,16 +137,17 @@ ClassInfoGetters
 
     void Destroy(bool notInherited = false) override;
 
+    /// <summary>
+    /// Gets the coordinates where the limb should start at the start of the LimbPath cycle, relative to the owning AtomGroup's local origin.
+    /// </summary>
+    /// <returns>A Vector with the start position.</returns>
+    const Vector & GetStartOffset() const { return m_Start; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetStartOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the coordinates where the limb should start at the start of the
-//                  LimbPath cycle, relative to the owning AtomGroup's local origin.
-// Arguments:       None.
-// Return value:    A Vector with the start position.
-
-    Vector GetStartOffset() const { return m_Start; }
+    /// <summary>
+    /// Sets the coordinates where the limb should start at the start of the LimbPath cycle, relative to the owning AtomGroup's local origin.
+    /// </summary>
+    /// <param name="newStartOffset">A Vector with the new start offset.</param>
+    void SetStartOffset(const Vector &newStartOffset) { m_Start = newStartOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -162,14 +161,18 @@ ClassInfoGetters
     unsigned int GetSegCount() const { return m_Segments.size(); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSegments
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the array of 'waypoints' or segments of this LimbPath.
-// Arguments:       None.
-// Return value:    An array of Vectors defining the path of this LimbPath.
+    /// <summary>
+    /// Gets a pointer to the segment at the given index. Ownership is NOT transferred.
+    /// </summary>
+    /// <param name="segmentIndex">The index of the segment to get.</param>
+    /// <returns>A pointer to the segment at the given index. Ownership is NOT transferred.</returns>
+    Vector *GetSegment(int segmentIndex) { if (segmentIndex >= 0 && segmentIndex < m_Segments.size()) { return &m_Segments.at(segmentIndex); } return nullptr;}
 
-//    const Vector const * GetSegArray() const { return m_aSegments; }
+    /// <summary>
+    /// Gets whether or not foot collisions should be disabled, i.e. the limbpath's progress is greater than the FootCollisionsDisabledSegment value.
+    /// </summary>
+    /// <returns>Whether or not foot collisions should be disabled for this limbpath at its current progress.</returns>
+    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && GetSegCount() - GetCurrentSegmentNumber() <= m_FootCollisionsDisabledSegment; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -343,7 +346,7 @@ ClassInfoGetters
 // Return value:    A float indicating the total progress made on the entire path, from
 //                  0.0 to 1.0. If the path has ended, 0.0 is returned.
 
-    float GetTotalProgress();
+    float GetTotalProgress()  const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -357,7 +360,13 @@ ClassInfoGetters
 // Return value:    A float indicating the total progress made on the regular path, from
 //                  0.0 to 1.0. If the path has ended, 0.0 is returned.
 
-    float GetRegularProgress();
+    float GetRegularProgress() const;
+
+    /// <summary>
+    /// Gets the current segment as a number, rather than an iterator.
+    /// </summary>
+    /// <returns>The current segment as a number.</returns>
+    int GetCurrentSegmentNumber() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -438,15 +447,6 @@ ClassInfoGetters
     void SetHFlip(bool hflipped)
     {
         m_HFlipped = hflipped;
-/*
-        if (m_HFlipped != hflipped) {
-            // Gotta flip before restart.
-            m_HFlipped = hflipped;
-            Restart();
-        }
-        else
-            m_HFlipped = hflipped;
-*/
         m_Rotation.SetXFlipped(m_HFlipped);
     }
 
@@ -573,7 +573,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether this has been Create:ed yet.
 
-    bool IsInitialized() { return !m_Start.IsZero() || !m_Segments.empty(); }
+    bool IsInitialized() const { return !m_Start.IsZero() || !m_Segments.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -585,7 +585,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    bool IsStaticPoint() { return m_Segments.empty(); }
+    bool IsStaticPoint() const { return m_Segments.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -621,6 +621,8 @@ protected:
 
     // The iterator to the segment of the path that the limb ended up on the end of
 	std::deque<Vector>::iterator m_CurrentSegment;
+
+    int m_FootCollisionsDisabledSegment; //!< The segment after which foot collisions will be disabled for this limbpath, if it's for legs.
 
     // Normalized measure of how far the limb has progressed toward the
     // current segment's target. 0.0 means its farther away than the

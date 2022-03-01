@@ -4,7 +4,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(Round, Entity, 500)
+	ConcreteClassInfo(Round, Entity, 500);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -13,6 +13,7 @@ namespace RTE {
 		m_ParticleCount = 0;
 		m_FireVel = 0;
 		m_Separation = 0;
+		m_LifeVariation = 0;
 		m_Shell = 0;
 		m_ShellVel = 0;
 		m_FireSound.Reset();
@@ -51,6 +52,7 @@ namespace RTE {
 		m_ParticleCount = reference.m_ParticleCount;
 		m_FireVel = reference.m_FireVel;
 		m_Separation = reference.m_Separation;
+		m_LifeVariation = reference.m_LifeVariation;
 		m_Shell = reference.m_Shell;
 		m_ShellVel = reference.m_ShellVel;
 		m_FireSound = reference.m_FireSound;
@@ -63,7 +65,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Round::ReadProperty(std::string propName, Reader &reader) {
+	int Round::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Particle") {
 			m_Particle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_Particle, "Stream suggests allocating an unallocable type in Round::Create!");
@@ -73,6 +75,8 @@ namespace RTE {
 			reader >> m_FireVel;
 		} else if (propName == "Separation") {
 			reader >> m_Separation;
+		} else if (propName == "LifeVariation") {
+			reader >> m_LifeVariation;
 		} else if (propName == "Shell") {
 			m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "ShellVelocity") {
@@ -104,6 +108,8 @@ namespace RTE {
 		writer << m_FireVel;
 		writer.NewProperty("Separation");
 		writer << m_Separation;
+		writer.NewProperty("LifeVariation");
+		writer << m_LifeVariation;
 		writer.NewProperty("Shell");
 		writer << m_Shell;
 		writer.NewProperty("ShellVelocity");

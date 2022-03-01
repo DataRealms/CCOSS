@@ -28,9 +28,7 @@ namespace RTE
 // Parent(s):       Attachable.
 // Class history:   02/29/2004 AEmitter created.
 
-class AEmitter:
-    public Attachable
-{
+class AEmitter : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -38,12 +36,12 @@ class AEmitter:
 
 public:
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AEmitter)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AEmitter);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AEmitter
@@ -63,17 +61,6 @@ ClassInfoGetters
 // Arguments:       None.
 
 	~AEmitter() override { Destroy(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AEmitter object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -272,6 +259,37 @@ ClassInfoGetters
 //                  0 means normal, -1.0 means least emission rate.
 
     float GetThrottle() const { return m_Throttle; }
+
+	/// <summary>
+	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this AEmitter.
+	/// </summary>
+	/// <returns>The throttle strength as a multiplier.</returns>
+	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0 ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
+
+	/// <summary>
+	/// Gets the negative throttle multiplier of this AEmitter.
+	/// </summary>
+	/// <returns>The negative throttle multiplier of this AEmitter.</returns>
+    float GetNegativeThrottleMultiplier() const { return m_NegativeThrottleMultiplier; }
+
+	/// <summary>
+	/// Gets the positive throttle multiplier of this AEmitter.
+	/// </summary>
+	/// <returns>The positive throttle multiplier of this AEmitter.</returns>
+    float GetPositiveThrottleMultiplier() const { return m_PositiveThrottleMultiplier; }
+
+	/// <summary>
+	/// Sets the negative throttle multiplier of this AEmitter.
+	/// </summary>
+	/// <param name="newValue">The new throttle multiplier of this AEmitter.</param>
+    void SetNegativeThrottleMultiplier(float newValue) { m_NegativeThrottleMultiplier = newValue; }
+
+	/// <summary>
+	/// Sets the positive throttle multiplier of this AEmitter.
+	/// </summary>
+	/// <param name="newValue">The new throttle multiplier of this AEmitter.</param>
+	void SetPositiveThrottleMultiplier(float newValue) { m_PositiveThrottleMultiplier = newValue; }
+
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetEmitRate
@@ -315,6 +333,18 @@ ClassInfoGetters
 
     void SetBurstSpacing(const float spacing) { m_BurstSpacing = spacing; }
 
+
+    /// <summary>
+    /// Gets the flash of this AEmitter.
+    /// </summary>
+    /// <returns>A pointer to the AEmitter's flash. Ownership is NOT transferred!</returns>
+    Attachable * GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this AEmitter. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newFlash">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetFlashScale
@@ -449,19 +479,6 @@ ClassInfoGetters
 
     void ResetAllTimers() override { Attachable::ResetAllTimers(); m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -574,6 +591,42 @@ ClassInfoGetters
 
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
+	/// <summary>
+	/// Gets this AEmitter's emission sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's emission sound.</returns>
+	SoundContainer * GetEmissionSound() const { return m_EmissionSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's emission sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's emission sound.</param>
+	void SetEmissionSound(SoundContainer *newSound) { m_EmissionSound = newSound; }
+
+	/// <summary>
+	/// Gets this AEmitter's burst sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's burst sound.</returns>
+	SoundContainer * GetBurstSound() const { return m_BurstSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's burst sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's burst sound.</param>
+	void SetBurstSound(SoundContainer *newSound) { m_BurstSound = newSound; }
+
+	/// <summary>
+	/// Gets this AEmitter's end sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's end sound.</returns>
+	SoundContainer * GetEndSound() const { return m_EndSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's end sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's end sound.</param>
+	void SetEndSound(SoundContainer *newSound) { m_EndSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -585,9 +638,9 @@ protected:
     // The list of MO instances that get emitted
     std::list<Emission *> m_EmissionList;
     // Sounds
-    SoundContainer m_EmissionSound;
-    SoundContainer m_BurstSound;
-    SoundContainer m_EndSound;
+    SoundContainer *m_EmissionSound;
+    SoundContainer *m_BurstSound;
+    SoundContainer *m_EndSound;
     // Whether emitting is currently enabled or not.
     bool m_EmitEnabled;
     // Whether or not the it was emitting last frame or not.
@@ -596,12 +649,9 @@ protected:
     long m_EmitCount;
     // The max number of emissions to emit per emit being enabled
     long m_EmitCountLimit;
-    // The range negative throttle has on emission rate. 1.0 means the rate can be throttled down to 0%, 0 means negative throttle has no effect
-    double m_MinThrottleRange;
-    // The range positive throttle has on emission rate. 1.0 means the rate can be throttled up to 200%, 0 means negative throttle has no effect
-    double m_MaxThrottleRange;
-    // The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
-    float m_Throttle;
+	float m_NegativeThrottleMultiplier; //!< The multiplier applied to the emission rate when throttle is negative. Relative to the absolute throttle value.
+	float m_PositiveThrottleMultiplier; //!< The multiplier applied to the emission rate when throttle is positive. Relative to the absolute throttle value.
+	float m_Throttle; //!< The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
     // Whether or not this' emissions ignore hits with itself, even if they are set to hit other MOs.
     bool m_EmissionsIgnoreThis;
     // The scale factor that will be applied to the regular spread and emission
@@ -628,8 +678,6 @@ protected:
     Timer m_LastEmitTmr;
     // Emission flash Attachable
     Attachable *m_pFlash;
-    // Flash offset.
-//    Vector m_FlashOff; nah dont need it
     // Flash display scale
     float m_FlashScale;
     // How large impulse this emitter generates when bursting

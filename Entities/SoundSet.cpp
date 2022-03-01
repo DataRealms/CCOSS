@@ -8,16 +8,16 @@ namespace RTE {
 	const std::string SoundSet::m_sClassName = "SoundSet";
 
 	const std::unordered_map<std::string, SoundSet::SoundSelectionCycleMode> SoundSet::c_SoundSelectionCycleModeMap = {
-		{"Random", SoundSelectionCycleMode::RANDOM},
-		{"Forwards", SoundSelectionCycleMode::FORWARDS},
-		{"All", SoundSelectionCycleMode::ALL}
+		{"random", SoundSelectionCycleMode::RANDOM},
+		{"forwards", SoundSelectionCycleMode::FORWARDS},
+		{"all", SoundSelectionCycleMode::ALL}
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundSet::Clear() {
 		m_SoundSelectionCycleMode = SoundSelectionCycleMode::RANDOM;
-		m_CurrentSelection = {false, 0};
+		m_CurrentSelection = {false, -1};
 
 		m_SoundData.clear();
 		m_SubSoundSets.clear();
@@ -42,7 +42,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundSet::ReadProperty(std::string propName, Reader &reader) {
+	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "SoundSelectionCycleMode") {
 			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
 		} else if (propName == "AddSound") {
@@ -68,7 +68,7 @@ namespace RTE {
 		/// <param name="soundPath">The path to the sound file.</param>
 		auto readSoundFromPath = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
-			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
+			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 			FMOD::Sound *soundObject = soundFile.GetAsSound();
 			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 
@@ -103,6 +103,8 @@ namespace RTE {
 	SoundSet::SoundSelectionCycleMode SoundSet::ReadSoundSelectionCycleMode(Reader &reader) {
 		SoundSelectionCycleMode soundSelectionCycleModeToReturn;
 		std::string soundSelectionCycleModeString = reader.ReadPropValue();
+		std::locale locale;
+		for (char &character : soundSelectionCycleModeString) { character = std::tolower(character, locale); }
 
 		std::unordered_map<std::string, SoundSelectionCycleMode>::const_iterator soundSelectionCycleMode = c_SoundSelectionCycleModeMap.find(soundSelectionCycleModeString);
 		if (soundSelectionCycleMode != c_SoundSelectionCycleModeMap.end()) {
@@ -155,7 +157,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	void SoundSet::SaveSoundSelectionCycleMode(Writer &writer, SoundSelectionCycleMode soundSelectionCycleMode) {
-		std::list<std::pair<const std::string, SoundSelectionCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_SoundSelectionCycleModeMap.begin(), c_SoundSelectionCycleModeMap.end(), [&soundSelectionCycleMode = soundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
+		auto cycleModeMapEntry = std::find_if(c_SoundSelectionCycleModeMap.begin(), c_SoundSelectionCycleModeMap.end(), [&soundSelectionCycleMode = soundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
 		if (cycleModeMapEntry != c_SoundSelectionCycleModeMap.end()) {
 			writer << cycleModeMapEntry->first;
 		} else {
@@ -173,6 +175,18 @@ namespace RTE {
 		}
 
 		m_SoundData.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SoundSet::RemoveSound(const std::string &soundFilePath, bool removeFromSubSoundSets) {
+		auto soundsToRemove = std::remove_if(m_SoundData.begin(), m_SoundData.end(), [&soundFilePath](const SoundSet::SoundData &soundData) { return soundData.SoundFile.GetDataPath() == soundFilePath; });
+		bool anySoundsToRemove = soundsToRemove != m_SoundData.end();
+		if (anySoundsToRemove) { m_SoundData.erase(soundsToRemove, m_SoundData.end()); }
+		if (removeFromSubSoundSets) {
+			for (SoundSet subSoundSet : m_SubSoundSets) { anySoundsToRemove |= RemoveSound(soundFilePath, removeFromSubSoundSets); }
+		}
+		return anySoundsToRemove;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -272,9 +286,7 @@ namespace RTE {
 			case 0:
 				return false;
 			case 1:
-				break;
-			case 2:
-				selectSoundForwards();
+				m_CurrentSelection.second = 0;
 				break;
 			default:
 				switch (m_SoundSelectionCycleMode) {
@@ -285,7 +297,7 @@ namespace RTE {
 						selectSoundForwards();
 						break;
 					default:
-						RTEAbort("Invalid sound selection sound cycle mode.");
+						RTEAbort("Invalid sound selection sound cycle mode. " + m_SoundSelectionCycleMode);
 						break;
 				}
 				RTEAssert(m_CurrentSelection.second >= 0 && m_CurrentSelection.second < selectedVectorSize, "Failed to select next sound, either none was selected or the selected sound was invalid.");

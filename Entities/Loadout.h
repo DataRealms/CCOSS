@@ -33,9 +33,7 @@ class Actor;
 // Parent(s):       Entity.
 // Class history:   2/21/2012 Loadout created.
 
-class Loadout:
-    public Entity
-{
+class Loadout : public Entity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -45,9 +43,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Loadout)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Loadout);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

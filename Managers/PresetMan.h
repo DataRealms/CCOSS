@@ -36,11 +36,8 @@ class DataModule;
 // Class history:   12/25/2001 PresetMan created.
 // Class history:   05/30/2008 Changed name to PresetMan.
 
-class PresetMan:
-    public Singleton<PresetMan>//,
-//    public Serializable
-{
-	friend class LuaMan;
+class PresetMan : public Singleton<PresetMan> {
+	friend struct ManagerLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -76,7 +73,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    int Create();
+	int Initialize() { return 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,16 +95,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this entity.
-
-    const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -496,15 +483,12 @@ public:
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
-
     // Owned and loaded DataModule:s
     std::vector<DataModule *> m_pDataModules;
 
     // Names of all DataModule:s mapped to indices into the m_pDataModules vector.
     // The names are all lowercase name so we can more easily find them in case-agnostic fashion
-    std::map<std::string, int> m_DataModuleIDs;
+    std::map<std::string, size_t> m_DataModuleIDs;
 
     // How many modules are 'official' and shipped with the game, and guaranteed to not have name conflicts among them
     // All official modules are in the beginning of the m_TypeMap, so this count shows how many into that vector they represent
@@ -521,6 +505,11 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	/// <summary>
+	/// Iterates through the working directory to find any files matching the zipped module package extension (.rte.zip) and proceeds to extract them.
+	/// </summary>
+	void FindAndExtractZippedModules() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

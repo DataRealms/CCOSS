@@ -42,9 +42,7 @@ class GUIComboBox;
 // Class history:   8/30/2007 AssemblyEditor created, inheriting directly from Activity.
 //                  9/17/2007 Spliced out and made to derive from EditorActivty
 
-class AssemblyEditor:
-    public EditorActivity
-{
+class AssemblyEditor : public EditorActivity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -53,9 +51,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AssemblyEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AssemblyEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AssemblyEditor

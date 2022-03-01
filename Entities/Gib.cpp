@@ -4,7 +4,7 @@
 
 namespace RTE {
 
-	const std::string Gib::m_sClassName = "Gib";
+	const std::string Gib::c_ClassName = "Gib";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -12,11 +12,13 @@ namespace RTE {
 		m_GibParticle = 0;
 		m_Offset.Reset();
 		m_Count = 1;
-		m_Spread = c_PI;
+		m_Spread = 0.1F;
 		m_MinVelocity = 0;
 		m_MaxVelocity = 0;
 		m_LifeVariation = 0.1F;
 		m_InheritsVel = true;
+		m_IgnoresTeamHits = false;
+		m_SpreadMode = SpreadMode::SpreadRandom;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,13 +32,15 @@ namespace RTE {
 		m_MaxVelocity = reference.m_MaxVelocity;
 		m_LifeVariation = reference.m_LifeVariation;
 		m_InheritsVel = reference.m_InheritsVel;
+		m_IgnoresTeamHits = reference.m_IgnoresTeamHits;
+		m_SpreadMode = reference.m_SpreadMode;
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Gib::ReadProperty(std::string propName, Reader &reader) {
+	int Gib::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "GibParticle") {
 			m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_GibParticle, "Stream suggests allocating an unallocable type in Gib::Create!");
@@ -54,6 +58,10 @@ namespace RTE {
 			reader >> m_LifeVariation;
 		} else if (propName == "InheritsVel") {
 			reader >> m_InheritsVel;
+		} else if (propName == "IgnoresTeamHits") {
+			reader >> m_IgnoresTeamHits;
+		} else if (propName == "SpreadMode") {
+			m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue()));
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}

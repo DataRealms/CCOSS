@@ -35,19 +35,17 @@ class PathFinder;
 // Parent(s):       Entity.
 // Class history:   08/02/2006 Scene created.
 
-class Scene:
-    public Entity
-{
+class Scene : public Entity {
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -57,9 +55,6 @@ public:
 		AIPLAN,
 		PLACEDSETSCOUNT
 	};
-
-	const static int PREVIEW_WIDTH = 140;
-	const static int PREVIEW_HEIGHT = 55;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Nested class:    Area
@@ -76,12 +71,15 @@ public:
     friend class AreaEditorGUI;
     friend class AreaPickerGUI;
 
+	friend struct EntityLuaBindings;
+
     //////////////////////////////////////////////////////////////////////////////////////////
     // Public member variable, method and friend function declarations
 
     public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area
@@ -129,16 +127,6 @@ public:
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  AddBox
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Adds a Box to this' area coverage.
@@ -146,6 +134,13 @@ public:
     // Return value:    Whether the Box was successfully added or not.
 
 		bool AddBox(const Box &newBox);
+
+        /// <summary>
+        /// Removes the first Box in the Area that has the same Corner, Width and Height of the passed-in Box.
+        /// </summary>
+        /// <param name="boxToRemove">A Box whose values are used to determine what Box to remove.</param>
+        /// <returns>Whether or not a Box was removed.</returns>
+        bool RemoveBox(const Box &boxToRemove);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,8 +256,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The list of Box:es defining the Area in the owner Scene
         std::vector<Box> m_BoxList;
         // The name tag of this Area
@@ -273,6 +266,8 @@ public:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -399,17 +394,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	int SavePreview(string bitmapPath);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawPlacedObjectsPreview
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw placed objects onto specified preview bitmap with scaling
-// Arguments:       Bitmap to draw on. Set of scene objects to draw. Width and height of scaled scene layer, 
-//					scaled map offset, scale.
-// Return value:    None.
-
-	void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	int SavePreview(const std::string &bitmapPath);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -937,26 +922,28 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
     bool HasArea(std::string areaName);
 
+	/// <summary>
+	/// Gets a specified Area identified by name. Ownership is NOT transferred!
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <param name="luaWarnNotError">Whether to warn or error in the Lua console. True is warn, false is error.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetArea(const std::string_view &areaName, bool luaWarnNotError);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific Area identified by a name. Ownership is NOT transferred!
-// Arguments:       The name of the Area to try to get.
-// Return value:    A pointer to the Area asked for. 0 if no Area of that name was found.
+	/// <summary>
+	/// Gets a specified Area identified by name, showing a Lua error if it's not found. Ownership is NOT transferred!
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetArea(const std::string &areaName) { return GetArea(areaName, false); }
 
-    Area * GetArea(std::string areaName);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNonRequiredArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific Area identified by a name. Ownership is NOT transferred!
-//					Using this function will not add the area to the list of required areas
-//					which Scenario GUI uses to show compatible areas.
-// Arguments:       The name of the Area to try to get.
-// Return value:    A pointer to the Area asked for. 0 if no Area of that name was found.
-
-	Area * GetOptionalArea(std::string areaName) { return GetArea(areaName); };
+	/// <summary>
+	/// Gets a specified Area identified by name, showing a Lua warning if it's not found. Ownership is NOT transferred!
+	/// Using this function will not add the area to the list of required areas which Scenario GUI uses to show compatible areas.
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, true); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(MOSParticle, MovableObject, 1000)
+	ConcreteClassInfo(MOSParticle, MovableObject, 1000);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int MOSParticle::ReadProperty(std::string propName, Reader &reader) {
+	int MOSParticle::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Atom") {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> *m_Atom;
@@ -111,14 +111,15 @@ namespace RTE {
 
 		// Set the atom to ignore a certain MO, if set and applicable.
 		if (m_HitsMOs && m_pMOToNotHit && g_MovableMan.ValidMO(m_pMOToNotHit) && !m_MOIgnoreTimer.IsPastSimTimeLimit()) {
-			MOID root = m_pMOToNotHit->GetID();
-			int footprint = m_pMOToNotHit->GetMOIDFootprint();
-			for (int i = 0; i < footprint; ++i) {
-				m_Atom->AddMOIDToIgnore(root + i);
+			std::vector<MOID> MOIDsNotToHit;
+			m_pMOToNotHit->GetMOIDs(MOIDsNotToHit);
+			for (const MOID &MOIDNotToHit : MOIDsNotToHit) {
+				m_Atom->AddMOIDToIgnore(MOIDNotToHit);
 			}
 		}
 		// Do static particle bounce calculations.
-		int hitCount = m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked());
+		int hitCount = 0;
+		if (!IsTooFast()) { m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); }
 
 		m_Atom->ClearMOIDIgnoreList();
 

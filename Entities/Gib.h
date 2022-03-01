@@ -15,7 +15,13 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
+
+		/// <summary>
+		/// Different types of logic for the Gib to use when applying velocity to its GibParticles.
+		/// </summary>
+		enum class SpreadMode { SpreadRandom, SpreadEven, SpreadSpiral };
 
 #pragma region Creation
 		/// <summary>
@@ -49,7 +55,7 @@ namespace RTE {
 		/// Gets the reference particle to be used as a Gib. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>A pointer to the particle to be used as a Gib.</returns>
-		const MovableObject * GetParticlePreset() { return m_GibParticle; }
+		const MovableObject * GetParticlePreset() const { return m_GibParticle; }
 
 		/// <summary>
 		/// Gets the spawn offset of this Gib from the parent's position.
@@ -93,19 +99,21 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this Gib's GibParticles should inherit the velocity of the gibbing parent.</returns>
 		bool InheritsVelocity() const { return m_InheritsVel; }
-#pragma endregion
 
-#pragma region Class Info
 		/// <summary>
-		/// Gets the class name of this Entity.
+		/// Gets whether this Gib's GibParticles should ignore hits with the team of the gibbing parent.
 		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return m_sClassName; }
+		/// <returns>Whether this Gib's GibParticles should ignore hits with the team of the gibbing parent.</returns>
+		bool IgnoresTeamHits() const { return m_IgnoresTeamHits; }
+
+		/// <summary>
+		/// Gets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles. 
+		/// </summary>
+		/// <returns>The spread mode of this Gib.</returns>
+		SpreadMode GetSpreadMode() const { return m_SpreadMode; }
 #pragma endregion
 
 	protected:
-
-		static const std::string m_sClassName; //!< A string with the friendly-formatted type name of this object.
 
 		const MovableObject *m_GibParticle; //!< The pointer to the preset instance that copies of will be created as this Gib. Not Owned.
 		Vector m_Offset; //!< Offset spawn position from owner/parent's position.
@@ -115,8 +123,12 @@ namespace RTE {
 		float m_MaxVelocity; //!< The maximum velocity a GibParticle object can have when spawned.
 		float m_LifeVariation; //!< The per-Gib variation in Lifetime, in percentage of the existing Lifetime of the gib.
 		bool m_InheritsVel; //!< Whether this Gib should inherit the velocity of the exploding parent or not.
+		bool m_IgnoresTeamHits; //!< Whether this Gib should ignore hits with the team of the exploding parent or not.
+		SpreadMode m_SpreadMode; //!< Determines what kind of logic is used when applying velocity to the GibParticle objects.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this Gib, effectively resetting the members of this abstraction level only.

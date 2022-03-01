@@ -30,17 +30,17 @@
 #include "SettingsMan.h"
 #include "PerformanceMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
 ConcreteClassInfo(Actor, MOSRotating, 20);
 
-BITMAP **Actor::m_apNoTeamIcon;
+std::vector<BITMAP *> Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];
-BITMAP **Actor::m_apSelectArrow;
-BITMAP **Actor::m_apAlarmExclamation;
+std::vector<BITMAP *> Actor::m_apSelectArrow;
+std::vector<BITMAP *> Actor::m_apAlarmExclamation;
 bool Actor::m_sIconsLoaded = false;
 
 #define ARROWTIME 1000
@@ -59,38 +59,37 @@ bool Actor::m_sIconsLoaded = false;
 // Description:     Clears all the member variables of this Actor, effectively
 //                  resetting the members of this abstraction level only.
 
-void Actor::Clear()
-{
+void Actor::Clear() {
     m_Controller.Reset();
-    m_BodyHitSound.Reset();
-    m_AlarmSound.Reset();
-    m_PainSound.Reset();
-    m_DeathSound.Reset();
-    m_DeviceSwitchSound.Reset();
-//    m_FacingRight = true;
+    m_BodyHitSound = nullptr;
+    m_AlarmSound = nullptr;
+    m_PainSound = nullptr;
+    m_DeathSound = nullptr;
+    m_DeviceSwitchSound = nullptr;
     m_Status = STABLE;
-    m_Health = m_PrevHealth = m_MaxHealth = 100;
-    m_pTeamIcon = 0;
-	m_pControllerIcon = 0;
+    m_Health = m_PrevHealth = m_MaxHealth = 100.0F;
+	m_pTeamIcon = nullptr;
+	m_pControllerIcon = nullptr;
     m_LastSecondTimer.Reset();
     m_LastSecondPos.Reset();
     m_RecentMovement.Reset();
-    m_RecentMovementMag = 0;
-    m_TravelImpulseDamage = 750;
-    m_StableVel.SetXY(15, 25);
+	m_RecentMovementMag = 0;
+    m_TravelImpulseDamage = 750.0F;
+    m_StableVel.SetXY(15.0F, 25.0F);
+	m_StableRecoverDelay = 1000;
     m_HeartBeat.Reset();
     m_NewControlTmr.Reset();
     m_DeathTmr.Reset();
-    m_GoldCarried = 0;
+	m_GoldCarried = 0;
     m_GoldPicked = false;
     m_AimState = AIMSTILL;
-    m_AimAngle = 0;
+	m_AimAngle = 0;
     m_AimRange = c_HalfPI;
-    m_AimDistance = 0;
+	m_AimDistance = 0;
     m_AimTmr.Reset();
     m_SharpAimTimer.Reset();
     m_SharpAimDelay = 250;
-    m_SharpAimProgress = 0;
+	m_SharpAimProgress = 0;
     m_SharpAimMaxedOut = false;
     m_PointingTarget.Reset();
     m_SeenTargetPos.Reset();
@@ -98,14 +97,15 @@ void Actor::Clear()
     m_AlarmTimer.SetSimTimeLimitMS(3000);
     m_AlarmTimer.SetElapsedSimTimeMS(4000);
     m_LastAlarmPos.Reset();
-    m_SightDistance = 450;
-    m_Perceptiveness = 0.5;
+    m_SightDistance = 450.0F;
+    m_Perceptiveness = 0.5F;
+	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
     m_ViewPoint.Reset();
     m_Inventory.clear();
-    m_MaxMass = 0;
-    m_pItemInReach = 0;
+	m_MaxInventoryMass = -1.0F;
+	m_pItemInReach = nullptr;
     m_PieNeedsUpdate = false;
     m_HUDStack = 0;
     m_FlashWhiteMS = 0;
@@ -119,22 +119,24 @@ void Actor::Clear()
     m_Waypoints.clear();
     m_DrawWaypoints = false;
     m_MoveTarget.Reset();
-    m_pMOMoveTarget = 0;
+	m_pMOMoveTarget = nullptr;
     m_PrevPathTarget.Reset();
     m_MoveVector.Reset();
     m_MovePath.clear();
     m_UpdateMovePath = true;
-    m_MoveProximityLimit = 100;
+    m_MoveProximityLimit = 100.0F;
     m_LateralMoveState = LAT_STILL;
     m_MoveOvershootTimer.Reset();
     m_ObstacleState = PROCEEDING;
     m_TeamBlockState = NOTBLOCKED;
     m_BlockTimer.Reset();
-    m_BestTargetProximity = 10000.0f;
+    m_BestTargetProximity = 10000.0F;
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrength = 1;
+    m_DigStrength = 1.0F;
+
+    m_DamageMultiplier = 1.0F;
 }
 
 
@@ -171,32 +173,6 @@ int Actor::Create()
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Actor object ready for use.
-
-int Actor::Create(BITMAP *pSprite,
-                  Controller *pController,
-                  const float mass,
-                  const Vector &position,
-                  const Vector &velocity,
-                  AtomGroup *hitBody,
-                  const unsigned long lifetime,
-                  Status status,
-                  const int health)
-{
-    // Set MO Type.
-    m_MOType = MovableObject::TypeActor;
-
-    m_Controller = *pController;
-    m_Status = status;
-    m_Health = health;
-
-    return MOSRotating::Create(pSprite, mass, position, velocity, hitBody, lifetime);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -214,11 +190,11 @@ int Actor::Create(const Actor &reference)
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
-    m_BodyHitSound = reference.m_BodyHitSound;
-    m_AlarmSound = reference.m_AlarmSound;
-    m_PainSound = reference.m_PainSound;
-    m_DeathSound = reference.m_DeathSound;
-    m_DeviceSwitchSound = reference.m_DeviceSwitchSound;
+	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
+	if (reference.m_AlarmSound) { m_AlarmSound = dynamic_cast<SoundContainer*>(reference.m_AlarmSound->Clone()); }
+	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer *>(reference.m_PainSound->Clone()); }
+	if (reference.m_DeathSound) { m_DeathSound = dynamic_cast<SoundContainer *>(reference.m_DeathSound->Clone()); }
+	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
     m_Health = m_PrevHealth = reference.m_Health;
@@ -231,6 +207,7 @@ int Actor::Create(const Actor &reference)
     m_LastSecondPos = reference.m_LastSecondPos;
     m_TravelImpulseDamage = reference.m_TravelImpulseDamage;
     m_StableVel = reference.m_StableVel;
+    m_StableRecoverDelay = reference.m_StableRecoverDelay;
     m_GoldCarried = reference.m_GoldCarried;
     m_AimState = reference.m_AimState;
     m_AimRange = reference.m_AimRange;
@@ -242,6 +219,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
 
@@ -250,16 +228,15 @@ int Actor::Create(const Actor &reference)
          ++itr)
         m_Inventory.push_back(dynamic_cast<MovableObject *>((*itr)->Clone()));
 
-    m_MaxMass = reference.m_MaxMass;
+    m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
-    for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
     
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
-        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.png");
-        m_apNoTeamIcon = noTeamFile.GetAsAnimation(2);
+        ContentFile("Base.rte/GUIs/TeamIcons/NoTeam.png").GetAsAnimation(m_apNoTeamIcon, 2);
 
         ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
@@ -285,10 +262,8 @@ int Actor::Create(const Actor &reference)
         iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
-        m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
-        m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
+        ContentFile("Base.rte/GUIs/Indicators/SelectArrow.png").GetAsAnimation(m_apSelectArrow, 4);
+        ContentFile("Base.rte/GUIs/Indicators/AlarmExclamation.png").GetAsAnimation(m_apAlarmExclamation, 2);
 
         m_sIconsLoaded = true;
     }
@@ -323,19 +298,24 @@ int Actor::Create(const Actor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Actor::ReadProperty(std::string propName, Reader &reader)
+int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "BodyHitSound")
-        reader >> m_BodyHitSound;
-    else if (propName == "AlarmSound")
-        reader >> m_AlarmSound;
-    else if (propName == "PainSound")
-        reader >> m_PainSound;
-    else if (propName == "DeathSound")
-        reader >> m_DeathSound;
-    else if (propName == "DeviceSwitchSound")
-        reader >> m_DeviceSwitchSound;
-    else if (propName == "Status")
+	if (propName == "BodyHitSound") {
+		m_BodyHitSound = new SoundContainer;
+		reader >> m_BodyHitSound;
+	} else if (propName == "AlarmSound") {
+		m_AlarmSound = new SoundContainer;
+		reader >> m_AlarmSound;
+	} else if (propName == "PainSound") {
+		m_PainSound = new SoundContainer;
+		reader >> m_PainSound;
+	} else if (propName == "DeathSound") {
+		m_DeathSound = new SoundContainer;
+		reader >> m_DeathSound;
+	} else if (propName == "DeviceSwitchSound") {
+		m_DeviceSwitchSound = new SoundContainer;
+		reader >> m_DeviceSwitchSound;
+	} else if (propName == "Status")
         reader >> m_Status;
     else if (propName == "DeploymentID")
         reader >> m_DeploymentID;
@@ -361,6 +341,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_TravelImpulseDamage;
     else if (propName == "StableVelocityThreshold")
         reader >> m_StableVel;
+    else if (propName == "StableRecoveryDelay")
+        reader >> m_StableRecoverDelay;
     else if (propName == "AimAngle")
         reader >> m_AimAngle;
     else if (propName == "AimRange")
@@ -373,6 +355,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_SightDistance;
     else if (propName == "Perceptiveness")
         reader >> m_Perceptiveness;
+	else if (propName == "CanRevealUnseen")
+		reader >> m_CanRevealUnseen;
     else if (propName == "CharHeight")
         reader >> m_CharHeight;
     else if (propName == "HolsterOffset")
@@ -383,14 +367,14 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
-    else if (propName == "MaxMass")
-        reader >> m_MaxMass;
+    else if (propName == "MaxInventoryMass")
+        reader >> m_MaxInventoryMass;
     else if (propName == "AddPieSlice")
     {
-        PieMenuGUI::Slice newSlice;
+        PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
     }
     else if (propName == "AIMode")
     {
@@ -440,6 +424,8 @@ int Actor::Save(Writer &writer) const
     writer << m_TravelImpulseDamage;
     writer.NewProperty("StableVelocityThreshold");
     writer << m_StableVel;
+    writer.NewProperty("StableRecoveryDelay");
+    writer << m_StableRecoverDelay;
     writer.NewProperty("AimAngle");
     writer << m_AimAngle;
     writer.NewProperty("AimRange");
@@ -452,6 +438,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+	writer.NewProperty("CanRevealUnseen");
+	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
@@ -461,9 +449,9 @@ int Actor::Save(Writer &writer) const
         writer.NewProperty("AddInventory");
         writer << **itr;
     }
-    writer.NewProperty("MaxMass");
-    writer << m_MaxMass;
-    for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    writer.NewProperty("MaxInventoryMass");
+    writer << m_MaxInventoryMass;
+    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
         writer << *itr;
@@ -482,6 +470,12 @@ int Actor::Save(Writer &writer) const
 
 void Actor::Destroy(bool notInherited)
 {
+	delete m_DeviceSwitchSound;
+	delete m_BodyHitSound;
+	delete m_PainSound;
+	delete m_DeathSound;
+	delete m_AlarmSound;
+
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);
 
@@ -506,21 +500,15 @@ int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-
-float Actor::GetMass() const
-{
-    float totalMass = MOSRotating::GetMass();
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-        totalMass += (*itr)->GetMass();
-    totalMass += m_GoldCarried * g_SceneMan.GetKgPerOz();
-    return totalMass;
+float Actor::GetInventoryMass() const {
+    float inventoryMass = 0.0F;
+    for (const MovableObject *inventoryItem : m_Inventory) {
+        inventoryMass += inventoryItem->GetMass();
+    }
+    return inventoryMass;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -542,7 +530,7 @@ bool Actor::IsPlayerControlled() const
 
 float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult) const
 {
-	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * ((float)GetHealth() / (float)GetMaxHealth()));
+	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * (GetHealth() / GetMaxHealth()));
     totalValue += GetGoldCarried();
 
     MOSprite *pItem = 0;
@@ -674,7 +662,7 @@ Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, 
 
 bool Actor::Look(float FOVSpread, float range)
 {
-    if (!g_SceneMan.AnythingUnseen(m_Team))
+    if (!g_SceneMan.AnythingUnseen(m_Team) || m_CanRevealUnseen == false)
         return false;
 
     // Use the 'eyes' on the 'head', if applicable
@@ -743,19 +731,6 @@ void Actor::RestDetection()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FacingAngle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adjusts an absolute aiming angle based on whether this Actor is facing
-//                  left or right.
-
-float Actor::FacingAngle(float angle) const
-{
-    return (m_HFlipped ? c_PI : 0) + (angle * (m_HFlipped ? -1 : 1));
-//    return (angle * m_HFlipped ? -1 : 1);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds all slices this needs on a pie menu.
@@ -763,32 +738,11 @@ float Actor::FacingAngle(float angle) const
 bool Actor::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     // Add the custom scripted options of this Actor
-    for (list<PieMenuGUI::Slice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
         pPieMenu->AddSlice(*itr);
 
     m_PieNeedsUpdate = false;
     return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool Actor::HandlePieCommand(int pieSliceIndex)
-{
-/* Actually don't; the PSI_SCRIPTED is handled earlier in PieMenuGUI::Update
-    // Handle scripted pie commands here; run their scripts
-    if (pieSliceIndex == PieMenuGUI::PSI_SCRIPTED)
-    {
-// TODO: THIS
-
-        return true;
-    }
-*/
-    return false;
 }
 
 
@@ -827,8 +781,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
         playSound = true;
     }
 
-    if (playSound && !muteSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+    if (m_DeviceSwitchSound && playSound && !muteSound)
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }
@@ -858,6 +812,19 @@ void Actor::RemoveInventoryItem(string presetName)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
+    if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
+        MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
+        m_Inventory.erase(m_Inventory.begin() + inventoryIndex);
+        return itemAtIndex;
+    }
+    return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SwapPrevInventory
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -879,11 +846,40 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
         playSound = true;
     }
 
-    if (playSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+    if (m_DeviceSwitchSound && playSound)
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2) {
+    if (inventoryIndex1 < 0 || inventoryIndex2 < 0 || inventoryIndex1 >= m_Inventory.size() || inventoryIndex2 >= m_Inventory.size()) {
+        return false;
+    }
+
+    std::swap(m_Inventory.at(inventoryIndex1), m_Inventory.at(inventoryIndex2));
+    return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex) {
+    if (!newInventoryItem) {
+        return RemoveInventoryItemAtIndex(inventoryIndex);
+    }
+
+    if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
+        m_Inventory.emplace_back(newInventoryItem);
+        return nullptr;
+    }
+    MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
+    m_Inventory.at(inventoryIndex) = newInventoryItem;
+    return currentInventoryItemAtIndex;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -896,7 +892,7 @@ void Actor::DropAllInventory()
 {
     MovableObject *pObject = 0;
     Actor *pPassenger = 0;
-    float velMin, velRange, angularVel;
+    float velMin, velMax, angularVel;
     Vector gibROffset, gibVel;
     for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
@@ -906,22 +902,22 @@ void Actor::DropAllInventory()
 		{
 			// Generate the velocities procedurally
 			velMin = 3.0F;
-			velRange = 10.0F;
+			velMax = velMin + std::sqrt(m_SpriteRadius);
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
-			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
+			pObject->SetPos(m_Pos + gibROffset);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F)) * RandomNum());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
 			{
 				float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-				angularVel = fabs(pObject->GetAngularVel() * 0.5F);
-				angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
+				angularVel = std::abs(pObject->GetAngularVel() * 0.5F);
+				angularVel += std::abs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
 				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0.0F ? -1 : 1));
 			}
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
@@ -932,10 +928,11 @@ void Actor::DropAllInventory()
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
-			if (gibVel.IsZero())
-				gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
-			else
-				gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
+			if (gibVel.IsZero()) {
+				gibVel.SetXY(RandomNum(velMin, velMax), 0.0F);
+			} else {
+				gibVel.SetMagnitude(RandomNum(velMin, velMax));
+			}
 			// Don't! the offset was already rotated!
 			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
@@ -973,28 +970,14 @@ void Actor::DropAllInventory()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore)
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
-    m_DeathSound.Play(m_Pos);
+	if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 
     // Gib all the regular gibs
-    MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-
-	if (g_SettingsMan.EnableCrabBombs()) {
-		unsigned short crabCount = 0;
-		for (const MovableObject *inventoryEntry : m_Inventory) {
-			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
-		}
-		// If we have enough crabs gib all actors on scene except brains and doors
-		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
-			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
-				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
-				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
-			}
-		}
-	}
+    MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 
     // Throw out all the inventory with the appropriate force and directions
     MovableObject *pObject = 0;
@@ -1007,16 +990,16 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = internalBlast / pObject->GetMass();
+		velMin = m_GibBlastStrength / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F);
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+        gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F)) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)
@@ -1048,8 +1031,8 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject->ResetAllTimers();
 
         // Set the gib to not hit a specific MO
-        if (pIgnoreMO)
-            pObject->SetWhichMOToNotHit(pIgnoreMO);
+        if (movableObjectToIgnore)
+            pObject->SetWhichMOToNotHit(movableObjectToIgnore);
 
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
@@ -1117,22 +1100,23 @@ bool Actor::CollideAtPoint(HitData &hd)
 //                  MO. Appropriate effects will be determined and applied ONLY IF there
 //                  was penetration! If not, nothing will be affected.
 
-bool Actor::ParticlePenetration(HitData &hd)
-{
+bool Actor::ParticlePenetration(HitData &hd) {
     bool penetrated = MOSRotating::ParticlePenetration(hd);
 
-    // If penetrated, be alarmed (if not completely unperceptive, that is)!
-    if (penetrated && m_Perceptiveness > 0)
-    {
-        // Move the alarm point out a bit from the Body so the reaction is better
-//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint));
+    MovableObject *hitor = hd.Body[HITOR];
+    float damageToAdd = hitor->DamageOnCollision();
+    damageToAdd += penetrated ? hitor->DamageOnPenetration() : 0;
+    if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
+    if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-        Vector extruded(hd.HitVel[HITOR]);
-        extruded.SetMagnitude(m_CharHeight);
-        extruded = m_Pos - extruded;
-        g_SceneMan.WrapPosition(extruded);
-        AlarmPoint(extruded);
-    }
+	if (damageToAdd != 0) { m_Health = std::min(m_Health - (damageToAdd * m_DamageMultiplier), m_MaxHealth); }
+	if ((penetrated || damageToAdd != 0) && m_Perceptiveness > 0 && m_Health > 0) {
+		Vector extruded(hd.HitVel[HITOR]);
+		extruded.SetMagnitude(m_CharHeight);
+		extruded = m_Pos - extruded;
+		g_SceneMan.WrapPosition(extruded);
+		AlarmPoint(extruded);
+	}
 
     return penetrated;
 }
@@ -1290,9 +1274,9 @@ bool Actor::UpdateAIScripted() {
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
     return status >= 0;
 }
@@ -1364,35 +1348,6 @@ void Actor::UpdateAI()
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int Actor::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          VerifyMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1416,12 +1371,13 @@ void Actor::VerifyMOIDs()
 
 void Actor::Update()
 {
+    //TODO This should be after MOSRotating::Update call. It's here because this lets Attachable scripts affect their parent's control states, but this is a bad, hacky solution.
+	//See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/commit/ea20b6d790cd4cbb41eb923057b3db9982f6545d
+    m_Controller.Update();
+
     /////////////////////////////////
     // Hit Body update and handling
     MOSRotating::Update();
-
-    // Update the controller!
-    m_Controller.Update();
 
     // Update the viewpoint to be at least what the position is
     m_ViewPoint = m_Pos;
@@ -1491,57 +1447,52 @@ void Actor::Update()
         else if (!m_pMOMoveTarget)
             m_AIMode = AIMODE_SENTRY;
     }
-
+	// Save health state so we can compare next update
+	m_PrevHealth = m_Health;
     /////////////////////////////////////
-    // Detract damage caused by wounds from health
-
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
+    // Take damage/heal from wounds and wounds on Attachables
+    for (AEmitter *wound : m_Wounds) {
+        m_Health -= wound->CollectDamage() * m_DamageMultiplier;
+    }
+    for (Attachable *attachable : m_Attachables) {
+        m_Health -= attachable->CollectDamage();
+    }
+    m_Health = std::min(m_Health, m_MaxHealth);
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
-    if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2)
-    {
-        m_BodyHitSound.Play(m_Pos);
-    }
-    if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
-	{
-        m_PainSound.Play(m_Pos);
-		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
-		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
-		if (damage > 0)
-			m_Health -= damage;
-		if (m_Status != DYING && m_Status != DEAD)
-			m_Status = UNSTABLE;
-        m_ForceDeepCheck = true;
-    }
+	float travelImpulseMagnitude = m_TravelImpulse.GetMagnitude();
+
+	if (m_BodyHitSound && travelImpulseMagnitude > m_TravelImpulseDamage * 0.5F) { m_BodyHitSound->Play(m_Pos); }
+
+	if (travelImpulseMagnitude > m_TravelImpulseDamage) {
+		const float impulse = travelImpulseMagnitude - m_TravelImpulseDamage;
+		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
+		m_Health -= damage;
+		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
+		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
+		m_ForceDeepCheck = true;
+	}
 
     /////////////////////////////
     // Stability logic
 
-    if (m_Status == STABLE)
-    {
+    if (m_Status == STABLE) {
         // If moving really fast, we're not able to be stable
-// TODO don't hardcode this threshold!
-        if (fabs(m_Vel.m_X) > fabs(m_StableVel.m_X) || fabs(m_Vel.m_Y) > fabs(m_StableVel.m_Y))
-            m_Status = UNSTABLE;
+		if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
 
         m_StableRecoverTimer.Reset();
     }
-    else if (m_Status == UNSTABLE)
-    {
+    else if (m_Status == UNSTABLE) {
         // Only regain stability if we're not moving too fast and it's been a while since we lost it
-        if (m_StableRecoverTimer.IsPastSimMS(1000) && !(fabs(m_Vel.m_X) > fabs(m_StableVel.m_X) || fabs(m_Vel.m_Y) > fabs(m_StableVel.m_Y)))
-            m_Status = STABLE;
+		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
     }
     
     // Spread the carried items and gold around before death.
-    if (m_Status == DYING || m_Status == DEAD)
-    {
+    if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
-		if (m_Inventory.size() > 0)
-	        DropAllInventory();
+		if (m_Inventory.size() > 0) { DropAllInventory(); }
 
         Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
         int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
@@ -1574,9 +1525,8 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
-    {
-        m_DeathSound.Play(m_Pos);
+	if (m_Status != DYING && m_Status != DEAD && std::round(m_Health) <= 0) {
+		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;
@@ -1584,13 +1534,9 @@ void Actor::Update()
 	}
 
 	// Prevent dead actors from rotating like mad
-	if (m_Status == DYING || m_Status == DEAD)
-	{
-		m_AngularVel = m_AngularVel * 0.98;
-	}
+	if (m_Status == DYING || m_Status == DEAD) { m_AngularVel = m_AngularVel * 0.98F; }
 
-    if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000)
-        m_Status = DEAD; 
+	if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000) { m_Status = DEAD; }
 
     //////////////////////////////////////////////////////
     // Save previous second's position so we can detect larger movement
@@ -1608,7 +1554,7 @@ void Actor::Update()
 
     if (m_FrameCount > 1)
     {
-        if (m_SpriteAnimMode == LOOPWHENMOVING)
+        if (m_SpriteAnimMode == LOOPWHENACTIVE)
         {
             if (m_Controller.IsState(MOVE_LEFT) || m_Controller.IsState(MOVE_RIGHT) || m_Controller.GetAnalogMove().GetLargest() > 0.1)
             {
@@ -1637,26 +1583,19 @@ void Actor::Update()
             m_FlashWhiteMS = 0;
     }
 
-    // If this is the actual brain of any player, flash that player's screen when he's hurt and dead
-	if (g_SettingsMan.FlashOnBrainDamage())
-	{
-		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
-		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
-		{
-			// Got Hurt
-			if (m_PrevHealth - m_Health > 1.5)
+	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
+	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {
+		if (m_PrevHealth - m_Health > 1.5F) {
+			// If this is a brain that's under attack, broadcast an alarm event so that the enemy AI won't dawdle in trying to kill it.
+			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5F));
+			if (g_SettingsMan.FlashOnBrainDamage()) {
 				g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_RedColor, 10);
-
-			// Croaked.. flash for a longer period
-			if (m_ToDelete || m_Status == DEAD)
-				g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_WhiteColor, 500);
-
-			// If this is a brain, broadcast alarm message that enemy AI will pick up on so they don't dawdle in trying to kill it
-			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5));
+			}
+		}
+		if ((m_ToDelete || m_Status == DEAD) && g_SettingsMan.FlashOnBrainDamage()) {
+			g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_WhiteColor, 500);
 		}
 	}
-    // Save health state so we can compare next update
-    m_PrevHealth = m_Health;
 
 // Do NOT mess witht he HUD stack in update... it should only be altered in DrawHUD, or it will jitter when multiple sim updates happen
 //    m_HUDStack = -m_CharHeight / 2;
@@ -1702,6 +1641,9 @@ void Actor::Draw(BITMAP *pTargetBitmap,
 
 void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
 {
+	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
+    m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -1709,21 +1651,17 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
+		return;
+	}
 
     // Draw stat info HUD
     char str[64];
 
     GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
-    // This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
-    m_HUDStack = -m_CharHeight / 2;
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 
@@ -1795,29 +1733,28 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_4);
 					if (m_pControllerIcon)
 					{
-						BITMAP **apControllerBitmaps = 0;
-						apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
+						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps[0]->h);
+						masked_blit(apControllerBitmaps.at(0), pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps.at(0)->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps.at(0)->h / 2) + 8, apControllerBitmaps.at(0)->w, apControllerBitmaps.at(0)->h);
 					}
 				}
 
                 // Get the Icon bitmaps of this Actor's team, if any
-                BITMAP **apIconBitmaps = 0;
+                std::vector<BITMAP *> apIconBitmaps;
                 if (m_pTeamIcon)
                     apIconBitmaps = m_pTeamIcon->GetBitmaps8();
 
                 // Team Icon could not be found, or of no team, so use the static noteam Icon instead
-                if (!apIconBitmaps)
+                if (apIconBitmaps.empty())
                     apIconBitmaps = m_apNoTeamIcon;
 
                 // Now draw the Icon if we can
-                if (apIconBitmaps && m_pTeamIcon && m_pTeamIcon->GetFrameCount() > 0)
+                if (!apIconBitmaps.empty() && m_pTeamIcon && m_pTeamIcon->GetFrameCount() > 0)
                 {
                     // Make team icon blink faster as the health goes down
                     int f = m_HeartBeat.AlternateReal(200 + 800 * (m_Health / 100)) ? 0 : 1;
                     f = MIN(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
-                    masked_blit(apIconBitmaps[f], pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps[f]->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps[f]->h / 2) + 8, apIconBitmaps[f]->w, apIconBitmaps[f]->h);
+                    masked_blit(apIconBitmaps.at(f), pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps.at(f)->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps.at(f)->h / 2) + 8, apIconBitmaps.at(f)->w, apIconBitmaps.at(f)->h);
                 }
             }
             // Draw death icon
@@ -1846,7 +1783,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
 */
             std::snprintf(str, sizeof(str), "%.0f", m_Health);
-//            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
             m_HUDStack += -12;

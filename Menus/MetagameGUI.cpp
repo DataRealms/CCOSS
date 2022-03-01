@@ -23,28 +23,26 @@
 #include "MetaMan.h"
 #include "MetaSave.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIComboBox.h"
-#include "GUI/GUICheckbox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUISlider.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUIComboBox.h"
+#include "GUICheckbox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUISlider.h"
 
 #include "Controller.h"
 #include "Entity.h"
 #include "MOSprite.h"
 #include "HeldDevice.h"
 #include "AHuman.h"
-#include "GABrainMatch.h"
-#include "GABaseDefense.h"
 #include "GATutorial.h"
 #include "GAScripted.h"
 #include "BaseEditor.h"
@@ -52,11 +50,6 @@
 #include "SLTerrain.h"
 #include "DataModule.h"
 #include "Loadout.h"
-
-extern int g_IntroState;
-extern volatile bool g_Quit;
-extern int g_StationOffsetX;
-extern int g_StationOffsetY;
 
 using namespace RTE;
 
@@ -72,7 +65,7 @@ using namespace RTE;
 #define BRAINOVERLAP 2
 
 
-const string MetagameGUI::m_ClassName = "MetagameGUI";
+const string MetagameGUI::c_ClassName = "MetagameGUI";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -317,6 +310,8 @@ void MetagameGUI::Clear()
     m_StartDifficulty = Activity::MediumDifficulty;
     m_BackToMain = false;
     m_Quit = false;
+
+	m_StationPosOnOrbit.Reset();
 }
 
 
@@ -375,8 +370,9 @@ int MetagameGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
+		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
+	}
     m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -410,7 +406,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pToolTipBox->SetEnabled(false);
     m_pToolTipBox->SetVisible(false);
     // Set the font
-    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     m_apScreenBox[NEWDIALOG] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("NewGameDialog"));
@@ -523,7 +519,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pSceneOwnerTeam = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SceneOwnerTeam"));
     m_pSceneResidentsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneResidentsLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
     m_pSceneInfoPopup->SetVisible(false);
     m_pSceneBudgetLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneBudgetLabel"));
     m_pSceneBudgetSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("SceneBudgetSlider"));
@@ -584,40 +580,6 @@ int MetagameGUI::Create(Controller *pController)
     m_apPlayerNameBox[Players::PlayerThree]->SetText("Player 3");
     m_apPlayerNameBox[Players::PlayerFour]->SetText("Player 4");
 
-    // Add a "Random" tech choice to all the combo boxes first so that's at least in there always
-    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerOne]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerTwo]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerThree]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerFour]->SetSelectedIndex(0);
-
-    // Populate the tech comboboxes with the available tech modules
-    const DataModule *pModule = 0;
-    string techName;
-    string techString = " Tech";
-    string::size_type techPos = string::npos;
-    for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  
-    {
-        pModule = g_PresetMan.GetDataModule(i);
-        techName = pModule->GetFriendlyName();
-        if (pModule && (techPos = techName.find(techString)) != string::npos)
-        {
-            techName.replace(techPos, techString.length(), "");
-            m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-        }
-    }
-    // Make the lists be scrolled to the top when they are initially dropped
-    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->ScrollToTop();
-
     // Add the handicap options to the dropdowns
     // Prepare the brain icon
     std::snprintf(str, sizeof(str), "%c", -48);
@@ -644,31 +606,15 @@ int MetagameGUI::Create(Controller *pController)
     m_pSaveInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SavedGameStats"));
     m_pLoadInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LoadStats"));
 
-    // Fill flags from what has already been loaded into the PresetMan
-    // Get the list of all read-in team flag icons
-    list<Entity *> flagList;
-    g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
-    Icon *pIcon = 0;
-    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
-    {
-        // Set up the combo boxes
-        m_apPlayerTeamSelect[player]->ClearList();
-        m_apPlayerTeamSelect[player]->SetDropHeight(70);
-        m_apPlayerTechSelect[player]->SetDropHeight(70);
-        m_apPlayerHandicap[player]->SetDropHeight(70);
-        m_apPlayerTeamSelect[player]->GetListPanel()->SetAlternateDrawMode(true);
-        m_apPlayerTeamSelect[player]->SetDropDownStyle(GUIComboBox::DropDownList);
-        // Go through the flag list and them to the combo box
-        for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr)
-        {
-            pIcon = dynamic_cast<Icon *>(*itr);
-            if (pIcon)
-                m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon);
-        }
-        // Select the first one
-        m_apPlayerTeamSelect[player]->SetSelectedIndex(player);
-//        m_apPlayerTeamSelect[player]->get
-    }
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		m_apPlayerTeamSelect[player]->ClearList();
+		m_apPlayerTeamSelect[player]->SetDropHeight(70);
+		m_apPlayerTechSelect[player]->SetDropHeight(70);
+		m_apPlayerHandicap[player]->SetDropHeight(70);
+		m_apPlayerTeamSelect[player]->GetListPanel()->SetAlternateDrawMode(true);
+		m_apPlayerTeamSelect[player]->SetDropDownStyle(GUIComboBox::DropDownList);
+	}
+
     // Special height for the last one so it doesn't fly out of the dialog box
     m_apPlayerTeamSelect[Players::PlayerFour]->SetDropHeight(40);
     m_apPlayerTechSelect[Players::PlayerFour]->SetDropHeight(40);
@@ -772,7 +718,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int MetagameGUI::ReadProperty(string propName, Reader &reader)
+int MetagameGUI::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     Vector tempPos;
 
@@ -814,29 +760,17 @@ int MetagameGUI::ReadProperty(string propName, Reader &reader)
 // Description:     Saves the complete state of this MetagameGUI to an output stream for
 //                  later recreation with Create(Reader &reader);
 
-int MetagameGUI::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int MetagameGUI::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    Vector tempPos;
+	writer.NewPropertyWithValue("P1BoxPos", Vector(m_apPlayerBox[Players::PlayerOne]->GetXPos(), m_apPlayerBox[Players::PlayerOne]->GetYPos()));
+	writer.NewPropertyWithValue("P2BoxPos", Vector(m_apPlayerBox[Players::PlayerTwo]->GetXPos(), m_apPlayerBox[Players::PlayerTwo]->GetYPos()));
+	writer.NewPropertyWithValue("P3BoxPos", Vector(m_apPlayerBox[Players::PlayerThree]->GetXPos(), m_apPlayerBox[Players::PlayerThree]->GetYPos()));
+	writer.NewPropertyWithValue("P4BoxPos", Vector(m_apPlayerBox[Players::PlayerFour]->GetXPos(), m_apPlayerBox[Players::PlayerFour]->GetYPos()));
 
-    writer.NewProperty("P1BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerOne]->GetXPos(), m_apPlayerBox[Players::PlayerOne]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P2BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerTwo]->GetXPos(), m_apPlayerBox[Players::PlayerTwo]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P3BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerThree]->GetXPos(), m_apPlayerBox[Players::PlayerThree]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P4BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerFour]->GetXPos(), m_apPlayerBox[Players::PlayerFour]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("PhaseBoxPos");
-    tempPos.SetXY(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos());
-    writer << tempPos;
+	writer.NewPropertyWithValue("PhaseBoxPos", Vector(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos()));
 
-    return 0;
+	return 0;
 }
 
 
@@ -888,6 +822,31 @@ void MetagameGUI::SetEnabled(bool enable)
         m_MenuEnabled = DISABLING;
         g_GUISound.ExitMenuSound()->Play();
     }
+
+	// Populate the tech comboboxes with the available tech modules
+	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+		m_apPlayerTechSelect[team]->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
+		m_apPlayerTechSelect[team]->SetSelectedIndex(0);
+	}
+	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+		if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+			if (dataModule->IsFaction()) {
+				for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
+					m_apPlayerTechSelect[team]->GetListPanel()->ScrollToTop();
+				}
+			}
+		}
+	}
+
+	list<Entity *> flagList;
+	g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
+			if (const Icon *pIcon = dynamic_cast<Icon *>(*itr)) { m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon); }
+		}
+	}
+	if (m_apPlayerTeamSelect[Players::PlayerOne]->GetSelectedIndex() < 0) { m_apPlayerTeamSelect[Players::PlayerOne]->SetSelectedIndex(0); }
 
     m_ScreenChange = true;
 }
@@ -1137,36 +1096,25 @@ bool MetagameGUI::StartNewGame()
                 g_MetaMan.m_TeamCount++;
             }
 
-            // Get the tech selection and apply it to the metaplayer
-            GUIListPanel::Item *pTechItem = m_apPlayerTechSelect[player]->GetSelectedItem();
-            if (pTechItem)
-            {
-                // If the "random" selection, choose one from the list of loaded techs
-                if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0)//pTechItem->m_ExtraIndex < 0)
-                {
-                    int selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
-					
-					// Don't let the game to chose the same faction twice
+			if (const GUIListPanel::Item *selectedTech = m_apPlayerTechSelect[player]->GetSelectedItem()) {
+				// If the "random" selection, choose one from the list of loaded techs.
+				if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0) {
+					int randomSelection = 0;
+
+					// Don't let the game to chose the same faction twice.
 					bool ok = false;
-					while (!ok)
-					{
+					while (!ok) {
+						randomSelection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 						ok = true;
-						selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
-
-						for (int p = 0; p < player; p++)
-							if (selection == m_apPlayerTechSelect[p]->GetSelectedIndex())
-								ok = false;
+						for (int p = 0; p < player; p++) {
+							if (randomSelection == m_apPlayerTechSelect[p]->GetSelectedIndex()) { ok = false; }
+						}
 					}
+					selectedTech = m_apPlayerTechSelect[player]->GetItem(randomSelection);
+				}
+				if (selectedTech) { newPlayer.m_NativeTechModule = selectedTech->m_ExtraIndex; }
+			}
 
-                    m_apPlayerTechSelect[player]->SetSelectedIndex(selection);
-                    pTechItem = m_apPlayerTechSelect[player]->GetSelectedItem();
-                }
-
-                // Now set the selected tech's module index as what the metaplayer is going to use
-                if (pTechItem)
-                    newPlayer.m_NativeTechModule = pTechItem->m_ExtraIndex;
-            }
-            
             // Set the starting brains for this player
             // Start with the baseline setting
             newPlayer.m_BrainPool = m_pLengthSlider->GetValue();
@@ -1330,16 +1278,13 @@ bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneDat
     // Now write out the index file of all MetaSaves so the new save is found on next runtime
     Writer indexWriter((string(METASAVEPATH) + string("Index.ini")).c_str());
     indexWriter.ObjectStart("DataModule");
-    indexWriter.NewProperty("ModuleName");
-    indexWriter << "Metagame Saves";
+    indexWriter.NewPropertyWithValue("ModuleName", "Metagame Saves");
     // Get the current list of all MetaSave Preset:s, including the new one we just saved
     list<Entity *> saveList;
     g_PresetMan.GetAllOfType(saveList, "MetaSave");
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
-    {
-        indexWriter.NewProperty("AddMetaSave");
-        indexWriter << (*itr);
+	for (const Entity *saveListEntry : saveList) {
+        indexWriter.NewPropertyWithValue("AddMetaSave", saveListEntry);
     }
     indexWriter.ObjectEnd();
 
@@ -1823,7 +1768,7 @@ void MetagameGUI::Update()
         if (g_MetaMan.NoBrainsLeftInAnyPool())
             m_pGameMessageLabel->SetText("All players' brains have been deployed, and so the team with the most\nowned sites (and if tied, the most gold) won the mining contract for this planet!");
         else
-            m_pGameMessageLabel->SetText("Only the team which is already in the lead (in owned sites - or gold, if tied)\nhas any brains left to deploy, so they won the mining contract for this planet!");
+            m_pGameMessageLabel->SetText("The team that is in the lead (in owned sites - or gold, if tied)\nand has brains left to deploy has won the mining contract for this planet!");
     }
 
     // Update site change animations independent of the phase/mode.. they can happen here and there
@@ -1937,8 +1882,8 @@ void MetagameGUI::Update()
     for (int metaPlayer = 0; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
     {
         // The tradestar is a moving target
-        if (m_aStationIncomeLineIndices[metaPlayer] >= 0 && !m_IncomeSiteLines.empty())
-            m_IncomeSiteLines[m_aStationIncomeLineIndices[metaPlayer]].m_PlanetPoint.SetXY(g_StationOffsetX, g_StationOffsetY);
+		if (m_aStationIncomeLineIndices[metaPlayer] >= 0 && !m_IncomeSiteLines.empty())
+			m_IncomeSiteLines[m_aStationIncomeLineIndices[metaPlayer]].m_PlanetPoint = m_StationPosOnOrbit;
 
         // The brain pool counters might also be if player moves the player bar
         if (m_aBrainSaleIncomeLineIndices[metaPlayer] >= 0 && !m_IncomeSiteLines.empty())
@@ -2126,24 +2071,17 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 void MetagameGUI::UpdateInput()
 {
     // If esc pressed, show campaign dialog if applicable
-    if (g_UInputMan.KeyPressed(KEY_ESC))
-    {
-        // Just quit if the dialog is already up
-        /*if (m_pConfirmationBox->GetVisible() && m_pConfirmationButton->GetText() == "Quit")
-            g_Quit = true;
-        else
-        {
-            HideAllScreens();
-            g_MetaMan.SetSuspend(true);
-            m_pConfirmationLabel->SetText("Sure you want to quit to OS?\nAny unsaved progress\nwill be lost!");
-            m_pConfirmationButton->SetText("Quit");
-            m_pConfirmationBox->SetVisible(true);
-        }*/
-        
-		HideAllScreens();
-        g_MetaMan.SetSuspend(true);
-        SwitchToScreen(MENUDIALOG);
-    }
+	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (m_MenuScreen == MENUDIALOG) {
+			g_MetaMan.SetSuspend(false);
+			SwitchToScreen(ROOTBOX);
+		} else {
+			HideAllScreens();
+			g_MetaMan.SetSuspend(true);
+			SwitchToScreen(MENUDIALOG);
+		}
+		return;
+	}
 
     ///////////////////////////////////////////////////////////
     // Mouse handling
@@ -2210,40 +2148,39 @@ void MetagameGUI::UpdateInput()
     // Update the ToolTip popup
 
     // Show the ToolTip popup, if we are hovering over anything that has one to show
-    string toolTip = "";
-    GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
-    if (g_SettingsMan.ToolTips() && pCurrentHover && !(toolTip = pCurrentHover->GetToolTip()).empty())
-    {
-        // Restart timer if there's a new thing we're hovering over
-        if (pCurrentHover != m_pHoveredControl)
-            m_ToolTipTimer.Reset();
+	std::string toolTip = "";
+	GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
+	if (pCurrentHover) {
+		toolTip = pCurrentHover->GetToolTip();
+		// The control's tooltip can end up being "True" for reasons unknown to man, so just clear it.
+		if (toolTip == "None" || toolTip == "True") { toolTip.clear(); }
+	}
+	if (g_SettingsMan.ShowToolTips() && pCurrentHover && !toolTip.empty()) {
+		// Restart timer if there's a new thing we're hovering over
+		if (pCurrentHover != m_pHoveredControl) { m_ToolTipTimer.Reset(); }
 
-        // If we've been hovering over the same thing for enough time, then show the tooltip
-        if (m_ToolTipTimer.IsPastRealMS(500))
-        {
-            // Show the popup box with the hovered item's description
-            m_pToolTipBox->SetVisible(true);
-            // Need to add an offset to make it look better and not have the cursor obscure text
-            m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
-            m_pToolTipText->SetHAlignment(GUIFont::Left);
-            m_pToolTipText->SetText(toolTip);
-            // Resize the box height to fit the text
-            int newHeight = m_pToolTipText->ResizeHeightToFit();
-            m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
-            // Make sure the popup box doesn't drop out of sight
-            KeepBoxOnScreen(m_pToolTipBox, -1);
-        }
-
-        // Save the control we're currently hovering over so we can compare next frame
-        m_pHoveredControl = pCurrentHover;
-    }
-    else
-    {
-        m_pToolTipBox->SetVisible(false);
-        m_pToolTipText->SetText("");
-        m_ToolTipTimer.Reset();
-        m_pHoveredControl = 0;
-    }
+		// If we've been hovering over the same thing for enough time, then show the tooltip
+		if (m_ToolTipTimer.IsPastRealMS(500)) {
+			// Show the popup box with the hovered item's description
+			m_pToolTipBox->SetVisible(true);
+			// Need to add an offset to make it look better and not have the cursor obscure text
+			m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
+			m_pToolTipText->SetHAlignment(GUIFont::Left);
+			m_pToolTipText->SetText(toolTip);
+			// Resize the box height to fit the text
+			int newHeight = m_pToolTipText->ResizeHeightToFit();
+			m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
+			// Make sure the popup box doesn't drop out of sight
+			KeepBoxOnScreen(m_pToolTipBox, -1);
+		}
+		// Save the control we're currently hovering over so we can compare next frame
+		m_pHoveredControl = pCurrentHover;
+	} else {
+		m_pToolTipBox->SetVisible(false);
+		m_pToolTipText->SetText("");
+		m_ToolTipTimer.Reset();
+		m_pHoveredControl = nullptr;
+	}
 
 
     ///////////////////////////////////////
@@ -2280,6 +2217,7 @@ void MetagameGUI::UpdateInput()
 				// weegee SwitchToScreen(NEWDIALOG);
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
+				if (g_MetaMan.m_GameState == MetaMan::GAMEOVER && g_ActivityMan.GetActivity()) { g_PostProcessMan.ClearScreenPostEffects(); }
                 // Signal that we want to go back to main menu
                 m_BackToMain = true;
                 g_GUISound.BackButtonPressSound()->Play();
@@ -2342,8 +2280,8 @@ void MetagameGUI::UpdateInput()
 			if (anEvent.GetControl() == m_apMetaButton[CONFIRM])
             {
                 // Confirm Quit Program button
-                if (m_pConfirmationButton->GetText() == "Quit")
-                    g_Quit = true;
+				if (m_pConfirmationButton->GetText() == "Quit")
+					System::SetQuit();
 
                 // Do the appropriate thing depending on which screen we're confirming
                 if (m_MenuScreen == NEWDIALOG)
@@ -2536,6 +2474,8 @@ void MetagameGUI::UpdateInput()
             {
                 int metaPlayer = g_MetaMan.GetPlayerTurn();
                 int team = g_MetaMan.m_Players[metaPlayer].GetTeam();
+                // Actually change the player's funds
+                g_MetaMan.m_Players[metaPlayer].m_Funds -= SCANCOST;
                 // Set up and start the scripted activity for scanning the site for this' team
                 GAScripted *pScanActivity = new GAScripted;
                 pScanActivity->Create("Base.rte/Activities/SiteScan.lua", "SiteScan");
@@ -3034,11 +2974,6 @@ void MetagameGUI::CompletedActivity()
             // Update the Scene info box since the scene might have changed
             UpdateScenesBox(true);
 
-            // Clear out the Lua state completely so it's not running some BS in the background
-            g_LuaMan.Destroy();
-            g_LuaMan.Create();
-            g_PresetMan.ReloadAllScripts();
-
             // Play some nice ambient music
             g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1, 0.4);
         }
@@ -3475,7 +3410,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // TRADESTAR BANK ACCOUNT AND RENT
             // Add line to show existing funds stored in space station, and deduct rent from
-            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, Vector(g_StationOffsetX, g_StationOffsetY), "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
+            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, m_StationPosOnOrbit, "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
             m_IncomeSiteLines.back().m_FundsAmount = g_MetaMan.m_Players[m_AnimMetaPlayer].m_PhaseStartFunds;
             m_IncomeSiteLines.back().m_FundsTarget = m_IncomeSiteLines.back().m_FundsAmount - totalRent;
             // Save the index so we can update the line later
@@ -3905,7 +3840,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) > 0)
                 g_MetaMan.m_Players[metaPlayer].m_Funds = GetPlayerLineFunds(m_IncomeSiteLines, metaPlayer, false);
 
-			if (g_SettingsMan.EndlessMode())
+			if (g_SettingsMan.EndlessMetaGameMode())
 			{
 				g_MetaMan.m_Players[metaPlayer].ChangeBrainPoolCount(20 - g_MetaMan.m_Players[metaPlayer].GetBrainPoolCount());
 				g_MetaMan.m_Players[metaPlayer].ChangeFunds(10000 - g_MetaMan.m_Players[metaPlayer].GetFunds());
@@ -6251,7 +6186,9 @@ void MetagameGUI::UpdateGameSizeLabels()
 // TODO: Hook these constants up to settings!!
 	// How many scenes are there total
 	const int totalCount = g_MetaMan.TotalScenePresets();
-	const int minCount = std::clamp((playerCount * 3 / 2), 3, totalCount);
+	int minCount = std::max((playerCount * 3 / 2), 3);
+	minCount = std::min(minCount, totalCount);
+
 	m_pSizeSlider->SetMinimum(minCount);
 	m_pSizeSlider->SetMaximum(std::max(totalCount * 7 / 10, minCount));
 	m_pSizeSlider->SetValueResolution(1);

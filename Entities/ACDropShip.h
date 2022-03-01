@@ -30,9 +30,7 @@ class Attachable;
 // Parent(s):       ACraft.
 // Class history:   12/13/2006 ACDropShip created.
 
-class ACDropShip:
-    public ACraft
-{
+class ACDropShip : public ACraft {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -42,9 +40,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(ACDropShip)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(ACDropShip);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACDropShip
@@ -110,17 +108,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAltitude
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the altitide of this' pos (or appropriate low point) over the
@@ -144,17 +131,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AutoStabilizing
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether this has the means and will try to right itself, or if
@@ -163,30 +139,6 @@ ClassInfoGetters
 // Return value:    Wheter this will try to auto stabilize.
 
 	bool AutoStabilizing() override { return true; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-    bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -211,21 +163,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACDropShip's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:	GetMaxPassengers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     The recomended, not absolute, maximum number of actors that fit in the
@@ -237,114 +174,77 @@ ClassInfoGetters
 	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the right side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetRightThruster() const { return m_pRThruster; }
 
-    AEmitter * GetRThruster() const { return m_pRThruster; }
+    /// <summary>
+    /// Sets the right side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetRightThruster(AEmitter *newThruster);
 
+    /// <summary>
+    /// Gets the left side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetLeftThruster() const { return m_pLThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetLeftThruster(AEmitter *newThruster);
 
-    AEmitter * GetLThruster() const { return m_pLThruster; }
+    /// <summary>
+    /// Gets the right side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetURightThruster() const { return m_pURThruster; }
 
+    /// <summary>
+    /// Sets the right side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetURightThruster(AEmitter *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetURThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the left side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetULeftThruster() const { return m_pULThruster; }
 
-    AEmitter * GetURThruster() const { return m_pURThruster; }
+    /// <summary>
+    /// Sets the left side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetULeftThruster(AEmitter *newThruster);
 
+    /// <summary>
+    /// Gets the left side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable * GetLeftHatch() const { return m_pLHatch; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetULThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetLeftHatch(Attachable *newHatch);
 
-    AEmitter * GetULThruster() const { return m_pULThruster; }
+    /// <summary>
+    /// Gets the right side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable * GetRightHatch() const { return m_pRHatch; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetLHatch() const { return m_pLHatch; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetRHatch() const { return m_pRHatch; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetEmissionTimers() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	int GetTotalWoundCount() const override; 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	int GetTotalWoundLimit() const override; 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	int RemoveAnyRandomWounds(int amount) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+    /// <summary>
+    /// Sets the right side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetRightHatch(Attachable *newHatch);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -402,26 +302,13 @@ ClassInfoGetters
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
-
 
     // Member variables
     static Entity::ClassInfo m_sClass;
     // Body AtomGroups.
     AtomGroup *m_pBodyAG;
     // Thruster emitters.
+    //TODO when this class is cleaned up, these and their getters and setters should probably be renamed (I'd argue the lua bindings should be broken to match but that's debatable). L and R should be Left and Right and they should probably be Primary and Secondary.
     AEmitter *m_pRThruster;
     AEmitter *m_pLThruster;
     AEmitter *m_pURThruster;
@@ -442,8 +329,6 @@ protected:
 
     // Automatically stabilize the craft with the upper thrusters? Defaults to yes.
     int m_AutoStabilize;
-    // The craft explodes if it has been on its side for more than this many MS (default 4000). Disable by setting to -1.
-    float m_ScuttleIfFlippedTime;
 
 	// Maximum engine rotation in degrees
 	float m_MaxEngineAngle;

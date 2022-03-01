@@ -32,9 +32,7 @@ class ContentFile;
 // Parent(s):       Entity.
 // Class history:   12/31/2001 SceneLayer created.
 
-class SceneLayer:
-    public Entity
-{
+class SceneLayer : public Entity {
 	friend class NetworkServer;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -44,9 +42,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(SceneLayer)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(SceneLayer);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

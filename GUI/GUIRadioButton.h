@@ -1,34 +1,12 @@
 #ifndef _GUIRADIOBUTTON_
 #define _GUIRADIOBUTTON_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIRadioButton.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIRadioButton class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIRadioButton
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A radiobutton control class.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/15/2004 GUIRadioButton Created.
-
-class GUIRadioButton :
-    public GUIControl,
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A radiobutton control class.
+/// </summary>
+class GUIRadioButton : public GUIControl, public GUIPanel {
 
 public:
 
@@ -56,7 +34,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +170,7 @@ public:
 // Description:     Gets the check state.
 // Arguments:       None.
 
-    bool GetCheck();
+    bool GetCheck() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +179,7 @@ public:
 // Description:     Sets the text.
 // Arguments:       Text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string &Text);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +188,7 @@ public:
 // Description:     Gets the text.
 // Arguments:       None.
 
-    std::string GetText();
+    std::string GetText() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -221,34 +199,22 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+    GUIBitmap *m_Image;
+    GUIRect m_ImageRects[4];
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          BuildBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Create the checkbox bitmap to draw.
-// Arguments:       None.
+    bool m_Checked;
+    int m_Mouseover;
+    std::string m_Text;
 
-    void BuildBitmap();
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Method:          BuildBitmap
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Create the checkbox bitmap to draw.
+	// Arguments:       None.
 
-
-// Members
-    
-    GUIBitmap        *m_Image;
-    GUIRect            m_ImageRects[4];
-
-    bool            m_Checked;
-    int                m_Mouseover;
-    std::string        m_Text;
+	void BuildBitmap();
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUICHECKBOX_
+};
+#endif

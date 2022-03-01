@@ -25,26 +25,23 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
-
-
-extern bool g_ResetActivity;
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 namespace RTE {
 
-AbstractClassInfo(EditorActivity, Activity)
+AbstractClassInfo(EditorActivity, Activity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +132,7 @@ int EditorActivity::Create(const EditorActivity &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int EditorActivity::ReadProperty(std::string propName, Reader &reader)
+int EditorActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -158,18 +155,9 @@ int EditorActivity::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this EditorActivity with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int EditorActivity::Save(Writer &writer) const
-{
-    Activity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int EditorActivity::Save(Writer &writer) const {
+	Activity::Save(writer);
+	return 0;
 }
 
 
@@ -229,9 +217,6 @@ int EditorActivity::Start()
     // Force the split screen config to just be one big screen for editing
     g_FrameMan.ResetSplitScreens(false, false);
 
-    // Only need one controller
-    m_PlayerController[0].Create();
-
     ///////////////////////////
     // GUI manager setup
 
@@ -241,8 +226,9 @@ int EditorActivity::Start()
         m_pGUIInput = new AllegroInput(-1, true); 
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+    if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+	}
 
     return error;
 }

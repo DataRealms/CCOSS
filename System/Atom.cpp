@@ -38,6 +38,7 @@ namespace RTE {
 		*/
 		m_TrailColor.Reset();
 		m_TrailLength = 0;
+		m_TrailLengthVariation = 0.0F;
 		m_NumPenetrations = 0;
 		m_ChangedDir = true;
 		m_ResultWrapped = false;
@@ -73,6 +74,7 @@ namespace RTE {
 		m_SubgroupID = reference.m_SubgroupID;
 		m_TrailColor = reference.m_TrailColor;
 		m_TrailLength = reference.m_TrailLength;
+		m_TrailLengthVariation = reference.m_TrailLengthVariation;
 
 		// These need to be set manually by the new owner.
 		m_OwnerMO = 0;
@@ -83,7 +85,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Atom::ReadProperty(std::string propName, Reader &reader) {
+	int Atom::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Offset") {
 			reader >> m_Offset;
 		} else if (propName == "OriginalOffset") {
@@ -98,6 +100,8 @@ namespace RTE {
 			reader >> m_TrailColor;
 		} else if (propName == "TrailLength") {
 			reader >> m_TrailLength;
+		} else if (propName == "TrailLengthVariation") {
+			reader >> m_TrailLengthVariation;
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -109,16 +113,12 @@ namespace RTE {
 	int Atom::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Offset");
-		writer << m_Offset;
-		writer.NewProperty("OriginalOffset");
-		writer << m_OriginalOffset;
-		writer.NewProperty("Material");
-		writer << m_Material;
-		writer.NewProperty("TrailColor");
-		writer << m_TrailColor;
-		writer.NewProperty("TrailLength");
-		writer << m_TrailLength;
+		writer.NewPropertyWithValue("Offset", m_Offset);
+		writer.NewPropertyWithValue("OriginalOffset", m_OriginalOffset);
+		writer.NewPropertyWithValue("Material", m_Material);
+		writer.NewPropertyWithValue("TrailColor", m_TrailColor);
+		writer.NewPropertyWithValue("TrailLength", m_TrailLength);
+		writer.NewPropertyWithValue("TrailLengthVariation", m_TrailLengthVariation);
 
 		return 0;
 	}
@@ -549,7 +549,7 @@ namespace RTE {
 				}
 				return hitStep;
 			}
-			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!");
+			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!" + (m_OwnerMO ? " Owner is " + m_OwnerMO->GetPresetName() + "." : ""));
 			m_OwnerMO->SetToDelete();
 		}
 		m_StepWasTaken = false;
@@ -662,6 +662,7 @@ namespace RTE {
 
 			delta[X] = std::floor(position.m_X + segTraj.m_X) - intPos[X];
 			delta[Y] = std::floor(position.m_Y + segTraj.m_Y) - intPos[Y];
+			RTEAssert(std::abs(delta[X]) < 2500 && std::abs(delta[Y] < 2500), "Extremely long difference trajectory found during Atom::Travel. Owner is " + m_OwnerMO->GetPresetName() + ", with Vel (" + std::to_string(velocity.GetX()) + ", " + std::to_string(velocity.GetY()) + ").");
 
 			//segProgress = 0.0F;
 			//delta2[X] = 0;
@@ -744,7 +745,7 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-MO collision detection and response. 
+				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
 				m_MOIDHit = g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]);
@@ -781,7 +782,7 @@ namespace RTE {
 					RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
 #endif
 
-					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them. 
+					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them.
 					// Orthogonal normals only, as the pixel boundaries themselves! See further down for the setting of this.
 					//m_LastHit.BitmapNormal = m_LastHit.Body[HITOR]->GetPos() - m_LastHit.Body[HITEE]->GetPos();
 					//m_LastHit.BitmapNormal.Normalize();
@@ -844,7 +845,7 @@ namespace RTE {
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-Terrain collision detection and response. 
+				// Atom-Terrain collision detection and response.
 
 				// If there was no MO collision detected, then check for terrain hits.
 				else if ((hitMaterialID = g_SceneMan.GetTerrMatter(intPos[X], intPos[Y])) && !m_OwnerMO->m_IgnoreTerrain) {
@@ -967,7 +968,7 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength /* + 3 * RandomNum()*/;
+			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}

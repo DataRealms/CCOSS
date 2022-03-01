@@ -1,10 +1,14 @@
 #include "TimerMan.h"
-#ifdef __unix__
+#include "PerformanceMan.h"
+#include "AudioMan.h"
+
+#ifdef _WIN32
+#include <Windows.h>
+#elif __unix__
 #include <time.h>
 #endif
-namespace RTE {
 
-	const std::string TimerMan::c_ClassName = "TimerMan";
+namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,8 +25,8 @@ namespace RTE {
 		m_DeltaBuffer.clear();
 		m_SimUpdatesSinceDrawn = -1;
 		m_DrawnSimUpdate = false;
+		m_SimSpeed = 1.0F;
 		m_TimeScale = 1.0F;
-		m_AveragingEnabled = false;
 		m_SimPaused = false;
 		// This gets dynamically turned on for short periods when sim gets heavy (explosions) and slow-mo effect is appropriate
 		m_OneSimUpdatePerFrame = false;
@@ -31,7 +35,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TimerMan::Create() {
+	int TimerMan::Initialize() {
 		// Get the frequency of ticks/s for this machine
 #ifdef _WIN32
 		LARGE_INTEGER tempLInt;
@@ -148,6 +152,8 @@ namespace RTE {
 		// Reset the counter since the last drawn update. Set it negative since we're counting full pure sim updates and this will be incremented to 0 on next SimUpdate
 		if (m_DrawnSimUpdate) { m_SimUpdatesSinceDrawn = -1; }
 
+		float globalPitch = 1.0F;
+
 		// Override the accumulator and just put one delta time in there so sim updates only once per frame
 		if (m_OneSimUpdatePerFrame) {
 			// Only let it appear to go slower, not faster, if limited
@@ -155,6 +161,17 @@ namespace RTE {
 
 			// Reset the counter of sim updates since the last drawn.. it will always be 0 since every update results in a drawn frame
 			m_SimUpdatesSinceDrawn = -1;
+
+			m_SimSpeed = GetDeltaTimeMS() / static_cast<float>(g_PerformanceMan.GetMSPFAverage());
+			if (IsSimSpeedLimited() && m_SimSpeed > 1.0F) { m_SimSpeed = 1.0F; }
+
+			// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
+			// TODO: This coefficient should probably move to SettingsMan and be loaded from ini. That way this effect can be lessened or even turned off entirely by users. 0.35 is a good default value though.
+			globalPitch = m_SimSpeed + (1.0F - m_SimSpeed) * 0.35F;
+		} else {
+			m_SimSpeed = 1.0F;
 		}
+		// TODO: Handle this from AudioMan::Update
+		g_AudioMan.SetGlobalPitch(globalPitch);
 	}
 }

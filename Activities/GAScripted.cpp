@@ -26,18 +26,16 @@
 #include "Scene.h"
 #include "Actor.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
-ConcreteClassInfo(GAScripted, GameActivity, 0)
+ConcreteClassInfo(GAScripted, GameActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -105,18 +103,17 @@ int GAScripted::Create(const GAScripted &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GAScripted::ReadProperty(std::string propName, Reader &reader)
+int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "ScriptFile") {
-		reader >> m_ScriptPath;
-		CorrectBackslashesInPaths(m_ScriptPath);
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "AddPieSlice")
 	{
-		PieMenuGUI::Slice newSlice;
+		PieSlice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else
         return GameActivity::ReadProperty(propName, reader);
@@ -131,16 +128,13 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GAScripted with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GAScripted::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
+int GAScripted::Save(Writer &writer) const {
+	GameActivity::Save(writer);
 
-    writer.NewProperty("ScriptFile");
-    writer << m_ScriptPath;
-    writer.NewProperty("LuaClassName");
-    writer << m_LuaClassName;
+	writer.NewPropertyWithValue("ScriptFile", m_ScriptPath);
+	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 
-    return 0;
+	return 0;
 }
 
 
@@ -206,7 +200,7 @@ int GAScripted::ReloadScripts()
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GAScripted::SceneIsCompatible(Scene *pScene, short teams)
+bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -311,7 +305,7 @@ int GAScripted::Start()
 	for (std::list<Entity *>::iterator sItr = globalScripts.begin(); sItr != globalScripts.end(); ++sItr )
 	{
 		GlobalScript * script = dynamic_cast<GlobalScript *>(*sItr);
-		if (script && g_SettingsMan.IsScriptEnabled(script->GetModuleAndPresetName()))
+		if (script && g_SettingsMan.IsGlobalScriptEnabled(script->GetModuleAndPresetName()))
 			m_GlobalScriptsList.push_back(dynamic_cast<GlobalScript *>(script->Clone()));
 	}
 

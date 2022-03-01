@@ -13,7 +13,8 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		Vector m_Corner; //!< Vector position of the upper left corner of this box.
 		float m_Width; //!< Width of this box.
@@ -249,19 +250,9 @@ namespace RTE {
 		friend bool operator!=(const Box &lhs, const Box &rhs) { return lhs.m_Corner != rhs.m_Corner || lhs.m_Width != rhs.m_Width || lhs.m_Height != rhs.m_Height; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Box.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Box.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this Box, effectively resetting the members of this abstraction level only.

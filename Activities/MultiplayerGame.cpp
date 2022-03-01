@@ -24,31 +24,28 @@
 #include "DataModule.h"
 #include "AudioMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "MultiplayerGameGUI.h"
 #include "PieMenuGUI.h"
 
 #include "NetworkClient.h"
 
-
-extern bool g_ResetActivity;
-
 namespace RTE {
 
-	ConcreteClassInfo(MultiplayerGame, Activity, 0)
+	ConcreteClassInfo(MultiplayerGame, Activity, 0);
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear
@@ -72,6 +69,8 @@ namespace RTE {
 		m_pConnectNATButton = 0;
 
 		m_pStatusLabel = 0;
+
+		m_BackToMainButton = nullptr;
 
 		m_Mode = SETUP;
 
@@ -117,7 +116,7 @@ namespace RTE {
 	//                  is called. If the property isn't recognized by any of the base classes,
 	//                  false is returned, and the reader's position is untouched.
 
-	int MultiplayerGame::ReadProperty(std::string propName, Reader &reader)
+	int MultiplayerGame::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
 		return Activity::ReadProperty(propName, reader);
 	}
@@ -174,8 +173,9 @@ namespace RTE {
 			m_pGUIInput = new AllegroInput(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
-		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+		}
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerGameGUI.ini");
 		m_pGUIController->EnableMouse(true);
@@ -185,10 +185,13 @@ namespace RTE {
 		if (pRootBox)
 			pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
+
 		GUICollectionBox *pDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConnectDialogBox"));
 		if (pDialogBox)
 		{
 			pDialogBox->SetPositionAbs(g_FrameMan.GetResX() / 2 - pDialogBox->GetWidth() / 2, g_FrameMan.GetResY() / 2 - pDialogBox->GetHeight() / 2);
+			m_BackToMainButton->SetPositionAbs((g_FrameMan.GetResX() - m_BackToMainButton->GetWidth()) / 2, pDialogBox->GetYPos() + pDialogBox->GetHeight() + 10);
 		}
 
 		m_pServerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("ServerNameTB"));
@@ -285,6 +288,11 @@ namespace RTE {
 			{
 				if (anEvent.GetType() == GUIEvent::Command)
 				{
+					if (anEvent.GetControl() == m_BackToMainButton) {
+						g_ActivityMan.PauseActivity();
+						return;
+					}
+
 					if (anEvent.GetControl() == m_pConnectButton)
 					{
 						std::string serverName;
@@ -430,7 +438,7 @@ namespace RTE {
 			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
-				//g_ResetActivity = true;
+				//g_ActivityMan.SetRestartActivity();
 				m_Mode = SETUP;
 				m_pGUIController->EnableMouse(true);
 				g_UInputMan.TrapMousePos(false, 0);

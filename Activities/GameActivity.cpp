@@ -31,22 +31,20 @@
 #include "HeldDevice.h"
 #include "Loadout.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 #include "PieMenuGUI.h"
+#include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 #include "GUIBanner.h"
-
-extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 #define BRAINLZWIDTHDEFAULT 640
 
 namespace RTE {
 
-AbstractClassInfo(GameActivity, Activity)
+AbstractClassInfo(GameActivity, Activity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +68,7 @@ void GameActivity::Clear()
         m_LandingZone[player].Reset();
         m_AIReturnCraft[player] = true;
         m_pPieMenu[player] = 0;
+        m_InventoryMenuGUI[player] = nullptr;
         m_pBuyGUI[player] = 0;
         m_pEditorGUI[player] = 0;
         m_pBannerRed[player] = 0;
@@ -104,8 +103,8 @@ void GameActivity::Clear()
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
-		m_aLZCursor[team] = 0;
-		m_aObjCursor[team] = 0;
+		m_aLZCursor[team].clear();
+		m_aObjCursor[team].clear();
     }
 
     m_Objectives.clear();
@@ -169,6 +168,7 @@ int GameActivity::Create(const GameActivity &reference)
         m_LandingZone[player] = reference.m_LandingZone[player];
         m_AIReturnCraft[player] = reference.m_AIReturnCraft[player];
         m_pPieMenu[player] = new PieMenuGUI;
+        m_InventoryMenuGUI[player] = new InventoryMenuGUI;
         m_pBuyGUI[player] = new BuyMenuGUI;
         m_pEditorGUI[player] = new SceneEditorGUI;
         m_pBannerRed[player] = new GUIBanner();
@@ -223,7 +223,7 @@ int GameActivity::Create(const GameActivity &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GameActivity::ReadProperty(std::string propName, Reader &reader)
+int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "CPUTeam")
     {
@@ -269,16 +269,13 @@ int GameActivity::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GameActivity with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GameActivity::Save(Writer &writer) const
-{
-    Activity::Save(writer);
+int GameActivity::Save(Writer &writer) const {
+	Activity::Save(writer);
 
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
+	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
+	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 
-    return 0;
+	return 0;
 }
 
 
@@ -292,6 +289,7 @@ void GameActivity::Destroy(bool notInherited)
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
+        delete m_InventoryMenuGUI[player];
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
         delete m_pBannerRed[player];
@@ -355,12 +353,10 @@ void GameActivity::Destroy(bool notInherited)
 
 void GameActivity::SetCPUTeam(int team)
 {
-    // Set the legacy var
-	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
-	{
+	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) {
+        // Set the legacy var
 	    m_CPUTeam = team;
 
-		// Activate the CPU team
 		m_TeamActive[team] = true;
 		m_TeamIsCPU[team] = true;
 	}
@@ -372,20 +368,36 @@ void GameActivity::SetCPUTeam(int team)
 */
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool GameActivity::IsBuyGUIVisible(int which) const {
+    if (which == -1) {
+        for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {
+            if (this->GetBuyGUI(player)->IsVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return this->GetBuyGUI(which)->IsVisible();
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SwitchToActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Forces the this to focus player control to a specific Actor for a
 //                  specific team. OWNERSHIP IS NOT TRANSFERRED!
 
-bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
+bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
 {
     // Computer players don't focus on any Actor
     if (!m_IsHuman[player])
         return false;
 
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -401,10 +413,11 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 // Description:     Forces the this to focus player control to the next Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
+void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -420,10 +433,11 @@ void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 // Description:     Forces this to focus player control to the previous Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
+void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint  || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -755,6 +769,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         newDelivery.pCraft = pDeliveryCraft;
         newDelivery.orderedByPlayer = player;
         newDelivery.landingZone = m_LandingZone[player];
+		newDelivery.multiOrderYOffset = 0;
         newDelivery.delay = m_DeliveryDelay * pDeliveryCraft->GetDeliveryDelayMultiplier();
         newDelivery.timer.Reset();
 
@@ -792,19 +807,18 @@ void GameActivity::SetupPlayers()
     Activity::SetupPlayers();
 
     // Add the locked cpu team that can't have any players
-    if (m_CPUTeam != Teams::NoTeam)
-    {
-        if (!m_TeamActive[m_CPUTeam])
-            m_TeamCount++;
+    if (m_CPUTeam != Teams::NoTeam && !m_TeamActive[m_CPUTeam]) {
+        m_TeamCount++;
         // Also activate the CPU team
         m_TeamActive[m_CPUTeam] = true;
     }
 
     // Don't clear a CPU team's active status though
-    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
-	{
-		if (m_TeamIsCPU[team])
-			m_TeamActive[team] = true;
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
+        if (m_TeamIsCPU[team] && !m_TeamActive[team]) {
+             m_TeamCount++;
+            m_TeamActive[team] = true;
+        }
 	}
 }
 
@@ -877,6 +891,14 @@ int GameActivity::Start()
         else
             m_pPieMenu[player] = new PieMenuGUI;
         m_pPieMenu[player]->Create(&m_PlayerController[player]);
+
+        // Allocate and (re)create the Inventory Menu GUIs
+        if (m_InventoryMenuGUI[player]) {
+            m_InventoryMenuGUI[player]->Destroy();
+        } else {
+            m_InventoryMenuGUI[player] = new InventoryMenuGUI;
+        }
+        m_InventoryMenuGUI[player]->Create(&m_PlayerController[player]);
 
         // Allocate and (re)create the Editor GUIs
         if (m_pEditorGUI[player])
@@ -995,28 +1017,28 @@ int GameActivity::Start()
     // Start the game timer
     m_GameTimer.Reset();
 
-    if (!(m_aLZCursor[0]))
+    if (m_aLZCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
-        m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[0], LZCURSORFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
-        m_aLZCursor[1] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[1], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
-		m_aLZCursor[2] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[2], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
-		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[3], LZCURSORFRAMECOUNT);
     }
 
-    if (!(m_aObjCursor[0]))
+    if (m_aObjCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
-        m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[0], OBJARROWFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
-        m_aObjCursor[1] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[1], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
-		m_aObjCursor[2] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[2], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
-		m_aObjCursor[3] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[3], OBJARROWFRAMECOUNT);
     }
 
     // Start the in-game music
@@ -1377,15 +1399,15 @@ void GameActivity::Update()
             SwitchToActor(m_Brain[player], player, team);
             m_ViewState[player] = ViewState::Normal;
         }
-        // Switch to next actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect)
+        // Switch to next actor if the player wants to. Don't do it while the buy menu is open
+        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
             SwitchToNextActor(player, team);
             m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
         }
-        // Switch to prev actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect)
+        // Switch to prev actor if the player wants to. Don't do it while the buy menu is open
+        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
             SwitchToPrevActor(player, team);
             m_ViewState[player] = ViewState::Normal;
@@ -1438,7 +1460,7 @@ void GameActivity::Update()
             m_PlayerController[player].RelativeCursorMovement(m_ActorCursor[player]);
 
             // Find the actor closest to the cursor, if any within the radius
-            float markedDistance = -1;
+			Vector markedDistance;
             Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_SceneMan.GetSceneWidth(), markedDistance);
 //            Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_FrameMan.GetPlayerScreenWidth() / 4);
 
@@ -1457,7 +1479,7 @@ void GameActivity::Update()
                 // Play err sound to indicate cancellation
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             // Player is done selecting new actor; switch to it if we have anything marked
             else if (m_PlayerController[player].IsState(ACTOR_NEXT) || m_PlayerController[player].IsState(ACTOR_PREV))// || m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1478,7 +1500,7 @@ void GameActivity::Update()
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             else
             {
@@ -1488,8 +1510,8 @@ void GameActivity::Update()
                     // Show the pie menu switching animation over the highlighted Actor
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
-                    if (markedDistance > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
-                        m_pPieMenu[player]->WobbleAnim();
+                    if (markedDistance.GetMagnitude() > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
+                        m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);
                 }
@@ -1514,7 +1536,7 @@ void GameActivity::Update()
 
             // If we are pointing to an actor to follow, then snap cursor to that actor's position
             Actor *pTargetActor = 0;
-            float distance = 0;
+			Vector distance;
             if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]))
             {
 //                m_ActorCursor[player] = pTargetActor->GetPos();
@@ -1538,8 +1560,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Stop drawing the waypoints
 //                m_ControlledActor[player]->DrawWaypoints(false);
                 // Update the player's move path now to the first waypoint set
@@ -1605,8 +1626,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Give player control back to actor
                 m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view
@@ -1665,8 +1685,7 @@ void GameActivity::Update()
 
         else if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            // Continuously display LZ message
-            g_FrameMan.SetScreenText("Choose your landing zone...", ScreenOfPlayer(player));
+			g_FrameMan.SetScreenText("Choose your landing zone... Hold UP or DOWN to place multiple orders", ScreenOfPlayer(player));
 
             // Save the x pos so we can see which direction the user is moving it
             float prevLZX = m_LandingZone[player].m_X;
@@ -1707,31 +1726,20 @@ void GameActivity::Update()
                     }
                 }
 */
-                // Figure out the direction the player is moving the cursor, so we can jump it in the right direction if needed
-                int direction = m_LandingZone[player].m_X - prevLZX;
-                // Move the actual LZ cursor to within the valid LZ Area
-                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, direction);
+                // Move the actual LZ cursor to within the valid LZ Area. We pass in 0 for direction so it doesn't try to wrap around on wrapping maps.
+                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, 0);
             }
 
             // Interface for the craft AI post-delivery mode
-            if (m_PlayerController[player].IsState(PRESS_DOWN))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
-                if (m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound()->Play(player);
-                else
-                    g_GUISound.UserErrorSound()->Play(player);
+			if (m_PlayerController[player].IsState(PRESS_DOWN)) {
+				if (m_AIReturnCraft[player]) { g_GUISound.SelectionChangeSound()->Play(player); }
 
-                m_AIReturnCraft[player] = false;
-            }
-            else if (m_PlayerController[player].IsState(PRESS_UP))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
-                if (!m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound()->Play(player);
-                else
-                    g_GUISound.UserErrorSound()->Play(player);
+				m_AIReturnCraft[player] = false;
+			} else if (m_PlayerController[player].IsState(PRESS_UP)) {
+				if (!m_AIReturnCraft[player]) { g_GUISound.SelectionChangeSound()->Play(player); }
 
-                m_AIReturnCraft[player] = true;
-            }
+				m_AIReturnCraft[player] = true;
+			}
 
             // Player canceled the order while selecting LZ - can't be done in pregame
             if (m_PlayerController[player].IsState(PRESS_SECONDARY) && m_ActivityState != ActivityState::PreGame)
@@ -1743,30 +1751,37 @@ void GameActivity::Update()
                 m_MessageTimer[player].Reset();
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
-            }
-            // Player is done selecting LZ,
-            else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
-            {
-                // Set the LZ cursor to be just over terran, to avoid getting stuck at halfway interpolating there
-                m_LandingZone[player].m_Y = 0;
-                m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10);
-                // Complete the purchase by getting the order from the BuyGUI, build it, and stuff it into a delivery
-                CreateDelivery(player);
-                // If there are no other Actors on this team, just view the LZ we have selected
-                if (!g_MovableMan.GetNextTeamActor(team))
-                {
-                    m_ObservationTarget[player] = m_LandingZone[player];
-                    m_ViewState[player] = ViewState::Observe;
-                }
-                // If there are other guys around, switch back to normal view
-                else
-                    m_ViewState[player] = ViewState::Normal;
-                // Stop displaying the LZ message
-                g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-                // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
-            }
+                m_pPieMenu[player]->DoDisableAnimation();
+			} else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY)) {
+				m_LandingZone[player].m_Y = 0;
+				float lzOffsetY = 0;
+				// Holding up or down will allow the player to make multiple orders without exiting the delivery phase. TODO: this should probably have a cooldown?
+				if (!m_PlayerController[player].IsState(MOVE_UP) && !m_PlayerController[player].IsState(MOVE_DOWN)) {
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10);
+					if (!g_MovableMan.GetNextTeamActor(team)) {
+						m_ObservationTarget[player] = m_LandingZone[player];
+						m_ViewState[player] = ViewState::Observe;
+					} else {
+						m_ViewState[player] = ViewState::Normal;
+					}
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
+					m_pPieMenu[player]->DoDisableAnimation();
+				} else {
+					// Place the new marker above the cursor so that they don't intersect with each other.
+					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
+				}
+
+				if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
+					g_GUISound.UserErrorSound()->Play(player);
+					m_FundsChanged[team] = true;
+				} else {
+					CreateDelivery(player);
+					m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
+				}
+				// Revert the Y offset so that the cursor doesn't flinch.
+				m_LandingZone[player].m_Y -= lzOffsetY;
+			}
 
             bool wrapped = g_SceneMan.ForceBounds(m_LandingZone[player]);
 
@@ -1803,14 +1818,21 @@ void GameActivity::Update()
         ////////////////////////////////////////
         // Update the Pie Menu
 
-        // Set the valid actor (or 0) so it can be flashed by the piemenu when it activates/deactivates
-        m_pPieMenu[player]->SetActor(m_ControlledActor[player]);
+        // Set the affected object so it can be flashed by the piemenu when it activates/deactivates
+        m_pPieMenu[player]->SetAffectedObject(m_ControlledActor[player]);
+        m_InventoryMenuGUI[player]->SetInventoryActor(m_ControlledActor[player]);
 
         if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle)
         {
             if (m_PlayerController[player].IsState(PIE_MENU_ACTIVE))
             {
-                if (!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate())
+                if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel || !m_InventoryMenuGUI[player]->IsVisible()) {
+                    m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Carousel);
+                    m_InventoryMenuGUI[player]->EnableIfNotEmpty();
+                }
+
+                // Don't open the pie menu if the buy menu is visible
+                if ((!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate()) && !m_pBuyGUI[player]->IsVisible())
                 {
                     // Remove all previous slices
                     m_pPieMenu[player]->ResetSlices();
@@ -1819,15 +1841,15 @@ void GameActivity::Update()
                     // Add some additional universal ones
 					if (m_BuyMenuEnabled)
 					{
-						PieMenuGUI::Slice buySlice("Buy Menu", PieMenuGUI::PSI_BUYMENU, PieMenuGUI::Slice::LEFT);
+						PieSlice buySlice("Buy Menu", PieSlice::PieSliceIndex::PSI_BUYMENU, PieSlice::SliceDirection::LEFT);
 						m_pPieMenu[player]->AddSlice(buySlice);
 					}
                     // Brain-specific options
                     if (m_ControlledActor[player] == m_Brain[player])
                     {
-						//PieMenuGUI::Slice statsSlice("Statistics", PieMenuGUI::PSI_STATS, PieMenuGUI::Slice::RIGHT, false);
+						//PieSlice statsSlice("Statistics", PieMenuGUI::PSI_STATS, PieSlice::RIGHT, false);
                         //m_pPieMenu[player]->AddSlice(statsSlice, true);
-						//PieMenuGUI::Slice ceaseFireSlice("Propose Cease Fire", PieMenuGUI::PSI_CEASEFIRE, PieMenuGUI::Slice::RIGHT, false);
+						//PieSlice ceaseFireSlice("Propose Cease Fire", PieMenuGUI::PSI_CEASEFIRE, PieSlice::RIGHT, false);
 						//m_pPieMenu[player]->AddSlice(ceaseFireSlice, true);
                     }
 
@@ -1844,8 +1866,10 @@ void GameActivity::Update()
                     m_pPieMenu[player]->SetEnabled(true);
                 }
             }
-            else
+            else {
                 m_pPieMenu[player]->SetEnabled(false);
+                if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) { m_InventoryMenuGUI[player]->SetEnabled(false); }
+            }
 // TODO: FIX CRASH BUG HERE WHEN GAME OVER!
             // Set/save position of the menu
             m_pPieMenu[player]->SetPos(m_ControlledActor[player]->GetCPUPos());
@@ -1855,17 +1879,17 @@ void GameActivity::Update()
         m_pPieMenu[player]->Update();
 
         // If it appears a slice has been activated, then let the controlled actor handle it
-        int command = m_pPieMenu[player]->GetPieCommand();
-        if (m_ControlledActor[player] && command != PieMenuGUI::PSI_NONE)
+        PieSlice::PieSliceIndex command = m_pPieMenu[player]->GetPieCommand();
+        if (m_ControlledActor[player] && command != PieSlice::PieSliceIndex::PSI_NONE)
         {
             // AI mode commands that need extra points set in special view modes here
-            if (command == PieMenuGUI::PSI_SENTRY)
+            if (command == PieSlice::PieSliceIndex::PSI_SENTRY)
                 m_ViewState[player] = ViewState::AISentryPoint;
-            else if (command == PieMenuGUI::PSI_PATROL)
+            else if (command == PieSlice::PieSliceIndex::PSI_PATROL)
                 m_ViewState[player] = ViewState::AIPatrolPoints;
-            else if (command == PieMenuGUI::PSI_GOLDDIG)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOLDDIG)
                 m_ViewState[player] = ViewState::AIGoldDigPoint;
-            else if (command == PieMenuGUI::PSI_GOTO)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOTO)
             {
                 m_ViewState[player] = ViewState::AIGoToPoint;
                 // Clear out the waypoints
@@ -1875,7 +1899,7 @@ void GameActivity::Update()
                 // Disable Actor's controller while we set the waypoints
                 m_ControlledActor[player]->GetController()->SetDisabled(true);
             }
-			else if (command == PieMenuGUI::PSI_FORMSQUAD)
+			else if (command == PieSlice::PieSliceIndex::PSI_FORMSQUAD)
             {
 				//Find out if we have any connected units, and disconnect them
 				bool isCommander = false;
@@ -1923,11 +1947,15 @@ void GameActivity::Update()
             // If the actor couldn't handle it, then it's probably a game specific one
             if (!m_ControlledActor[player]->HandlePieCommand(command))
             {
-                if (command == PieMenuGUI::PSI_BUYMENU)
-                {
+                if (command == PieSlice::PieSliceIndex::PSI_BUYMENU) {
                     m_pPieMenu[player]->SetEnabled(false);
                     m_pBuyGUI[player]->SetEnabled(true);
                     skipBuyUpdate = true;
+                } else if (command == PieSlice::PieSliceIndex::PSI_FULLINVENTORY) {
+                    m_pPieMenu[player]->SetEnabled(false);
+                    m_InventoryMenuGUI[player]->SetEnabled(false);
+                    m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Full);
+                    m_InventoryMenuGUI[player]->SetEnabled(true);
                 }
 /*
                 else if (command == PieMenuGUI::PSI_STATS)
@@ -1939,6 +1967,9 @@ void GameActivity::Update()
 */
             }
         }
+        
+        // Update inventory guis
+        m_InventoryMenuGUI[player]->Update();
 
         ///////////////////////////////////////
         // Update Buy Menu GUIs
@@ -1950,8 +1981,8 @@ void GameActivity::Update()
             m_pBuyGUI[player]->Update();
         }
 
-        // Trap the mouse if we're in gameplay and not in the buy menu
-		g_UInputMan.TrapMousePos(!m_pBuyGUI[player]->IsEnabled(), player);
+        // Trap the mouse if we're in gameplay and not in menus
+		g_UInputMan.TrapMousePos(!m_pBuyGUI[player]->IsEnabled() && !m_InventoryMenuGUI[player]->IsEnabledAndNotCarousel(), player);
 
         // Start LZ picking mode if a purchase was made
         if (m_pBuyGUI[player]->PurchaseMade())
@@ -1978,7 +2009,7 @@ void GameActivity::Update()
             if (m_GameOverTimer.IsPastSimMS(55000) || g_UInputMan.AnyStartPress())
             {
                 g_ActivityMan.EndActivity();
-                g_InActivity = false;
+				g_ActivityMan.SetInActivity(false);
             }
         }
 
@@ -1988,10 +2019,13 @@ void GameActivity::Update()
         if (m_ControlledActor[player])
         {
             // Don't disable when pie menu is active; it is done inside the Controller Update
-            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe)
+            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe) {
                 m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_AI);
-            else
+            } else if (m_InventoryMenuGUI[player]->IsEnabledAndNotCarousel()) {
+                m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_DISABLED);
+            } else {
                 m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_PLAYER);
+            }
         }
 
         ///////////////////////////////////////
@@ -2071,7 +2105,7 @@ void GameActivity::Update()
                 g_FrameMan.SetScreenText("Your order has arrived!", ScreenOfPlayer(player), 333);
                 m_MessageTimer[player].Reset();
 
-                pDeliveryCraft->ResetEmissionTimers();  // Reset the engine timers so they don't emit a massive burst after being added to the world
+				pDeliveryCraft->ResetAllTimers();
                 pDeliveryCraft->Update();
 
                 // Add the delivery craft to the world, TRANSFERRING OWNERSHIP
@@ -2191,6 +2225,14 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         {
             int halfWidth = 24;
             landZone = itr->landingZone - targetPos;
+			bool anyPlayerOnTeamIsInLandingZoneSelectViewState = false;
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (GetTeamOfPlayer(player) == team && m_ViewState[player] == ViewState::LandingZoneSelect) {
+					anyPlayerOnTeamIsInLandingZoneSelectViewState = true;
+					break;
+				}
+			}
+			if (!anyPlayerOnTeamIsInLandingZoneSelectViewState) { landZone.m_Y -= itr->multiOrderYOffset; }
             // Cursor
             draw_sprite(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X - halfWidth, landZone.m_Y - 48);
             draw_sprite_h_flip(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X + halfWidth - m_aLZCursor[cursor][frame]->w, landZone.m_Y - 48);
@@ -2319,7 +2361,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     if (pIcon)
         draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
-    std::snprintf(str, sizeof(str), "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
+    std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, std::floor(GetTeamFunds(m_Team[PoS])));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
@@ -2348,6 +2390,8 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         // Pie menu may be visible if we're choosing actors
         if (/*m_ControlledActor[PoS] && */m_pPieMenu[PoS] && m_pPieMenu[PoS]->IsVisible())
             m_pPieMenu[PoS]->Draw(pTargetBitmap, targetPos);
+
+        if (m_InventoryMenuGUI[PoS] && m_InventoryMenuGUI[PoS]->IsVisible()) { m_InventoryMenuGUI[PoS]->Draw(pTargetBitmap, targetPos); }
 
         if (m_pBuyGUI[PoS] && m_pBuyGUI[PoS]->IsVisible())
             m_pBuyGUI[PoS]->Draw(pTargetBitmap);

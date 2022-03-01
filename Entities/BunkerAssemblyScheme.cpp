@@ -15,12 +15,12 @@
 #include "PresetMan.h"
 #include "FrameMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0)
+ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ int BunkerAssemblyScheme::Create(const BunkerAssemblyScheme &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
+int BunkerAssemblyScheme::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BitmapFile")
     {
@@ -292,7 +292,7 @@ void BunkerAssemblyScheme::Destroy(bool notInherited)
 // Description:     Gets a bitmap showing a good identifyable icon of this, for use in
 //                  GUI lists etc.
 
-BITMAP * BunkerAssemblyScheme::GetGraphicalIcon()
+BITMAP * BunkerAssemblyScheme::GetGraphicalIcon() const
 {
 	return m_pIconBitmap;
 }

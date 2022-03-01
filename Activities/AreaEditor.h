@@ -40,9 +40,7 @@ class GUIComboBox;
 // Parent(s):       EditorActivity.
 // Class history:   7/21/2008 AreaEditor created, based off SceneEditor
 
-class AreaEditor:
-    public EditorActivity
-{
+class AreaEditor : public EditorActivity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -51,9 +49,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AreaEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AreaEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AreaEditor

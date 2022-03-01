@@ -39,9 +39,7 @@ namespace RTE
 	// Class history:   8/30/2007 MultiplayerGame created, inheriting directly from Activity.
 	//                  9/17/2007 Spliced out and made to derive from EditorActivty
 
-	class MultiplayerGame :
-	public Activity
-	{
+	class MultiplayerGame : public Activity {
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Public member variable, method and friend function declarations
@@ -49,9 +47,9 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EntityAllocation(MultiplayerGame)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(MultiplayerGame);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 
 		enum MultiplayerGameMode
@@ -201,6 +199,8 @@ namespace RTE
 
 		// The editor GUI
 		//MultiplayerGameGUI *m_pEditorGUI;
+
+		GUIButton *m_BackToMainButton; //!< Button to return to main menu.
 
 		// 
 		GUITextBox *m_pServerNameTextBox;

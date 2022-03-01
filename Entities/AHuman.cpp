@@ -26,12 +26,12 @@
 #include "Scene.h"
 #include "SettingsMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(AHuman, Actor, 20)
+ConcreteClassInfo(AHuman, Actor, 20);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +43,7 @@ ConcreteClassInfo(AHuman, Actor, 20)
 void AHuman::Clear()
 {
     m_pHead = 0;
+	m_LookToAimRatio = 0.7F;
     m_pJetpack = 0;
     m_pFGArm = 0;
     m_pBGArm = 0;
@@ -51,8 +52,10 @@ void AHuman::Clear()
     m_pFGHandGroup = 0;
     m_pBGHandGroup = 0;
     m_pFGFootGroup = 0;
+    m_BackupFGFootGroup = nullptr;
     m_pBGFootGroup = 0;
-    m_StrideSound.Reset();
+    m_BackupBGFootGroup = nullptr;
+    m_StrideSound = nullptr;
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
     m_ProneState = NOTPRONE;
@@ -62,6 +65,7 @@ void AHuman::Clear()
         m_Paths[BGROUND][i].Reset();
         m_Paths[FGROUND][i].Terminate();
         m_Paths[BGROUND][i].Terminate();
+        m_RotAngleTargets[i] = 0.0F;
     }
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
@@ -69,9 +73,17 @@ void AHuman::Clear()
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetReplenishRate = 1.0F;
+	m_JetAngleRange = 0.25F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
+	m_SharpAimRevertTimer.Reset();
+	m_FGArmFlailScalar = 0.0F;
+	m_BGArmFlailScalar = 0.7F;
+	m_EquipHUDTimer.Reset();
+	m_WalkAngle.fill(Matrix());
+	m_ArmSwingRate = 1.0F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -88,8 +100,6 @@ void AHuman::Clear()
     m_SweepTimer.Reset();
     m_PatrolTimer.Reset();
     m_JumpTimer.Reset();
-
-	m_GotHat = false;
 }
 
 
@@ -100,9 +110,15 @@ void AHuman::Clear()
 
 int AHuman::Create()
 {
-    // Read all the properties
-    if (Actor::Create() < 0)
-        return -1;
+	if (Actor::Create() < 0) {
+		return -1;
+	}
+
+    // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
+    if (m_pFGArm) {
+        m_Attachables.erase(std::find(m_Attachables.begin(), m_Attachables.end(), m_pFGArm));
+        m_Attachables.push_back(m_pFGArm);
+    }
 
     // Make the limb paths for the background limbs
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
@@ -137,45 +153,34 @@ int AHuman::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
-int AHuman::Create(const AHuman &reference)
-{
+int AHuman::Create(const AHuman &reference) {
+    if (reference.m_pBGArm) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID()); }
+    if (reference.m_pBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID()); }
+    if (reference.m_pJetpack) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID()); }
+    if (reference.m_pHead) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID()); }
+    if (reference.m_pFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID()); }
+    if (reference.m_pFGArm) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID()); }
+
     Actor::Create(reference);
 
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pBGArm) { SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone())); }
+    if (reference.m_pBGLeg) { SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pHead) { SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone())); }
+    if (reference.m_pFGLeg) { SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone())); }
+    if (reference.m_pFGArm) { SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone())); }
+
+	m_LookToAimRatio = reference.m_LookToAimRatio;
+
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
-
-    if (reference.m_pHead) {
-        m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pHead, true);
-    }
-
-    if (reference.m_pJetpack) {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
-
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
-
-    if (reference.m_pFGArm) {
-        m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        AddAttachable(m_pFGArm, true);
-    }
-
-    if (reference.m_pBGArm) {
-        m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        AddAttachable(m_pBGArm, true);
-    }
-
-    if (reference.m_pFGLeg) {
-        m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        AddAttachable(m_pFGLeg, true);
-    }
-
-    if (reference.m_pBGLeg) {
-        m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        AddAttachable(m_pBGLeg, true);
-    }
+    m_JetReplenishRate = reference.m_JetReplenishRate;
+	m_JetAngleRange = reference.m_JetAngleRange;
+	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
+	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
+	m_ArmSwingRate = reference.m_ArmSwingRate;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -183,19 +188,25 @@ int AHuman::Create(const AHuman &reference)
     m_pBGHandGroup->SetOwner(this);
     m_pFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone());
     m_pFGFootGroup->SetOwner(this);
+    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupFGFootGroup->Clone());
+    m_BackupFGFootGroup->SetOwner(this);
+    m_BackupFGFootGroup->SetLimbPos(reference.m_BackupFGFootGroup->GetLimbPos());
     m_pBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone());
     m_pBGFootGroup->SetOwner(this);
+    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupBGFootGroup->Clone());
+    m_BackupBGFootGroup->SetOwner(this);
+    m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_ArmsState = reference.m_ArmsState;
     m_MoveState = reference.m_MoveState;
     m_ProneState = reference.m_ProneState;
 
-    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-    {
+    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);
         m_Paths[BGROUND][i].Create(reference.m_Paths[BGROUND][i]);
+        m_RotAngleTargets[i] = reference.m_RotAngleTargets[i];
     }
 
     m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
@@ -223,56 +234,38 @@ int AHuman::Create(const AHuman &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AHuman::ReadProperty(std::string propName, Reader &reader)
-{
-	if (propName == "ThrowPrepTime")
-		reader >> m_ThrowPrepTime;
-	else if (propName == "Head")
-    {
-        delete m_pHead;
-        m_pHead = new Attachable;
-        reader >> m_pHead;
-		if (!m_pHead->IsDamageMultiplierRedefined())
-			m_pHead->SetDamageMultiplier(5);
-    }
-    else if (propName == "Jetpack")
-    {
-        delete m_pJetpack;
-        m_pJetpack = new AEmitter;
-        reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
+    if (propName == "ThrowPrepTime") {
+        reader >> m_ThrowPrepTime;
+    } else if (propName == "Head") {
+        SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
+	} else if (propName == "LookToAimRatio") {
+		reader >> m_LookToAimRatio;
+    } else if (propName == "Jetpack") {
+        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+	} else if (propName == "JumpTime" || propName == "JetTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "FGArm")
-    {
-        delete m_pFGArm;
-        m_pFGArm = new Arm;
-        reader >> m_pFGArm;
-    }
-    else if (propName == "BGArm")
-    {
-        delete m_pBGArm;
-        m_pBGArm = new Arm;
-        reader >> m_pBGArm;
-    }
-    else if (propName == "FGLeg")
-    {
-        delete m_pFGLeg;
-        m_pFGLeg = new Leg;
-        reader >> m_pFGLeg;
-    }
-    else if (propName == "BGLeg")
-    {
-        delete m_pBGLeg;
-        m_pBGLeg = new Leg;
-        reader >> m_pBGLeg;
-    }
-    else if (propName == "HandGroup")
-    {
+	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
+		reader >> m_JetReplenishRate;
+	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
+		reader >> m_JetAngleRange;
+	} else if (propName == "FGArmFlailScalar") {
+		reader >> m_FGArmFlailScalar;
+	} else if (propName == "BGArmFlailScalar") {
+		reader >> m_BGArmFlailScalar;
+	} else if (propName == "ArmSwingRate") {
+		reader >> m_ArmSwingRate;
+    } else if (propName == "FGArm") {
+        SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "BGArm") {
+        SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "FGLeg") {
+        SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "BGLeg") {
+        SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
         m_pFGHandGroup = new AtomGroup();
@@ -281,43 +274,54 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         m_pBGHandGroup->Create(*m_pFGHandGroup);
         m_pFGHandGroup->SetOwner(this);
         m_pBGHandGroup->SetOwner(this);
-    }
-    else if (propName == "FGFootGroup")
-    {
+    } else if (propName == "FGFootGroup") {
         delete m_pFGFootGroup;
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
-    }
-    else if (propName == "BGFootGroup")
-    {
+        m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
+        m_BackupFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "BGFootGroup") {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+        m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
+        m_BackupBGFootGroup->RemoveAllAtoms();
+    } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    else if (propName == "StandLimbPath")
+    } else if (propName == "StandLimbPath") {
         reader >> m_Paths[FGROUND][STAND];
-    else if (propName == "StandLimbPathBG")
+    } else if (propName == "StandLimbPathBG") {
         reader >> m_Paths[BGROUND][STAND];
-    else if (propName == "WalkLimbPath")
+    } else if (propName == "WalkLimbPath") {
         reader >> m_Paths[FGROUND][WALK];
-    else if (propName == "CrouchLimbPath")
+    } else if (propName == "CrouchLimbPath") {
         reader >> m_Paths[FGROUND][CROUCH];
-    else if (propName == "CrawlLimbPath")
+    } else if (propName == "CrouchLimbPathBG") {
+        reader >> m_Paths[BGROUND][CROUCH];
+    } else if (propName == "CrawlLimbPath") {
         reader >> m_Paths[FGROUND][CRAWL];
-    else if (propName == "ArmCrawlLimbPath")
+    } else if (propName == "ArmCrawlLimbPath") {
         reader >> m_Paths[FGROUND][ARMCRAWL];
-    else if (propName == "ClimbLimbPath")
+    } else if (propName == "ClimbLimbPath") {
         reader >> m_Paths[FGROUND][CLIMB];
-    else if (propName == "JumpLimbPath")
+    } else if (propName == "JumpLimbPath") {
         reader >> m_Paths[FGROUND][JUMP];
-    else if (propName == "DislodgeLimbPath")
+    } else if (propName == "DislodgeLimbPath") {
         reader >> m_Paths[FGROUND][DISLODGE];
-    else
+    } else if (propName == "StandRotAngleTarget") {
+        reader >> m_RotAngleTargets[STAND];
+    } else if (propName == "WalkRotAngleTarget") {
+        reader >> m_RotAngleTargets[WALK];
+    } else if (propName == "CrouchRotAngleTarget") {
+        reader >> m_RotAngleTargets[CROUCH];
+    } else if (propName == "JumpRotAngleTarget") {
+        reader >> m_RotAngleTargets[JUMP];
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -337,11 +341,23 @@ int AHuman::Save(Writer &writer) const
 	writer << m_ThrowPrepTime;
     writer.NewProperty("Head");
     writer << m_pHead;
+    writer.NewProperty("LookToAimRatio");
+    writer << m_LookToAimRatio;
     writer.NewProperty("Jetpack");
     writer << m_pJetpack;
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpReplenishRate");
+	writer << m_JetReplenishRate;
+	writer.NewProperty("JumpAngleRange");
+	writer << m_JetAngleRange;
+	writer.NewProperty("FGArmFlailScalar");
+	writer << m_FGArmFlailScalar;
+	writer.NewProperty("BGArmFlailScalar");
+	writer << m_BGArmFlailScalar;
+	writer.NewProperty("ArmSwingRate");
+	writer << m_ArmSwingRate;
     writer.NewProperty("FGArm");
     writer << m_pFGArm;
     writer.NewProperty("BGArm");
@@ -387,47 +403,16 @@ int AHuman::Save(Writer &writer) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the AHuman object.
 
-void AHuman::Destroy(bool notInherited)
-{
-    delete m_pBGLeg;
-    delete m_pFGLeg;
-    delete m_pBGArm;
-    delete m_pFGArm;
-    delete m_pJetpack;
-    delete m_pHead;
+void AHuman::Destroy(bool notInherited) {
+    delete m_pFGHandGroup;
     delete m_pBGHandGroup;
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;
-//    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
-//         itr != m_WalkPaths.end(); ++itr)
-//        delete *itr;
 
-    if (!notInherited)
-        Actor::Destroy();
+	delete m_StrideSound;
+
+    if (!notInherited) { Actor::Destroy(); }
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this AHuman, including the mass of its
-//                  currently attached body parts and inventory.
-
-float AHuman::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pHead)
-        totalMass += m_pHead->GetMass();
-    if (m_pFGArm)
-        totalMass += m_pFGArm->GetMass();
-    if (m_pBGArm)
-        totalMass += m_pBGArm->GetMass();
-    if (m_pFGLeg)
-        totalMass += m_pFGLeg->GetMass();
-    if (m_pBGLeg)
-        totalMass += m_pBGLeg->GetMass();
-    return totalMass;
 }
 
 
@@ -518,40 +503,138 @@ Vector AHuman::GetEyePos() const
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeadBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the sprite representing the head of this.
+void AHuman::SetHead(Attachable *newHead) {
+    if (m_pHead && m_pHead->IsAttached()) { RemoveAndDeleteAttachable(m_pHead); }
+    if (newHead == nullptr) {
+        m_pHead = nullptr;
+    } else {
+        m_pHead = newHead;
+        AddAttachable(newHead);
 
-BITMAP * AHuman::GetHeadBitmap() const
-{
-    if (m_pHead && m_pHead->IsAttached())
-        return m_pHead->GetSpriteFrame(0);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<AHuman *>(parent)->SetHead(attachable);
+        }});
 
-    return 0;
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(4.0F); }
+        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
+        m_pHead->SetInheritsRotAngle(false);
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
+void AHuman::SetJetpack(AEmitter *newJetpack) {
+    if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
+    if (newJetpack == nullptr) {
+        m_pJetpack = nullptr;
+    } else {
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
 
-void AHuman::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pHead)
-        m_pHead->SetID(newID);
-    if (m_pFGArm)
-        m_pFGArm->SetID(newID);
-    if (m_pBGArm)
-        m_pBGArm->SetID(newID);
-    if (m_pFGLeg)
-        m_pFGLeg->SetID(newID);
-    if (m_pBGLeg)
-        m_pBGLeg->SetID(newID);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
+        }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGArm(Arm *newArm) {
+    if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pFGArm); }
+    if (newArm == nullptr) {
+        m_pFGArm = nullptr;
+    } else {
+        m_pFGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGArm");
+            dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
+        }});
+
+        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
+        m_pFGArm->SetDrawnAfterParent(true);
+        m_pFGArm->SetDrawnNormallyByParent(false);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGArm(Arm *newArm) {
+    if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pBGArm); }
+    if (newArm == nullptr) {
+        m_pBGArm = nullptr;
+    } else {
+        m_pBGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGArm");
+            dynamic_cast<AHuman *>(parent)->SetBGArm(castedAttachable);
+        }});
+
+        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
+        m_pBGArm->SetDrawnAfterParent(false);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGLeg(Leg *newLeg) {
+    if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pFGLeg); }
+    if (newLeg == nullptr) {
+        m_pFGLeg = nullptr;
+    } else {
+        m_pFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGLeg");
+            dynamic_cast<AHuman *>(parent)->SetFGLeg(castedAttachable);
+        }});
+
+        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGLeg(Leg *newLeg) {
+    if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pBGLeg); }
+    if (newLeg == nullptr) {
+        m_pBGLeg = nullptr;
+    } else {
+        m_pBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGLeg");
+            dynamic_cast<AHuman *>(parent)->SetBGLeg(castedAttachable);
+        }});
+
+        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        m_pBGLeg->SetDrawnAfterParent(false);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP * AHuman::GetGraphicalIcon() const {
+	return m_GraphicalIcon ? m_GraphicalIcon : (m_pHead ? m_pHead->GetSpriteFrame(0) : GetSpriteFrame(0));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -669,45 +752,49 @@ bool AHuman::OnSink(const Vector &pos)
 
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-    if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pItemInReach);
-		
-        pPieMenu->AddSlice(pickUpSlice);
-    } else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull());
-        pPieMenu->AddSlice(reloadSlice);
+	if (m_pItemInReach) {
+		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_Status != INACTIVE);
+		pPieMenu->AddSlice(pickUpSlice);
+	} else {
+		PieSlice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
+		pPieMenu->AddSlice(reloadSlice);
 	}
-	
-	PieMenuGUI::Slice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_DROP, PieMenuGUI::Slice::DOWN, m_pFGArm && m_pFGArm->GetHeldMO());
-    pPieMenu->AddSlice(dropSlice);
+	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
+	pPieMenu->AddSlice(dropSlice);
 
-	PieMenuGUI::Slice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieMenuGUI::PSI_NEXTITEM, PieMenuGUI::Slice::RIGHT, m_pFGArm && !m_Inventory.empty());
-    pPieMenu->AddSlice(nextItemSlice);
-    PieMenuGUI::Slice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieMenuGUI::PSI_PREVITEM, PieMenuGUI::Slice::LEFT, m_pFGArm && !m_Inventory.empty());
+	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_NEXTITEM, PieSlice::SliceDirection::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
+	pPieMenu->AddSlice(nextItemSlice);
+	PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_PREVITEM, PieSlice::SliceDirection::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(prevItemSlice);
 
-	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
+	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(sentryAISlice);
-    PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+    PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
-	PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
+	PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
     pPieMenu->AddSlice(formSquadSlice);
 	
-	PieMenuGUI::Slice goToSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
+	PieSlice goToSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(goToSlice);
-    PieMenuGUI::Slice goldAISlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN);
+    PieSlice goldAISlice("Gold Dig AI Mode", PieSlice::PieSliceIndex::PSI_GOLDDIG, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(goldAISlice);
 
-    PieMenuGUI::Slice huntAISlice("Brain Hunt AI Mode", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
+    PieSlice huntAISlice("Brain Hunt AI Mode", PieSlice::PieSliceIndex::PSI_BRAINHUNT, PieSlice::SliceDirection::RIGHT);
 	pPieMenu->AddSlice(huntAISlice);
 
-    // Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
-    Actor::AddPieMenuSlices(pPieMenu);
+    PieSlice fullInventorySlice("Show Full Inventory", PieSlice::PieSliceIndex::PSI_FULLINVENTORY, PieSlice::SliceDirection::RIGHT, GetEquippedItem() || GetEquippedBGItem() || !m_Inventory.empty());
+    pPieMenu->AddSlice(fullInventorySlice);
 
     // Add any custom slices from a currently held device
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
-        m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu);
+	if (m_Status != INACTIVE) {
+		// Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
+		Actor::AddPieMenuSlices(pPieMenu);
 
+		// Add any custom slices from a currently held device
+		if (m_pFGArm && m_pFGArm->HoldsDevice()) { m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu); }
+	} else {
+		m_PieNeedsUpdate = false;
+	}
     return true;
 }
 
@@ -718,38 +805,38 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 // Description:     Handles and does whatever a specific activated Pie Menu slice does to
 //                  this.
 
-bool AHuman::HandlePieCommand(int pieSliceIndex)
+bool AHuman::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_PICKUP)
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PICKUP)
             m_Controller.SetState(WEAPON_PICKUP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_DROP)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DROP)
             m_Controller.SetState(WEAPON_DROP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_RELOAD)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieMenuGUI::PSI_NEXTITEM)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_NEXTITEM)
             m_Controller.SetState(WEAPON_CHANGE_NEXT, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_PREVITEM)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PREVITEM)
             m_Controller.SetState(WEAPON_CHANGE_PREV, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_SENTRY)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieMenuGUI::PSI_PATROL)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieMenuGUI::PSI_BRAINHUNT)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
         {
             m_AIMode = AIMODE_BRAINHUNT;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOTO)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
         {
             m_AIMode = AIMODE_GOTO;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
             m_UpdateMovePath = true;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOLDDIG)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOLDDIG)
             m_AIMode = AIMODE_GOLDDIG;
         else
             return Actor::HandlePieCommand(pieSliceIndex);
@@ -801,7 +888,9 @@ bool AHuman::EquipFirearm(bool doEquip)
         pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->IsWeapon())
             return true;
-    }
+	} else {
+		UnequipBGArm();
+	}
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
@@ -832,7 +921,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
             }
 
             return true;
@@ -882,7 +971,11 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 if (m_pFGArm->HoldsSomething())
                 {
                     m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    MovableObject *previouslyHeldItem = m_pFGArm->ReleaseHeldMO();
+                    // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
+                    // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
+                    if (previouslyHeldItem->GetsHitByMOs()) { previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
+                    m_Inventory.emplace_back(previouslyHeldItem);
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -894,8 +987,8 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -956,8 +1049,8 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1018,8 +1111,8 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1082,8 +1175,8 @@ bool AHuman::EquipThrowable(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1144,8 +1237,8 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1239,7 +1332,7 @@ bool AHuman::EquipShield()
             EquipShieldInBGArm();
 
             // Play the device switching sound
-            m_DeviceSwitchSound.Play(m_Pos);
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
             return true;
         }
@@ -1308,11 +1401,7 @@ bool AHuman::EquipShieldInBGArm()
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
             m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
-            // Play the device switching sound only if activity is running
-			if (g_ActivityMan.ActivityRunning())
-			{
-				m_DeviceSwitchSound.Play(m_Pos);
-			}
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
             return true;
         }
@@ -1321,30 +1410,29 @@ bool AHuman::EquipShieldInBGArm()
     return false;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  UnequipBGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Unequips whatever is in the BG arm and puts it into the inventory.
-// Arguments:       None.
-// Return value:    Whether there was anything to unequip.
 
-bool AHuman::UnequipBGArm()
-{
-    if (!(m_pBGArm && m_pBGArm->IsAttached()))
-        return false;
-
-    // Put back into the inventory what we had in our hand, if anything
-    if (m_pBGArm->HoldsSomething())
-    {
-        m_pBGArm->GetHeldDevice()->Deactivate();
-        m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
-        return true;
-    }
-
-    return false;
+bool AHuman::UnequipFGArm() {
+	if (m_pFGArm && m_pFGArm->HoldsSomething()) {
+		m_pFGArm->GetHeldDevice()->Deactivate();
+		m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		return true;
+	}
+	return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool AHuman::UnequipBGArm() {
+	if (m_pBGArm && m_pBGArm->HoldsSomething()) {
+		m_pBGArm->GetHeldDevice()->Deactivate();
+		m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
+		m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		return true;
+	}
+	return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
@@ -1374,6 +1462,19 @@ MovableObject * AHuman::GetEquippedBGItem() const
 		return m_pBGArm->GetHeldMO();
 	}
 	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float AHuman::GetEquippedMass() const {
+	float equippedMass = 0;
+	if (MovableObject *fgDevice = GetEquippedItem()) {
+		equippedMass += fgDevice->GetMass();
+	}
+	if (MovableObject *bgDevice = GetEquippedBGItem()) {
+		equippedMass += bgDevice->GetMass();
+	}
+	return equippedMass;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1474,7 +1575,7 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearm() const
+void AHuman::ReloadFirearms() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
@@ -1482,6 +1583,13 @@ void AHuman::ReloadFirearm() const
 		if (pWeapon) {
 			pWeapon->Reload();
 		}
+    }
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
+    {
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pBGArm->GetHeldMO());
+        if (pWeapon) {
+            pWeapon->Reload();
+        }
     }
 }
 
@@ -1554,7 +1662,7 @@ bool AHuman::IsWithinRange(Vector &point) const
 
 bool AHuman::Look(float FOVSpread, float range)
 {
-    if (!g_SceneMan.AnythingUnseen(m_Team))
+    if (!g_SceneMan.AnythingUnseen(m_Team) || m_CanRevealUnseen == false)
         return false;
 
     // Set the length of the look vector
@@ -1648,86 +1756,6 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Detach all limbs and let loose
-    if (m_pHead && m_pHead->IsAttached())
-    {
-        RemoveAttachable(m_pHead);
-        m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * RandomNum());
-        m_pHead->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pHead);
-        m_pHead = 0;
-    }
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Jetpacks are really nothing, so just delete them safely
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack->SetToDelete(true);
-        g_MovableMan.AddParticle(m_pJetpack);
-        m_pJetpack = 0;
-    }
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        RemoveAttachable(m_pFGArm);
-        m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * RandomNum());
-        m_pFGArm->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pFGArm);
-        m_pFGArm = 0;
-    }
-    if (m_pBGArm && m_pBGArm->IsAttached())
-    {
-        RemoveAttachable(m_pBGArm);
-        m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * RandomNum());
-        m_pBGArm->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pBGArm);
-        m_pBGArm = 0;
-    }
-    if (m_pFGLeg && m_pFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pFGLeg);
-        m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * RandomNum());
-        m_pFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pFGLeg);
-        m_pFGLeg = 0;
-    }
-    if (m_pBGLeg && m_pBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pBGLeg);
-        m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * RandomNum());
-        m_pBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pBGLeg);
-        m_pBGLeg = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool AHuman::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pFGArm && m_pFGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pFGLeg && m_pFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pHead && m_pHead->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pBGArm && m_pBGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pBGLeg && m_pBGLeg->IsOnScenePoint(scenePoint)));
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resest all the timers used by this. Can be emitters, etc. This is to
@@ -1796,6 +1824,38 @@ bool AHuman::UpdateMovePath()
     return true;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
+	if (m_Controller.IsState(BODY_JUMP)) {
+		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
+	} else {
+		int rayCount = 4;
+		float rayLength = 10.0F;
+		Vector hipPos = m_Pos;
+		if (whichLayer == AHuman::Layer::FGROUND && m_pFGLeg) {
+			rayLength += m_pFGLeg->GetMaxLength();
+			hipPos += RotateOffset(m_pFGLeg->GetParentOffset());
+		} else if (m_pBGLeg) {
+			rayLength += m_pBGLeg->GetMaxLength();
+			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
+		}
+		float traceRotation = c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor();
+		Vector hitPos;
+		Vector terrainVector(0, rayLength);
+		Vector trace(0, rayLength);
+		for (int i = 0; i < rayCount; i++) {
+			if (g_SceneMan.CastStrengthRay(hipPos, trace, 10.0F, hitPos, 4, g_MaterialGrass)) {
+				terrainVector += trace - g_SceneMan.ShortestDistance(hipPos, hitPos, g_SceneMan.SceneWrapsX());
+			} else {
+				// Since no terrain was found, reinforce the existing terrain direction Vector, so any terrain found in future affects it less.
+				terrainVector *= 1.5F;
+			}
+			trace.RadRotate(traceRotation);
+		}
+		m_WalkAngle[whichLayer] = Matrix((terrainVector * GetFlipFactor()).GetAbsRadAngle() + c_HalfPI * GetFlipFactor());
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
@@ -1884,14 +1944,13 @@ void AHuman::UpdateAI()
         }
         else
         {
-            // Stop and then turn around after a period of time, or if bumped into another actor (like a rocket)
-            if (m_PatrolTimer.IsPastSimMS(8000) ||
-                /*g_SceneMan.CastNotMaterialRay(m_Pos, Vector(m_CharHeight / 4, 0), g_MaterialAir, Vector(), 4, false)*/
-                g_SceneMan.CastMORay(m_Pos, Vector((m_LateralMoveState == LAT_RIGHT ? m_CharHeight : -m_CharHeight) / 3, 0), m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 4) != g_NoMOID)
-            {
-                m_PatrolTimer.Reset();
-                m_LateralMoveState = LAT_STILL;
-            }
+			Vector hitPos;
+			Vector trace((m_LateralMoveState == LAT_RIGHT ? GetRadius() : -GetRadius()) * 0.5F, 0);
+			// Stop and turn around after a period of time, or if bumped into another actor (like a rocket), or if walking off a ledge.
+			if (m_PatrolTimer.IsPastSimMS(8000) || g_SceneMan.CastMORay(m_Pos, trace, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 5) != g_NoMOID || !g_SceneMan.CastStrengthRay(m_Pos + trace, Vector(0, GetRadius()), 5.0F, hitPos, 5, g_MaterialGrass)) {
+				m_PatrolTimer.Reset();
+				m_LateralMoveState = LAT_STILL;
+			}
         }
     }
     // Going to a goal, potentially through a set of waypoints
@@ -3086,391 +3145,267 @@ int AHuman::OnPieMenu(Actor *pieMenuActor) {
 
 void AHuman::Update()
 {
-	if (g_SettingsMan.EnableHats() && !m_GotHat && m_pHead)
-	{
-		m_GotHat = true;
+	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
+	float rot = m_Rotation.GetRadAngle();
+	Vector analogAim = m_Controller.GetAnalogAim();
 
-		if (RandomNum() > 0.8F)
-		{
-			int hat = RandomNum(1, 20);
+	m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
 
-            std::stringstream hatName;
-            hatName << "Random Hat " << hat;
-			const Entity *preset = g_PresetMan.GetEntityPreset("Attachable", hatName.str());
+	////////////////////////////////////
+	// Jetpack activation and blast direction
 
-			if (preset)
-			{
-                Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
-                if (pNewHat)
-                {
-			        m_pHead->DetachOrDestroyAll(true);
-			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
-                }
+	if (m_pJetpack) {
+		if (m_JetTimeTotal > 0) {
+			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
+			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
+			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+		}
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
+			m_pJetpack->TriggerBurst();
+			m_ForceDeepCheck = true;
+			m_pJetpack->EnableEmission(true);
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
+		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
+			m_pJetpack->EnableEmission(true);
+			m_pJetpack->AlarmOnEmit(m_Team);
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
+			m_MoveState = JUMP;
+			m_Paths[FGROUND][JUMP].Restart();
+			m_Paths[BGROUND][JUMP].Restart();
+		} else {
+			m_pJetpack->EnableEmission(false);
+			if (m_MoveState == JUMP) { m_MoveState = STAND; }
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
+		}
+
+		float maxAngle = c_HalfPI * m_JetAngleRange;
+		// If pie menu is on, keep the angle to what it was before.
+		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+			// Direct the jetpack nozzle according to either analog stick input or aim angle.
+			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
+				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
+			} else {
+				// Thrust in the opposite direction when strafing.
+				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
+                // TODO: don't hardcode this ratio?
+				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
+				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
+				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);
 			}
 		}
 	}
 
-    float deltaTime = g_TimerMan.GetDeltaTimeSecs();
+	////////////////////////////////////
+	// Movement direction
 
-    // Set Default direction of all the paths!
-    m_Paths[FGROUND][WALK].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][WALK].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CROUCH].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CROUCH].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CRAWL].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CRAWL].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CLIMB].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CLIMB].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][STAND].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][STAND].SetHFlip(m_HFlipped);
+	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
-    ////////////////////////////////////
-    // Jetpack activation and blast direction
+	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
+	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+		bool crouching = m_Controller.IsState(BODY_CROUCH);
+		if ((m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP) && m_Status != INACTIVE) {
+			for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
+				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+			}
+			// Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs.
+			if (m_MoveState != JUMP || isStill) {
+				// Restart the stride if we're just starting to walk or crawl.
+				if ((m_MoveState != WALK && !crouching) || (m_MoveState != CRAWL && crouching)) {
+					m_StrideStart = true;
+					MoveOutOfTerrain(g_MaterialGrass);
+				}
 
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Start Jetpack burn
-        if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
-        {
-            m_pJetpack->TriggerBurst();
-            // This is to make sure se get loose from being stuck
-            m_ForceDeepCheck = true;
-            m_pJetpack->EnableEmission(true);
-            // Quadruple this for the burst
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
-            if (m_JetTimeLeft < 0)
-                m_JetTimeLeft = 0;
-        }
-        // Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
-        else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0)
-        {
-            m_pJetpack->EnableEmission(true);
-            // Jetpacks are noisy!
-            m_pJetpack->AlarmOnEmit(m_Team);
-            // Deduct from the jetpack time
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
-            m_MoveState = JUMP;
-        }
-        // Jetpack is off/turning off
-        else
-        {
-            m_pJetpack->EnableEmission(false);
-            if (m_MoveState == JUMP)
-                m_MoveState = STAND;
+				m_MoveState = crouching ? CRAWL : WALK;
 
-            // Replenish the jetpack time, twice as fast
-            m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-            if (m_JetTimeLeft >= m_JetTimeTotal)
-                m_JetTimeLeft = m_JetTimeTotal;
-        }
+				// Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright.
+				if (m_MoveState == CRAWL && m_ProneState == NOTPRONE) {
+					m_ProneState = GOPRONE;
+					m_ProneTimer.Reset();
+				}
 
-        // If pie menu is on, keep the angle to what it was before
-        if (m_Controller.IsState(PIE_MENU_ACTIVE))
-        {
-            // Don't change anything
-        }
-        // Direct the jetpack nozzle according to movement stick if analog input is present
-        else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
-        {
-            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + c_PI;
-            // Clamp the angle to 45 degrees down cone with centr straight down on body
-            if (jetAngle > c_PI + c_HalfPI + c_QuarterPI)// - c_SixteenthPI)
-                jetAngle = c_PI + c_HalfPI + c_QuarterPI;// - c_SixteenthPI;
-            else if (jetAngle < c_PI + c_QuarterPI)// + c_SixteenthPI)
-                jetAngle = c_PI + c_QuarterPI;// + c_SixteenthPI;
-
-            m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
-        }
-        // Or just use the aim angle if we're getting digital input
-        else
-        {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
-            // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
-            m_pJetpack->SetEmitAngle(jetAngle);
-        }
-    }
-
-    ////////////////////////////////////
-    // Movement direction
-
-    // If the pie menu is on, try to preserve whatever move state we had before it going into effect
-    if (m_Controller.IsState(PIE_MENU_ACTIVE))
-    {
-        // Just keep the previous movestate, don't stand up or stop walking or stop jumping
-    }
-    else if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE)
-    {
-        // Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs
-        if (m_MoveState != JUMP || (m_MoveState == JUMP && m_Vel.GetLargest() < 0.1))
-        {
-            // Restart the stride if we're just starting to walk or crawl
-            if ((m_MoveState != WALK && !m_Controller.IsState(BODY_CROUCH)) ||
-                (m_MoveState != CRAWL && m_Controller.IsState(BODY_CROUCH)))
-            {
-                m_StrideStart = true;
-                MoveOutOfTerrain(g_MaterialGrass);
-            }
-
-            // Crawling or walking?
-            m_MoveState = m_Controller.IsState(BODY_CROUCH) ? CRAWL : WALK;
-
-            // Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright
-            if (m_MoveState == CRAWL && m_ProneState == NOTPRONE)
-            {
-                m_ProneState = GOPRONE;
-                m_ProneTimer.Reset();
-            }
-
-            m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-            m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-        }
-
-        // Walk backwards if the aiming is done in the opposite direction of travel
-        if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
-        {
-            // Walk backwards if necessary
-            m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-            m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-        }
-        // Flip if we're moving in the opposite direction
-        else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
-        {
-            m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
-            m_CheckTerrIntersection = true;
-            if (m_ProneState == NOTPRONE)
-                MoveOutOfTerrain(g_MaterialGrass);
-            m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
-            m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
-
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CROUCH].Terminate();
-            m_Paths[BGROUND][CROUCH].Terminate();
-            m_Paths[FGROUND][CLIMB].Terminate();
-            m_Paths[BGROUND][CLIMB].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-            m_Paths[FGROUND][ARMCRAWL].Terminate();
-            m_Paths[BGROUND][ARMCRAWL].Terminate();
-            m_Paths[FGROUND][STAND].Terminate();
-            m_Paths[BGROUND][STAND].Terminate();
-            m_StrideStart = true;
-            // Stop the going prone spring
-            if (m_ProneState == GOPRONE)
-                m_ProneState = PRONE;
-        }
-    }
-    // Not moving, so check if we need to be crouched or not
-    // Crouching before having gone prone?
-    else if (m_Controller.IsState(BODY_CROUCH))
-    {
-        // Don't go back to crouching if we're already prone. Player has to let go of the crouch button first
-        if (m_ProneState == NOTPRONE)
-            m_MoveState = CROUCH;
-        // If already laying down, just don't do anything and keep laying there
-        else
-            m_MoveState = NOMOVE;
-    }
-    else
-        m_MoveState = STAND;
-
-    // Disengage the prone state as soon as the crouch is released when the pie menu isn't active
-    if (!m_Controller.IsState(BODY_CROUCH) && !m_Controller.IsState(PIE_MENU_ACTIVE))
-        m_ProneState = NOTPRONE;
-
-    ////////////////////////////////////
-    // Change held MovableObjects
-
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-            m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-			m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-
-    ////////////////////////////////////
-    // Reload held MO, if applicable
-
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        HeldDevice *pDevice = m_pFGArm->GetHeldDevice();
-
-        // Holds device, check if we are commanded to reload, or do other related stuff
-        if (pDevice)
-        {
-            // Only reload if no other pickuppable item is in reach
-            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
-            {
-                pDevice->Reload();
-                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-                    m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-                }
-                m_DeviceSwitchSound.Play(m_Pos);
-
-                // Interrupt sharp aiming
-                m_SharpAimTimer.Reset();
-                m_SharpAimProgress = 0;
-            }
-
-            // Detect reloading and move hand accordingly
-			if (pDevice->IsReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+				m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
 			}
 
-            // Detect reloading being completed and move hand accordingly
-			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-				m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
+			// Walk backwards if the aiming is already focused in the opposite direction of travel.
+			if (analogAim.GetMagnitude() != 0 || isSharpAiming) {
+				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
+				m_HFlipped = !m_HFlipped;
+				m_CheckTerrIntersection = true;
+				if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+
+				for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
+					m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+					m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+					m_Paths[FGROUND][i].Terminate();
+					m_Paths[BGROUND][i].Terminate();
+				}
+				m_StrideStart = true;
+				// Stop the going prone spring.
+				if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
 			}
+		} else {
+			m_ArmClimbing[FGROUND] = false;
+			m_ArmClimbing[BGROUND] = false;
+			if (crouching) {
+				// Don't go back to crouching if we're already prone, the player has to let go of the crouch button first. If already laying down, just stay put.
+				m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
+			} else {
+				m_MoveState = STAND;
+			}
+		}
+		// Disengage the prone state as soon as crouch is released.
+		if (!crouching) { m_ProneState = NOTPRONE; }
+	}
+
+    ////////////////////////////////////
+    // Change and reload held MovableObjects
+
+	bool reloadFG = false;
+	if (m_pFGArm && m_Status != INACTIVE) {
+		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
+		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
+		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+		if (changeNext || changePrev) {
+			if (changeNext && changePrev) {
+				UnequipArms();
+			} else if (!m_Inventory.empty() || UnequipBGArm()) {
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (changeNext) {
+					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				} else {
+					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+				}
+				EquipShieldInBGArm();
+				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+			}
+			m_EquipHUDTimer.Reset();
+			m_PieNeedsUpdate = true;
+			m_SharpAimProgress = 0;
         }
+
+		// Reload held MO, if applicable
+		if (pFireArm) {
+			if (pFireArm->IsReloading()) {
+				// Interrupt sharp aiming while reloading
+				m_SharpAimTimer.Reset();
+				m_SharpAimProgress = 0;
+				// Move BG hand accordingly
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
+			}
+			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
+				pFireArm->Reload();
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				reloadFG = true;
+
+				// Interrupt sharp aiming
+				m_SharpAimTimer.Reset();
+				m_SharpAimProgress = 0;
+			}
+			// Detect reloading being completed and move hand accordingly
+			if (pFireArm->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
+		}
     }
 
     ////////////////////////////////////
     // Aiming
 
-    if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE)
-    {
-// TODO: Improve these!")
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
-        if (m_AimState != AIMUP)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMUP; 
-        m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-        if (m_AimAngle > m_AimRange)
-            m_AimAngle = m_AimRange;
-    }
-    else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE)
-    {
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
-        if (m_AimState != AIMDOWN)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMDOWN;
-        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-        if (m_AimAngle < -m_AimRange)
-            m_AimAngle = -m_AimRange;
-    }
-    // Analog aim
-    else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1 && m_Status != INACTIVE)
-    {
-        Vector aim = m_Controller.GetAnalogAim();
-        // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
-        if (aim.m_X == 0)
-            aim.m_X += m_HFlipped ? -0.01 : 0.01;
-        m_AimAngle = aim.GetAbsRadAngle();
+	if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE) {
+        // Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMUP) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMUP; 
+		m_AimAngle += isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+		if (m_AimAngle > m_AimRange) { m_AimAngle = m_AimRange; }
 
-        // Check for flip change
-        if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
-        {
-            m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
-            m_CheckTerrIntersection = true;
-            if (m_ProneState == NOTPRONE)
-                MoveOutOfTerrain(g_MaterialGrass);
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CLIMB].Terminate();
-            m_Paths[BGROUND][CLIMB].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-            m_Paths[FGROUND][ARMCRAWL].Terminate();
-            m_Paths[BGROUND][ARMCRAWL].Terminate();
-            m_Paths[FGROUND][STAND].Terminate();
-            m_Paths[BGROUND][STAND].Terminate();
-            m_StrideStart = true;
-            // Stop the going prone spring
-            if (m_ProneState == GOPRONE)
-                m_ProneState = PRONE;
-        }
-        // Correct angle based on flip
-        m_AimAngle = FacingAngle(m_AimAngle);
-        // Clamp so it's within the range
-        Clamp(m_AimAngle, m_AimRange, -m_AimRange);
-    }
-    else
-        m_AimState = AIMSTILL;
+	} else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE) {
+        // Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMDOWN) {m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMDOWN;
+		m_AimAngle -= isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
+
+	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
+		// Hack to avoid the GetAbsRadAngle from mangling an aim angle straight down.
+		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
+		m_AimAngle = analogAim.GetAbsRadAngle();
+
+		if ((analogAim.m_X > 0 && m_HFlipped) || (analogAim.m_X < 0 && !m_HFlipped)) {
+			m_HFlipped = !m_HFlipped;
+			m_CheckTerrIntersection = true;
+			if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+			for (int i = STAND; i < CLIMB; ++i) {
+				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+				m_Paths[FGROUND][i].Terminate();
+				m_Paths[BGROUND][i].Terminate();
+			}
+			m_StrideStart = true;
+			// Stop the going prone spring.
+			if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
+		}
+		// Correct angle based on flip.
+		m_AimAngle = FacingAngle(m_AimAngle);
+		// Clamp so it's within the range.
+		Clamp(m_AimAngle, m_AimRange, -m_AimRange);
+	} else {
+		m_AimState = AIMSTILL;
+	}
+	float adjustedAimAngle = m_AimAngle * GetFlipFactor();
 
     //////////////////////////////
     // Sharp aim calculation
 
 // TODO: make the delay data driven by both the actor and the device!
     // 
-    if (m_Controller.IsState(AIM_SHARP) && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE) && m_Vel.GetMagnitude() < 5.0)
-    {
-/*
-        float halfDelay = m_SharpAimDelay / 2;
-        // Accelerate for first half
-        if (!m_SharpAimTimer.IsPastSimMS(halfDelay))
-            m_SharpAimProgress = (float)m_SharpAimTimer.GetElapsedSimTimeMS() / (float)m_SharpAimDelay;
-        // Decelerate for second half
-        else if (!m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)
-            m_SharpAimProgress
-        // At max
-        else
-            m_SharpAimProgress = 1.0;
-*/
-        float aimMag = m_Controller.GetAnalogAim().GetMagnitude();
+	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
+        float aimMag = analogAim.GetMagnitude();
 
-        // If aim sharp is being done digitally, then translate to full analog aim mag
-        if (aimMag < 0.1)
-            aimMag = 1.0;
+		// If aim sharp is being done digitally, then translate to full analog aim mag
+		if (aimMag < 0.1F) { aimMag = 1.0F; }
+		if (m_MoveState == WALK) { aimMag *= 0.3F; }
 
-        if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay))
-        {
-            // Only go slower outward
-            if (m_SharpAimProgress < aimMag)
-                m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
-            else
-                m_SharpAimProgress = aimMag;
-        }
-        else
-            m_SharpAimProgress = 0;
-    }
-    else
-    {
-        m_SharpAimProgress = 0;
-        m_SharpAimTimer.Reset();
-    }
+		if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)) {
+			// Only go slower outward
+			if (m_SharpAimProgress < aimMag) {
+				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035F;
+			} else {
+				m_SharpAimProgress = aimMag;
+			}
+			m_SharpAimRevertTimer.Reset();
+		} else {
+			m_SharpAimProgress *= 0.95F;
+			m_SharpAimRevertTimer.SetElapsedSimTimeMS(m_SharpAimDelay - m_SharpAimTimer.GetElapsedSimTimeMS());
+		}
+	} else {
+		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+		if (m_SharpAimRevertTimer.IsPastSimMS(m_SharpAimDelay)) {
+			m_SharpAimTimer.Reset();
+		} else {
+			m_SharpAimTimer.SetElapsedSimTimeMS(m_SharpAimDelay - m_SharpAimRevertTimer.GetElapsedSimTimeMS());
+		}
+	}
 
     ////////////////////////////////////
     // Fire/Activate held devices
 
 	ThrownDevice *pThrown = nullptr;
-	if (m_pFGArm && m_pFGArm->IsAttached()) {
-		// DOn't reach toward anything
-		m_pFGArm->ReachToward(Vector());
+	if (m_pFGArm && m_Status != INACTIVE) {
+		if (m_pBGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
+			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+		} else if (m_pFGLeg && m_ArmSwingRate > 0) {
+			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+		} else {
+			// Force arm to idle by reaching toward a virtually inaccessible point.
+			m_pFGArm->ReachToward(Vector());
+		}
 
 		// Activate held device, if it's not a thrown device.
 		if (m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice()) {
@@ -3485,35 +3420,35 @@ void AHuman::Update()
 		else if (m_pFGArm->GetHeldMO()) {
 			pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
 			if (pThrown) {
+				pThrown->SetSharpAim(isSharpAiming ? 1.0F : 0);
 				if (m_Controller.IsState(WEAPON_FIRE)) {
-					if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/) {
+					if (m_ArmsState != THROWING_PREP) {
 						m_ThrowTmr.Reset();
-						if (!pThrown->ActivatesWhenReleased()) {
-							pThrown->Activate();
-						}
+						if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					}
+					float throwProgress = GetThrowProgress();
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
+					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + (pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + pThrown->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
+					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
+					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
-					m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
-
-					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-
-					if (pThrown->ActivatesWhenReleased()) {
-						pThrown->Activate();
-					}
-					if (pMO) {
-						pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
-						float throwScalar = static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS(), static_cast<double>(m_ThrowPrepTime)) / m_ThrowPrepTime);
-						Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
-						tossVec.RadRotate(m_AimAngle);
-						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-						pMO->SetAngularVel(5.0F * RandomNormalNum());
+					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
+						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
+						float maxThrowVel = pThrown->GetMaxThrowVel();
+						float minThrowVel = pThrown->GetMinThrowVel();
+						if (maxThrowVel == 0) {
+							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
+							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
+							minThrowVel = maxThrowVel * 0.2F;
+						}
+						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
+						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
+						pMO->SetRotAngle(adjustedAimAngle);
 
 						if (pMO->IsHeldDevice()) {
-							// Set the grenade or whatever to ignore hits with same team
 							pMO->SetTeam(m_Team);
 							pMO->SetIgnoresTeamHits(true);
 							g_MovableMan.AddItem(pMO);
@@ -3526,12 +3461,16 @@ void AHuman::Update()
 						}
 						pMO = 0;
 					}
+					if (pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					m_ThrowTmr.Reset();
+				} else {
+					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + pThrown->GetStanceOffset().RadRotate(adjustedAimAngle));
 				}
 			}
 		} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 			m_pFGArm->SetHeldMO(SwapNextInventory());
 			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			EquipShieldInBGArm();
 			m_ArmsState = WEAPON_READY;
 		} else if (m_ArmsState == THROWING_RELEASE) {
 			m_pFGArm->SetHandPos(m_Pos + (m_HolsterOffset + Vector(15, -15)).GetXFlipped(m_HFlipped));
@@ -3542,14 +3481,27 @@ void AHuman::Update()
 		m_ArmsState = WEAPON_READY;
 	}
 
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
-    {
-        m_pBGArm->GetHeldDevice()->SetSharpAim(m_SharpAimProgress);
-        if (m_Controller.IsState(WEAPON_FIRE))
-            m_pBGArm->GetHeldDevice()->Activate();
-        else
-            m_pBGArm->GetHeldDevice()->Deactivate();
-    }
+    if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
+		HeldDevice *pDevice = m_pBGArm->GetHeldDevice();
+		if (pDevice->IsReloading()) {
+			m_SharpAimTimer.Reset();
+			m_SharpAimProgress = 0;
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
+		}
+		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+			pDevice->Reload();
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+		}
+		if (pDevice->DoneReloading() && m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+
+		pDevice->SetSharpAim(m_SharpAimProgress);
+		if (m_Controller.IsState(WEAPON_FIRE)) {
+			pDevice->Activate();
+		} else {
+			pDevice->Deactivate();
+		}
+	}
 
     // Controller disabled
     if (m_Controller.IsDisabled())
@@ -3565,78 +3517,96 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Item dropping logic
 
-	if (m_Controller.IsState(WEAPON_DROP) && m_pFGArm && m_pFGArm->IsAttached()) {
-		MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-		if (pMO) {
-			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-			Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
-			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-			pMO->SetAngularVel(5.0F * RandomNormalNum());
-			if (pMO->IsDevice()) {
-				g_MovableMan.AddItem(pMO);
-			} else {
-				if (pMO->IsGold()) {
-					m_GoldInInventoryChunk = 0;
-					ChunkGold();
+	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
+		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
+			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
+				} else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
 				}
-				g_MovableMan.AddParticle(pMO);
+			}
+			if (!m_Inventory.empty()) {
+				m_pFGArm->SetHeldMO(SwapNextInventory());
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			}
+		} else if (m_pBGArm) {
+			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
+				}
+				else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
+				}
+			} else if (!m_Inventory.empty()) {
+				DropAllInventory();
+				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 		}
-
-		m_pFGArm->SetHeldMO(SwapNextInventory());
-		m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		EquipShieldInBGArm();
+		m_SharpAimProgress = 0;
 		m_PieNeedsUpdate = true;
+		m_EquipHUDTimer.Reset();
 	}
 
     ////////////////////////////////////////
     // Item pickup logic
 
-    float reach = m_CharHeight / 3;
+	float reach = m_SpriteRadius;
+	Vector reachPoint = m_Pos;
 
-    // Try to detect a new item
-    if (!m_pItemInReach && m_Status == STABLE)
-    {
-        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+	// Try to detect a new item
+	if (m_pFGArm && m_Status == STABLE) {
+		reach += m_pFGArm->GetMaxLength();
+		reachPoint = m_pFGArm->GetJointPos();
 
-        MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
-        if (pItem)
-        {
-            m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
-			if (m_pItemInReach)
+		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+
+		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+				m_pItemInReach = foundDevice;
 				m_PieNeedsUpdate = true;
-        }
-    }
+			}
+		}
+	}
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach))
-    {
-        m_pItemInReach = 0;
+    if (m_pItemInReach && (!m_pFGArm || m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
+        m_pItemInReach = nullptr;
         m_PieNeedsUpdate = true;
     }
 
-    // Pick up the designated item
-    if (m_pItemInReach && m_pFGArm && m_pFGArm->IsAttached() && m_Controller.IsState(WEAPON_PICKUP))
-    {
-        // Remove the item from the scene, it's gong into the hands of this
-        if (g_MovableMan.RemoveMO(m_pItemInReach))
-        {
-            // If we have an arm to hold the picked up item in, replace whatever's in it (if anything) with what we are picking up
-            if (m_pFGArm && m_pFGArm->IsAttached())
-            {
-                MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-                if (pMO)
-                    m_Inventory.push_back(pMO);
-                m_pFGArm->SetHeldMO(m_pItemInReach);
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            }
-            // No arms to hold newly picked up item with, so just put it into inventory instead
-            else
-            {
-                m_Inventory.push_back(m_pItemInReach);
-            }
-            m_PieNeedsUpdate = true;
-            m_DeviceSwitchSound.Play(m_Pos);
-        }
+	if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
+        MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+		if (pMO) { m_Inventory.push_back(pMO); }
+        m_pFGArm->SetHeldMO(m_pItemInReach);
+        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		m_pItemInReach = nullptr;
+
+		EquipShieldInBGArm();
+		m_SharpAimProgress = 0;
+        m_PieNeedsUpdate = true;
+		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+
+		m_EquipHUDTimer.Reset();
     }
 
     ///////////////////////////////////////////////////
@@ -3644,9 +3614,18 @@ void AHuman::Update()
 
     if (m_Status == STABLE && m_MoveState != NOMOVE)
     {
+        // This exists to support disabling foot collisions if the limbpath has that flag set.
+        if ((m_pFGFootGroup->GetAtomCount() == 0 && m_BackupFGFootGroup->GetAtomCount() > 0) != m_Paths[FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupFGFootGroup->SetLimbPos(m_pFGFootGroup->GetLimbPos());
+            std::swap(m_pFGFootGroup, m_BackupFGFootGroup);
+        }
+        if ((m_pBGFootGroup->GetAtomCount() == 0 && m_BackupBGFootGroup->GetAtomCount() > 0) != m_Paths[BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupBGFootGroup->SetLimbPos(m_pBGFootGroup->GetLimbPos());
+            std::swap(m_pBGFootGroup, m_BackupBGFootGroup);
+        }
+
         // WALKING, OR WE ARE JETPACKING AND STUCK
-        if (m_MoveState == WALK || (m_MoveState == JUMP && m_Vel.GetLargest() < 1.0))
-        {
+        if (m_MoveState == WALK || (m_MoveState == JUMP && isStill)) {
             m_Paths[FGROUND][STAND].Terminate();
             m_Paths[BGROUND][STAND].Terminate();
 
@@ -3655,51 +3634,40 @@ void AHuman::Update()
             float FGLegProg = m_Paths[FGROUND][WALK].GetRegularProgress();
             float BGLegProg = m_Paths[BGROUND][WALK].GetRegularProgress();
 
-            bool playStride = false;
+            bool restarted = false;
 
-            // Make sure we are starting a stride if we're basically stopped
-            if (fabs(m_Vel.GetLargest()) < 0.5)
-                m_StrideStart = true;
+			// Make sure we are starting a stride if we're basically stopped.
+			if (isStill) { m_StrideStart = true; }
 
-            if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5) || m_StrideStart)))
-            {
-//                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos +
-                                                                     m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                                                     m_Vel,
-                                                                     Matrix(),
-                                                                     m_Paths[FGROUND][WALK],
-                                                                     deltaTime,
-                                                                     &playStride,
-                                                                     false);
-            }
-            else
-                m_ArmClimbing[BGROUND] = false;
+			if (m_pFGLeg && (!m_pBGLeg || !(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5F) || m_StrideStart)) {
+				// Reset the stride timer if the path is about to restart.
+				if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_ArmClimbing[BGROUND] = !(m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false));
+				if (restarted) { UpdateWalkAngle(FGROUND); }
+			} else {
+				m_ArmClimbing[BGROUND] = false;
+			}
+			if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][WALK].PathEnded() && FGLegProg < 0.5F))) {
+				m_StrideStart = false;
+				// Reset the stride timer if the path is about to restart.
+				if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false);
+				if (restarted) { UpdateWalkAngle(BGROUND); }
+			} else {
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+				m_ArmClimbing[FGROUND] = false;
+			}
+			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
-            if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][WALK].PathEnded() && FGLegProg < 0.5)))
-            {
-                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos +
-                                                                     m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                                                     m_Vel,
-                                                                     Matrix(),
-                                                                     m_Paths[BGROUND][WALK],
-                                                                     deltaTime,
-                                                                     &playStride,
-                                                                     false);
-            }
-            else
-                m_ArmClimbing[FGROUND] = false;
-
-            // Play the stride sound, if applicable
-            if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND])
-                m_StrideSound.Play(m_Pos);
+			if (restarted) {
+				if (!climbing) {
+					if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
+					RunScriptedFunctionInAppropriateScripts("OnStride");
+				} else {
+					m_WalkAngle[FGROUND] = Matrix();
+					m_WalkAngle[BGROUND] = Matrix();
+				}
+			}
 
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart
@@ -3709,291 +3677,235 @@ void AHuman::Update()
             float FGArmProg = m_Paths[FGROUND][CLIMB].GetRegularProgress();
             float BGArmProg = m_Paths[BGROUND][CLIMB].GetRegularProgress();
 
+			// TODO: Figure out what this comment means, and then rephrase it better!
             // Slightly negative BGArmProg makes sense because any progress on the starting segments are reported as negative,
             // and there's many starting segments on properly formed climbing paths
-            if (m_pFGArm && (m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && (!m_pBGArm || !m_pFGLeg || BGArmProg > 0.1))
-            {
-                m_ArmClimbing[FGROUND] = true;
-                m_Paths[FGROUND][WALK].Terminate();
-    //            m_Paths[BGROUND][WALK].Terminate();
-                m_StrideStart = true;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][CLIMB].PathEnded() || m_Paths[FGROUND][CLIMB].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pFGHandGroup->PushAsLimb(m_Pos +
-                                           m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           m_Rotation,
-                                           m_Paths[FGROUND][CLIMB],
-                                           deltaTime);
-            }
-            else
-            {
-                m_ArmClimbing[FGROUND] = false;
-                m_Paths[FGROUND][CLIMB].Terminate();
-            }
+			if (climbing) {
+				if (m_pFGArm && !(m_Paths[FGROUND][CLIMB].PathEnded() && BGArmProg > 0.1F)) {	// < 0.5F
+					m_ArmClimbing[FGROUND] = true;
+					m_Paths[FGROUND][WALK].Terminate();
+					m_StrideStart = true;
+					// Reset the stride timer if the path is about to restart.
+					if (m_Paths[FGROUND][CLIMB].PathEnded() || m_Paths[FGROUND][CLIMB].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pFGHandGroup->PushAsLimb(m_Pos + Vector(0, m_pFGArm->GetParentOffset().m_Y).RadRotate(-rot), m_Vel, Matrix(), m_Paths[FGROUND][CLIMB], deltaTime, 0, false);
+				} else {
+					m_ArmClimbing[FGROUND] = false;
+					m_Paths[FGROUND][CLIMB].Terminate();
+				}
+				if (m_pBGArm) {
+					m_ArmClimbing[BGROUND] = true;
+					m_Paths[BGROUND][WALK].Terminate();
+					m_StrideStart = true;
+					// Reset the stride timer if the path is about to restart.
+					if (m_Paths[BGROUND][CLIMB].PathEnded() || m_Paths[BGROUND][CLIMB].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pBGHandGroup->PushAsLimb(m_Pos + Vector(0, m_pBGArm->GetParentOffset().m_Y).RadRotate(-rot), m_Vel, Matrix(), m_Paths[BGROUND][CLIMB], deltaTime, 0, false);
+				} else {
+					m_ArmClimbing[BGROUND] = false;
+					m_Paths[BGROUND][CLIMB].Terminate();
+				}
+			}
 
-            if (m_pBGArm && (m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]))
-            {
-                m_ArmClimbing[BGROUND] = true;
-    //            m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-                m_StrideStart = true;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][CLIMB].PathEnded() || m_Paths[BGROUND][CLIMB].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pBGHandGroup->PushAsLimb(m_Pos +
-                                           m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           m_Rotation,
-                                           m_Paths[BGROUND][CLIMB],
-                                           deltaTime);
-            }
-            else
-            {
-                m_ArmClimbing[BGROUND] = false;
-                m_Paths[BGROUND][CLIMB].Terminate();
-            }
-
-            // Restart the climbing stroke if the current one seems to be taking too long without movement
-            if ((m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && fabs(m_Vel.GetLargest()) < 0.5 && m_StrideTimer.IsPastSimMS(m_Paths[BGROUND][CLIMB].GetTotalPathTime() / 4))
-            {
+			// Restart the climbing stroke if the current one seems to be taking too long with no movement.
+			if (climbing && isStill && m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[BGROUND][CLIMB].GetTotalPathTime() * 0.5F))) {
                 m_StrideStart = true;
                 m_Paths[FGROUND][CLIMB].Terminate();
                 m_Paths[BGROUND][CLIMB].Terminate();
-            }
-            // Reset the walking stride if it's taking too long
-            else if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][WALK].GetTotalPathTime()))
-            {
+			} else if (m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[FGROUND][WALK].GetTotalPathTime() * 1.1F))) {
+				// Reset the walking stride if it's taking longer than it should.
                 m_StrideStart = true;
                 m_Paths[FGROUND][WALK].Terminate();
                 m_Paths[BGROUND][WALK].Terminate();
             }
+		} else if (m_MoveState == CRAWL) {
+			// Start crawling only once we are fully prone.
+			if (m_ProneState == PRONE) {
+
+				float FGLegProg = m_Paths[FGROUND][CRAWL].GetRegularProgress();
+				float BGLegProg = m_Paths[BGROUND][CRAWL].GetRegularProgress();
+
+				if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][CRAWL].PathEnded() && BGLegProg < 0.5F) || m_StrideStart))) {
+					if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[FGROUND][CRAWL], deltaTime);
+				} else {
+					m_Paths[FGROUND][CRAWL].Terminate();
+				}
+				if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][CRAWL].PathEnded() && FGLegProg < 0.5F))) {
+					m_StrideStart = false;
+					if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[BGROUND][CRAWL], deltaTime);
+				} else {
+					m_Paths[BGROUND][CRAWL].Terminate();
+				}
+				if (m_pBGArm) {
+					m_ArmClimbing[BGROUND] = true;
+					m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
+				} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+					m_ArmClimbing[FGROUND] = true;
+					m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
+				}
+				// Restart the stride if the current one seems to be taking too long.
+				if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime())) {
+					m_StrideStart = true;
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
+				}
+			} else {
+				if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
+
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+			}
+		} else if (m_pFGLeg || m_pBGLeg) {
+			if (m_MoveState == JUMP) {
+				// TODO: Utilize jump paths in an intuitive way!
+				if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
+
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+
+				if (m_JetTimeLeft <= 0) {
+					m_MoveState = STAND;
+					m_Paths[FGROUND][JUMP].Terminate();
+					m_Paths[BGROUND][JUMP].Terminate();
+					m_Paths[FGROUND][STAND].Terminate();
+					m_Paths[BGROUND][STAND].Terminate();
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+				}
+			} else {
+				m_Paths[FGROUND][JUMP].Terminate();
+				m_Paths[BGROUND][JUMP].Terminate();
+				if (m_MoveState == CROUCH) {
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
+
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][CROUCH], deltaTime); }
+
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][CROUCH], deltaTime); }
+
+				} else {
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
+					m_Paths[FGROUND][ARMCRAWL].Terminate();
+					m_Paths[BGROUND][ARMCRAWL].Terminate();
+
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
+
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
+				}
+			}
+		}
+	} else {
+		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
+		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.
+		if (m_pFGArm) { m_pFGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGArm->GetParentOffset()), m_pFGArm->GetMaxLength(), m_PrevVel * m_pFGArm->GetJointStiffness(), m_AngularVel, m_pFGArm->GetMass(), deltaTime); }
+
+		if (m_pBGArm) { m_pBGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGArm->GetParentOffset()), m_pBGArm->GetMaxLength(), m_PrevVel * m_pBGArm->GetJointStiffness(), m_AngularVel, m_pBGArm->GetMass(), deltaTime); }
+
+		if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel * m_pFGLeg->GetJointStiffness(), m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
+
+        if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel * m_pBGLeg->GetJointStiffness(), m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+	}
+
+    /////////////////////////////////
+    // Manage Attachable:s
+    if (m_pHead) {
+        float toRotate = 0;
+        // Only rotate the head to match the aim angle if body is stable and upright
+        if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((adjustedAimAngle) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
+		} else {
+			// Rotate the head loosely along with the body if upside down, unstable or dying.
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(rot) * m_pHead->GetJointStiffness() * (std::abs(toRotate) + c_QuarterPI);
         }
-        // CRAWLING
-        else if (m_MoveState == CRAWL)
-        {
-            // LEG Crawls
-            float FGLegProg = m_Paths[FGROUND][CRAWL].GetRegularProgress();
-            float BGLegProg = m_Paths[BGROUND][CRAWL].GetRegularProgress();
+        // Now actually rotate by the amount calculated above
+        m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
+    }
 
-            // FG Leg crawl
-            if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][CRAWL].PathEnded() && BGLegProg < 0.5) || m_StrideStart)))
-            {
-//                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()),
-                                                                   m_Vel,
-                                                                   m_Rotation,
-                                                                   m_Paths[FGROUND][CRAWL],
-                                                                   deltaTime,
-                                                                   0,
-                                                                   true);
+    if (m_pFGLeg) {
+        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pBGLeg) {
+        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+	if (m_pFGArm) {
+		float affectingBodyAngle = 0.0F;
+		if (m_FGArmFlailScalar != 0 && m_SharpAimDelay != 0) {
+			float aimScalar = std::min(static_cast<float>(m_SharpAimTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
+			float revertScalar = std::min(static_cast<float>(m_SharpAimRevertTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
+			aimScalar = (aimScalar > revertScalar) ? aimScalar : 1.0F - revertScalar;
+
+			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
+		}
+		m_pFGArm->SetRotAngle(affectingBodyAngle + adjustedAimAngle);
+
+        if (m_Status == STABLE) {
+            if (m_ArmClimbing[FGROUND]) {
+                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+            } else if (!m_pFGArm->IsReaching()) {
+				// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
+				m_pFGArm->Reach(Vector());
             }
-            else
-                m_Paths[FGROUND][CRAWL].Terminate();
-
-            // BG Leg crawl
-            if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][CRAWL].PathEnded() && FGLegProg < 0.5)))
-            {
-                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                // If both legs can't find free resrtart, ti's time to use the arm!
-                m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()),
-                                                                   m_Vel,
-                                                                   m_Rotation,
-                                                                   m_Paths[BGROUND][CRAWL],
-                                                                   deltaTime,
-                                                                   0,
-                                                                   true);
-            }
-            else
-                m_Paths[BGROUND][CRAWL].Terminate();
-
-            // ARMS using rotated path to help crawl
-            if (m_pBGArm)
-            {
-                m_ArmClimbing[BGROUND] = true;
-                // Reset the stride timer if the path is about to restart
-//                if (m_Paths[BGROUND][ARMCRAWL].PathEnded() || m_Paths[BGROUND][ARMCRAWL].PathIsAtStart())
-//                    m_StrideStart = true;
-                m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[BGROUND][ARMCRAWL],
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-/*
-            if (m_pFGArm)
-            {
-                m_ArmClimbing[FGROUND] = true;
-//                m_StrideStart = true;
-                m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[FGROUND][ARMCRAWL],
-            //                              mass,
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-*/
-
-            // Restart the stride if the current one seems to be taking too long
-            if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime()))
-            {
-                m_StrideStart = true;
-                m_Paths[FGROUND][CRAWL].Terminate();
-                m_Paths[BGROUND][CRAWL].Terminate();
-            }
-        }
-        // JUMPING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP)
-        {
-/*
-            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pFGFootGroup->PushAsLimb(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[FGROUND][m_MoveState],
-    //                                  mass / 2,
-                                      deltaTime);
-            }
-            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pBGFootGroup->PushAsLimb(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[BGROUND][m_MoveState],
-    //                                mass / 2,
-                                      deltaTime);
-            }
-
-            if (m_JetTimeLeft <= 0)
-            {
-                m_MoveState = STAND;
-                m_Paths[FGROUND][JUMP].Terminate();
-                m_Paths[BGROUND][JUMP].Terminate();
-                m_Paths[FGROUND][STAND].Terminate();
-                m_Paths[BGROUND][STAND].Terminate();
-                m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-            }
-*/
-        }
-        // CROUCHING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == CROUCH)
-        {
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-
-            if (m_pFGLeg)
-                m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           Matrix(),
-                                           m_Paths[FGROUND][CROUCH],
-                                           deltaTime);
-
-            if (m_pBGLeg)
-                m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           Matrix(),
-                                           m_Paths[BGROUND][CROUCH],
-                                           deltaTime);
-        }
-        // STANDING
-        else if (m_pFGLeg || m_pBGLeg)
-        {
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-
-            if (m_pFGLeg)
-                m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[FGROUND][STAND],
-                                      deltaTime,
-                                      0,
-                                      false);
-
-            if (m_pBGLeg)
-                m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[BGROUND][STAND],
-                                      deltaTime,
-                                      0,
-                                      false);
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
         }
     }
-    // Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion
-    else
-    {
 
-// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc
-        bool wrapped = false;
-        Vector limbPos;
-        if (m_pFGArm)
-        {
-//            m_pFGHandGroup->SetLimbPos(m_pFGArm->GetHandPos(), m_HFlipped);
-            m_pFGHandGroup->FlailAsLimb(m_Pos,
-                                        m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pFGArm->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pFGArm->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
+    if (m_pBGArm) {
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (adjustedAimAngle));
+        if (m_Status == STABLE) { 
+			if (m_ArmClimbing[BGROUND]) {
+				// Can't climb or crawl with the shield
+				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) { UnequipBGArm(); }
+				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+
+			} else {
+				HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem());
+				ThrownDevice *thrownDevice = dynamic_cast<ThrownDevice *>(heldDevice);
+				if (thrownDevice && (m_ArmsState == THROWING_PREP || isSharpAiming)) {
+					float throwProgress = isSharpAiming ? 1.0F : GetThrowProgress();
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + (thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + (thrownDevice->GetStanceOffset() + thrownDevice->GetSupportOffset().GetXFlipped(m_HFlipped)) * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
+				} else if (heldDevice) {
+					if (GetEquippedBGItem() && !heldDevice->IsOneHanded()) {
+						UnequipBGArm();
+					} else {
+						m_pBGArm->Reach(heldDevice->GetSupportPos());
+						if (m_pBGArm->DidReach()) {
+							heldDevice->SetSupported(true);
+							m_pBGArm->SetRecoil(heldDevice->GetRecoilForce(), heldDevice->GetRecoilOffset(), heldDevice->IsRecoiled());
+						} else {
+							// BGArm did not reach to support the device. Count device as supported anyway, if crouching.
+							heldDevice->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
+							m_pBGArm->SetRecoil(Vector(), Vector(), false);
+						}
+					}
+				} else if (m_pFGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+				} else if (m_pBGLeg && m_ArmSwingRate > 0) {
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+				} else {
+					// Force arm to idle by reaching toward a virtually inaccessible point.
+					m_pBGArm->ReachToward(Vector());
+				}
+			}
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
-        if (m_pBGArm)
-        {
-//            m_pBGHandGroup->SetLimbPos(m_pBGArm->GetHandPos(), m_HFlipped);
-            m_pBGHandGroup->FlailAsLimb(m_Pos,
-                                        m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pBGArm->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pBGArm->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pFGLeg)
-        {
-//            m_pFGFootGroup->SetLimbPos(m_pFGLeg->GetAnklePos(), m_HFlipped);
-            m_pFGFootGroup->FlailAsLimb(m_Pos,
-                                        m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pFGLeg->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pFGLeg->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pBGLeg)
-        {
-//            m_pBGFootGroup->SetLimbPos(m_pBGLeg->GetAnklePos(), m_HFlipped);
-            m_pBGFootGroup->FlailAsLimb(m_Pos,
-                                        m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pBGLeg->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pBGLeg->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
+	} else if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+		m_pFGArm->GetHeldDevice()->SetSupported(false);
     }
 
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
 
     ////////////////////////////////////
@@ -4006,20 +3918,38 @@ void AHuman::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-    {
-        float maxLength = m_pFGArm->GetHeldDevice()->GetSharpLength();
-
-        // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
-        if (m_SharpAimProgress > 0)
-        {
+	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+		HeldDevice *heldDevice = m_pFGArm->GetHeldDevice();
+		float maxLength = heldDevice->GetSharpLength();
+		if (maxLength == 0) {
+			m_SharpAimProgress = 0;
+			m_SharpAimMaxedOut = true;
+		} else if (m_MoveState == WALK) {
+			maxLength *= 0.7F;
+		}
+		// Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
+		if (m_SharpAimProgress > 0) {
+			// TODO: make an uniform function to get the total GripStrength of an AHuman?
+			float totalGripStrength = m_pFGArm->GetGripStrength();
+			if (m_pBGArm) {
+				if (m_pBGArm->HoldsHeldDevice()) {
+					HeldDevice *heldBGDevice = m_pBGArm->GetHeldDevice();
+					if (heldBGDevice->IsRecoiled()) {
+						m_SharpAimProgress *= 1.0F - std::min(heldBGDevice->GetRecoilForce().GetMagnitude() / std::max(m_pBGArm->GetGripStrength() * heldBGDevice->GetGripStrengthMultiplier(), 1.0F), 1.0F);
+					}
+				} else if (heldDevice->GetSupported()) {
+					totalGripStrength += m_pBGArm->GetGripStrength();
+				}
+			}
+			if (heldDevice->IsRecoiled()) {
+				m_SharpAimProgress *= 1.0F - std::min(heldDevice->GetRecoilForce().GetMagnitude() / std::max(totalGripStrength * heldDevice->GetGripStrengthMultiplier(), 1.0F), 1.0F);
+			}
 			Vector notUsed;
             Vector sharpAimVector(maxLength, 0);
             sharpAimVector *= aimMatrix;
 
             // See how far along the sharp aim vector there is opaque air
-//            float result = g_SceneMan.CastNotMaterialRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, g_MaterialAir, 5);
-            float result = g_SceneMan.CastObstacleRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), g_MaterialAir, 5);
+            float result = g_SceneMan.CastObstacleRay(heldDevice->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
             // If we didn't find anything but air before the sharpdistance, then don't alter the sharp distance
             if (result >= 0 && result < (maxLength * m_SharpAimProgress))
             {
@@ -4027,11 +3957,7 @@ void AHuman::Update()
                 m_SharpAimMaxedOut = true;
             }
         }
-        // Indicate maxed outedness if we really are, too
-        if (m_SharpAimProgress > 0.9)
-            m_SharpAimMaxedOut = true;
-
-//        sharpDistance *= m_Controller.GetAnalogAim().GetMagnitude();
+		if (m_SharpAimProgress > 0.9F) { m_SharpAimMaxedOut = true; }
         aimSight.m_X += maxLength * m_SharpAimProgress;
     }
 
@@ -4039,180 +3965,10 @@ void AHuman::Update()
     aimSight *= aimMatrix;
     m_ViewPoint = m_Pos.GetFloored() + aimSight;
 
-    // Add velocity also so the viewpoint moves ahead at high speeds
-    if (m_Vel.GetMagnitude() > 10.0)
-        m_ViewPoint += m_Vel * 6;
+	// Add velocity also so the viewpoint moves ahead at high speeds
+	if (m_Vel.GetMagnitude() > 10.0F) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
-    /////////////////////////////////
-    // Update Attachable:s
 
-    if (m_pHead && m_pHead->IsAttached())
-    {
-        m_pHead->SetHFlipped(m_HFlipped);
-        m_pHead->SetJointPos(m_Pos + m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        float toRotate = 0;
-        // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI))
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
-            toRotate *= 0.15;
-        }
-        // If dying upright, make head slump forward or back depending on body lean
-// TODO: Doesn't work too well, but probably could
-//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
-//        {
-//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
-//            toRotate *= 0.10;
-//        }
-        // Make head just keep rotating loosely with the body if unstable or upside down
-        else
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
-            toRotate *= 0.10;
-        }
-        // Now actually rotate by the amount calculated above
-        m_pHead->SetRotAngle(m_pHead->GetRotMatrix().GetRadAngle() + toRotate);
-
-        m_pHead->Update();
-        // Update the Atoms' offsets in the parent group
-        Matrix headAtomRot(FacingAngle(m_pHead->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
-
-        m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pFGLeg && m_pFGLeg->IsAttached())
-    {
-        m_pFGLeg->SetHFlipped(m_HFlipped);
-        m_pFGLeg->SetJointPos(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[FGROUND])
-            m_pFGLeg->ReachToward(m_pFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pFGLeg->Update();
-        m_Health -= m_pFGLeg->CollectDamage();
-    }
-
-    if (m_pBGLeg && m_pBGLeg->IsAttached())
-    {
-        m_pBGLeg->SetHFlipped(m_HFlipped);
-        m_pBGLeg->SetJointPos(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[BGROUND])
-            m_pBGLeg->ReachToward(m_pBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pBGLeg->Update();
-        m_Health -= m_pBGLeg->CollectDamage();
-    }
-
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        m_pFGArm->SetHFlipped(m_HFlipped);
-        m_pFGArm->SetJointPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pFGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-//        m_pFGArm->SetRotTarget(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[FGROUND])
-            {
-                // Can't climb with anything in the arm?
-    //            UnequipBGArm();
-                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-            }
-            // This will likely make the arm idle since the target will be out of range
-            else if (!m_pFGArm->IsReaching())
-                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-        }
-        // Unstable, so just drop the arm limply
-        else
-            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-
-        m_pFGArm->Update();
-        m_Health -= m_pFGArm->CollectDamage();
-    }
-
-    if (m_pBGArm && m_pBGArm->IsAttached())
-    {
-        m_pBGArm->SetHFlipped(m_HFlipped);
-        m_pBGArm->SetJointPos(m_Pos + m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[BGROUND])
-            {
-                // Can't climb with the shield
-                UnequipBGArm();
-                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->Update();
-            }
-            else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice())
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-    //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
-                m_pBGArm->Update();
-
-                // BGArm does reach to support the device held by FGArm.
-                if (m_pBGArm->DidReach())
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(true);
-                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(),
-                                        m_pFGArm->GetHeldDevice()->GetRecoilOffset(),
-                                        m_pFGArm->GetHeldDevice()->IsRecoiled());
-                }
-                // BGArm did not reach to support the device.
-                else
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(false);
-                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
-                }
-            }
-            else
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                // This will likely make the arm idle since the target will be out of range
-                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
-                m_pBGArm->Update();
-            }
-        }
-        // Unstable, so just drop the arm limply
-        else
-        {
-            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-            m_pBGArm->Update();
-        }
-
-        m_Health -= m_pBGArm->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pHead))
-        m_pHead = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pFGArm, true))
-        m_pFGArm = 0;
-    if (!ApplyAttachableForces(m_pBGArm, true))
-        m_pBGArm = 0;
-    if (!ApplyAttachableForces(m_pFGLeg, true))
-        m_pFGLeg = 0;
-    if (!ApplyAttachableForces(m_pBGLeg, true))
-        m_pBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting
@@ -4251,129 +4007,92 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Balance stuff
 
-    // Get the rotation in radians.
-    float rot = m_Rotation.GetRadAngle();
-//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
     // Eliminate full rotations
-    while (fabs(rot) > c_TwoPI) {
+    while (std::abs(rot) > c_TwoPI) {
         rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
     }
     // Eliminate rotations over half a turn
-    if (fabs(rot) > c_PI)
-    {
+    if (std::abs(rot) > c_PI) {
         rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
-		if (m_Status != DYING && m_Status != DEAD)
-			m_Status = UNSTABLE;
+		if (m_Status == STABLE) { m_Status = UNSTABLE; }
         m_StableRecoverTimer.Reset();
     }
 
     // Rotational balancing spring calc
-    if (m_Status == STABLE)
-    {
+	if (m_Status == STABLE) {
+
         // If we're supposed to be laying down on the ground, make the spring pull the body that way until we reach that angle
         if (m_ProneState != NOTPRONE)
         {
             float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
             float rotDiff = rotTarget - rot;
 
-            if (m_ProneState == GOPRONE)
-            {
-                if (!m_ProneTimer.IsPastSimMS(333))
-                {
-                    if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-                    {
-                        m_AngularVel += rotDiff * 0.45;// * fabs(rotDiff);
-                        m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.25;
-                    }
+			if (m_ProneState == GOPRONE) {
+				if (!m_ProneTimer.IsPastSimMS(333)) {
+					if (std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+						m_AngularVel += rotDiff * 0.4F;
+						m_Vel.m_X += (m_HFlipped ? -std::abs(rotDiff) : std::abs(rotDiff)) / std::max(m_Vel.GetMagnitude(), 4.0F);
+					}
+                } else {
+					// Done going down, now stay down without spring.
+                    m_AngularVel *= 0.5F;
+					m_ProneState = PRONE;
                 }
-                // Done going down, now stay down without spring
-                else
-                {
-                    m_AngularVel *= 0.5;
-                    m_ProneState = PRONE;
-                }
-/*
-                // Break the spring if close to target angle.
-                if (-c_HalfPI + fabs(rot) > 0.1)
-                    m_AngularVel -= rot * fabs(rot);
-                else if (fabs(m_AngularVel) > 0.1)
-                    m_AngularVel *= 0.5;
-*/
-            }
-            // If down, try to keep flat against the ground
-            else if (m_ProneState == PRONE)
-            {
-                if (fabs(rotDiff) > c_SixteenthPI && fabs(rotDiff) < c_HalfPI)
-                    m_AngularVel += rotDiff * 0.65;// * fabs(rotDiff);
-                else if (fabs(m_AngularVel) > 0.3)
-                    m_AngularVel *= 0.85;
-            }
-        }
-        // Upright body posture
-        else
-        {
-            // Break the spring if close to target angle.
-            if (fabs(rot) > 0.1)
-                m_AngularVel -= rot * 0.5;//fabs(rot);
-            else if (fabs(m_AngularVel) > 0.3)
-                m_AngularVel *= 0.5;
-        }
+			} else if (m_ProneState == PRONE) {
+				// If down, try to keep flat against the ground.
+				if (std::abs(rotDiff) > c_SixteenthPI && std::abs(rotDiff) < c_HalfPI) {
+					m_AngularVel += rotDiff * 0.65F;
+				} else if (std::abs(m_AngularVel) > 0.3F) {
+					m_AngularVel *= 0.85F;
+				}
+			}
+		} else {
+			// Upright body posture
+			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1.0F - (m_AimAngle / c_HalfPI) : 1.0F) * GetFlipFactor());
+			m_AngularVel = m_AngularVel * (0.98F - 0.06F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
+		}
     }
-    // Keel over
-    else if (m_Status == UNSTABLE)
-    {
-        float rotTarget = 0;
-        // If traveling at speed, then always start falling forward
-        if (fabs(m_Vel.m_X) > 1.0)
-            rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
-        // Go whichever way we're already rotated
-        else
-            rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+	else if (m_Status == UNSTABLE) {
+		float rotTarget = 0;
+		// If traveling at speed, always start falling forward.
+		if (std::abs(m_Vel.m_X) > 1.0F) {
+			rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
+		} else {
+			// Otherwise, go whichever way we're already rotated.
+			rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+		}
 
-        float rotDiff = rotTarget - rot;
-        if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-        {
-            m_AngularVel += rotDiff * 0.05;
-//            m_Vel.m_X += (rotTarget > 0 ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-        }
-    }
-    // While dying, pull body quickly toward down toward horizontal
-    else if (m_Status == DYING)
-    {
-        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
-//        float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
-        float rotDiff = rotTarget - rot;
-        if (!m_DeathTmr.IsPastSimMS(125) && fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-        {
-            m_AngularVel += rotDiff * 0.5;//fabs(rotDiff);
-//            m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-            m_Vel.m_X += (rotTarget > 0 ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-        }
-        else
-            m_Status = DEAD;
-
-//        else if (fabs(m_AngularVel) > 0.1)
-//            m_AngularVel *= 0.5;
-    }
+		float rotDiff = rotTarget - rot;
+		if (std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+			m_AngularVel += rotDiff * 0.05F;
+		}
+	} else if (m_Status == DYING) {
+		float rotTarget = m_Vel.m_X - (rot + m_AngularVel) > 0 ? -c_HalfPI : c_HalfPI;
+		float rotDiff = rotTarget - rot;
+		if (!m_DeathTmr.IsPastSimMS(125) && std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+			// TODO: finetune this for situations like low gravity!
+			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY * m_GlobalAccScalar) / GetPPM();
+			m_AngularVel += rotDiff * velScalar;
+			m_Vel.m_X += (rotTarget > 0 ? -std::abs(rotDiff) : std::abs(rotDiff)) * velScalar * 0.5F;
+		} else {
+			m_Status = DEAD;
+		}
+	}
     m_Rotation.SetRadAngle(rot);
 
     ///////////////////////////////////////////////////
     // Death detection and handling
 
-    // Losing head should kill
-    if (!m_pHead && m_Status != DYING && m_Status != DEAD)
-        m_Health -= m_MaxHealth + 1;
-    // Losing all limbs should kill... eventually
-    else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD)
-        m_Health -= 0.1;
+	if (!m_pHead && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= m_MaxHealth + 1.0F;
+	} else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= 0.1F;
+	}
 
-    if (m_Status == DYING)
-    {
-        if (m_pFGArm && m_pFGArm->IsAttached())
-            m_pFGArm->DropEverything();
-        if (m_pBGArm && m_pBGArm->IsAttached())
-            m_pBGArm->DropEverything();
+    if (m_Status == DYING) {
+		if (m_pFGArm) { m_pFGArm->DropEverything(); }
+		if (m_pBGArm) { m_pBGArm->DropEverything(); }
     }
 
     /////////////////////////////////////////
@@ -4384,187 +4103,30 @@ void AHuman::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawThrowingReticule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws an aiming aid in front of this HeldDevice for throwing.
 
-void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, double amount) const
-{
-    const int pointCount = 9;
-    Vector points[pointCount];
-    //Color colors[pointCount];
+void AHuman::DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos, float progressScalar) const {
+	const int pointCount = 9;
+	Vector points[pointCount];
 
 	for (int index = 0; index < pointCount; index++) {
 		points[index].SetXY(static_cast<float>(index * 4), 0.0F);
-		//colors[index].SetRGB(255 - index * 3, 225 - index * 20, index);
+	}
+	Vector outOffset(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F);
+	float adjustedAimAngle = m_AimAngle * GetFlipFactor();
+
+	acquire_bitmap(targetBitmap);
+
+	for (int i = 0; i < pointCount * progressScalar; ++i) {
+		points[i].FlipX(m_HFlipped);
+		points[i] += outOffset;
+		points[i].RadRotate(adjustedAimAngle);
+		points[i] += m_pFGArm->GetJointPos();
+
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, RandomNum(63, 127));
+		putpixel(targetBitmap, points[i].GetFloorIntX() - targetPos.GetFloorIntX(), points[i].GetFloorIntY() - targetPos.GetFloorIntY(), g_YellowGlowColor);
 	}
 
-    Vector outOffset(m_HFlipped ? -15 : 15, -4);
-//    Matrix aimMatrix(m_AimAngle);
-//    aimMatrix.SetXFlipped(m_HFlipped);
-
-    acquire_bitmap(pTargetBitmap);
-
-    for (int i = 0; i < pointCount * amount; ++i) {
-        points[i].FlipX(m_HFlipped);
-        points[i] += outOffset;
-        points[i].RadRotate(m_HFlipped ? -m_AimAngle : m_AimAngle);
-        points[i] += m_Pos;
-        if (m_pFGArm && m_pFGArm->IsAttached())
-            points[i] += m_pFGArm->GetParentOffset();
-
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + RandomNum(0, 100));
-
-        putpixel(pTargetBitmap, points[i].GetFloorIntX() - targetPos.GetFloorIntX(), points[i].GetFloorIntY() - targetPos.GetFloorIntY(), g_YellowGlowColor);
-    }
-
-    release_bitmap(pTargetBitmap);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int AHuman::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pBGLeg && m_pBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pBGLeg);
-		if (m_pBGArm && m_pBGArm->GetWoundCount())
-			bodyParts.push_back(m_pBGArm);
-		if (m_pJetpack && m_pJetpack->GetWoundCount())
-			bodyParts.push_back(m_pJetpack);
-		if (m_pHead && m_pHead->GetWoundCount())
-			bodyParts.push_back(m_pHead);
-		if (m_pFGLeg && m_pFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pFGLeg);
-		if (m_pFGArm && m_pFGArm->GetWoundCount())
-			bodyParts.push_back(m_pFGArm);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int AHuman::GetTotalWoundCount() const
-{
-	int count = Actor::GetTotalWoundCount();
-
-    if (m_pBGLeg)
-        count += m_pBGLeg->GetWoundCount();
-    if (m_pBGArm)
-        count += m_pBGArm->GetWoundCount();
-    if (m_pJetpack)
-        count += m_pJetpack->GetWoundCount();
-    if (m_pHead)
-        count += m_pHead->GetWoundCount();
-    if (m_pFGLeg)
-        count += m_pFGLeg->GetWoundCount();
-    if (m_pFGArm)
-        count += m_pFGArm->GetWoundCount();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-
-int AHuman::GetTotalWoundLimit() const
-{ 
-	int count = Actor::GetGibWoundLimit();
-
-    if (m_pBGLeg)
-        count += m_pBGLeg->GetGibWoundLimit();
-    if (m_pBGArm)
-        count += m_pBGArm->GetGibWoundLimit();
-    if (m_pJetpack)
-        count += m_pJetpack->GetGibWoundLimit();
-    if (m_pHead)
-        count += m_pHead->GetGibWoundLimit();
-    if (m_pFGLeg)
-        count += m_pFGLeg->GetGibWoundLimit();
-    if (m_pFGArm)
-        count += m_pFGArm->GetGibWoundLimit();
-
-	return count;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame
-
-void AHuman::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                              MOID rootMOID,
-                              bool makeNewMOID)
-{
-    if (m_pBGLeg)
-        m_pBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pBGArm)
-        m_pBGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pHead)
-        m_pHead->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGLeg)
-        m_pFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGArm)
-        m_pFGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void AHuman::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pBGLeg)
-		m_pBGLeg->GetMOIDs(MOIDs);
-	if (m_pBGArm)
-		m_pBGArm->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pHead)
-		m_pHead->GetMOIDs(MOIDs);
-	if (m_pFGLeg)
-		m_pFGLeg->GetMOIDs(MOIDs);
-	if (m_pFGArm)
-		m_pFGArm->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
+	release_bitmap(targetBitmap);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -4573,65 +4135,33 @@ void AHuman::GetMOIDs(std::vector<MOID> &MOIDs) const
 // Description:     Draws this AHuman's current graphical representation to a
 //                  BITMAP of choice.
 
-void AHuman::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-    if (m_pBGLeg)
-        m_pBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pBGArm)
-        m_pBGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pHead && !m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
+void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pHead && m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGLeg)
-        m_pFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGArm)
-    {
-        m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-        // Draw background Arm's hand after the HeldDevice of FGArm is drawn.
-        if (!onlyPhysical && mode == g_DrawColor && (m_pBGArm && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()))
-            m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
-    }
-    
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug)
-    {
-        // Limbpath debug drawing
-        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
+    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
+    // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
+    if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
+    if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
+
+    //TODO simplify this complex if check when arm is cleaned up like turret so all it can hold are HeldDevices and children
+    // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
+    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
+        m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
 
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
-
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
+        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
+    }
 }
 
 
@@ -4642,6 +4172,8 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
 //                  BITMAP of choice.
 
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -4649,11 +4181,11 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
 		return;
-    }
+	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
@@ -4692,15 +4224,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Player AI drawing
 
-    // Device aiming reticule
-	if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
-		m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-	}
-        
-
-    // Throwing reticule
-	if (m_ArmsState == THROWING_PREP) {
-		DrawThrowingReticule(pTargetBitmap, targetPos, std::min(m_ThrowTmr.GetElapsedSimTimeMS() / m_ThrowPrepTime, 1.0));
+	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+		// Draw the aiming dots for the currently held device.
+		if (m_ArmsState == THROWING_PREP) {
+			DrawThrowingReticle(pTargetBitmap, targetPos, GetThrowProgress());
+		} else if (m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) {
+			m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
+		}
 	}
 
     //////////////////////////////////////
@@ -4715,7 +4245,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     {
         AllegroBitmap allegroBitmap(pTargetBitmap);
 /*
-        // Device aiming reticule
+        // Device aiming reticle
         if (m_Controller.IsState(AIM_SHARP) &&
             m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
             m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen);*/
@@ -4746,7 +4276,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
 
         // Weight and jetpack energy
-        if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP))
+        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
         {
             // Draw empty fuel indicator
             if (m_JetTimeLeft < 100)
@@ -4758,57 +4288,67 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				if (acceleration > 0.47F) {
 					str[0] = -31;
 				} else {
-					str[0] = acceleration > 0.35F ? -30 : -29;
+					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
 				}
-                // Do the blinky blink
-                if ((str[0] == -29 || str[0] == -30) && m_IconBlinkTimer.AlternateSim(250))
-                    str[0] = -28;
+				// Do the blinky blink
+				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
             }
             // null-terminate
             str[1] = 0;
-            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 11, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 9, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
             float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-// TODO: Don't hardcode this shit
-            int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + (16 * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-//                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
-//                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
-            m_HUDStack += -10;
-        }
+			m_HUDStack -= 10;
+			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
+				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
+				m_HUDStack -= 9;
+			}
+		}
         // Held-related GUI stuff
-        else if (m_pFGArm && m_pFGArm->IsAttached())
-        {
-            HDFirearm *pHeldFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
+        else if (m_pFGArm || m_pBGArm) {
+            HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedItem());
+			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
 
-            // Ammo
-            if (pHeldFirearm)
-            {
-                MovableObject *bgHeldItem = GetEquippedBGItem();
-                HDFirearm const *bgHeldFirearm = bgHeldItem == NULL ? NULL : dynamic_cast<HDFirearm *>(bgHeldItem);
-
+            if (fgHeldFirearm || bgHeldFirearm) {
                 str[0] = -56; str[1] = 0;
-                pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                std::string fgWeaponString = pHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(pHeldFirearm->GetRoundInMagCount());
-                fgWeaponString = pHeldFirearm->IsReloading() ? "Reloading" : fgWeaponString;
+                pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 10, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
 
-                if (bgHeldItem && bgHeldFirearm) {
-                    std::string bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
-                    bgWeaponString = bgHeldFirearm->IsReloading() ? "Reloading" : bgWeaponString;
-                    std::snprintf(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
+				std::string fgWeaponString = "EMPTY";
+				if (fgHeldFirearm) {
+					if (fgHeldFirearm->IsReloading()) {
+						fgWeaponString = "Reloading";
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * fgHeldFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+					} else {
+						fgWeaponString = fgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(fgHeldFirearm->GetRoundInMagCount());
+					}
+				}
+
+                if (bgHeldFirearm) {
+					std::string bgWeaponString;
+					if (bgHeldFirearm->IsReloading()) {
+						bgWeaponString = "Reloading";
+						int totalTextWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * bgHeldFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+					} else {
+						bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
+					}
+					std::snprintf(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
                 } else {
                     std::snprintf(str, sizeof(str), "%s", fgWeaponString.c_str());
                 }
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+                pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
-                m_HUDStack += -10;
+                m_HUDStack -= 10;
             }
 
-            // Device changing GUI
-            if (m_Controller.IsState(PIE_MENU_ACTIVE))
-            {
+			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
 /*
                 // Display Gold tally if gold chunk is in hand
                 if (m_pFGArm->HoldsSomething() && m_pFGArm->GetHeldMO()->IsGold() && GetGoldCarried() > 0)
@@ -4818,26 +4358,12 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                     std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
-                    m_HUDStack += -11;
+                    m_HUDStack -= 11;
                 }
 */
-                if (m_pFGArm->HoldsSomething())
-                {
-/*
-                    std::snprintf(str, sizeof(str), " Œ Drop");
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-                    m_HUDStack += -9;
-*/
-//                    std::snprintf(str, sizeof(str), "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
-                    m_HUDStack += -9;
-                }
-                else
-                {
-//                    std::snprintf(str, sizeof(str), "æ  EMPTY  ø");
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
-                    m_HUDStack += -9;
-                }
+				std::string equippedItemsString = (m_pFGArm && m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
+				m_HUDStack -= 9;
 /*
                 // Reload GUI, only show when there's nothing to pick up
                 if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
@@ -4852,19 +4378,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             std::snprintf(str, sizeof(str), "NO ARM!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-            m_HUDStack += -9;
+            m_HUDStack -= 9;
         }
 
         // Pickup GUI
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE))
-        {
-            if (m_pItemInReach && g_MovableMan.IsDevice(m_pItemInReach) && m_pFGArm && m_pFGArm->IsAttached())
-            {
-                std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-            }
-            else
-                m_pItemInReach = 0;
+        if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
+            std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
+            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
         }
 /*
         // AI Mode select GUI HUD

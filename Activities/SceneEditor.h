@@ -41,9 +41,7 @@ class GUIComboBox;
 // Class history:   8/30/2007 SceneEditor created, inheriting directly from Activity.
 //                  9/17/2007 Spliced out and made to derive from EditorActivty
 
-class SceneEditor:
-    public EditorActivity
-{
+class SceneEditor : public EditorActivity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -52,9 +50,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(SceneEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(SceneEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     SceneEditor

@@ -3,9 +3,6 @@
 
 #include "Atom.h"
 
-// Defined in Winbase.h and conflicts with our method so we need to undefine it manually.
-#undef AddAtom
-
 namespace RTE {
 
 	class MOSRotating;
@@ -18,9 +15,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(AtomGroup)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(AtomGroup);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>
@@ -167,7 +164,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPos">The Vector with the new absolute position.</param>
 		/// <param name="hFlipped">Whether to adjust the new position for horizontal flip or not.</param>
-		void SetLimbPos(Vector &newPos, bool hFlipped = false) { m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped); }
+		void SetLimbPos(const Vector &newPos, bool hFlipped = false) { m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped); }
 
 		/// <summary>
 		/// Gets the current mass moment of inertia of this AtomGroup.
@@ -179,10 +176,11 @@ namespace RTE {
 #pragma region Atom Management
 		/// <summary>
 		/// Adds a new Atom into the internal list that makes up this AtomGroup. Ownership of the Atom IS transferred!
+		/// Note, this resets the moment of inertia, which then has to be recalculated.
 		/// </summary>
 		/// <param name="newAtom">A pointer to an Atom that will pushed onto the end of the list. Ownership IS transferred!</param>
 		/// <param name="subgroupID">The subgroup ID that the new Atom will have within the group.</param>
-		void AddAtom(Atom *newAtom, long subgroupID = 0) { newAtom->SetSubID(subgroupID); m_Atoms.push_back(newAtom); }
+		void AddAtom(Atom *newAtom, long subgroupID = 0) { newAtom->SetSubID(subgroupID); m_Atoms.push_back(newAtom); m_MomentOfInertia = 0.0F; }
 
 		/// <summary>
 		/// Adds a list of new Atoms to the internal list that makes up this AtomGroup. Ownership of all Atoms in the list IS NOT transferred!
@@ -199,6 +197,18 @@ namespace RTE {
 		/// <param name="removeID">The ID of the subgroup of Atoms to remove.</param>
 		/// <returns>Whether any Atoms of that subgroup ID were found and removed.</returns>
 		bool RemoveAtoms(long removeID);
+
+		/// <summary>
+		/// Removes all atoms in this AtomGroup, leaving it empty of Atoms.
+		/// </summary>
+		void RemoveAllAtoms() { m_Atoms.clear(); m_SubGroups.clear(); m_MomentOfInertia = 0.0F; m_StoredOwnerMass = 0.0F; }
+
+		/// <summary>
+		/// Gets whether the AtomGroup contains a subgroup with the given subgroupID.
+		/// </summary>
+		/// <param name="subgroupID">The subgroupID to check for.</param>
+		/// <returns>Whether this AtomGroup contains a subgroup with the given subgroupID.</returns>
+		bool ContainsSubGroup(long subgroupID) const { return m_SubGroups.count(subgroupID) != 0; }
 
 		/// <summary>
 		/// Updates the offsets of a subgroup of Atoms in this AtomGroup. This allows repositioning a subgroup to match the position and rotation of the graphical representation of it's owner MOSR.
@@ -351,6 +361,7 @@ namespace RTE {
 		std::unordered_map<long, std::list<Atom *>> m_SubGroups; //!< Sub groupings of Atoms. Points to Atoms owned in m_Atoms. Not owned.
 
 		MOSRotating *m_OwnerMOSR; //!< The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
+		float m_StoredOwnerMass; //!< The stored mass for the owner MOSR. Used to figure out when the moment of inertia needs to be recalculated due to significant mass changes.
 		const Material *m_Material; //!< Material of this AtomGroup.
 
 		bool m_AutoGenerate; //!< Whether the Atoms in this AtomGroup were automatically generated based on a sprite, or manually defined.

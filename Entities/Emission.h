@@ -22,9 +22,7 @@ namespace RTE
 // Description:     Something to bundle the properties of an emission together.
 // Parent(s):       Entity.
 
-class Emission :
-	public Entity
-{
+class Emission : public Entity {
 	friend class AEmitter;
 	friend class PEmitter;
 
@@ -34,9 +32,9 @@ class Emission :
 public:
 
 	// Concrete allocation and cloning definitions
-	EntityAllocation(Emission)
-	SerializableOverrideMethods
-	ClassInfoGetters
+	EntityAllocation(Emission);
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Constructor:     Emission

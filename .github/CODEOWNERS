@@ -6,6 +6,6 @@
 * @administrators
 
 #C++ Owners
-*.cpp @core-game-coders
-*.h @core-game-coders
-*.c++ @core-game-coders
+*.cpp @core-game-code-managers
+*.h @core-game-code-managers
+*.c++ @core-game-code-managers

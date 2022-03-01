@@ -17,7 +17,7 @@
 
 namespace RTE {
 
-AbstractClassInfo(MOSprite, MovableObject)
+AbstractClassInfo(MOSprite, MovableObject);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,9 @@ AbstractClassInfo(MOSprite, MovableObject)
 void MOSprite::Clear()
 {
     m_SpriteFile.Reset();
-    m_aSprite = 0;
+    m_aSprite.clear();
+	m_IconFile.Reset();
+	m_GraphicalIcon = nullptr;
     m_FrameCount = 1;
     m_SpriteOffset.Reset();
     m_Frame = 0;
@@ -38,8 +40,8 @@ void MOSprite::Clear()
     m_SpriteAnimTimer.Reset();
     m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
-    m_MaxRadius = 1;
-    m_MaxDiameter = 2;
+    m_SpriteRadius = 1.0F;
+    m_SpriteDiameter = 2.0F;
     m_Rotation.Reset();
     m_PrevRotation.Reset();
     m_AngularVel = 0;
@@ -62,22 +64,19 @@ int MOSprite::Create()
         return -1;
 
     // Post-process reading
-    delete [] m_aSprite;
-    m_aSprite = m_SpriteFile.GetAsAnimation(m_FrameCount);
+	m_aSprite.clear();
+    m_SpriteFile.GetAsAnimation(m_aSprite, m_FrameCount);
 
-    if (m_aSprite && m_aSprite[0])
+    if (!m_aSprite.empty() && m_aSprite.at(0))
     {
         // Set default sprite offset
-        if (m_SpriteOffset.IsZero())
-        {
-            m_SpriteOffset.m_X = -m_aSprite[0]->w / 2;
-            m_SpriteOffset.m_Y = -m_aSprite[0]->h / 2;
-        }
+        if (m_SpriteOffset.IsZero()) { m_SpriteOffset.SetXY(static_cast<float>(-m_aSprite.at(0)->w) / 2.0F, static_cast<float>(-m_aSprite.at(0)->h) / 2.0F); }
+
         // Calc maximum dimensions from the Pos, based on the sprite
-        float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
-        float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-        m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-        m_MaxDiameter = m_MaxRadius * 2;
+        float maxX = std::max(std::fabs(m_SpriteOffset.GetX()), std::fabs(static_cast<float>(m_aSprite.at(0)->w) + m_SpriteOffset.GetX()));
+        float maxY = std::max(std::fabs(m_SpriteOffset.GetY()), std::fabs(static_cast<float>(m_aSprite.at(0)->h) + m_SpriteOffset.GetY()));
+        m_SpriteRadius = std::sqrt((maxX * maxX) + (maxY * maxY));
+        m_SpriteDiameter = m_SpriteRadius * 2.0F;
     }
     else
         return -1;
@@ -102,17 +101,17 @@ int MOSprite::Create(ContentFile spriteFile,
 
     m_SpriteFile = spriteFile;
     m_FrameCount = frameCount;
-    delete [] m_aSprite;
-    m_aSprite = m_SpriteFile.GetAsAnimation(m_FrameCount);
-    m_SpriteOffset = Vector(-m_aSprite[0]->w / 2, -m_aSprite[0]->h / 2);
+	m_aSprite.clear();
+    m_SpriteFile.GetAsAnimation(m_aSprite, m_FrameCount);
+    m_SpriteOffset.SetXY(static_cast<float>(-m_aSprite.at(0)->w) / 2.0F, static_cast<float>(-m_aSprite.at(0)->h) / 2.0F);
 
     m_HFlipped = false;
 
     // Calc maximum dimensions from the Pos, based on the sprite
-    float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
-    float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-    m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-    m_MaxDiameter = m_MaxRadius * 2;
+    float maxX = std::max(std::fabs(m_SpriteOffset.GetX()), std::fabs(static_cast<float>(m_aSprite.at(0)->w) + m_SpriteOffset.GetX()));
+    float maxY = std::max(std::fabs(m_SpriteOffset.GetY()), std::fabs(static_cast<float>(m_aSprite.at(0)->h) + m_SpriteOffset.GetY()));
+    m_SpriteRadius = std::sqrt((maxX * maxX) + (maxY * maxY));
+    m_SpriteDiameter = m_SpriteRadius * 2.0F;
 
     return 0;
 }
@@ -127,28 +126,22 @@ int MOSprite::Create(const MOSprite &reference)
 {
     MovableObject::Create(reference);
 
-    if (!reference.m_aSprite)
+    if (reference.m_aSprite.empty())
         return -1;
 
     m_SpriteFile = reference.m_SpriteFile;
+	m_IconFile = reference.m_IconFile;
+	m_GraphicalIcon = m_IconFile.GetAsBitmap();
 
     m_FrameCount = reference.m_FrameCount;
     m_Frame = reference.m_Frame;
-    // Allocate a new array of pointers (owned by this),
-    // and copy the pointers' values themselves over by shallow copy (the BITMAPs are not owned by this)
-    delete [] m_aSprite;
-    m_aSprite = new BITMAP *[m_FrameCount];
-    for (int i = 0; i < m_FrameCount; ++i)
-    {
-        m_aSprite[i] = reference.m_aSprite[i];
-    }
-
+	m_aSprite = reference.m_aSprite;
     m_SpriteOffset = reference.m_SpriteOffset;
     m_SpriteAnimMode = reference.m_SpriteAnimMode;
     m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
     m_HFlipped = reference.m_HFlipped;
-    m_MaxRadius = reference.m_MaxRadius;
-    m_MaxDiameter = reference.m_MaxDiameter;
+    m_SpriteRadius = reference.m_SpriteRadius;
+    m_SpriteDiameter = reference.m_SpriteDiameter;
 
     m_Rotation = reference.m_Rotation;
     m_AngularVel = reference.m_AngularVel;
@@ -170,13 +163,16 @@ int MOSprite::Create(const MOSprite &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSprite::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "SpriteFile")
-        reader >> m_SpriteFile;
-    else if (propName == "FrameCount")
-        reader >> m_FrameCount;
-    else if (propName == "SpriteOffset")
+int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
+	if (propName == "SpriteFile") {
+		reader >> m_SpriteFile;
+	} else if (propName == "IconFile") {
+		reader >> m_IconFile;
+		m_GraphicalIcon = m_IconFile.GetAsBitmap();
+	} else if (propName == "FrameCount") {
+		reader >> m_FrameCount;
+		m_aSprite.reserve(m_FrameCount);
+	} else if (propName == "SpriteOffset")
         reader >> m_SpriteOffset;
     else if (propName == "SpriteAnimMode")
     {
@@ -192,8 +188,8 @@ int MOSprite::ReadProperty(std::string propName, Reader &reader)
             m_SpriteAnimMode = ALWAYSLOOP;
         else if (mode == "ALWAYSPINGPONG")
             m_SpriteAnimMode = ALWAYSPINGPONG;
-        else if (mode == "LOOPWHENMOVING")
-            m_SpriteAnimMode = LOOPWHENMOVING;
+        else if (mode == "LOOPWHENACTIVE")
+            m_SpriteAnimMode = LOOPWHENACTIVE;
         else
             Abort
 */
@@ -308,8 +304,6 @@ int MOSprite::Save(Writer &writer) const
 
 void MOSprite::Destroy(bool notInherited)
 {
-    //  Delete only the array of pointers, not the BITMAP:s themselves... owned by static contentfile maps
-    delete[] m_aSprite;
 //    delete m_pEntryWound; Not doing this anymore since we're not owning
 //    delete m_pExitWound;
 
@@ -407,7 +401,7 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
         }
     }
 */
-    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius))
+    if (WithinBox(scenePoint, m_Pos.m_X - m_SpriteRadius, m_Pos.m_Y - m_SpriteRadius, m_Pos.m_X + m_SpriteRadius, m_Pos.m_Y + m_SpriteRadius))
     {
         // Get scene point in object's relative space
         Vector spritePoint = scenePoint - m_Pos;

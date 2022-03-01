@@ -23,9 +23,9 @@
 
 namespace RTE {
 
-ConcreteClassInfo(SLTerrain, SceneLayer, 0)
+ConcreteClassInfo(SLTerrain, SceneLayer, 0);
 
-const string SLTerrain::TerrainFrosting::m_sClassName = "TerrainFrosting";
+const string SLTerrain::TerrainFrosting::c_ClassName = "TerrainFrosting";
 BITMAP * SLTerrain::m_spTempBitmap16 = 0;
 BITMAP * SLTerrain::m_spTempBitmap32 = 0;
 BITMAP * SLTerrain::m_spTempBitmap64 = 0;
@@ -89,7 +89,7 @@ int SLTerrain::TerrainFrosting::Create(const TerrainFrosting &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::TerrainFrosting::ReadProperty(std::string propName, Reader &reader)
+int SLTerrain::TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "TargetMaterial")
         reader >> m_TargetMaterial;
@@ -331,9 +331,9 @@ int SLTerrain::LoadData()
     // Get the background texture
     BITMAP *m_pBGTexture = m_BGTextureFile.GetAsBitmap();
     // Get the material palette for quicker access
-    Material **apMaterials = g_SceneMan.GetMaterialPalette();
+	const std::array<Material *, c_PaletteEntriesNumber> &apMaterials = g_SceneMan.GetMaterialPalette();
     // Get the Material palette ID mappings local to the DataModule this SLTerrain is loaded from
-    const unsigned char *materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
+	const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
     Material *pMaterial = 0;
 
     // Lock all involved bitmaps
@@ -351,18 +351,18 @@ int SLTerrain::LoadData()
             // Read which material the current pixel represents
             matIndex = _getpixel(m_pMainBitmap, xPos, yPos);
             // Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's
-            if (materialMappings[matIndex] != 0)
+            if (materialMappings.at(matIndex) != 0)
             {
                 // Assign the mapping and put it onto the material bitmap too
-                matIndex = materialMappings[matIndex];
+                matIndex = materialMappings.at(matIndex);
                 _putpixel(m_pMainBitmap, xPos, yPos, matIndex);
             }
 
             // Validate the material, or default to default material
-            if (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials[matIndex])
-                pMaterial = apMaterials[matIndex];
+            if (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials.at(matIndex))
+                pMaterial = apMaterials.at(matIndex);
             else
-                pMaterial = apMaterials[g_MaterialDefault];
+                pMaterial = apMaterials.at(g_MaterialDefault);
 
             // If haven't read a pixel of this material before, then get its texture so we can quickly access it
             if (!apTexBitmaps[matIndex])
@@ -575,7 +575,7 @@ int SLTerrain::ClearData()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::ReadProperty(std::string propName, Reader &reader)
+int SLTerrain::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BackgroundTexture")
         reader >> m_BGTextureFile;
@@ -1103,8 +1103,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
         // Temporary bitmap holder, doesn't own
         BITMAP *pSprite = pMOSprite->GetSpriteFrame();
 
-// TODO: Make the diameter more accurate.. now we have to double it because it's not taking into account anything attached to the MO
-        float diameter = pMOSprite->GetDiameter() * 2;
+        float diameter = pMOSprite->GetDiameter();
         // Choose an appropriate size
         if (diameter >= 256)
             pTempBitmap = m_spTempBitmap512;

@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Vector.h"
 #include "Controller.h"
+#include "PieSlice.h"
 
 struct BITMAP;
 
@@ -178,7 +179,7 @@ public:
 // Arguments:       None.
 // Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
 
-    int GetActivatedPieSlice();
+    PieSlice::PieSliceIndex GetActivatedPieSlice() { return m_ActivatedPieSliceType; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -307,16 +308,17 @@ protected:
 
     void UpdatePieMenu();
 
+	/// <summary>
+	/// Updates the path to the current brain in the cursor or resident in the scene, if any. If there's none, the path is cleared.
+	/// </summary>
+	/// <returns>Whether a brain was found in the cursor or the scene.</returns>
+	bool UpdateBrainPath();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateBrainPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the brain path to the current brain in cursor or resident
-//                  in the scene, if any. If there's none, the path is cleared.
-// Arguments:       None.
-// Return value:    Whether a resident brain was found in the scene.
-
-    bool UpdateBrainPath();
+	/// <summary>
+	/// Updates the path from the designated position to orbit, and its cost.
+	/// </summary>
+	/// <param name="brainPos">The designated position of the brain.</param>
+	void UpdateBrainSkyPathAndCost(Vector brainPos);
 
 
     enum BlinkMode
@@ -356,6 +358,7 @@ protected:
 
     // The pie menu
     PieMenuGUI *m_pPieMenu;
+    PieSlice::PieSliceIndex m_ActivatedPieSliceType; //!< The activated PieSliceType, reset every frame.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

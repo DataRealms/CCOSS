@@ -3,6 +3,9 @@
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
+#include "fmod/fmod.hpp"
+#include "fmod/fmod_errors.h"
+
 namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";
@@ -46,15 +49,15 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
-			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps.at(depth)) {
-				destroy_bitmap(bitmap.second);
+			for (const auto &[bitmapPath, bitmapPtr] : s_LoadedBitmaps.at(depth)) {
+				destroy_bitmap(bitmapPtr);
 			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::ReadProperty(std::string propName, Reader &reader) {
+	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "FilePath" || propName == "Path") {
 			SetDataPath(reader.ReadPropValue());
 		} else {
@@ -68,10 +71,8 @@ namespace RTE {
 	int ContentFile::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		if (!m_DataPath.empty()) {
-			writer.NewProperty("FilePath");
-			writer << m_DataPath;
-		}
+		if (!m_DataPath.empty()) { writer.NewPropertyWithValue("FilePath", m_DataPath); }
+
 		return 0;
 	}
 
@@ -82,9 +83,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
-		m_DataPath = newDataPath;
-		CorrectBackslashesInPaths(m_DataPath);
-
+		m_DataPath = CorrectBackslashesInPath(newDataPath);
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
@@ -117,58 +116,55 @@ namespace RTE {
 		if (foundBitmap != s_LoadedBitmaps.at(bitDepth).end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
-			if (!std::filesystem::exists(dataPathToLoad)) {
+			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
 				const std::string dataPathWithoutExtension = dataPathToLoad.substr(0, dataPathToLoad.length() - m_DataPathExtension.length());
 				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-				if (std::filesystem::exists(dataPathWithoutExtension + altFileExtension)) {
+				if (System::PathExistsCaseSensitive(dataPathWithoutExtension + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					dataPathToLoad = dataPathWithoutExtension + altFileExtension;
 				} else {
-					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
+					RTEAbort("Failed to find image file with following path and name:\n\n" + dataPathToLoad + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
 				}
 			}
 			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).insert({ dataPathToLoad, returnBitmap }); }
+			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).try_emplace(dataPathToLoad, returnBitmap); }
 		}
 		return returnBitmap;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode) {
-		if (m_DataPath.empty()) {
-			return nullptr;
+	void ContentFile::GetAsAnimation(std::vector<BITMAP *> &vectorToFill, int frameCount, int conversionMode) {
+		if (m_DataPath.empty() || frameCount < 1) {
+			return;
 		}
-		// Create the array of as many BITMAP pointers as requested frames
-		BITMAP **returnBitmaps = new BITMAP *[frameCount];
+		vectorToFill.reserve(frameCount);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
-		// Don't try to append numbers if there's only one frame
 		if (frameCount == 1) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
-			if (!std::filesystem::exists(m_DataPath)) {
+			if (!System::PathExistsCaseSensitive(m_DataPath)) {
 				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-				if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
+				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
 					SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
-				} else if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+				} else if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
 				}
 			}
-			returnBitmaps[0] = GetAsBitmap(conversionMode);
-			return returnBitmaps;
+			vectorToFill.emplace_back(GetAsBitmap(conversionMode));
+		} else {
+			char framePath[1024];
+			for (int frameNum = 0; frameNum < frameCount; ++frameNum) {
+				std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
+				vectorToFill.emplace_back(GetAsBitmap(conversionMode, true, framePath));
+			}
 		}
-		char framePath[1024];
-		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
-			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
-			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, true, framePath);
-		}
-		return returnBitmaps;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +203,7 @@ namespace RTE {
 			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-			s_LoadedSamples.insert({ m_DataPath, returnSample });
+			s_LoadedSamples.try_emplace(m_DataPath, returnSample);
 		}
 		return returnSample;
 	}
@@ -219,10 +215,10 @@ namespace RTE {
 			return nullptr;
 		}
 
-		if (!std::filesystem::exists(m_DataPath)) {
+		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					foundAltExtension = true;
@@ -237,7 +233,7 @@ namespace RTE {
 			}
 		}
 		if (std::filesystem::file_size(m_DataPath) == 0) {
-			const std::string errorMessage = "Failed to create sound because because the file was empty. The path and name were: ";
+			const std::string errorMessage = "Failed to create sound because the file was empty. The path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return nullptr;
@@ -248,7 +244,7 @@ namespace RTE {
 		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {
-			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + " The path and name were: ";
+			const std::string errorMessage = "Failed to create sound because of FMOD error:\n" + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return returnSample;

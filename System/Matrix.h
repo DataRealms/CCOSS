@@ -13,7 +13,8 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
 		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the respective axes of its invoked Vectors.
@@ -117,7 +118,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Returns the angle difference between what this is currently representing, to another angle in radians.
-		/// It will wrap and normalize and give the shortest absolute distance between this and the passed in.
+		/// It will wrap and normalize and give the smallest angle difference between this and the passed in.
 		/// </summary>
 		/// <param name="otherAngle">A float with the angle to get the difference to from this, in radians.</param>
 		/// <returns>A float with the difference angle between this and the passed-in angle.</returns>
@@ -125,7 +126,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Returns the angle difference between what this is currently representing, to another angle in degrees.
-		/// It will wrap and normalize and give the shortest absolute distance between this and the passed in.
+		/// It will wrap and normalize and give the smallest angle difference between this and the passed in.
 		/// </summary>
 		/// <param name="otherAngle">A float with the angle to get the difference to from this, in degrees.</param>
 		/// <returns>A float with the difference angle between this and the passed-in angle.</returns>
@@ -292,19 +293,9 @@ namespace RTE {
 		friend Vector & operator/=(Vector &lhs, Matrix &rhs) { return lhs = rhs / lhs; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Matrix.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Makes the elements of this matrix update to represent the set angle.

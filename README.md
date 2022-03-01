@@ -1,8 +1,15 @@
 # Cortex Command Community Project Source
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
+[![Linux Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
+
 This is a community-driven effort to continue the development of Cortex Command.  
-Stay up to date in our [Discord channel](https://discord.gg/SdNnKJN).
+Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
+
+***
+
+# How to Play the Game
+If you just want to play the latest version of the game you can get it from our [website](https://cortex-command-community.github.io), and you can get mods from our [mod portal](https://cccp.mod.io).
 
 ***
 
@@ -11,7 +18,7 @@ First you need to download the necessary files:
 
 1. Install the necessary tools.  
 You'll probably want [Visual Studio Community Edition](https://visualstudio.microsoft.com/downloads/) (build supports both 2017 and 2019 versions).  
-You also need to have [Visual C++ Redistributable for Visual Studio 2017 (x86)](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed in order to run the compiled builds.  
+You also need to have both x86 and x64 versions of the [Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed in order to run the compiled builds.  
 You may also want to check out the list of recommended Visual Studio plugins [here](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).
 
 2. Clone this Source Repository and the [Data Repository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data) in neighboring folders.  
@@ -19,14 +26,12 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 
 3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\` into the **Data Repository**:
 * `lua51.dll`
+* `lua51-64.dll`
 * `fmod.dll`
-* `liblz4.dll`
-* `zlibwapi.dll`
-
-4. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into the **Data Repository**.
+* `fmodL.dll`
 
 Now you're ready to build and launch the game.  
-Simply open `RTEA.sln` with Visual Studio, choose your configuration, and run the project.
+Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.
 
 * Use `Debug Full` for debugging with all visual elements enabled (builds fast, runs very slow).
 * Use `Debug Minimal` for debugging with all visual elements disabled (builds fast, runs slightly faster).
@@ -35,75 +40,86 @@ Simply open `RTEA.sln` with Visual Studio, choose your configuration, and run th
 
 The first build will take a while, but future ones should be quicker.
 
-# Linux Build Instructions
-The Linux build uses the meson build system, and builds against system libraries
+If you want to use an IDE other than Visual Studio, you will have to build using meson. Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers.
 
-### Dependencies:
+***
+
+# Linux Build Instructions
+The Linux build uses the meson build system, and builds against system libraries.
+
+## Dependencies
 
 * `g++>=8.1` (needs to support c++17 filesystem)
 * `allegro4`
 * `loadpng`
 * `flac`
 * `luajit`
+* `lua5.2`
 * `minizip`
-* `lz4`
+* `lz4>=1.9.0`
 * `libpng`
 * `libX11`
-* `meson>=0.43`
+* [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
-* `xorg-misc-fonts`
+* (optional) `xmessage`
 
-### Building:
+## Building
 
-1. Install Dependencies (see below for some distro-specific instructions).
+1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
 
-2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data)
+2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data).
 
 3. Open a terminal in the Source Repository.
 
-4. `meson builddir`
+4. `meson build` or `meson --buildtype=debug build` for debug build (default is release build)
 
-5. `cd builddir`
+5. `ninja -C build`
 
-For `meson` versions `>=0.54` (check `meson --version`) :
+6. (optional) `sudo ninja install -C build` (To uninstall later, keep the build directory intact. The game can then be uninstalled by `sudo ninja uninstall -C build`)
 
-6. `meson compile` for debug build, or `meson compile CCCP` for a release build.  
-If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option, if this doesn't help increase your swap size to at least 6Gb.
+If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
-For `meson` versions `<0.54`
+## Running
+(If you installed the game in step 6 above, it should appear with your regular applications and will just run)
 
-6. `ninja` for debug builds, or `ninja CCCP.x86_64` for release builds.  
-Using the `-j<number of threads>` option will also work here.
+1. Copy (or link, might be preferable for testing builds) `build/CortexCommand` or `build/CortexCommand_debug` (depending on if you made a debug build) into the **Data Repository**.
 
-### Running:
+   `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/build/CortexCommand . `
 
-1. Copy (or link, might be preferable for testing builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**.
+2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
-2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
+   `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
 
-3. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
+3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
 
-### Troubleshooting:
-Until borderless windows are implemented, you might seem get stuck in fullscreen mode.  
-Try Alt-Return, or if that doesn't work kill CC with ctrl-alt-end.
+4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
-On X11 media keys and such don't work in fullscreen, this is a known issue (this does not happen on Wayland).
+## Installing Dependencies
 
-If you get errors similar to `ALSA lib ... could not open slave`, try adding:
-```
-option snd_mia index=0
-option snd_intel_hda index=1
-```
-to `/etc/modprobe.d/alsa-base.conf`
+**Arch Linux:**  
+`# pacman -S allegro4 boost flac luajit lua52 minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
+
+**Ubuntu >=20.04:**  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+## Troubleshooting
+
+* On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
+
+* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
+
+* Gamepad triggers may be inverted, to work around that: Hold down the trigger, select the input you want it assigned to and release to assign it, then it will be correct in use.
 
 ***
 
-**Arch Linux:**
-`# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`
+**Windows 10 (64-bit) without Visual Studio**  
+- [Windows SDK](https://developer.microsoft.com/de-de/windows/downloads/windows-10-sdk/)
+- [Clang Toolset](https://github.com/llvm/llvm-project/releases) (Grab the latest LLVM-...-win64.exe)
+- [git](https://www.git-scm.org)
+- [meson](https://github.com/mesonbuild/meson/releases) (documentation [here](https://www.mesonbuild.com))
+- (optional) Visual Studio for the Developer Consoles since setup otherwise may be unnecessarily hard
 
-**Ubuntu:**
-`# apt-get install liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
+***
 
-## More Information
+# More Information
 
-For more information and recommendations, see [here](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).
+See the [Information and Recommendations](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links) page for more details and useful development tools.

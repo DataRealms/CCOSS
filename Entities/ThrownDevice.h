@@ -12,9 +12,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(ThrownDevice)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(ThrownDevice);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>
@@ -56,16 +56,28 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the Start throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
+		/// Gets the start throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
 		/// <returns>A const reference to the current start throw parent offset.</returns>
 		Vector GetStartThrowOffset() const { return m_StartThrowOffset; }
 
 		/// <summary>
-		/// Gets the End throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
+		/// Sets the start throw offset for this ThrownDevice.
+		/// </summary>
+		/// <param name="startOffset">The new start throw offset.</param>
+		void SetStartThrowOffset(Vector startOffset) { m_StartThrowOffset = startOffset; }
+
+		/// <summary>
+		/// Gets the end throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
 		/// <returns>A const reference to the current end throw parent offset.</returns>
 		Vector GetEndThrowOffset() const { return m_EndThrowOffset; }
+
+		/// <summary>
+		/// Sets the end throw offset for this ThrownDevice.
+		/// </summary>
+		/// <param name="endOffset">The new end throw offset.</param>
+		void SetEndThrowOffset(Vector endOffset) { m_EndThrowOffset = endOffset; }
 
 		/// <summary>
 		/// Gets the minimum throw velocity of this when thrown.
@@ -100,12 +112,6 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Gets the current position offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
-		/// </summary>
-		/// <returns>A const reference to the current stance parent offset.</returns>
-		Vector GetStanceOffset() const override { return m_StanceOffset.GetXFlipped(m_HFlipped); }
-
-		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
 		void ResetAllTimers() override;
@@ -133,6 +139,7 @@ namespace RTE {
 		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown.
 		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does.
 		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it.
+		const MovableObject *m_StrikerLever; //!< Striker lever particle MovableObject preset instance.
 
 	private:
 

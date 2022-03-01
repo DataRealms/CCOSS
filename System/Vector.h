@@ -15,7 +15,8 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		float m_X = 0.0F; //!< X value of this vector.
 		float m_Y = 0.0F; //!< Y value of this vector.
@@ -164,6 +165,14 @@ namespace RTE {
 		Vector & CapMagnitude(const float capMag);
 
 		/// <summary>
+		/// Clamps the magnitude of this Vector between the upper and lower limits, and keeps its angle intact.
+		/// </summary>
+		/// <param name="upperMagnitudeLimit">A float value that defines the upper limit for the magnitude.</param>
+		/// <param name="lowerMagnitudeLimit">A float value that defines the lower limit for the magnitude.</param>
+		/// <returns>A reference to this after the change.</returns>
+		Vector & ClampMagnitude(float upperMagnitudeLimit, float lowerMagnitudeLimit);
+
+		/// <summary>
 		/// Returns a Vector that has the same direction as this but with a magnitude of 1.0.
 		/// </summary>
 		/// <returns>A normalized copy of this vector.</returns>
@@ -190,32 +199,32 @@ namespace RTE {
 		float GetAbsDegAngle() const { return GetAbsRadAngle() / c_PI * 180.0F; }
 
 		/// <summary>
-		/// Returns a Vector rotated relatively by an angle in radians.
+		/// Returns a copy of this Vector, rotated relatively by an angle in radians.
 		/// </summary>
 		/// <param name="angle">The angle in radians to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>a Vector rotated relatively to this Vector .</returns>
-		Vector GetRadRotated(const float angle);
+		/// <returns>A rotated copy of this Vector.</returns>
+		Vector GetRadRotatedCopy(const float angle);
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in radians.
 		/// </summary>
 		/// <param name="angle">The angle in radians to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & RadRotate(const float angle) { *this = GetRadRotated(angle); return *this; }
+		Vector & RadRotate(const float angle) { *this = GetRadRotatedCopy(angle); return *this; }
 
 		/// <summary>
-		/// Returns a Vector rotated relatively by an angle in degrees.
+		/// Returns a copy of this Vector, rotated relatively by an angle in degrees.
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>a Vector rotated relatively to this Vector .</returns>
-		Vector GetDegRotated(const float angle) { return GetRadRotated(angle * c_PI / 180.0F); };
+		/// <returns>A rotated copy of this Vector.</returns>
+		Vector GetDegRotatedCopy(const float angle) { return GetRadRotatedCopy(angle * c_PI / 180.0F); };
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in degrees.
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & DegRotate(const float angle) { *this = GetDegRotated(angle); return *this; }
+		Vector & DegRotate(const float angle) { *this = GetDegRotatedCopy(angle); return *this; }
 
 		/// <summary>
 		/// Set this Vector to an absolute rotation based on the absolute rotation of another Vector.
@@ -487,14 +496,6 @@ namespace RTE {
 		/// <param name="rhs">An int index indicating which element is requested (X = 0, Y = 1).</param>
 		/// <returns>The requested element.</returns>
 		float & operator[](const int &rhs) { return (rhs == 0) ? m_X : m_Y; }
-#pragma endregion
-
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Vector.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	private:

@@ -34,9 +34,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   02/27/2012 Deployment created.
 
-class Deployment:
-    public SceneObject
-{
+class Deployment : public SceneObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -46,9 +44,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Deployment)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Deployment);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Deployment
@@ -138,7 +136,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
+    BITMAP * GetGraphicalIcon() const override { return !m_Icon.GetBitmaps8().empty() ? m_Icon.GetBitmaps8().at(0) : nullptr; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,14 +287,6 @@ ClassInfoGetters
 
 	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetID
@@ -385,8 +375,8 @@ protected:
 	// Whether the deployment and it's loadout is flipped
 	bool m_HFlipped;
 	// Shared HFlipped arrow bitmaps
-	static BITMAP **m_apArrowLeftBitmap;
-	static BITMAP **m_apArrowRightBitmap;
+	static std::vector<BITMAP *> m_apArrowLeftBitmap;
+	static std::vector<BITMAP *> m_apArrowRightBitmap;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

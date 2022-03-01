@@ -10,7 +10,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr const char *c_GameVersion = "Pre-Release 3.0";
+	static constexpr const char *c_GameVersion = "Pre-Release 4.0";
 #pragma endregion
 
 #pragma region Physics Constants
@@ -252,9 +252,9 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Enumeration for cardinal directions, as well as None.
+	/// Enumeration for cardinal directions, as well as None and Any.
 	/// </summary>
-	enum class Direction { None = -1, Up, Down, Left, Right };
+	enum Directions { None = -1, Up, Down, Left, Right, Any };
 #pragma endregion
 
 #pragma region Un-Definitions

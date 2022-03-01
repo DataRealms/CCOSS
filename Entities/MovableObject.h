@@ -52,9 +52,7 @@ class SLTerrain;
 // Parent(s):       SceneObject.
 // Class history:   03/18/2001 MovableObject created.
 
-class MovableObject:
-    public SceneObject
-{
+class MovableObject : public SceneObject {
 
 friend class Atom;
 friend struct EntityLuaBindings;

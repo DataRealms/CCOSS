@@ -809,22 +809,20 @@ int BuyMenuGUI::GetTotalOrderPassengers() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
-    if (enabled != m_SelectingEquipment) {
+    if (enabled != m_SelectingEquipment && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
         m_SelectingEquipment = enabled;
         RefreshTabDisabledStates();
 
-        if (g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
-            if (m_SelectingEquipment) {
-                m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
-                m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
-                m_MenuCategory = m_LastVisitedEquipmentTab;
-            } else {
-                m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
-                m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
-                m_MenuCategory = m_LastVisitedMainTab;
-            }
+        if (m_SelectingEquipment) {
+            m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedEquipmentTab;
+        } else {
+            m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedMainTab;
         }
-        
+
         CategoryChange();
         m_pShopList->ScrollTo(m_SelectingEquipment ? m_LastEquipmentScrollPosition : m_LastMainScrollPosition);
 
@@ -2034,7 +2032,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
             {
                 pSObject = dynamic_cast<SceneObject *>(*oItr);
                 // Only add buyable and non-brain items, unless they are explicitly set to be available.
-				if ((pSObject && pSObject->IsBuyable() && !pSObject->IsInGroup("Brains")) || GetOwnedItemsAmount((pSObject)->GetModuleAndPresetName()) > 0 || m_AlwaysAllowedItems.find((pSObject)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end()) {
+				if ((pSObject && pSObject->IsBuyable() && !pSObject->IsBuyableInObjectPickerOnly() && !pSObject->IsInGroup("Brains")) || GetOwnedItemsAmount((pSObject)->GetModuleAndPresetName()) > 0 || m_AlwaysAllowedItems.find((pSObject)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end()) {
 					tempList.push_back(pSObject);
 				}
             }

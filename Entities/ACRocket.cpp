@@ -56,6 +56,7 @@ void ACRocket::Clear()
         m_Paths[RIGHT][i].Terminate();
         m_Paths[LEFT][i].Terminate();
     }
+	m_MaxGimbalAngle = 0;
 }
 
 
@@ -93,36 +94,23 @@ int ACRocket::Create()
 // Description:     Creates a ACRocket to be identical to another, by deep copy.
 
 int ACRocket::Create(const ACRocket &reference) {
-    if (reference.m_pRLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRLeg->GetUniqueID());
-        SetRightLeg(dynamic_cast<Leg *>(reference.m_pRLeg->Clone()));
-    }
-    if (reference.m_pLLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLLeg->GetUniqueID());
-        SetLeftLeg(dynamic_cast<Leg *>(reference.m_pLLeg->Clone()));
-    }
-    if (reference.m_pMThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMThruster->GetUniqueID());
-        SetMainThruster(dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone()));
-    }
-    if (reference.m_pRThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
-        SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone()));
-    }
-    if (reference.m_pLThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
-        SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone()));
-    }
-    if (reference.m_pURThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
-        SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone()));
-    }
-    if (reference.m_pULThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
-        SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone()));
-    }
+    if (reference.m_pRLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRLeg->GetUniqueID()); }
+    if (reference.m_pLLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLLeg->GetUniqueID()); }
+    if (reference.m_pMThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMThruster->GetUniqueID()); }
+    if (reference.m_pRThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID()); }
+    if (reference.m_pLThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID()); }
+    if (reference.m_pURThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID()); }
+    if (reference.m_pULThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID()); }
 
     ACraft::Create(reference);
+
+    if (reference.m_pRLeg) { SetRightLeg(dynamic_cast<Leg *>(reference.m_pRLeg->Clone())); }
+    if (reference.m_pLLeg) { SetLeftLeg(dynamic_cast<Leg *>(reference.m_pLLeg->Clone())); }
+    if (reference.m_pMThruster) { SetMainThruster(dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone())); }
+    if (reference.m_pRThruster) { SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone())); }
+    if (reference.m_pLThruster) { SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone())); }
+    if (reference.m_pURThruster) { SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone())); }
+    if (reference.m_pULThruster) { SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone())); }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
@@ -144,6 +132,8 @@ int ACRocket::Create(const ACRocket &reference) {
         m_Paths[RIGHT][i].Create(reference.m_Paths[RIGHT][i]);
         m_Paths[LEFT][i].Create(reference.m_Paths[LEFT][i]);
     }
+
+	m_MaxGimbalAngle = reference.m_MaxGimbalAngle;
 
     return 0;
 }
@@ -190,6 +180,9 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_Paths[RIGHT][LOWERING];
     } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
+    } else if (propName == "MaxGimbalAngle") {
+		reader >> m_MaxGimbalAngle;
+		m_MaxGimbalAngle *= (c_PI / 180.0F);
     } else {
         return ACraft::ReadProperty(propName, reader);
     }
@@ -234,6 +227,8 @@ int ACRocket::Save(Writer &writer) const
     writer << m_Paths[RIGHT][LOWERING];
     writer.NewProperty("RaisingGearLimbPath");
     writer << m_Paths[RIGHT][RAISING];
+	writer.NewProperty("MaxGimbalAngle");
+	writer << m_MaxGimbalAngle / (c_PI / 180.0F);
 
     return 0;
 }
@@ -494,6 +489,8 @@ void ACRocket::Update()
 
     if ((m_Status == STABLE || m_Status == UNSTABLE) && !m_Controller.IsDisabled()) {
 		if (m_pMThruster) { 
+			if (m_MaxGimbalAngle != 0) { m_pMThruster->SetInheritedRotAngleOffset(std::sin(m_Rotation.GetRadAngle()) * m_MaxGimbalAngle - c_HalfPI); }
+
 			if (m_Controller.IsState(MOVE_UP) || m_Controller.IsState(AIM_UP)) {
 				if (!m_pMThruster->IsEmitting()) {
 					m_pMThruster->TriggerBurst();

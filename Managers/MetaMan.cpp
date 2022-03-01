@@ -1142,6 +1142,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
         counterRatio = 0.5;
         // Nothing to attack with
         offenseRatio = 0;
+		pThisPlayer->SetOffensiveTargetName("");
     }
     // Special case: no owned bases
     else if (ownedScenes.empty())

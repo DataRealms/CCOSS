@@ -43,9 +43,7 @@ class Loadout;
 // Parent(s):       Activity.
 // Class history:   8/7/2007 GameActivity created.
 
-class GameActivity:
-    public Activity
-{
+class GameActivity : public Activity {
 
     friend struct ActivityLuaBindings;
 
@@ -58,6 +56,8 @@ class GameActivity:
         int orderedByPlayer;
         // Where to land
         Vector landingZone;
+		// How much this delivery was offset upwards for multi-ordering, stored to help with delivery icons. If 0, this was presumably not a multi-order.
+		float multiOrderYOffset;
         // How long left until entry, in ms
         long delay;
         // Times how long we've been in transit

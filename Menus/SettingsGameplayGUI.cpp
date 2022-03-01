@@ -49,15 +49,18 @@ namespace RTE {
 
 		m_UnheldItemsHUDDisplayRangeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderUnheldItemsHUDRange"));
 		int unheldItemsHUDDisplayRangeValue = static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange());
-		if (unheldItemsHUDDisplayRangeValue <= -1) {
+		if (unheldItemsHUDDisplayRangeValue == 0) {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMinimum());
-		} else if (unheldItemsHUDDisplayRangeValue == 0) {
+		} else if (unheldItemsHUDDisplayRangeValue <= -1) {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMaximum());
 		} else {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange() / c_PPM));
 		}
 		m_UnheldItemsHUDDisplayRangeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelUnheldItemsHUDRangeValue"));
 		UpdateUnheldItemsHUDDisplayRange();
+
+		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxAlwaysShowUnheldItemsInStrategicMode"));
+		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->SetCheck(g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +132,8 @@ namespace RTE {
 				UpdateCrabBombThresholdTextbox();
 			} else if (guiEvent.GetControl() == m_UnheldItemsHUDDisplayRangeSlider) {
 				UpdateUnheldItemsHUDDisplayRange();
+			} else if (guiEvent.GetControl() == m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox) {
+				g_SettingsMan.SetAlwaysDisplayUnheldItemsInStrategicMode(m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->GetCheck());
 			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input.
 			} else if (guiEvent.GetControl() == m_GameplaySettingsBox && guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_GameplaySettingsBox->HasFocus()) {
 				UpdateMaxUnheldItemsTextbox();

@@ -237,7 +237,14 @@ namespace RTE {
 		if (m_AudioEnabled) {
 			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops); }
 
-			FMOD_RESULT result = m_MusicChannelGroup->stop();
+			bool musicIsPlaying;
+			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&musicIsPlaying);
+			if (result == FMOD_OK && musicIsPlaying) {
+				bool doNotPlayNextStream = true;
+				FMOD_RESULT result = m_MusicChannelGroup->setUserData(&doNotPlayNextStream);
+				result = (result == FMOD_OK) ? m_MusicChannelGroup->stop() : result;
+				result = (result == FMOD_OK) ? m_MusicChannelGroup->setUserData(nullptr) : result;
+			}
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not stop existing music to play new music: " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -523,6 +530,7 @@ namespace RTE {
 		int channelIndex;
 		std::vector<const SoundSet::SoundData *> selectedSoundData;
 		soundContainer->GetTopLevelSoundSet().GetFlattenedSoundData(selectedSoundData, true);
+		float pitchVariationFactor = 1.0F + std::abs(soundContainer->GetPitchVariation());
 		for (const SoundSet::SoundData *soundData : selectedSoundData) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
@@ -530,7 +538,8 @@ namespace RTE {
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
-			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch()) : result;
+			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
+			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
 			if (soundContainer->IsImmobile()) {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
@@ -806,7 +815,9 @@ namespace RTE {
 
 	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
 		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			g_AudioMan.PlayNextStream();
+			void *userData;
+			FMOD_RESULT result = g_AudioMan.m_MusicChannelGroup->getUserData(&userData);
+			if (userData == nullptr) { g_AudioMan.PlayNextStream(); }
 		}
 		return FMOD_OK;
 	}

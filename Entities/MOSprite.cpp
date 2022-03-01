@@ -30,6 +30,8 @@ void MOSprite::Clear()
 {
     m_SpriteFile.Reset();
     m_aSprite.clear();
+	m_IconFile.Reset();
+	m_GraphicalIcon = nullptr;
     m_FrameCount = 1;
     m_SpriteOffset.Reset();
     m_Frame = 0;
@@ -128,6 +130,8 @@ int MOSprite::Create(const MOSprite &reference)
         return -1;
 
     m_SpriteFile = reference.m_SpriteFile;
+	m_IconFile = reference.m_IconFile;
+	m_GraphicalIcon = m_IconFile.GetAsBitmap();
 
     m_FrameCount = reference.m_FrameCount;
     m_Frame = reference.m_Frame;
@@ -159,11 +163,13 @@ int MOSprite::Create(const MOSprite &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader)
-{
-    if (propName == "SpriteFile")
-        reader >> m_SpriteFile;
-	else if (propName == "FrameCount") {
+int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
+	if (propName == "SpriteFile") {
+		reader >> m_SpriteFile;
+	} else if (propName == "IconFile") {
+		reader >> m_IconFile;
+		m_GraphicalIcon = m_IconFile.GetAsBitmap();
+	} else if (propName == "FrameCount") {
 		reader >> m_FrameCount;
 		m_aSprite.reserve(m_FrameCount);
 	} else if (propName == "SpriteOffset")

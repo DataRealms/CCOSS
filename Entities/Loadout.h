@@ -33,9 +33,7 @@ class Actor;
 // Parent(s):       Entity.
 // Class history:   2/21/2012 Loadout created.
 
-class Loadout:
-    public Entity
-{
+class Loadout : public Entity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

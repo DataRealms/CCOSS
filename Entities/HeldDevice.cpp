@@ -53,6 +53,7 @@ void HeldDevice::Clear()
     m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
+	m_BlinkTimer.SetSimTimeLimitMS(1000);
     m_PieSlices.clear();
     m_Loudness = -1;
 
@@ -368,13 +369,7 @@ bool HeldDevice::CollideAtPoint(HitData &hd)
 
 void HeldDevice::Activate()
 {
-    if (!m_Activated)
-    {
-        m_ActivationTimer.Reset();
-        // Register alarming event!
-        if (m_Loudness > 0)
-            g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness));
-    }
+    if (!m_Activated) { m_ActivationTimer.Reset(); }
     m_Activated = true;
 }
 
@@ -488,6 +483,8 @@ void HeldDevice::Update()
 //        m_aSprite->SetAngle(m_Rotation);
 //        m_aSprite->SetScale(m_Scale);
     }
+
+	if (m_BlinkTimer.IsPastSimTimeLimit()) { m_BlinkTimer.Reset(); }
 }
 
 
@@ -536,84 +533,82 @@ void HeldDevice::Draw(BITMAP *pTargetBitmap,
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
 //                  BITMAP of choice.
 
-void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
-{
-    if (!m_HUDVisible)
-        return;
+void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	if (!m_HUDVisible) {
+		return;
+	}
 
     Attachable::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    if (!m_Parent && !IsUnPickupable())
-    {
-        // Only draw if the team viewing this has seen the space where this is located
-		int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
-        int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
-        if (viewingTeam != Activity::NoTeam)
-        {
-            if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-                return;
-        }
-
-        Vector drawPos = m_Pos - targetPos;
-        // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-        if (!targetPos.IsZero())
-        {
-            // Spans vertical scene seam
-            int sceneWidth = g_SceneMan.GetSceneWidth();
-            if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth)
-            {
-                if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w)))
-                    drawPos.m_X -= sceneWidth;
-                else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w))
-                    drawPos.m_X += sceneWidth;
-            }
-            // Spans horizontal scene seam
-            int sceneHeight = g_SceneMan.GetSceneHeight();
-            if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight)
-            {
-                if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h)))
-                    drawPos.m_Y -= sceneHeight;
-                else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h))
-                    drawPos.m_Y += sceneHeight;
-            }
-        }
-
-        char str[64];
-        str[0] = 0;
-        GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
-        GUIFont *pTextFont = g_FrameMan.GetSmallFont();
-        if (pSymbolFont && pTextFont) {
-            if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {
-				str[0] = 0;
-            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 500) {
-				str[0] = -42;
-                str[1] = 0;
-            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 750) {
-				str[0] = -41;
-                str[1] = 0;
-            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 1000) {
-				str[0] = -40;
-				str[1] = 0;
-			} else {
-				m_BlinkTimer.Reset();
-				// Check for nearby actors that will toggle this pickup HUD
-				float range = g_SettingsMan.GetUnheldItemsHUDDisplayRange();
-                if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::ActivityState::Running) { range = -1.0F; }
-                if (const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(g_ActivityMan.GetActivity())) {
-                    if (gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) {
-                        range = -1.0F;
-                    }
-                }
-				m_SeenByPlayer.at(viewingPlayer) = range < 0 || (range > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
+	if (!IsUnPickupable()) {
+		if (m_Parent) {
+			m_SeenByPlayer.fill(false);
+			m_BlinkTimer.Reset();
+		} else {
+			// Only draw if the team viewing this has seen the space where this is located.
+			int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
+			int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
+			if (viewingTeam == Activity::NoTeam || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
+				return;
 			}
-			if (m_SeenByPlayer.at(viewingPlayer)) {
-				AllegroBitmap pBitmapInt(pTargetBitmap);
-				pSymbolFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, str, GUIFont::Centre);
-				std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
-				pTextFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() - 29, str, GUIFont::Centre);
+
+			Vector drawPos = m_Pos - targetPos;
+			// Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam.
+			if (!targetPos.IsZero()) {
+				int sceneWidth = g_SceneMan.GetSceneWidth();
+				if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth) {
+					if ((targetPos.GetFloorIntX() < 0) && (m_Pos.GetFloorIntX() > (sceneWidth - pTargetBitmap->w))) {
+						drawPos.m_X -= static_cast<float>(sceneWidth);
+					} else if ((targetPos.GetFloorIntX() + pTargetBitmap->w > sceneWidth) && (m_Pos.GetFloorIntX() < pTargetBitmap->w)) {
+						drawPos.m_X += static_cast<float>(sceneWidth);
+					}
+				}
+				int sceneHeight = g_SceneMan.GetSceneHeight();
+				if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight) {
+					if ((targetPos.GetFloorIntY() < 0) && (m_Pos.GetFloorIntY() > (sceneHeight - pTargetBitmap->h))) {
+						drawPos.m_Y -= static_cast<float>(sceneHeight);
+					} else if ((targetPos.GetFloorIntY() + pTargetBitmap->h > sceneHeight) && (m_Pos.GetFloorIntY() < pTargetBitmap->h)) {
+						drawPos.m_Y += static_cast<float>(sceneHeight);
+					}
+				}
 			}
-        }
-    }
+
+			GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
+			GUIFont *pTextFont = g_FrameMan.GetSmallFont();
+			if (pSymbolFont && pTextFont) {
+				const Activity *activity = g_ActivityMan.GetActivity();
+				float unheldItemDisplayRange = activity->GetActivityState() == Activity::ActivityState::Running ? g_SettingsMan.GetUnheldItemsHUDDisplayRange() : -1.0F;
+				if (g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode()) {
+					const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(activity);
+					if (gameActivity && gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) { unheldItemDisplayRange = -1.0F; }
+				}
+				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
+				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
+				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < unheldItemDisplayRange);
+
+				if (m_SeenByPlayer.at(viewingPlayer)) {
+					char pickupArrowString[64];
+					pickupArrowString[0] = 0;
+					if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {
+						pickupArrowString[0] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 500) {
+						pickupArrowString[0] = -42;
+						pickupArrowString[1] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 750) {
+						pickupArrowString[0] = -41;
+						pickupArrowString[1] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 1000) {
+						pickupArrowString[0] = -40;
+						pickupArrowString[1] = 0;
+					}
+
+					AllegroBitmap targetAllegroBitmap(pTargetBitmap);
+					pSymbolFont->DrawAligned(&targetAllegroBitmap, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, pickupArrowString, GUIFont::Centre);
+					pTextFont->DrawAligned(&targetAllegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() - 29, m_PresetName, GUIFont::Centre);
+				}
+			}
+		}
+	}
 }
 
 } // namespace RTE

@@ -22,6 +22,7 @@ namespace RTE {
 		.def("Reset", &Entity::Reset)
 		.def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
 		.def("AddToGroup", &Entity::AddToGroup)
+		.def("RemoveFromGroup", &Entity::RemoveFromGroup)
 		.def("IsInGroup", &Entity::IsInGroup);
 	}
 
@@ -60,6 +61,7 @@ namespace RTE {
 		.property("StrideSound", &ACrab::GetStrideSound, &ACrabSetStrideSound)
 		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
 		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
+		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -85,13 +87,13 @@ namespace RTE {
 			luabind::value("MOVEMENTSTATECOUNT", ACrab::MovementState::MOVEMENTSTATECOUNT)
 		]
 		.enum_("Side")[
-			luabind::value("LEFTSIDE", ACrab::LEFTSIDE), // Doesn't have qualifier
-			luabind::value("RIGHTSIDE", ACrab::RIGHTSIDE), // Doesn't have qualifier
-			luabind::value("SIDECOUNT", ACrab::SIDECOUNT) // Doesn't have qualifier
+			luabind::value("LEFTSIDE", ACrab::Side::LEFTSIDE),
+			luabind::value("RIGHTSIDE", ACrab::Side::RIGHTSIDE),
+			luabind::value("SIDECOUNT", ACrab::Side::SIDECOUNT)
 		]
 		.enum_("Layer")[
-			luabind::value("FGROUND", ACrab::FGROUND), // Doesn't have qualifier
-			luabind::value("BGROUND", ACrab::BGROUND) // Doesn't have qualifier
+			luabind::value("FGROUND", ACrab::Layer::FGROUND),
+			luabind::value("BGROUND", ACrab::Layer::BGROUND)
 		]
 		.enum_("DeviceHandlingState")[
 			luabind::value("STILL", ACrab::DeviceHandlingState::STILL),
@@ -152,8 +154,8 @@ namespace RTE {
 			luabind::value("HatchStateCount", ACraft::HatchState::HatchStateCount)
 		]
 		.enum_("Side")[
-			luabind::value("RIGHT", ACraft::RIGHT), // Doesn't have qualifier
-			luabind::value("LEFT", ACraft::LEFT) // Doesn't have qualifier
+			luabind::value("RIGHT", ACraft::Side::RIGHT),
+			luabind::value("LEFT", ACraft::Side::LEFT)
 		]
 
 		.enum_("CraftDeliverySequence")[
@@ -220,6 +222,7 @@ namespace RTE {
 		.property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
 		.property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
 		.property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
+		.property("SharpAimProgress", &Actor::GetSharpAimProgress)
 		.property("Height", &Actor::GetHeight)
 		.property("AIMode", &Actor::GetAIMode, &Actor::SetAIMode)
 		.property("DeploymentID", &Actor::GetDeploymentID)
@@ -368,6 +371,7 @@ namespace RTE {
 		.property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
 		.property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
 		.property("Throttle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
+		.property("ThrottleFactor", &AEmitter::GetThrottleFactor)
 		.property("NegativeThrottleMultiplier", &AEmitter::GetNegativeThrottleMultiplier, &AEmitter::SetNegativeThrottleMultiplier)
 		.property("PositiveThrottleMultiplier", &AEmitter::GetPositiveThrottleMultiplier, &AEmitter::SetPositiveThrottleMultiplier)
 		.property("BurstSpacing", &AEmitter::GetBurstSpacing, &AEmitter::SetBurstSpacing)
@@ -408,11 +412,13 @@ namespace RTE {
 		.property("StrideSound", &AHuman::GetStrideSound, &AHumanSetStrideSound)
 		.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
+		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
 		.property("EquippedBGItem", &AHuman::GetEquippedBGItem)
+		.property("EquippedMass", &AHuman::GetEquippedMass)
 		.property("FirearmIsReady", &AHuman::FirearmIsReady)
 		.property("ThrowableIsReady", &AHuman::ThrowableIsReady)
 		.property("FirearmIsEmpty", &AHuman::FirearmIsEmpty)
@@ -420,6 +426,8 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
+		.property("IsClimbing", &AHuman::IsClimbing)
+		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)
@@ -429,7 +437,9 @@ namespace RTE {
 		.def("EquipDeviceInGroup", &AHuman::EquipDeviceInGroup)
 		.def("EquipNamedDevice", &AHuman::EquipNamedDevice)
 		.def("EquipLoadedFirearmInGroup", &AHuman::EquipLoadedFirearmInGroup)
+		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
+		.def("UnequipArms", &AHuman::UnequipArms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)
@@ -441,6 +451,8 @@ namespace RTE {
 		.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 		.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
 		.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
+		.def("GetWalkAngle", &AHuman::GetWalkAngle)
+		.def("SetWalkAngle", &AHuman::SetWalkAngle)
 
 		.enum_("UpperBodyState")[
 			luabind::value("WEAPON_READY", AHuman::UpperBodyState::WEAPON_READY),
@@ -471,8 +483,8 @@ namespace RTE {
 			luabind::value("PRONESTATECOUNT", AHuman::ProneState::PRONESTATECOUNT)
 		]
 		.enum_("Layer")[
-			luabind::value("FGROUND", AHuman::FGROUND), // Doesn't have qualifier
-			luabind::value("BGROUND", AHuman::BGROUND) // Doesn't have qualifier
+			luabind::value("FGROUND", AHuman::Layer::FGROUND),
+			luabind::value("BGROUND", AHuman::Layer::BGROUND)
 		]
 		.enum_("DeviceHandlingState")[
 			luabind::value("STILL", AHuman::DeviceHandlingState::STILL),
@@ -530,6 +542,7 @@ namespace RTE {
 		.property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
 		.property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
+		.property("JointPos", &Attachable::GetJointPos)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &AttachableSetParentBreakWound)
@@ -649,6 +662,7 @@ namespace RTE {
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
+		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
 
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
@@ -665,10 +679,10 @@ namespace RTE {
 		.def("DoneReloading", &HeldDevice::DoneReloading)
 		.def("NeedsReloading", &HeldDevice::NeedsReloading)
 		.def("IsFull", &HeldDevice::IsFull)
+		.def("IsEmpty", &HeldDevice::IsEmpty)
 		.def("IsPickupableBy", &HeldDevice::IsPickupableBy)
 		.def("AddPickupableByPresetName", &HeldDevice::AddPickupableByPresetName)
-		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName)
-		.def("SetSupported", &HeldDevice::SetSupported);
+		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -780,6 +794,8 @@ namespace RTE {
 		.def("FacingAngle", &MOSprite::FacingAngle)
 		.def("GetSpriteWidth", &MOSprite::GetSpriteWidth)
 		.def("GetSpriteHeight", &MOSprite::GetSpriteHeight)
+		.def("GetIconWidth", &MOSprite::GetIconWidth)
+		.def("GetIconHeight", &MOSprite::GetIconHeight)
 		.def("SetEntryWound", &MOSprite::SetEntryWound)
 		.def("SetExitWound", &MOSprite::SetExitWound)
 		.def("GetEntryWoundPresetName", &MOSprite::GetEntryWoundPresetName)
@@ -902,6 +918,7 @@ namespace RTE {
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)
 		.property("HUDVisible", &MovableObject::GetHUDVisible, &MovableObject::SetHUDVisible)
 		.property("PinStrength", &MovableObject::GetPinStrength, &MovableObject::SetPinStrength)
+		.property("RestThreshold", &MovableObject::GetRestThreshold, &MovableObject::SetRestThreshold)
 		.property("DamageOnCollision", &MovableObject::DamageOnCollision, &MovableObject::SetDamageOnCollision)
 		.property("DamageOnPenetration", &MovableObject::DamageOnPenetration, &MovableObject::SetDamageOnPenetration)
 		.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)
@@ -969,6 +986,7 @@ namespace RTE {
 		.property("EmitAngle", &PEmitter::GetEmitAngle, &PEmitter::SetEmitAngle)
 		.property("GetThrottle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
 		.property("Throttle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+		.property("ThrottleFactor", &PEmitter::GetThrottleFactor)
 		.property("BurstSpacing", &PEmitter::GetBurstSpacing, &PEmitter::SetBurstSpacing)
 		.property("EmitCountLimit", &PEmitter::GetEmitCountLimit, &PEmitter::SetEmitCountLimit)
 		.property("FlashScale", &PEmitter::GetFlashScale, &PEmitter::SetFlashScale)
@@ -1032,9 +1050,10 @@ namespace RTE {
 		.def("RetrieveResidentBrains", &Scene::RetrieveResidentBrains)
 		.def("GetResidentBrain", &Scene::GetResidentBrain)
 		.def("SetResidentBrain", &Scene::SetResidentBrain)
+		.def_readwrite("Areas", &Scene::m_AreaList, luabind::return_stl_iterator)
 		.def("SetArea", &Scene::SetArea)
 		.def("HasArea", &Scene::HasArea)
-		.def("GetArea", &Scene::GetArea)
+		.def("GetArea", (Scene::Area * (Scene:: *)(const std::string &areaName)) &Scene::GetArea)
 		.def("GetOptionalArea", &Scene::GetOptionalArea)
 		.def("WithinArea", &Scene::WithinArea)
 		.def("ResetPathFinding", &Scene::ResetPathFinding)
@@ -1063,7 +1082,9 @@ namespace RTE {
 		.property("Name", &Scene::Area::GetName)
 
 		.def("Reset", &Scene::Area::Reset)
+		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)
 		.def("AddBox", &Scene::Area::AddBox)
+		.def("RemoveBox", &Scene::Area::RemoveBox)
 		.def("HasNoArea", &Scene::Area::HasNoArea)
 		.def("IsInside", &Scene::Area::IsInside)
 		.def("IsInsideX", &Scene::Area::IsInsideX)
@@ -1137,9 +1158,11 @@ namespace RTE {
 		.property("Pos", &SoundContainer::GetPosition, &SoundContainer::SetPosition)
 		.property("Volume", &SoundContainer::GetVolume, &SoundContainer::SetVolume)
 		.property("Pitch", &SoundContainer::GetPitch, &SoundContainer::SetPitch)
+		.property("PitchVariation", &SoundContainer::GetPitchVariation, &SoundContainer::SetPitchVariation)
 
 		.def("HasAnySounds", &SoundContainer::HasAnySounds)
 		.def("GetTopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)
+		.def("SetTopLevelSoundSet", &SoundContainer::SetTopLevelSoundSet)
 		.def("IsBeingPlayed", &SoundContainer::IsBeingPlayed)
 		.def("Play", (bool (SoundContainer:: *)()) &SoundContainer::Play)
 		.def("Play", (bool (SoundContainer:: *)(const int player)) &SoundContainer::Play)
@@ -1171,8 +1194,10 @@ namespace RTE {
 
 		.def("HasAnySounds", &SoundSet::HasAnySounds)
 		.def("SelectNextSounds", &SoundSet::SelectNextSounds)
-		.def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)
-		.def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+		.def("AddSound", (void (SoundSet:: *)(const std::string &soundFilePath)) &SoundSet::AddSound)
+		.def("AddSound", (void (SoundSet:: *)(const std::string &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+		.def("RemoveSound", (bool (SoundSet:: *)(const std::string &soundFilePath)) &SoundSet::RemoveSound)
+		.def("RemoveSound", (bool (SoundSet:: *)(const std::string &soundFilePath, bool removeFromSubSoundSets)) &SoundSet::RemoveSound)
 		.def("AddSoundSet", &SoundSet::AddSoundSet)
 
 		.enum_("SoundSelectionCycleMode")[

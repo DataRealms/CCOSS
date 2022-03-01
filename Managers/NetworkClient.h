@@ -187,6 +187,7 @@ namespace RTE {
 
 		int m_MouseButtonPressedState[3]; //!<
 		int m_MouseButtonReleasedState[3]; //!<
+		int m_MouseWheelMoved; //!< Whether the mousewheel was moved this Update. Used to make mousewheel detection better.
 
 	private:
 

@@ -215,7 +215,7 @@ namespace RTE {
 			}
 		}
 		// Avoid zero (if radius is nonexistent, for example), will cause divide by zero problems otherwise.
-		if (m_MomentOfInertia == 0.0F) { m_MomentOfInertia = 0.000001F; }
+		if (m_MomentOfInertia == 0.0F) { m_MomentOfInertia = 1.0F; }
 
 		return m_MomentOfInertia;
 	}
@@ -235,7 +235,10 @@ namespace RTE {
 			m_Atoms.push_back(atomToAdd);
 			m_SubGroups.at(subgroupID).push_back(atomToAdd);
 		}
-		if (!atomList.empty()) { m_MomentOfInertia = 0.0F; }
+		if (!atomList.empty()) {
+			m_MomentOfInertia = 0.0F;
+			if (m_OwnerMOSR) { GetMomentOfInertia(); }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +260,10 @@ namespace RTE {
 			}
 		}
 		m_SubGroups.erase(removeID);
-		if (removedAny) { m_MomentOfInertia = 0.0F; }
+		if (removedAny) {
+			m_MomentOfInertia = 0.0F;
+			if (m_OwnerMOSR) { GetMomentOfInertia(); }
+		}
 
 		return removedAny;
 	}
@@ -1197,8 +1203,14 @@ namespace RTE {
 
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
-		// Pull back the limb if it strayed off the path.
-		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) { m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius()); }
+		// Pull back or reset the limb if it strayed off the path.
+		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) { 
+			if (limbDist.GetMagnitude() > m_OwnerMOSR->GetDiameter()) {
+				limbPath.Terminate();
+			} else {
+				m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
+			}
+		}
 
 		// TODO: Change this to a regular while loop if possible.
 		do {

@@ -29,9 +29,7 @@ namespace RTE
 // Parent(s):       MOSParticle.
 // Class history:   02/29/2004 PEmitter created.
 
-class PEmitter :
-	public MOSParticle
-{
+class PEmitter : public MOSParticle {
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +272,14 @@ public:
 	//                  0 means normal, -1.0 means least emission rate.
 
 	float GetThrottle() const { return m_Throttle; }
+
+
+	/// <summary>
+	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this PEmitter.
+	/// </summary>
+	/// <returns>The throttle strength as a multiplier.</returns>
+	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0 ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
+
 	/*
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          SetEmitRate

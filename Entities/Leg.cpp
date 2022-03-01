@@ -133,6 +133,7 @@ namespace RTE {
 				dynamic_cast<Leg *>(parent)->SetFoot(attachable);
 			}});
 
+			if (m_Foot->HasNoSetDamageMultiplier()) { m_Foot->SetDamageMultiplier(1.0F); }
 			m_Foot->SetInheritsRotAngle(false);
 			m_Foot->SetParentGibBlastStrengthMultiplier(0.0F);
 			m_Foot->SetCollidesWithTerrainWhileAttached(false);

@@ -29,9 +29,7 @@ class Magazine;
 // Parent(s):       HeldDevice.
 // Class history:   07/1/2002 HDFirearm created.
 
-class HDFirearm:
-    public HeldDevice
-{
+class HDFirearm : public HeldDevice {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -652,6 +650,8 @@ ClassInfoGetters;
 // Return value:    Whetehr magazine is full or not.
 
 	bool IsFull() const override;
+
+	bool IsEmpty() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

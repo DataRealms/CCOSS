@@ -30,9 +30,7 @@ namespace RTE
 // Parent(s):       Entity.
 // Class history:   8/6/2007 SceneObject created.
 
-class SceneObject:
-    public Entity
-{
+class SceneObject : public Entity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +40,11 @@ public:
 
 	SerializableOverrideMethods;
 	ClassInfoGetters;
+
+	/// <summary>
+	/// Enumeration for the different buyable modes of this SceneObject.
+	/// </summary>
+	enum class BuyableMode { NoRestrictions, BuyMenuOnly, ObjectPickerOnly };
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -461,6 +464,18 @@ public:
 
     bool IsBuyable() const { return m_Buyable; }
 
+	/// <summary>
+	/// Gets whether this SceneObject is available only in the BuyMenu list when buyable.
+	/// </summary>
+	/// <returns>Whether this SceneObject is available only in the BuyMenu list when buyable.</returns>
+	bool IsBuyableInBuyMenuOnly() const { return m_BuyableMode == BuyableMode::BuyMenuOnly; }
+
+	/// <summary>
+	/// Gets whether this SceneObject is available only in the ObjectPicker list when buyable.
+	/// </summary>
+	/// <returns>Whether this SceneObject is available only in the ObjectPicker list when buyable.</returns>
+	bool IsBuyableInObjectPickerOnly() const { return m_BuyableMode == BuyableMode::ObjectPickerOnly; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGraphicalIcon
@@ -538,6 +553,9 @@ protected:
     float m_OzValue;
     // Whether this shows up in the buy menu at all
     bool m_Buyable;
+
+	BuyableMode m_BuyableMode; //!< In which buy lists this SceneObject is available when buyable.
+
     // The team this object belongs to. -1 if none.
     int m_Team;
     // The player this was placed by in edit mode

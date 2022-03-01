@@ -337,7 +337,28 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	}
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
-		if (LoadScript(scriptPath) == -3) { reader.ReportError("Duplicate script path " + scriptPath); }
+        switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
+            case 0:
+                break;
+            case -1:
+                reader.ReportError("The script path " + scriptPath + " was empty.");
+                break;
+            case -2:
+                reader.ReportError("The script path " + scriptPath + "  did not point to a valid file.");
+                break;
+            case -3:
+                reader.ReportError("The script path " + scriptPath + " is already loaded onto this object.");
+                break;
+            case -4:
+                reader.ReportError("Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+                break;
+            case -5:
+                // Error in lua file, this'll pop up in the console so no need to report an error through the reader.
+                break;
+            default:
+                RTEAbort("Reached default case while adding script in INI. This should never happen!");
+                break;
+        }
 	} else if (propName == "ScreenEffect") {
         reader >> m_ScreenEffectFile;
         m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
@@ -592,7 +613,7 @@ int MovableObject::ReloadScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::AddScript(const std::string &scriptPath) {
-    switch (LoadScript(scriptPath)) {
+    switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
         case 0:
             // If we have a ScriptObjectName that means Create has already been run for pre-existing scripts. Run it right away for this one.
             if (ObjectScriptsInitialized()) {

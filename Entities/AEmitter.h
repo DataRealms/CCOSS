@@ -28,9 +28,7 @@ namespace RTE
 // Parent(s):       Attachable.
 // Class history:   02/29/2004 AEmitter created.
 
-class AEmitter:
-    public Attachable
-{
+class AEmitter : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,6 +259,12 @@ ClassInfoGetters;
 //                  0 means normal, -1.0 means least emission rate.
 
     float GetThrottle() const { return m_Throttle; }
+
+	/// <summary>
+	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this AEmitter.
+	/// </summary>
+	/// <returns>The throttle strength as a multiplier.</returns>
+	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0 ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
 
 	/// <summary>
 	/// Gets the negative throttle multiplier of this AEmitter.

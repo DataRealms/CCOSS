@@ -53,7 +53,7 @@ cd "${tmp_dir}"
 
 export CCCP_SETTINGSPATH="Settings.ini"
 
-@EXENAME@ $@
+"@EXEPATH@/@EXENAME@" $@
 
 exit_code=$?
 

@@ -392,8 +392,8 @@ namespace RTE {
 		/// <summary>
 		/// Gets any keyboard or gamepad directional input.
 		/// </summary>
-		/// <returns>The direction of found input. Priority matches ordering of the Direction enumeration.</returns>
-		Direction GetNonMouseButtonControllerMovement();
+		/// <returns>The direction of found input. Priority matches ordering of the Directions enumeration.</returns>
+		Directions GetNonMouseButtonControllerMovement();
 
 		/// <summary>
 		/// Breakdown of HandleNonMouseInput for handling pressing/holding up.

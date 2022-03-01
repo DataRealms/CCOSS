@@ -25,7 +25,7 @@ namespace RTE {
 		/// Constructor method used to instantiate a Attachable object in system memory. Create() should be called before using the object.
 		/// </summary>
 		Attachable() { Clear(); }
-		
+
 		/// <summary>
 		/// Makes the Attachable object ready for use.
 		/// </summary>
@@ -237,6 +237,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newJointOffset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
 		void SetJointOffset(const Vector &newJointOffset) { m_JointOffset = newJointOffset; }
+
+		/// <summary>
+		/// Gets the absolute position of the joint that the parent of this Attachable sets upon Update().
+		/// </summary>
+		/// <returns>A Vector describing the current absolute position of the joint.</returns>
+		const Vector & GetJointPos() const { return m_JointPos; }
 #pragma endregion
 
 #pragma region Force Transferral
@@ -304,14 +310,14 @@ namespace RTE {
 #pragma region Inherited Value Getters and Setters
 		/// <summary>
 		/// Gets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
-		/// -1 (or technically any value that's not 0 or 1) means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance.
+		/// 0 means no inheritance, 1 means normal inheritance, anything else means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
 		/// </summary>
 		/// <returns>Whether or not this Attachable inherits its parent's HFlipped value.</returns>
 		int InheritsHFlipped() const { return m_InheritsHFlipped; }
 
 		/// <summary>
 		/// Sets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
-		/// -1 (or technically any value that's not 0 or 1) means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance.
+		/// 0 means no inheritance, 1 means normal inheritance, anything else means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
 		/// </summary>
 		/// <param name="inheritsRotAngle">Whether or not to inherit its parent's HFlipped value.</param>
 		void SetInheritsHFlipped(int inheritsHFlipped) { m_InheritsHFlipped = inheritsHFlipped; }
@@ -524,10 +530,10 @@ namespace RTE {
 		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be drawn normally when attached, or will require special handling by some non-MOSR parent type.
 		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when it's removed from its parent.
 		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
-		
+
 		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
 		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs.
-		
+
 		//TODO This is a stopgap for a dedicated Wound class, that would be helpful to simplify things like this and default damage multiplier handling.
 		bool m_IsWound; //!< Whether or not this Attachable has been added as a wound. Only set and applied for Attachables with parents.
 

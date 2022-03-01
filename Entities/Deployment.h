@@ -34,9 +34,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   02/27/2012 Deployment created.
 
-class Deployment:
-    public SceneObject
-{
+class Deployment : public SceneObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

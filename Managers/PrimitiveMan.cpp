@@ -16,6 +16,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PrimitiveMan::DrawIconPrimitive(int player, const Vector &centerPos, Entity *entity) {
+		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity)) { m_ScheduledPrimitives.push_back(std::make_unique<BitmapPrimitive>(player, centerPos, moSprite->GetGraphicalIcon(), 0, false, false)); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
 		for (const std::unique_ptr<GraphicalPrimitive> &primitive : m_ScheduledPrimitives) {
 			if (primitive->m_Player == player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }

@@ -34,8 +34,7 @@ class AEmitter;
 // Parent(s):       Actor.
 // Class history:   10/24/2007 ACrab created.
 
-class ACrab :
-	public Actor {
+class ACrab : public Actor {
 	friend struct EntityLuaBindings;
 
 
@@ -259,6 +258,18 @@ public:
 
 
 	/// <summary>
+	/// Gets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <returns>The rate at which the jetpack is replenished.</returns>
+	float GetJetReplenishRate() const { return m_JetReplenishRate; }
+
+	/// <summary>
+	/// Sets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
+	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
+
+	/// <summary>
 	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
 	/// </summary>
 	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
@@ -349,9 +360,9 @@ public:
 	bool FirearmNeedsReload() const;
 
 	/// <summary>
-	/// Indicates whether all of the MountedDevices are at full capacity.
+	/// Gets whether or not all of this ACrab's Turret's HDFirearms are full.
 	/// </summary>
-	/// <returns>Whether all of the MountedDevices are at full capacity.</returns>
+	/// <returns>Whether or not all of this ACrab's Turret's HDFirearms are full. Will return true if there is no Turret or no HDFirearms.</returns>
 	bool FirearmsAreFull() const;
 
 
@@ -422,6 +433,13 @@ int FirearmActivationDelay() const;
 // Return value:    A pointer to the MO seen while looking.
 
 	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
+
+
+	/// <summary>
+	/// Gets the GUI representation of this ACrab, only defaulting to its Turret or body if no GraphicalIcon has been defined.
+	/// </summary>
+	/// <returns>The graphical representation of this ACrab as a BITMAP.</returns>
+	BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -585,6 +603,7 @@ protected:
 	float m_JetTimeTotal;
 	// How much time left the jetpack can go, in ms
 	float m_JetTimeLeft;
+	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
 	// Blink timer

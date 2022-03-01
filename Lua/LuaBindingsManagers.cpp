@@ -31,13 +31,14 @@ namespace RTE {
 		.property("MusicVolume", &AudioMan::GetMusicVolume, &AudioMan::SetMusicVolume)
 		.property("SoundsVolume", &AudioMan::GetSoundsVolume, &AudioMan::SetSoundsVolume)
 
+		.def("StopAll", &AudioMan::StopAll)
 		.def("GetGlobalPitch", &AudioMan::GetGlobalPitch)
 		.def("IsMusicPlaying", &AudioMan::IsMusicPlaying)
 		.def("SetTempMusicVolume", &AudioMan::SetTempMusicVolume)
 		.def("GetMusicPosition", &AudioMan::GetMusicPosition)
 		.def("SetMusicPosition", &AudioMan::SetMusicPosition)
 		.def("SetMusicPitch", &AudioMan::SetMusicPitch)
-		.def("StopAll", &AudioMan::StopMusic)
+		.def("StopMusic", &AudioMan::StopMusic)
 		.def("PlayMusic", &AudioMan::PlayMusic)
 		.def("PlayNextStream", &AudioMan::PlayNextStream)
 		.def("StopMusic", &AudioMan::StopMusic)
@@ -144,6 +145,7 @@ namespace RTE {
 		.def("IsOfActor", &MovableMan::IsOfActor)
 		.def("GetRootMOID", &MovableMan::GetRootMOID)
 		.def("RemoveMO", &MovableMan::RemoveMO)
+		.def("KillAllTeamActors", &MovableMan::KillAllTeamActors)
 		.def("KillAllEnemyActors", &MovableMan::KillAllEnemyActors)
 		.def("OpenAllDoors", &MovableMan::OpenAllDoors)
 		.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)
@@ -227,7 +229,9 @@ namespace RTE {
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
-		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive);
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
+		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

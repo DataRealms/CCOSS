@@ -253,20 +253,15 @@ Actor * Deployment::CreateDeployedActor(int player, float &costTally)
     }
 
     // Find the Loadout that this Deployment is referring to
-    const Loadout *pLoadout = dynamic_cast<const Loadout *>(g_PresetMan.GetEntityPreset("Loadout", m_LoadoutName, nativeModule));
-    if (pLoadout)
-    {
-        // Create and pass along the first Actor and his inventory defined in the Loadout
-        pReturnActor = pLoadout->CreateFirstActor(nativeModule, foreignCostMult, nativeCostMult, costTally);
-        // Set the position and team etc for the Actor we are prepping to spawn
-        if (pReturnActor)
-        {
-            pReturnActor->SetPos(m_Pos);
-            pReturnActor->SetTeam(m_Team);
-			pReturnActor->SetHFlipped(m_HFlipped);
-            pReturnActor->SetControllerMode(Controller::CIM_AI);
-            pReturnActor->SetAIMode(Actor::AIMODE_SENTRY);
-			pReturnActor->SetDeploymentID(m_ID);
+    if (const Loadout *pLoadout = dynamic_cast<const Loadout *>(g_PresetMan.GetEntityPreset("Loadout", m_LoadoutName, nativeModule))) {
+        if (std::unique_ptr<Actor> rawLoadoutActor = std::unique_ptr<Actor>(pLoadout->CreateFirstActor(nativeModule, foreignCostMult, nativeCostMult, costTally))) {
+			rawLoadoutActor->SetPos(m_Pos);
+			rawLoadoutActor->SetTeam(m_Team);
+			rawLoadoutActor->SetHFlipped(m_HFlipped);
+			rawLoadoutActor->SetControllerMode(Controller::CIM_AI);
+			rawLoadoutActor->SetAIMode(Actor::AIMODE_SENTRY);
+			rawLoadoutActor->SetDeploymentID(m_ID);
+			pReturnActor = dynamic_cast<Actor *>(rawLoadoutActor->Clone());
         }
     }
 

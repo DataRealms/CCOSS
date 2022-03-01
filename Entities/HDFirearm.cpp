@@ -100,15 +100,13 @@ int HDFirearm::Create()
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
 int HDFirearm::Create(const HDFirearm &reference) {
-    if (reference.m_pMagazine) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID());
-        SetMagazine(dynamic_cast<Magazine *>(reference.m_pMagazine->Clone()));
-    }
-    if (reference.m_pFlash) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
-        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
-    }
+    if (reference.m_pMagazine) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID()); }
+    if (reference.m_pFlash) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID()); }
+
     HeldDevice::Create(reference);
+
+    if (reference.m_pMagazine) { SetMagazine(dynamic_cast<Magazine *>(reference.m_pMagazine->Clone())); }
+    if (reference.m_pFlash) { SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone())); }
 
     m_pMagazineReference = reference.m_pMagazineReference;
 	if (reference.m_PreFireSound) { m_PreFireSound = dynamic_cast<SoundContainer *>(reference.m_PreFireSound->Clone()); }
@@ -175,7 +173,6 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "DeactivationSound") {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "EmptySound") {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
@@ -619,8 +616,10 @@ void HDFirearm::Activate() {
     HeldDevice::Activate();
 
     if (!IsReloading()) {
+		if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->FadeOut(); }
         if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
         if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
+		if (IsEmpty()) { Reload(); }
     }
 }
 
@@ -636,9 +635,9 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-	if (m_PreFireSound) { m_PreFireSound->Stop(); }
+	if (m_PreFireSound) { m_PreFireSound->FadeOut(); }
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
-    if (m_DeactivationSound && wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound->Play(m_Pos); }
+    if (m_DeactivationSound && wasActivated && m_FiredLastFrame) { m_DeactivationSound->Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -681,9 +680,7 @@ void HDFirearm::Reload()
             m_pMagazine = 0;
         }
 
-        // Stop any activation
-        m_Activated = false;
-		if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed()) { m_FireSound->Stop(); }
+		Deactivate();
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
@@ -732,6 +729,14 @@ bool HDFirearm::IsFull() const
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool HDFirearm::IsEmpty() const {
+	if (m_pMagazine) {
+		return m_pMagazine->IsEmpty();
+	}
+    return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -928,7 +933,9 @@ void HDFirearm::Update()
                 delete pRound;
             }
             pRound = 0;
-        }
+		} else {
+			m_ActivationTimer.Reset();
+		}
 	} else if (m_Activated && !m_AlreadyClicked) {
         // Play empty pin click sound.
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
@@ -955,11 +962,9 @@ void HDFirearm::Update()
     // Do stuff to deactivate after being activated
     if (!m_Activated)
     {
-		if (m_AlreadyClicked && m_FiredLastFrame && m_DeactivationSound) { m_DeactivationSound->Play(m_Pos); }
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
-		if (m_PreFireSound) { m_PreFireSound->Stop(); }
         // Stop any looping activation sounds
         if (m_FireSound && m_FireSound->GetLoopSetting() == -1)// && m_FireSound->IsBeingPlayed())
             m_FireSound->Stop();
@@ -1003,6 +1008,8 @@ void HDFirearm::Update()
             }
 			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
+
+		if (m_Loudness > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness)); }
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)

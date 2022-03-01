@@ -178,9 +178,15 @@ bool PresetMan::LoadAllDataModules() {
 			return false;
 		}
 	} else {
-		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+		std::vector<std::filesystem::directory_entry> workingDirectoryFolders;
+		std::copy_if(std::filesystem::directory_iterator(System::GetWorkingDirectory()), std::filesystem::directory_iterator(), std::back_inserter(workingDirectoryFolders),
+			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
+		);
+		std::sort(workingDirectoryFolders.begin(), workingDirectoryFolders.end());
+
+		for (const std::filesystem::directory_entry &directoryEntry : workingDirectoryFolders) {
 			std::string directoryEntryPath = directoryEntry.path().generic_string();
-			if (std::filesystem::is_directory(directoryEntryPath) && std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
+			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
 				if (!g_SettingsMan.IsModDisabled(moduleName) && (std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end() && moduleName != "Metagames.rte" && moduleName != "Scenes.rte")) {
 					int moduleID = GetModuleID(moduleName);
@@ -663,7 +669,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 			{
 				SceneObject * pSObject = dynamic_cast<SceneObject *>(*oItr);
 				// Buyable and not brain?
-				if (pSObject && pSObject->IsBuyable() && !pSObject->IsInGroup("Brains"))
+				if (pSObject && pSObject->IsBuyable() && !pSObject->IsBuyableInObjectPickerOnly() && !pSObject->IsInGroup("Brains"))
 				{
 					entityList.push_back(*oItr);
 					foundAny = true;

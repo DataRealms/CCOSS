@@ -1493,6 +1493,28 @@ enum MOType
 
 	void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  GetUpdatePeriod()
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets period of lua updates.
+// Arguments:       None.
+// Return value:    Updates period.
+
+    unsigned int GetUpdatePeriod() {
+        return m_UpdatePeriod;
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  SetUpdatePeriod()
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets period of update lua calls.
+// Arguments:       Period of updates.
+// Return value:    None.
+
+    void SetUpdatePeriod(unsigned int period) {
+        m_UpdatePeriod = period;
+    }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
@@ -2006,6 +2028,10 @@ protected:
 	unsigned int m_LastCollisionSimFrameNumber;
 	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
 	bool m_ProvidesPieMenuContext;
+    // Update every n frames property
+    unsigned int m_UpdatePeriod;
+    // Update scripts counter
+    unsigned int m_UpdateFrames;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

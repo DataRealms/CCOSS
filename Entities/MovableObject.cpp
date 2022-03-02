@@ -108,6 +108,9 @@ void MovableObject::Clear()
 	m_ParticleUniqueIDHit = 0;
 
 	m_ProvidesPieMenuContext = false;
+
+    m_UpdateFrames = 0;
+    m_UpdatePeriod = 1;
 }
 
 
@@ -133,6 +136,8 @@ int MovableObject::Create()
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
+
+    m_UpdateFrames = 0;
 
     g_MovableMan.RegisterObject(this);
 
@@ -169,6 +174,8 @@ int MovableObject::Create(const float mass,
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
+
+    m_UpdateFrames = 0;
 
 	g_MovableMan.RegisterObject(this);
 
@@ -252,6 +259,8 @@ int MovableObject::Create(const MovableObject &reference)
 	m_MOIDHit = reference.m_MOIDHit;
 	m_TerrainMatHit = reference.m_TerrainMatHit;
 	m_ParticleUniqueIDHit = reference.m_ParticleUniqueIDHit;
+
+    m_UpdatePeriod = reference.m_UpdatePeriod;
 
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
@@ -401,6 +410,8 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
         reader >> m_ApplyWoundBurstDamageOnCollision;
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
+    else if (propName == "UpdatePeriod")
+        reader >> m_UpdatePeriod;
 	else
         return SceneObject::ReadProperty(propName, reader);
 
@@ -1007,9 +1018,18 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::UpdateScripts() {
+    m_UpdateFrames++;
+    
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
     }
+
+    if (m_UpdateFrames < m_UpdatePeriod) {
+        return 1;
+    }
+
+    m_UpdateFrames = 0;
+
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;

@@ -7,22 +7,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
-</details>
-
-<details><summary><b>Changed</b></summary>
-</details>
-
-<details><summary><b>Fixed</b></summary>
-</details>
-
-<details><summary><b>Removed</b></summary>
-</details>
-
-***
-
-## [0.1.0 pre-release 4.0][0.1.0-pre4.0] - 2022/02/28
-
-<details><summary><b>Added</b></summary>
 
 - New `Scene` Lua property `BackgroundLayers` (R/O) to access an iterator of the `Scene`'s `SLBackground` layers.
 
@@ -76,6 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	CanHFlip/CanVFlip = 0/1 // Flips each debris piece on the X, Y or both axis.  
 
 	FlipChance = floatValue // Chance for a debris piece to be flipped when either `CanHFlip` or `CanYFlip` are set true. 0-1, defaults to 0.5.
+	```
 
 - Added support for `Material` background textures with INI property `BGTextureFile`.
 
@@ -133,7 +118,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ***
 
-## [Unreleased]
+## [0.1.0 pre-release 4.0][0.1.0-pre4.0] - 2022/02/28
 
 <details><summary><b>Added</b></summary>
 

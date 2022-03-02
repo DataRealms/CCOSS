@@ -1498,7 +1498,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets period of lua updates.
 // Arguments:       None.
-// Return value:    Updates period.
+// Return value:    Period of updates.
 
     unsigned int GetUpdatePeriod() {
         return m_UpdatePeriod;
@@ -1507,7 +1507,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetUpdatePeriod()
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets period of update lua calls.
+// Description:     Sets period of lua updates.
 // Arguments:       Period of updates.
 // Return value:    None.
 

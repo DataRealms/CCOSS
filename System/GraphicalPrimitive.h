@@ -56,6 +56,16 @@ namespace RTE {
 	/// </summary>
 	class LinePrimitive : public GraphicalPrimitive {
 
+		/// <summary>
+		/// Draw a line primitive with the option to change thickness.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the line in pixels.</param>
+		void lineWithThickness(BITMAP *drawScreen, const Vector &startPos, const Vector &endPos, unsigned char color, const int thickness);
+
 	public:
 
 		int m_Thickness; //!< Thickness of the line primitive in pixels.

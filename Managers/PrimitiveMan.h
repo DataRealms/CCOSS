@@ -65,13 +65,14 @@ namespace RTE {
 		/// <param name="color">Color to draw primitive with.</param>
 		void DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color) { m_ScheduledPrimitives.push_back(std::make_unique<LinePrimitive>(player, startPos, endPos, color)); }
 
-/// <summary>
+		/// <summary>
 		/// Schedule to draw a line primitive visible only to a specified player with the option to change thickness.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
 		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
 		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the line in pixels.</param>
 		void DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness) { m_ScheduledPrimitives.push_back(std::make_unique<LinePrimitive>(player, startPos, endPos, color, thickness)); }
 
 		/// <summary>

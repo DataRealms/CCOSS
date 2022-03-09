@@ -33,27 +33,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static void lineWithThickness(BITMAP *drawScreen, const Vector &startPos, const Vector &endPos, unsigned char color, const int &thickness) {
-		int x_delta = startPos.GetFloorIntX() - endPos.GetFloorIntX(),
-			y_delta = startPos.GetFloorIntY() - endPos.GetFloorIntY();
-		Vector n(-y_delta, x_delta);
+	void LinePrimitive::lineWithThickness(BITMAP *drawScreen, const Vector &startPos, const Vector &endPos, unsigned char color, const int thickness) {
+		bool oddThickness = thickness % 2;
+		Vector normal(
+			-(startPos.GetFloorIntY() - endPos.GetFloorIntY())	/*-y_delta*/,
+			startPos.GetFloorIntX() - endPos.GetFloorIntX() 	/*x_delta*/
+		);
 
-		int startIdx = 0;
-		if (thickness % 2) { // If odd draw the center line first
-			line(drawScreen, startPos.GetFloorIntX(), startPos.GetFloorIntY(), endPos.GetFloorIntX(), endPos.GetFloorIntY(), color);
-			startIdx = 1;
+		// normalLenFactor	- incrementally relocate normal vector from center line 
+		// normalUnit	 	- scale normal vector to be unit vector relative to increment value
+		if (oddThickness) { line(drawScreen, startPos.GetFloorIntX(), startPos.GetFloorIntY(), endPos.GetFloorIntX(), endPos.GetFloorIntY(), color); }
+		for (int i = oddThickness ? 1 : 0; i < thickness / 2; ++i) {
+			float normalLenFactor = i / normal.GetMagnitude();
+			Vector normalUnit(normal.GetFloorIntX() * normalLenFactor, normal.GetFloorIntY() * normalLenFactor);
+			line(drawScreen, startPos.GetFloorIntX() + normalUnit.GetX(), startPos.GetFloorIntY() + normalUnit.GetY(), endPos.GetFloorIntX() + normalUnit.GetX(), endPos.GetFloorIntY() + normalUnit.GetY(), color);
 		}
-		int i = startIdx;
-		for (; i < thickness / 2; ++i) {
-			float n_len_factor = i / n.GetMagnitude();
-			Vector n_unit(n.GetFloorIntX() * n_len_factor, n.GetFloorIntY() * n_len_factor);
-			line(drawScreen, startPos.GetFloorIntX() + n_unit.GetX(), startPos.GetFloorIntY() + n_unit.GetY(), endPos.GetFloorIntX() + n_unit.GetX(), endPos.GetFloorIntY() + n_unit.GetY(), color);
-		}
-		i = -startIdx;
-		for (; i > -(thickness / 2); --i) {
-			float n_len_factor = abs(i) / n.GetMagnitude();
-			Vector n_unit(n.GetFloorIntX() * n_len_factor, n.GetFloorIntY() * n_len_factor);
-			line(drawScreen, startPos.GetFloorIntX() - n_unit.GetX(), startPos.GetFloorIntY() - n_unit.GetY(), endPos.GetFloorIntX() - n_unit.GetX(), endPos.GetFloorIntY() - n_unit.GetY(), color);
+		for (int i = oddThickness ? -1 : 0; i > -(thickness / 2); --i) {
+			float normalLenFactor = abs(i) / normal.GetMagnitude();
+			Vector normalUnit(normal.GetFloorIntX() * normalLenFactor, normal.GetFloorIntY() * normalLenFactor);
+			line(drawScreen, startPos.GetFloorIntX() - normalUnit.GetX(), startPos.GetFloorIntY() - normalUnit.GetY(), endPos.GetFloorIntX() - normalUnit.GetX(), endPos.GetFloorIntY() - normalUnit.GetY(), color);
 		}
 	}
 

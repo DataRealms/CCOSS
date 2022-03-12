@@ -144,7 +144,7 @@ void AreaEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex AreaEditorGUI::GetActivatedPieSlice() {
+PieSlice::PieSliceIndex AreaEditorGUI::GetActivatedPieSlice() const {
 	return m_PieMenu->GetPieCommand();
 }
 

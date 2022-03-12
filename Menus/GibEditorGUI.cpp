@@ -159,8 +159,7 @@ void GibEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex GibEditorGUI::GetActivatedPieSlice()
-{
+PieSlice::PieSliceIndex GibEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 

@@ -260,8 +260,7 @@ bool SceneEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex SceneEditorGUI::GetActivatedPieSlice()
-{
+PieSlice::PieSliceIndex SceneEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 

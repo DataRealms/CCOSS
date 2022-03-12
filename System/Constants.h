@@ -70,6 +70,7 @@ namespace RTE {
 	static constexpr float c_PI = 3.14159265F;
 	static constexpr float c_HalfPI = 1.57079633F;
 	static constexpr float c_QuarterPI = 0.78539816F;
+	static constexpr float c_OneAndAHalfPI = 4.71238898F;
 	static constexpr float c_EighthPI = 0.39269908F;
 	static constexpr float c_SixteenthPI = 0.19634954F;
 #pragma endregion
@@ -229,9 +230,11 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Enumeration for cardinal directions, as well as None and Any.
+	/// Enumeration and supporting maps for cardinal directions, as well as None and Any.
 	/// </summary>
 	enum Directions { None = -1, Up, Down, Left, Right, Any };
+	static const std::unordered_map<std::string, Directions> c_DirectionNameToDirectionsMap = { {"None", Directions::None}, {"Up", Directions::Up}, {"Down", Directions::Down}, {"Left", Directions::Left}, {"Right", Directions::Right}, {"Any", Directions::Any} };
+	static const std::unordered_map<Directions, float> c_DirectionsToRadiansMap = { {Directions::Up, c_HalfPI}, {Directions::Down, c_OneAndAHalfPI}, {Directions::Left, c_PI}, {Directions::Right, 0.0F}};
 #pragma endregion
 
 #pragma region Un-Definitions

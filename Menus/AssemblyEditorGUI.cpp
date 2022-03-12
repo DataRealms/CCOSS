@@ -237,8 +237,7 @@ bool AssemblyEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex AssemblyEditorGUI::GetActivatedPieSlice()
-{
+PieSlice::PieSliceIndex AssemblyEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 

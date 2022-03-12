@@ -185,7 +185,7 @@ public:
 // Arguments:       None.
 // Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
 
-    PieSlice::PieSliceIndex GetActivatedPieSlice() { return m_ActivatedPieSliceType; }
+	PieSlice::PieSliceIndex GetActivatedPieSlice() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -85,7 +85,6 @@ namespace RTE {
 		} else if (propName == "Direction") {
 			std::string directionString = reader.ReadPropValue();
 			std::locale locale;
-			for (char &character : directionString) { character = std::tolower(character, locale); }
 			if (c_DirectionNameToDirectionsMap.find(directionString) != c_DirectionNameToDirectionsMap.end()) {
 				m_Direction = c_DirectionNameToDirectionsMap.find(directionString)->second;
 			} else {

@@ -360,6 +360,7 @@ void Arm::Update() {
     // HeldDevices need to use the aim angle for their positioning and rotating, while ThrownDevices need to aim and position themselves based on the hand offset, so this done here for TDs and below for HDs.
     if (thrownDevice || !heldDevice) { m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0); }
 
+	UpdateCurrentHandOffset();
     if (heldDevice) {
         // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
         // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
@@ -369,8 +370,6 @@ void Arm::Update() {
     }
 
     Attachable::Update();
-
-	UpdateCurrentHandOffset();
 
     m_Recoiled = heldDevice && heldDevice->IsRecoiled();
 

@@ -1766,18 +1766,26 @@ void GameActivity::Update()
 					}
 					g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 					m_pPieMenu[player]->DoDisableAnimation();
+
+					CreateDelivery(player);
 				} else {
 					// Place the new marker above the cursor so that they don't intersect with each other.
 					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
 					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
-				}
 
-				if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
-					g_GUISound.UserErrorSound()->Play(player);
-					m_FundsChanged[team] = true;
-				} else {
-					CreateDelivery(player);
-					m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
+					if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
+						g_GUISound.UserErrorSound()->Play(player);
+						m_FundsChanged[team] = true;
+						if (!g_MovableMan.GetNextTeamActor(team)) {
+							m_ObservationTarget[player] = m_LandingZone[player];
+							m_ViewState[player] = ViewState::Observe;
+						} else {
+							m_ViewState[player] = ViewState::Normal;
+						}
+					} else {
+						CreateDelivery(player);
+						m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
+					}
 				}
 				// Revert the Y offset so that the cursor doesn't flinch.
 				m_LandingZone[player].m_Y -= lzOffsetY;

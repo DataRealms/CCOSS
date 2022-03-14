@@ -270,12 +270,12 @@ namespace RTE {
 		if (erase && m_DoorMaterialDrawn && !m_DoorMaterialTempErased) {
 			EraseDoorMaterial(true);
 			m_DoorMaterialDrawn = doorMaterialDrawnState;
+			m_DoorMaterialTempErased = erase;
 		} else if (!erase && m_DoorMaterialDrawn && m_DoorMaterialTempErased) {
+			m_DoorMaterialTempErased = erase;
 			DrawDoorMaterial(true);
 			m_DoorMaterialDrawn = doorMaterialDrawnState;
 		}
-
-		m_DoorMaterialTempErased = erase;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

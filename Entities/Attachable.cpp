@@ -113,7 +113,9 @@ namespace RTE {
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {
-			reader >> m_JointStiffness;
+			float jointStiffness = 0;
+			reader >> jointStiffness;
+			SetJointStiffness(jointStiffness);
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {

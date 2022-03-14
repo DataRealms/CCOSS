@@ -337,6 +337,13 @@ ClassInfoGetters;
 	/// <param name = newValue>The new velocity variation scalar.</param>
 	void SetShellVelVariation(float newVariation) { m_ShellVelVariation = newVariation; }
 
+	/// <summary>
+	/// Sets the stiffness scalar of the joint of this HDFirearm. Unlike Attachable::SetJointStiffness, there are no limitations on this value.
+	/// 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all, negative values will apply negative force, which may behave oddly.
+	/// </summary>
+	/// <param name="jointStiffness">A float describing the normalized stiffness scalar of this Attachable's joint.</param>
+	void SetJointStiffness(float jointStiffness) override { m_JointStiffness = jointStiffness; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAIFireVel
 //////////////////////////////////////////////////////////////////////////////////////////

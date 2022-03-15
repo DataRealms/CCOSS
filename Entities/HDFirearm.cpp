@@ -635,7 +635,7 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-	if (m_PreFireSound) { m_PreFireSound->FadeOut(); }
+	if (m_PreFireSound) { m_PreFireSound->Stop(); }
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
     if (m_DeactivationSound && wasActivated && m_FiredLastFrame) { m_DeactivationSound->Play(m_Pos); }
 }

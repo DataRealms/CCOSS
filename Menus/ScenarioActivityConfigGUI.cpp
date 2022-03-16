@@ -331,13 +331,20 @@ namespace RTE {
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 
 		if (clickedPlayer == PlayerColumns::PlayerCPU) {
-			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Color);
-			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawColor(c_GUIColorBlue);
+			if (clickedTeam == TeamRows::DisabledTeam) {
+				for (int nonClickedTeam = Activity::Teams::TeamOne; nonClickedTeam < TeamRows::DisabledTeam; ++nonClickedTeam) {
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawColor(c_GUIColorBlue);
+				}
+			} else {
+				m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawColor(c_GUIColorBlue);
+			}
 		} else {
-			for (int nonHoveredTeam = Activity::Teams::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
-				if (nonHoveredTeam != clickedTeam) {
-					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
-					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
+			for (int nonClickedTeam = Activity::Teams::TeamOne; nonClickedTeam < TeamRows::TeamRowCount; ++nonClickedTeam) {
+				if (nonClickedTeam != clickedTeam) {
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawColor(c_GUIColorBlue);
 				}
 			}
 		}

@@ -215,11 +215,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
-			for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
+			for (const std::string_view &variableToSafetyCheck : variablesToSafetyCheck) {
 				if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) { scriptString << " and "; }
 				scriptString << variableToSafetyCheck;
 			}
@@ -235,8 +235,8 @@ namespace RTE {
 			}
 		}
 		if (!functionLiteralArguments.empty()) {
-			for (const std::string &functionLiteralArgument : functionLiteralArguments) {
-				scriptString << ", " + functionLiteralArgument;
+			for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+				scriptString << ", " + std::string(functionLiteralArgument);
 			}
 		}
 		scriptString << ");";

@@ -905,8 +905,6 @@ public:
 
 	unsigned int GetSimUpdateFrameNumber() const { return m_SimUpdateFrameNumber; }
 
-	void OnPieMenu(Actor *pActor);
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

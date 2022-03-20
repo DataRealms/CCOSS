@@ -50,7 +50,6 @@ namespace RTE {
 		.def("IsRunning", &Activity::IsRunning)
 		.def("IsPaused", &Activity::IsPaused)
 		.def("IsOver", &Activity::IsOver)
-		.def("EnteredOrbit", &Activity::EnteredOrbit)
 		.def("SwitchToActor", &Activity::SwitchToActor)
 		.def("SwitchToNextActor", &Activity::SwitchToNextActor)
 		.def("SwitchToPrevActor", &Activity::SwitchToPrevActor)

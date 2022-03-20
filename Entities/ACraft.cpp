@@ -927,7 +927,7 @@ void ACraft::Update()
 
     if (m_Pos.m_Y < -m_CharHeight)
     {
-        g_ActivityMan.GetActivity()->EnteredOrbit(this);
+        g_ActivityMan.GetActivity()->HandleCraftEnteringOrbit(this);
         // Play fading away thruster sound
 //        if (m_pMThruster && m_pMThruster->IsEmitting())
 //            m_pMThruster->(pTargetBitmap, targetPos, mode, onlyPhysical);
@@ -940,7 +940,7 @@ void ACraft::Update()
 		{
 			if (m_Pos.m_X < -GetSpriteWidth() || m_Pos.m_X > g_SceneMan.GetSceneWidth() + GetSpriteWidth())
 			{
-				g_ActivityMan.GetActivity()->EnteredOrbit(this);
+				g_ActivityMan.GetActivity()->HandleCraftEnteringOrbit(this);
 				m_ToDelete = true;
 			}
 		}

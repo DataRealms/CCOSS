@@ -21,7 +21,7 @@
 namespace RTE
 {
 
-class Actor;
+class ACraft;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -161,10 +161,10 @@ ClassInfoGetters;
 
 
     /// <summary>
-    /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+	/// Handles when an ACraft has left the game scene and entered orbit, though does not delete it. Ownership is NOT transferred, as the ACraft's inventory is just 'unloaded'.
     /// </summary>
-    /// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
-	void EnteredOrbit(Actor *orbitedCraft) override;
+    /// <param name="orbitedCraft">The ACraft instance that entered orbit. Ownership is NOT transferred!</param>
+	void HandleCraftEnteringOrbit(ACraft *orbitedCraft) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

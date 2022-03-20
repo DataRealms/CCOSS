@@ -21,6 +21,7 @@
 #include "SettingsMan.h" 
 #include "AHuman.h"
 #include "ACrab.h"
+#include "ACraft.h"
 #include "SLTerrain.h"
 #include "Controller.h"
 #include "Scene.h"
@@ -236,13 +237,13 @@ bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GAScripted::EnteredOrbit(Actor *orbitedCraft) {
-    GameActivity::EnteredOrbit(orbitedCraft);
+void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
+    GameActivity::HandleCraftEnteringOrbit(orbitedCraft);
 
     if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
         g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
-        for (GlobalScript *globalScript : m_GlobalScriptsList) {
-            if (globalScript->IsActive()) { globalScript->EnteredOrbit(orbitedCraft); }
+        for (const GlobalScript *globalScript : m_GlobalScriptsList) {
+            if (globalScript->IsActive()) { globalScript->HandleCraftEnteringOrbit(orbitedCraft); }
         }
     }
 }

@@ -688,9 +688,9 @@ protected:
 
 #pragma region Event Handling
 	/// <summary>
-	/// Method to be called when this ACrab's PieMenuGUI is opened.
+	/// Event listener to be run while this ACrab's PieMenuGUI is opened.
 	/// </summary>
-	void PieMenuOpenListener() override;
+	void WhilePieMenuOpenListener() override;
 #pragma endregion
 
 

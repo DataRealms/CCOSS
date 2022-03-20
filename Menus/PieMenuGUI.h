@@ -247,35 +247,22 @@ namespace RTE {
 
 #pragma region Event Handling
 		/// <summary>
-		/// Add the passed in MovableObject and function as a listener for when this PieMenuGUI is opened.
+		/// Add the passed in MovableObject and function as a listener to be run while this PieMenuGUI is open.
 		/// </summary>
 		/// <param name="listeningObject">The MovableObject listening.</param>
 		/// <param name="listenerFunction">The function to be run on the MovableObject.</param>
-		void AddPieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { m_OnPieMenuOpenListeners.insert({ listeningObject, listenerFunction }); }
+		void AddWhilePieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { m_WhilePieMenuOpenListeners.insert({ listeningObject, listenerFunction }); }
 
 		/// <summary>
 		/// Removes the passed in MovableObject and its listening function as a listener for when this PieMenuGUI is opened.
 		/// </summary>
 		/// <param name="objectToRemove">The MovableObject whose listening function should be removed.</param>
 		/// <returns>Whether or not the MovableObject was found and removed as a listener.</returns>
-		bool RemovePieMenuOpenListener(const MovableObject *objectToRemove) { return m_OnPieMenuOpenListeners.erase(objectToRemove) == 1; }
-
-		/// <summary>
-		/// Add the passed in MovableObject and function as a listener for when this PieMenuGUI is closed.
-		/// </summary>
-		/// <param name="listeningObject">The MovableObject listening.</param>
-		/// <param name="listenerFunction">The function to be run on the MovableObject.</param>
-		void AddPieMenuCloseListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { m_OnPieMenuCloseListeners.insert({ listeningObject, listenerFunction }); }
-
-		/// <summary>
-		/// Removes the passed in MovableObject and its listening function as a listener for when this PieMenuGUI is closed.
-		/// </summary>
-		/// <param name="objectToRemove">The MovableObject whose listening function should be removed.</param>
-		/// <returns>Whether or not the MovableObject was found and removed as a listener.</returns>
-		bool RemovePieMenuCloseListener(const MovableObject *objectToRemove) { return m_OnPieMenuCloseListeners.erase(objectToRemove) == 1; }
+		bool RemoveWhilePieMenuOpenListener(const MovableObject *objectToRemove) { return m_WhilePieMenuOpenListeners.erase(objectToRemove) == 1; }
 #pragma endregion
 
 	private:
+
 		static const int c_QuadrantSlotCount = 5; //!< The maximum number of PieSlices a PieQuadrant can have.
 		static constexpr float c_PieSliceSlotSize = c_HalfPI / static_cast<float>(c_QuadrantSlotCount); //!< The size of one PieSlice slot in PieQuadrants.
 
@@ -378,8 +365,7 @@ namespace RTE {
 		const PieSlice *m_AlreadyActivatedSlice; //!< The PieSlice that was most recently activated by pressing primary. Used to avoid duplicate activation when disabling.
 		std::vector<PieSlice *> m_CurrentSlices; //!< All the PieSlices in this PieMenuGUI in INI order. Not owned here, just pointing to the ones above.
 
-		std::unordered_map<const MovableObject *, std::function<void()>> m_OnPieMenuOpenListeners; //!< Unordered map of MovableObject pointers to functions to be called when the PieMenuGUI starts to open. Pointers are NOT owned.
-		std::unordered_map<const MovableObject *, std::function<void()>> m_OnPieMenuCloseListeners; //!< Unordered map of MovableObject pointers to functions to be called when the PieMenuGUI starts to close. Pointers are NOT owned.
+		std::unordered_map<const MovableObject *, std::function<void()>> m_WhilePieMenuOpenListeners; //!< Unordered map of MovableObject pointers to functions to be called while the PieMenuGUI is open. Pointers are NOT owned.
 
 		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
 		bool m_CursorInVisiblePosition; //!< Whether or not this PieMenuGUI's cursor is in a visible position and should be shown.

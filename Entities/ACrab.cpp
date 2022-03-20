@@ -2856,14 +2856,9 @@ void ACrab::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::PieMenuOpenListener() {
-	Actor::PieMenuOpenListener();
+void ACrab::WhilePieMenuOpenListener() {
+	Actor::WhilePieMenuOpenListener();
 
-	if (m_Status == Actor::Status::INACTIVE) {
-		GetPieMenu()->SetEnabled(false);
-		FlashWhite(100);
-		return;
-	}
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
 		if (pieSlice->GetType() == PieSlice::PieSliceIndex::PSI_RELOAD) {
 			if (m_pTurret && m_pTurret->HasMountedDevice()) {

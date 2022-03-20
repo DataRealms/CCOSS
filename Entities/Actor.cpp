@@ -173,8 +173,7 @@ int Actor::Create()
     if (!m_PieMenu) { SetPieMenu(static_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", GetDefaultPieMenuName())->Clone())); }
 
 	if (m_PieMenu) {
-		m_PieMenu->AddPieMenuOpenListener(this, std::bind(&Actor::PieMenuOpenListener, this));
-		m_PieMenu->AddPieMenuCloseListener(this, std::bind(&Actor::PieMenuCloseListener, this));
+		m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this));
 	}
 
     return 0;
@@ -291,8 +290,7 @@ int Actor::Create(const Actor &reference)
 
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
 	SetPieMenu(static_cast<PieMenuGUI *>(reference.m_PieMenu->Clone()));
-	m_PieMenu->AddPieMenuOpenListener(this, std::bind(&Actor::PieMenuOpenListener, this));
-	m_PieMenu->AddPieMenuCloseListener(this, std::bind(&Actor::PieMenuCloseListener, this));
+	m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this));
 
 
     return 0;

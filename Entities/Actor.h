@@ -78,7 +78,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnPieMenuOpen", "OnPieMenuClose");
+AddScriptFunctionNames(MOSRotating, "UpdateAI");
 SerializableOverrideMethods;
 ClassInfoGetters;
 DefaultPieMenuNameVirtual("Empty Pie Menu");
@@ -1535,14 +1535,9 @@ protected:
 
 #pragma region Event Handling
 	/// <summary>
-	/// Event listener for when this Actor's PieMenuGUI is opened.
+	/// Event listener to be run while this Actor's PieMenuGUI is opened.
 	/// </summary>
-	virtual void PieMenuOpenListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuOpen"); }
-
-	/// <summary>
-	/// Event listener for when this Actor's PieMenuGUI is closed.
-	/// </summary>
-	virtual void PieMenuCloseListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuClose"); }
+	virtual void WhilePieMenuOpenListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuOpen"); }
 #pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////

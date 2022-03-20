@@ -4452,14 +4452,9 @@ void AHuman::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::PieMenuOpenListener() {
-	Actor::PieMenuOpenListener();
+void AHuman::WhilePieMenuOpenListener() {
+	Actor::WhilePieMenuOpenListener();
 
-	if (m_Status == Actor::Status::INACTIVE) {
-		GetPieMenu()->SetEnabled(false);
-		FlashWhite(100);
-		return;
-	}
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
 		switch (pieSlice->GetType()) {
 			case PieSlice::PieSliceIndex::PSI_PICKUP:

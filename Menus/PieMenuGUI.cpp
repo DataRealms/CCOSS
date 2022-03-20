@@ -302,10 +302,7 @@ namespace RTE {
 				soundToPlay->Play();
 			}
 
-			if (enable) {
-				for (const auto &[listenerObject, listenerFunction] : m_OnPieMenuOpenListeners) { listenerFunction(); }
-			} else {
-				for (const auto &[listenerObject, listenerFunction] : m_OnPieMenuCloseListeners) { listenerFunction(); }
+			if (!enable) {
 				m_AlreadyActivatedSlice = nullptr;
 				m_HoverTimer.SetRealTimeLimitMS(100);
 				m_HoverTimer.Reset();
@@ -381,12 +378,17 @@ namespace RTE {
 		if (m_AffectedObject && !g_MovableMan.ValidMO(m_AffectedObject)) { m_AffectedObject = nullptr; }
 
 		if (m_MenuMode == MenuMode::Normal) {
-			if (IsEnabled() && m_ActivatedSlice && m_ActivatedSlice->GetSubMenu() != nullptr) {
-				m_CursorAngle = m_ActivatedSlice->GetMidAngle() + GetRotAngle();
-				m_HoverTimer.Reset();
-			} else if (IsEnabled() && (HandleMouseInput() || HandleNonMouseInput())) {
-				m_HoverTimer.Reset();
-			} else if (m_HoverTimer.IsPastRealTimeLimit()) {
+			if (IsEnabled()) {
+				for (const auto &[listenerObject, listenerFunction] : m_WhilePieMenuOpenListeners) { listenerFunction(); }
+
+				if (m_ActivatedSlice && m_ActivatedSlice->GetSubMenu() != nullptr) {
+					m_CursorAngle = m_ActivatedSlice->GetMidAngle() + GetRotAngle();
+					m_HoverTimer.Reset();
+				} else if (HandleMouseInput() || HandleNonMouseInput()) {
+					m_HoverTimer.Reset();
+				}
+			}
+			if (m_HoverTimer.IsPastRealTimeLimit()) {
 				m_HoveredSlice = nullptr;
 				m_CursorInVisiblePosition = false;
 				m_BGBitmapNeedsRedrawing = true;

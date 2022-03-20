@@ -219,13 +219,6 @@ ClassInfoGetters;
 	void UpdateGlobalScripts(bool lateUpdate);
 
 
-    /// <summary>
-    /// Calls this to be processed by derived classes to enable pie-menu dynamic change.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-	void OnPieMenu(Actor *pieMenuActor) override;
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawGUI
 //////////////////////////////////////////////////////////////////////////////////////////

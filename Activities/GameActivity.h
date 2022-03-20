@@ -869,8 +869,6 @@ public:
 
 	void SetNetworkPlayerName(int player, std::string name);
 
-    virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

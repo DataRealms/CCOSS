@@ -1800,10 +1800,6 @@ enum MOType
 
 	void SetHitWhatTerrMaterial(unsigned char matID);
 
-	bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
-
-	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
-
     /// <summary>
     /// Gets whether this MO's RootParent can GetHitByMOs and is currently traveling.
     /// </summary>
@@ -2004,8 +2000,6 @@ protected:
 	long int m_ParticleUniqueIDHit;
 	// Number of sim update frame when last collision was detcted
 	unsigned int m_LastCollisionSimFrameNumber;
-	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
-	bool m_ProvidesPieMenuContext;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

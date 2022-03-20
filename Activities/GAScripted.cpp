@@ -109,12 +109,6 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
-	else if (propName == "AddPieSlice")
-	{
-		PieSlice newSlice;
-		reader >> newSlice;
-		//PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-	}
 	else
         return GameActivity::ReadProperty(propName, reader);
 

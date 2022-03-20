@@ -106,8 +106,6 @@ void MovableObject::Clear()
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
-
-	m_ProvidesPieMenuContext = false;
 }
 
 
@@ -256,8 +254,6 @@ int MovableObject::Create(const MovableObject &reference)
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
 
-	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
-
     return 0;
 }
 
@@ -326,14 +322,6 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_CanBeSquished;
 	else if (propName == "HUDVisible")
 		reader >> m_HUDVisible;
-	else if (propName == "ProvidesPieMenuContext")
-		reader >> m_ProvidesPieMenuContext;
-	else if (propName == "AddPieSlice")
-	{
-		PieSlice newSlice;
-		reader >> newSlice;
-		//PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-	}
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
         switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {

@@ -159,6 +159,10 @@ namespace RTE {
 		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
 	}
 
+	static void DeactivateGlobalScript(GlobalScript *luaSelfObject) {
+		luaSelfObject->SetActive(false);
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);

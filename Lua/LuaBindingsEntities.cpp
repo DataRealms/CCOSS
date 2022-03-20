@@ -598,7 +598,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, GlobalScript) {
 		return AbstractTypeLuaClassDefinition(GlobalScript, Entity)
 
-		.def("Deactivate", &GlobalScript::Deactivate);
+		.def("Deactivate", &DeactivateGlobalScript);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -468,7 +468,11 @@ namespace RTE {
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
 
 			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
-				for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) { rootParentAsActor->GetPieMenu()->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true); }
+				if (PieMenuGUI *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+					for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+						rootParentAsActorPieMenu->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
+					}
+				}
 			}
 		} else {
 			m_RootMOID = m_MOID;
@@ -486,7 +490,9 @@ namespace RTE {
 					rootParent->SetWhichMOToNotHit(this);
 				}
 
-				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) { rootParentAsActor->GetPieMenu()->RemovePieSlicesByOriginalSource(this); }
+				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) {
+					if (PieMenuGUI *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) { rootParentAsActorPieMenu->RemovePieSlicesByOriginalSource(this); }
+				}
 			}
 
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }

@@ -371,7 +371,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
+		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
         m_Inventory.push_back(pInvMO);
     }
     else if (propName == "MaxInventoryMass")
@@ -383,6 +383,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         m_AIMode = static_cast<AIMode>(mode);
     } else if (propName == "PieMenu") {
         m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.ReadReflectedPreset(reader)));
+		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
         m_PieMenu->Create(this);
     }
     else

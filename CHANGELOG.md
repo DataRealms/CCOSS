@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Completely replaced `ScriptFile` with `ScriptPath`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

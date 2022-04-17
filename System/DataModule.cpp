@@ -14,6 +14,7 @@ namespace RTE {
 		m_FriendlyName.clear();
 		m_Author.clear();
 		m_Description.clear();
+		m_SupportedGameVersion.clear();
 		m_Version = 1;
 		m_ModuleID = -1;
 		m_IconFile.Reset();
@@ -48,6 +49,11 @@ namespace RTE {
 
 		if (reader.Create(indexPath, true, progressCallback) >= 0) {
 			int result = Serializable::Create(reader);
+
+			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && m_SupportedGameVersion != c_GameVersion) {
+				RTEAssert(!m_SupportedGameVersion.empty(), m_FriendlyName + " does not specify a supported Cortex Command version. Please contact the mod author.");
+				RTEAbort(m_FriendlyName + " supports Cortex Command version " + m_SupportedGameVersion + ", and so is not compatible with this version of Cortex Command - " + c_GameVersion + ".");
+			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.
 			if (progressCallback) { progressCallback(" ", true); }
@@ -110,6 +116,8 @@ namespace RTE {
 			}
 		} else if (propName == "IsFaction") {
 			reader >> m_IsFaction;
+		} else if (propName == "SupportedGameVersion") {
+			reader >> m_SupportedGameVersion;
 		} else if (propName == "Version") {
 			reader >> m_Version;
 		} else if (propName == "ScanFolderContents") {
@@ -149,6 +157,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("Author", m_Author);
 		writer.NewPropertyWithValue("Description", m_Description);
 		writer.NewPropertyWithValue("IsFaction", m_IsFaction);
+		writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion);
 		writer.NewPropertyWithValue("Version", m_Version);
 		writer.NewPropertyWithValue("IconFile", m_IconFile);
 

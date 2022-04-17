@@ -51,8 +51,8 @@ namespace RTE {
 			int result = Serializable::Create(reader);
 
 			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && m_SupportedGameVersion != c_GameVersion) {
-				RTEAssert(!m_SupportedGameVersion.empty(), m_FriendlyName + " does not specify a supported Cortex Command version. Please contact the mod author.");
-				RTEAbort(m_FriendlyName + " supports Cortex Command version " + m_SupportedGameVersion + ", and so is not compatible with this version of Cortex Command - " + c_GameVersion + ".");
+				RTEAssert(!m_SupportedGameVersion.empty(), m_FriendlyName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				RTEAbort(m_FriendlyName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.

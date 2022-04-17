@@ -100,11 +100,13 @@ namespace RTE {
 		m_ActivityConfigBox->SetEnabled(enable);
 		m_ActivityConfigBox->SetVisible(enable);
 
+		bool selectingPreviousActivityWithManuallyAdjustedGold = m_StartingGoldAdjustedManually && m_PreviouslySelectedActivity == selectedActivity;
 		if (enable) {
 			m_SelectedActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 			m_SelectedScene = selectedScene;
 			RTEAssert(m_SelectedActivity && m_SelectedScene, "Trying to start a scenario game without an Activity or a Scene!");
 		} else {
+			m_PreviouslySelectedActivity = m_SelectedActivity;
 			m_SelectedActivity = nullptr;
 			m_SelectedScene = nullptr;
 		}
@@ -114,7 +116,15 @@ namespace RTE {
 		}
 		if (enable && m_SelectedActivity && m_SelectedScene) {
 			if (!m_TechListFetched) { PopulateTechComboBoxes(); }
+
+			int startingGoldOverride = selectingPreviousActivityWithManuallyAdjustedGold ? m_StartingGoldSlider->GetValue() : -1;
 			ResetActivityConfigBox();
+
+			if (startingGoldOverride >= 0) {
+				m_StartingGoldSlider->SetValue(startingGoldOverride);
+				m_StartingGoldAdjustedManually = true;
+				UpdateStartingGoldSliderAndLabel();
+			}
 		}
 	}
 
@@ -271,6 +281,7 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
 		if (!m_StartingGoldAdjustedManually) {
+			m_StartingGoldSlider->SetValue(2000);
 			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
 			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {

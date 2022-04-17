@@ -400,28 +400,14 @@ ClassInfoGetters;
 
 	bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the global and accumulated forces. Then it clears
-//                  out the force list.Note that this does NOT apply the accumulated
-//                  impulses (impulse forces)!
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Gathers, clears and applies this MOSRotating's accumulated forces.
+	/// </summary>
 	void ApplyForces() override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyImpulses
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the accumulated impulse forces. Then it clears
-//                  out the impulse list.Note that this does NOT apply the accumulated
-//                  regular forces (non-impulse forces)!
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Gathers, clears and applies this MOSRotating's accumulated impulse forces, gibbing if appropriate.
+	/// </summary>
 	void ApplyImpulses() override;
 
     /// <summary>

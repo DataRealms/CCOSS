@@ -1125,65 +1125,40 @@ bool MOSRotating::MoveOutOfTerrain(unsigned char strongerThan)
     return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, strongerThan);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the global and accumulated forces. Then it clears
-//                  out the force list.Note that this does NOT apply the accumulated
-//                  impulses (impulse forces)!
-
-void MOSRotating::ApplyForces()
-{
+void MOSRotating::ApplyForces() {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
-    // Apply the rotational effects of all the forces accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator fItr = m_Forces.begin();
-         fItr != m_Forces.end(); ++fItr) {
-        // Continuous force application to rotational velocity.
-        if (!(*fItr).second.IsZero())
-            m_AngularVel += ((*fItr).second.GetPerpendicular().Dot((*fItr).first) /
-                            m_pAtomGroup->GetMomentOfInertia()) * deltaTime;
-    }
+	for (const auto &[forceVector, forceOffset] : m_Forces) {
+		if (!forceOffset.IsZero()) { m_AngularVel += (forceOffset.GetPerpendicular().Dot(forceVector) / m_pAtomGroup->GetMomentOfInertia()) * deltaTime; }
+	}
 
     MOSprite::ApplyForces();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyImpulses
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the accumulated impulse forces. Then it clears
-//                  out the impulse list.Note that this does NOT apply the accumulated
-//                  regular forces (non-impulse forces)!
+void MOSRotating::ApplyImpulses() {
+	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
+		if (!impulseForceOffset.IsZero()) { m_AngularVel += impulseForceOffset.GetPerpendicular().Dot(impulseForceVector) / m_pAtomGroup->GetMomentOfInertia(); }
+	}
 
-void MOSRotating::ApplyImpulses()
-{
-    // Apply the rotational effects of all the impulses accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin();
-         iItr != m_ImpulseForces.end(); ++iItr) {
-        // Impulse force application to the rotational velocity of this MO.
-        if (!(*iItr).second.IsZero())
-            m_AngularVel += (*iItr).second.GetPerpendicular().Dot((*iItr).first) /
-                            m_pAtomGroup->GetMomentOfInertia();
-    }
+	Vector totalImpulse;
+	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
+		totalImpulse += impulseForceVector;
+	}
 
-    // See if the impulses are enough to gib this
-    Vector totalImpulse;
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr)
-    {
-        totalImpulse += (*iItr).first;
-    }
-    // If impulse gibbing threshold is enabled for this, see if it's below the total impulse force
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
-		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
-			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
-		}
+		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) { impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio; }
 		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
 	}
-    MOSprite::ApplyImpulses();
+
+	MOSprite::ApplyImpulses();
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

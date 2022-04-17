@@ -198,19 +198,30 @@ namespace RTE {
 		m_pPlayerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("PlayerNameTB"));
 		m_pConnectButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ConnectButton"));
 
+		/*
 		m_pNATServiceServerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("NATServiceNameTB"));
 		m_pNATServerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("NATServiceServerNameTB"));
 		m_pNATServerPasswordTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("NATServiceServerPasswordTB"));
 		m_pConnectNATButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ConnectNATButton"));
 
+		m_pNATServiceServerNameTextBox->SetVisible(false);
+		m_pNATServerNameTextBox->SetVisible(false);
+		m_pNATServerPasswordTextBox->SetVisible(false);
+		m_pConnectNATButton->SetVisible(false);
+		*/
+
+		//NOTE Instruction labels aren't dynamic so they don't really need to be gotten. Status label should be empty unless there's a status to report.
 		m_pStatusLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StatusLabel"));
+		m_pStatusLabel->SetText("");
 
 		m_pServerNameTextBox->SetText(g_SettingsMan.GetNetworkServerAddress());
 		m_pPlayerNameTextBox->SetText(g_SettingsMan.GetPlayerNetworkName());
 
+		/*
 		m_pNATServiceServerNameTextBox->SetText(g_SettingsMan.GetNATServiceAddress());
 		m_pNATServerNameTextBox->SetText(g_SettingsMan.GetNATServerName());
 		m_pNATServerPasswordTextBox->SetText(g_SettingsMan.GetNATServerPassword());
+		*/
 
 		return error;
 	}

@@ -345,7 +345,7 @@ protected:
 	// Maximum engine rotation in degrees
 	float m_MaxEngineAngle;
 
-	float m_HoverHeightModifier;
+	float m_HoverHeightModifier; //!< The modifier for the height at which this ACDropShip should hover above terrain when releasing its cargo. Used in cpp and Lua AI.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

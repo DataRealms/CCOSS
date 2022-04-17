@@ -368,6 +368,11 @@ ClassInfoGetters;
 
     bool HoldsSomething() { return m_pHeldMO != 0; }
 
+	/// <summary>
+	/// Does stuff that needs to be done after Update().
+	/// </summary>
+	void PostTravel() override { if (IsAttached()) { m_AngularVel = 0; } MOSRotating::PostTravel(); }
+
     /// <summary>
     /// Updates this Arm. Supposed to be done every frame.
     /// </summary>

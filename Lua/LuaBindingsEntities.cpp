@@ -278,6 +278,8 @@ namespace RTE {
 		.def("UpdateMovePath", &Actor::UpdateMovePath)
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
+		.def("IsOrganic", &Actor::IsOrganic)
+		.def("IsRobotic", &Actor::IsRobotic)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),

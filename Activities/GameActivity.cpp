@@ -664,8 +664,8 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
         MovableObject *pInventoryObject = 0;
-        Actor *pPassenger = 0;
-        Actor *pLastPassenger = 0;
+        AHuman *pPassenger = 0;
+		AHuman *pLastPassenger = 0;
         list<MovableObject *> cargoItems;
 
         for (list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
@@ -694,7 +694,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 				// Make copy of the preset instance in the list
 				pInventoryObject = dynamic_cast<MovableObject *>((*itr)->Clone());
 				// See if it's actually a passenger, as opposed to a regular item
-				pPassenger = dynamic_cast<Actor *>(pInventoryObject);
+				pPassenger = dynamic_cast<AHuman *>(pInventoryObject);
 				// If it's an actor, then set its team and add it to the Craft's inventory!
 				if (pPassenger)
 				{

@@ -898,6 +898,9 @@ protected:
 	// is done by external Lua code
 	bool m_IsAnimatedManually;
 
+
+	bool m_LegacyCompatibilityRoundsAlwaysFireUnflipped; //<! Legacy compatibility flag to make it so rounds don't flip with the gun. Useful for old mods with things like missiles that accounted for the old code that didn't flip them properly.
+
 /* TODO
     // Path the the script file that contains the ballistic solution function of this
     std::string m_BallisticScriptPath;

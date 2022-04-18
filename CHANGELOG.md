@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+
+- New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

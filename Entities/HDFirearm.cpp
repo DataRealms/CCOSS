@@ -74,6 +74,8 @@ void HDFirearm::Clear()
     m_AlreadyClicked = false;
 	m_RoundsFired = 0;
 	m_IsAnimatedManually = false;
+
+	m_LegacyCompatibilityRoundsAlwaysFireUnflipped = false;
 }
 
 
@@ -139,6 +141,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_MagOff = reference.m_MagOff;
 	m_RoundsFired = reference.m_RoundsFired;
 	m_IsAnimatedManually = reference.m_IsAnimatedManually;
+
+	m_LegacyCompatibilityRoundsAlwaysFireUnflipped = reference.m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
 
     return 0;
 }
@@ -223,8 +227,10 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_ShellVelVariation;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
-    } else if (propName == "EjectionOffset") {
-        reader >> m_EjectOff;
+	} else if (propName == "EjectionOffset") {
+		reader >> m_EjectOff;
+	} else if (propName == "LegacyCompatibilityRoundsAlwaysFireUnflipped") {
+		reader >> m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
     } else {
         return HeldDevice::ReadProperty(propName, reader);
     }
@@ -301,6 +307,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
     writer << m_EjectOff;
+
+	writer.NewPropertyWithValue("LegacyCompatibilityRoundsAlwaysFireUnflipped", m_LegacyCompatibilityRoundsAlwaysFireUnflipped);
 
     return 0;
 }
@@ -854,8 +862,12 @@ void HDFirearm::Update()
                     particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
                     pParticle->SetVel(m_Vel + particleVel);
-                    pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
-					pParticle->SetHFlipped(m_HFlipped);
+					if (m_LegacyCompatibilityRoundsAlwaysFireUnflipped) {
+						pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
+					} else {
+						pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
+						pParticle->SetHFlipped(m_HFlipped);
+					}
 					if (lifeVariation != 0 && pParticle->GetLifetime() != 0) {
 						pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + (particleCountMax > 1 ? lifeVariation - (lifeVariation * 2.0F * (static_cast<float>(pRound->ParticleCount()) / static_cast<float>(particleCountMax - 1))) : lifeVariation * RandomNormalNum()))), 1));
 					}

@@ -14,6 +14,7 @@
 #include "Arm.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
+#include "AHuman.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -388,25 +389,48 @@ void Arm::UpdateCurrentHandOffset() {
         Vector targetOffset;
         if (m_pHeldMO && !dynamic_cast<ThrownDevice *>(m_pHeldMO)) {
             m_DidReach = false;
-			HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
-			// TODO: calculate total grip strength from both arms? (also: fine-tune this shit, and move it elsewhere)
-			float totalGripStrength = (m_GripStrength || heldDevice->GetJointStrength()) * (heldDevice->GetSupported() ? 2.0F : 1.0F);
+			const HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
 			targetOffset = heldDevice->GetStanceOffset();
-			// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.
-			float rotAngleScalar = std::abs(std::cos(m_Parent->GetRotAngle()));
-			float recoilScalar = std::min((heldDevice->GetRecoilForce() / totalGripStrength).GetMagnitude() * 0.4F, 0.8F) * rotAngleScalar;
-			targetOffset.SetX(targetOffset.GetX() * (1.0F - recoilScalar));
-			// Shift Y offset slightly so the device is more likely to go under the shoulder rather than over it. (otherwise it looks goofy)
-			if (targetOffset.GetY() <= 0) { targetOffset.SetY(targetOffset.GetY() * (1.0F - recoilScalar) + recoilScalar); }
+
+			// TODO: Fine-tune this shit if needed, and move it elsewhere
+			if (!heldDevice->GetRecoilForce().IsZero()) {
+				float totalGripStrength = m_GripStrength * heldDevice->GetGripStrengthMultiplier();
+				if (totalGripStrength == 0) { totalGripStrength = heldDevice->GetJointStrength(); }
+				if (heldDevice->GetSupported()) {
+					const AHuman *rootParentAsAHuman = dynamic_cast<const AHuman *>(GetRootParent());
+					const Arm *rootParentAsHumanBGArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
+					if (rootParentAsHumanBGArm) {
+						if (rootParentAsHumanBGArm->GetGripStrength() < 0) {
+							totalGripStrength = -1.0F;
+						} else if (rootParentAsHumanBGArm->GetGripStrength() > 0) {
+							totalGripStrength += (rootParentAsHumanBGArm->GetGripStrength() * heldDevice->GetGripStrengthMultiplier());
+						} else {
+							totalGripStrength *= 1.5F;
+						}
+					}
+				}
+				if (totalGripStrength > 0) {
+					// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.
+					float rotAngleScalar = std::abs(std::cos(m_Parent->GetRotAngle()));
+					float recoilScalar = std::min((heldDevice->GetRecoilForce() / totalGripStrength).GetMagnitude() * 0.4F, 0.8F) * rotAngleScalar;
+					targetOffset.SetX(targetOffset.GetX() * (1.0F - recoilScalar));
+
+					// Shift Y offset slightly so the device is more likely to go under the shoulder rather than over it, otherwise it looks goofy.
+					if (targetOffset.GetY() <= 0) { targetOffset.SetY(targetOffset.GetY() * (1.0F - recoilScalar) + recoilScalar); }
+				}
+			}
 			targetOffset *= m_Rotation;
+
             // In order to keep the held device from clipping through terrain, we need to determine where its muzzle position will be, and use that to figure out where its midpoint will be, as well as the distance between the two.
             Vector newMuzzlePos = (m_JointPos + targetOffset) - RotateOffset(heldDevice->GetJointOffset()) + RotateOffset(heldDevice->GetMuzzleOffset());
-            Vector midToMuzzle = RotateOffset({heldDevice->GetRadius(), 0});
+            Vector midToMuzzle = RotateOffset({heldDevice->GetIndividualRadius(), 0});
             Vector midOfDevice = newMuzzlePos - midToMuzzle;
 
             Vector terrainOrMuzzlePosition;
-            g_SceneMan.CastStrengthRay(midOfDevice, midToMuzzle, 5, terrainOrMuzzlePosition, 0, false);
-            targetOffset += g_SceneMan.ShortestDistance(newMuzzlePos, terrainOrMuzzlePosition, g_SceneMan.SceneWrapsX());
+			if (g_SceneMan.CastStrengthRay(midOfDevice, midToMuzzle, 5, terrainOrMuzzlePosition, 0, false)) {
+				Vector muzzleAdjustment = g_SceneMan.ShortestDistance(newMuzzlePos, terrainOrMuzzlePosition, g_SceneMan.SceneWrapsX());
+				if (muzzleAdjustment.GetMagnitude() > 2.0F) { targetOffset += muzzleAdjustment; }
+			}
         } else {
             if (m_TargetPosition.IsZero()) {
                 targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
@@ -423,7 +447,7 @@ void Arm::UpdateCurrentHandOffset() {
 
         Vector distanceFromTargetOffsetToHandOffset(targetOffset - m_HandOffset);
         m_HandOffset += distanceFromTargetOffsetToHandOffset * m_MoveSpeed;
-        m_HandOffset.ClampMagnitude(m_MaxLength, m_MaxLength / 2 + 0.1F);
+        m_HandOffset.ClampMagnitude(m_MaxLength / 2.0F, m_MaxLength);
     } else {
         m_HandOffset.SetXY(m_MaxLength * 0.65F, 0);
         m_HandOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
@@ -435,8 +459,8 @@ void Arm::UpdateCurrentHandOffset() {
 void Arm::UpdateArmFrame() {
     if (IsAttached()) {
         float halfMax = m_MaxLength / 2.0F;
-        unsigned int newFrame = static_cast<unsigned int>(std::floor(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount)));
-        m_Frame = std::clamp(newFrame, 0U, m_FrameCount - 1);
+        float newFrame = std::floor((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount);
+        m_Frame = static_cast<unsigned int>(std::clamp(newFrame, 0.0F, static_cast<float>(m_FrameCount - 1)));
     }
 }
 
@@ -456,8 +480,8 @@ void Arm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bo
 
 void Arm::DrawHand(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode) const {
     Vector handPos(m_JointPos + m_HandOffset + (m_Recoiled ? m_RecoilOffset : Vector()) - targetPos);
-    handPos.m_X -= static_cast<float>((m_pHand->w / 2) + 1);
-    handPos.m_Y -= static_cast<float>((m_pHand->h / 2) + 1);
+    handPos.m_X -= static_cast<float>((m_pHand->w / 2));
+    handPos.m_Y -= static_cast<float>((m_pHand->h / 2));
 
     if (!m_HFlipped) {
         if (mode == g_DrawWhite) {

@@ -414,8 +414,7 @@ bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffne
     if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthValueToUse < 0) {
         jointStrengthValueToUse = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
         if (m_Supported) {
-            const AHuman *rootParentAsAHuman = dynamic_cast<AHuman *>(GetRootParent());
-            if (rootParentAsAHuman != nullptr) { jointStrengthValueToUse += rootParentAsAHuman->GetBGArm() ? rootParentAsAHuman->GetBGArm()->GetGripStrength() * m_GripStrengthMultiplier : 0.0F; }
+            if (const AHuman *rootParentAsAHuman = dynamic_cast<AHuman *>(GetRootParent())) { jointStrengthValueToUse += rootParentAsAHuman->GetBGArm() ? rootParentAsAHuman->GetBGArm()->GetGripStrength() * m_GripStrengthMultiplier : 0.0F; }
         }
     }
     bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessValueToUse, jointStrengthValueToUse, gibImpulseLimitValueToUse);

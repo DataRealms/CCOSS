@@ -1025,7 +1025,11 @@ void HDFirearm::Update()
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		m_RecoilForce *= 0.6F;
+		if (m_RecoilForce.GetMagnitude() > 0.01F) {
+			m_RecoilForce *= 0.6F;
+		} else {
+			m_RecoilForce.Reset();
+		}
 		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 

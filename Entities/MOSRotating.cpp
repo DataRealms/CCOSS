@@ -1746,7 +1746,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 		keyColor = g_MOIDMaskColor;
 	}
 
-    Vector spritePos(m_Pos.GetFloored() - targetPos);
+    Vector spritePos(m_Pos.GetRounded() - targetPos);
 
     if (m_Recoiled)
         spritePos += m_RecoilOffset;

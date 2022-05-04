@@ -674,15 +674,11 @@ public:
 
     int EjectAllItems(std::list<SceneObject *> &itemList);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OpenAllDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens all doors and keeps them open until this is called again with false.
-// Arguments:       Whether to open all doors (true), or undo this action (false)
-//                  Which team to do this for. NoTeam means all teams.
-// Return value:    None.
-
+    /// <summary>
+    /// Opens all doors and keeps them open until this is called again with false.
+    /// </summary>
+    /// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
+    /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
     void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
 
 

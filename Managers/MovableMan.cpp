@@ -1493,45 +1493,24 @@ int MovableMan::GetTeamMOIDCount(int team) const
 		return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OpenAllDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens all doors and keeps them open until this is called again with false.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::OpenAllDoors(bool open, int team)
-{
-    ADoor *pDoor = 0;
-    for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-    {
-        pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
-        {
-            // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
-            pDoor->Update();
-            if (open)
-                pDoor->OpenDoor();
-            else
-                pDoor->CloseDoor();
-            pDoor->SetClosedByDefault(!open);
-        }
-    }
-    // Also check all doors added this frame
-    for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
-    {
-        pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
-        {
-            // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
-            pDoor->Update();
-            if (open)
-                pDoor->OpenDoor();
-            else
-                pDoor->CloseDoor();
-            pDoor->SetClosedByDefault(!open);
-        }
-    }
+void MovableMan::OpenAllDoors(bool open, int team) {
+	for (std::deque<Actor *> actorDequeue : { m_Actors, m_AddedActors }) {
+		for (Actor *actor : actorDequeue) {
+			if (ADoor *actorAsADoor = dynamic_cast<ADoor *>(actor); actorAsADoor && (team == Activity::NoTeam || actorAsADoor->GetTeam() == team)) {
+				if (actorAsADoor->GetDoorState() != (open ? ADoor::DoorState::OPEN : ADoor::DoorState::CLOSED)) {
+					actorAsADoor->Update();
+					actorAsADoor->SetClosedByDefault(!open);
+				}
+				actorAsADoor->ResetSensorTimer();
+				open ? actorAsADoor->OpenDoor() : actorAsADoor->CloseDoor();
+			}
+		}
+	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          OverrideMaterialDoors

@@ -167,6 +167,11 @@ namespace RTE {
 		/// </summary>
 		/// <param name="erase">Whether to erase door material (true) or draw it (false).</param>
 		void TempEraseOrRedrawDoorMaterial(bool erase);
+
+		/// <summary>
+		/// Resets the sensor Timer for this ADoor, effectively making it ignore Actors.
+		/// </summary>
+		void ResetSensorTimer() { m_SensorTimer.Reset(); }
 #pragma endregion
 
 #pragma region Virtual Override Methods

@@ -12,6 +12,7 @@ namespace RTE {
 		m_Particle = 0;
 		m_ParticleCount = 0;
 		m_FireVel = 0;
+		m_InheritsFirerVelocity = false;
 		m_Separation = 0;
 		m_LifeVariation = 0;
 		m_Shell = 0;
@@ -50,6 +51,7 @@ namespace RTE {
 
 		m_Particle = reference.m_Particle;
 		m_ParticleCount = reference.m_ParticleCount;
+		m_InheritsFirerVelocity = reference.m_InheritsFirerVelocity;
 		m_FireVel = reference.m_FireVel;
 		m_Separation = reference.m_Separation;
 		m_LifeVariation = reference.m_LifeVariation;
@@ -73,6 +75,8 @@ namespace RTE {
 			reader >> m_ParticleCount;
 		} else if (propName == "FireVelocity") {
 			reader >> m_FireVel;
+		} else if (propName == "InheritsFirerVelocity") {
+			reader >> m_InheritsFirerVelocity;
 		} else if (propName == "Separation") {
 			reader >> m_Separation;
 		} else if (propName == "LifeVariation") {
@@ -106,6 +110,7 @@ namespace RTE {
 		writer << m_ParticleCount;
 		writer.NewProperty("FireVelocity");
 		writer << m_FireVel;
+		writer.NewPropertyWithValue("InheritsFirerVelocity", m_InheritsFirerVelocity);
 		writer.NewProperty("Separation");
 		writer << m_Separation;
 		writer.NewProperty("LifeVariation");

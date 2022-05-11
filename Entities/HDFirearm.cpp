@@ -861,7 +861,7 @@ void HDFirearm::Update()
                     particleVel = roundVel;
                     particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
-                    pParticle->SetVel(m_Vel + particleVel);
+                    pParticle->SetVel(pRound->GetInheritsFirerVelocity() ? (m_Vel + particleVel) : particleVel);
 					if (m_LegacyCompatibilityRoundsAlwaysFireUnflipped) {
 						pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
 					} else {

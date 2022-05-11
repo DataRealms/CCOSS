@@ -1012,6 +1012,7 @@ namespace RTE {
 		.property("NextParticle", &Round::GetNextParticle)
 		.property("Shell", &Round::GetShell)
 		.property("FireVel", &Round::GetFireVel)
+		.property("InheritsFirerVelocity", &Round::GetInheritsFirerVelocity)
 		.property("ShellVel", &Round::GetShellVel)
 		.property("Separation", &Round::GetSeparation)
 		.property("ParticleCount", &Round::ParticleCount)

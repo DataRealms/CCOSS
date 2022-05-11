@@ -319,7 +319,7 @@ void ACDropShip::UpdateAI()
     float angle = m_Rotation.GetRadAngle();
 
     // This is the altitude at which the craft will hover and unload its cargo
-    float hoverAltitude = m_CharHeight * 2 + GetHoverHeightModifier();
+    float hoverAltitude = m_CharHeight * 2 + m_HoverHeightModifier;
     // The gutter range threshold for how much above and below the hovering altitude is ok to stay in
     float hoverRange = m_CharHeight / 4;
     // Get the altitude reading, within 25 pixels precision

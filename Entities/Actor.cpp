@@ -137,6 +137,9 @@ void Actor::Clear() {
     m_DigStrength = 1.0F;
 
     m_DamageMultiplier = 1.0F;
+
+	m_Organic = false;
+	m_Robotic = false;
 }
 
 
@@ -285,6 +288,8 @@ int Actor::Create(const Actor &reference)
     m_ObstacleState = reference.m_ObstacleState;
     m_TeamBlockState = reference.m_TeamBlockState;
 
+	m_Organic = reference.m_Organic;
+	m_Robotic = reference.m_Robotic;
 
     return 0;
 }
@@ -381,8 +386,11 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         int mode;
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
-    }
-    else
+	} else if (propName == "Organic") {
+		reader >> m_Organic;
+	} else if (propName == "Robotic") {
+		reader >> m_Robotic;
+	} else
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -458,6 +466,9 @@ int Actor::Save(Writer &writer) const
     }
     writer.NewProperty("AIMode");
     writer << m_AIMode;
+
+	writer.NewPropertyWithValue("Organic", m_Organic);
+	writer.NewPropertyWithValue("Robotic", m_Robotic);
 
     return 0;
 }

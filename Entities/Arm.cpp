@@ -459,7 +459,7 @@ void Arm::UpdateCurrentHandOffset() {
 void Arm::UpdateArmFrame() {
     if (IsAttached()) {
         float halfMax = m_MaxLength / 2.0F;
-        float newFrame = std::floor((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount);
+        float newFrame = std::floor(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount));
         m_Frame = static_cast<unsigned int>(std::clamp(newFrame, 0.0F, static_cast<float>(m_FrameCount - 1)));
     }
 }

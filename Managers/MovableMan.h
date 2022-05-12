@@ -421,55 +421,30 @@ public:
 
     void SortTeamRoster(int team) { m_SortTeamRoster[team] = true; }
 
+    /// <summary>
+    /// Adds a MovableObject to this, after it is determined what it is and the best way to add it is. E.g. if it's an Actor, it will be added as such. Ownership IS transferred!
+    /// </summary>
+    /// <param name="movableObjectToAdd">A pointer to the MovableObject to add. Ownership IS transferred!</param>
+    /// <returns>Whether the MovableObject was successfully added or not. Note that Ownership IS transferred either way, but the MovableObject will be deleted if this is not successful.</returns>
+    bool AddMO(MovableObject *movableObjectToAdd);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a MovableObject to this, after it is determined what it is and the
-//                  best way to add it is. E.g. if it's an Actor, it will be added as such.
-//                  Ownership IS transferred! TODO: ITEMS ARE NOT SORTED OUT YET
-// Arguments:       A pointer to the MovableObject to add. Ownership IS transferred!
-// Return value:    Whether the MovableObject was successfully added or not. Either way,
-//                  ownership was transferred. If no success, the object was deleted.
+    /// <summary>
+    /// Adds an Actor to the internal list of Actors. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+    /// <param name="actorToAdd">A pointer to the Actor to add. Ownership IS transferred!</param>
+    void AddActor(Actor *actorToAdd);
 
+    /// <summary>
+    /// Adds a pickup-able item to the internal list of items. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+	/// <param name="itemToAdd">A pointer to the item to add. Ownership IS transferred!</param>
+    void AddItem(MovableObject *itemToAdd);
 
-    bool AddMO(MovableObject *pMOToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddActor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an Actor to the internal list of MO:s. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the Actor to add.
-// Return value:    None.
-
-    void AddActor(Actor *pActorToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a pickup-able item to the internal list of items. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the item MovableObject to add. Ownership is transferred.
-// Return value:    None.
-
-    void AddItem(MovableObject *pItemToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddParticle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a MovableObject to the internal list of MO:s. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the MovableObject to add. Ownership is transferred.
-// Return value:    None.
-
-    void AddParticle(MovableObject *pMOToAdd);
+    /// <summary>
+    /// Adds a MovableObject to the internal list of particles. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+    /// <param name="particleToAdd">A pointer to the MovableObject to add. Ownership is transferred!</param>
+    void AddParticle(MovableObject *particleToAdd);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

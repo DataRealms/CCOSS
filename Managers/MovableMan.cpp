@@ -771,8 +771,6 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
         return false;
     }
 
-	movableObjectToAdd->SetAsAddedToMovableMan();
-
     if (Actor *actorToAdd = dynamic_cast<Actor *>(movableObjectToAdd)) {
         AddActor(actorToAdd);
         return true;
@@ -793,7 +791,6 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 	if (actorToAdd) {
 		actorToAdd->SetPrevPos(actorToAdd->GetPos());
 		actorToAdd->Update();
-		actorToAdd->PostTravel();
 		actorToAdd->SetAsAddedToMovableMan();
 
 		if (actorToAdd->IsTooFast()) {
@@ -817,7 +814,6 @@ void MovableMan::AddItem(MovableObject *itemToAdd) {
     if (itemToAdd) {
 		itemToAdd->SetPrevPos(itemToAdd->GetPos());
 		itemToAdd->Update();
-		itemToAdd->PostTravel();
 		itemToAdd->SetAsAddedToMovableMan();
 
 		if (itemToAdd->IsTooFast()) {

@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Changed the `Vector` function `ClampMagnitude` so its parameter order makes sense, it's now `Vector:ClampMagnitude(lowerMagnitudeLimit, upperMagnitudeLimit)`.
 
+- Changed the `MovableMan` function `AddItem` so it now only accepts `HeldDevice`s and sub-classes (i.e. `HDFirearm`, `ThrownDevice`, `TDExplosive`), because it always expected that anyway, and it's good to enforce it.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

@@ -28,6 +28,7 @@ namespace RTE
 
 class MovableObject;
 class Actor;
+class HeldDevice;
 class MOPixel;
 class AHuman;
 class SceneLayer;
@@ -438,7 +439,7 @@ public:
     /// Adds a pickup-able item to the internal list of items. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
     /// </summary>
 	/// <param name="itemToAdd">A pointer to the item to add. Ownership IS transferred!</param>
-    void AddItem(MovableObject *itemToAdd);
+    void AddItem(HeldDevice *itemToAdd);
 
     /// <summary>
     /// Adds a MovableObject to the internal list of particles. Destruction and deletion will be taken care of automatically. Ownership IS transferred!

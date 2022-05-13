@@ -4,6 +4,8 @@
 #include "MovableMan.h"
 #include "ConsoleMan.h"
 
+#include "HeldDevice.h"
+
 namespace RTE {
 
 #pragma region Manager Lua Adapters
@@ -38,8 +40,8 @@ namespace RTE {
 	/// </summary>
 	/// <param name="movableMan">A reference to MovableMan, provided by Lua.</param>
 	/// <param name="item">A pointer to the item to be added.</param>
-	static void AddItem(MovableMan &movableMan, MovableObject *item) {
-		if (movableMan.ValidMO(item)) {
+	static void AddItem(MovableMan &movableMan, HeldDevice *item) {
+		if (movableMan.ValidMO(dynamic_cast<MovableObject *>(item))) {
 			g_ConsoleMan.PrintString("ERROR: Tried to add an Item that already exists in the simulation!" + item->GetPresetName());
 		} else {
 			movableMan.AddItem(item);

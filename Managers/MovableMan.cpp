@@ -22,6 +22,7 @@
 #include "Controller.h"
 #include "AtomGroup.h"
 #include "Actor.h"
+#include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
 
@@ -810,7 +811,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::AddItem(MovableObject *itemToAdd) {
+void MovableMan::AddItem(HeldDevice *itemToAdd) {
     if (itemToAdd) {
 		itemToAdd->SetPrevPos(itemToAdd->GetPos());
 		itemToAdd->Update();

@@ -666,10 +666,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 						g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
 					}
 				}
-                else if (pMO->IsDevice())
-                    g_MovableMan.AddItem(dynamic_cast<MovableObject *>(pMO));
-                else
-                    g_MovableMan.AddParticle(dynamic_cast<MovableObject *>(pMO));
+				g_MovableMan.AddMO(pMO);
             }
             else
             {
@@ -741,7 +738,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 								SceneObject *pObject = pDep->CreateDeployedObject(pDep->GetPlacedByPlayer(), cost);
 								pMO = dynamic_cast<MovableObject *>(pObject);
 								if (pMO)
-									g_MovableMan.AddItem(pMO);
+									g_MovableMan.AddMO(pMO);
 								else
 								{
 									delete pObject;

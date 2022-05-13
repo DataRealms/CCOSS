@@ -1071,7 +1071,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pObject = pDep->CreateDeployedObject(pDep->GetPlacedByPlayer(), cost);
 									MovableObject *pMO = dynamic_cast<MovableObject *>(pObject);
 									if (pMO)
-										g_MovableMan.AddItem(pMO);
+										g_MovableMan.AddMO(pMO);
 									else
 									{
 										delete pObject;

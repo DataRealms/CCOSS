@@ -768,7 +768,6 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
 
 bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
     if (!movableObjectToAdd) {
-		delete movableObjectToAdd;
         return false;
     }
 
@@ -778,12 +777,10 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
     } else if (HeldDevice *heldDeviceToAdd = dynamic_cast<HeldDevice *>(movableObjectToAdd)) {
         AddItem(heldDeviceToAdd);
         return true;
-    } else {
-        AddParticle(movableObjectToAdd);
-        return true;
     }
+    AddParticle(movableObjectToAdd);
 
-    return false;
+    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

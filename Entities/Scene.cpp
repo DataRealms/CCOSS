@@ -665,8 +665,9 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 						// Place units as usual if we're told to place units
 						g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
 					}
+				} else {
+					g_MovableMan.AddMO(pMO);
 				}
-				g_MovableMan.AddMO(pMO);
             }
             else
             {

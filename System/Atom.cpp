@@ -558,7 +558,7 @@ namespace RTE {
 					abortString += " Owner is " + realOwner->GetPresetName() + ".";
 				}
 			}
-			abortString += " DomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + "Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
+			abortString += " DomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
 			RTEAbort(abortString);
 			m_OwnerMO->SetToDelete();
 		}

@@ -664,8 +664,8 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
         MovableObject *pInventoryObject = 0;
-        AHuman *pPassenger = 0;
-		AHuman *pLastPassenger = 0;
+		Actor *pPassenger = 0;
+		Actor *pLastPassenger = 0;
         list<MovableObject *> cargoItems;
 
         for (list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
@@ -694,27 +694,32 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 				// Make copy of the preset instance in the list
 				pInventoryObject = dynamic_cast<MovableObject *>((*itr)->Clone());
 				// See if it's actually a passenger, as opposed to a regular item
-				pPassenger = dynamic_cast<AHuman *>(pInventoryObject);
+				pPassenger = dynamic_cast<Actor *>(pInventoryObject);
 				// If it's an actor, then set its team and add it to the Craft's inventory!
 				if (pPassenger)
 				{
-					// If this is the first passenger, then give him all the shit found in the list before him
-					if (!pLastPassenger)
-					{
-						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-							pPassenger->AddInventoryItem(*iItr);
-					}
-					// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
-					else
-					{
-						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-							pLastPassenger->AddInventoryItem(*iItr);
+					if (dynamic_cast<AHuman *>(pPassenger)) {
+						// If this is the first passenger, then give him all the shit found in the list before him
+						if (!pLastPassenger) {
+							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+								pPassenger->AddInventoryItem(*iItr);
+						}
+						// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
+						else {
+							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+								pLastPassenger->AddInventoryItem(*iItr);
+						}
+
+						// Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
+						pLastPassenger = pPassenger;
+					} else if (pLastPassenger) {
+						for (MovableObject *cargoItem : cargoItems) {
+							pLastPassenger->AddInventoryItem(cargoItem);
+						}
+						pLastPassenger = nullptr;
 					}
 					// Clear out the temporary cargo list since we've assign all the stuff in it to a passenger
 					cargoItems.clear();
-
-					// Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
-					pLastPassenger = pPassenger;
 					// Set the team etc for the current passenger and stuff him into the craft
 					pPassenger->SetTeam(team);
 					pPassenger->SetControllerMode(Controller::CIM_AI);

@@ -1,4 +1,4 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.53')
+project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.53')
 
 #### Build environment Setup ####
 
@@ -94,7 +94,7 @@ endif
 conf_data = configuration_data()
 prefix = get_option('prefix')
 
-conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
+conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'))
 if suffix==''
   suffix=[]
   conf_data.set('EXENAME', elfname)

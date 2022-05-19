@@ -868,9 +868,9 @@ ClassInfoGetters;
 	void SetGibSound(SoundContainer *newSound) { m_GibSound = newSound; }
 
 	/// <summary>
-	/// Ensures all attachables and wounds are positioned correctly. Must be run when this MOSRotating is added to MovableMan to avoid issues with Attachables spawning in at (0, 0).
+	/// Ensures all attachables and wounds are positioned and rotated correctly. Must be run when this MOSRotating is added to MovableMan to avoid issues with Attachables spawning in at (0, 0).
 	/// </summary>
-	void CorrectAttachablePositions() const;
+	virtual void CorrectAttachableAndWoundPositionsAndRotations() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

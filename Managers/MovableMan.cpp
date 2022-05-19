@@ -788,7 +788,7 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
 void MovableMan::AddActor(Actor *actorToAdd) {
 	if (actorToAdd) {
 		actorToAdd->SetAsAddedToMovableMan();
-		actorToAdd->CorrectAttachablePositions();
+		actorToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
 		if (actorToAdd->IsTooFast()) {
 			actorToAdd->SetToDelete(true);
@@ -810,7 +810,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 void MovableMan::AddItem(HeldDevice *itemToAdd) {
     if (itemToAdd) {
 		itemToAdd->SetAsAddedToMovableMan();
-		itemToAdd->CorrectAttachablePositions();
+		itemToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
 		if (itemToAdd->IsTooFast()) {
 			itemToAdd->SetToDelete(true);
@@ -829,7 +829,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 void MovableMan::AddParticle(MovableObject *particleToAdd){
     if (particleToAdd) {
         particleToAdd->SetAsAddedToMovableMan();
-		if (MOSRotating *particleToAddAsMOSRotating = dynamic_cast<MOSRotating *>(particleToAdd)) { particleToAddAsMOSRotating->CorrectAttachablePositions(); }
+		if (MOSRotating *particleToAddAsMOSRotating = dynamic_cast<MOSRotating *>(particleToAdd)) { particleToAddAsMOSRotating->CorrectAttachableAndWoundPositionsAndRotations(); }
 
 		if (particleToAdd->IsTooFast()) {
 			particleToAdd->SetToDelete(true);

@@ -291,6 +291,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ADoor::CorrectAttachableAndWoundPositionsAndRotations() const {
+		if (m_Door) {
+			m_Door->SetParentOffset(m_ClosedByDefault ? m_ClosedOffset : m_OpenOffset);
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_ClosedByDefault ? m_ClosedAngle : m_OpenAngle) * GetFlipFactor());
+		}
+		MOSRotating::CorrectAttachableAndWoundPositionsAndRotations();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ADoor::OpenDoor() {
 		if (m_DoorState == STOPPED) {
 			SharedDoorControls();

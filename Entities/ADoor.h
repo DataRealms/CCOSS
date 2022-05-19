@@ -184,6 +184,11 @@ namespace RTE {
 		void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 		/// <summary>
+		/// Ensures all attachables and wounds are positioned and rotated correctly. Must be run when this ADoor is added to MovableMan to avoid issues with Attachables spawning in at (0, 0).
+		/// </summary>
+		void CorrectAttachableAndWoundPositionsAndRotations() const override;
+
+		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;

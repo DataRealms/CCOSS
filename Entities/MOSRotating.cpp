@@ -1974,14 +1974,18 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MOSRotating::CorrectAttachablePositions() const {
+void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
 	for (Attachable *attachable : m_Attachables) {
+		attachable->PreUpdate();
+		attachable->m_PreUpdateHasRunThisFrame = false;
 		attachable->UpdatePositionAndJointPositionBasedOnOffsets();
-		attachable->CorrectAttachablePositions();
+		attachable->CorrectAttachableAndWoundPositionsAndRotations();
 	}
 	for (Attachable *wound : m_Wounds) {
+		wound->PreUpdate();
+		wound->m_PreUpdateHasRunThisFrame = false;
 		wound->UpdatePositionAndJointPositionBasedOnOffsets();
-		wound->CorrectAttachablePositions();
+		wound->CorrectAttachableAndWoundPositionsAndRotations();
 	}
 }
 

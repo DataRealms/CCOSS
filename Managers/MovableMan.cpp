@@ -787,9 +787,8 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
 
 void MovableMan::AddActor(Actor *actorToAdd) {
 	if (actorToAdd) {
-		actorToAdd->SetPrevPos(actorToAdd->GetPos());
-		actorToAdd->Update();
 		actorToAdd->SetAsAddedToMovableMan();
+		actorToAdd->CorrectAttachablePositions();
 
 		if (actorToAdd->IsTooFast()) {
 			actorToAdd->SetToDelete(true);
@@ -810,9 +809,8 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 
 void MovableMan::AddItem(HeldDevice *itemToAdd) {
     if (itemToAdd) {
-		itemToAdd->SetPrevPos(itemToAdd->GetPos());
-		itemToAdd->Update();
 		itemToAdd->SetAsAddedToMovableMan();
+		itemToAdd->CorrectAttachablePositions();
 
 		if (itemToAdd->IsTooFast()) {
 			itemToAdd->SetToDelete(true);
@@ -830,12 +828,8 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 
 void MovableMan::AddParticle(MovableObject *particleToAdd){
     if (particleToAdd) {
-		//TODO consider running this for particles. It's old code that was uncommented for actors and items to ensure their attachables are positioned correctly, but particles should have no need for that. However, mosrotatings and child classes can be added to this via lua. Note that Travel should be unnecessary for this.
-//        particleToAdd->SetPrevPos(particleToAdd->GetPos());
-//        particleToAdd->Update();
-//        particleToAdd->Travel();
-//        particleToAdd->PostTravel();
         particleToAdd->SetAsAddedToMovableMan();
+		if (MOSRotating *particleToAddAsMOSRotating = dynamic_cast<MOSRotating *>(particleToAdd)) { particleToAddAsMOSRotating->CorrectAttachablePositions(); }
 
 		if (particleToAdd->IsTooFast()) {
 			particleToAdd->SetToDelete(true);

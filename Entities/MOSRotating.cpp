@@ -1974,6 +1974,19 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::CorrectAttachablePositions() const {
+	for (Attachable *attachable : m_Attachables) {
+		attachable->UpdatePositionAndJointPositionBasedOnOffsets();
+		attachable->CorrectAttachablePositions();
+	}
+	for (Attachable *wound : m_Wounds) {
+		wound->UpdatePositionAndJointPositionBasedOnOffsets();
+		wound->CorrectAttachablePositions();
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
     Vector forces;

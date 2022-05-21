@@ -8,7 +8,7 @@ if host_machine.system() in ['linux','osx']
     dependency('allegro'),
     dependency('loadpng'),
     dependency('flac'),
-    dependency('minizip'),
+    dependency('minizip', version:'<1.3'),
     dependency('luajit'),
     dependency('lua52'),
     dependency('threads'),

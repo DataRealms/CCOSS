@@ -1,20 +1,20 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.53')
+project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
 deps=[]
 if host_machine.system() in ['linux','osx']
   deps = [
-    dependency('allegro'),
+    dependency('allegro', version:'<5.0'),
     dependency('loadpng'),
     dependency('flac'),
-    dependency('minizip', version:'<1.3'),
+    dependency('minizip', version:'<1.3', not_found_message:'The correct version of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
-    dependency('lua52'),
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
     dependency('boost'), #needed for luabind
+    dependency(['lua52', 'lua5.2', 'lua-5.2']),
   ]
   if host_machine.system() == 'linux'
     deps += dependency('x11')

@@ -281,7 +281,6 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
 		if (!m_StartingGoldAdjustedManually) {
-			m_StartingGoldSlider->SetValue(2000);
 			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
 			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
@@ -294,6 +293,8 @@ namespace RTE {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
 			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			} else {
+				m_StartingGoldSlider->SetValue(2000);
 			}
 		}
 		std::string goldString(16, '\0');

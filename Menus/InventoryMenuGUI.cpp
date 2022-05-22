@@ -1140,6 +1140,10 @@ namespace RTE {
 		if (buttonHeld && m_GUISelectedItem) {
 			return;
 		}
+		if ((buttonEquippedItemIndex == 1 && m_GUISelectedItem && !dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object)->IsDualWieldable()) || (m_GUISelectedItem && m_GUISelectedItem->EquippedItemIndex == 1 && buttonObject && !dynamic_cast<HeldDevice *>(buttonObject)->IsDualWieldable())) {
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+			return;
+		}
 
 		int pressedButtonItemIndex = buttonEquippedItemIndex;
 		if (pressedButtonItemIndex == -1) {
@@ -1211,7 +1215,7 @@ namespace RTE {
 		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
 		
 		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
-		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsOneHanded() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
+		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsDualWieldable() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
 		
 		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
 		MovableObject *equippedItemToSwapOut = equippedItemIndex == 0 ? equippedItem : offhandEquippedItem;

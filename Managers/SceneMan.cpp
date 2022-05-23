@@ -3398,7 +3398,6 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
 				terrain->Draw(targetBitmap, targetBox);
 			}
-			// Draw the unseen obstruction layer so it obscures the team's view.
 			if (!g_FrameMan.IsInMultiplayerMode()) {
 				int team = m_ScreenTeam[m_LastUpdatedScreen];
 				if (SceneLayer *unseenLayer = (team != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(team) : nullptr) { unseenLayer->Draw(targetBitmap, targetBox); }
@@ -3463,7 +3462,6 @@ void SceneMan::ClearCurrentScene() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) const {
-	// Get the diameter of the MovableObject and convert it to a multiple of 16, i.e. 16, 32, etc
 	int bitmapSizeNeeded = static_cast<int>(std::ceil(static_cast<float>(moDiameter) / 16.0F)) * 16;
 	for (const auto &[bitmapSize, bitmapPtr] : m_IntermediateSettlingBitmaps) {
 		if (std::min(bitmapSize, bitmapSizeNeeded) >= bitmapSizeNeeded) {

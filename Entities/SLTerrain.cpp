@@ -130,13 +130,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLTerrain::Destroy(bool notInherited) {
-		if (!notInherited) { SceneLayer::Destroy(); }
-		Clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void SLTerrain::TexturizeTerrain() {
 		BITMAP *defaultBGLayerTexture = m_DefaultBGTextureFile.GetAsBitmap();
 
@@ -437,7 +430,6 @@ namespace RTE {
 				}
 			}
 		}
-		// Add a box to the updated areas list to show there's been change to the materials layer.
 		// TODO: improve fit/tightness of box here.
 		m_UpdatedMateralAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
 

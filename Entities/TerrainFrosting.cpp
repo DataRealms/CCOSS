@@ -51,7 +51,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainFrosting::FrostTerrain(SLTerrain *terrain) const {
-		// Try to get the texture of the frosting material. If there is none, the color index will be used instead.
 		BITMAP *frostingTexture = m_FrostingMaterial.GetFGTexture();
 		BITMAP *fgColorBitmap = terrain->GetFGColorBitmap();
 		BITMAP *matBitmap = terrain->GetBitmap();
@@ -68,7 +67,6 @@ namespace RTE {
 		for (int xPos = 0; xPos < matBitmap->w; ++xPos) {
 			int thicknessGoal = RandomNum(m_MinThickness, m_MaxThickness);
 
-			// Work upward from the bottom of each column.
 			for (int yPos = matBitmap->h - 1; yPos >= 0; --yPos) {
 				int materialCheckPixel = _getpixel(matBitmap, xPos, yPos);
 
@@ -76,7 +74,6 @@ namespace RTE {
 					targetMatFound = true;
 					appliedThickness = 0;
 				} else if (targetMatFound && materialCheckPixel != m_TargetMaterial.GetIndex() && appliedThickness <= thicknessGoal) {
-					// Target material has ended! See if we should start putting on the frosting.
 					targetMatFound = false;
 					applyingFrosting = true;
 				}

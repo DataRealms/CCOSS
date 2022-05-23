@@ -57,7 +57,7 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the SLTerrain object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		void Destroy(bool notInherited = false) override;
+		void Destroy(bool notInherited = false) override { if (!notInherited) { SceneLayer::Destroy(); } Clear(); }
 #pragma endregion
 
 #pragma region Data Handling
@@ -218,7 +218,7 @@ namespace RTE {
 		/// <param name="makeMOPs">Whether to generate any MOPixels from the erased terrain pixels.</param>
 		/// <param name="skipMOP">How many pixels to skip making MOPixels from, between each that gets made. 0 means every pixel turns into an MOPixel.</param>
 		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
-		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred! </returns>
+		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred!</returns>
 		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
 #pragma endregion
 

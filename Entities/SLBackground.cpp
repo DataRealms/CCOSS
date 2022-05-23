@@ -48,7 +48,6 @@ namespace RTE {
 		} else {
 			m_SpriteAnimMode = SpriteAnimMode::NOANIM;
 		}
-		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
 		if (!m_WrapX) {
 			m_FillColorLeft = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
 			m_FillColorRight = _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);

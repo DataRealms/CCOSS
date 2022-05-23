@@ -173,7 +173,6 @@ namespace RTE {
 
 		for (const SceneObject::SOPlacer &childObject : GetChildObjects()) {
 			// TODO: check if we're placing a brain, and have it replace the resident brain of the scene!
-			// Copy and apply, transferring ownership of the new copy to SceneMan.
 			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(this));
 		}
 		return true;

@@ -115,7 +115,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
-		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not. If requirements aren't met, this will not auto-scroll even if set true.</param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not. If requirements aren't met, this will not auto-scroll even if set to true.</param>
 		void SetAutoScrollX(bool autoScroll) { m_AutoScrollX = autoScroll; }
 
 		/// <summary>
@@ -127,7 +127,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
-		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not. If requirements aren't met, this will not auto-scroll even if set true.</param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not. If requirements aren't met, this will not auto-scroll even if set to true.</param>
 		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
 
 		/// <summary>

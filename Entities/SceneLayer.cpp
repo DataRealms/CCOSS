@@ -352,7 +352,6 @@ namespace RTE {
 		set_clip_rect(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()) - 1, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()) - 1);
 		bool drawScaled = m_ScaleFactor.GetX() > 1.0F || m_ScaleFactor.GetY() > 1.0F;
 
-		// If this SceneLayer is wider AND higher than the target bitmap, use simple wrapping logic - otherwise need to tile.
 		if (m_MainBitmap->w > targetBitmap->w && m_MainBitmap->h > targetBitmap->h) {
 			DrawWrapped(targetBitmap, targetBox, drawScaled);
 		} else {

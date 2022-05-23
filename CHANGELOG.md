@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
+- New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
+
+- New `Actor` INI properties `Organic = 0/1` and `Robotic = 0/1` and supporting Lua functions `Actor:IsOrganic()` and `Actor:IsRobotic()`.  
+	These have no direct gameplay effect (and default to false), but will be very useful for inter-mod compatibility, as they allow scripts to know if an `Actor` is organic or robotic, and treat them accordingly.
+  
+- New INI and Lua (R/W) `ACDropShip` property `HoverHeightModifier`. This allows for modification of the height at which an `ACDropShip` will hover when unloading cargo, or staying at a location.
+
 - New `Scene` Lua property `BackgroundLayers` (R/O) to access an iterator of the `Scene`'s `SLBackground` layers.
 
 - `SLBackground` layers can now be animated using the same INI and Lua animation controls as everything else (`FrameCount`, `SpriteAnimMode`, etc). ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
@@ -67,6 +74,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Completely replaced `ScriptFile` with `ScriptPath`.
 
 - `Scene` background layer presets in INI are now defined as `SLBackground` rather than `SceneLayer`.
 

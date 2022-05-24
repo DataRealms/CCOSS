@@ -34,7 +34,8 @@ namespace RTE {
 		}
 		// Extract the file name and module name from the path
 		m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
-		m_DataModuleName = m_FilePath.substr(0, m_FilePath.find_first_of("/\\"));
+		const int nameLength = m_FilePath.find_last_of("/\\") - m_FilePath.find_first_of("/\\") -1;
+		m_DataModuleName = m_FilePath.substr(m_FilePath.find_first_of("/\\") + 1, nameLength);
 		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
 
 		m_CanFail = failOK;
@@ -266,8 +267,9 @@ namespace RTE {
 		// Report that we're including a file
 		if (m_ReportProgress) { m_ReportProgress(m_ReportTabs + m_FileName + " on line " + std::to_string(m_CurrentLine) + " includes:", false); }
 
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(GetReadModuleID()) ? "Data/" : "Mods/";
 		// Get the file path from the current stream before pushing it into the StreamStack, otherwise we can't open a new stream after releasing it because we can't read.
-		std::string includeFilePath = std::filesystem::path(ReadPropValue()).generic_string();
+		std::string includeFilePath = moduleFolder + std::filesystem::path(ReadPropValue()).generic_string();
 
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
 		m_StreamStack.push(StreamInfo(m_Stream.release(), m_FilePath, m_CurrentLine, m_PreviousIndent));

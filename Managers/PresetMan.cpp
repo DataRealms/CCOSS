@@ -310,15 +310,22 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleIDFromPath
+// Method:          FullModulePath
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns wether or not the module is vanilla.
-// Arguments:       The ID of the module to check.
-// Return value:    True if vanilla, false otherwise.
+// Arguments:       The Path to be completed.
+//                  The ID of the module to check.
+// Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
-bool PresetMan::IsModuleOfficial(int whichModule)
+std::string PresetMan::FullModulePath(std::string modulePath, int whichModule)
 {
-    return whichModule < m_OfficialModuleCount;
+    const std::string moduleFolder = whichModule < m_OfficialModuleCount ? "Data/" : "Mods/";
+    const std::string topFolder =  modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
+    if (topFolder == moduleFolder)
+    {
+        return modulePath;
+    }
+    return moduleFolder + modulePath;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

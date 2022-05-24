@@ -173,14 +173,15 @@ public:
 
     int GetModuleIDFromPath(std::string dataPath);
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          GetModuleIDFromPath
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Returns wether or not the module is vanilla.
-    // Arguments:       The ID of the module to check.
-    // Return value:    True if vanilla, false otherwise.
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          FullModulePath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns wether or not the module is vanilla.
+// Arguments:       The Path to be completed.
+//                  The ID of the module to check.
+// Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
-    bool IsModuleOfficial(int whichModule = 0);;
+    std::string FullModulePath(std::string modulePath, int whichModule = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

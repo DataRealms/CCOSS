@@ -109,8 +109,7 @@ namespace RTE {
 		BITMAP *returnBitmap = nullptr;
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(GetDataModuleID()) ? "Data/" : "Mods/";
-		dataPathToLoad = moduleFolder + dataPathToLoad;
+		dataPathToLoad = g_PresetMan.FullModulePath(dataPathToLoad, GetDataModuleID());
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
@@ -196,16 +195,18 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
+		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath, GetDataModuleID());
+
 		FMOD::Sound *returnSample = nullptr;
 
-		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
+		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(dataPathToLoad);
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;
 		} else {
 			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-			s_LoadedSamples.try_emplace(m_DataPath, returnSample);
+			s_LoadedSamples.try_emplace(dataPathToLoad, returnSample);
 		}
 		return returnSample;
 	}
@@ -220,9 +221,10 @@ namespace RTE {
 		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
+				const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension, GetDataModuleID());
+				if (System::PathExistsCaseSensitive(dataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					SetDataPath(dataPathToLoad);
 					foundAltExtension = true;
 					break;
 				}

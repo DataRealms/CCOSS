@@ -267,9 +267,8 @@ namespace RTE {
 		// Report that we're including a file
 		if (m_ReportProgress) { m_ReportProgress(m_ReportTabs + m_FileName + " on line " + std::to_string(m_CurrentLine) + " includes:", false); }
 
-		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(GetReadModuleID()) ? "Data/" : "Mods/";
 		// Get the file path from the current stream before pushing it into the StreamStack, otherwise we can't open a new stream after releasing it because we can't read.
-		std::string includeFilePath = moduleFolder + std::filesystem::path(ReadPropValue()).generic_string();
+		std::string includeFilePath = g_PresetMan.FullModulePath(std::filesystem::path(ReadPropValue()).generic_string(), GetReadModuleID());
 
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
 		m_StreamStack.push(StreamInfo(m_Stream.release(), m_FilePath, m_CurrentLine, m_PreviousIndent));

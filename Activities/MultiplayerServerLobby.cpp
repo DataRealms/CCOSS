@@ -225,11 +225,11 @@ namespace RTE {
 			m_pGUIInput = new AllegroInput(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
-		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
 			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 		}
 
-		m_pGUIController->Load("Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
+		m_pGUIController->Load("Data/Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
 		m_pGUIController->EnableMouse(true);
 
 		// Resize the invisible root container so it matches the screen rez
@@ -326,7 +326,7 @@ namespace RTE {
 		m_pScenePreviewBitmap = create_bitmap_ex(8, 140, 55);
 		//m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
 
-		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview000.png");
+		ContentFile defaultPreview("Data/Base.rte/GUIs/DefaultPreview000.png");
 		m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
 
 		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
@@ -343,7 +343,7 @@ namespace RTE {
 
 		if (!m_pCursor)
 		{
-			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
+			ContentFile cursorFile("Data/Base.rte/GUIs/Skins/Cursor.png");
 			m_pCursor = cursorFile.GetAsBitmap();
 		}
 

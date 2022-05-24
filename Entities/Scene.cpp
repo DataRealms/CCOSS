@@ -1066,7 +1066,7 @@ int Scene::SavePreview(const std::string &bitmapPath) {
 	}
 	if (!m_pPreviewBitmap) { m_pPreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight); }
 
-	ContentFile scenePreviewGradient("Base.rte/GUIs/PreviewSkyGradient.png");
+	ContentFile scenePreviewGradient("Data/Base.rte/GUIs/PreviewSkyGradient.png");
 	draw_sprite(m_pPreviewBitmap, scenePreviewGradient.GetAsBitmap(COLORCONV_NONE, true), 0, 0);
 
 	int sceneWidth = m_pTerrain->GetBitmap()->w;

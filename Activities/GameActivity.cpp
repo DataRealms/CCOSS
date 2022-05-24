@@ -984,14 +984,14 @@ int GameActivity::Start()
             m_pBannerRed[player]->Destroy();
         else
             m_pBannerRed[player] = new GUIBanner;
-        m_pBannerRed[player]->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 8);
+        m_pBannerRed[player]->Create("Data/Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 8);
 
         // Allocate and (re)create the banners
         if (m_pBannerYellow[player])
             m_pBannerYellow[player]->Destroy();
         else
             m_pBannerYellow[player] = new GUIBanner;
-        m_pBannerYellow[player]->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 8);
+        m_pBannerYellow[player]->Create("Data/Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 8);
 
         // Resetting the banner repeat counter
         m_BannerRepeats[player] = 0;
@@ -1024,35 +1024,35 @@ int GameActivity::Start()
 
     if (m_aLZCursor[0].empty())
     {
-        ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
+        ContentFile cursorFile("Data/Base.rte/GUIs/Indicators/LZArrowRedL.png");
         cursorFile.GetAsAnimation(m_aLZCursor[0], LZCURSORFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
+        cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/LZArrowGreenL.png");
         cursorFile.GetAsAnimation(m_aLZCursor[1], LZCURSORFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
+		cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/LZArrowBlueL.png");
 		cursorFile.GetAsAnimation(m_aLZCursor[2], LZCURSORFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
+		cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/LZArrowYellowL.png");
 		cursorFile.GetAsAnimation(m_aLZCursor[3], LZCURSORFRAMECOUNT);
     }
 
     if (m_aObjCursor[0].empty())
     {
-        ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
+        ContentFile cursorFile("Data/Base.rte/GUIs/Indicators/ObjArrowRed.png");
         cursorFile.GetAsAnimation(m_aObjCursor[0], OBJARROWFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
+        cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/ObjArrowGreen.png");
         cursorFile.GetAsAnimation(m_aObjCursor[1], OBJARROWFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
+		cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/ObjArrowBlue.png");
 		cursorFile.GetAsAnimation(m_aObjCursor[2], OBJARROWFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
+		cursorFile.SetDataPath("Data/Base.rte/GUIs/Indicators/ObjArrowYellow.png");
 		cursorFile.GetAsAnimation(m_aObjCursor[3], OBJARROWFRAMECOUNT);
     }
 
     // Start the in-game music
     g_AudioMan.ClearMusicQueue();
-    g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/cc2g.ogg", 0);
+    g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/cc2g.ogg", 0);
     g_AudioMan.QueueSilence(30);
-    g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
+    g_AudioMan.QueueMusicStream("Data/Base.rte/Music/Watts/Last Man.ogg");
     g_AudioMan.QueueSilence(30);
-    g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+    g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/cc2g.ogg");
 
     return error;
 }
@@ -1111,20 +1111,20 @@ void GameActivity::End()
     if (playerWon)
     {
 // Didn't work well, has gap between intro and loop tracks
-//        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinintro.ogg", 0);
-//        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/uwinloop.ogg");
+//        g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/uwinintro.ogg", 0);
+//        g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/uwinloop.ogg");
         g_AudioMan.ClearMusicQueue();
         // Loop it twice, nice tune!
-        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
+        g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
         g_AudioMan.QueueSilence(10);
-        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+        g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg");
     }
     else
     {
         g_AudioMan.ClearMusicQueue();
-        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
+        g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
         g_AudioMan.QueueSilence(10);
-        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+        g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg");
     }
 */
 
@@ -1275,11 +1275,11 @@ void GameActivity::UpdateEditing()
             g_SceneMan.GetScene()->ResetPathFinding();
             // Start the in-game track
             g_AudioMan.ClearMusicQueue();
-            g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/cc2g.ogg", 0);
+            g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/cc2g.ogg", 0);
             g_AudioMan.QueueSilence(30);
-            g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
+            g_AudioMan.QueueMusicStream("Data/Base.rte/Music/Watts/Last Man.ogg");
             g_AudioMan.QueueSilence(30);
-            g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+            g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/cc2g.ogg");
         }
     }
 }

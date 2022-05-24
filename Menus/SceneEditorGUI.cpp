@@ -152,9 +152,9 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     // Only load the static dot bitmaps once
     if (!s_pValidPathDot)
     {
-        ContentFile dotFile("Base.rte/GUIs/Indicators/PathDotValid.png");
+        ContentFile dotFile("Data/Base.rte/GUIs/Indicators/PathDotValid.png");
         s_pValidPathDot = dotFile.GetAsBitmap();
-        dotFile.SetDataPath("Base.rte/GUIs/Indicators/PathDotInvalid.png");
+        dotFile.SetDataPath("Data/Base.rte/GUIs/Indicators/PathDotInvalid.png");
         s_pInvalidPathDot = dotFile.GetAsBitmap();
     }
 

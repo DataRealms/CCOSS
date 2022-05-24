@@ -79,7 +79,7 @@ namespace RTE {
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
 		m_NetworkFrameReady = 1;
-		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
+		m_PaletteFile = ContentFile("Data/Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_GUIScreen = nullptr;
@@ -301,7 +301,7 @@ namespace RTE {
 
 		CreateBackBuffers();
 
-		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
+		ContentFile scenePreviewGradientFile("Data/Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
 
 		return 0;
@@ -922,13 +922,13 @@ namespace RTE {
 		if (isSmall) {
 			if (!m_SmallFont) {
 				m_SmallFont = new GUIFont("SmallFont");
-				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontSmall.png");
+				m_SmallFont->Load(m_GUIScreen, "Data/Base.rte/GUIs/Skins/FontSmall.png");
 			}
 			return m_SmallFont;
 		}
 		if (!m_LargeFont) {
 			m_LargeFont = new GUIFont("FatFont");
-			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontLarge.png");
+			m_LargeFont->Load(m_GUIScreen, "Data/Base.rte/GUIs/Skins/FontLarge.png");
 		}
 		return m_LargeFont;
 	}

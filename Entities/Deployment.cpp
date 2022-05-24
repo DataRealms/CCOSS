@@ -60,11 +60,11 @@ int Deployment::Create()
 
 	if (m_apArrowLeftBitmap.empty())
 	{
-		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
+		ContentFile("Data/Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
 	}
 	if (m_apArrowRightBitmap.empty())
 	{
-		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
+		ContentFile("Data/Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
 	}
 
 	return 0;
@@ -87,11 +87,11 @@ int Deployment::Create(string loadoutName, const Icon &icon, float spawnRadius)
 
 	if (m_apArrowLeftBitmap.empty())
 	{
-		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
+		ContentFile("Data/Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
 	}
 	if (m_apArrowRightBitmap.empty())
 	{
-		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
+		ContentFile("Data/Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
 	}
 
     return 0;

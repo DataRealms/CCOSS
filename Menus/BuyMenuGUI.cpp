@@ -142,15 +142,15 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(pController->GetPlayer()); 
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 	}
-    m_pGUIController->Load("Base.rte/GUIs/BuyMenuGUI.ini");
+    m_pGUIController->Load("Data/Base.rte/GUIs/BuyMenuGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
+        ContentFile cursorFile("Data/Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -176,8 +176,8 @@ int BuyMenuGUI::Create(Controller *pController)
         // Set the images for the logo and header decorations
         GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
         m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
-        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
+        ContentFile headerFile("Data/Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
+        ContentFile logoFile("Data/Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
         pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
         m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
         pHeader->SetDrawType(GUICollectionBox::Image);
@@ -380,7 +380,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     // Not a metagame player, just a regular scenario player
     else
 	{
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "Data/Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
 	}
 
@@ -487,7 +487,7 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
             std::snprintf(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
     }
     else
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "Data/Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
     // Open the file
     Writer loadoutFile(loadoutPath, false);

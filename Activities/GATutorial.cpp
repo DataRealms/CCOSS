@@ -385,13 +385,13 @@ int GATutorial::Start()
 /*
     // Start special tutorial playlist
     g_AudioMan.ClearMusicQueue();
-    g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/ccambient4.ogg", 0);
+    g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg", 0);
     g_AudioMan.QueueSilence(30);
-    g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+    g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/cc2g.ogg");
     g_AudioMan.QueueSilence(30);
-    g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
+    g_AudioMan.QueueMusicStream("Data/Base.rte/Music/Watts/Last Man.ogg");
     g_AudioMan.QueueSilence(30);
-    g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+    g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/cc2g.ogg");
 */
     return error;
 }
@@ -443,14 +443,14 @@ void GATutorial::End()
 		if (playerWon) {
 			g_AudioMan.ClearMusicQueue();
 			// Loop it twice, nice tune!
-			g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
+			g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
 			g_AudioMan.QueueSilence(10);
-			g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+			g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg");
 		} else {
 			g_AudioMan.ClearMusicQueue();
-			g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
+			g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
 			g_AudioMan.QueueSilence(10);
-			g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+			g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg");
 		}
 	}
 }

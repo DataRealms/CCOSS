@@ -233,9 +233,9 @@ namespace RTE {
 					g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
 					g_AudioMan.SetMusicPosition(m_LastMusicPos);
 					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
+					g_AudioMan.QueueMusicStream("Data/Base.rte/Music/Watts/Last Man.ogg");
 					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+					g_AudioMan.QueueMusicStream("Data/Base.rte/Music/dBSoundworks/cc2g.ogg");
 				}
 			}
 

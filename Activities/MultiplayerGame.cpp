@@ -173,11 +173,11 @@ namespace RTE {
 			m_pGUIInput = new AllegroInput(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
-		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
 			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 		}
 
-		m_pGUIController->Load("Base.rte/GUIs/MultiplayerGameGUI.ini");
+		m_pGUIController->Load("Data/Base.rte/GUIs/MultiplayerGameGUI.ini");
 		m_pGUIController->EnableMouse(true);
 
 		// Resize the invisible root container so it matches the screen rez

@@ -212,7 +212,7 @@ int EditorActivity::Start()
 
     // Play editing music
     g_AudioMan.ClearMusicQueue();
-    g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+    g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/ccambient4.ogg");
 
     // Force the split screen config to just be one big screen for editing
     g_FrameMan.ResetSplitScreens(false, false);
@@ -226,7 +226,7 @@ int EditorActivity::Start()
         m_pGUIInput = new AllegroInput(-1, true); 
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+    if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 	}
 

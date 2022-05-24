@@ -77,7 +77,7 @@ namespace RTE {
 		if (!g_FrameMan.ResolutionChanged()) {
 			if (!g_SettingsMan.SkipIntro() && !g_ActivityMan.IsSetToLaunchIntoActivity()) {
 				m_IntroTextFont = std::make_unique<GUIFont>("FontLarge");
-				m_IntroTextFont->Load(guiScreen, "Base.rte/GUIs/Skins/Menus/FontLarge.png");
+				m_IntroTextFont->Load(guiScreen, "Data/Base.rte/GUIs/Skins/Menus/FontLarge.png");
 				CreateIntroSequenceSlides();
 			} else {
 				m_IntroSequenceState = IntroSequence::MainMenuAppear;
@@ -91,33 +91,32 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::CreateTitleElements() {
-		m_DataRealmsLogo = ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap();
-		m_FmodLogo = ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap();
+		m_DataRealmsLogo = ContentFile("Data/Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap();
+		m_FmodLogo = ContentFile("Data/Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap();
 
-		m_PreGameLogoText.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitle.png"));
-		m_PreGameLogoTextGlow.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitleGlow.png"));
-		m_GameLogo.Create(ContentFile("Base.rte/GUIs/Title/Title.png"));
-		m_GameLogoGlow.Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.png"));
-		m_Planet.Create(ContentFile("Base.rte/GUIs/Title/Planet.png"));
-		m_Moon.Create(ContentFile("Base.rte/GUIs/Title/Moon.png"));
-		m_Station.Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
-		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
-		m_Nebula.SetScrollRatio(Vector(-1.0F, 1.0F / 3.0F));
+		m_PreGameLogoText.Create(ContentFile("Data/Base.rte/GUIs/Title/Intro/PreTitle.png"));
+		m_PreGameLogoTextGlow.Create(ContentFile("Data/Base.rte/GUIs/Title/Intro/PreTitleGlow.png"));
+		m_GameLogo.Create(ContentFile("Data/Base.rte/GUIs/Title/Title.png"));
+		m_GameLogoGlow.Create(ContentFile("Data/Base.rte/GUIs/Title/TitleGlow.png"));
+		m_Planet.Create(ContentFile("Data/Base.rte/GUIs/Title/Planet.png"));
+		m_Moon.Create(ContentFile("Data/Base.rte/GUIs/Title/Moon.png"));
+		m_Station.Create(ContentFile("Data/Base.rte/GUIs/Title/Station.png"));
+		m_Nebula.Create(ContentFile("Data/Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
 
 		set_write_alpha_blender();
-		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Data/Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Data/Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Data/Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Data/Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 
 		int starSmallBitmapCount = 4;
-		std::vector<BITMAP *> starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
+		std::vector<BITMAP *> starSmallBitmaps = ContentFile("Data/Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
 
 		int starLargeBitmapCount = 1;
-		std::vector<BITMAP *> starLargeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount);
+		std::vector<BITMAP *> starLargeBitmaps = ContentFile("Data/Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount);
 
 		int starHugeBitmapCount = 2;
-		std::vector<BITMAP *> starHugeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount);
+		std::vector<BITMAP *> starHugeBitmaps = ContentFile("Data/Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount);
 
 		int starCount = (g_FrameMan.GetResX() * m_Nebula.GetBitmap()->h) / 1000;
 		for (int i = 0; i < starCount; ++i) {
@@ -146,7 +145,7 @@ namespace RTE {
 	void TitleScreen::CreateIntroSequenceSlides() {
 		std::string highRes = (g_FrameMan.GetResY() >= 680) ? "HD" : "";
 		for (int slideNum = 0; slideNum < m_IntroSlides.size(); ++slideNum) {
-			m_IntroSlides[slideNum] = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
+			m_IntroSlides.at(slideNum) = ContentFile(("Data/Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
 		}
 	}
 
@@ -250,7 +249,7 @@ namespace RTE {
 					m_IntroScrollDuration = 66.6F - m_IntroScrollStartTime;
 					m_ScrollOffset.SetY(m_IntroScrollStartOffsetY);
 
-					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
@@ -376,7 +375,7 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(0.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_FadeAmount = 0;
-					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PreMainMenuScrollOffsetY, 0, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(120, m_GameLogoMainMenuOffsetY, m_SectionProgress)));
@@ -413,7 +412,7 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					g_GUISound.SplashSound()->Play();
-					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
 				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewScrollOffsetY, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
@@ -422,7 +421,7 @@ namespace RTE {
 			case TitleTransition::PlanetToMainMenu:
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
-					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewScrollOffsetY, 0, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(m_GameLogoPlanetViewOffsetY, m_GameLogoMainMenuOffsetY, m_SectionProgress)));
@@ -446,7 +445,7 @@ namespace RTE {
 					m_ScrollOffset.SetY(m_PlanetViewScrollOffsetY);
 					m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), m_GameLogoPlanetViewOffsetY));
 					m_StationOrbitTimer.SetElapsedRealTimeS(m_StationOrbitTimerElapsedTime);
-					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, 1.0F, m_SectionProgress));
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
@@ -462,7 +461,7 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_StationOrbitTimer.SetElapsedRealTimeS(m_StationOrbitTimerElapsedTime);
-					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
+					g_AudioMan.PlayMusic("Data/Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, 1.0F, m_SectionProgress));
 				m_ScrollOffset.SetY(EaseOut(250, 0, m_SectionProgress));

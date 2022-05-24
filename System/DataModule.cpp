@@ -366,7 +366,8 @@ namespace RTE {
 
 	int DataModule::FindAndRead(const ProgressCallback &progressCallback) {
 		int result = 0;
-		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + m_FileName)) {
+		const std::string directoryToScan = g_PresetMan.FullModulePath(m_FileName, m_ModuleID);
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + directoryToScan)) {
 			if (directoryEntry.path().extension() == ".ini" && directoryEntry.path().filename() != "Index.ini") {
 				Reader iniReader;
 				if (iniReader.Create(m_FileName + "/" + directoryEntry.path().filename().generic_string(), false, progressCallback) >= 0) {

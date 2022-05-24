@@ -29,6 +29,8 @@
 #include "LoadingScreen.h"
 #include "SettingsMan.h"
 
+static const std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+
 namespace RTE {
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +166,6 @@ bool PresetMan::LoadAllDataModules() {
 	FindAndExtractZippedModules();
 
 	// Load all the official modules first!
-	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	for (const std::string &officialModule : officialModules) {
 		if (!LoadDataModule(officialModule, true, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
@@ -307,6 +308,19 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
         slashPos = dataPath.find_first_of('\\');
 
     return GetModuleID(dataPath.substr(0, slashPos));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetModuleIDFromPath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns wether or not the module is vanilla.
+// Arguments:       The ID of the module to check.
+// Return value:    True if vanilla, false otherwise.
+
+bool PresetMan::IsModuleOfficial(int whichModule)
+{
+    return std::find(officialModules.begin(), officialModules.end(), GetDataModuleName(whichModule)) != officialModules.end();
 }
 
 

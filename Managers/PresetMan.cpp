@@ -319,6 +319,7 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 
 std::string PresetMan::FullModulePath(std::string modulePath, int whichModule)
 {
+    // Scenes.rte and Metagames.rte are loaded last but are official modules anyway
     const bool isSpecialCase = whichModule >= m_pDataModules.size() - 2;
     const std::string moduleFolder = whichModule < m_OfficialModuleCount || isSpecialCase ? "Data/" : "Mods/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);

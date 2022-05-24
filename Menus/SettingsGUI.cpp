@@ -14,8 +14,8 @@ namespace RTE {
 
 	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
-		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
-		m_GUIControlManager->Load("Data/Base.rte/GUIs/SettingsGUI.ini");
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
+		m_GUIControlManager->Load("Base.rte/GUIs/SettingsGUI.ini");
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());

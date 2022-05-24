@@ -25,8 +25,8 @@ namespace RTE {
 
 	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, bool progressReportDisabled) {
 		GUIControlManager loadingScreenManager;
-		RTEAssert(loadingScreenManager.Create(guiScreen, guiInput, "Data/Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
-		loadingScreenManager.Load("Data/Base.rte/GUIs/LoadingGUI.ini");
+		RTEAssert(loadingScreenManager.Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
+		loadingScreenManager.Load("Base.rte/GUIs/LoadingGUI.ini");
 
 		int loadingSplashOffset = 0;
 		if (!progressReportDisabled) {
@@ -34,7 +34,7 @@ namespace RTE {
 			loadingSplashOffset = m_ProgressListboxPosX / 4;
 		}
 		SceneLayer loadingSplash;
-		loadingSplash.Create(ContentFile("Data/Base.rte/GUIs/Title/LoadingSplash.png").GetAsBitmap(COLORCONV_NONE, false), false, Vector(), true, false, Vector(1.0F, 0));
+		loadingSplash.Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png").GetAsBitmap(COLORCONV_NONE, false), false, Vector(), true, false, Vector(1.0F, 0));
 		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset), 0));
 
 		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));

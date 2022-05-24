@@ -370,10 +370,10 @@ int MetagameGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 	}
-    m_pGUIController->Load("Data/Base.rte/GUIs/MetagameGUI.ini");
+    m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     GUICollectionBox *pRootBox = m_apScreenBox[ROOTBOX] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
@@ -386,10 +386,10 @@ int MetagameGUI::Create(Controller *pController)
     m_pBannerRedBottom = new GUIBanner();
     m_pBannerYellowTop = new GUIBanner();
     m_pBannerYellowBottom = new GUIBanner();
-    m_pBannerRedTop->Create("Data/Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
-    m_pBannerRedBottom->Create("Data/Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
-    m_pBannerYellowTop->Create("Data/Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
-    m_pBannerYellowBottom->Create("Data/Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Data/Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
+    m_pBannerRedTop->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerRedBottom->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerYellowTop->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
+    m_pBannerYellowBottom->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
 
     // General game message label
     m_pGameMessageLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GameMessageLabel"));
@@ -2483,7 +2483,7 @@ void MetagameGUI::UpdateInput()
                 g_MetaMan.m_Players[metaPlayer].m_Funds -= SCANCOST;
                 // Set up and start the scripted activity for scanning the site for this' team
                 GAScripted *pScanActivity = new GAScripted;
-                pScanActivity->Create("Data/Base.rte/Activities/SiteScan.lua", "SiteScan");
+                pScanActivity->Create("Base.rte/Activities/SiteScan.lua", "SiteScan");
                 char str[64];
                 std::snprintf(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
                 pScanActivity->SetPresetName(g_MetaMan.GetGameName() + str);
@@ -2980,7 +2980,7 @@ void MetagameGUI::CompletedActivity()
             UpdateScenesBox(true);
 
             // Play some nice ambient music
-            g_AudioMan.PlayMusic("Data/Base.rte/Music/Hubnester/ccmenu.ogg", -1, 0.4);
+            g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1, 0.4);
         }
     }
 }
@@ -4238,7 +4238,7 @@ void MetagameGUI::SetupOffensives()
                     {
                         // Set up the MetaFight activity
                         GAScripted *pOffensive = new GAScripted;
-                        pOffensive->Create("Data/Base.rte/Activities/MetaFight.lua", "MetaFight");
+                        pOffensive->Create("Base.rte/Activities/MetaFight.lua", "MetaFight");
                         char str[64];
                         std::snprintf(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
                         pOffensive->SetPresetName(g_MetaMan.GetGameName() + str);

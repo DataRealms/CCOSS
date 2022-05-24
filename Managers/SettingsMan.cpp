@@ -16,7 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-		m_SettingsPath = "Data/Base.rte/Settings.ini";
+		m_SettingsPath = "Base.rte/Settings.ini";
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;

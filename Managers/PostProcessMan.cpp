@@ -27,13 +27,13 @@ namespace RTE {
 
 	int PostProcessMan::Initialize() {
 		// TODO: Make more robust and load more glows!
-		ContentFile glowFile("Data/Base.rte/Effects/Glows/YellowTiny.png");
+		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.png");
 		m_YellowGlow = glowFile.GetAsBitmap();
 		m_YellowGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Data/Base.rte/Effects/Glows/RedTiny.png");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.png");
 		m_RedGlow = glowFile.GetAsBitmap();
 		m_RedGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Data/Base.rte/Effects/Glows/BlueTiny.png");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.png");
 		m_BlueGlow = glowFile.GetAsBitmap();
 		m_BlueGlowHash = glowFile.GetHash();
 

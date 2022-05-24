@@ -80,15 +80,15 @@ int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
         m_pGUIInput = new AllegroInput(pController->GetPlayer());
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 	}
-    m_pGUIController->Load("Data/Base.rte/GUIs/AreaPickerGUI.ini");
+    m_pGUIController->Load("Base.rte/GUIs/AreaPickerGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Data/Base.rte/GUIs/Skins/Cursor.png");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -101,7 +101,7 @@ int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
         m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PickerGUIBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Data/Base.rte/GUIs/BuyMenuBackground.png");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pParentBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pParentBox->SetDrawBackground(true);
 //        m_pParentBox->SetDrawType(GUICollectionBox::Image);

@@ -167,7 +167,7 @@ int AssemblyEditor::Start()
     //////////////////////////////////////////////////////////////
     // Hooking up directly to the controls defined in the GUI ini
 
-    m_pGUIController->Load("Data/Base.rte/GUIs/AssemblyEditorGUI.ini");
+    m_pGUIController->Load("Base.rte/GUIs/AssemblyEditorGUI.ini");
 
     // Resize the invisible root container so it matches the screen rez
     GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));

@@ -172,7 +172,7 @@ int GibEditor::Start()
     //////////////////////////////////////////////////////////////
     // Hooking up directly to the controls defined in the GUI ini
 
-    m_pGUIController->Load("Data/Base.rte/GUIs/GibEditorGUI.ini");
+    m_pGUIController->Load("Base.rte/GUIs/GibEditorGUI.ini");
 
     // Resize the invisible root container so it matches the screen rez
     GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));
@@ -207,7 +207,7 @@ int GibEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Data/Base.rte/GUIs/BuyMenuBackground.png");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);

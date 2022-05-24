@@ -51,7 +51,7 @@ namespace RTE {
 	int PieMenuGUI::Create(Controller *controller, MovableObject *affectedObject) {
 		RTEAssert(controller, "No controller sent to PieMenuGUI on creation!");
 
-		if (!s_CursorBitmap) { s_CursorBitmap = ContentFile("Data/Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap(); }
+		if (!s_CursorBitmap) { s_CursorBitmap = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap(); }
 
 		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
 

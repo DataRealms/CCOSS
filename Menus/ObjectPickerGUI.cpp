@@ -66,13 +66,13 @@ namespace RTE {
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
 		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(controller->GetPlayer()); }
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
-		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Data/Base.rte/GUIs/Skins", "DefaultSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins", "DefaultSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 
-		m_GUIControlManager->Load("Data/Base.rte/GUIs/ObjectPickerGUI.ini");
+		m_GUIControlManager->Load("Base.rte/GUIs/ObjectPickerGUI.ini");
 		m_GUIControlManager->EnableMouse(controller->IsMouseControlled());
 
 		if (!s_Cursor) {
-			ContentFile cursorFile("Data/Base.rte/GUIs/Skins/Cursor.png");
+			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
 			s_Cursor = cursorFile.GetAsBitmap();
 		}
 

@@ -44,11 +44,11 @@ namespace RTE {
 		m_InputWizardTitleLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPlayerInputMappingWizardTitle"));
 
 		int dpadDiagramBitampCount = 13;
-		ContentFile("Data/Base.rte/GUIs/Controllers/D-Pad.png").GetAsAnimation(m_DPadDiagramBitmaps, dpadDiagramBitampCount, COLORCONV_8_TO_32);
+		ContentFile("Base.rte/GUIs/Controllers/D-Pad.png").GetAsAnimation(m_DPadDiagramBitmaps, dpadDiagramBitampCount, COLORCONV_8_TO_32);
 
 		int analogDiagramBitmapCount = 21;
-		ContentFile("Data/Base.rte/GUIs/Controllers/DualAnalogDS.png").GetAsAnimation(m_DualAnalogDSDiagramBitmaps, analogDiagramBitmapCount, COLORCONV_8_TO_32);
-		ContentFile("Data/Base.rte/GUIs/Controllers/DualAnalogXB.png").GetAsAnimation(m_DualAnalogXBDiagramBitmaps, analogDiagramBitmapCount, COLORCONV_8_TO_32);
+		ContentFile("Base.rte/GUIs/Controllers/DualAnalogDS.png").GetAsAnimation(m_DualAnalogDSDiagramBitmaps, analogDiagramBitmapCount, COLORCONV_8_TO_32);
+		ContentFile("Base.rte/GUIs/Controllers/DualAnalogXB.png").GetAsAnimation(m_DualAnalogXBDiagramBitmaps, analogDiagramBitmapCount, COLORCONV_8_TO_32);
 
 		CreateManualConfigScreen();
 		CreatePresetSelectionScreen();

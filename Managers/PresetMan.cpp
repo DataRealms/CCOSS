@@ -29,8 +29,6 @@
 #include "LoadingScreen.h"
 #include "SettingsMan.h"
 
-static const std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
-
 namespace RTE {
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +164,7 @@ bool PresetMan::LoadAllDataModules() {
 	FindAndExtractZippedModules();
 
 	// Load all the official modules first!
+	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	for (const std::string &officialModule : officialModules) {
 		if (!LoadDataModule(officialModule, true, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
@@ -310,7 +309,6 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
     return GetModuleID(dataPath.substr(0, slashPos));
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetModuleIDFromPath
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -320,9 +318,8 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 
 bool PresetMan::IsModuleOfficial(int whichModule)
 {
-    return std::find(officialModules.begin(), officialModules.end(), GetDataModuleName(whichModule)) != officialModules.end();
+    return whichModule < m_OfficialModuleCount;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddEntityPreset

@@ -109,6 +109,8 @@ namespace RTE {
 		BITMAP *returnBitmap = nullptr;
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(GetDataModuleID()) ? "Data/" : "Mods/";
+		dataPathToLoad = moduleFolder + dataPathToLoad;
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.

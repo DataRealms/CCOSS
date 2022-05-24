@@ -342,7 +342,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else if (propName == "ScriptPath") {
-		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
+		std::string scriptPath = g_PresetMan.FullModulePath(CorrectBackslashesInPath(reader.ReadPropValue()), GetModuleID());
         switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
             case 0:
                 break;

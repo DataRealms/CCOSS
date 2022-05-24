@@ -143,19 +143,21 @@ namespace RTE {
 		if (m_DataPath.empty() || frameCount < 1) {
 			return;
 		}
+		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath, GetDataModuleID());
+		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension, GetDataModuleID());
 		vectorToFill.reserve(frameCount);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		if (frameCount == 1) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
-			if (!System::PathExistsCaseSensitive(m_DataPath)) {
+			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
 				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
-					SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
-				} else if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+				if (System::PathExistsCaseSensitive(dataPathWithoutExtensionToLoad + "000" + m_DataPathExtension)) {
+					SetDataPath(dataPathWithoutExtensionToLoad + "000" + m_DataPathExtension);
+				} else if (System::PathExistsCaseSensitive(dataPathWithoutExtensionToLoad + "000" + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
+					SetDataPath(dataPathWithoutExtensionToLoad + "000" + altFileExtension);
 				}
 			}
 			vectorToFill.emplace_back(GetAsBitmap(conversionMode));

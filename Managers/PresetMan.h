@@ -163,6 +163,14 @@ public:
 
     int GetModuleID(std::string moduleName);
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetModuleNameFromPath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the Name of a loaded DataModule, from a full data file path.
+// Arguments:       The full path to a data file inside the data module id you want to get.
+// Return value:    The requested Name. If no module of the name was found, "" will be returned.
+
+    std::string GetModuleNameFromPath(std::string dataPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetModuleIDFromPath
@@ -174,9 +182,18 @@ public:
     int GetModuleIDFromPath(std::string dataPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FullModulePath
+// Method:          IsModuleOfficial
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns wether or not the module is vanilla.
+// Arguments:       The ID of the module to check.
+// Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
+
+    bool IsModuleOfficial(int whichModule = 0);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          FullModulePath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the Full path to the module including Data/ or Mods/.
 // Arguments:       The Path to be completed.
 //                  The ID of the module to check.
 // Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.

@@ -108,6 +108,13 @@ namespace RTE {
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
+
+		/// <summary>
+		/// Sets the proper package.path for the script to run.
+		/// </summary>
+		/// <param name="luaState">The script parent state.</param>
+		/// <param name="filePath">The path to the file to load and run.</param>
+		void SetLuaPath(lua_State* luaState, const std::string& filePath);
 #pragma endregion
 
 #pragma region

@@ -291,37 +291,72 @@ int PresetMan::GetModuleID(string moduleName)
     return -1;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetModuleNameFromPath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the Name of a loaded DataModule, from a full data file path.
+std::string PresetMan::GetModuleNameFromPath( std::string dataPath )
+{
+    if( dataPath.empty() ) {
+        return "";
+    }
+
+    int slashPos = dataPath.find_first_of( '/' );
+    if( slashPos == string::npos ) {
+        slashPos = dataPath.find_first_of( '\\' );
+    }
+    std::string moduleName = dataPath.substr( 0, slashPos );
+    // check if path starts with Data/ or Mods/ and remove that part to get to the actual module name
+    if( moduleName == "Data" || moduleName == "Mods" ) {
+        std::string shortenPath = dataPath.substr( slashPos + 1 );
+        slashPos = shortenPath.find_first_of( '/' );
+        if( slashPos == string::npos ) {
+            slashPos = shortenPath.find_first_of( '\\' );
+        }
+        moduleName = shortenPath.substr( 0, slashPos );
+    }
+
+    return moduleName;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetModuleIDFromPath
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the ID of a loaded DataModule, from a full data file path.
 
-int PresetMan::GetModuleIDFromPath(std::string dataPath)
+int PresetMan::GetModuleIDFromPath( std::string dataPath )
 {
-    if (dataPath.empty())
+    if( dataPath.empty() ) {
         return -1;
+    }
 
-    int slashPos = dataPath.find_first_of('/');
-    if (slashPos == string::npos)
-        slashPos = dataPath.find_first_of('\\');
+    const std::string moduleName = GetModuleNameFromPath( dataPath );
+    return GetModuleID( moduleName );
+}
 
-    return GetModuleID(dataPath.substr(0, slashPos));
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          IsModuleOfficial
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns wether or not the module is vanilla.
+
+bool PresetMan::IsModuleOfficial(int whichModule)
+{
+    // Scenes.rte and Metagames.rte are loaded last but are official modules anyway
+    const bool isSpecialCase = whichModule >= m_pDataModules.size() - 2;
+    return whichModule < m_OfficialModuleCount || isSpecialCase;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FullModulePath
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns wether or not the module is vanilla.
+// Description:     Returns the Full path to the module including Data/ or Mods/.
 // Arguments:       The Path to be completed.
 //                  The ID of the module to check.
 // Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
 std::string PresetMan::FullModulePath(std::string modulePath, int whichModule)
 {
-    // Scenes.rte and Metagames.rte are loaded last but are official modules anyway
-    const bool isSpecialCase = whichModule >= m_pDataModules.size() - 2;
-    const std::string moduleFolder = whichModule < m_OfficialModuleCount || isSpecialCase ? "Data/" : "Mods/";
+    const std::string moduleFolder = IsModuleOfficial(whichModule) ? "Data/" : "Mods/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {
         return modulePath;

@@ -109,7 +109,7 @@ namespace RTE {
 		BITMAP *returnBitmap = nullptr;
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		dataPathToLoad = g_PresetMan.FullModulePath(dataPathToLoad, GetDataModuleID());
+		dataPathToLoad = g_PresetMan.FullModulePath(dataPathToLoad);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
@@ -143,8 +143,8 @@ namespace RTE {
 		if (m_DataPath.empty() || frameCount < 1) {
 			return;
 		}
-		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath, GetDataModuleID());
-		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension, GetDataModuleID());
+		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
+		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension);
 		vectorToFill.reserve(frameCount);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
@@ -197,7 +197,7 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath, GetDataModuleID());
+		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
 
 		FMOD::Sound *returnSample = nullptr;
 
@@ -223,7 +223,7 @@ namespace RTE {
 		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension, GetDataModuleID());
+				const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension);
 				if (System::PathExistsCaseSensitive(dataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(dataPathToLoad);

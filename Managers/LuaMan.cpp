@@ -176,6 +176,17 @@ namespace RTE {
 			// Add package path to the defaults.
 			"package.path = package.path .. \";Base.rte/?.lua\";\n"
 		);
+		// Override dofile() to be able to account for Data/ or Mods/ subfolder
+		luaL_dostring(m_MasterState,
+			"OriginalDoFile = dofile;"
+			"dofile = function(filePath);"
+				"filePath = FullModulePath(filePath);"
+				"if filePath ~= \"\";"
+				"then;"
+					"return OriginalDoFile(filePath);"
+				"end;"
+			"end;"
+		);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

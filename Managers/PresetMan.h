@@ -195,10 +195,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the Full path to the module including Data/ or Mods/.
 // Arguments:       The Path to be completed.
-//                  The ID of the module to check.
 // Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
-    std::string FullModulePath(std::string modulePath, int whichModule = 0);
+    std::string FullModulePath(std::string modulePath);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

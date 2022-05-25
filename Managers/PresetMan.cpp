@@ -354,8 +354,9 @@ bool PresetMan::IsModuleOfficial(int whichModule)
 //                  The ID of the module to check.
 // Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
-std::string PresetMan::FullModulePath(std::string modulePath, int whichModule)
+std::string PresetMan::FullModulePath(std::string modulePath)
 {
+    const int whichModule = GetModuleIDFromPath(modulePath);
     const std::string moduleFolder = IsModuleOfficial(whichModule) ? "Data/" : "Mods/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {

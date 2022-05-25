@@ -188,7 +188,9 @@ namespace RTE {
 		.def("GetRandomOfGroupInModuleSpace", &PresetMan::GetRandomOfGroupInModuleSpace)
 		.def("GetEntityDataLocation", &PresetMan::GetEntityDataLocation)
 		.def("ReadReflectedPreset", &PresetMan::ReadReflectedPreset)
-		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts);
+		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts)
+		.def("IsModuleOfficial", &PresetMan::IsModuleOfficial)
+		.def("FullModulePath", &PresetMan::FullModulePath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

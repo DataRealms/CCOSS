@@ -241,6 +241,10 @@ MovableObject * Arm::ReleaseHeldMO()
 			// Once detached may have incorrect ID value. Detach will take care m_RootID. New ID will be assigned on next frame.
             m_pHeldMO->SetAsNoID();
             RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
+			//This is to work around the edge case where an attachable is set to delete/gibbed in its OnDetach script. In that case the object is added to MovableMan and nothing else should be done with it (e.g. it shouldn't be added to MovableMan again), so this will return nullptr to signify there's no object to work with.
+			if (pReturnMO->IsSetToDelete()) {
+				return nullptr;
+			}
 		}
     }
     m_pHeldMO = nullptr;

@@ -181,18 +181,18 @@ namespace RTE {
 		/// Gets a deque of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedMaterialAreas().
 		/// </summary>
 		/// <returns>Reference to the deque that has been filled with Boxes which are unwrapped and may be out of bounds of the scene!</returns>
-		const std::deque<Box> & GetUpdatedMaterialAreas() const { return m_UpdatedMateralAreas; }
+		const std::deque<Box> & GetUpdatedMaterialAreas() const { return m_UpdatedMaterialAreas; }
 
 		/// <summary>
 		/// Adds a notification that an area of the material terrain has been updated.
 		/// </summary>
 		/// <param name="newArea">The Box defining the newly updated material area that can be unwrapped and may be out of bounds of the scene.</param>
-		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.emplace_back(newArea); }
+		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMaterialAreas.emplace_back(newArea); }
 
 		/// <summary>
 		/// Clears the list of updated areas in the material layer (main bitmap).
 		/// </summary>
-		void ClearUpdatedMaterialAreas() { m_UpdatedMateralAreas.clear(); }
+		void ClearUpdatedMaterialAreas() { m_UpdatedMaterialAreas.clear(); }
 
 		/// <summary>
 		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer.
@@ -252,7 +252,7 @@ namespace RTE {
 		std::vector<TerrainDebris *> m_TerrainDebris; //!< The TerrainDebris that need to be  placed on this SLTerrain.
 		std::vector<TerrainObject *> m_TerrainObjects; //!< The TerrainObjects that need to be placed on this SLTerrain.
 
-		std::deque<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer (main bitmap) which have been affected by new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
+		std::deque<Box> m_UpdatedMaterialAreas; //!< List of areas of the material layer (main bitmap) which have been affected by new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
 
 		/// <summary>
 		/// Applies Material textures to the foreground and background color layers, based on the loaded material layer (main bitmap).

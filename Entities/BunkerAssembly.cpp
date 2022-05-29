@@ -100,7 +100,7 @@ void BunkerAssembly::AddPlacedObject(SceneObject * pSO)
 		pTObject->SetTeam(GetTeam());
 
 		for (const SceneObject::SOPlacer &childObject : pTObject->GetChildObjects()) {
-			SOPlacer newPlacer = childObject;
+			SceneObject::SOPlacer newPlacer = childObject;
 			newPlacer.SetTeam(pTObject->GetTeam());
 			// Explicitly set child object's offset, because it will be a part of a bigger 'terrain object'
 			newPlacer.SetOffset(newPlacer.GetOffset() + pTObject->GetPos() + m_BitmapOffset);

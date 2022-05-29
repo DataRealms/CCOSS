@@ -3320,7 +3320,6 @@ void SceneMan::Update(int screen) {
 
 	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
 		Vector scrollVec(offsetTarget - m_Offset[screen]);
-		// Figure out the scroll progress this frame, and cap it at 1.0.
 		float scrollProgress = static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F);
 		if (scrollProgress > 1.0F) { scrollProgress = 1.0F; }
 		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);

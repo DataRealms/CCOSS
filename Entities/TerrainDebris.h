@@ -106,9 +106,9 @@ namespace RTE {
 		/// Checks if conditions apply for a debris piece to be placed to the terrain. The actual position is returned via the passed in Box's center position.
 		/// </summary>
 		/// <param name="terrain">Pointer to the SLTerrain to check debris placement on. Ownership is NOT transferred!</param>
-		/// <param name="positionCheckBox">A Box that holds the debris piece's dimensions. The center position of the Box will be modified during checking.</param>
+		/// <param name="possiblePiecePosition">A Box that holds the debris piece's dimensions. The center position of the Box will be modified during checking.</param>
 		/// <returns>True if a valid placement position was found, which means the passed in Box's center or corner positions are good to be used as the piece's drawing position.</returns>
-		bool GetPiecePlacementPosition(SLTerrain *terrain, Box &positionCheckBox) const;
+		bool GetPiecePlacementPosition(SLTerrain *terrain, Box &possiblePiecePosition) const;
 
 		/// <summary>
 		/// Checks whether the passed in pixel color value is of target Material, and if extra conditions apply for it to be valid for placement, depending on DebrisPlacementMode.

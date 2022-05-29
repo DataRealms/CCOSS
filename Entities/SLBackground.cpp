@@ -42,12 +42,12 @@ namespace RTE {
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
 
-		if (m_FrameCount > 1) {
-			// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
-			if (m_FrameCount == 2 && m_SpriteAnimMode >= SpriteAnimMode::ALWAYSRANDOM) { m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP; }
-		} else {
+		if (m_FrameCount == 1) {
 			m_SpriteAnimMode = SpriteAnimMode::NOANIM;
+		} else if (m_FrameCount == 2 && m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
+			m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP;
 		}
+
 		if (!m_WrapX) {
 			m_FillColorLeft = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
 			m_FillColorRight = _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
@@ -248,7 +248,6 @@ namespace RTE {
 			if (m_FillColorUp != ColorKeys::g_MaskColor && m_Offset.GetFloorIntY() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY - m_Offset.GetFloorIntY(), m_FillColorUp); }
 			if (m_FillColorDown != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY + bitmapHeight - m_Offset.GetFloorIntY(), targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillColorDown); }
 		}
-		// Reset the clip rect back to the entire target bitmap.
 		set_clip_rect(targetBitmap, 0, 0, targetBitmap->w - 1, targetBitmap->h - 1);
 	}
 }

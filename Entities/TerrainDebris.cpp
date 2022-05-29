@@ -123,11 +123,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool TerrainDebris::GetPiecePlacementPosition(SLTerrain *terrain, Box &positionCheckBox) const {
+	bool TerrainDebris::GetPiecePlacementPosition(SLTerrain *terrain, Box &possiblePiecePosition) const {
 		BITMAP *matBitmap = terrain->GetMaterialBitmap();
 		int posX = RandomNum(0, matBitmap->w);
 		int depth = RandomNum(m_MinDepth, m_MaxDepth);
-		int buriedDepthOffset = m_OnlyBuried ? static_cast<int>(positionCheckBox.GetHeight() * 0.6F) : 0;
+		int buriedDepthOffset = m_OnlyBuried ? static_cast<int>(possiblePiecePosition.GetHeight() * 0.6F) : 0;
 		int prevMaterialCheckPixel = -1;
 
 		bool scanForOverhang = m_DebrisPlacementMode == DebrisPlacementMode::OnOverhangOnly || m_DebrisPlacementMode == DebrisPlacementMode::OnCavityOverhangOnly || m_DebrisPlacementMode == DebrisPlacementMode::OnOverhangAndCavityOverhang;
@@ -145,8 +145,8 @@ namespace RTE {
 					if (MaterialPixelIsValidTarget(materialCheckPixel, prevMaterialCheckPixel)) {
 						surfacePosY += (depth + buriedDepthOffset);
 						overhangPosY -= (depth + buriedDepthOffset);
-						positionCheckBox.SetCenter(Vector(static_cast<float>(posX), static_cast<float>(scanForOverhang ? overhangPosY : surfacePosY)));
-						if (!m_OnlyBuried || terrain->IsBoxBuried(positionCheckBox)) {
+						possiblePiecePosition.SetCenter(Vector(static_cast<float>(posX), static_cast<float>(scanForOverhang ? overhangPosY : surfacePosY)));
+						if (!m_OnlyBuried || terrain->IsBoxBuried(possiblePiecePosition)) {
 							return true;
 						}
 					}
@@ -165,6 +165,7 @@ namespace RTE {
 		if (materialCheckPixel != m_TargetMaterial.GetIndex()) {
 			checkResult = false;
 		} else {
+			// TODO: Consider using disgustang bitwise/shifting junk instead of enum.
 			switch (m_DebrisPlacementMode) {
 				case DebrisPlacementMode::OnSurfaceOnly:
 				case DebrisPlacementMode::OnOverhangOnly:
@@ -239,8 +240,8 @@ namespace RTE {
 		for (int piece = 0; piece < possiblePieceToPlaceCount; ++piece) {
 			int pieceBitmapIndex = RandomNum(0, m_BitmapCount - 1);
 			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::ScatterOnTerrain!");
-			Box positionCheckBox(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
-			if (GetPiecePlacementPosition(terrain, positionCheckBox)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), positionCheckBox.GetCorner()); }
+			Box possiblePiecePosition(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
+			if (GetPiecePlacementPosition(terrain, possiblePiecePosition)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), possiblePiecePosition.GetCorner()); }
 		}
 		// Reference. Do not remove.
 		//release_bitmap(terrain->GetMaterialBitmap());

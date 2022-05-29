@@ -160,7 +160,7 @@ namespace RTE {
 		ContentFile m_FGColorFile; //!< ContentFile containing the path to this TerrainObject's foreground color layer representation.
 		BITMAP *m_FGColorBitmap; //!< Foreground color BITMAP of this TerrainObject.
 
-		ContentFile m_BGColorFile; //!<ContentFile containing the path to this TerrainObject's background color layer representation.
+		ContentFile m_BGColorFile; //!< ContentFile containing the path to this TerrainObject's background color layer representation.
 		BITMAP *m_BGColorBitmap; //!< Background color BITMAP of this TerrainObject.
 
 		ContentFile m_MaterialFile; //!< ContentFile containing the path to this TerrainObject's Material layer representation.

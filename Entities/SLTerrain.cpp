@@ -23,7 +23,7 @@ namespace RTE {
 		m_TerrainFrostings.clear();
 		m_TerrainDebris.clear();
 		m_TerrainObjects.clear();
-		m_UpdatedMateralAreas.clear();
+		m_UpdatedMaterialAreas.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,6 +130,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	// TODO: Break this down and refactor.
 	void SLTerrain::TexturizeTerrain() {
 		BITMAP *defaultBGLayerTexture = m_DefaultBGTextureFile.GetAsBitmap();
 
@@ -216,7 +217,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLTerrain::LoadData() {
-		// Load the materials bitmap into the main bitmap.
 		SceneLayer::LoadData();
 
 		RTEAssert(m_FGColorLayer.get(), "Terrain's foreground layer not instantiated before trying to load its data!");
@@ -414,7 +414,7 @@ namespace RTE {
 						skipCount = 0;
 						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
 						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
-						// Create the MOPixel based off the Terrain data.
+						
 						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
 						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
 						terrainPixel->SetToHitMOs(false);
@@ -431,7 +431,7 @@ namespace RTE {
 			}
 		}
 		// TODO: improve fit/tightness of box here.
-		m_UpdatedMateralAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
+		m_UpdatedMaterialAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
 
 		return dislodgedMOPixels;
 	}

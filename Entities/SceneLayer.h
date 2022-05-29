@@ -208,7 +208,7 @@ namespace RTE {
 		void UnlockBitmaps() { /*release_bitmap(m_MainBitmap);*/ }
 
 		/// <summary>
-		/// Only wraps a position coordinate if it is off bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
+		/// Only wraps a position coordinate if it is out of bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
 		/// </summary>
 		/// <param name="posX">The X coordinates of the position to wrap.</param>
 		/// <param name="posY">The Y coordinates of the position to wrap.</param>
@@ -216,14 +216,14 @@ namespace RTE {
 		bool WrapPosition(int &posX, int &posY) const;
 
 		/// <summary>
-		/// Only wraps a position coordinate if it is off bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
+		/// Only wraps a position coordinate if it is out of bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
 		/// </summary>
 		/// <param name="pos">The vector coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not.</returns>
 		bool WrapPosition(Vector &pos) const { return ForceBoundsOrWrapPosition(pos, false); }
 
 		/// <summary>
-		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
+		/// Wraps or bounds a position coordinate if it is out of bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
 		/// <param name="posX">The X coordinates of the position to wrap.</param>
 		/// <param name="posY">The Y coordinates of the position to wrap.</param>
@@ -231,7 +231,7 @@ namespace RTE {
 		bool ForceBounds(int &posX, int &posY) const;
 
 		/// <summary>
-		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
+		/// Wraps or bounds a position coordinate if it is out of bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
 		/// <param name="pos">The Vector coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
@@ -283,7 +283,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
+		/// Wraps or bounds a position coordinate if it is out of bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
 		/// <param name="pos">The Vector coordinates of the position to wrap.</param>
 		/// <param name="forceBounds">Whether to attempt bounding or wrapping, or just wrapping.</param>

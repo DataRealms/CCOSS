@@ -357,7 +357,6 @@ namespace RTE {
 		} else {
 			DrawTiled(targetBitmap, targetBox, drawScaled);
 		}
-		// Reset the clip rect back to the entire target bitmap.
 		set_clip_rect(targetBitmap, 0, 0, targetBitmap->w - 1, targetBitmap->h - 1);
 	}
 

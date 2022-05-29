@@ -122,7 +122,7 @@ namespace RTE {
 
 	BITMAP * TerrainObject::GetGraphicalIcon() const {
 		if (m_FGColorBitmap) {
-			// Check if the FG bitmap has anything to show, if not, show the background layer instead.
+			// Check several spots on the FG bitmap, to be sure it has parts that aren't transparent. If not, show the background layer instead.
 			int piece = m_FGColorBitmap->w / 10;
 			if (_getpixel(m_FGColorBitmap, m_FGColorBitmap->w / 2, m_FGColorBitmap->h / 2) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, piece, piece) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, m_FGColorBitmap->w - piece, piece) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, piece, m_FGColorBitmap->h - piece) != ColorKeys::g_MaskColor) {
 				return m_FGColorBitmap;
@@ -181,7 +181,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainObject::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-		// Take care of wrapping situations
 		std::array<Vector, 4> drawPos;
 		drawPos.at(0) = m_Pos + m_BitmapOffset - targetPos;
 		int passes = 1;

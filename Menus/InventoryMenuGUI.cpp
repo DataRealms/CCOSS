@@ -1140,7 +1140,7 @@ namespace RTE {
 		if (buttonHeld && m_GUISelectedItem) {
 			return;
 		}
-		if ((buttonEquippedItemIndex == 1 && m_GUISelectedItem && !dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object)->IsDualWieldable()) || (m_GUISelectedItem && m_GUISelectedItem->EquippedItemIndex == 1 && buttonObject && !dynamic_cast<HeldDevice *>(buttonObject)->IsDualWieldable())) {
+		if ((buttonEquippedItemIndex == 1 && m_GUISelectedItem && !m_GUISelectedItem->Object->HasObjectInGroup("Shields") && !dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object)->IsDualWieldable()) || (m_GUISelectedItem && m_GUISelectedItem->EquippedItemIndex == 1 && buttonObject && !buttonObject->HasObjectInGroup("Shields") && !dynamic_cast<HeldDevice *>(buttonObject)->IsDualWieldable())) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 			return;
 		}

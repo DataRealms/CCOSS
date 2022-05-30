@@ -6,6 +6,7 @@
 #include "ActivityMan.h"
 #include "SoundContainer.h"
 #include "GUISound.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -235,7 +236,8 @@ namespace RTE {
 
 	void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
-			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops); }
+			const char *fullFilePath = g_PresetMan.FullModulePath(filePath).c_str();
+			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, fullFilePath, loops); }
 
 			bool musicIsPlaying;
 			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&musicIsPlaying);
@@ -252,7 +254,7 @@ namespace RTE {
 
 			FMOD::Sound *musicStream;
 
-			result = m_AudioSystem->createStream(filePath, FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
+			result = m_AudioSystem->createStream(fullFilePath, FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -285,7 +287,7 @@ namespace RTE {
 				}
 			}
 
-			m_MusicPath = filePath;
+			m_MusicPath = fullFilePath;
 
 			result = musicChannel->setCallback(MusicChannelEndedCallback);
 			if (result != FMOD_OK) {

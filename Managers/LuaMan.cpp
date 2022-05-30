@@ -178,14 +178,7 @@ namespace RTE {
 		);
 		// Override dofile() to be able to account for Data/ or Mods/ subfolder
 		luaL_dostring(m_MasterState,
-			"OriginalDoFile = dofile;"
-			"dofile = function(filePath);"
-				"filePath = FullModulePath(filePath);"
-				"if filePath ~= \"\";"
-				"then;"
-					"return OriginalDoFile(filePath);"
-				"end;"
-			"end;"
+			"OriginalDoFile = dofile dofile = function(filePath) filePath = PresetMan:FullModulePath(filePath) if filePath ~= '' then return OriginalDoFile(filePath) end end;"
 		);
 	}
 

@@ -27,15 +27,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Reader::Create(const std::string &fileName, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
-		m_FilePath = std::filesystem::path(fileName).generic_string();
+		m_FilePath = g_PresetMan.FullModulePath(std::filesystem::path(fileName).generic_string());
 
 		if (m_FilePath.empty()) {
 			return -1;
 		}
 		// Extract the file name and module name from the path
-		m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
-		const int nameLength = m_FilePath.find_last_of("/\\") - m_FilePath.find_first_of("/\\") -1;
-		m_DataModuleName = m_FilePath.substr(m_FilePath.find_first_of("/\\") + 1, nameLength);
+		m_FileName =  m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
+		m_DataModuleName = g_PresetMan.GetModuleNameFromPath(m_FilePath);
 		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
 
 		m_CanFail = failOK;

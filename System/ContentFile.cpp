@@ -219,14 +219,14 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-
-		if (!System::PathExistsCaseSensitive(m_DataPath)) {
+		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
+		if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension);
-				if (System::PathExistsCaseSensitive(dataPathToLoad)) {
+				const std::string altDataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension);
+				if (System::PathExistsCaseSensitive(altDataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(dataPathToLoad);
+					SetDataPath(altDataPathToLoad);
 					foundAltExtension = true;
 					break;
 				}
@@ -238,7 +238,7 @@ namespace RTE {
 				return nullptr;
 			}
 		}
-		if (std::filesystem::file_size(m_DataPath) == 0) {
+		if (std::filesystem::file_size(dataPathToLoad) == 0) {
 			const std::string errorMessage = "Failed to create sound because the file was empty. The path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
@@ -247,7 +247,7 @@ namespace RTE {
 		FMOD::Sound *returnSample = nullptr;
 
 		FMOD_MODE fmodFlags = FMOD_CREATESAMPLE | FMOD_3D | (asyncLoading ? FMOD_NONBLOCKING : FMOD_DEFAULT);
-		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
+		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(dataPathToLoad.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {
 			const std::string errorMessage = "Failed to create sound because of FMOD error:\n" + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";

@@ -1,5 +1,6 @@
 #include "GUI.h"
 #include "GUIReader.h"
+#include "PresetMan.h"
 
 using namespace RTE;
 
@@ -37,7 +38,7 @@ bool GUISkin::Load(const std::string &directory, const std::string &fileName) {
 	// Destroy any previous instances
 	Destroy();
 
-	m_Directory = directory;
+	m_Directory = g_PresetMan.FullModulePath(directory);
 
 	GUIReader skinFile;
 	if (skinFile.Create((m_Directory + "/" + fileName).c_str()) == -1) {

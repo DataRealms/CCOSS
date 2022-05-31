@@ -319,8 +319,7 @@ namespace RTE {
 	void LuaMan::SetLuaPath( lua_State *luaState, const std::string &filePath )
 	{
 		const std::string moduleName = g_PresetMan.GetModuleNameFromPath( filePath );
-		const int moduleID = g_PresetMan.GetModuleID( moduleName );
-		const std::string moduleFolder = g_PresetMan.IsModuleOfficial( moduleID ) ? "Data/" : "Mods/";
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(moduleName) ? "Data/" : "Mods/";
 		const std::string scriptPath = moduleFolder + moduleName + "/?.lua";
 
 		lua_getglobal( m_MasterState, "package" );

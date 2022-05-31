@@ -29,6 +29,8 @@
 #include "LoadingScreen.h"
 #include "SettingsMan.h"
 
+static const std::array<std::string, 12> allOfficialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte", "Scenes.rte", "Metagames.rte" };
+
 namespace RTE {
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -178,13 +180,14 @@ bool PresetMan::LoadAllDataModules() {
 			return false;
 		}
 	} else {
-		std::vector<std::filesystem::directory_entry> workingDirectoryFolders;
-		std::copy_if(std::filesystem::directory_iterator(System::GetWorkingDirectory()), std::filesystem::directory_iterator(), std::back_inserter(workingDirectoryFolders),
+		std::vector<std::filesystem::directory_entry> modDirectoryFolders;
+		const std::string modDirectory = System::GetWorkingDirectory() + "Mods/";
+		std::copy_if(std::filesystem::directory_iterator(modDirectory), std::filesystem::directory_iterator(), std::back_inserter(modDirectoryFolders),
 			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
 		);
-		std::sort(workingDirectoryFolders.begin(), workingDirectoryFolders.end());
+		std::sort(modDirectoryFolders.begin(), modDirectoryFolders.end());
 
-		for (const std::filesystem::directory_entry &directoryEntry : workingDirectoryFolders) {
+		for (const std::filesystem::directory_entry &directoryEntry : modDirectoryFolders) {
 			std::string directoryEntryPath = directoryEntry.path().generic_string();
 			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
@@ -339,11 +342,9 @@ int PresetMan::GetModuleIDFromPath( std::string dataPath )
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns wether or not the module is vanilla.
 
-bool PresetMan::IsModuleOfficial(int whichModule)
+bool PresetMan::IsModuleOfficial(std::string moduleName)
 {
-    // Scenes.rte and Metagames.rte are loaded last but are official modules anyway
-    const bool isSpecialCase = whichModule >= m_pDataModules.size() - 2;
-    return whichModule < m_OfficialModuleCount || isSpecialCase;
+	return std::find(allOfficialModules.begin(), allOfficialModules.end(), moduleName) != allOfficialModules.end();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -356,8 +357,8 @@ bool PresetMan::IsModuleOfficial(int whichModule)
 
 std::string PresetMan::FullModulePath(std::string modulePath)
 {
-    const int whichModule = GetModuleIDFromPath(modulePath);
-    const std::string moduleFolder = IsModuleOfficial(whichModule) ? "Data/" : "Mods/";
+    const std::string moduleName = GetModuleNameFromPath(modulePath);
+    const std::string moduleFolder = IsModuleOfficial(moduleName) ? "Data/" : "Mods/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {
         return modulePath;

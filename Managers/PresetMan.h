@@ -185,10 +185,10 @@ public:
 // Method:          IsModuleOfficial
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns wether or not the module is vanilla.
-// Arguments:       The ID of the module to check.
+// Arguments:       The Name of the module to check.
 // Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
 
-    bool IsModuleOfficial(int whichModule = 0);
+    bool IsModuleOfficial(std::string moduleName);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FullModulePath

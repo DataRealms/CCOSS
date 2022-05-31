@@ -281,12 +281,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
-		if (filePath.empty()) {
+		const std::string fullScriptPath = g_PresetMan.FullModulePath(filePath);
+		if (fullScriptPath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
 			return -1;
 		}
 
-		if (!System::PathExistsCaseSensitive(filePath)) {
+		if (!System::PathExistsCaseSensitive(fullScriptPath)) {
 			m_LastError = "Script file: " + filePath + " doesn't exist!";
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
@@ -298,9 +299,9 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		SetLuaPath(m_MasterState, filePath);
+		SetLuaPath(m_MasterState, fullScriptPath);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
+		if (luaL_loadfile(m_MasterState, fullScriptPath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {

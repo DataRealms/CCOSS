@@ -278,8 +278,8 @@ namespace RTE {
 						Vector pos1 = sceneListEntry1->GetLocation() + sceneListEntry1->GetLocationOffset();
 						Vector pos2 = sceneListEntry2->GetLocation() + sceneListEntry2->GetLocationOffset();
 						Vector overlap = pos1 - pos2;
-						float overlapMagnitude = overlap.GetMagnitude();
-						if (overlapMagnitude < requiredDistance) {
+						float overlapMagnitudeSqr = overlap.GetSqrMagnitude();
+						if (overlapMagnitudeSqr < requiredDistance*requiredDistance) {
 							foundOverlap = true;
 							float overlapX = overlap.GetX();
 							float xDirMult = 0;
@@ -297,7 +297,7 @@ namespace RTE {
 							}
 							if (yDirMult != 0) {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(-overlapX + (requiredDistance * xDirMult), -overlapY + (requiredDistance * yDirMult)));
-							} else if (overlapMagnitude == 0.0F) {
+							} else if (overlapMagnitudeSqr == 0.0F) {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector((pos1.GetX() > 0) ? -requiredDistance : requiredDistance, (pos1.GetY() > 0) ? -requiredDistance : requiredDistance));
 							} else {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(overlapX, overlapY));
@@ -427,11 +427,11 @@ namespace RTE {
 		bool foundAnyHover = false;
 		if (m_ActivityScenes && !m_DraggedBox && !m_ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;
-			float shortestDist = 10.0F;
+			float shortestDistSqr = 10.0F*10.0f;
 			for (Scene *activityScene : *m_ActivityScenes) {
-				float distance = (m_PlanetCenter + activityScene->GetLocation() + activityScene->GetLocationOffset() - Vector(static_cast<float>(mouseX), static_cast<float>(mouseY))).GetMagnitude();
-				if (distance < shortestDist) {
-					shortestDist = distance;
+				float sqrDistance = (m_PlanetCenter + activityScene->GetLocation() + activityScene->GetLocationOffset() - Vector(static_cast<float>(mouseX), static_cast<float>(mouseY))).GetSqrMagnitude();
+				if (sqrDistance < shortestDistSqr) {
+					shortestDistSqr = sqrDistance;
 					candidateScene = activityScene;
 					foundAnyHover = true;
 				}

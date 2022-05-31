@@ -687,7 +687,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 					Vector pos1 = (*pItr)->GetLocation() + (*pItr)->GetLocationOffset();
 					Vector pos2 = (*pItr2)->GetLocation() + (*pItr2)->GetLocationOffset();
 
-					if ((pos1 - pos2).GetMagnitude() < 8)
+					if ((pos1 - pos2).GetSqrMagnitude() < 8.0F*8.0F)
 					{
 						isOverlapped = true;
 						break;
@@ -1806,15 +1806,15 @@ void MetagameGUI::Update()
         }
 
         // Validate mouse position as being over the planet area for hover operations!
-        if (!m_pDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius)
+        if (!m_pDraggedBox && (mousePos - m_PlanetCenter).GetSqrMagnitude() < m_PlanetRadius*m_PlanetRadius)
         {
             // If unlocked, detect any Scene close to the mouse and highlight it
             bool foundAnyHover = false;
             bool foundNewHover = false;
             vector<Scene *>::iterator sItr;
             vector<Scene *>::iterator newCandidateItr = g_MetaMan.m_Scenes.end();
-            float distance = 0;
-            float shortestDist = 1000000.0;
+
+            float shortestDistSqr = std::numeric_limits<float>::infinity();
             for (sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
             {
                 // Only mess with Scenes we can see
@@ -1822,13 +1822,13 @@ void MetagameGUI::Update()
                     continue;
 
                 screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
-                distance = (screenLocation - mousePos).GetMagnitude();
+                float sqrDistance = (screenLocation - mousePos).GetSqrMagnitude();
 
                 // The first new scene the mouse's position is close to when unlocked, make selected
-                if (distance < 16 && distance < shortestDist)
+                if (sqrDistance < 16.0F*16.0F && sqrDistance < shortestDistSqr)
                 {
                     // This is now the shortest
-                    shortestDist = distance;
+                    shortestDistSqr = sqrDistance;
                     foundAnyHover = true;
                     // See if the scene hovered is different from the previously hovered one, and if so, set it to the new candidate to switch hovering to
 // Actually, don't because it will cause alternating each frame if two hover zones overlap!

@@ -2123,7 +2123,7 @@ const SceneObject * Scene::PickPlacedObject(int whichSet, Vector &scenePoint, in
 const SceneObject * Scene::PickPlacedActorInRange(int whichSet, Vector &scenePoint, int range, int *pListOrderPlace) const
 {
 	SceneObject * pFoundObject = 0;
-	float distance = range;
+	float distanceSqr = range*range;
 	
 	// REVERSE!
     int i = m_PlacedObjects[whichSet].size() - 1;
@@ -2131,12 +2131,12 @@ const SceneObject * Scene::PickPlacedActorInRange(int whichSet, Vector &scenePoi
     {
 		if (dynamic_cast<const Actor *>(*itr))
 		{
-			float d = g_SceneMan.ShortestDistance((*itr)->GetPos(), scenePoint, true).GetMagnitude();
-			if (d < distance)
+			float checkDistanceSqr = g_SceneMan.ShortestDistance((*itr)->GetPos(), scenePoint, true).GetSqrMagnitude();
+			if (checkDistanceSqr < distanceSqr)
 			{
 				if (pListOrderPlace)
 					*pListOrderPlace = i;
-				distance = d;
+				distanceSqr = checkDistanceSqr;
 				pFoundObject = *itr;
 			}
 		}

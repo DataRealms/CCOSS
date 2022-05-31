@@ -1510,7 +1510,8 @@ void GameActivity::Update()
                     // Show the pie menu switching animation over the highlighted Actor
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
-                    if (markedDistance.GetMagnitude() > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
+                    int quarterFrameBuffer = g_FrameMan.GetPlayerFrameBufferWidth(player) / 4;
+                    if (markedDistance.GetSqrMagnitude() > quarterFrameBuffer*quarterFrameBuffer)
                         m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);
@@ -1599,14 +1600,19 @@ void GameActivity::Update()
 
 			//Check if we crossed the seam
 			if (g_SceneMan.GetScene()->WrapsX())
-				if (relativeToActor.GetMagnitude() > sceneWidth / 2 && relativeToActor.GetMagnitude() > 350)
-					if (m_ActorCursor->m_X < sceneWidth / 2)
+            {
+                float halfSceneWidth = sceneWidth * 0.5F;
+				if (relativeToActor.GetSqrMagnitude() > halfSceneWidth*halfSceneWidth && relativeToActor.GetSqrMagnitude() > 350.0F*350.0F)
+                {
+					if (m_ActorCursor->m_X < halfSceneWidth)
 						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
 					else
 						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
-	
+                }
+            }
+
 			// Limit selection range
-			relativeToActor = relativeToActor.CapMagnitude(350);
+			relativeToActor = relativeToActor.CapMagnitude(350.0F);
 			m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + relativeToActor;
 
             m_pPieMenu[player]->SetEnabled(false);
@@ -1649,7 +1655,7 @@ void GameActivity::Update()
 				m_ControlledActor[player]->SetAIMode(Actor::AIMODE_SENTRY);
 
 				// Detect nearby actors and attach them to commander
-				float radius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_ControlledActor[player]->GetPos(), true).GetMagnitude();
+				float sqrRadius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_ControlledActor[player]->GetPos(), true).GetSqrMagnitude();
 
 				Actor *pActor = 0;
 				Actor *pFirstActor = 0;
@@ -1664,7 +1670,7 @@ void GameActivity::Update()
 					{
 						// If human, set appropriate AI mode
 						if (dynamic_cast<AHuman *>(pActor) || dynamic_cast<ACrab *>(pActor))
-							if (g_SceneMan.ShortestDistance(m_ControlledActor[player]->GetPos(), pActor->GetPos(),true).GetMagnitude() < radius)
+							if (g_SceneMan.ShortestDistance(m_ControlledActor[player]->GetPos(), pActor->GetPos(),true).GetSqrMagnitude() < sqrRadius)
 							{
 								pActor->FlashWhite();
 								pActor->ClearAIWaypoints();
@@ -2495,10 +2501,11 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 				//Calculate unwrapped cursor position, or it won't glow
 				unwrappedPos = m_ActorCursor[PoS] - m_ControlledActor[PoS]->GetPos();
 				float sceneWidth = g_SceneMan.GetSceneWidth();
+                float halfSceneWidth = sceneWidth * 0.5F;
 				
-				if (unwrappedPos.GetMagnitude() > sceneWidth / 2 && unwrappedPos.GetMagnitude() > 350)
+				if (unwrappedPos.GetSqrMagnitude() > halfSceneWidth*halfSceneWidth && unwrappedPos.GetSqrMagnitude() > 350*350)
 				{
-					if (m_ActorCursor->m_X < sceneWidth / 2)
+					if (m_ActorCursor->m_X < halfSceneWidth)
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);
 					else
 						unwrappedPos = m_ActorCursor[PoS] - Vector(sceneWidth , 0);

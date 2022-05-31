@@ -767,12 +767,16 @@ float SceneMan::TargetDistanceScalar(Vector point)
         // Check if we're off the screen and then fall off
         if (distance > screenRadius)
         {
-            // Get ratio of how close to the very opposite of teh scene the point is
-            scalar = 0.5 + 0.5 * (distance - screenRadius) / (sceneRadius - screenRadius);
+            // Get ratio of how close to the very opposite of the scene the point is
+
+            // CCCP TODO: while doing some opimizations, I stumbled across this code.
+            // This is very clearly wrong; sceneRadius - screenRadius == 0, so this divides by 0
+            //scalar = 0.5 + 0.5 * (distance - screenRadius) / (sceneRadius - screenRadius);
+            scalar = 1.0F;
         }
         // Full audio if within the screen
         else
-            scalar = 0;
+            scalar = 0.0F;
 
         // See if this screen's distance scalar is the closest one yet
         if (scalar < closestScalar)
@@ -977,10 +981,9 @@ bool SceneMan::WillPenetrate(const int posX,
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
 
-    float impMag = impulse.GetMagnitude();
     unsigned char materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
-
-    return impMag >= GetMaterialFromID(materialID)->GetIntegrity();
+    float integrity = GetMaterialFromID(materialID)->GetIntegrity();
+    return impulse.GetSqrMagnitude() >= integrity*integrity;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1241,10 +1244,10 @@ bool SceneMan::TryPenetrate(int posX,
 
     float sprayScale = 0.1;
 //    float spraySpread = 10.0;
-    float impMag = impulse.GetMagnitude();
+    float impMagSqr = impulse.GetSqrMagnitude();
 
     // Test if impulse force is enough to penetrate
-    if (impMag >= sceneMat->GetIntegrity())
+    if (impMagSqr >= sceneMat->GetIntegrity()*sceneMat->GetIntegrity())
     {
         if (numPenetrations <= 3)
         {
@@ -1305,7 +1308,7 @@ bool SceneMan::TryPenetrate(int posX,
 
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
-        retardation = -(sceneMat->GetIntegrity() / impMag);
+        retardation = -(sceneMat->GetIntegrity() / std::sqrt(impMagSqr));
 
         // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
         if (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)

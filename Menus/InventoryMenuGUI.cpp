@@ -1261,7 +1261,7 @@ namespace RTE {
 		auto LaunchInventoryItem = [this, &dropDirection](MovableObject *itemToLaunch) {
 			Vector itemPosition = m_InventoryActor->GetPos();
 			Vector throwForce(0.75F + (0.25F * RandomNum()), 0);
-			if (dropDirection && dropDirection->GetMagnitude() > 0.5F) {
+			if (dropDirection && dropDirection->GetSqrMagnitude() > 0.5F*0.5F) {
 				itemPosition += Vector(m_InventoryActor->GetRadius(), 0).AbsRotateTo(*dropDirection);
 				throwForce.SetX(throwForce.GetX() + 5.0F);
 				throwForce.AbsRotateTo(*dropDirection);

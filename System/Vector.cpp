@@ -44,8 +44,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::CapMagnitude(const float capMag) {
-		if (capMag == 0) { Reset(); }
-		if (GetMagnitude() > capMag) { SetMagnitude(capMag); }
+		if (capMag == 0.0F) { Reset(); }
+		if (GetSqrMagnitude() > capMag*capMag) { SetMagnitude(capMag); }
 		return *this;
 	}
 
@@ -53,11 +53,12 @@ namespace RTE {
 
 	Vector & Vector::ClampMagnitude(float upperLimit, float lowerLimit) {
 		if (upperLimit < lowerLimit) { std::swap(upperLimit, lowerLimit); }
-		if (upperLimit == 0 && lowerLimit == 0) {
+		const float sqrMagnituge = GetSqrMagnitude();
+		if (upperLimit == 0.0F && lowerLimit == 0.0F) {
 			Reset();
-		} else if (GetMagnitude() > upperLimit) {
+		} else if (sqrMagnituge > upperLimit*upperLimit) {
 			SetMagnitude(upperLimit);
-		} else if (GetMagnitude() < lowerLimit) {
+		} else if (sqrMagnituge < lowerLimit*lowerLimit) {
 			SetMagnitude(lowerLimit);
 		}
 		return *this;

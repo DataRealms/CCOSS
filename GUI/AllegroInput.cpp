@@ -235,7 +235,7 @@ namespace RTE {
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
 
 		// See how much to accelerate the joystick input based on how long the stick has been pushed around
-		if (joyKeyDirectional.GetMagnitude() < 0.95F) { m_CursorAccelTimer->Reset(); }
+		if (joyKeyDirectional.GetSqrMagnitude() < 0.95F*0.95F) { m_CursorAccelTimer->Reset(); }
 
 		float acceleration = 0.25F + static_cast<float>(std::min(m_CursorAccelTimer->GetElapsedRealTimeS(), 0.5)) * 20.0F;
 

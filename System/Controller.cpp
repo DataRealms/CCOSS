@@ -328,14 +328,14 @@ namespace RTE {
 		}
 
 		// If the joystick-controlled analog cursor is less than at the edge of input range, don't accelerate
-		if (GetAnalogCursor().GetMagnitude() < 0.85F) { m_JoyAccelTimer.Reset(); }
+		if (GetAnalogCursor().GetSqrMagnitude() < 0.85F*0.85F) { m_JoyAccelTimer.Reset(); }
 		// If the keyboard inputs for cursor movements is initially pressed, reset the acceleration timer
 		if (IsState(ACTOR_NEXT) || IsState(ACTOR_PREV) || (IsState(PRESS_LEFT) || IsState(PRESS_RIGHT) || IsState(PRESS_UP) || IsState(PRESS_DOWN))) {
 			m_KeyAccelTimer.Reset();
 		}
 
 		// Translate analog aim input into sharp aim control state
-		if (m_AnalogAim.GetMagnitude() > 0.1F && !m_ControlStates.at(PIE_MENU_ACTIVE)) { m_ControlStates.at(AIM_SHARP) = true; }
+		if (m_AnalogAim.GetSqrMagnitude() > 0.1F*0.1F && !m_ControlStates.at(PIE_MENU_ACTIVE)) { m_ControlStates.at(AIM_SHARP) = true; }
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates.at(BODY_JUMP) || (pieMenuActive && !m_ControlStates.at(SECONDARY_ACTION))) {

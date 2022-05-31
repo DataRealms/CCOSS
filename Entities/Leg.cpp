@@ -39,7 +39,7 @@ namespace RTE {
 		// Ensure Legs don't collide with terrain when attached since their expansion/contraction is frame based so atom group doesn't know how to account for it.
 		SetCollidesWithTerrainWhileAttached(false);
 
-		if (m_ContractedOffset.GetMagnitude() > m_ExtendedOffset.GetMagnitude()) { std::swap(m_ContractedOffset, m_ExtendedOffset); }
+		if (m_ContractedOffset.GetSqrMagnitude() > m_ExtendedOffset.GetSqrMagnitude()) { std::swap(m_ContractedOffset, m_ExtendedOffset); }
 
 		m_MinExtension = m_ContractedOffset.GetMagnitude();
 		m_MaxExtension = m_ExtendedOffset.GetMagnitude();

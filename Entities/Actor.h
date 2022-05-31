@@ -1385,7 +1385,6 @@ protected:
     Vector m_LastSecondPos;
     // Movement since last whole second
     Vector m_RecentMovement;
-    float m_RecentMovementMag;
     // Threshold for taking damage from travel impulses, in kg * m/s
     float m_TravelImpulseDamage;
     // Timer for timing the delay before regaining stability after losing it
@@ -1539,9 +1538,9 @@ protected:
     TeamBlockState m_TeamBlockState;
     // Times how long after an obstruction is cleared to start proceeding again
     Timer m_BlockTimer;
-    // The closest the actor has ever come to the current waypoint it's going for. Used to checking if we shuold re-update the movepath
+    // The closest the actor has ever come to the current waypoint it's going for, squared. Used to checking if we shuold re-update the movepath
     // It's useful for when the path seems to be broken or unreachable
-    float m_BestTargetProximity;
+    float m_BestTargetProximitySqr;
     // Timer used to check on larger movement progress toward the goal
     Timer m_ProgressTimer;
     // Timer used to time how long we've been stuck in the same spot.

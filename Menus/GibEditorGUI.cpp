@@ -250,9 +250,9 @@ void GibEditorGUI::Update()
     // Analog cursor input
 
     Vector analogInput;
-    if (m_pController->GetAnalogMove().GetMagnitude() > 0.1)
+    if (m_pController->GetAnalogMove().GetSqrMagnitude() > 0.1F*0.1F)
         analogInput = m_pController->GetAnalogMove();
-//    else if (m_pController->GetAnalogAim().GetMagnitude() > 0.1)
+//    else if (m_pController->GetAnalogAim().GetSqrMagnitude() > 0.1F*0.1F)
 //        analogInput = m_pController->GetAnalogAim();
 
     /////////////////////////////////////////////

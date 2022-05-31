@@ -427,9 +427,9 @@ void SceneEditorGUI::Update()
     // Analog cursor input
 
     Vector analogInput;
-    if (m_pController->GetAnalogMove().GetMagnitude() > 0.1)
+    if (m_pController->GetAnalogMove().GetSqrMagnitude() > 0.1F*0.1F)
         analogInput = m_pController->GetAnalogMove();
-//    else if (m_pController->GetAnalogAim().GetMagnitude() > 0.1)
+//    else if (m_pController->GetAnalogAim().GetSqrMagnitude() > 0.1F*0.1F)
 //        analogInput = m_pController->GetAnalogAim();
 
     /////////////////////////////////////////////
@@ -978,7 +978,7 @@ void SceneEditorGUI::Update()
 								SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 								if (pBrain)
 								{
-									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).GetMagnitude() < 20)
+									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).GetSqrMagnitude() < 20.0F*20.0F)
 									{
 										AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 										if (pBrainAHuman)
@@ -1110,7 +1110,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 									if (pBrain)
 									{
-										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).GetMagnitude() < 20)
+										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).GetSqrMagnitude() < 20.0F*20.0F)
 										{
 											AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 											if (pBrainAHuman)

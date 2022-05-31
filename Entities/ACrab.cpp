@@ -871,10 +871,10 @@ bool ACrab::IsWithinRange(Vector &point) const
         return true;
 
     Vector diff = g_SceneMan.ShortestDistance(m_Pos, point, false);
-    float distance = diff.GetMagnitude();
+    float sqrDistance = diff.GetSqrMagnitude();
 
     // Really close!
-    if (distance <= m_CharHeight)
+    if (sqrDistance <= m_CharHeight*m_CharHeight)
         return true;
 
     // Start with the default aim distance
@@ -886,7 +886,7 @@ bool ACrab::IsWithinRange(Vector &point) const
         range += m_pTurret->GetFirstMountedDevice()->GetSharpLength() * m_SharpAimProgress;
     }
 
-    return distance <= range;
+    return sqrDistance <= range*range;
 }
 
 
@@ -1241,7 +1241,7 @@ void ACrab::UpdateAI()
                 // Only replace the target if the one we found is closer, or the old one isn't gold anymore
                 Vector newGoldDir = newGoldPos - m_Pos;
                 Vector oldGoldDir = m_DigTarget - m_Pos;
-                if (newGoldDir.GetMagnitude() < oldGoldDir.GetMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
+                if (newGoldDir.GetSqrMagnitude() < oldGoldDir.GetSqrMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
                 {
                     m_DigTarget = newGoldPos;
                     m_StuckTimer.Reset();
@@ -1999,7 +1999,7 @@ void ACrab::UpdateAI()
     if (m_ObstacleState == PROCEEDING)
     {
         // Reset stuck timer if we're moving fine, or we're waiting for teammate to move
-        if (m_RecentMovementMag > 2.5 || m_TeamBlockState)
+        if (m_RecentMovement.GetSqrMagnitude() > 2.5F*2.5F || m_TeamBlockState)
             m_StuckTimer.Reset();
 
         if (m_DeviceState == SCANNING)
@@ -2026,7 +2026,7 @@ void ACrab::UpdateAI()
     if (m_ObstacleState == JUMPING)
     {
         // Reset stuck timer if we're moving fine
-        if (m_RecentMovementMag > 2.5)
+        if (m_RecentMovement.GetSqrMagnitude() > 2.5F*2.5F)
             m_StuckTimer.Reset();
 
         if (m_StuckTimer.IsPastSimMS(250))
@@ -2054,7 +2054,7 @@ void ACrab::UpdateAI()
     }
     // Reset from backstepping
 // TODO: better movement detection
-    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovementMag > 15.0))
+    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.GetSqrMagnitude() > 15.0F*15.0F))
     {
         m_ObstacleState = PROCEEDING;
         m_StuckTimer.Reset();
@@ -2121,7 +2121,9 @@ void ACrab::Update()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
+    
 	Vector analogAim = m_Controller.GetAnalogAim();
+    const float analogAimDeadzone = 0.1F;
 
     // Set Default direction of all the paths!
     for (int side = 0; side < SIDECOUNT; ++side)
@@ -2172,7 +2174,7 @@ void ACrab::Update()
 		// If pie menu is on, keep the angle to what it was before.
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
 			// Direct the jetpack nozzle according to movement stick if analog input is present.
-			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+			if (m_Controller.GetAnalogMove().GetSqrMagnitude() > analogAimDeadzone*analogAimDeadzone) {
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
 			// Use the aim angle if we're getting digital input.
@@ -2190,8 +2192,8 @@ void ACrab::Update()
 
     ////////////////////////////////////
     // Movement direction
-
-	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+    const float movementThreshold = 1.0f;
+	bool isStill = (m_Vel + m_PrevVel).GetSqrMagnitude() < movementThreshold*movementThreshold;
 
 	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
@@ -2273,7 +2275,7 @@ void ACrab::Update()
 		m_AimState = AIMDOWN;
 		m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 
-	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
+	} else if (analogAim.GetSqrMagnitude() > analogAimDeadzone*analogAimDeadzone && m_Status != INACTIVE) {
         // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
         m_AimAngle = analogAim.GetAbsRadAngle();
@@ -2308,7 +2310,7 @@ void ACrab::Update()
     //////////////////////////////
     // Sharp aim calculation
 
-	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetMagnitude() < 5.0F) {
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetSqrMagnitude() < 5.0F*5.0F) {
         float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full magnitude.
@@ -2544,7 +2546,7 @@ void ACrab::Update()
     m_ViewPoint = m_Pos.GetFloored() + aimSight;
 
     // Add velocity also so the viewpoint moves ahead at high speeds
-    if (m_Vel.GetMagnitude() > 10.0)
+    if (m_Vel.GetSqrMagnitude() > 10.0F*10.0F)
         m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F);
 
 /* Done by pie menu now, see HandlePieCommand()

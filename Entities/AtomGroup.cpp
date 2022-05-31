@@ -174,14 +174,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::CalculateMaxRadius() const {
-		float magnitude;
-		float longest = 0.0F;
+		float sqrMagnitude;
+		float sqrLongest = 0.0F;
 
 		for (const Atom *atom : m_Atoms) {
-			magnitude = atom->GetOffset().GetMagnitude();
-			if (magnitude > longest) { longest = magnitude; }
+			sqrMagnitude = atom->GetOffset().GetSqrMagnitude();
+			if (sqrMagnitude > sqrLongest) { sqrLongest = sqrMagnitude; }
 		}
-		return longest;
+		return std::sqrt(sqrLongest);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -519,9 +519,9 @@ namespace RTE {
 						// Figure out the pre-collision velocity of the hitting Atom due to body translation and rotation.
 						hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angularVel;
 
-						const float radMag = hitData.HitRadius[HITOR].GetMagnitude();
+						const float sqrRadMag = hitData.HitRadius[HITOR].GetSqrMagnitude();
 						// These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
-						hitData.HitDenominator = (1.0F / massDistribution) + ((radMag * radMag) / momentInertiaDistribution);
+						hitData.HitDenominator = (1.0F / massDistribution) + (sqrRadMag / momentInertiaDistribution);
 						hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
 						// Set the Atom with the HitData with all the info we have so far.
 						(*atomItr)->SetHitData(hitData);
@@ -595,8 +595,8 @@ namespace RTE {
 
 						if (g_SceneMan.TryPenetrate(penetratingAtom->GetCurrentPos().GetFloorIntX(), penetratingAtom->GetCurrentPos().GetFloorIntY(), hitData.PreImpulse[HITOR], hitData.HitVel[HITOR], retardation, 1.0F, 1/*(*penetratingAtom)->GetNumPenetrations()*/)) {
 							// Recalculate these here without the distributed mass and MI.
-							const float radMag = hitData.HitRadius[HITOR].GetMagnitude();
-							hitData.HitDenominator = (1.0F / mass) + ((radMag * radMag) / m_MomentOfInertia);
+							const float sqrRadMag = hitData.HitRadius[HITOR].GetSqrMagnitude();
+							hitData.HitDenominator = (1.0F / mass) + (sqrRadMag / m_MomentOfInertia);
 							hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
 							hitData.TotalMass[HITOR] = mass;
 							hitData.MomInertia[HITOR] = m_MomentOfInertia;
@@ -1204,8 +1204,9 @@ namespace RTE {
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
 		// Pull back or reset the limb if it strayed off the path.
-		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) { 
-			if (limbDist.GetMagnitude() > m_OwnerMOSR->GetDiameter()) {
+		float sqrLimbDistance = limbDist.GetSqrMagnitude();
+		if (sqrLimbDistance > m_OwnerMOSR->GetRadius()*m_OwnerMOSR->GetRadius()) { 
+			if (sqrLimbDistance > m_OwnerMOSR->GetDiameter()*m_OwnerMOSR->GetDiameter()) {
 				limbPath.Terminate();
 			} else {
 				m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
@@ -1246,7 +1247,7 @@ namespace RTE {
 
 		Vector limbRange = m_LimbPos - jointPos;
 
-		if (limbRange.GetMagnitude() > limbRadius) {
+		if (limbRange.GetSqrMagnitude() > limbRadius*limbRadius) {
 			limbRange.SetMagnitude(limbRadius);
 			m_LimbPos = jointPos + limbRange;
 		}
@@ -1343,7 +1344,7 @@ namespace RTE {
 		exitDirection.SetMagnitude(m_OwnerMOSR->GetDiameter());
 
 		// See which of the intersecting Atoms has the longest to travel along the exit direction before it clears
-		float longestDistance = 0.0F;
+		float longestDistanceSqr = 0.0F;
 
 		Vector clearPos = Vector();
 		Vector atomExitVector = Vector();
@@ -1361,16 +1362,17 @@ namespace RTE {
 
 			if (rayHit) {
 				atomExitVector = clearPos - atomPos;
-				if (atomExitVector.GetMagnitude() > longestDistance) {
+				float atomExitSqrDist = atomExitVector.GetSqrMagnitude();
+				if (atomExitSqrDist > longestDistanceSqr) {
 					// We found the Atom with the longest to travel along the exit direction to clear, so that's the distance to move the whole object to clear all its Atoms.
-					longestDistance = atomExitVector.GetMagnitude();
+					longestDistanceSqr = atomExitSqrDist;
 					totalExitVector = atomExitVector;
 				}
 			}
 		}
 
 		// If the exit vector is too large, then avoid the jarring jump and report that we didn't make it out
-		if (totalExitVector.GetMagnitude() > m_OwnerMOSR->GetIndividualRadius()) {
+		if (totalExitVector.GetSqrMagnitude() > m_OwnerMOSR->GetIndividualRadius()*m_OwnerMOSR->GetIndividualRadius()) {
 			return false;
 		}
 
@@ -1460,14 +1462,15 @@ namespace RTE {
 		Vector clearPos = Vector();
 
 		// See which of the intersecting Atoms has the longest to travel along the exit direction before it clears
-		float longestDistance = 0.0F;
+		float longestDistanceSqr = 0.0F;
 		for (const Atom *intersectingAtom : intersectingAtoms) {
 			atomPos = intersectingAtom->GetCurrentPos();
 			if (g_SceneMan.CastFindMORay(atomPos, exitDirection, g_NoMOID, clearPos, 0, true, 0)) {
 				atomExitVector = clearPos - atomPos.GetFloored();
-				if (atomExitVector.GetMagnitude() > longestDistance) {
+				float atomExitSqrDist = atomExitVector.GetSqrMagnitude();
+				if (atomExitSqrDist > longestDistanceSqr) {
 					// We found the Atom with the longest to travel along the exit direction to clear, so that's the distance to move the whole object to clear all its Atoms.
-					longestDistance = atomExitVector.GetMagnitude();
+					longestDistanceSqr = atomExitSqrDist;
 					totalExitVector = atomExitVector;
 				}
 			}
@@ -1498,10 +1501,10 @@ namespace RTE {
 		}
 
 		// Now actually apply the exit vectors to both, but only if the jump isn't too jarring
-		if (thisExit.GetMagnitude() < m_OwnerMOSR->GetIndividualRadius()) { position += thisExit; }
-		if (!intersectedExit.IsZero() && intersectedExit.GetMagnitude() < intersectedMO->GetRadius()) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
+		if (thisExit.GetSqrMagnitude() < m_OwnerMOSR->GetIndividualRadius()*m_OwnerMOSR->GetIndividualRadius()) { position += thisExit; }
+		if (!intersectedExit.IsZero() && intersectedExit.GetSqrMagnitude() < intersectedMO->GetRadius()*intersectedMO->GetRadius()) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
 
-		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.GetMagnitude() > m_OwnerMOSR->GetDiameter()) */ {
+		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.GetSqrMagnitude() > m_OwnerMOSR->GetDiameter()*m_OwnerMOSR->GetDiameter()) */ {
 			// Move back before gibbing so gibs don't end up inside terrain
 			position -= thisExit;
 			m_OwnerMOSR->GibThis(-totalExitVector);
@@ -1509,7 +1512,7 @@ namespace RTE {
 
 		MOSRotating *intersectedMOS = dynamic_cast<MOSRotating *>(intersectedMO);
 
-		if (intersectedMOS && intersectedMOS->CanBeSquished() && intersectedMOS->GetAtomGroup()->RatioInTerrain() > 0.75F) /* && totalExitVector.GetMagnitude() > intersectedMO->GetDiameter()) */ {
+		if (intersectedMOS && intersectedMOS->CanBeSquished() && intersectedMOS->GetAtomGroup()->RatioInTerrain() > 0.75F) /* && totalExitVector.GetSqrMagnitude() > intersectedMO->GetDiameter()*intersectedMO->GetDiameter()) */ {
 			// Move back before gibbing so gibs don't end up inside terrain
 			intersectedMO->SetPos(intersectedMO->GetPos() - intersectedExit);
 			intersectedMOS->GibThis(totalExitVector);

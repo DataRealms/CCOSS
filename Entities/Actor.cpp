@@ -73,7 +73,6 @@ void Actor::Clear() {
     m_LastSecondTimer.Reset();
     m_LastSecondPos.Reset();
     m_RecentMovement.Reset();
-	m_RecentMovementMag = 0;
     m_TravelImpulseDamage = 750.0F;
     m_StableVel.SetXY(15.0F, 25.0F);
 	m_StableRecoverDelay = 1000;
@@ -130,7 +129,7 @@ void Actor::Clear() {
     m_ObstacleState = PROCEEDING;
     m_TeamBlockState = NOTBLOCKED;
     m_BlockTimer.Reset();
-    m_BestTargetProximity = 10000.0F;
+    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
@@ -206,7 +205,6 @@ int Actor::Create(const Actor &reference)
 //    m_LastSecondTimer.Reset();
 //    m_LastSecondPos.Reset();
 //    m_RecentMovement.Reset();
-//    m_RecentMovementMag = 0;
     m_LastSecondPos = reference.m_LastSecondPos;
     m_TravelImpulseDamage = reference.m_TravelImpulseDamage;
     m_StableVel = reference.m_StableVel;
@@ -1091,7 +1089,7 @@ bool Actor::CollideAtPoint(HitData &hd)
 {
     return MOSRotating::CollideAtPoint(hd);
 
-//    if (hd.ResImpulse[HITEE].GetMagnitude() > GetMaterial().strength) {
+//    if (hd.ResImpulse[HITEE].GetSqrMagnitude() > GetMaterial().strength*GetMaterial().strength) {
 //        m_pParent->
 //    }
 /* Obsolete
@@ -1267,7 +1265,7 @@ bool Actor::UpdateMovePath()
     // Reset the proximity logic
     m_StuckTimer.Reset();
     m_ProgressTimer.Reset();
-    m_BestTargetProximity = g_SceneMan.GetSceneDim().GetLargest();
+    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
     m_UpdateMovePath = false;
 
     // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
@@ -1394,11 +1392,11 @@ void Actor::Update()
     m_ViewPoint = m_Pos;
 
     // Update the best progress made, if we're any closer to the currently pursued waypoint
-    float targetProximity = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetMagnitude();
+    float targetProximitySqr = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetSqrMagnitude();
     // Reset the timer if we've made progress as the crow flies
-    if (targetProximity < m_BestTargetProximity)
+    if (targetProximitySqr < m_BestTargetProximitySqr)
     {
-        m_BestTargetProximity = targetProximity;
+        m_BestTargetProximitySqr = targetProximitySqr;
         m_ProgressTimer.Reset();
     }
 
@@ -1473,12 +1471,12 @@ void Actor::Update()
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
-	float travelImpulseMagnitude = m_TravelImpulse.GetMagnitude();
+	const float travelImpulseMagnitudeSqr = m_TravelImpulse.GetSqrMagnitude();
+    float halfTravelImpulseDamage = m_TravelImpulseDamage * 0.5F;
+	if (m_BodyHitSound && travelImpulseMagnitudeSqr > halfTravelImpulseDamage*halfTravelImpulseDamage) { m_BodyHitSound->Play(m_Pos); }
 
-	if (m_BodyHitSound && travelImpulseMagnitude > m_TravelImpulseDamage * 0.5F) { m_BodyHitSound->Play(m_Pos); }
-
-	if (travelImpulseMagnitude > m_TravelImpulseDamage) {
-		const float impulse = travelImpulseMagnitude - m_TravelImpulseDamage;
+	if (travelImpulseMagnitudeSqr > m_TravelImpulseDamage*m_TravelImpulseDamage) {
+		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
 		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
@@ -1555,7 +1553,6 @@ void Actor::Update()
     if (m_LastSecondTimer.IsPastSimMS(1000))
     {
         m_RecentMovement = m_Pos - m_LastSecondPos;
-        m_RecentMovementMag = m_RecentMovement.GetMagnitude();
         m_LastSecondPos = m_Pos;
         m_LastSecondTimer.Reset();
     }

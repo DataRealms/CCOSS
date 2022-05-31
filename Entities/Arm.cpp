@@ -310,9 +310,11 @@ void Arm::Reach(const Vector &scenePoint)
     else
         m_Pos += m_ParentOffset;
 
+    float reachSqrMagnitude = reachVec.GetSqrMagnitude();
     Vector reachVec(m_TargetPosition - m_Pos);
-    return reachVec.GetMagnitude() <= m_MaxLength &&
-           reachVec.GetMagnitude() >= (m_MaxLength / 2);
+    const float halfMaxLength = m_MaxLength * 0.5F;
+    return reachSqrMagnitude <= m_MaxLength*m_MaxLength &&
+           reachSqrMagnitude >= halfMaxLength*halfMaxLength;
 */
 }
 
@@ -415,7 +417,7 @@ void Arm::UpdateCurrentHandOffset() {
             } else {
                 targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
                 m_DidReach = m_WillIdle;
-                if (m_WillIdle && targetOffset.GetMagnitude() > m_MaxLength) {
+                if (m_WillIdle && targetOffset.GetSqrMagnitude() > m_MaxLength*m_MaxLength) {
                     targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
                     m_DidReach = false;
                 }

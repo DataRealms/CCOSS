@@ -584,7 +584,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 				}
 				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
 				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
-				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < unheldItemDisplayRange);
+				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetSqrMagnitude() < unheldItemDisplayRange*unheldItemDisplayRange);
 
 				if (m_SeenByPlayer.at(viewingPlayer)) {
 					char pickupArrowString[64];

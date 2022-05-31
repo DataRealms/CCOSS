@@ -309,7 +309,6 @@ bool ACRocket::OnSink(const Vector &pos)
 
 void ACRocket::UpdateAI()
 {
-    float velMag = m_Vel.GetMagnitude();
     float angle = m_Rotation.GetRadAngle();
 
     // This is the limit where increased thrust should be applied to assure a soft landing
@@ -320,7 +319,8 @@ void ACRocket::UpdateAI()
     float altitude = GetAltitude(g_SceneMan.GetSceneHeight() / 2, 10);
 
     // Stuck detection
-    if (velMag > 1.0)
+    float moveThreshold = 1.0f;
+    if (m_Vel.GetSqrMagnitude() > moveThreshold*moveThreshold)
         m_StuckTimer.Reset();
 
     /////////////////////////////
@@ -429,7 +429,7 @@ void ACRocket::UpdateAI()
     // STABILIZATION
 
     // Don't mess if we're unloading or automatically stabilizing
-    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && velMag < 5.0))
+    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && m_Vel.GetSqrMagnitude() < 5.0f*5.0F))
         m_LateralMoveState = LAT_STILL;
     else
     {

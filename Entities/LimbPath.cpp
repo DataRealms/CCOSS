@@ -308,7 +308,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
         returnVel.CapMagnitude(adjustedTravelSpeed);
         returnVel += m_JointVel;
 
-//        if (distVect.GetMagnitude() < 0.5)
+//        if (distVect.GetSqrMagnitude() < 0.5F*0.5F)
 //            returnVel *= 0.1;
     }
     else
@@ -375,7 +375,8 @@ void LimbPath::ReportProgress(const Vector &limbPos)
 {
     if (IsStaticPoint())
     {
-        m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).GetMagnitude() < 1.0;
+        const float threshold = 1.0F;
+        m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).GetSqrMagnitude() < threshold*threshold;
     }
     else
     {
@@ -441,7 +442,7 @@ float LimbPath::GetTotalProgress() const
 // Method:          GetRegularProgress
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a value representing the progress that has been made on the
-//                  regular part of this path, ie averythign except the starting segments.
+//                  regular part of this path, ie everything except the starting segments.
 //                  If progress has not been made past the starting segments, < 0 will
 //                  be returned. If the path has ended, 0.0 is returned.
 

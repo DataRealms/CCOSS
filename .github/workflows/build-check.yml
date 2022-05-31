@@ -52,8 +52,8 @@ jobs:
         with:
           # The action to run
           setup-options: --buildtype=debug -Ddebug_type=full
-          meson-version: 0.55.3
-          ninja-version: 1.10.0
+          meson-version: 0.60.0
+          ninja-version: 1.10.2
           action: build
 
   build-windows:

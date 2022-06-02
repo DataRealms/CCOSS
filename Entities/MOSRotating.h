@@ -635,6 +635,18 @@ ClassInfoGetters;
 	/// <returns>The rate at which wound count affects the impulse limit.</returns>
 	float GetWoundCountAffectsImpulseLimitRatio() const { return m_WoundCountAffectsImpulseLimitRatio; }
 
+	/// <summary>
+	/// Gets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
+	/// </summary>
+	/// <returns>Whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.</returns>
+	bool GetGibAtEndOfLifetime() const { return m_GibAtEndOfLifetime; }
+	
+	/// <summary>
+	/// Sets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
+	/// </summary>
+	/// <param name="shouldGibAtEndOfLifetime">Whether or not this MOSRotating should gib at the end of its lifetime instead of just being deleted.</param>
+	void SetGibAtEndOfLifetime(bool shouldGibAtEndOfLifetime) { m_GibAtEndOfLifetime = shouldGibAtEndOfLifetime; }
+
     /// <summary>
     /// Gets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
     /// </summary>
@@ -957,6 +969,7 @@ protected:
 	int m_GibWoundLimit; //!< The number of wounds that will gib this MOSRotating. 0 means that it can't be gibbed via wounds.
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
 	float m_WoundCountAffectsImpulseLimitRatio; //!< The rate at which this MOSRotating's wound count will diminish the impulse limit.
+	bool m_GibAtEndOfLifetime; //!< Whether or not this MOSRotating should gib when it reaches the end of its lifetime, instead of just deleting.
     // Gib sound effect
     SoundContainer *m_GibSound;
     // Whether to flash effect on gib

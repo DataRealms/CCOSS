@@ -74,6 +74,7 @@ void MOSRotating::Clear()
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
 	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
+	m_GibAtEndOfLifetime = false;
     m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
@@ -256,6 +257,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
 	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
+	m_GibAtEndOfLifetime = reference.m_GibAtEndOfLifetime;
 	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
 	m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
@@ -329,7 +331,9 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "GibBlastStrength") {
 		reader >> m_GibBlastStrength;
 	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
-        reader >> m_WoundCountAffectsImpulseLimitRatio;
+		reader >> m_WoundCountAffectsImpulseLimitRatio;
+	} else if (propName == "GibAtEndOfLifetime") {
+		reader >> m_GibAtEndOfLifetime;
 	} else if (propName == "GibSound") {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
@@ -411,6 +415,7 @@ int MOSRotating::Save(Writer &writer) const
     writer << m_GibImpulseLimit;
     writer.NewProperty("GibWoundLimit");
     writer << m_GibWoundLimit;
+	writer.NewPropertyWithValue("GibAtEndOfLifetime", m_GibAtEndOfLifetime);
     writer.NewProperty("GibSound");
     writer << m_GibSound;
     writer.NewProperty("EffectOnGib");
@@ -1424,6 +1429,9 @@ void MOSRotating::PostTravel()
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
     if (IsTooFast())
         GibThis();
+
+	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
+	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }
 
     MOSprite::PostTravel();
 

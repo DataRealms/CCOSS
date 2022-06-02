@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   
 - New INI and Lua (R/W) `ACDropShip` property `HoverHeightModifier`. This allows for modification of the height at which an `ACDropShip` will hover when unloading cargo, or staying at a location.
 
+- New Lua event functions for `HDFirearm` - `OnFire(self)` that triggers when the gun fires, and `OnReload(self, hadMagazineBeforeReload)` that triggers when the gun is reloaded.
 </details>
 
 <details><summary><b>Changed</b></summary>

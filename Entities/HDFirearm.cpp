@@ -676,8 +676,8 @@ void HDFirearm::StopActivationSound()
 void HDFirearm::Reload()
 {
 	if (!m_Reloading && m_Reloadable) {
-        if (m_pMagazine)
-        {
+		bool hadMagazineBeforeReloading = m_pMagazine != nullptr;
+        if (hadMagazineBeforeReloading) {
 			Vector constrainedMagazineOffset = g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2.0F);
 			Vector ejectVector = Vector(2.0F * GetFlipFactor(), 0.0F) + constrainedMagazineOffset.RadRotate(RandomNum(-0.2F, 0.2F));
 			m_pMagazine->SetVel(m_Vel + ejectVector);
@@ -692,6 +692,9 @@ void HDFirearm::Reload()
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
+
+		RunScriptedFunctionInAppropriateScripts("OnReload", false, false, {}, { hadMagazineBeforeReloading ? "true" : "false" });
+
 		m_Reloading = true;
     }
 }
@@ -945,6 +948,8 @@ void HDFirearm::Update()
                 delete pRound;
             }
             pRound = 0;
+
+			if (m_FireFrame) { RunScriptedFunctionInAppropriateScripts("OnFire", false, false); }
 		} else {
 			m_ActivationTimer.Reset();
 		}

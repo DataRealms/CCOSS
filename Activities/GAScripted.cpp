@@ -460,7 +460,7 @@ void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 void GAScripted::CollectRequiredAreas()
 {
     // Open the script file so we can check it out
-    std::ifstream *pScriptFile = new std::ifstream(m_ScriptPath.c_str());
+    std::ifstream *pScriptFile = new std::ifstream( g_PresetMan.FullModulePath(m_ScriptPath.c_str()));
     if (!pScriptFile->good())
         return;
 

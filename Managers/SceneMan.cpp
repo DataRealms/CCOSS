@@ -879,7 +879,7 @@ void SceneMan::UnlockScene()
 
 bool SceneMan::SceneIsLocked() const
 {
-    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to check if scene is locked before there is a scene or terrain!");
     return m_pCurrentScene->IsLocked();
 }
 
@@ -1443,7 +1443,7 @@ bool SceneMan::LoadUnseenLayer(std::string bitmapPath, int team)
 
 bool SceneMan::AnythingUnseen(const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when checking if anything is unseen!");
 
     return m_pCurrentScene->GetUnseenLayer(team) != 0;
 // TODO: Actually check all pixels on the map too?
@@ -1458,7 +1458,7 @@ bool SceneMan::AnythingUnseen(const int team)
 
 Vector SceneMan::GetUnseenResolution(const int team) const
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when getting unseen resolution!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return Vector(1, 1);
 
@@ -1477,7 +1477,7 @@ Vector SceneMan::GetUnseenResolution(const int team) const
 
 bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when checking if a position is unseen!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
@@ -1502,7 +1502,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when revealing an unseen position!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
@@ -1541,7 +1541,7 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when making a position unseen!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
@@ -1580,7 +1580,7 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 
 void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when revealing an unseen area!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return;
 
@@ -1607,7 +1607,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
 
 void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists when making an area unseen!");
 	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return;
 

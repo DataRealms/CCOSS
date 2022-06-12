@@ -154,7 +154,6 @@ namespace RTE {
 	void RunMenuLoop() {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
-		g_AudioMan.StopAll();
 
 		while (!System::IsSetToQuit()) {
 			g_UInputMan.Update();

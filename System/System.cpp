@@ -62,6 +62,46 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	FILE* System::OpenFileCaseInsensitive(const std::filesystem::path filePath, const std::string& mode)
+	{
+		std::filesystem::path inspectedPath{ System::GetWorkingDirectory() };
+
+		const std::filesystem::path relativeFilePath = filePath.lexically_relative(inspectedPath);
+
+		for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator)
+		{
+			bool pathPartExists = false;
+
+			// Check if a path part (directory or file) exists in the filesystem.
+			for (const std::filesystem::path& filesystemEntryPath : std::filesystem::directory_iterator{ inspectedPath })
+			{
+				if (System::StringsEqualCaseInsensitive(filesystemEntryPath.filename().string(), (*relativeFilePathIterator).string()))
+				{
+					inspectedPath = filesystemEntryPath;
+					pathPartExists = true;
+					break;
+				}
+			}
+
+			if (!pathPartExists)
+			{
+				// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
+				if (std::next(relativeFilePathIterator) == relativeFilePath.end())
+				{
+					return fopen((inspectedPath / relativeFilePath.filename()).string().c_str(), mode.c_str());
+				}
+
+				// Some directory in relativeFilePath doesn't exist, so the file can't be created.
+				return nullptr;
+			}
+		}
+
+		// If the file exists, open it.
+		return fopen(inspectedPath.string().c_str(), mode.c_str());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void System::EnableLoggingToCLI() {
 #ifdef _WIN32
 		// Create a console instance for the current process
@@ -287,5 +327,14 @@ namespace RTE {
 
 			return (std::search(rawData.begin(), rawData.end(), findString.begin(), findString.end()) != rawData.end()) ? 0 : 1;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	bool System::StringsEqualCaseInsensitive(const std::string &a, const std::string &b) {
+		return std::equal(a.begin(), a.end(),
+			b.begin(), b.end(),
+			[](char a, char b)
+			{ return std::tolower(a) == std::tolower(b); });
 	}
 }

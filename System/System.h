@@ -94,6 +94,15 @@ namespace RTE {
 		/// <param name="pathToCheck">The path to check.</param>
 		/// <returns>Whether the file exists.</returns>
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
+
+		/// <summary>
+		/// Attempts to open a file case insensitively, and creates one if it doesn't exist yet, as long as all of its parent directories exist.
+		/// This means that if "mod.rte/foo/bar.txt" exists, calling this method with filePath "mod.rte/foo/BAR.txt" will open and return that same file, even on case sensitive operating systems.
+		/// </summary>
+		/// <param name="filePath">The file path to open case insensitively.</param>
+		/// <param name="mode">File access mode passed on to fopen().</param>
+		/// <returns>A pointer to the opened or created file, or nullptr when the file couldn't be created due to a missing parent directory.</returns>
+		static FILE* OpenFileCaseInsensitive(const std::filesystem::path filePath, const std::string &mode);
 #pragma endregion
 
 #pragma region Command-Line Interface
@@ -143,6 +152,14 @@ namespace RTE {
 		/// <param name="">The exact string to look for. Case sensitive!</param>
 		/// <returns>0 if the string was found in the file or 1 if not. -1 if the file was inaccessible.</returns>
 		static int ASCIIFileContainsString(const std::string &filePath, const std::string &findString);
+
+		/// <summary>
+		/// Checks whether two strings are equal when the casing is disregarded.
+		/// </summary>
+		/// <param name="a">First string.</param>
+		/// <param name="b">Second string.</param>
+		/// <returns>Whether the two strings are equal case insensitively.</returns>
+		static bool StringsEqualCaseInsensitive(const std::string &a, const std::string &b);
 #pragma endregion
 
 	private:

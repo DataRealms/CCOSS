@@ -392,8 +392,8 @@ namespace RTE {
 		}
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
-		if ((fullPath.find("..") == std::string::npos) && (System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
-			if (FILE *file = fopen(fullPath.c_str(), accessMode.c_str())) {
+		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
+			if (FILE *file = System::OpenFileCaseInsensitive(fullPath, accessMode)) {
 				m_OpenedFiles.at(fileIndex) = file;
 				return fileIndex;
 			}

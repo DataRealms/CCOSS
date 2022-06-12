@@ -843,7 +843,7 @@ void SceneMan::CheckOffset(int screen)
 void SceneMan::LockScene()
 {
 //    RTEAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
-    if (!m_pCurrentScene->IsLocked())
+    if (m_pCurrentScene && !m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Lock();
         m_pMOColorLayer->LockBitmaps();
@@ -863,7 +863,7 @@ void SceneMan::LockScene()
 void SceneMan::UnlockScene()
 {
 //    RTEAssert(m_pCurrentScene->IsLocked(), "Hey, unlocking already unlocked scene!");
-    if (m_pCurrentScene->IsLocked())
+    if (m_pCurrentScene && m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Unlock();
         m_pMOColorLayer->UnlockBitmaps();
@@ -3291,7 +3291,7 @@ bool SceneMan::AddTerrainObject(TerrainObject *pObject)
     if (!pObject)
         return false;
 
-    bool result =  m_pCurrentScene->GetTerrain()->ApplyObject(pObject);
+	bool result = m_pCurrentScene && m_pCurrentScene->GetTerrain()->ApplyObject(pObject);
 	if (result)
 	{
 		Vector corner = pObject->GetPos() + pObject->GetBitmapOffset();

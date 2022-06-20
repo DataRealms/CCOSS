@@ -3285,22 +3285,14 @@ void SceneMan::Update(int screen) {
 		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
 		if (m_TargetWrapped[screen]) {
 			if (terrain->WrapsX()) {
-				if (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) {
-					m_Offset[screen].SetX(m_Offset[screen].GetX() - static_cast<float>(terrain->GetBitmap()->w));
-					m_SeamCrossCount[screen][X] += 1;
-				} else {
-					m_Offset[screen].SetX(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w));
-					m_SeamCrossCount[screen][X] -= 1;
-				}
+				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
+				m_Offset[screen].SetX(m_Offset[screen].GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
+				m_SeamCrossCount[screen][X] += wrappingScrollDirection;
 			}
 			if (terrain->WrapsY()) {
-				if (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) {
-					m_Offset[screen].SetY(m_Offset[screen].GetY() - static_cast<float>(terrain->GetBitmap()->h));
-					m_SeamCrossCount[screen][Y] += 1;
-				} else {
-					m_Offset[screen].SetY(m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h));
-					m_SeamCrossCount[screen][Y] -= 1;
-				}
+				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
+				m_Offset[screen].SetY(m_Offset[screen].GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
+				m_SeamCrossCount[screen][Y] += wrappingScrollDirection;
 			}
 		}
 		m_TargetWrapped[screen] = false;
@@ -3320,8 +3312,7 @@ void SceneMan::Update(int screen) {
 
 	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
 		Vector scrollVec(offsetTarget - m_Offset[screen]);
-		float scrollProgress = static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F);
-		if (scrollProgress > 1.0F) { scrollProgress = 1.0F; }
+		float scrollProgress = std::min(1.0F, static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F));
 		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
 	}
 

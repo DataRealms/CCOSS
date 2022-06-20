@@ -29,8 +29,8 @@ namespace RTE {
 		m_FillColorUp = ColorKeys::g_MaskColor;
 		m_FillColorDown = ColorKeys::g_MaskColor;
 
-		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(1.0F, 1.0F), Vector(2.0F, 2.0F) };
 		m_IgnoreAutoScale = false;
+		m_FitScreenScaleFactor.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,8 +86,8 @@ namespace RTE {
 		m_AutoScrollStep = reference.m_AutoScrollStep;
 		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
 
-		m_LayerScaleFactors = reference.m_LayerScaleFactors;
 		m_IgnoreAutoScale = reference.m_IgnoreAutoScale;
+		m_FitScreenScaleFactor = reference.m_FitScreenScaleFactor;
 
 		return 0;
 	}
@@ -156,25 +156,23 @@ namespace RTE {
 
 	void SLBackground::InitScaleFactors() {
 		if (!m_IgnoreAutoScale) {
-			m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
-
 			float fitScreenScaleFactor = 1.0F;
 			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
 				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
 				fitScreenScaleFactor = std::clamp(static_cast<float>(g_SceneMan.GetSceneHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 			}
-			m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
+			m_FitScreenScaleFactor.SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
 
 			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
 				case LayerAutoScaleMode::FitScreen:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
+					SetScaleFactor(m_FitScreenScaleFactor);
 					break;
 				case LayerAutoScaleMode::AlwaysUpscaled:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
+					SetScaleFactor(Vector(2.0F, 2.0F));
 					break;
 				default:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
+					SetScaleFactor(m_ScaleFactor);
 					break;
 			}
 			m_ScrollInfo *= m_ScaleFactor;

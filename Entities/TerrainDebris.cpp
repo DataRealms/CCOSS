@@ -191,13 +191,13 @@ namespace RTE {
 
 	void TerrainDebris::DrawToTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const {
 		// Create a square temp bitmap that is larger than the original to avoid clipping if rotating.
-		int dimensions = 10 + ((bitmapToDraw->w <= bitmapToDraw->h) ? bitmapToDraw->h : bitmapToDraw->w);
+		int dimensions = 10 + std::max(bitmapToDraw->w, bitmapToDraw->h);
 		BITMAP *tempDrawBitmap = create_bitmap_ex(8, dimensions, dimensions);
 		clear_bitmap(tempDrawBitmap);
 
 		// Offset the original bitmap on the temp bitmap so it's centered, otherwise will be positioned incorrectly and can clip if rotated or flipped.
-		int offsetX = (bitmapToDraw->w < dimensions) ? (dimensions - bitmapToDraw->w) / 2 : 0;
-		int offsetY = (bitmapToDraw->h < dimensions) ? (dimensions - bitmapToDraw->h) / 2 : 0;
+		int offsetX = (dimensions - bitmapToDraw->w) / 2;
+		int offsetY = (dimensions - bitmapToDraw->h) / 2;
 		blit(bitmapToDraw, tempDrawBitmap, 0, 0, offsetX, offsetY, bitmapToDraw->w, bitmapToDraw->h);
 
 		BITMAP *tempFlipAndRotBitmap = nullptr;

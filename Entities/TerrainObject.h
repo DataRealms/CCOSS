@@ -96,16 +96,16 @@ namespace RTE {
 		const Vector & GetBitmapOffset() const { return m_BitmapOffset; }
 
 		/// <summary>
-		/// Gets the width of this TerrainObject's BITMAP. All layers of the TerrainObject are checked for cases where one or two of the layers are not defined.
+		/// Gets the width of the widest BITMAP of this TerrainObject's layers.
 		/// </summary>
 		/// <returns>The width of this TerrainObject.</returns>
-		int GetBitmapWidth() const;
+		int GetBitmapWidth() const { return std::max({ m_MaterialBitmap ? m_MaterialBitmap->w : 0, m_BGColorBitmap ? m_BGColorBitmap->w : 0, m_FGColorBitmap ? m_FGColorBitmap->w : 0 }); }
 
 		/// <summary>
-		/// Gets the height of this TerrainObject. All layers of the TerrainObject are checked for cases where one or two of the layers are not defined.
+		/// Gets the height of the highest BITMAP of this TerrainObject's layers.
 		/// </summary>
 		/// <returns>The height of this TerrainObject.</returns>
-		int GetBitmapHeight() const;
+		int GetBitmapHeight() const { return std::max({ m_MaterialBitmap ? m_MaterialBitmap->h : 0, m_BGColorBitmap ? m_BGColorBitmap->h : 0, m_FGColorBitmap ? m_FGColorBitmap->h : 0 }); }
 
 		/// <summary>
 		/// Gets the list of child objects that should be placed when this TerrainObject is placed.
@@ -148,9 +148,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="drawMode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
 		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this TerrainObject, like indicator arrows or hovering HUD text and so on.</param>
-		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode drawMode = DrawMode::g_DrawColor, bool onlyPhysical = false) const override;
 #pragma endregion
 
 	protected:

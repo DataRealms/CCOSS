@@ -100,26 +100,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TerrainObject::GetBitmapWidth() const {
-		int bitmapWidth = 0;
-		if (m_MaterialBitmap) { bitmapWidth = std::max(bitmapWidth, m_MaterialBitmap->w); }
-		if (m_BGColorBitmap) { bitmapWidth = std::max(bitmapWidth, m_BGColorBitmap->w); }
-		if (m_FGColorBitmap) { bitmapWidth = std::max(bitmapWidth, m_FGColorBitmap->w); }
-		return bitmapWidth;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int TerrainObject::GetBitmapHeight() const {
-		int bitmapHeight = 0;
-		if (m_MaterialBitmap) { bitmapHeight = std::max(bitmapHeight, m_MaterialBitmap->h); }
-		if (m_BGColorBitmap) { bitmapHeight = std::max(bitmapHeight, m_BGColorBitmap->h); }
-		if (m_FGColorBitmap) { bitmapHeight = std::max(bitmapHeight, m_FGColorBitmap->h); }
-		return bitmapHeight;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	BITMAP * TerrainObject::GetGraphicalIcon() const {
 		if (m_FGColorBitmap) {
 			// Check several spots on the FG bitmap, to be sure it has parts that aren't transparent. If not, show the background layer instead.
@@ -180,47 +160,52 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TerrainObject::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-		std::array<Vector, 4> drawPos;
-		drawPos.at(0) = m_Pos + m_BitmapOffset - targetPos;
-		int passes = 1;
+	void TerrainObject::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode drawMode, bool onlyPhysical) const {
+		std::array<Vector, 4> drawPos = { m_Pos + m_BitmapOffset - targetPos };
+		int wrapPasses = 1;
 
 		// See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap.
 		if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= targetBitmap->w) {
 			if (drawPos.at(0).GetFloorIntX() < m_FGColorBitmap->w) {
-				drawPos.at(passes) = drawPos.at(0);
-				drawPos.at(passes).m_X += static_cast<float>(targetBitmap->w);
-				passes++;
+				drawPos.at(wrapPasses) = drawPos.at(0);
+				drawPos.at(wrapPasses).m_X += static_cast<float>(targetBitmap->w);
+				wrapPasses++;
 			} else if (drawPos.at(0).GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
-				drawPos.at(passes) = drawPos.at(0);
-				drawPos.at(passes).m_X -= static_cast<float>(targetBitmap->w);
-				passes++;
+				drawPos.at(wrapPasses) = drawPos.at(0);
+				drawPos.at(wrapPasses).m_X -= static_cast<float>(targetBitmap->w);
+				wrapPasses++;
 			}
 		} else {
 			// Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam.
 			if (g_SceneMan.SceneWrapsX()) {
 				float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
 				if (targetPos.m_X < 0) {
-					drawPos.at(passes) = drawPos.at(0);
-					drawPos.at(passes).m_X -= sceneWidth;
-					passes++;
+					drawPos.at(wrapPasses) = drawPos.at(0);
+					drawPos.at(wrapPasses).m_X -= sceneWidth;
+					wrapPasses++;
 				}
 				if (targetPos.m_X + static_cast<float>(targetBitmap->w) > sceneWidth) {
-					drawPos.at(passes) = drawPos.at(0);
-					drawPos.at(passes).m_X += sceneWidth;
-					passes++;
+					drawPos.at(wrapPasses) = drawPos.at(0);
+					drawPos.at(wrapPasses).m_X += sceneWidth;
+					wrapPasses++;
 				}
 			}
 		}
-		for (int i = 0; i < passes; ++i) {
-			if (mode == g_DrawColor) {
-				if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
-				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
-			} else if (mode == g_DrawMaterial) {
-				if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
-			} else if (mode == g_DrawTrans) {
-				if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
-				if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+		for (int i = 0; i < wrapPasses; ++i) {
+			switch (drawMode) {
+				case DrawMode::g_DrawColor:
+					if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
+					if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
+					break;
+				case DrawMode::g_DrawMaterial:
+					if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
+					break;
+				case DrawMode::g_DrawTrans:
+					if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+					if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+					break;
+				default:
+					break;
 			}
 		}
 	}

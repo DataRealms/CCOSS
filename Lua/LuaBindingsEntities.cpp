@@ -40,6 +40,7 @@ namespace RTE {
 		.property("MaxEngineAngle", &ACDropShip::GetMaxEngineAngle, &ACDropShip::SetMaxEngineAngle)
 		.property("LateralControlSpeed", &ACDropShip::GetLateralControlSpeed, &ACDropShip::SetLateralControlSpeed)
 		.property("LateralControl", &ACDropShip::GetLateralControl)
+		.property("HoverHeightModifier", &ACDropShip::GetHoverHeightModifier, &ACDropShip::SetHoverHeightModifier)
 
 		.def("DetectObstacle", &ACDropShip::DetectObstacle)
 		.def("GetAltitude", &ACDropShip::GetAltitude);
@@ -278,6 +279,8 @@ namespace RTE {
 		.def("UpdateMovePath", &Actor::UpdateMovePath)
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
+		.def("IsOrganic", &Actor::IsOrganic)
+		.def("IsRobotic", &Actor::IsRobotic)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),

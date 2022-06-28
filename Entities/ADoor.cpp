@@ -241,8 +241,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ADoor::EraseDoorMaterial(bool updateMaterialArea) {
-		m_DoorMaterialDrawn = false;
-
 		if (!g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return false;
 		}
@@ -251,6 +249,7 @@ namespace RTE {
 		int fillY = m_LastDoorMaterialPos.GetFloorIntY();
 
 		DrawDoorMaterial(true);
+		m_DoorMaterialDrawn = false;
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
 			if (m_Door && updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
@@ -268,9 +267,9 @@ namespace RTE {
 
 		bool doorMaterialDrawnState = m_DoorMaterialDrawn;
 		if (erase && m_DoorMaterialDrawn && !m_DoorMaterialTempErased) {
+			m_DoorMaterialTempErased = erase;
 			EraseDoorMaterial(true);
 			m_DoorMaterialDrawn = doorMaterialDrawnState;
-			m_DoorMaterialTempErased = erase;
 		} else if (!erase && m_DoorMaterialDrawn && m_DoorMaterialTempErased) {
 			m_DoorMaterialTempErased = erase;
 			DrawDoorMaterial(true);
@@ -333,7 +332,7 @@ namespace RTE {
 
 	void ADoor::StopDoor() {
 		if (m_DoorState == OPENING || m_DoorState == CLOSING) {
-			if (m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) { DrawDoorMaterial(); }
+			if (m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) { DrawDoorMaterial(true); }
 			m_DoorMoveStopTime = m_DoorMoveTime - m_DoorMoveTimer.GetElapsedSimTimeMS();
 			m_DoorStateOnStop = m_DoorState;
 			if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }

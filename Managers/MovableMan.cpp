@@ -1441,38 +1441,17 @@ void MovableMan::OpenAllDoors(bool open, int team) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OverrideMaterialDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Temporarily erases any material door representations of a specific team.
-//                  Used for making pathfinding work better, allowing teammember to navigate
-//                  through friendly bases.
-
-void MovableMan::OverrideMaterialDoors(bool enable, int team)
-{
-    ADoor *pDoor = 0;
-    for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-    {
-        pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
-        {
-            // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
-            pDoor->Update();
-            pDoor->TempEraseOrRedrawDoorMaterial(enable);
-        }
-    }
-    // Also check all doors added this frame
-    for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
-    {
-        pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
-        {
-            // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
-            pDoor->Update();
-            pDoor->TempEraseOrRedrawDoorMaterial(enable);
-        }
-    }
+void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) {
+	for (std::deque<Actor *> actorDequeue : { m_Actors, m_AddedActors }) {
+		for (Actor *actor : actorDequeue) {
+			if (ADoor *actorAsDoor = dynamic_cast<ADoor *>(actor); actorAsDoor && (team == Activity::NoTeam || actorAsDoor->GetTeam() == team)) {
+				actorAsDoor->TempEraseOrRedrawDoorMaterial(eraseDoorMaterial);
+			}
+		}
+	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

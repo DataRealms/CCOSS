@@ -657,18 +657,13 @@ public:
     /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
     void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OverrideMaterialDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Temporarily erases any material door representations of a specific team.
-//                  Used for making pathfinding work better, allowing teammember to navigate
-//                  through friendly bases.
-// Arguments:       Whether to enable the override (true), or undo this action (false)
-//                  Which team to do this for. NoTeam means all teams.
-// Return value:    None.
-
-    void OverrideMaterialDoors(bool enable, int team = Activity::NoTeam);
+    /// <summary>
+    /// Temporarily erases or redraws any material door representations of a specific team.
+	/// Used to make pathfinding work better, allowing Actors to navigate through firendly bases despite the door material layer.
+    /// </summary>
+    /// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
+    /// <param name="team">Which team to do this for, NoTeam means all teams.</param>
+    void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,6 @@ namespace RTE {
 		m_FillColorDown = ColorKeys::g_MaskColor;
 
 		m_IgnoreAutoScale = false;
-		m_FitScreenScaleFactor.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +86,6 @@ namespace RTE {
 		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
 
 		m_IgnoreAutoScale = reference.m_IgnoreAutoScale;
-		m_FitScreenScaleFactor = reference.m_FitScreenScaleFactor;
 
 		return 0;
 	}
@@ -156,17 +154,11 @@ namespace RTE {
 
 	void SLBackground::InitScaleFactors() {
 		if (!m_IgnoreAutoScale) {
-			float fitScreenScaleFactor = 1.0F;
-			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
-				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
-			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
-				fitScreenScaleFactor = std::clamp(static_cast<float>(g_SceneMan.GetSceneHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
-			}
-			m_FitScreenScaleFactor.SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
+			float fitScreenScaleFactor = std::clamp(static_cast<float>(std::min(g_SceneMan.GetSceneHeight(), g_FrameMan.GetPlayerScreenHeight())) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 
 			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
 				case LayerAutoScaleMode::FitScreen:
-					SetScaleFactor(m_FitScreenScaleFactor);
+					SetScaleFactor(Vector(fitScreenScaleFactor, fitScreenScaleFactor));
 					break;
 				case LayerAutoScaleMode::AlwaysUpscaled:
 					SetScaleFactor(Vector(2.0F, 2.0F));

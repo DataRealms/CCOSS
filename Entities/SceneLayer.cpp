@@ -192,7 +192,6 @@ namespace RTE {
 				destroy_bitmap(bitmapToSave);
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
-			// Set the path to point to the new file location.
 			m_BitmapFile.SetDataPath(bitmapPath);
 			// TODO: Move this into some global thread container or a ThreadMan™ instead of detaching.
 			saveThread.detach();
@@ -219,10 +218,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SceneLayer::GetPixel(int pixelX, int pixelY) const {
-		int posX = pixelX;
-		int posY = pixelY;
-		WrapPosition(posX, posY);
-		return (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(m_MainBitmap, posX, posY);
+		WrapPosition(pixelX, pixelY);
+		return (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(m_MainBitmap, pixelX, pixelY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,14 +227,12 @@ namespace RTE {
 	void SceneLayer::SetPixel(int pixelX, int pixelY, int materialID) const {
 		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
-		int posX = pixelX;
-		int posY = pixelY;
-		WrapPosition(posX, posY);
+		WrapPosition(pixelX, pixelY);
 
-		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
+		if (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) {
 			return;
 		}
-		_putpixel(m_MainBitmap, posX, posY, materialID);
+		_putpixel(m_MainBitmap, pixelX, pixelY, materialID);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -42,7 +42,7 @@ namespace RTE {
 	int SLTerrain::Create(const SLTerrain &reference) {
 		SceneLayer::Create(reference);
 
-		// Don't copy the layers because they are loaded later by LoadData.
+		// Copy the layers but not the layer BITMAPs because they will be loaded later by LoadData.
 		m_FGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_FGColorLayer->Clone()));
 		m_BGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_BGColorLayer->Clone()));
 
@@ -324,24 +324,24 @@ namespace RTE {
 
 		for (int y = box.m_Corner.GetFloorIntY(); y < static_cast<int>(box.m_Corner.GetY() + box.m_Height); ++y) {
 			for (int x = box.m_Corner.GetFloorIntX(); x < static_cast<int>(box.m_Corner.GetX() + box.m_Width); ++x) {
-				int wrapX = x;
-				int wrapY = y;
+				int wrappedX = x;
+				int wrappedY = y;
 
 				if (wrapsX) {
-					if (wrapX < 0) { wrapX += width; }
-					if (wrapX >= width) { wrapX -= width; }
+					if (wrappedX < 0) { wrappedX += width; }
+					if (wrappedX >= width) { wrappedX -= width; }
 				}
 				if (wrapsY) {
-					if (wrapY < 0) { wrapY += height; }
-					if (wrapY >= height) { wrapY -= height; }
+					if (wrappedY < 0) { wrappedY += height; }
+					if (wrappedY >= height) { wrappedY -= height; }
 				}
-				if (wrapX >= 0 && wrapX < width && wrapY >= 0 && wrapY < height) {
-					int matPixel = _getpixel(m_MainBitmap, wrapX, wrapY);
+				if (wrappedX >= 0 && wrappedX < width && wrappedY >= 0 && wrappedY < height) {
+					int matPixel = _getpixel(m_MainBitmap, wrappedX, wrappedY);
 					if (matPixel == MaterialColorKeys::g_MaterialCavity) {
-						_putpixel(m_MainBitmap, wrapX, wrapY, MaterialColorKeys::g_MaterialAir);
+						_putpixel(m_MainBitmap, wrappedX, wrappedY, MaterialColorKeys::g_MaterialAir);
 						matPixel = MaterialColorKeys::g_MaterialAir;
 					}
-					if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), wrapX, wrapY, ColorKeys::g_MaskColor); }
+					if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), wrappedX, wrappedY, ColorKeys::g_MaskColor); }
 				}
 			}
 		}
@@ -414,7 +414,7 @@ namespace RTE {
 						skipCount = 0;
 						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
 						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
-						
+
 						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
 						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
 						terrainPixel->SetToHitMOs(false);

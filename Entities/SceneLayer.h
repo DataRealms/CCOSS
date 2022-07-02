@@ -208,7 +208,8 @@ namespace RTE {
 		void UnlockBitmaps() { /*release_bitmap(m_MainBitmap);*/ }
 
 		/// <summary>
-		/// Only wraps a position coordinate if it is out of bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
+		/// Wraps the given position coordinate if it is out of bounds of this SceneLayer and wrapping is enabled on the appropriate axes.
+		/// Does not force the position coordinate within bounds if wrapping is not enabled.
 		/// </summary>
 		/// <param name="posX">The X coordinates of the position to wrap.</param>
 		/// <param name="posY">The Y coordinates of the position to wrap.</param>
@@ -216,7 +217,8 @@ namespace RTE {
 		bool WrapPosition(int &posX, int &posY) const;
 
 		/// <summary>
-		/// Only wraps a position coordinate if it is out of bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
+		/// Wraps the given position Vector if it is out of bounds of this SceneLayer and wrapping is enabled on the appropriate axes.
+		/// Does not force the position Vector within bounds if wrapping is not enabled.
 		/// </summary>
 		/// <param name="pos">The vector coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not.</returns>

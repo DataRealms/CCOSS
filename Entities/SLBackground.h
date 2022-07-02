@@ -235,7 +235,6 @@ namespace RTE {
 		int m_FillColorDown; //!< Palette index to use for filling the gap between the lower edge of the bitmap and the lower edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 
 		bool m_IgnoreAutoScale; //!< Whether auto-scaling settings are ignored and the read-in scale factor is used instead.
-		Vector m_FitScreenScaleFactor; // The calculated scale factor that fits the SLBackground the player's screen when LayerAutoScaleMode is set to FitScreen.
 
 		/// <summary>
 		/// Clears all the member variables of this SLBackground, effectively resetting the members of this abstraction level only.

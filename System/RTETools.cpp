@@ -100,7 +100,41 @@ namespace RTE {
 
 	float NormalizeAngleBetween0And2PI(float angle) {
 		while (angle < 0) { angle += c_TwoPI; }
-		return fmodf((angle + c_TwoPI), c_TwoPI);
+		return angle > c_TwoPI ? fmodf(angle + c_TwoPI, c_TwoPI) : angle;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float NormalizeAngleBetweenNegativePIAndPI(float angle) {
+		while (angle < 0) { angle += c_TwoPI; }
+		return angle > c_PI ? fmodf(angle + c_PI, c_TwoPI) - c_PI : angle;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool AngleWithinRange(float angleToCheck, float startAngle, float endAngle) {
+		angleToCheck = NormalizeAngleBetween0And2PI(angleToCheck);
+		startAngle = NormalizeAngleBetween0And2PI(startAngle);
+		endAngle = NormalizeAngleBetween0And2PI(endAngle);
+
+		return endAngle >= startAngle ? (angleToCheck >= startAngle && angleToCheck <= endAngle) : (angleToCheck >= startAngle || angleToCheck <= endAngle);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float ClampAngle(float angleToClamp, float startAngle, float endAngle) {
+		angleToClamp = NormalizeAngleBetween0And2PI(angleToClamp);
+
+		if (!AngleWithinRange(angleToClamp, startAngle, endAngle)) {
+			startAngle = NormalizeAngleBetween0And2PI(startAngle);
+			endAngle = NormalizeAngleBetween0And2PI(endAngle);
+
+			float shortestDistanceToStartAngle = std::min(c_TwoPI - std::abs(angleToClamp - startAngle), std::abs(angleToClamp - startAngle));
+			float shortestDistanceToEndAngle = std::min(c_TwoPI - std::abs(angleToClamp - endAngle), std::abs(angleToClamp - endAngle));
+			angleToClamp = shortestDistanceToStartAngle < shortestDistanceToEndAngle ? startAngle : endAngle;
+		}
+
+		return angleToClamp;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

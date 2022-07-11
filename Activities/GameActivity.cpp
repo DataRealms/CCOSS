@@ -1787,24 +1787,23 @@ void GameActivity::Update()
 
 		if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle) {
 			PieMenuGUI *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
-			if (m_PlayerController[player].IsState(PIE_MENU_ACTIVE)) {
-				if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel || !m_InventoryMenuGUI[player]->IsVisible()) {
+			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE)) {
+				if (controlledActorPieMenu->IsEnabling() && m_BuyMenuEnabled && !controlledActorPieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_BUYMENU)) {
+					PieSlice *buyPieSlice = dynamic_cast<PieSlice *>(g_PresetMan.GetEntityPreset("PieSlice", "BuyMenu")->Clone());
+					buyPieSlice->SetCanBeMiddleSlice(controlledActorPieMenu->GetPieSlices().empty());
+					buyPieSlice->SetDirection(Directions::Up);
+					buyPieSlice->SetDescription("Buy Menu");
+					controlledActorPieMenu->AddPieSlice(buyPieSlice, this);
+				}
+
+				if (controlledActorPieMenu->IsEnabled() && controlledActorPieMenu->HasSubPieMenuOpen() && m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) {
+					m_InventoryMenuGUI[player]->SetEnabled(false);
+				} else if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel || !m_InventoryMenuGUI[player]->IsVisible()) {
 					m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Carousel);
 					m_InventoryMenuGUI[player]->EnableIfNotEmpty();
 				}
-				if (!controlledActorPieMenu->IsEnabled()) {
-					if (m_BuyMenuEnabled && !controlledActorPieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_BUYMENU)) {
-						PieSlice *buySlice = dynamic_cast<PieSlice *>(g_PresetMan.GetEntityPreset("PieSlice", "BuyMenu")->Clone());
-						buySlice->SetCanBeMiddleSlice(controlledActorPieMenu->GetPieSlices().empty());
-						buySlice->SetDirection(Directions::Up);
-						buySlice->SetDescription("Buy Menu");
-						controlledActorPieMenu->AddPieSlice(buySlice, this);
-					}
-					controlledActorPieMenu->SetEnabled(true);
-				}
-			} else {
-				controlledActorPieMenu->SetEnabled(false);
-				if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) { m_InventoryMenuGUI[player]->SetEnabled(false); }
+			} else if (!m_PlayerController[player].IsState(PIE_MENU_ACTIVE) && m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) {
+				m_InventoryMenuGUI[player]->SetEnabled(false);
 			}
 
 			if (PieSlice::PieSliceIndex command = controlledActorPieMenu->GetPieCommand(); command != PieSlice::PieSliceIndex::PSI_NONE) {

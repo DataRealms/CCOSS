@@ -69,14 +69,15 @@ namespace RTE {
 		/// Resets the entire PieMenuGUI, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); Entity::Reset(); }
-
-		/// <summary>
-		/// Resets and removes all PieSlices from the PieMenuGUI so that new ones can be added.
-		/// </summary>
-		void ResetSlices();
 #pragma endregion
 
 #pragma region Getters and Setters
+		/// <summary>
+		/// Gets the owner Actor of this PieMenuGUI. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The owner Actor of this PieMenuGUI. Ownership is NOT transferred!</returns>
+		const Actor * GetOwner() const { return m_Owner; }
+		
 		/// <summary>
 		/// Sets the owner Actor of this PieMenuGUI, ensuring this is that Actor's PieMenuGUI, and updates PieSlice sources accordingly. Ownership is NOT transferred!
 		/// </summary>
@@ -87,7 +88,7 @@ namespace RTE {
 		/// Gets the currently in-use Controller for this PieMenuGUI - either the menu Controller if there's one set, or the owning Actor's Controller. Ownership IS NOT transferred!
 		/// </summary>
 		/// <returns>The currently in-use Controller for this PieMenuGUI.</returns>
-		Controller * GetController();
+		Controller * GetController() const;
 
 		/// <summary>
 		/// Sets the menu Controller used by this PieMenuGUI, separate from any Controller on its owner Actor. Ownership is NOT transferred!
@@ -106,6 +107,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="affectedObject">The new MovableObject affected by this PieMenuGUI. Ownership is NOT transferred!</param>
 		void SetAffectedObject(MovableObject *affectedObject) { m_AffectedObject = affectedObject; }
+
+		/// <summary>
+		/// Gets whether this PieMenuGUI is a sub-PieMenuGUI, i.e. it's owned by a PieSlice.
+		/// </summary>
+		/// <returns>Whether or not this PieMenuGUI is a sub-PieMenuGUI.</returns>
+		bool IsSubPieMenu() const { return m_DirectionIfSubPieMenu != Directions::None; }
 
 		/// <summary>
 		/// Gets the absolute center position of this PieMenuGUI.
@@ -144,10 +151,34 @@ namespace RTE {
 		void SetRotAngle(float rotAngle) { m_Rotation.SetRadAngle(rotAngle); }
 
 		/// <summary>
-		/// Gets whether or not the PieMenuGUI is enabled.
+		/// Gets the full inner radius of this PieMenuGUI.
 		/// </summary>
-		/// <returns>Whether or not the PieMenuGUI.</returns>
+		/// <returns>Gets the full inner radius of this PieMenuGUI.</returns>
+		int GetFullInnerRadius() const { return m_FullInnerRadius; }
+
+		/// <summary>
+		/// Sets the full inner radius of this PieMenuGUI and recreates the background bitmap if it's changed.
+		/// </summary>
+		/// <param name="fullInnerRadius">The new full inner radius of this PieMenuGUI.</param>
+		void SetFullInnerRadius(int fullInnerRadius) { if (m_FullInnerRadius != fullInnerRadius) { m_FullInnerRadius = fullInnerRadius; RecreateBackgroundBitmaps(); } }
+
+		/// <summary>
+		/// Gets whether or not the PieMenuGUI is enabled or in the process of being enabled, and is not in wobble mode.
+		/// </summary>
+		/// <returns>Whether or not the PieMenuGUI is enabled or in the process of being enabled.</returns>
 		bool IsEnabled() const { return (m_EnabledState == EnabledState::Enabled || m_EnabledState == EnabledState::Enabling) && m_MenuMode != MenuMode::Wobble; }
+
+		/// <summary>
+		/// Gets whether or not the PieMenuGUI is in the process of being enabled.
+		/// </summary>
+		/// <returns>Whether or not the PieMenuGUI is in the process of being enabled.</returns>
+		bool IsEnabling() const { return m_EnabledState == EnabledState::Enabling; }
+
+		/// <summary>
+		/// Gets whether or not the PieMenuGUI is in the process of being disabled.
+		/// </summary>
+		/// <returns>Whether or not the PieMenuGUI is in the process of being disabled.</returns>
+		bool IsDisabling() const { return m_EnabledState == EnabledState::Enabling && m_MenuMode != MenuMode::Wobble; }
 
 		/// <summary>
 		/// Gets whether or not the PieMenuGUI is in the process of enabling or disabling.
@@ -167,18 +198,24 @@ namespace RTE {
 		/// <param name="enable">Whether to enable or disable the PieMenuGUI.</param>
 		/// <param name="playSounds">Whether or not to play appropriate sounds when the menu is enabled or disabled.</param>
 		void SetEnabled(bool enable, bool playSounds = true);
+
+		/// <summary>
+		/// Gets whether this PieMenuGUI has an open sub-PieMenuGUI.
+		/// </summary>
+		/// <returns>Whether or not this PieMenuGUI has an open sub-PieMenuGUI.</returns>
+		bool HasSubPieMenuOpen() const { return m_ActiveSubPieMenu != nullptr; }
 #pragma endregion
 
 #pragma region Special Animation Handling
 		/// <summary>
-		/// Plays the disabling animation, regardless of whether the PieMenuGUI was enabled or not.
-		/// </summary>
-		void DoDisableAnimation() { m_InnerRadius = c_FullRadius; m_MenuMode = MenuMode::Normal; m_EnableDisableAnimationTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
-
-		/// <summary>
 		/// Sets this PieMenuGUI to normal MenuMode.
 		/// </summary>
 		void SetAnimationModeToNormal() { if (m_MenuMode != MenuMode::Normal) { m_MenuMode = MenuMode::Normal; m_EnabledState = EnabledState::Disabled; } }
+
+		/// <summary>
+		/// Plays the disabling animation, regardless of whether the PieMenuGUI was enabled or not.
+		/// </summary>
+		void DoDisableAnimation() { m_CurrentInnerRadius = m_FullInnerRadius; m_MenuMode = MenuMode::Normal; m_EnableDisableAnimationTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
 
 		/// <summary>
 		/// Plays an animation of the background circle expanding and contracting continuously. The PieMenuGUI is effectively disabled while doing this.
@@ -190,21 +227,34 @@ namespace RTE {
 		/// Makes the background circle freeze at a certain radius until SetEnabled is called. The PieMenuGUI is effectively disabled while doing this.
 		/// </summary>
 		/// <param name="radius">The radius to make the background circle freeze at.</param>
-		void FreezeAtRadius(int radius) { m_MenuMode = MenuMode::Freeze; m_InnerRadius = radius; m_BGBitmapNeedsRedrawing = true; }
+		void FreezeAtRadius(int radius) { m_MenuMode = MenuMode::Freeze; m_CurrentInnerRadius = radius; m_BGBitmapNeedsRedrawing = true; }
 #pragma endregion
 
 #pragma region PieSlice Handling
 		/// <summary>
+		/// Gets the activated PieSlice for this PieMenu in the last update. If there is a sub-PieMenu open for this PieMenu, it gets that activated PieSlice instead.
+		/// </summary>
+		/// <returns>The activated PieSlice for this PieMenu.</returns>
+		const PieSlice * GetActivatedPieSlice() const;
+		
+		/// <summary>
 		/// Gets the command issued by this PieMenuGUI in the last update, i.e. the PieSlice Type of the currently activated PieSlice, or None if no slice was activated.
 		/// </summary>
 		/// <returns>The PieSlice type which has been picked, or None if none has been picked.</returns>
-		PieSlice::PieSliceIndex GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : m_ActivatedSlice->GetType(); }
+		PieSlice::PieSliceIndex GetPieCommand() const;
 
 		/// <summary>
 		/// Gets a const reference to the vector containing pointers to all the PieSlices in this PieMenuGUI.
 		/// </summary>
 		/// <returns>A const reference to the vector containing pointers to all the PieSlices in this PieMenuGUI.</returns>
-		const std::vector<PieSlice *> & GetPieSlices() const { return m_CurrentSlices; }
+		const std::vector<PieSlice *> & GetPieSlices() const { return m_CurrentPieSlices; }
+
+		/// <summary>
+		/// Gets the first found PieSlice with the passed in preset name, if there is one.
+		/// </summary>
+		/// <param name="presetName">The preset name to look for.</param>
+		/// <returns>The first found PieSlice with the passed in preset name, or nullptr if there are no PieSlices with that preset name in this PieMenuGUI.</returns>
+		PieSlice * GetFirstPieSliceByPresetName(const std::string_view &presetName) const;
 
 		/// <summary>
 		/// Gets the first found PieSlice with the passed in PieSlice Type, if there is one.
@@ -220,16 +270,38 @@ namespace RTE {
 		/// Note that if the slice could not be added, it will be deleted to avoid memory leaks, and the method will return false.
 		/// </summary>
 		/// <param name="newPieSlice">The new PieSlice to add. Ownership IS transferred.</param>
-		/// <param name="sliceSource">The source of the added PieSlice. Should be nullptr for slices not added by Entities.</param>
+		/// <param name="pieSliceOriginalSource">The source of the added PieSlice. Should be nullptr for slices not added by Entities.</param>
 		/// <param name="allowQuadrantOverflow">Whether the new PieSlice can be placed in PieQuadrants other than the one specified by its Direction, if that PieQuadrant is full.</param>
 		/// <returns>Whether or not the PieSlice was added successfully.</returns>
-		bool AddPieSlice(PieSlice *newPieSlice, const Entity *sliceSource, bool allowQuadrantOverflow = false);
+		bool AddPieSlice(PieSlice *newPieSlice, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
+
+		/// <summary>
+		/// Removes and returns the passed in PieSlice from this PieMenuGUI if it's in the PieMenuGUI. Ownership IS transferred to the caller!
+		/// </summary>
+		/// <param name="pieSliceToRemove">The PieSlice to remove from this PieMenuGUI. Ownership IS transferred to the caller!</param>
+		/// <returns>The removed PieSlice, if it was in the PieMenuGUI.</returns>
+		PieSlice * RemovePieSlice(const PieSlice *pieSliceToRemove);
+
+		/// <summary>
+		/// Removes any PieSlices in this PieMenuGUI whose preset name matches the passed in preset name.
+		/// </summary>
+		/// <param name="presetNameToRemoveBy">The preset name to check against.</param>
+		/// <returns>Whether or not any PieSlices were removed from this PieMenuGUI.</returns>
+		bool RemovePieSlicesByPresetName(const std::string_view &presetNameToRemoveBy);
+
+		/// <summary>
+		/// Removes any PieSlices in this PieMenuGUI whose PieSlice Type matches the passed in PieSlice Type.
+		/// </summary>
+		/// <param name="pieSliceTypeToRemoveBy">The PieSlice Type to check against.</param>
+		/// <returns>Whether or not any PieSlices were removed from this PieMenuGUI.</returns>
+		bool RemovePieSlicesByType(PieSlice::PieSliceIndex pieSliceTypeToRemoveBy);
 
 		/// <summary>
 		/// Removes any PieSlices in this PieMenuGUI whose original source matches the passed in Entity.
 		/// </summary>
 		/// <param name="originalSource">The original source whose PieSlices should be removed.</param>
-		void RemovePieSlicesByOriginalSource(const Entity *originalSource) { for (PieQuadrant &pieQuadrant : m_PieQuadrants) { pieQuadrant.RemovePieSlicesByOriginalSource(originalSource); } ReloadCurrentPieSlices(); }
+		/// <returns>Whether or not any PieSlices were removed from this PieMenuGUI.</returns>
+		bool RemovePieSlicesByOriginalSource(const Entity *originalSource);
 #pragma endregion
 
 #pragma region Updating
@@ -264,17 +336,16 @@ namespace RTE {
 
 	private:
 
-		static const int c_QuadrantSlotCount = 5; //!< The maximum number of PieSlices a PieQuadrant can have.
-		static constexpr float c_PieSliceSlotSize = c_HalfPI / static_cast<float>(c_QuadrantSlotCount); //!< The size of one PieSlice slot in PieQuadrants.
-
+		static constexpr int c_PieQuadrantSlotCount = 5; //!< The maximum number of PieSlices a PieQuadrant can have.
+		static constexpr float c_PieSliceSlotSize = c_HalfPI / static_cast<float>(c_PieQuadrantSlotCount); //!< The size of one PieSlice slot in PieQuadrants.
 		struct PieQuadrant {
-			bool Enabled = false; //!< Whether this PieQuadrant is enabled and visible or disabled.
+			bool Enabled; //!< Whether this PieQuadrant is enabled and visible or disabled.
 			Directions Direction; //!< The direction of this PieQuadrant.
 
 			std::unique_ptr<PieSlice> MiddlePieSlice; //!< A unique_ptr to the middle PieSlice of this PieQuadrant.
-			std::array<std::unique_ptr<PieSlice>, c_QuadrantSlotCount / 2> LeftPieSlices; //!< An array of unique_ptrs to the left side PieSlices of this PieQuadrant.
-			std::array<std::unique_ptr<PieSlice>, c_QuadrantSlotCount / 2> RightPieSlices; //!< An array of unique_ptrs to the right side PieSlices of this PieQuadrant.
-			std::array<const PieSlice *, c_QuadrantSlotCount> SlotsForPieSlices; //!< An array representing the slots in this PieQuadrant, via pointers to the PieSlices filling each slot.
+			std::array<std::unique_ptr<PieSlice>, c_PieQuadrantSlotCount / 2> LeftPieSlices; //!< An array of unique_ptrs to the left side PieSlices of this PieQuadrant.
+			std::array<std::unique_ptr<PieSlice>, c_PieQuadrantSlotCount / 2> RightPieSlices; //!< An array of unique_ptrs to the right side PieSlices of this PieQuadrant.
+			std::array<const PieSlice *, c_PieQuadrantSlotCount> SlotsForPieSlices; //!< An array representing the slots in this PieQuadrant, via pointers to the PieSlices filling each slot.
 
 			/// <summary>
 			/// Resets this PieQuadrant and deletes all slices in it.
@@ -312,10 +383,10 @@ namespace RTE {
 			bool AddPieSlice(PieSlice *pieSliceToAdd);
 
 			/// <summary>
-			/// Removes any PieSlices in this PieQuadrant whose original source matches the passed in Entity.
+			/// Removes the passed in PieSlice from this PieQuadrant. Ownership IS transferred to the caller!
 			/// </summary>
-			/// <param name="originalSource">The original source whose PieSlices should be removed.</param>
-			void RemovePieSlicesByOriginalSource(const Entity *originalSource);
+			/// <param name="pieSliceToRemove">The PieSlice to be removed from this PieQuadrant. Ownership IS transferred to the caller!</param>
+			PieSlice * RemovePieSlice(const PieSlice *pieSliceToRemove);
 		};
 
 		/// <summary>
@@ -333,8 +404,10 @@ namespace RTE {
 		/// </summary>
 		enum class IconSeparatorMode { Line, Circle };
 
-		static const int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
-		static const int c_FullRadius = 58; //!< The radius the menu should have when fully enabled, in pixels.
+		static constexpr int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
+		static constexpr int c_DefaultFullRadius = 58; //!< The radius the menu should have when fully enabled, in pixels.
+		static constexpr int c_PieSliceWithSubPieMenuHoverOpenInterval = 1000; //!< The number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
+		static constexpr int c_PieSliceWithSubPieMenuExtraThickness = 3; //!< The extra thickness to be added to PieSlices with a sub-PieMenu.
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static BITMAP *s_CursorBitmap; //!< A static pointer to the bitmap to use as the cursor in any menu.
@@ -344,6 +417,7 @@ namespace RTE {
 		Actor *m_Owner; //!< The owner Actor of this PieMenuGUI. Note that PieMenuGUIs do not necessarily need to have a owner.
 		Controller *m_MenuController; //!< The Controller which controls this PieMenuGUI. Separate from the Controller of the owner or affected object (if there is one).
 		MovableObject *m_AffectedObject; //!< The MovableObject this PieMenuGUI affects, if any. Only applies if there's no owner.
+		Directions m_DirectionIfSubPieMenu; //!< The direction this sub-PieMenuGUI is facing in. None if this is not a sub-PieMenuGUI of another PieMenuGUI.
 		MenuMode m_MenuMode; //!< The mode this PieMenuGUI is in. See MenuMode enum for more details.
 		Vector m_CenterPos; //!< The center position of this PieMenuGUI in the scene.
 		Matrix m_Rotation; //!< The rotation of this PieMenuGUI. Generally 0 for top level PieMenuGUIs.
@@ -351,8 +425,11 @@ namespace RTE {
 		EnabledState m_EnabledState; //!< The enabled state of the PieMenuGUI.
 		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
 		Timer m_HoverTimer; //!< Timer to measure how long to hold a hovered over slice.
+		Timer m_SubPieMenuHoverOpenTimer; //!< Timer for opening sub-PieMenus when their owning slices are hovered over.
 
+		//TODO maybe add lua bindings for the visual stuff - it could be fun to let that be lua - modifiable
 		IconSeparatorMode m_IconSeparatorMode; //!< The icon separator mode of this PieMenuGUI.
+		int m_FullInnerRadius; //!< The full inner radius of the PieMenuGUI's background, in pixels.
 		int m_BackgroundThickness; //!< The thickness of the PieMenuGUI's background, in pixels.
 		int m_BackgroundSeparatorSize; //!< The size of the PieMenuGUI's background separators, in pixels. Used differently based on the menu's IconSeparatorMode.
 		bool m_DrawBackgroundTransparent; //!< Whether or not the PieMenuGUI's background should be drawn transparently.
@@ -361,19 +438,24 @@ namespace RTE {
 		int m_SelectedItemBackgroundColor; //!< The color used for drawing selected PieMenuGUI items' backgrounds.
 
 		std::array<PieQuadrant, 4> m_PieQuadrants; //!< The array of PieQuadrants that make up this PieMenuGUI. Quadrants may be individually enabled or disabled, affecting what's drawn.
-		const PieSlice *m_HoveredSlice; //!< The PieSlice currently being hovered over.
-		const PieSlice *m_ActivatedSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
-		const PieSlice *m_AlreadyActivatedSlice; //!< The PieSlice that was most recently activated by pressing primary. Used to avoid duplicate activation when disabling.
-		std::vector<PieSlice *> m_CurrentSlices; //!< All the PieSlices in this PieMenuGUI in INI order. Not owned here, just pointing to the ones above.
+		const PieSlice *m_HoveredPieSlice; //!< The PieSlice currently being hovered over.
+		const PieSlice *m_ActivatedPieSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
+		const PieSlice *m_AlreadyActivatedPieSlice; //!< The PieSlice that was most recently activated by pressing primary. Used to avoid duplicate activation when disabling.
+		std::vector<PieSlice *> m_CurrentPieSlices; //!< All the PieSlices in this PieMenuGUI in INI order. Not owned here, just pointing to the ones above.
+		
+		PieMenuGUI *m_ActiveSubPieMenu; //!< The currently active sub-PieMenuGUI, if any.
 
 		std::unordered_map<const MovableObject *, std::function<void()>> m_WhilePieMenuOpenListeners; //!< Unordered map of MovableObject pointers to functions to be called while the PieMenuGUI is open. Pointers are NOT owned.
 
-		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
+		int m_CurrentInnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
 		bool m_CursorInVisiblePosition; //!< Whether or not this PieMenuGUI's cursor is in a visible position and should be shown.
 		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to the right.
 
-		BITMAP *m_BGBitmap; //!< The intermediary bitmap used to first draw the menu background, which will be blitted to the final draw target surface.
+		BITMAP *m_BGBitmap; //!< The intermediary bitmap used to first draw the PieMenu background, which will be blitted to the final draw target surface.
+		BITMAP *m_BGRotationBitmap; //!< The intermediary bitmap used to allow the PieMenu background to rotate, which will be pivoted onto the BG bitmap.
+		BITMAP *m_BGPieSlicesWithSubPieMenuBitmap; //!< The intermediary bitmap used to support handling PieSlices with sub-PieMenuGUIs, which will be drawn onto the BG bitmap.
 		bool m_BGBitmapNeedsRedrawing; //!< Whether the BG bitmap should be redrawn during the next Update call.
+		bool m_BGPieSlicesWithSubPieMenuBitmapNeedsRedrawing; //!< Whether the BG bitmap for PieSlices with sub-PieMenuGUIs should be redrawn when the BGBitmap is redrawn.
 
 #pragma region Update Breakdown
 		/// <summary>
@@ -434,9 +516,9 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Clears and refills the vector of current PieSlices for this PieMenuGUI. Also expands PieSlices where applicable, since these operations will always happen together.
+		/// Clears and refills the vector of current PieSlices for this PieMenuGUI. Also realigns PieSlices and expands them into empty space if possible, to ensure everything is properly ready.
 		/// </summary>
-		void ReloadCurrentPieSlices();
+		void RepopulateAndRealignCurrentPieSlices();
 
 		/// <summary>
 		/// Expands any PieSlices that border onto another PieQuadrant's unfilled slot, so they visually occupy that empty slot.
@@ -444,12 +526,51 @@ namespace RTE {
 		void ExpandPieSliceIntoEmptySpaceIfPossible();
 
 		/// <summary>
-		/// Sets the given PieSlice as the selected one for this PieMenuGUI.
+		/// Recreates this PieMenuGUI's background bitmap based on its full inner radius.
 		/// </summary>
-		/// <param name="pieSliceToSelect">The PieSlice to be selected. Has to be a PieSlice currently in this PieMenuGUI.</param>
-		/// <param name="moveCursorToSlice">Whether to also move the cursor to the center of the newly selected PieSlice. Defaults to false.</param>
-		/// <returns>Whether or not this resulted in a different PieSlice being selected. Also returns false if no PieSlice was selected.</returns>
-		bool SelectPieSlice(const PieSlice *pieSliceToSelect, bool moveCursorToSlice = false);
+		void RecreateBackgroundBitmaps();
+
+		/// <summary>
+		/// Draws the background separators for this PieMenuGUI, based on its IconSeparatorMode, onto the passed in bitmap.
+		/// </summary>
+		/// <param name="backgroundBitmapToDrawTo">The bitmap to draw the separators onto.</param>
+		/// <param name="pieCircleCenterX">The center X position of the circle being separated.</param>
+		/// <param name="pieCircleCenterY">The center Y position of the circle being separated.</param>
+		/// <param name="subPieMenuRotationOffset">The rotation offset used if this is a sub-PieMenu.</param>
+		void DrawBackgroundPieSliceSeparators(BITMAP *backgroundBitmapToDrawTo, int pieCircleCenterX, int pieCircleCenterY, float subPieMenuRotationOffset) const;
+
+		/// <summary>
+		/// Draws a backgound separator, based on this PieMenuGUI's IconSeparatorMode, to the passed in bitmap.
+		/// </summary>
+		/// <param name="backgroundBitmapToDrawTo">The bitmap to draw the separator onto.</param>
+		/// <param name="pieCircleCenterX">The center X position of the circle the separator is drawn onto.</param>
+		/// <param name="pieCircleCenterY">The center Y position of the circle the separator is drawn onto.</param>
+		/// <param name="rotAngle">The rotation of the separator, not used for all separator types.</param>
+		/// <param name="isHoveredPieSlice">Whether the separator is being drawn for the PieMenuGUI's hovered PieSlice.</param>
+		/// <param name="pieSliceHasSubPieMenu">Whether the PieSlice whose separator is being drawn has a sub-PieMenuGUI.</param>
+		/// <param name="drawHalfSizedSeparator">Whether to draw a half-sized separator or a full-sized one. Defaults to drawing a full-sized one.</param>
+		void DrawBackgroundPieSliceSeparator(BITMAP *backgroundBitmapToDrawTo, int pieCircleCenterX, int pieCircleCenterY, float rotAngle, bool isHoveredPieSlice, bool pieSliceHasSubPieMenu, bool drawHalfSizedSeparator = false) const;
+
+		/// <summary>
+		/// Sets the passed in PieSlice as the hovered PieSlice of this PieMenuGUI. If nullptr is passed in, no PieSlice will be hovered.
+		/// </summary>
+		/// <param name="pieSliceToSetAsHovered">The PieSlice to consider hovered, if any. Has to be a PieSlice currently in this PieMenuGUI.</param>
+		/// <param name="moveCursorIconToSlice">Whether to also move the cursor icon to the center of the new hovered PieSlice and set it to be drawn (generally for non-mouse inputs). Defaults to false.</param>
+		/// <returns>Whether or not the PieSlice to set as hovered was different from the already hovered PieSlice.</returns>
+		bool SetHoveredPieSlice(const PieSlice *pieSliceToSetAsHovered, bool moveCursorToPieSlice = false);
+
+		/// <summary>
+		/// Prepares the passed in PieSlice's sub-PieMenu for use by setting flags, moving PieSlices around, and disabling PieQuadrants as appropriate.
+		/// </summary>
+		/// <param name="pieSliceWithSubPieMenu">The PieSlice with a sub-PieMenu that needs to be prepared.</param>
+		/// <returns>Whether the sub-PieMenu was prepared. PieMenus with the SubPieMenu flag already set will not have action taken on them.</returns>
+		bool PreparePieSliceSubPieMenuForUse(const PieSlice *pieSliceWithSubPieMenu) const;
+
+		/// <summary>
+		/// If the Controller for this PieMenu is mouse controlled, sets up mouse angle limits and positions for when the pie menu is enabled or disabled. Also used when a sub-PieMenu of this PieMenu is disabled.
+		/// </summary>
+		/// <param name="enable">Whether the PieMenu is being enabled or disabled.</param>
+		void PrepareMouseForEnableOrDisable(bool enable) const;
 
 		/// <summary>
 		/// Clears all the member variables of this PieMenuGUI, effectively resetting the members of this abstraction level only.

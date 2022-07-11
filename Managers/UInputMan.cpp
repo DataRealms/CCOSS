@@ -380,7 +380,16 @@ namespace RTE {
 		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
 			m_NetworkAnalogMoveData[whichPlayer].CapMagnitude(m_MouseTrapRadius * magCap);
 		}
-		m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap);
+		m_AnalogMouseData.SetMagnitude(m_MouseTrapRadius * magCap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetMouseValueAngle(float angle, int whichPlayer) {
+		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
+			m_NetworkAnalogMoveData[whichPlayer].SetAbsRadAngle(angle);
+		}
+		m_AnalogMouseData.SetAbsRadAngle(angle);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -120,7 +120,7 @@ namespace RTE {
 		/// Sets the Direction of this PieSlice.
 		/// </summary>
 		/// <param name="newDirection">The new Direction of this PieSlice.</param>
-		void SetDirection(Directions newDirection) { m_Direction = newDirection; }
+		void SetDirection(Directions newDirection) { if (newDirection != Directions::None) { m_Direction = newDirection; } }
 
 		/// <summary>
 		/// Gets whether or not this PieSlice can be the middle PieSlice of a PieQuadrant.
@@ -178,29 +178,41 @@ namespace RTE {
 		void SetIcon(Icon *newIcon) { m_Icon = std::unique_ptr<Icon>(newIcon); }
 
 		/// <summary>
-		/// Gets the file path of the scripted file this PieSlice should run when activated. Empty if it's not a scripted type. Empty if its SliceType isn't scripted.
+		/// Gets the file path of the Lua file this PieSlice should run when activated, if any.
 		/// </summary>
 		/// <returns>The file path to the script file this PieSlice should load when activated.</returns>
 		const std::string & GetScriptPath() const { return m_ScriptPath; }
 
 		/// <summary>
-		/// Gets the name of the Lua function to run when this PieSlice is activated as a scripted pie menu option. Empty if its SliceType isn't scripted.
+		/// Sets the file path of the scripted file this PieSlice should run when activated.
 		/// </summary>
-		/// <returns>The Lua function name this PieSlice should execute when activated.</returns>
+		/// <param name="newScriptPath">The file path of the Lua file this PieSlice should run when activated.</param>
+		void SetScriptPath(const std::string &newScriptPath) { m_ScriptPath = newScriptPath; }
+
+		/// <summary>
+		/// Gets the name of the Lua function to run when this PieSlice is activated.
+		/// </summary>
+		/// <returns>The name of the Lua function this PieSlice should execute when activated.</returns>
 		const std::string & GetFunctionName() const { return m_FunctionName; }
+
+		/// <summary>
+		/// Sets the name of the Lua function to run when this PieSlice is activated as a scripted pie menu option.
+		/// </summary>
+		/// <param name="newFunctionName">The name of the Lua function to run when this PieSlice is activated.</param>
+		void SetFunctionName(const std::string &newFunctionName) { m_FunctionName = newFunctionName; }
 
 		//TODO Ideally this would be done with a weak_ptr but I'm not sure how it'll go with LuaMan. Try it out and see
 		/// <summary>
 		/// Gets the sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.
 		/// </summary>
 		/// <returns>The sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.</returns>
-		PieMenuGUI * GetSubMenu() const { return m_SubMenu.get(); }
+		PieMenuGUI * GetSubPieMenu() const { return m_SubPieMenu.get(); }
 
 		/// <summary>
 		/// Sets the sub-PieMenu for this PieSlice. Ownership IS transferred.
 		/// </summary>
 		/// <param name="pieMenuGUI">The new sub-PieMenu for this PieSlice. Ownership IS transferred.</param>
-		void SetSubMenu(PieMenuGUI *pieMenuGUI) { m_SubMenu = std::unique_ptr<PieMenuGUI>(pieMenuGUI); }
+		void SetSubPieMenu(PieMenuGUI *subPieMenuGUI) { m_SubPieMenu = std::unique_ptr<PieMenuGUI>(subPieMenuGUI); }
 #pragma endregion
 
 #pragma region Angle Getter and Setters
@@ -255,7 +267,7 @@ namespace RTE {
 
 		std::string m_ScriptPath; //!< Path to the script file this should run when activated.
 		std::string m_FunctionName; //!< Name of the function in the script this should run when activated.
-		std::unique_ptr<PieMenuGUI> m_SubMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
+		std::unique_ptr<PieMenuGUI> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
 
 		float m_StartAngle; //!< The start angle of this PieSlice's area on the PieMenu, counted in radians from straight out right and going counter clockwise.
 		int m_SlotCount; //!< The arc length of the PieSlice area, so that the icon should be drawn at the AreaStart + halfway of this.
@@ -270,6 +282,10 @@ namespace RTE {
 		/// Clears all the member variables of this PieSlice, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
+		// Disallow the use of some implicit methods.
+		PieSlice(const PieSlice &reference) = delete;
+		PieSlice &operator=(const PieSlice &rhs) = delete;
 	};
 }
 #endif

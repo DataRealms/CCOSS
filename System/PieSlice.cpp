@@ -11,7 +11,7 @@ namespace RTE {
 
 	void PieSlice::Clear() {
 		m_Type = PieSliceIndex::PSI_NONE;
-		m_Direction = Directions::Right;
+		m_Direction = Directions::Any;
 		m_CanBeMiddleSlice = true;
 		m_OriginalSource = nullptr;
 
@@ -20,7 +20,7 @@ namespace RTE {
 
 		m_ScriptPath.clear();
 		m_FunctionName.clear();
-		m_SubMenu.reset();
+		m_SubPieMenu.reset();
 
 		m_StartAngle = 0;
 		m_SlotCount = 0;
@@ -52,29 +52,13 @@ namespace RTE {
 
 		m_ScriptPath = reference.m_ScriptPath;
 		m_FunctionName = reference.m_FunctionName;
-		if (reference.m_SubMenu) { m_SubMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(reference.m_SubMenu->Clone())); }
+		if (reference.m_SubPieMenu) { SetSubPieMenu(dynamic_cast<PieMenuGUI *>(reference.m_SubPieMenu->Clone())); }
 
 		m_StartAngle = reference.m_StartAngle;
 		m_SlotCount = reference.m_SlotCount;
 		m_MidAngle = reference.m_MidAngle;
 
 		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	BITMAP *RTE::PieSlice::GetAppropriateIcon(bool sliceIsSelected) const {
-		int iconFrameCount = m_Icon->GetFrameCount();
-		if (iconFrameCount > 0) {
-			if (!IsEnabled() && iconFrameCount > 2) {
-				return m_Icon->GetBitmaps8()[2];
-			} else if (sliceIsSelected && iconFrameCount > 1) {
-				return m_Icon->GetBitmaps8()[1];
-			} else {
-				return m_Icon->GetBitmaps8()[0];
-			}
-		}
-		return nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,8 +89,8 @@ namespace RTE {
 			reader >> m_ScriptPath;
 		} else if (propName == "FunctionName") {
 			reader >> m_FunctionName;
-		} else if (propName == "SubMenu") {
-			m_SubMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.ReadReflectedPreset(reader)));
+		} else if (propName == "SubPieMenu") {
+			SetSubPieMenu(dynamic_cast<PieMenuGUI *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -119,22 +103,37 @@ namespace RTE {
 	int PieSlice::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		writer.NewPropertyWithValue("Type", m_Type);
-		writer.NewPropertyWithValue("Direction", static_cast<int>(m_Direction));
-		writer.NewPropertyWithValue("Enabled", m_Enabled);
+		if (m_Type != PieSliceIndex::PSI_NONE) { writer.NewPropertyWithValue("Type", m_Type); }
+		if (m_Direction != Directions::Any) { writer.NewPropertyWithValue("Direction", static_cast<int>(m_Direction)); }
+		if (!m_Enabled) { writer.NewPropertyWithValue("Enabled", m_Enabled); }
 		writer.NewPropertyWithValue("Icon", m_Icon.get());
 		if (!m_ScriptPath.empty() && !m_FunctionName.empty()) {
 			writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
 			writer.NewPropertyWithValue("FunctionName", m_FunctionName);
 		}
-		if (m_SubMenu) { writer.NewPropertyWithValue("SubMenu", m_SubMenu.get()); }
+		if (m_SubPieMenu) { writer.NewPropertyWithValue("SubPieMenu", m_SubPieMenu.get()); }
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	BITMAP * RTE::PieSlice::GetAppropriateIcon(bool sliceIsSelected) const {
+		if (int iconFrameCount = m_Icon->GetFrameCount(); iconFrameCount > 0) {
+			if (!IsEnabled() && iconFrameCount > 2) {
+				return m_Icon->GetBitmaps8()[2];
+			} else if (sliceIsSelected && iconFrameCount > 1) {
+				return m_Icon->GetBitmaps8()[1];
+			} else {
+				return m_Icon->GetBitmaps8()[0];
+			}
+		}
+		return nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PieSlice::RecalculateMidAngle() {
-		m_MidAngle = m_StartAngle + ((static_cast<float>(m_SlotCount) * PieMenuGUI::c_PieSliceSlotSize / 2.0F));
+		m_MidAngle = m_StartAngle + (static_cast<float>(m_SlotCount) * PieMenuGUI::c_PieSliceSlotSize / 2.0F);
 	}
 }

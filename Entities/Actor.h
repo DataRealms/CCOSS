@@ -1321,7 +1321,7 @@ DefaultPieMenuNameVirtual("Empty Pie Menu");
 	/// Sets the PieMenuGUI for this Actor. Ownership IS transferred.
 	/// </summary>
 	/// <param name="newPieMenu">The new PieMenuGUI for this Actor.</param>
-	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); }
+	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this)); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

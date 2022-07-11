@@ -170,9 +170,9 @@ int Actor::Create()
 	if (IsInGroup("Brains"))
 		m_IgnoresTeamHits = true;
 
-    if (!m_PieMenu) { SetPieMenu(static_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", GetDefaultPieMenuName())->Clone())); }
-
-	if (m_PieMenu) {
+	if (!m_PieMenu) {
+		SetPieMenu(static_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", GetDefaultPieMenuName())->Clone()));
+	} else {
 		m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this));
 	}
 

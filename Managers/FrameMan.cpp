@@ -561,6 +561,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Vector FrameMan::GetMiddleOfPlayerScreen(int whichPlayer) {
+		Vector middleOfPlayerScreen;
+
+		if (whichPlayer == -1 || IsInMultiplayerMode()) {
+			middleOfPlayerScreen.SetXY(static_cast<float>(m_ResX / 2), static_cast<float>(m_ResY / 2));
+		} else {
+			int playerScreen = g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer);
+
+			middleOfPlayerScreen.SetXY(static_cast<float>(m_PlayerScreenWidth / 2), static_cast<float>(m_PlayerScreenHeight / 2));
+			if ((playerScreen == 1 && g_FrameMan.GetVSplit()) || playerScreen == 3) {
+				middleOfPlayerScreen.SetX(middleOfPlayerScreen.GetX() + static_cast<float>(m_PlayerScreenWidth));
+			}
+			if ((playerScreen == 1 && g_FrameMan.GetHSplit()) || playerScreen >= 2) {
+				middleOfPlayerScreen.SetY(middleOfPlayerScreen.GetY() + static_cast<float>(m_PlayerScreenHeight));
+			}
+		}
+		return middleOfPlayerScreen;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {

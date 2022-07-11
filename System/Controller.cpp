@@ -26,6 +26,7 @@ namespace RTE {
 		m_WeaponDropIgnore = false;
 		m_WeaponReloadIgnore = false;
 		m_MouseMovement.Reset();
+		m_AnalogAimValueAngleLimits = { {0, 0}, false };
 		m_ReleaseTimer.Reset();
 		m_JoyAccelTimer.Reset();
 		m_KeyAccelTimer.Reset();
@@ -61,6 +62,8 @@ namespace RTE {
 		m_WeaponPickupIgnore = reference.m_WeaponPickupIgnore;
 		m_WeaponDropIgnore = reference.m_WeaponDropIgnore;
 		m_WeaponReloadIgnore = reference.m_WeaponReloadIgnore;
+
+		m_AnalogAimValueAngleLimits = reference.m_AnalogAimValueAngleLimits;
 
 		return 0;
 	}
@@ -317,6 +320,8 @@ namespace RTE {
 		// ANALOG joystick values
 		Vector move = g_UInputMan.AnalogMoveValues(m_Player);
 		Vector aim = g_UInputMan.AnalogAimValues(m_Player);
+		if (m_AnalogAimValueAngleLimits.second) { aim.SetAbsRadAngle(ClampAngle(aim.GetAbsRadAngle(), m_AnalogAimValueAngleLimits.first.first, m_AnalogAimValueAngleLimits.first.second)); }
+
 		bool pieMenuActive = m_ControlStates.at(PIE_MENU_ACTIVE);
 
 		// Only change aim and move if not holding actor switch buttons - don't want to mess up AI's aim

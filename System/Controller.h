@@ -212,6 +212,24 @@ namespace RTE {
 		Vector GetAnalogCursor() const { return m_AnalogCursor; }
 
 		/// <summary>
+		/// Sets the analog cursor to the specified position.
+		/// </summary>
+		/// <param name="newAnalogCursor">The position the analog cursor should be set to.</param>
+		void SetAnalogCursor(const Vector &newAnalogCursor) { m_AnalogCursor = newAnalogCursor; }
+
+		/// <summary>
+		/// Sets the analog aim angle limits for the given player (does nothing for player -1). The limit end is always CCW from the limit start.
+		/// </summary>
+		/// <param name="angleLimitStart">The starting angle limit for analog aiming.</param>
+		/// <param name="angleLimitEnd">The ending angle limit for analog aiming.</param>
+		void SetAnalogAimValueAngleLimits(float angleLimitStart, float angleLimitEnd) { m_AnalogAimValueAngleLimits = { {angleLimitStart, angleLimitEnd}, true }; }
+
+		/// <summary>
+		/// Clears the analog aim limits for the given player (does nothing for player -1).
+		/// </summary>
+		void ClearAnalogAimValueAngleLimits() { m_AnalogAimValueAngleLimits.second = false; }
+
+		/// <summary>
 		/// Adds relative movement to a passed-in vector. Uses the appropriate input method currently of this.
 		/// </summary>
 		/// <param name="cursorPos"> The vector to alter.</param>
@@ -328,6 +346,8 @@ namespace RTE {
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.
+
+		std::pair<std::pair<float, float>, bool> m_AnalogAimValueAngleLimits; //!< Analog aim value limits, as well as whether or not the limit is actually enabled.
 
 	private:
 

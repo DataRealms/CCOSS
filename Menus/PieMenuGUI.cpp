@@ -313,9 +313,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PieSlice *PieMenuGUI::GetPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const {
-		for (PieSlice *pieSlice : m_CurrentSlices) {
-			if (pieSlice->GetType() == pieSliceType) { return pieSlice; }
+	PieSlice *PieMenuGUI::GetFirstPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const {
+		for (PieSlice *pieSlice : m_CurrentPieSlices) {
+			if (pieSlice->GetType() == pieSliceType) {
+				return pieSlice;
+			}
 		}
 		return nullptr;
 	}

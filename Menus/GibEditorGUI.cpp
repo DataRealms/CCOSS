@@ -262,15 +262,15 @@ void GibEditorGUI::Update()
 
 	m_PieMenu->Update();
 
-	if (PieSlice *zoomInSlice = m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMIN)) { zoomInSlice->SetEnabled(m_ZoomFactor < MAXZOOMFACTOR); }
-	if (PieSlice *zoomOutSlice = m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMOUT)) { zoomOutSlice->SetEnabled(m_ZoomFactor > MINZOOMFACTOR); }
+	if (PieSlice *zoomInSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMIN)) { zoomInSlice->SetEnabled(m_ZoomFactor < MAXZOOMFACTOR); }
+	if (PieSlice *zoomOutSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMOUT)) { zoomOutSlice->SetEnabled(m_ZoomFactor > MINZOOMFACTOR); }
 
     // Show the pie menu only when the secondary button is held down
     if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGGIB) {
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_INFRONT), m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_BEHIND) };
+		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_INFRONT), m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_BEHIND) };
 		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
 			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGGIB); }
 		}

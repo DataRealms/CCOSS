@@ -381,7 +381,7 @@ void AssemblyEditorGUI::Update()
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		PieSlice *saveSlice = m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_SAVE);
+		PieSlice *saveSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_SAVE);
 		if (saveSlice) {
 			saveSlice->SetEnabled(m_pCurrentScheme != nullptr);
 			saveSlice->SetDescription(m_pCurrentScheme != nullptr ? "Save Assembly" : "Can't Save Assembly, Scheme Not Selected!");

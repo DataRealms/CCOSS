@@ -465,7 +465,7 @@ void SceneEditorGUI::Update()
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_INFRONT), m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_BEHIND) };
+		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_INFRONT), m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_BEHIND) };
 		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
 			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
 		}

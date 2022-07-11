@@ -207,10 +207,11 @@ namespace RTE {
 		const std::vector<PieSlice *> & GetPieSlices() const { return m_CurrentSlices; }
 
 		/// <summary>
-		/// Gets the first found PieSlice with the given PieSlice Type, if there are any.
+		/// Gets the first found PieSlice with the passed in PieSlice Type, if there is one.
 		/// </summary>
-		/// <returns>The first found PieSlice with the given PieSlice Type, or nullptr if there are none with that Type in this PieMenuGUI.</returns>
-		PieSlice * GetPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const;
+		/// <param name="pieSliceType">The type of PieSlice to look for.</param>
+		/// <returns>The first found PieSlice with the passed in PieSlice Type, or nullptr if there are no PieSlices with that Type in this PieMenuGUI.</returns>
+		PieSlice * GetFirstPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const;
 		
 		/// <summary>
 		/// Adds a PieSlice to the PieMenuGUI, setting its original source to the specified sliceSource. Ownership IS transferred.

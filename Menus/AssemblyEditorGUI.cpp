@@ -378,8 +378,8 @@ void AssemblyEditorGUI::Update()
 
     // Show the pie menu only when the secondary button is held down
     if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
-		m_PieMenu->SetEnabled(true);
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
+		m_PieMenu->SetEnabled(true);
 
 		PieSlice *saveSlice = m_PieMenu->GetPieSliceByType(PieSlice::PieSliceIndex::PSI_SAVE);
 		if (saveSlice) {

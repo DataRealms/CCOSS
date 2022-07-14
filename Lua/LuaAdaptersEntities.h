@@ -104,12 +104,12 @@ namespace RTE {
 	#define LuaEntityCast(TYPE) \
 		static TYPE * To##TYPE(Entity *entity) { \
 			TYPE *targetType = dynamic_cast<TYPE *>(entity); \
-			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference! Entity was ") + (entity ? entity->GetPresetName() : "nil")); } \
 			return targetType; \
 		} \
 		static const TYPE * ToConst##TYPE(const Entity *entity) { \
 			const TYPE *targetType = dynamic_cast<const TYPE *>(entity); \
-			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference! Entity was ") + (entity ? entity->GetPresetName() : "nil")); } \
 			return targetType; \
 		} \
 		static bool Is##TYPE(Entity *entity) { \

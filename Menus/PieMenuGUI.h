@@ -250,30 +250,39 @@ namespace RTE {
 		const std::vector<PieSlice *> & GetPieSlices() const { return m_CurrentPieSlices; }
 
 		/// <summary>
-		/// Gets the first found PieSlice with the passed in preset name, if there is one.
+		/// Gets the first found PieSlice with the passed in preset name, if there is one. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="presetName">The preset name to look for.</param>
 		/// <returns>The first found PieSlice with the passed in preset name, or nullptr if there are no PieSlices with that preset name in this PieMenuGUI.</returns>
-		PieSlice * GetFirstPieSliceByPresetName(const std::string_view &presetName) const;
+		PieSlice * GetFirstPieSliceByPresetName(const std::string &presetName) const;
 
 		/// <summary>
-		/// Gets the first found PieSlice with the passed in PieSlice Type, if there is one.
+		/// Gets the first found PieSlice with the passed in PieSlice Type, if there is one. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="pieSliceType">The type of PieSlice to look for.</param>
 		/// <returns>The first found PieSlice with the passed in PieSlice Type, or nullptr if there are no PieSlices with that Type in this PieMenuGUI.</returns>
 		PieSlice * GetFirstPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const;
 		
 		/// <summary>
-		/// Adds a PieSlice to the PieMenuGUI, setting its original source to the specified sliceSource. Ownership IS transferred.
+		/// Adds a PieSlice to the PieMenuGUI, setting its original source to the specified sliceSource. Ownership IS transferred!
 		/// The slice will be placed in the appropriate PieQuadrant for its Direction, with Any Direction using the first available PieQuadrant.
 		/// If allowQuadrantOverflow is true, the PieSlice will be added to the next available PieQuadrant in Direction order.
 		/// Note that if the slice could not be added, it will be deleted to avoid memory leaks, and the method will return false.
 		/// </summary>
-		/// <param name="newPieSlice">The new PieSlice to add. Ownership IS transferred.</param>
+		/// <param name="pieSliceToAdd">The new PieSlice to add. Ownership IS transferred.</param>
 		/// <param name="pieSliceOriginalSource">The source of the added PieSlice. Should be nullptr for slices not added by Entities.</param>
 		/// <param name="allowQuadrantOverflow">Whether the new PieSlice can be placed in PieQuadrants other than the one specified by its Direction, if that PieQuadrant is full.</param>
 		/// <returns>Whether or not the PieSlice was added successfully.</returns>
-		bool AddPieSlice(PieSlice *newPieSlice, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
+		bool AddPieSlice(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
+
+		/// <summary>
+		/// Adds a PieSlice to the PieMenuGUI, with the same conditions as AddPieSlice above, but only if no PieSlice exists in this PieMenuGUI with the same PresetName. Ownership IS transferred!
+		/// </summary>
+		/// <param name="pieSliceToAdd">The new PieSlice to add. Ownership IS transferred.</param>
+		/// <param name="pieSliceOriginalSource">The source of the added PieSlice. Should be nullptr for slices not added by Entities.</param>
+		/// <param name="allowQuadrantOverflow">Whether the new PieSlice can be placed in PieQuadrants other than the one specified by its Direction, if that PieQuadrant is full.</param>
+		/// <returns>Whether or not the PieSlice was added successfully.</returns>
+		bool AddPieSliceIfPresetNameIsUnique(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
 
 		/// <summary>
 		/// Removes and returns the passed in PieSlice from this PieMenuGUI if it's in the PieMenuGUI. Ownership IS transferred to the caller!
@@ -287,7 +296,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="presetNameToRemoveBy">The preset name to check against.</param>
 		/// <returns>Whether or not any PieSlices were removed from this PieMenuGUI.</returns>
-		bool RemovePieSlicesByPresetName(const std::string_view &presetNameToRemoveBy);
+		bool RemovePieSlicesByPresetName(const std::string &presetNameToRemoveBy);
 
 		/// <summary>
 		/// Removes any PieSlices in this PieMenuGUI whose PieSlice Type matches the passed in PieSlice Type.
@@ -324,7 +333,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="listeningObject">The MovableObject listening.</param>
 		/// <param name="listenerFunction">The function to be run on the MovableObject.</param>
-		void AddWhilePieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { m_WhilePieMenuOpenListeners.insert({ listeningObject, listenerFunction }); }
+		void AddWhilePieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { if (listeningObject) { m_WhilePieMenuOpenListeners.insert({ listeningObject, listenerFunction }); } }
 
 		/// <summary>
 		/// Removes the passed in MovableObject and its listening function as a listener for when this PieMenuGUI is opened.
@@ -362,7 +371,7 @@ namespace RTE {
 			/// Gets whether or not this PieQuadrant contains the given PieSlice.
 			/// </summary>
 			/// <returns>Whether or not this PieQuadrant contains the given PieSlice.</returns>
-			bool ContainsSlice(const PieSlice *sliceToCheck) const { return sliceToCheck == MiddlePieSlice.get() || sliceToCheck == LeftPieSlices.at(0).get() || sliceToCheck == RightPieSlices.at(0).get() || sliceToCheck == LeftPieSlices.at(1).get() || sliceToCheck == RightPieSlices.at(1).get(); }
+			bool ContainsPieSlice(const PieSlice *sliceToCheck) const { return sliceToCheck == MiddlePieSlice.get() || sliceToCheck == LeftPieSlices.at(0).get() || sliceToCheck == RightPieSlices.at(0).get() || sliceToCheck == LeftPieSlices.at(1).get() || sliceToCheck == RightPieSlices.at(1).get(); }
 
 			/// <summary>
 			/// Gets a vector of non-owning pointers to the PieSlices in this PieQuadrant.
@@ -370,15 +379,15 @@ namespace RTE {
 			/// Alternatively it can go in CCW order, getting the outermost right slice and moving inwards through the middle and then left slices.
 			/// </summary>
 			/// <param name="inCCWOrder">Whether to get flattened slices in counter-clockwise order. Defaults to false.</param>
-			std::vector<PieSlice *> GetFlattenedSlices(bool inCCWOrder = false) const;
+			std::vector<PieSlice *> GetFlattenedPieSlices(bool inCCWOrder = false) const;
 
 			/// <summary>
-			/// Aligns all PieSlices in this PieQuadrant, setting their angle and size details.
+			/// Balances this PieQuadrant be removing and readding all PieSlices if needed, then aligns all PieSlices in this PieQuadrant, setting their angle and size details.
 			/// </summary>
-			void RealignSlices();
+			void RealignPieSlices();
 
 			/// <summary>
-			/// Adds the PieSlice to the quadrant. Ownership IS transferred.
+			/// Adds the PieSlice to the quadrant. PieSlices are added to the middle, then the left side, then the right side so things fill evenly. Ownership IS transferred!
 			/// </summary>
 			bool AddPieSlice(PieSlice *pieSliceToAdd);
 

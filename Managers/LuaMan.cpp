@@ -75,6 +75,10 @@ namespace RTE {
 			luabind::def("EaseOut", &EaseOut),
 			luabind::def("EaseInOut", &EaseInOut),
 			luabind::def("Clamp", &Limit),
+			luabind::def("NormalizeAngleBetween0And2PI", &NormalizeAngleBetween0And2PI),
+			luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
+			luabind::def("AngleWithinRange", &AngleWithinRange),
+			luabind::def("ClampAngle", &ClampAngle),
 			luabind::def("GetPPM", &GetPPM),
 			luabind::def("GetMPP", &GetMPP),
 			luabind::def("GetPPL", &GetPPL),
@@ -148,7 +152,8 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons)
+			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
 		];
 
 		// Assign the manager instances to globals in the lua master state

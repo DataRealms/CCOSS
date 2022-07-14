@@ -191,6 +191,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(MouseButtons);
 		LuaBindingRegisterFunctionDeclarationForType(JoyButtons);
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
+		LuaBindingRegisterFunctionDeclarationForType(Directions);
 	};
 }
 #endif

@@ -126,58 +126,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	LuaBindingRegisterFunctionDefinitionForType(SystemLuaBindings, PieSlice) {
-		return luabind::class_<PieSlice>("Slice")
-
-		.def(luabind::constructor<>())
-
-		.property("FunctionName", &PieSlice::GetFunctionName)
-		.property("Description", &PieSlice::GetDescription)
-		.property("Type", &PieSlice::GetType)
-		.property("Direction", &PieSlice::GetDirection)
-
-		.enum_("PieSliceIndex")[
-			luabind::value("PSI_NONE", PieSlice::PieSliceIndex::PSI_NONE),
-			luabind::value("PSI_PICKUP", PieSlice::PieSliceIndex::PSI_PICKUP),
-			luabind::value("PSI_DROP", PieSlice::PieSliceIndex::PSI_DROP),
-			luabind::value("PSI_NEXTITEM", PieSlice::PieSliceIndex::PSI_NEXTITEM),
-			luabind::value("PSI_PREVITEM", PieSlice::PieSliceIndex::PSI_PREVITEM),
-			luabind::value("PSI_RELOAD", PieSlice::PieSliceIndex::PSI_RELOAD),
-			luabind::value("PSI_BUYMENU", PieSlice::PieSliceIndex::PSI_BUYMENU),
-			luabind::value("PSI_STATS", PieSlice::PieSliceIndex::PSI_STATS),
-			luabind::value("PSI_MAP", PieSlice::PieSliceIndex::PSI_MAP),
-			luabind::value("PSI_FORMSQUAD", PieSlice::PieSliceIndex::PSI_FORMSQUAD),
-			luabind::value("PSI_CEASEFIRE", PieSlice::PieSliceIndex::PSI_CEASEFIRE),
-			luabind::value("PSI_SENTRY", PieSlice::PieSliceIndex::PSI_SENTRY),
-			luabind::value("PSI_PATROL", PieSlice::PieSliceIndex::PSI_PATROL),
-			luabind::value("PSI_BRAINHUNT", PieSlice::PieSliceIndex::PSI_BRAINHUNT),
-			luabind::value("PSI_GOLDDIG", PieSlice::PieSliceIndex::PSI_GOLDDIG),
-			luabind::value("PSI_GOTO", PieSlice::PieSliceIndex::PSI_GOTO),
-			luabind::value("PSI_RETURN", PieSlice::PieSliceIndex::PSI_RETURN),
-			luabind::value("PSI_STAY", PieSlice::PieSliceIndex::PSI_STAY),
-			luabind::value("PSI_DELIVER", PieSlice::PieSliceIndex::PSI_DELIVER),
-			luabind::value("PSI_SCUTTLE", PieSlice::PieSliceIndex::PSI_SCUTTLE),
-			luabind::value("PSI_DONE", PieSlice::PieSliceIndex::PSI_DONE),
-			luabind::value("PSI_LOAD", PieSlice::PieSliceIndex::PSI_LOAD),
-			luabind::value("PSI_SAVE", PieSlice::PieSliceIndex::PSI_SAVE),
-			luabind::value("PSI_NEW", PieSlice::PieSliceIndex::PSI_NEW),
-			luabind::value("PSI_PICK", PieSlice::PieSliceIndex::PSI_PICK),
-			luabind::value("PSI_MOVE", PieSlice::PieSliceIndex::PSI_MOVE),
-			luabind::value("PSI_REMOVE", PieSlice::PieSliceIndex::PSI_REMOVE),
-			luabind::value("PSI_INFRONT", PieSlice::PieSliceIndex::PSI_INFRONT),
-			luabind::value("PSI_BEHIND", PieSlice::PieSliceIndex::PSI_BEHIND),
-			luabind::value("PSI_ZOOMIN", PieSlice::PieSliceIndex::PSI_ZOOMIN),
-			luabind::value("PSI_ZOOMOUT", PieSlice::PieSliceIndex::PSI_ZOOMOUT),
-			luabind::value("PSI_TEAM1", PieSlice::PieSliceIndex::PSI_TEAM1),
-			luabind::value("PSI_TEAM2", PieSlice::PieSliceIndex::PSI_TEAM2),
-			luabind::value("PSI_TEAM3", PieSlice::PieSliceIndex::PSI_TEAM3),
-			luabind::value("PSI_TEAM4", PieSlice::PieSliceIndex::PSI_TEAM4),
-			luabind::value("PSI_COUNT", PieSlice::PieSliceIndex::PSI_COUNT)
-		];
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	LuaBindingRegisterFunctionDefinitionForType(SystemLuaBindings, Timer) {
 		return luabind::class_<Timer>("Timer")
 

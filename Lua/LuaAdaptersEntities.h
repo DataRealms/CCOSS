@@ -163,6 +163,14 @@ namespace RTE {
 		luaSelfObject->SetActive(false);
 	}
 
+	static bool PieMenuAddPieSlice(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
+		return luaSelfObject->AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, false);
+	}
+
+	static bool PieMenuAddPieSliceIfPresetNameIsUnique(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
+		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, false);
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);
@@ -188,6 +196,8 @@ namespace RTE {
 	LuaEntityCreate(TDExplosive);
 	LuaEntityCreate(TerrainObject);
 	LuaEntityCreate(PEmitter);
+	LuaEntityCreate(PieSlice);
+	LuaEntityCreate(PieMenu);
 
 	LuaEntityClone(Entity);
 	LuaEntityClone(SoundContainer);
@@ -218,6 +228,8 @@ namespace RTE {
 	LuaEntityClone(TDExplosive);
 	LuaEntityClone(TerrainObject);
 	LuaEntityClone(PEmitter);
+	LuaEntityClone(PieSlice);
+	LuaEntityClone(PieMenu);
 
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
@@ -253,6 +265,8 @@ namespace RTE {
 	LuaEntityCast(TDExplosive);
 	LuaEntityCast(TerrainObject);
 	LuaEntityCast(PEmitter);
+	LuaEntityCast(PieSlice);
+	LuaEntityCast(PieMenu);
 
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetBreakWound);
@@ -263,6 +277,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetEndSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, Attachable, SetDoor);
 	LuaPropertyOwnershipSafetyFaker(Leg, Attachable, SetFoot);
+	LuaPropertyOwnershipSafetyFaker(Actor, PieMenu, SetPieMenu);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetBodyHitSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetAlarmSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetPainSound);

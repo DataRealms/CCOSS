@@ -215,6 +215,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
+		m_TempEntityVector.reserve(entityVector.size());
+		for (const Entity *entity : entityVector) {
+			m_TempEntityVector.emplace_back(const_cast<Entity *>(entity));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {

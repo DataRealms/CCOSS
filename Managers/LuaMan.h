@@ -74,10 +74,10 @@ namespace RTE {
 		void SetTempEntity(Entity *entity) { m_TempEntity = entity; }
 
 		/// <summary>
-		/// Sets a temporary vector of entities that can be accessed in the Lua state.
+		/// Sets a temporary vector of Entities that can be accessed in the Lua state. These Entities are const_cast so they're non-const, for ease-of-use in Lua.
 		/// </summary>
 		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
-		void SetTempEntityVector(const std::vector<const Entity *> &entityVector) { m_TempEntityVector = entityVector; }
+		void SetTempEntityVector(const std::vector<const Entity *> &entityVector);
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -223,7 +223,7 @@ namespace RTE {
 		long m_NextPresetID; //!< The next unique preset ID to hand out to the next Preset that wants to define some functions. This gets incremented each time a new one is requested to give unique ID's to all original presets.
 		long m_NextObjectID; //!< The next unique object ID to hand out to the next scripted Entity instance that wants to run its preset's scripts. This gets incremented each time a new one is requested to give unique ID's to all scripted objects.
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
-		std::vector<const Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
+		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 

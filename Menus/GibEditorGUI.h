@@ -29,7 +29,7 @@ namespace RTE
 class MovableObject;
 class MOSRotating;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -350,7 +350,7 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
-	std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The PieMenuGUI for this GibEditorGUI.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this GibEditorGUI.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // Grid snapping enabled

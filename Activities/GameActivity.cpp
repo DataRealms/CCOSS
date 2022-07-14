@@ -34,7 +34,7 @@
 #include "GUI.h"
 #include "GUIFont.h"
 #include "AllegroBitmap.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
@@ -1789,7 +1789,7 @@ void GameActivity::Update()
         }
 
 		if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle) {
-			PieMenuGUI *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
+			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE)) {
 				if (!m_BuyMenuEnabled && controlledActorPieMenu->IsEnabling()) {
 					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::PieSliceIndex::PSI_BUYMENU);

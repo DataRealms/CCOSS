@@ -22,7 +22,7 @@
 #include "HDFirearm.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 
@@ -4434,7 +4434,7 @@ void AHuman::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int AHuman::WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) {
+int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 	int result = Actor::WhilePieMenuOpenListener(pieMenu);
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {

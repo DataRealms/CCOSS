@@ -3,7 +3,7 @@
 
 #include "MOSRotating.h"
 
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 namespace RTE {
 

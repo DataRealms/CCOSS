@@ -26,7 +26,7 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "AreaPickerGUI.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "Scene.h"
 
 using namespace RTE;
@@ -74,7 +74,7 @@ int AreaEditorGUI::Create(Controller *pController, bool fullFeatured, int whichM
 
 	if (m_PieMenu) { m_PieMenu = nullptr; }
 	std::string pieMenuName = m_FullFeatured ? "Area Editor Full Pie Menu" : "Area Editor Minimal Pie Menu";
-	m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", pieMenuName)->Clone()));
+	m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", pieMenuName)->Clone()));
 	m_PieMenu->SetMenuController(pController);
 
     // Allocate and (re)create the Editor GUIs

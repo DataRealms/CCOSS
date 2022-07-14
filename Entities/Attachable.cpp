@@ -468,7 +468,7 @@ namespace RTE {
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
 
 			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
-				if (PieMenuGUI *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+				if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
 					rootParentAsActorPieMenu->AddWhilePieMenuOpenListener(this, std::bind(&MovableObject::WhilePieMenuOpenListener, this, rootParentAsActorPieMenu));
 					for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
 						rootParentAsActorPieMenu->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
@@ -492,7 +492,7 @@ namespace RTE {
 				}
 
 				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) {
-					if (PieMenuGUI *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+					if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
 						rootParentAsActorPieMenu->RemoveWhilePieMenuOpenListener(this);
 						rootParentAsActorPieMenu->RemovePieSlicesByOriginalSource(this);
 					}

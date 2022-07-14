@@ -43,7 +43,7 @@ namespace RTE
 struct HitData;
 
 class MOSRotating;
-class PieMenuGUI;
+class PieMenu;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -1551,9 +1551,9 @@ enum MOType
 	int UpdateScripts();
 
 	/// <summary>
-	/// Event listener to be run while this MovableObject's PieMenuGUI is opened.
+	/// Event listener to be run while this MovableObject's PieMenu is opened.
 	/// </summary>
-	virtual int WhilePieMenuOpenListener(const PieMenuGUI *pieMenu);
+	virtual int WhilePieMenuOpenListener(const PieMenu *pieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

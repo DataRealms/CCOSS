@@ -39,7 +39,7 @@
 #include "GUIButton.h"
 #include "GUILabel.h"
 #include "GUISlider.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 #include "NetworkServer.h"
 

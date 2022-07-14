@@ -29,7 +29,7 @@ namespace RTE
 {
 
 class AreaPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
-	std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The PieMenuGUI for this AreaEditorGUI.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this AreaEditorGUI.
     // The Area picker
     AreaPickerGUI *m_pPicker;
     // Grid snapping enabled

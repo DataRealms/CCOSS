@@ -19,7 +19,7 @@
 #include "AEmitter.h"
 #include "HDFirearm.h"
 #include "Controller.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "SceneMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"

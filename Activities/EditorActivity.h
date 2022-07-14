@@ -18,7 +18,7 @@
 #include "RTETools.h"
 #include "ActivityMan.h"
 #include "PostProcessMan.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 namespace RTE
 {
@@ -288,7 +288,7 @@ protected:
     // Whether this thing has ever been saved (or loaded). Will be true of new until it is saved
     bool m_HasEverBeenSaved;
 
-    std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The pie menu this EditorActivity should use, if any.
+    std::unique_ptr<PieMenu> m_PieMenu; //!< The pie menu this EditorActivity should use, if any.
 
     // GUI Screen for use by the GUI dialog boxes. Owned
     GUIScreen *m_pGUIScreen;

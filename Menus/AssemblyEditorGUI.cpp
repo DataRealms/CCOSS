@@ -31,7 +31,7 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "ObjectPickerGUI.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 
@@ -99,7 +99,7 @@ int AssemblyEditorGUI::Create(Controller *pController, FeatureSets featureSet, i
     m_FeatureSet = featureSet;
 
 	if (m_PieMenu) { m_PieMenu = nullptr; }
-	m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", "Assembly Editor Pie Menu")->Clone()));
+	m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", "Assembly Editor Pie Menu")->Clone()));
 	m_PieMenu->SetMenuController(pController);
 
     // Update the brain path

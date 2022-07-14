@@ -21,7 +21,7 @@
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "PresetMan.h"
@@ -2856,7 +2856,7 @@ void ACrab::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int ACrab::WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) {
+int ACrab::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 	int result = Actor::WhilePieMenuOpenListener(pieMenu);
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {

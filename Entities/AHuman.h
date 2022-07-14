@@ -403,7 +403,7 @@ DefaultPieMenuName("Default Human Pie Menu");
     bool CollideAtPoint(HitData &hitData) override;
 
     /// <summary>
-    /// Tries to handle the activated PieSlice in this object's PieMenuGUI, if there is one, based on its Type.
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its Type.
     /// </summary>
     /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
     /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
@@ -1102,9 +1102,9 @@ protected:
 
 #pragma region Event Handling
 	/// <summary>
-	/// Event listener to be run while this AHuman's PieMenuGUI is opened.
+	/// Event listener to be run while this AHuman's PieMenu is opened.
 	/// </summary>
-	int WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) override;
+	int WhilePieMenuOpenListener(const PieMenu *pieMenu) override;
 #pragma endregion
 
 

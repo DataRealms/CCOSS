@@ -42,7 +42,7 @@
 #include "GUIComboBox.h"
 
 #include "ObjectPickerGUI.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 namespace RTE {
 
@@ -73,7 +73,7 @@ int ActorEditor::Create()
     if (EditorActivity::Create() < 0)
         return -1;
 
-    m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", "Actor Editor Pie Menu")->Clone()));
+    m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", "Actor Editor Pie Menu")->Clone()));
 
     return 0;
 }
@@ -279,7 +279,7 @@ void ActorEditor::Update()
     // Pie menu logic
 
 	if (m_pEditedActor) {
-		PieMenuGUI *editedActorPieMenu = m_pEditedActor->GetPieMenu();
+		PieMenu *editedActorPieMenu = m_pEditedActor->GetPieMenu();
 		if (m_PlayerController[0].IsState(PIE_MENU_ACTIVE) && m_EditorMode != EditorActivity::LOADDIALOG) {
 			editedActorPieMenu->SetEnabled(true);
 		} else {

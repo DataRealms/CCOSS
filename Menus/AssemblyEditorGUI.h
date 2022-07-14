@@ -30,7 +30,7 @@ namespace RTE
 
 class SceneObject;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@ protected:
 	// Whether we need a clear path to orbit to place brain
 	bool m_RequireClearPathToOrbit;
 
-	std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The PieMenuGUI for this AssemblyEditorGUI.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this AssemblyEditorGUI.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

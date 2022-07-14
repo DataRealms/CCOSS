@@ -15,7 +15,7 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 namespace RTE
 {
@@ -603,7 +603,7 @@ DefaultPieMenuNameVirtual("Empty Pie Menu");
     bool IsDead() const { return m_Status == DEAD; }
 
     /// <summary>
-    /// Tries to handle the activated PieSlice in this object's PieMenuGUI, if there is one, based on its Type.
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its Type.
     /// </summary>
     /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
     /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
@@ -1312,16 +1312,16 @@ DefaultPieMenuNameVirtual("Empty Pie Menu");
 	void SetStableRecoverDelay(int newRecoverDelay) { m_StableRecoverDelay = newRecoverDelay; }
 
     /// <summary>
-    /// Gets a pointer to the PieMenuGUI for this Actor. Ownership is NOT transferred.
+    /// Gets a pointer to the PieMenu for this Actor. Ownership is NOT transferred.
     /// </summary>
-    /// <returns>The PieMenuGUI for this Actor.</returns>
-    PieMenuGUI * GetPieMenu() const { return m_PieMenu.get(); }
+    /// <returns>The PieMenu for this Actor.</returns>
+    PieMenu * GetPieMenu() const { return m_PieMenu.get(); }
 
 	/// <summary>
-	/// Sets the PieMenuGUI for this Actor. Ownership IS transferred.
+	/// Sets the PieMenu for this Actor. Ownership IS transferred.
 	/// </summary>
-	/// <param name="newPieMenu">The new PieMenuGUI for this Actor.</param>
-	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get())); }
+	/// <param name="newPieMenu">The new PieMenu for this Actor.</param>
+	void SetPieMenu(PieMenu *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenu>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get())); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1538,7 +1538,7 @@ protected:
 
 private:
 
-    std::unique_ptr<PieMenuGUI> m_PieMenu;
+    std::unique_ptr<PieMenu> m_PieMenu;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

@@ -28,7 +28,7 @@ namespace RTE
 
 class SceneObject;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ public:
     void SetController(Controller *pController);
 
 	/// <summary>
-	/// Sets the FeatureSet for this SceneEditorGUI, and sets up the PieMenuGUI accordingly.
+	/// Sets the FeatureSet for this SceneEditorGUI, and sets up the PieMenu accordingly.
 	/// </summary>
 	/// <param name="newFeatureSet">The new FeatureSet for this SceneEditorGUI.</param>
 	void SetFeatureSet(SceneEditorGUI::FeatureSets newFeatureSet);
@@ -352,7 +352,7 @@ protected:
 	// Whether we need a clear path to orbit to place brain
 	bool m_RequireClearPathToOrbit;
 
-	std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The PieMenuGUI for this SceneEditorGUI.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this SceneEditorGUI.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

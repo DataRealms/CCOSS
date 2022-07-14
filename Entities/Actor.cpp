@@ -171,7 +171,7 @@ int Actor::Create()
 		m_IgnoresTeamHits = true;
 
 	if (!m_PieMenu) {
-		SetPieMenu(static_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", GetDefaultPieMenuName())->Clone()));
+		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
 	} else {
 		m_PieMenu->SetOwner(this);
 	}
@@ -289,7 +289,7 @@ int Actor::Create(const Actor &reference)
     m_TeamBlockState = reference.m_TeamBlockState;
 
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
-	SetPieMenu(static_cast<PieMenuGUI *>(reference.m_PieMenu->Clone()));
+	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));
 	m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get()));
 
 
@@ -382,7 +382,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
     } else if (propName == "PieMenu") {
-        m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.ReadReflectedPreset(reader)));
+        m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
         m_PieMenu->Create(this);
     }

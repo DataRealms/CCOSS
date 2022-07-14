@@ -31,7 +31,7 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "ObjectPickerGUI.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "Deployment.h"
@@ -199,9 +199,9 @@ void SceneEditorGUI::SetFeatureSet(SceneEditorGUI::FeatureSets newFeatureSet) {
 			pieMenuName = "Scene Editor In-Game Pie Menu";
 			break;
 		default:
-			RTEAbort("Unhandled SceneEditorGUI FeatureSet when setting up PieMenuGUI.");
+			RTEAbort("Unhandled SceneEditorGUI FeatureSet when setting up PieMenu.");
 	}
-	m_PieMenu = std::unique_ptr<PieMenuGUI>(dynamic_cast<PieMenuGUI *>(g_PresetMan.GetEntityPreset("PieMenuGUI", pieMenuName)->Clone()));
+	m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", pieMenuName)->Clone()));
 	//m_PieMenu->Create();
 	m_PieMenu->SetMenuController(m_pController);
 }

@@ -22,7 +22,7 @@ namespace RTE
 
 class Actor;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 class GUIScreen;
 class GUIInput;
 class GUIControlManager;

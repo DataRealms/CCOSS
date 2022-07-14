@@ -7,7 +7,7 @@
 
 namespace RTE {
 
-	class PieMenuGUI;
+	class PieMenu;
 	class Actor;
 
 	/// <summary>
@@ -206,13 +206,13 @@ namespace RTE {
 		/// Gets the sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.
 		/// </summary>
 		/// <returns>The sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.</returns>
-		PieMenuGUI * GetSubPieMenu() const { return m_SubPieMenu.get(); }
+		PieMenu * GetSubPieMenu() const { return m_SubPieMenu.get(); }
 
 		/// <summary>
 		/// Sets the sub-PieMenu for this PieSlice. Ownership IS transferred.
 		/// </summary>
-		/// <param name="pieMenuGUI">The new sub-PieMenu for this PieSlice. Ownership IS transferred.</param>
-		void SetSubPieMenu(PieMenuGUI *subPieMenuGUI) { m_SubPieMenu = std::unique_ptr<PieMenuGUI>(subPieMenuGUI); }
+		/// <param name="newSubPieMenu">The new sub-PieMenu for this PieSlice. Ownership IS transferred.</param>
+		void SetSubPieMenu(PieMenu *newSubPieMenu) { m_SubPieMenu = std::unique_ptr<PieMenu>(newSubPieMenu); }
 #pragma endregion
 
 #pragma region Angle Getter and Setters
@@ -267,7 +267,7 @@ namespace RTE {
 
 		std::string m_ScriptPath; //!< Path to the script file this should run when activated.
 		std::string m_FunctionName; //!< Name of the function in the script this should run when activated.
-		std::unique_ptr<PieMenuGUI> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
+		std::unique_ptr<PieMenu> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
 
 		float m_StartAngle; //!< The start angle of this PieSlice's area on the PieMenu, counted in radians from straight out right and going counter clockwise.
 		int m_SlotCount; //!< The arc length of the PieSlice area, so that the icon should be drawn at the AreaStart + halfway of this.

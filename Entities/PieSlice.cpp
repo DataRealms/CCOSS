@@ -1,6 +1,6 @@
 #include "PieSlice.h"
 
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -52,7 +52,7 @@ namespace RTE {
 
 		m_ScriptPath = reference.m_ScriptPath;
 		m_FunctionName = reference.m_FunctionName;
-		if (reference.m_SubPieMenu) { SetSubPieMenu(dynamic_cast<PieMenuGUI *>(reference.m_SubPieMenu->Clone())); }
+		if (reference.m_SubPieMenu) { SetSubPieMenu(dynamic_cast<PieMenu *>(reference.m_SubPieMenu->Clone())); }
 
 		m_StartAngle = reference.m_StartAngle;
 		m_SlotCount = reference.m_SlotCount;
@@ -90,7 +90,7 @@ namespace RTE {
 		} else if (propName == "FunctionName") {
 			reader >> m_FunctionName;
 		} else if (propName == "SubPieMenu") {
-			SetSubPieMenu(dynamic_cast<PieMenuGUI *>(g_PresetMan.ReadReflectedPreset(reader)));
+			SetSubPieMenu(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -134,6 +134,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieSlice::RecalculateMidAngle() {
-		m_MidAngle = m_StartAngle + (static_cast<float>(m_SlotCount) * PieMenuGUI::c_PieSliceSlotSize / 2.0F);
+		m_MidAngle = m_StartAngle + (static_cast<float>(m_SlotCount) * PieMenu::c_PieSliceSlotSize / 2.0F);
 	}
 }

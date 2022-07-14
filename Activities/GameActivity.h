@@ -28,7 +28,7 @@ namespace RTE
 
 class Actor;
 class ACraft;
-class PieMenuGUI;
+class PieMenu;
 class InventoryMenuGUI;
 class BuyMenuGUI;
 class SceneEditorGUI;
@@ -1023,7 +1023,7 @@ protected:
     Vector m_LandingZone[Players::MaxPlayerCount];
     // Whether the last craft was set to return or not after delivering
     bool m_AIReturnCraft[Players::MaxPlayerCount];
-    std::array<std::unique_ptr<PieMenuGUI>, Players::MaxPlayerCount> m_StrategicModePieMenu; //!< The strategic mode PieMenus for each Player.
+    std::array<std::unique_ptr<PieMenu>, Players::MaxPlayerCount> m_StrategicModePieMenu; //!< The strategic mode PieMenus for each Player.
     // The inventory menu gui for each player
     InventoryMenuGUI *m_InventoryMenuGUI[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player

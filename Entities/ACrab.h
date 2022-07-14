@@ -690,7 +690,7 @@ protected:
 	/// <summary>
 	/// Event listener to be run while this ACrab's PieMenuGUI is opened.
 	/// </summary>
-	void WhilePieMenuOpenListener() override;
+	int WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) override;
 #pragma endregion
 
 

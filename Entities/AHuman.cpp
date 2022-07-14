@@ -3056,24 +3056,6 @@ void AHuman::UpdateAI()
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int AHuman::OnPieMenu(Actor *pieMenuActor) {
-	int status = Actor::OnPieMenu(pieMenuActor);
-
-    // Note: This is a bit ugly, but it should make this function output different error statuses based on whether the AHuman's OnPieMenuFunction fails, or its weapons' do, though the specifics can't be sussed out by the error alone.
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
-        status += m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
-    }
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsDevice()) {
-        status += m_pBGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
-    }
-
-	return status;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -4452,8 +4434,8 @@ void AHuman::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::WhilePieMenuOpenListener() {
-	Actor::WhilePieMenuOpenListener();
+int AHuman::WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) {
+	int result = Actor::WhilePieMenuOpenListener(pieMenu);
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
 		switch (pieSlice->GetType()) {
@@ -4517,6 +4499,7 @@ void AHuman::WhilePieMenuOpenListener() {
 				break;
 		}
 	}
+	return result;
 }
 
 

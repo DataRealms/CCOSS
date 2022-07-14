@@ -801,13 +801,6 @@ DefaultPieMenuName("Default Human Pie Menu");
 
 	void Update() override;
 
-    /// <summary>
-    /// Executes the Lua-defined OnPieMenu event handler for this AHuman.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	int OnPieMenu(Actor *pieMenuActor) override;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -1111,7 +1104,7 @@ protected:
 	/// <summary>
 	/// Event listener to be run while this AHuman's PieMenuGUI is opened.
 	/// </summary>
-	void WhilePieMenuOpenListener() override;
+	int WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) override;
 #pragma endregion
 
 

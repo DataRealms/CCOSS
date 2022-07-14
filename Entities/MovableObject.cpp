@@ -1008,12 +1008,8 @@ int MovableObject::UpdateScripts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::OnPieMenu(Actor *pieMenuActor) {
-    if (!pieMenuActor) {
-        return -1;
-    }
-
-    return RunScriptedFunctionInAppropriateScripts("OnPieMenu", false, false, {pieMenuActor});
+int MovableObject::WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) {
+	return RunScriptedFunctionInAppropriateScripts("WhilePieMenuOpen", false, false, { pieMenu });
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

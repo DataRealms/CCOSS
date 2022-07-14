@@ -1321,7 +1321,7 @@ DefaultPieMenuNameVirtual("Empty Pie Menu");
 	/// Sets the PieMenuGUI for this Actor. Ownership IS transferred.
 	/// </summary>
 	/// <param name="newPieMenu">The new PieMenuGUI for this Actor.</param>
-	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this)); }
+	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get())); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1532,13 +1532,6 @@ protected:
     Timer m_StuckTimer;
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
-
-#pragma region Event Handling
-	/// <summary>
-	/// Event listener to be run while this Actor's PieMenuGUI is opened.
-	/// </summary>
-	virtual void WhilePieMenuOpenListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuOpen"); }
-#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

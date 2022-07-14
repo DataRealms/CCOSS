@@ -2856,8 +2856,8 @@ void ACrab::SetLimbPathPushForce(float force)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::WhilePieMenuOpenListener() {
-	Actor::WhilePieMenuOpenListener();
+int ACrab::WhilePieMenuOpenListener(const PieMenuGUI *pieMenu) {
+	int result = Actor::WhilePieMenuOpenListener(pieMenu);
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
 		if (pieSlice->GetType() == PieSlice::PieSliceIndex::PSI_RELOAD) {
@@ -2871,6 +2871,7 @@ void ACrab::WhilePieMenuOpenListener() {
 			break;
 		}
 	}
+	return result;
 }
 
 

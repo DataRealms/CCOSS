@@ -43,6 +43,7 @@ namespace RTE
 struct HitData;
 
 class MOSRotating;
+class PieMenuGUI;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -61,7 +62,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO");
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -1549,12 +1550,10 @@ enum MOType
 
 	int UpdateScripts();
 
-    /// <summary>
-    /// Executes the Lua-defined OnPieMenu event handler for this MO.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int OnPieMenu(Actor *pieMenuActor);
+	/// <summary>
+	/// Event listener to be run while this MovableObject's PieMenuGUI is opened.
+	/// </summary>
+	virtual int WhilePieMenuOpenListener(const PieMenuGUI *pieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

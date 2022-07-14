@@ -255,7 +255,9 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GoldSwitchEnabled;
 	else if (propName == "RequireClearPathToOrbitSwitchEnabled")
         reader >> m_RequireClearPathToOrbitSwitchEnabled;
-    else
+	else if (propName == "BuyMenuEnabled") {
+		reader >> m_BuyMenuEnabled;
+	} else
         return Activity::ReadProperty(propName, reader);
 
     return 0;
@@ -273,6 +275,7 @@ int GameActivity::Save(Writer &writer) const {
 
 	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
 	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
+	writer.NewPropertyWithValue("BuyMenuEnabled", m_BuyMenuEnabled);
 
 	return 0;
 }
@@ -1788,12 +1791,8 @@ void GameActivity::Update()
 		if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle) {
 			PieMenuGUI *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE)) {
-				if (controlledActorPieMenu->IsEnabling() && m_BuyMenuEnabled && !controlledActorPieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_BUYMENU)) {
-					PieSlice *buyPieSlice = dynamic_cast<PieSlice *>(g_PresetMan.GetEntityPreset("PieSlice", "BuyMenu")->Clone());
-					buyPieSlice->SetCanBeMiddleSlice(controlledActorPieMenu->GetPieSlices().empty());
-					buyPieSlice->SetDirection(Directions::Up);
-					buyPieSlice->SetDescription("Buy Menu");
-					controlledActorPieMenu->AddPieSlice(buyPieSlice, this);
+				if (!m_BuyMenuEnabled && controlledActorPieMenu->IsEnabling()) {
+					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::PieSliceIndex::PSI_BUYMENU);
 				}
 
 				if (controlledActorPieMenu->IsEnabled() && controlledActorPieMenu->HasSubPieMenuOpen() && m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) {

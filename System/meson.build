@@ -16,7 +16,6 @@ sources += files(
 'System.cpp',
 'InputMapping.cpp',
 'PathFinder.cpp',
-'PieSlice.cpp',
 'DataModule.cpp',
 'Timer.cpp',
 'RTEError.cpp',

@@ -578,7 +578,6 @@
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
     <ClInclude Include="System\GraphicalPrimitive.h" />
-    <ClInclude Include="System\PieSlice.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -671,6 +670,8 @@
     <ClInclude Include="Entities\MOSprite.h" />
     <ClInclude Include="Entities\MOSRotating.h" />
     <ClInclude Include="Entities\MovableObject.h" />
+    <ClInclude Include="Entities\PieMenu.h" />
+    <ClInclude Include="Entities\PieSlice.h" />
     <ClInclude Include="Entities\Scene.h" />
     <ClInclude Include="Entities\SceneLayer.h" />
     <ClInclude Include="Entities\SceneObject.h" />
@@ -701,7 +702,6 @@
     <ClInclude Include="Menus\MainMenuGUI.h" />
     <ClInclude Include="Menus\MetagameGUI.h" />
     <ClInclude Include="Menus\ObjectPickerGUI.h" />
-    <ClInclude Include="Menus\PieMenuGUI.h" />
     <ClInclude Include="Menus\ScenarioGUI.h" />
     <ClInclude Include="Menus\SceneEditorGUI.h" />
   </ItemGroup>
@@ -843,7 +843,6 @@
     <ClCompile Include="Menus\SettingsMiscGUI.cpp" />
     <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
-    <ClCompile Include="System\PieSlice.cpp" />
     <ClCompile Include="Menus\InventoryMenuGUI.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Controller.cpp" />
@@ -974,6 +973,8 @@
     <ClCompile Include="Entities\MOSprite.cpp" />
     <ClCompile Include="Entities\MOSRotating.cpp" />
     <ClCompile Include="Entities\MovableObject.cpp" />
+    <ClCompile Include="Entities\PieMenu.cpp" />
+    <ClCompile Include="Entities\PieSlice.cpp" />
     <ClCompile Include="Entities\Scene.cpp" />
     <ClCompile Include="Entities\SceneLayer.cpp" />
     <ClCompile Include="Entities\SceneObject.cpp" />
@@ -1004,7 +1005,6 @@
     <ClCompile Include="Menus\MainMenuGUI.cpp" />
     <ClCompile Include="Menus\MetagameGUI.cpp" />
     <ClCompile Include="Menus\ObjectPickerGUI.cpp" />
-    <ClCompile Include="Menus\PieMenuGUI.cpp" />
     <ClCompile Include="Menus\ScenarioGUI.cpp" />
     <ClCompile Include="Menus\SceneEditorGUI.cpp" />
     <ClCompile Include="Main.cpp" />

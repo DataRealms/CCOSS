@@ -34,6 +34,8 @@ sources += files(
 'MOSRotating.cpp',
 'MovableObject.cpp',
 'PEmitter.cpp',
+'PieMenu.cpp',
+'PieSlice.cpp',
 'Round.cpp',
 'Scene.cpp',
 'SceneLayer.cpp',

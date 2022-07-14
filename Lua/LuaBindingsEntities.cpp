@@ -643,6 +643,7 @@ namespace RTE {
 		.def("GetAIBlastRadius", &HDFirearm::GetAIBlastRadius)
 		.def("GetAIPenetration", &HDFirearm::GetAIPenetration)
 		.def("CompareTrajectories", &HDFirearm::CompareTrajectories)
+		.def("GetNextMagazineName", &HDFirearm::GetNextMagazineName)
 		.def("SetNextMagazineName", &HDFirearm::SetNextMagazineName);
 	}
 

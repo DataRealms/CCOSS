@@ -236,23 +236,31 @@ namespace RTE {
 		}
 		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
 
-		scriptString << functionName + "(" + selfObjectName;
+		scriptString << functionName + "(";
+		if (!selfObjectName.empty()) { scriptString << selfObjectName; }
+		bool isFirstFunctionArgument = selfObjectName.empty();
 		if (!functionEntityArguments.empty()) {
 			SetTempEntityVector(functionEntityArguments);
 			for (const Entity *functionEntityArgument : functionEntityArguments) {
-				scriptString << ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
+				scriptString << "(To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				isFirstFunctionArgument = false;
 			}
 		}
 		if (!functionLiteralArguments.empty()) {
 			for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
 				scriptString << ", " + std::string(functionLiteralArgument);
+				isFirstFunctionArgument = false;
 			}
 		}
 		scriptString << ");";
 
 		if (!variablesToSafetyCheck.empty()) { scriptString << " end;"; }
 
-		return RunScriptString(scriptString.str());
+		int result = RunScriptString(scriptString.str());
+		m_TempEntityVector.clear();
+		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

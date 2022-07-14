@@ -519,6 +519,7 @@ namespace RTE {
 		}
 
 		if (GetController()->IsDisabled()) {
+			SetEnabled(false);
 			return;
 		}
 

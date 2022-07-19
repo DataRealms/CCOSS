@@ -236,8 +236,8 @@ namespace RTE {
 
 	void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
-			const char *fullFilePath = g_PresetMan.FullModulePath(filePath).c_str();
-			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, fullFilePath, loops); }
+			const std::string fullFilePath = g_PresetMan.FullModulePath(filePath);
+			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, fullFilePath.c_str(), loops); }
 
 			bool musicIsPlaying;
 			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&musicIsPlaying);
@@ -254,15 +254,15 @@ namespace RTE {
 
 			FMOD::Sound *musicStream;
 
-			result = m_AudioSystem->createStream(fullFilePath, FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
+			result = m_AudioSystem->createStream(fullFilePath.c_str(), FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: Could not open music file " + fullFilePath + ": " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 
 			result = musicStream->setLoopCount(loops);
 			if (result != FMOD_OK && (loops != 0 && loops != 1)) {
-				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + std::string(filePath) + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times.") + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + fullFilePath + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times.") + std::string(FMOD_ErrorString(result)));
 			}
 
 			FMOD::Channel *musicChannel;
@@ -273,7 +273,7 @@ namespace RTE {
 				result = musicChannel->set3DAttributes(&zero_vector, nullptr);
 			}
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + fullFilePath + ": " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 			result = musicChannel->setPriority(PRIORITY_HIGH);
@@ -283,7 +283,7 @@ namespace RTE {
 				volumeOverrideIfNotMuted = std::clamp((volumeOverrideIfNotMuted > 1.0F ? volumeOverrideIfNotMuted / 100.0F : volumeOverrideIfNotMuted), 0.0F, 1.0F);
 				result = musicChannel->setVolume(volumeOverrideIfNotMuted);
 				if (result != FMOD_OK && (loops != 0 && loops != 1)) {
-					g_ConsoleMan.PrintString("ERROR: Failed to set volume override for music file: " + std::string(filePath) + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
+					g_ConsoleMan.PrintString("ERROR: Failed to set volume override for music file: " + fullFilePath + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
 				}
 			}
 

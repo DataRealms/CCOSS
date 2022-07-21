@@ -14,7 +14,7 @@ namespace RTE {
 	class Actor;
 
 	/// <summary>
-	/// A GUI for displaying pie menus.
+	/// A PieMenu for managing interactions with objects and Actors.
 	/// </summary>
 	class PieMenu : public Entity {
 		

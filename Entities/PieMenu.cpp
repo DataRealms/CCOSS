@@ -814,7 +814,7 @@ namespace RTE {
 		int centerY = IsSubPieMenu() ? 0 : m_BGBitmap->h / 2;
 		if (m_DirectionIfSubPieMenu == Directions::Up || m_DirectionIfSubPieMenu == Directions::Left) { centerX = m_BGBitmap->w; }
 		if (m_DirectionIfSubPieMenu == Directions::Up || m_DirectionIfSubPieMenu == Directions::Right) { centerY = m_BGBitmap->h; }
-		if (m_DirectionIfSubPieMenu == Directions::Down) { centerX = -2; }
+		if (m_DirectionIfSubPieMenu == Directions::Down) { centerX = -2; centerY = -2; }
 		if (m_DirectionIfSubPieMenu == Directions::Left) { centerY = -2; }
 		float subPieMenuRotationOffset = IsSubPieMenu() ? c_QuarterPI : 0;
 
@@ -940,7 +940,7 @@ namespace RTE {
 		pivot_sprite(targetBitmap, s_CursorBitmap, drawPos.GetFloorIntX() + cursorPos.GetFloorIntX(), drawPos.GetFloorIntY() + cursorPos.GetFloorIntY(), s_CursorBitmap->w / 2, s_CursorBitmap->h / 2, ftofix((m_CursorAngle / c_PI) * -128.0F));
 
 		if (m_HoveredPieSlice) {
-			float textRotation = m_HoveredPieSlice->GetMidAngle() + GetRotAngle();
+			float textRotation = NormalizeAngleBetween0And2PI(m_HoveredPieSlice->GetMidAngle() + GetRotAngle());
 			Vector textCenteringOffset(0.0F, static_cast<float>(m_LargeFont->GetFontHeight()) * 0.45F);
 			Vector textPos = Vector(static_cast<float>(m_CurrentInnerRadius + m_BackgroundThickness + (m_LargeFont->GetFontHeight() * 0.5)), 0).RadRotate(textRotation) - textCenteringOffset;
 

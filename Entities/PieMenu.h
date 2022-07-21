@@ -276,13 +276,14 @@ namespace RTE {
 		bool AddPieSlice(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
 
 		/// <summary>
-		/// Adds a PieSlice to the PieMenu, with the same conditions as AddPieSlice above, but only if no PieSlice exists in this PieMenu with the same PresetName. Ownership IS transferred!
+		/// Adds a PieSlice to the PieMenu, with the same conditions as AddPieSlice above, but only if no PieSlice exists in this PieMenu with the same PresetName (optionally with the same original source). Ownership IS transferred!
 		/// </summary>
 		/// <param name="pieSliceToAdd">The new PieSlice to add. Ownership IS transferred.</param>
 		/// <param name="pieSliceOriginalSource">The source of the added PieSlice. Should be nullptr for slices not added by Entities.</param>
+		/// <param name="onlyCheckPieSlicesWithSameOriginalSource">Whether all PieSlices in the PieMenu should be checked to see if there are no duplicates, or only those with the same original source.</param>
 		/// <param name="allowQuadrantOverflow">Whether the new PieSlice can be placed in PieQuadrants other than the one specified by its Direction, if that PieQuadrant is full.</param>
 		/// <returns>Whether or not the PieSlice was added successfully.</returns>
-		bool AddPieSliceIfPresetNameIsUnique(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow = false);
+		bool AddPieSliceIfPresetNameIsUnique(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool onlyCheckPieSlicesWithSameOriginalSource = false, bool allowQuadrantOverflow = false);
 
 		/// <summary>
 		/// Removes and returns the passed in PieSlice from this PieMenu if it's in the PieMenu. Ownership IS transferred to the caller!

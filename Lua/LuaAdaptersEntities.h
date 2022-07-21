@@ -167,8 +167,12 @@ namespace RTE {
 		return luaSelfObject->AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, false);
 	}
 
-	static bool PieMenuAddPieSliceIfPresetNameIsUnique(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
-		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, false);
+	static bool PieMenuAddPieSliceIfPresetNameIsUnique1(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
+		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, false, false);
+	}
+
+	static bool PieMenuAddPieSliceIfPresetNameIsUnique2(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool onlyCheckPieSlicesWithSameOriginalSource) {
+		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, onlyCheckPieSlicesWithSameOriginalSource, false);
 	}
 
 	LuaEntityCreate(SoundContainer);

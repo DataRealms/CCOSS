@@ -81,7 +81,7 @@ EntityAllocation(Actor);
 AddScriptFunctionNames(MOSRotating, "UpdateAI");
 SerializableOverrideMethods;
 ClassInfoGetters;
-DefaultPieMenuNameVirtual("Empty Pie Menu");
+DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Actor

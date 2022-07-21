@@ -1,7 +1,7 @@
 #ifndef _RTEGLOBALSCRIPT_
 #define _RTEGLOBALSCRIPT_
 
-#include "Entity.h"
+#include "PieSlice.h"
 
 namespace RTE {
 
@@ -75,6 +75,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether or not this GlobalScript should be updated late.</returns>
 		bool ShouldLateUpdate() const { return m_LateUpdate; }
+
+		/// <summary>
+		/// Gets the list of PieSlices this GlobalScript adds to any active Actor PieMenus.
+		/// </summary>
+		/// <returns>The list of PieSilces this GlobalScript adds to any active Actor PieMenus</returns>
+		const std::vector<std::unique_ptr<PieSlice>> & GetPieSlicesToAdd() const { return m_PieSlicesToAdd; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -123,6 +129,8 @@ namespace RTE {
 		std::string m_LuaClassName; //!< The name of the class (table) defining the logic of this in Lua, as specified in the script file.
 		bool m_IsActive; //!< Whether this GlobalScript is currently allowed to run.
 		bool m_LateUpdate; //!< Whether or not this GlobalScript should be updated late, i.e. after the standard MovableMan update.
+
+		std::vector<std::unique_ptr<PieSlice>> m_PieSlicesToAdd; //!< A vector of PieSlices that should be added to any PieMenus opened while this GlobalScript is active.
 
 		/// <summary>
 		/// Clears all the member variables of this GlobalScript, effectively resetting the members of this abstraction level only.

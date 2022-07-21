@@ -1853,7 +1853,6 @@ void GameActivity::Update()
 						m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
 					}
 				} else if (command == PieSlice::PieSliceIndex::PSI_BUYMENU) {
-					controlledActorPieMenu->SetEnabled(false);
 					m_pBuyGUI[player]->SetEnabled(true);
 					skipBuyUpdate = true;
 				} else if (command == PieSlice::PieSliceIndex::PSI_FULLINVENTORY) {

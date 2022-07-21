@@ -2,8 +2,10 @@
 
 #include "LuaMan.h"
 #include "MovableMan.h"
+#include "PresetMan.h"
 
 #include "ACraft.h"
+#include "PieSlice.h"
 
 namespace RTE {
 
@@ -16,6 +18,7 @@ namespace RTE {
 		m_LuaClassName.clear();
 		m_IsActive = false;
 		m_LateUpdate = false;
+		m_PieSlicesToAdd.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +30,10 @@ namespace RTE {
 		m_LuaClassName = reference.m_LuaClassName;
 		m_IsActive = reference.m_IsActive;
 		m_LateUpdate = reference.m_LateUpdate;
+
+		for (const std::unique_ptr<PieSlice> &referencePieSliceToAdd : reference.m_PieSlicesToAdd) {
+			m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(referencePieSliceToAdd->Clone())));
+		}
 
 		return 0;
 	}
@@ -40,6 +47,8 @@ namespace RTE {
 			reader >> m_LuaClassName;
 		} else if (propName == "LateUpdate") {
 			reader >> m_LateUpdate;
+		} else if (propName == "AddPieSlice") {
+			m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -55,6 +64,10 @@ namespace RTE {
 		writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
 		writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 		writer.NewPropertyWithValue("LateUpdate", m_LateUpdate);
+
+		for (const std::unique_ptr<PieSlice> &pieSliceToAdd : m_PieSlicesToAdd) {
+			writer.NewPropertyWithValue("AddPieSlice", pieSliceToAdd.get());
+		}
 
 		return 0;
 	}

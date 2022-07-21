@@ -384,7 +384,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PieMenu::AddPieSlice(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow) {
-		if (!m_PieQuadrants[pieSliceToAdd->GetDirection()].Enabled) { pieSliceToAdd->SetDirection(Directions::Any); }
+		if (!m_PieQuadrants.at(pieSliceToAdd->GetDirection()).Enabled) { pieSliceToAdd->SetDirection(Directions::Any); }
 
 		bool sliceWasAdded = false;
 		if (pieSliceToAdd->GetDirection() == Directions::Any) {

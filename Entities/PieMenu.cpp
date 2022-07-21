@@ -419,16 +419,25 @@ namespace RTE {
     bool PieMenu::AddPieSliceIfPresetNameIsUnique(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool onlyCheckPieSlicesWithSameOriginalSource, bool allowQuadrantOverflow) {
 		const std::string &pieSlicePresetName = pieSliceToAdd->GetPresetName();
 
-		if (pieSliceToAdd->GetPresetName() == "None" || (!onlyCheckPieSlicesWithSameOriginalSource && !GetFirstPieSliceByPresetName(pieSlicePresetName))) {
+		if (pieSlicePresetName == "None") {
 			return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
 		}
 
-		for (const PieSlice *pieSlice : m_CurrentPieSlices) {
-			if (pieSlice->GetOriginalSource() == pieSliceOriginalSource && pieSlice->GetPresetName() == pieSlicePresetName) {
-				delete pieSliceToAdd;
-				return false;
+		bool pieSliceAlreadyExists = onlyCheckPieSlicesWithSameOriginalSource ? false : GetFirstPieSliceByPresetName(pieSlicePresetName) != nullptr;
+		if (!pieSliceAlreadyExists) {
+			for (const PieSlice *pieSlice : m_CurrentPieSlices) {
+				if (pieSlice->GetOriginalSource() == pieSliceOriginalSource && pieSlice->GetPresetName() == pieSlicePresetName) {
+					pieSliceAlreadyExists = true;
+					break;
+				}
 			}
 		}
+
+		if (pieSliceAlreadyExists) {
+			delete pieSliceToAdd;
+			return false;
+		}
+
 		return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
 	}
 

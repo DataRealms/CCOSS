@@ -251,6 +251,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="midAngle">The mid angle to set for the PieSlice's area.</param>
 		void SetMidAngle(float midAngle) { m_MidAngle = midAngle; }
+
+		/// <summary>
+		/// Gets whether or not this PieSlice should draw itself flipped to match its absolute angle (i.e. its angle accounting for its PieMenu's rotation).
+		/// </summary>
+		/// <returns>Whether or not this PieSlice should draw itself flipped to match its absolute angle.</returns>
+		bool GetDrawFlippedToMatchAbsoluteAngle() const { return m_DrawFlippedToMatchAbsoluteAngle; }
+
+		/// <summary>
+		/// Sets whether or not this PieSlice should draw itself flipped to match its absolute angle (i.e. its angle accounting for its PieMenu's rotation).
+		/// </summary>
+		/// <param name="shouldDrawFlippedToMatchAbsoluteAngle">Whether or not this PieSlice should draw itself flipped to match its absolute angle.</param>
+		void SetDrawFlippedToMatchAbsoluteAngle(bool shouldDrawFlippedToMatchAbsoluteAngle) { m_DrawFlippedToMatchAbsoluteAngle = shouldDrawFlippedToMatchAbsoluteAngle; }
 #pragma endregion
 
 	private:
@@ -272,6 +284,8 @@ namespace RTE {
 		float m_StartAngle; //!< The start angle of this PieSlice's area on the PieMenu, counted in radians from straight out right and going counter clockwise.
 		int m_SlotCount; //!< The arc length of the PieSlice area, so that the icon should be drawn at the AreaStart + halfway of this.
 		float m_MidAngle; //!< The mid angle of this PieSlice.
+
+		bool m_DrawFlippedToMatchAbsoluteAngle; //!< Whether or not this PieSlice should draw flipped based on its absolute angle (i.e. its angle accounting for its pie menu's rotation)
 
 		/// <summary>
 		/// Recalculates this PieSlice's mid angle based on its start angle and slot count.

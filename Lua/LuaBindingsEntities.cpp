@@ -1021,6 +1021,8 @@ namespace RTE {
 		.property("FunctionName", &PieSlice::GetFunctionName, &PieSlice::SetFunctionName)
 		.property("SubPieMenu", &PieSlice::GetSubPieMenu, &PieSlice::SetSubPieMenu)
 
+		.property("DrawFlippedToMatchAbsoluteAngle", &PieSlice::GetDrawFlippedToMatchAbsoluteAngle, &PieSlice::SetDrawFlippedToMatchAbsoluteAngle)
+
 		.enum_("PieSliceType")[
 			luabind::value("PSI_NONE", PieSlice::PieSliceIndex::PSI_NONE),
 			luabind::value("PSI_PICKUP", PieSlice::PieSliceIndex::PSI_PICKUP),
@@ -1094,7 +1096,8 @@ namespace RTE {
 		.def("AddPieSlice", &PieMenu::AddPieSlice, luabind::adopt(_2))
 		.def("AddPieSlice", &PieMenuAddPieSlice, luabind::adopt(_2))
 		.def("AddPieSliceIfPresetNameIsUnique", &PieMenu::AddPieSliceIfPresetNameIsUnique, luabind::adopt(_2))
-		.def("AddPieSliceIfPresetNameIsUnique", &PieMenuAddPieSliceIfPresetNameIsUnique, luabind::adopt(_2))
+		.def("AddPieSliceIfPresetNameIsUnique", &PieMenuAddPieSliceIfPresetNameIsUnique1, luabind::adopt(_2))
+		.def("AddPieSliceIfPresetNameIsUnique", &PieMenuAddPieSliceIfPresetNameIsUnique2, luabind::adopt(_2))
 		.def("RemovePieSlice", &PieMenu::RemovePieSlice, luabind::adopt(luabind::return_value))
 		.def("RemovePieSlicesByPresetName", &PieMenu::RemovePieSlicesByPresetName)
 		.def("RemovePieSlicesByType", &PieMenu::RemovePieSlicesByType)

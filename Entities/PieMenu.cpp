@@ -904,15 +904,23 @@ namespace RTE {
 			BITMAP *pieSliceIcon = pieSlice->GetAppropriateIcon(pieSlice == m_HoveredPieSlice);
 
 			if (pieSliceIcon) {
-				float pieSliceRotation = pieSlice->GetMidAngle() + GetRotAngle();// -(IsSubPieMenu() ? c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) : 0);
+				float pieSliceRotation = NormalizeAngleBetween0And2PI(pieSlice->GetMidAngle() + GetRotAngle());
 
 				Vector pieSliceCenteringOffset(1.0F - static_cast<float>(pieSliceIcon->w / 2), 1.0F - static_cast<float>(pieSliceIcon->h / 2));
 				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Right).MiddlePieSlice.get()) { pieSliceCenteringOffset.SetX(pieSliceCenteringOffset.GetX() - 1.0F); }
 				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Down).MiddlePieSlice.get()) { pieSliceCenteringOffset.SetY(pieSliceCenteringOffset.GetY() - 1.0F); }
 
-				Vector pieSliceIconOffset = Vector(static_cast<float>(m_CurrentInnerRadius + (m_BackgroundThickness / 2) + (pieSlice->GetSubPieMenu() ? 0 : 0)), 0).RadRotate(pieSliceRotation) +pieSliceCenteringOffset;
+				Vector pieSliceIconOffset = Vector(static_cast<float>(m_CurrentInnerRadius + (m_BackgroundThickness / 2) + (pieSlice->GetSubPieMenu() ? 2 : 0)), 0).RadRotate(pieSliceRotation) + pieSliceCenteringOffset;
 
-				draw_sprite(targetBitmap, pieSliceIcon, drawPos.GetFloorIntX() + pieSliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + pieSliceIconOffset.GetFloorIntY());
+				if (!pieSlice->GetDrawFlippedToMatchAbsoluteAngle() || (pieSliceRotation >= 0 && pieSliceRotation < (c_HalfPI + 0.001F))) {
+					draw_sprite(targetBitmap, pieSliceIcon, drawPos.GetFloorIntX() + pieSliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + pieSliceIconOffset.GetFloorIntY());
+				} else if (pieSliceRotation < (c_PI + 0.001F)) {
+					draw_sprite_h_flip(targetBitmap, pieSliceIcon, drawPos.GetFloorIntX() + pieSliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + pieSliceIconOffset.GetFloorIntY());
+				} else if (pieSliceRotation < (c_OneAndAHalfPI + 0.001F)) {
+					draw_sprite_vh_flip(targetBitmap, pieSliceIcon, drawPos.GetFloorIntX() + pieSliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + pieSliceIconOffset.GetFloorIntY());
+				} else {
+					draw_sprite_v_flip(targetBitmap, pieSliceIcon, drawPos.GetFloorIntX() + pieSliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + pieSliceIconOffset.GetFloorIntY());
+				}
 			}
 		}
 	}

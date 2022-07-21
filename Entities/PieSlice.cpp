@@ -25,6 +25,8 @@ namespace RTE {
 		m_StartAngle = 0;
 		m_SlotCount = 0;
 		m_MidAngle = 0;
+
+		m_DrawFlippedToMatchAbsoluteAngle = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +59,8 @@ namespace RTE {
 		m_StartAngle = reference.m_StartAngle;
 		m_SlotCount = reference.m_SlotCount;
 		m_MidAngle = reference.m_MidAngle;
+
+		m_DrawFlippedToMatchAbsoluteAngle = reference.m_DrawFlippedToMatchAbsoluteAngle;
 
 		return 0;
 	}
@@ -91,6 +95,8 @@ namespace RTE {
 			reader >> m_FunctionName;
 		} else if (propName == "SubPieMenu") {
 			SetSubPieMenu(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
+		} else if (propName == "DrawFlippedToMatchAbsoluteAngle") {
+			reader >> m_DrawFlippedToMatchAbsoluteAngle;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}

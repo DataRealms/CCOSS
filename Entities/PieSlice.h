@@ -92,6 +92,11 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
+		/// Destructor method used to clean up a PieSlice object before deletion from system memory.
+		/// </summary>
+		~PieSlice() override { Destroy(true); }
+
+		/// <summary>
 		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
@@ -206,13 +211,13 @@ namespace RTE {
 		/// Gets the sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.
 		/// </summary>
 		/// <returns>The sub-PieMenu for this PieSlice if there is one. Ownership is NOT transferred.</returns>
-		PieMenu * GetSubPieMenu() const { return m_SubPieMenu.get(); }
+		PieMenu * GetSubPieMenu() const;
 
 		/// <summary>
 		/// Sets the sub-PieMenu for this PieSlice. Ownership IS transferred.
 		/// </summary>
 		/// <param name="newSubPieMenu">The new sub-PieMenu for this PieSlice. Ownership IS transferred.</param>
-		void SetSubPieMenu(PieMenu *newSubPieMenu) { m_SubPieMenu = std::unique_ptr<PieMenu>(newSubPieMenu); }
+		void SetSubPieMenu(PieMenu *newSubPieMenu);
 #pragma endregion
 
 #pragma region Angle Getter and Setters
@@ -267,6 +272,13 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// Custom deleter for PieMenu to avoid include problems with unique_ptr.
+		/// </summary>
+		struct PieMenuCustomDeleter {
+			void operator()(PieMenu *pieMenu) const;
+		};
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 		PieSliceIndex m_Type; //!< The slice type, also used to determine the icon.
@@ -279,7 +291,7 @@ namespace RTE {
 
 		std::string m_ScriptPath; //!< Path to the script file this should run when activated.
 		std::string m_FunctionName; //!< Name of the function in the script this should run when activated.
-		std::unique_ptr<PieMenu> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
+		std::unique_ptr<PieMenu, PieMenuCustomDeleter> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
 
 		float m_StartAngle; //!< The start angle of this PieSlice's area on the PieMenu, counted in radians from straight out right and going counter clockwise.
 		int m_SlotCount; //!< The arc length of the PieSlice area, so that the icon should be drawn at the AreaStart + halfway of this.

@@ -10,7 +10,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieSlice::Clear() {
-		m_Type = PieSliceIndex::PSI_NONE;
+		m_Type = Type::NoType;
 		m_Direction = Directions::Any;
 		m_CanBeMiddleSlice = true;
 		m_OriginalSource = nullptr;
@@ -69,7 +69,7 @@ namespace RTE {
 
 	int PieSlice::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Type") {
-			m_Type = static_cast<PieSliceIndex>(std::stoi(reader.ReadPropValue()));
+			m_Type = static_cast<Type>(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "Direction") {
 			std::string directionString = reader.ReadPropValue();
 			std::locale locale;
@@ -109,7 +109,7 @@ namespace RTE {
 	int PieSlice::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		if (m_Type != PieSliceIndex::PSI_NONE) { writer.NewPropertyWithValue("Type", m_Type); }
+		if (m_Type != Type::NoType) { writer.NewPropertyWithValue("Type", m_Type); }
 		if (m_Direction != Directions::Any) { writer.NewPropertyWithValue("Direction", static_cast<int>(m_Direction)); }
 		if (!m_Enabled) { writer.NewPropertyWithValue("Enabled", m_Enabled); }
 		writer.NewPropertyWithValue("Icon", m_Icon.get());

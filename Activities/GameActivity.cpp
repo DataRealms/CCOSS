@@ -1792,7 +1792,7 @@ void GameActivity::Update()
 			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE)) {
 				if (!m_BuyMenuEnabled && controlledActorPieMenu->IsEnabling()) {
-					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::PieSliceIndex::PSI_BUYMENU);
+					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::Type::BuyMenu);
 				}
 
 				if (controlledActorPieMenu->IsEnabled() && controlledActorPieMenu->HasSubPieMenuOpen() && m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) {
@@ -1805,21 +1805,21 @@ void GameActivity::Update()
 				m_InventoryMenuGUI[player]->SetEnabled(false);
 			}
 
-			if (PieSlice::PieSliceIndex command = controlledActorPieMenu->GetPieCommand(); command != PieSlice::PieSliceIndex::PSI_NONE) {
+			if (PieSlice::Type command = controlledActorPieMenu->GetPieCommand(); command != PieSlice::Type::NoType) {
 				// AI mode commands that need extra points set in special view modes here
 				//TODO I don't think these viewstates are actually used?!
-				if (command == PieSlice::PieSliceIndex::PSI_SENTRY) {
+				if (command == PieSlice::Type::Sentry) {
 					m_ViewState[player] = ViewState::AISentryPoint;
-				} else if (command == PieSlice::PieSliceIndex::PSI_PATROL) {
+				} else if (command == PieSlice::Type::Patrol) {
 					m_ViewState[player] = ViewState::AIPatrolPoints;
-				} else if (command == PieSlice::PieSliceIndex::PSI_GOLDDIG) {
+				} else if (command == PieSlice::Type::GoldDig) {
 					m_ViewState[player] = ViewState::AIGoldDigPoint;
-				} else if (command == PieSlice::PieSliceIndex::PSI_GOTO) {
+				} else if (command == PieSlice::Type::GoTo) {
 					m_ViewState[player] = ViewState::AIGoToPoint;
 					m_ControlledActor[player]->ClearAIWaypoints();
 					m_ActorCursor[player] = m_ControlledActor[player]->GetPos();
 					m_ControlledActor[player]->GetController()->SetDisabled(true);
-				} else if (command == PieSlice::PieSliceIndex::PSI_FORMSQUAD) {
+				} else if (command == PieSlice::Type::FormSquad) {
 					//Find out if we have any connected units, and disconnect them
 					bool isCommander = false;
 
@@ -1852,10 +1852,10 @@ void GameActivity::Update()
 						m_ControlledActor[player]->GetController()->SetDisabled(true);
 						m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
 					}
-				} else if (command == PieSlice::PieSliceIndex::PSI_BUYMENU) {
+				} else if (command == PieSlice::Type::BuyMenu) {
 					m_pBuyGUI[player]->SetEnabled(true);
 					skipBuyUpdate = true;
-				} else if (command == PieSlice::PieSliceIndex::PSI_FULLINVENTORY) {
+				} else if (command == PieSlice::Type::FullInventory) {
 					controlledActorPieMenu->SetEnabled(false);
 					m_InventoryMenuGUI[player]->SetEnabled(false);
 					m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Full);

@@ -237,7 +237,7 @@ bool AssemblyEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex AssemblyEditorGUI::GetActivatedPieSlice() const {
+PieSlice::Type AssemblyEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 
@@ -381,7 +381,7 @@ void AssemblyEditorGUI::Update()
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		PieSlice *saveSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_SAVE);
+		PieSlice *saveSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::SaveType);
 		if (saveSlice) {
 			saveSlice->SetEnabled(m_pCurrentScheme != nullptr);
 			saveSlice->SetDescription(m_pCurrentScheme != nullptr ? "Save Assembly" : "Can't Save Assembly, Scheme Not Selected!");
@@ -393,14 +393,14 @@ void AssemblyEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_PieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE) {
-		if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
+    if (m_PieMenu->GetPieCommand() != PieSlice::Type::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::Type::Pick) {
 			m_EditorGUIMode = PICKINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Move) {
 			m_EditorGUIMode = MOVINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Remove) {
 			m_EditorGUIMode = DELETINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Done) {
 			m_EditorGUIMode = DONEEDITING;
 		}
 

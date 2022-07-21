@@ -321,7 +321,7 @@ void BaseEditor::Update()
 
     // Get any mode change commands that the user gave the Editor GUI
     // Done with editing for now; save and return to campaign screen
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_DONE)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::Type::Done)
     {
         m_pEditorGUI->SetEditorGUIMode(SceneEditorGUI::INACTIVE);
 

@@ -144,7 +144,7 @@ void AreaEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex AreaEditorGUI::GetActivatedPieSlice() const {
+PieSlice::Type AreaEditorGUI::GetActivatedPieSlice() const {
 	return m_PieMenu->GetPieCommand();
 }
 
@@ -288,14 +288,14 @@ void AreaEditorGUI::Update()
 
 	if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGAREA) { m_PieMenu->SetEnabled(false); }
 
-    if (m_PieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE) {
-		if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
+    if (m_PieMenu->GetPieCommand() != PieSlice::Type::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::Type::Pick) {
 			m_EditorGUIMode = PICKINGAREA;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Move) {
 			m_EditorGUIMode = PREADDMOVEBOX;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Remove) {
 			m_EditorGUIMode = DELETINGBOX;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Done) {
 			m_EditorGUIMode = DONEEDITING;
 		}
     }

@@ -286,9 +286,9 @@ void ActorEditor::Update()
 			editedActorPieMenu->SetEnabled(false);
 		}
 
-		if (editedActorPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_LOAD) {
+		if (editedActorPieMenu->GetPieCommand() == PieSlice::Type::Load) {
 			ReloadActorData();
-		} else if (editedActorPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
+		} else if (editedActorPieMenu->GetPieCommand() == PieSlice::Type::Pick) {
 			m_EditorMode = EditorActivity::LOADDIALOG;
 			m_ModeChange = true;
 		}

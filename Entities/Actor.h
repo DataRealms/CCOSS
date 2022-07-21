@@ -607,7 +607,7 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
     /// </summary>
     /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
     /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
-    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceType) { return false; }
+    virtual bool HandlePieCommand(PieSlice::Type pieSliceType) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

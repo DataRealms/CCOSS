@@ -24,50 +24,49 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the types of PieSlices.
 		/// </summary>
-		enum PieSliceIndex {
-			PSI_NONE = 0,
+		enum Type {
+			NoType = 0,
 			// Inventory management
-			PSI_PICKUP,
-			PSI_DROP,
-			PSI_NEXTITEM,
-			PSI_PREVITEM,
-			PSI_RELOAD,
+			Pickup,
+			Drop,
+			NextItem,
+			PreviousItem,
+			Reload,
 			// Menu and GUI activations
-			PSI_BUYMENU,
-			PSI_FULLINVENTORY,
-			PSI_STATS,
-			PSI_MAP,
-			PSI_CEASEFIRE,
+			BuyMenu,
+			FullInventory,
+			Stats,
+			Map,
+			Ceasefire,
 			// Squad
-			PSI_FORMSQUAD,
+			FormSquad,
 			// AI Modes
-			PSI_AIMODES,
-			PSI_SENTRY,
-			PSI_PATROL,
-			PSI_BRAINHUNT,
-			PSI_GOLDDIG,
-			PSI_GOTO,
-			PSI_RETURN,
-			PSI_STAY,
-			PSI_DELIVER,
-			PSI_SCUTTLE,
+			AIModes,
+			Sentry,
+			Patrol,
+			BrainHunt,
+			GoldDig,
+			GoTo,
+			Return,
+			Stay,
+			Deliver,
+			Scuttle,
 			// Editor stuff
-			PSI_DONE,
-			PSI_LOAD,
-			PSI_SAVE,
-			PSI_NEW,
-			PSI_PICK,
-			PSI_MOVE,
-			PSI_REMOVE,
-			PSI_INFRONT,
-			PSI_BEHIND,
-			PSI_ZOOMIN,
-			PSI_ZOOMOUT,
-			PSI_TEAM1,
-			PSI_TEAM2,
-			PSI_TEAM3,
-			PSI_TEAM4,
-			PSI_COUNT
+			Done,
+			Load,
+			SaveType,
+			New,
+			Pick,
+			Move,
+			Remove,
+			InFront,
+			Behind,
+			ZoomIn,
+			ZoomOut,
+			Team1,
+			Team2,
+			Team3,
+			Team4
 		};
 
 #pragma region Creation
@@ -107,13 +106,13 @@ namespace RTE {
 		/// Gets the Type of this PieSlice.
 		/// </summary>
 		/// <returns>The Type of this PieSlice.</returns>
-		PieSliceIndex GetType() const { return m_Type; }
+		Type GetType() const { return m_Type; }
 
 		/// <summary>
 		/// Sets the Type of this PieSlice.
 		/// </summary>
 		/// <param name="newType">The new Type of this PieSlice.</param>
-		void SetType(PieSliceIndex newType) { m_Type = newType; }
+		void SetType(Type newType) { m_Type = newType; }
 
 		/// <summary>
 		/// Gets the Direction of this PieSlice.
@@ -281,7 +280,7 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		PieSliceIndex m_Type; //!< The slice type, also used to determine the icon.
+		Type m_Type; //!< The slice type, also used to determine the icon.
 		Directions m_Direction; //!< The desired direction/location of this on the PieMenu.
 		bool m_CanBeMiddleSlice; //!< Whether or not this PieSlice is allowed to be the middle slice. Defaults to true and should usually stay that way.
 		const Entity *m_OriginalSource; //!< A pointer to the original source of this PieSlice, normally filled in when PieSlices are added to PieMenus by objects other than the PieMenu's owner, and nullptr otherwise.

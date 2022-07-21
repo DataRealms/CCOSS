@@ -537,19 +537,19 @@ void ACraft::SetTeam(int team)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACraft::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) {
-    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE) {
-        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DELIVER) {
+bool ACraft::HandlePieCommand(PieSlice::Type pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::Type::NoType) {
+        if (pieSliceIndex == PieSlice::Type::Deliver) {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
-        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RETURN) {
+        } else if (pieSliceIndex == PieSlice::Type::Return) {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
-        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_STAY) {
+        } else if (pieSliceIndex == PieSlice::Type::Stay) {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
-        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SCUTTLE) {
+        } else if (pieSliceIndex == PieSlice::Type::Scuttle) {
             m_AIMode = AIMODE_SCUTTLE;
         } else {
             return Actor::HandlePieCommand(pieSliceIndex);

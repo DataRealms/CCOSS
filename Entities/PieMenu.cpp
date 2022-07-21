@@ -354,9 +354,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PieSlice::PieSliceIndex PieMenu::GetPieCommand() const {
+	PieSlice::Type PieMenu::GetPieCommand() const {
 		const PieSlice *activatedSlice = m_ActiveSubPieMenu ? m_ActiveSubPieMenu->GetActivatedPieSlice() : m_ActivatedPieSlice;
-		return activatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : activatedSlice->GetType();
+		return activatedSlice == nullptr ? PieSlice::Type::NoType : activatedSlice->GetType();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,7 +372,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PieSlice *PieMenu::GetFirstPieSliceByType(PieSlice::PieSliceIndex pieSliceType) const {
+	PieSlice *PieMenu::GetFirstPieSliceByType(PieSlice::Type pieSliceType) const {
 		for (PieSlice *pieSlice : m_CurrentPieSlices) {
 			if (pieSlice->GetType() == pieSliceType) {
 				return pieSlice;
@@ -487,7 +487,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenu::RemovePieSlicesByType(PieSlice::PieSliceIndex pieSliceTypeToRemoveBy) {
+	bool PieMenu::RemovePieSlicesByType(PieSlice::Type pieSliceTypeToRemoveBy) {
 		bool anySlicesRemoved = false;
 
 		for (const PieSlice *pieSlice : m_CurrentPieSlices) {
@@ -1070,7 +1070,7 @@ namespace RTE {
 				break;
 			case IconSeparatorMode::Circle:
 				for (const PieSlice *pieSlice : m_CurrentPieSlices) {
-					if (pieSlice->GetType() != PieSlice::PieSliceIndex::PSI_NONE) { DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, pieSlice->GetMidAngle() + subPieMenuRotationOffset, pieSlice == m_HoveredPieSlice && pieSlice->IsEnabled(), pieSlice->GetSubPieMenu()); }
+					if (pieSlice->GetType() != PieSlice::Type::NoType) { DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, pieSlice->GetMidAngle() + subPieMenuRotationOffset, pieSlice == m_HoveredPieSlice && pieSlice->IsEnabled(), pieSlice->GetSubPieMenu()); }
 				}
 				break;
 			default:

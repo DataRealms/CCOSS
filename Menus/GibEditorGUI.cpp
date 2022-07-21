@@ -159,7 +159,7 @@ void GibEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::PieSliceIndex GibEditorGUI::GetActivatedPieSlice() const {
+PieSlice::Type GibEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 
@@ -262,15 +262,15 @@ void GibEditorGUI::Update()
 
 	m_PieMenu->Update();
 
-	if (PieSlice *zoomInSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMIN)) { zoomInSlice->SetEnabled(m_ZoomFactor < MAXZOOMFACTOR); }
-	if (PieSlice *zoomOutSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_ZOOMOUT)) { zoomOutSlice->SetEnabled(m_ZoomFactor > MINZOOMFACTOR); }
+	if (PieSlice *zoomInSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::ZoomIn)) { zoomInSlice->SetEnabled(m_ZoomFactor < MAXZOOMFACTOR); }
+	if (PieSlice *zoomOutSlice = m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::ZoomOut)) { zoomOutSlice->SetEnabled(m_ZoomFactor > MINZOOMFACTOR); }
 
     // Show the pie menu only when the secondary button is held down
     if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGGIB) {
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_INFRONT), m_PieMenu->GetFirstPieSliceByType(PieSlice::PieSliceIndex::PSI_BEHIND) };
+		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::InFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::Behind) };
 		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
 			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGGIB); }
 		}
@@ -281,27 +281,27 @@ void GibEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_PieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE) {
-		if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
+    if (m_PieMenu->GetPieCommand() != PieSlice::Type::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::Type::Pick) {
 			m_EditorGUIMode = PICKINGGIB;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_LOAD) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Load) {
             // Set up the picker to pick an MOSRotating to load
             m_EditorGUIMode = PICKOBJECTTOLOAD;
             m_pPicker->ShowOnlyType("MOSRotating");
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Move) {
 			m_EditorGUIMode = MOVINGGIB;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Remove) {
 			m_EditorGUIMode = DELETINGGIB;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Done) {
 			m_EditorGUIMode = DONEEDITING;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_ZOOMIN && m_ZoomFactor < MAXZOOMFACTOR) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::ZoomIn && m_ZoomFactor < MAXZOOMFACTOR) {
 			m_ZoomFactor++;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_ZOOMOUT && m_ZoomFactor > MINZOOMFACTOR) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::ZoomOut && m_ZoomFactor > MINZOOMFACTOR) {
 			m_ZoomFactor--;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_INFRONT) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::InFront) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEINFRONT;
-        } else if (m_PieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_BEHIND) {
+        } else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Behind) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEBEHIND;
         }

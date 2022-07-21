@@ -378,7 +378,7 @@ enum Side
     /// </summary>
     /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
     /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
-    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceType) override;
+    bool HandlePieCommand(PieSlice::Type pieSliceType) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1302,7 +1302,7 @@ namespace RTE {
 		float enableDisableProgress = static_cast<float>(m_EnableDisableAnimationTimer.RealTimeLimitProgress());
 
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
-			if (carouselItemBox->Item || (carouselItemBox->IsForEquippedItems && !m_InventoryActorEquippedItems.empty())) {
+			if ((carouselItemBox->Item && carouselItemBox->Item->GetUniqueID() != 0) || (carouselItemBox->IsForEquippedItems && !m_InventoryActorEquippedItems.empty())) {
 				DrawCarouselItemBoxBackground(*carouselItemBox);
 				DrawCarouselItemBoxForeground(*carouselItemBox, &carouselAllegroBitmap);
 			} else if (m_CarouselDrawEmptyBoxes) {

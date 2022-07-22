@@ -314,6 +314,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("BackgroundSeparatorSize", m_BackgroundSeparatorSize);
 		writer.NewPropertyWithValue("DrawBackgroundTransparent", m_DrawBackgroundTransparent);
 		writer.NewPropertyWithValue("BackgroundColor", m_BackgroundColor);
+		writer.NewPropertyWithValue("BackgroundBorderColor", m_BackgroundBorderColor);
 		writer.NewPropertyWithValue("SelectedItemBackgroundColor", m_SelectedItemBackgroundColor);
 
 		for (const PieSlice *pieSlice : m_CurrentPieSlices) {

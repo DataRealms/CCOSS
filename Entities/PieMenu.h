@@ -412,12 +412,14 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the different item separator modes available to the PieMenu.
 		/// </summary>
-		enum class IconSeparatorMode { Line, Circle };
+		enum class IconSeparatorMode { Line, Circle, Square };
 
 		static constexpr int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
 		static constexpr int c_DefaultFullRadius = 58; //!< The radius the menu should have when fully enabled, in pixels.
 		static constexpr int c_PieSliceWithSubPieMenuHoverOpenInterval = 1000; //!< The number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
 		static constexpr int c_PieSliceWithSubPieMenuExtraThickness = 3; //!< The extra thickness to be added to PieSlices with a sub-PieMenu.
+
+		static const std::unordered_map<std::string, IconSeparatorMode> c_IconSeparatorModeMap; //!< A map of strings to IconSeparatorModes to support string parsing for the IconSeparatorMode enum. Populated in the implementing cpp file.
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static BITMAP *s_CursorBitmap; //!< A static pointer to the bitmap to use as the cursor in any menu.
@@ -437,7 +439,6 @@ namespace RTE {
 		Timer m_HoverTimer; //!< Timer to measure how long to hold a hovered over slice.
 		Timer m_SubPieMenuHoverOpenTimer; //!< Timer for opening sub-PieMenus when their owning slices are hovered over.
 
-		//TODO maybe add lua bindings for the visual stuff - it could be fun to let that be lua - modifiable
 		IconSeparatorMode m_IconSeparatorMode; //!< The icon separator mode of this PieMenu.
 		int m_FullInnerRadius; //!< The full inner radius of the PieMenu's background, in pixels.
 		int m_BackgroundThickness; //!< The thickness of the PieMenu's background, in pixels.

@@ -1939,8 +1939,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-    if (/*m_Controller.IsState(PIE_MENU_ACTIVE) || */m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP))
-    {
+	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
+	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int prevSpacing = m_Controller.IsState(ACTOR_PREV_PREP) ? 3 : 9;

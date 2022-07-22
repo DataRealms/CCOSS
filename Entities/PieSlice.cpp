@@ -72,7 +72,6 @@ namespace RTE {
 			m_Type = static_cast<Type>(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "Direction") {
 			std::string directionString = reader.ReadPropValue();
-			std::locale locale;
 			if (c_DirectionNameToDirectionsMap.find(directionString) != c_DirectionNameToDirectionsMap.end()) {
 				m_Direction = c_DirectionNameToDirectionsMap.find(directionString)->second;
 			} else {

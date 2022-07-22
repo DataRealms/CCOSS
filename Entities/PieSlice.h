@@ -32,7 +32,7 @@ namespace RTE {
 			NextItem,
 			PreviousItem,
 			Reload,
-			// Menu and GUI activations
+			// Menu and GUI activation
 			BuyMenu,
 			FullInventory,
 			Stats,

@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
+- New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load succesfully.
+
+- New `Actor` INI properties `Organic = 0/1` and `Robotic = 0/1` and supporting Lua functions `Actor:IsOrganic()` and `Actor:IsRobotic()`. These have no direct gameplay effect (and default to false), but will be very useful for inter-mod compatibility, as they allow scripts to know if an `Actor` is organic or robotic, and treat them accordingly.
+  
+- New INI and Lua (R/W) `ACDropShip` property `HoverHeightModifier`. This allows for modification of the height at which an `ACDropShip` will hover when unloading cargo, or staying at a location.
+
 - Made `Vector` properties `AbsRadAngle` and `AbsDegAngle` writable, so you can set a `Vector`'s direction directly, instead of rotating it by an angle via `RadRotate` and `DegRotate`.
 
 - New `HDFirearm` Lua function `GetNextMagazineName()`, that gets the name of the next `Magazine` to be loaded into the `HDFirearm`.
@@ -78,6 +84,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Completely replaced `ScriptFile` with `ScriptPath`.
 
 - Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:	
 	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.	

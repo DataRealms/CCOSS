@@ -1311,6 +1311,18 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 	/// <param name="newRecoverDelay">The recovery delay, in MS.</param>
 	void SetStableRecoverDelay(int newRecoverDelay) { m_StableRecoverDelay = newRecoverDelay; }
 
+	/// <summary>
+	/// Gets whether or not this Actor has the organic flag set and should be considered as organic.
+	/// </summary>
+	/// <returns>Whether or not this Actor has the organic flag set and should be considered as organic.</returns>
+	bool IsOrganic() const { return m_Organic; }
+
+	/// <summary>
+	/// Gets whether or not this Actor has the robotic flag set and should be considered as robotic.
+	/// </summary>
+	/// <returns>Whether or not this Actor has the robotic flag set and should be considered as robotic.</returns>
+	bool IsRobotic() const { return m_Robotic; }
+
     /// <summary>
     /// Gets a pointer to the PieMenu for this Actor. Ownership is NOT transferred.
     /// </summary>
@@ -1532,6 +1544,9 @@ protected:
     Timer m_StuckTimer;
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
+
+	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
+	bool m_Robotic; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

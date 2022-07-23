@@ -112,7 +112,7 @@ int GAScripted::Create(const GAScripted &reference)
 
 int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "ScriptFile") {
+	if (propName == "ScriptPath") {
 		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName") {
 		reader >> m_LuaClassName;
@@ -135,7 +135,7 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 int GAScripted::Save(Writer &writer) const {
 	GameActivity::Save(writer);
 
-	writer.NewPropertyWithValue("ScriptFile", m_ScriptPath);
+	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
 	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 
 	for (const std::unique_ptr<PieSlice> &pieSliceToAdd : m_PieSlicesToAdd) {

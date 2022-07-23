@@ -136,6 +136,9 @@ void Actor::Clear() {
 
     m_DamageMultiplier = 1.0F;
 
+	m_Organic = false;
+	m_Robotic = false;
+
     m_PieMenu.reset();
 }
 
@@ -288,10 +291,12 @@ int Actor::Create(const Actor &reference)
     m_ObstacleState = reference.m_ObstacleState;
     m_TeamBlockState = reference.m_TeamBlockState;
 
+	m_Organic = reference.m_Organic;
+	m_Robotic = reference.m_Robotic;
+
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
 	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));
 	m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get()));
-
 
     return 0;
 }
@@ -381,12 +386,15 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         int mode;
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
+	} else if (propName == "Organic") {
+		reader >> m_Organic;
+	} else if (propName == "Robotic") {
+		reader >> m_Robotic;
     } else if (propName == "PieMenu") {
         m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
         m_PieMenu->Create(this);
-    }
-    else
+	} else
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -459,6 +467,9 @@ int Actor::Save(Writer &writer) const
     writer << m_AIMode;
     writer.NewProperty("PieMenu");
     writer << m_PieMenu.get();
+
+	writer.NewPropertyWithValue("Organic", m_Organic);
+	writer.NewPropertyWithValue("Robotic", m_Robotic);
 
     return 0;
 }

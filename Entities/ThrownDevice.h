@@ -104,6 +104,13 @@ namespace RTE {
 		void SetMaxThrowVel(float maxThrowVel) { m_MaxThrowVel = maxThrowVel; }
 
 		/// <summary>
+		/// Ugly method to deal with lua AI bullshit, by pulling the max throwvel calculation based on arm strength into here.
+		/// If throw velocity is decided by the Arm and not by the ThrownDevice, then the mass of the ThrownDevice and the angular velocity of the root parent Actor will be taken into account.
+		/// </summary>
+		/// <returns>The max throw vel to use.</returns>
+		float GetCalculatedMaxThrowVelIncludingArmThrowStrength();
+
+		/// <summary>
 		/// If true then the explosive will not activate until it's released.
 		/// </summary>
 		/// <returns>Whether this ThrownDevice is supposed to only activate when it's released.</returns>

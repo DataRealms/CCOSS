@@ -3434,15 +3434,12 @@ void AHuman::Update()
 					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
 					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
+					float maxThrowVel = pThrown->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
 						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
-						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
-						if (maxThrowVel == 0) {
-							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
-							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
-							minThrowVel = maxThrowVel * 0.2F;
-						}
+						if (minThrowVel == 0) { minThrowVel = maxThrowVel * 0.2F; }
+
 						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
 						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());

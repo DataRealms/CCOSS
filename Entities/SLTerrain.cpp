@@ -416,7 +416,9 @@ namespace RTE {
 
 						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
 						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
+#ifndef RELEASE_BUILD
 						terrainPixel->SetPresetName("Dislodged Terrain Pixel from Material " + std::to_string(sceneMat->GetIndex()));
+#endif
 						terrainPixel->SetToHitMOs(false);
 						dislodgedMOPixels.emplace_back(terrainPixel.release());
 					}

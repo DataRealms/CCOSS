@@ -109,6 +109,9 @@ void MovableObject::Clear()
 	m_ParticleUniqueIDHit = 0;
 
 	m_ProvidesPieMenuContext = false;
+
+	m_SimUpdatesBetweenScriptedUpdates = 1;
+    m_SimUpdatesSinceLastScriptedUpdate = 0;
 }
 
 
@@ -253,6 +256,9 @@ int MovableObject::Create(const MovableObject &reference)
 	m_MOIDHit = reference.m_MOIDHit;
 	m_TerrainMatHit = reference.m_TerrainMatHit;
 	m_ParticleUniqueIDHit = reference.m_ParticleUniqueIDHit;
+
+	m_SimUpdatesBetweenScriptedUpdates = reference.m_SimUpdatesBetweenScriptedUpdates;
+	m_SimUpdatesSinceLastScriptedUpdate = reference.m_SimUpdatesSinceLastScriptedUpdate;
 
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
@@ -402,6 +408,8 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
         reader >> m_ApplyWoundBurstDamageOnCollision;
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
+    else if (propName == "SimUpdatesBetweenScriptedUpdates")
+        reader >> m_SimUpdatesBetweenScriptedUpdates;
 	else
         return SceneObject::ReadProperty(propName, reader);
 
@@ -1008,9 +1016,18 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::UpdateScripts() {
+    m_SimUpdatesSinceLastScriptedUpdate++;
+    
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
     }
+
+    if (m_SimUpdatesSinceLastScriptedUpdate < m_SimUpdatesBetweenScriptedUpdates) {
+        return 1;
+    }
+
+	m_SimUpdatesSinceLastScriptedUpdate = 0;
+
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;

@@ -20,6 +20,7 @@
 #include "SceneEditor.h"
 #include "UInputMan.h"
 
+#include "Deployment.h"
 #include "Controller.h"
 #include "SceneObject.h"
 #include "MOSprite.h"

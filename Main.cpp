@@ -63,6 +63,7 @@ namespace RTE {
 
 		g_UInputMan.Initialize();
 		g_ConsoleMan.Initialize();
+		g_SceneMan.Initialize();
 		g_MovableMan.Initialize();
 		g_MetaMan.Initialize();
 		g_MenuMan.Initialize();
@@ -195,9 +196,6 @@ namespace RTE {
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
 		while (!System::IsSetToQuit()) {
-			// Need to clear this out; sometimes background layers don't cover the whole back.
-			g_FrameMan.ClearBackBuffer8();
-
 			g_TimerMan.Update();
 
 			bool serverUpdated = false;

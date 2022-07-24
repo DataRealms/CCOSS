@@ -47,10 +47,16 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the texture bitmap of this Material, if any is associated with it.
+		/// Gets the foreground texture bitmap of this Material, if any is associated with it.
 		/// </summary>
-		/// <returns>Pointer to the texture bitmap of this Material.</returns>
-		BITMAP * GetTexture() const { return m_TerrainTexture; }
+		/// <returns>Pointer to the foreground texture bitmap of this Material.</returns>
+		BITMAP * GetFGTexture() const { return m_TerrainFGTexture; }
+
+		/// <summary>
+		/// Gets the background texture bitmap of this Material, if any is associated with it.
+		/// </summary>
+		/// <returns>Pointer to the background texture bitmap of this Material.</returns>
+		BITMAP * GetBGTexture() const { return m_TerrainBGTexture; }
 
 		/// <summary>
 		/// Gets the index of this Material in the material palette.
@@ -179,8 +185,10 @@ namespace RTE {
 		Color m_Color; //!< The natural color of this material.
 		bool m_UseOwnColor; //!< Whether or not to use the own color when a pixel of this material is knocked loose from the terrain. If 0, then the terrain pixel's color will be applied instead.
 
-		ContentFile m_TextureFile; //!< The file pointing to the terrain texture of this Material 
-		BITMAP *m_TerrainTexture; //!< The texture of this material, used when building an SLTerrain.
+		ContentFile m_FGTextureFile; //!< The file pointing to the terrain foreground texture of this Material.
+		ContentFile m_BGTextureFile; //!< The file pointing to the terrain background texture of this Material.
+		BITMAP *m_TerrainFGTexture; //!< The foreground texture of this Material, used when building an SLTerrain. Not owned.
+		BITMAP *m_TerrainBGTexture; //!< The background texture of this Material, used when building an SLTerrain. Not owned.
 
 	private:
 

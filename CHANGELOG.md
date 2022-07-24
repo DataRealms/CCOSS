@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+
+- New `MovableObject` INI and Lua (R/W) property `SimUpdatesBetweenScriptedUpdates`, that lets `MovableObject`s run their Lua update function less frequently, for performance benefits.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -1493,27 +1493,17 @@ enum MOType
 
 	void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetUpdatePeriod()
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets period of lua updates.
-// Arguments:       None.
-// Return value:    Period of updates.
+    /// <summary>
+    /// Gets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <returns>The number of Sim updates that run between each script update for this MovableObject.</returns>
+    int GetSimUpdatesBetweenScriptedUpdates() const { return m_SimUpdatesBetweenScriptedUpdates; }
 
-    unsigned int GetUpdatePeriod() {
-        return m_UpdatePeriod;
-    }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetUpdatePeriod()
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets period of lua updates.
-// Arguments:       Period of updates.
-// Return value:    None.
-
-    void SetUpdatePeriod(unsigned int period) {
-        m_UpdatePeriod = period;
-    }
+    /// <summary>
+    /// sets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <param name="newSimUpdatesBetweenScriptedUpdates">The new number of Sim updates that run between each script update for this MovableObject.</param>
+    void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2029,9 +2019,8 @@ protected:
 	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
 	bool m_ProvidesPieMenuContext;
     // Update every n frames property
-    unsigned int m_UpdatePeriod;
-    // Update scripts counter
-    unsigned int m_UpdateFrames;
+    int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
+    int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

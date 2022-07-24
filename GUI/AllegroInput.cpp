@@ -13,6 +13,7 @@ namespace RTE {
 
 	AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor) : GUIInput(whichPlayer, keyJoyMouseCursor) {
 		install_keyboard();
+		setlocale(LC_ALL, "C");
 		install_mouse();
 
 #ifndef GUI_STANDALONE

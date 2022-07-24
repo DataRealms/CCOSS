@@ -400,7 +400,7 @@ int MetaMan::SaveSceneData(string pathBase)
     for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         // Only save the data of revealed scenes that have already had their layers built and saved into files
-        if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsFileData())
+        if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsLoadedFromDisk())
         {
             // Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
             if ((*sItr)->SaveData(pathBase + " - " + (*sItr)->GetPresetName()) < 0)
@@ -422,7 +422,7 @@ int MetaMan::LoadSceneData()
     for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Only load the data of revealed scenes that have already had their layers built and saved into files
-        if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsFileData())
+        if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsLoadedFromDisk())
         {
             // Only load the scene layer data, don't place objects or do any init for actually playing the scene
             if ((*sItr)->LoadData(false, false) < 0)
@@ -1142,6 +1142,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
         counterRatio = 0.5;
         // Nothing to attack with
         offenseRatio = 0;
+		pThisPlayer->SetOffensiveTargetName("");
     }
     // Special case: no owned bases
     else if (ownedScenes.empty())

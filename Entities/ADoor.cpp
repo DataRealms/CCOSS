@@ -36,6 +36,8 @@ namespace RTE {
 		m_DrawMaterialLayerWhenClosed = true;
 		m_DoorMaterialID = g_MaterialDoor;
 		m_DoorMaterialDrawn = false;
+		m_DoorMaterialRedrawTimer.Reset();
+		m_DoorMaterialRedrawTimer.SetSimTimeLimitMS(10000);
 		m_DoorMaterialTempErased = false;
 		m_LastDoorMaterialPos.Reset();
 		m_DoorMoveStartSound = nullptr;
@@ -50,12 +52,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
-		if (reference.m_Door) {
-			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID());
-			SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone()));
-		}
+		if (reference.m_Door) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID()); }
 
 		Actor::Create(reference);
+
+		if (reference.m_Door) { SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone())); }
 
 		m_InitialSpriteAnimDuration = reference.m_SpriteAnimDuration;
 
@@ -78,10 +79,10 @@ namespace RTE {
 		m_DrawMaterialLayerWhenClosed = reference.m_DrawMaterialLayerWhenClosed;
 		m_DoorMaterialID = reference.m_DoorMaterialID;
 		m_DoorMaterialTempErased = reference.m_DoorMaterialTempErased;
-		if (reference.m_DoorMoveStartSound) { m_DoorMoveStartSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveStartSound->Clone()); }
-		if (reference.m_DoorMoveSound) { m_DoorMoveSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveSound->Clone()); }
-		if (reference.m_DoorDirectionChangeSound) { m_DoorDirectionChangeSound = dynamic_cast<SoundContainer*>(reference.m_DoorDirectionChangeSound->Clone()); }
-		if (reference.m_DoorMoveEndSound) { m_DoorMoveEndSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveEndSound->Clone()); }
+		if (reference.m_DoorMoveStartSound) { m_DoorMoveStartSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorMoveStartSound->Clone())); }
+		if (reference.m_DoorMoveSound) { m_DoorMoveSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorMoveSound->Clone())); }
+		if (reference.m_DoorDirectionChangeSound) { m_DoorDirectionChangeSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorDirectionChangeSound->Clone())); }
+		if (reference.m_DoorMoveEndSound) { m_DoorMoveEndSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorMoveEndSound->Clone())); }
 
 		return 0;
 	}
@@ -130,17 +131,13 @@ namespace RTE {
 		} else if (propName == "DrawMaterialLayerWhenClosed") {
 			reader >> m_DrawMaterialLayerWhenClosed;
 		} else if (propName == "DoorMoveStartSound") {
-			m_DoorMoveStartSound = new SoundContainer;
-			reader >> m_DoorMoveStartSound;
+			m_DoorMoveStartSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "DoorMoveSound") {
-			m_DoorMoveSound = new SoundContainer;
-			reader >> m_DoorMoveSound;
+			m_DoorMoveSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "DoorDirectionChangeSound") {
-			m_DoorDirectionChangeSound = new SoundContainer;
-			reader >> m_DoorDirectionChangeSound;
+			m_DoorDirectionChangeSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "DoorMoveEndSound") {
-			m_DoorMoveEndSound = new SoundContainer;
-			reader >> m_DoorMoveEndSound;
+			m_DoorMoveEndSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else {
 			return Actor::ReadProperty(propName, reader);
 		}
@@ -179,13 +176,13 @@ namespace RTE {
 		writer.NewProperty("DrawMaterialLayerWhenClosed");
 		writer << m_DrawMaterialLayerWhenClosed;
 		writer.NewProperty("DoorMoveStartSound");
-		writer << m_DoorMoveStartSound;
+		writer << m_DoorMoveStartSound.get();
 		writer.NewProperty("DoorMoveSound");
-		writer << m_DoorMoveSound;
+		writer << m_DoorMoveSound.get();
 		writer.NewProperty("DoorDirectionChangeSound");
-		writer << m_DoorDirectionChangeSound;
+		writer << m_DoorDirectionChangeSound.get();
 		writer.NewProperty("DoorMoveEndSound");
-		writer << m_DoorMoveEndSound;
+		writer << m_DoorMoveEndSound.get();
 
 		return 0;
 	}
@@ -199,11 +196,6 @@ namespace RTE {
 		if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Stop(); }
 		if (!notInherited) { Actor::Destroy(); }
 
-		delete m_DoorMoveStartSound;
-		delete m_DoorMoveSound;
-		delete m_DoorDirectionChangeSound;
-		delete m_DoorMoveEndSound;
-
 		for (ADSensor &sensor : m_Sensors) {
 			sensor.Destroy();
 		}
@@ -216,6 +208,7 @@ namespace RTE {
 	void ADoor::SetDoor(Attachable *newDoor) {
 		if (m_Door && m_Door->IsAttached()) { RemoveAndDeleteAttachable(m_Door); }
 		if (newDoor == nullptr) {
+			if (m_DoorMaterialDrawn) { EraseDoorMaterial(); }
 			m_Door = nullptr;
 		} else {
 			m_Door = newDoor;
@@ -232,11 +225,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::DrawDoorMaterial() {
+	void ADoor::DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing) {
 		if (!m_Door || m_DoorMaterialTempErased || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
-		if (m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
+		if (!disallowErasingMaterialBeforeDrawing && m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
 
 		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawDoor, true);
 		m_LastDoorMaterialPos = m_Door->GetPos();
@@ -247,8 +240,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ADoor::EraseDoorMaterial(bool updateMaterialArea, bool keepMaterialDrawnFlag) {
-		if (!keepMaterialDrawnFlag) { m_DoorMaterialDrawn = false; }
+	bool ADoor::EraseDoorMaterial(bool updateMaterialArea) {
+		m_DoorMaterialDrawn = false;
 
 		if (!g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return false;
@@ -257,6 +250,7 @@ namespace RTE {
 		int fillX = m_LastDoorMaterialPos.GetFloorIntX();
 		int fillY = m_LastDoorMaterialPos.GetFloorIntY();
 
+		DrawDoorMaterial(true);
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
 			if (m_Door && updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
@@ -267,22 +261,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::MaterialDrawOverride(bool enable) {
+	void ADoor::TempEraseOrRedrawDoorMaterial(bool erase) {
 		if (!g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
 
-		if (enable) {
-			// Erase the material temporarily if we have drawn it and the override isn't already in effect
-			if (m_DoorMaterialDrawn && m_DoorMaterialTempErased != enable) { EraseDoorMaterial(true, true); }
-		} else {
-			// Draw the door back if we were indeed temporarily suppressing it before
-			if (m_DoorMaterialDrawn && m_DoorMaterialTempErased != enable) {
-				m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawDoor, true);
-				g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
-			}
+		bool doorMaterialDrawnState = m_DoorMaterialDrawn;
+		if (erase && m_DoorMaterialDrawn && !m_DoorMaterialTempErased) {
+			EraseDoorMaterial(true);
+			m_DoorMaterialDrawn = doorMaterialDrawnState;
+		} else if (!erase && m_DoorMaterialDrawn && m_DoorMaterialTempErased) {
+			DrawDoorMaterial(true);
+			m_DoorMaterialDrawn = doorMaterialDrawnState;
 		}
-		m_DoorMaterialTempErased = enable;
+
+		m_DoorMaterialTempErased = erase;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,19 +360,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Update() {
-
-		if (m_Door && m_Door->IsAttached()) {
+		if (m_Door) {
 			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { UpdateSensors(); }
 			UpdateDoorAttachableActions();
+
+			if (((m_DrawMaterialLayerWhenOpen && m_DoorState == OPEN) || (m_DrawMaterialLayerWhenClosed && m_DoorState == CLOSED) || ((m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) && m_DoorState == STOPPED)) && m_DoorMaterialRedrawTimer.IsPastSimTimeLimit()) {
+				DrawDoorMaterial(true);
+				m_DoorMaterialRedrawTimer.Reset();
+			}
 		}
 
 		Actor::Update();
 
-		if (!m_Door) {
-			EraseDoorMaterial();
-			// Start the spinning out of control animation for the motor, start it slow
-			m_SpriteAnimDuration *= 4;
-		}
+		// Start the spinning out of control animation for the motor, start it slow
+		if (!m_Door) { m_SpriteAnimDuration *= 4; }
 
 		if (m_SpriteAnimMode == LOOPWHENOPENCLOSE && m_FrameCount > 1 && (m_DoorState == OPENING || m_DoorState == CLOSING) && m_SpriteAnimTimer.IsPastSimMS(m_SpriteAnimDuration)) {
 			m_Frame = (m_Frame + 1) % m_FrameCount;
@@ -389,11 +383,11 @@ namespace RTE {
 		// Lose health when door is lost, spinning out of control until grinds to halt
 		if (!m_Door && m_Status != DYING && m_Status != DEAD) {
 			m_SpriteAnimMode = ALWAYSLOOP;
-			m_SpriteAnimDuration = LERP(0, m_MaxHealth, 10, m_InitialSpriteAnimDuration, m_Health);
+			m_SpriteAnimDuration = static_cast<int>(LERP(0, m_MaxHealth, 10.0F, static_cast<float>(m_InitialSpriteAnimDuration), m_Health));
 
 			if (m_DoorMoveSound) {
 				if (!m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
-				m_DoorMoveSound->SetPitch(LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration));
+				m_DoorMoveSound->SetPitch(LERP(10.0F, static_cast<float>(m_InitialSpriteAnimDuration), 2.0F, 1.0F, static_cast<float>(m_SpriteAnimDuration)));
 			}
 
 			m_Health -= 0.4F;
@@ -404,7 +398,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::UpdateSensors() {		
-		const Actor *foundActor = 0;
+		const Actor *foundActor = nullptr;
 		bool anySensorInput = false;
 
 		for (ADSensor &sensor : m_Sensors) {
@@ -415,7 +409,7 @@ namespace RTE {
 				if (m_Team == Activity::NoTeam) {
 					OpenDoor();
 					break;
-				// If a sensor has found an enemy Actor, close the door and break so we don't accidentally open it for a friendly Actor.
+				// If a sensor has found an enemy Actor, close the door and stop looking, so we don't accidentally open it for a friendly Actor.
 				} else if (foundActor->GetTeam() != m_Team) {
 					CloseDoor();
 					break;
@@ -493,7 +487,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::DrawHUD(BITMAP *targetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
-		m_HUDStack = -m_CharHeight / 2;
+		m_HUDStack = -static_cast<int>(m_CharHeight) / 2;
 
 		if (!m_HUDVisible) {
 			return;

@@ -68,6 +68,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether simplified collision detection is enabled or not.</returns>
 		bool SimplifiedCollisionDetection() const { return m_SimplifiedCollisionDetection; }
+
+		/// <summary>
+		/// Gets the Scene background layer auto-scaling mode.
+		/// </summary>
+		/// <returns>The Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</returns>
+		int GetSceneBackgroundAutoScaleMode() const { return m_SceneBackgroundAutoScaleMode; }
+
+		/// <summary>
+		/// Sets the Scene background layer auto-scaling mode.
+		/// </summary>
+		/// <param name="newMode">The new Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</param>
+		void SetSceneBackgroundAutoScaleMode(int newMode) { m_SceneBackgroundAutoScaleMode = std::clamp(newMode, 0, 2); }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -106,6 +118,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newRadius">The new range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.</param>
 		void SetUnheldItemsHUDDisplayRange(float newRadius) { m_UnheldItemsHUDDisplayRange = std::floor(newRadius); }
+
+		/// <summary>
+		/// Gets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <returns>Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</returns>
+		bool AlwaysDisplayUnheldItemsInStrategicMode() const { return m_AlwaysDisplayUnheldItemsInStrategicMode; }
+
+		/// <summary>
+		/// Sets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <param name="shouldShowUnheldItemsInStrategicMode">Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</param>
+		void SetAlwaysDisplayUnheldItemsInStrategicMode(bool shouldShowUnheldItemsInStrategicMode) { m_AlwaysDisplayUnheldItemsInStrategicMode = shouldShowUnheldItemsInStrategicMode; }
 
 		/// <summary>
 		/// Whether red and white flashes appear when brain is damaged.
@@ -240,6 +264,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
 		void SetNATServerPassword(const std::string &newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
+
+		/// <summary>
+		/// Gets whether or not experimental multiplayer speedboosts should be used.
+		/// </summary>
+		/// <returns>Whether or not experimental multiplayer speedboosts should be used.</returns>
+		bool UseExperimentalMultiplayerSpeedBoosts() const { return m_UseExperimentalMultiplayerSpeedBoosts; }
+
+		/// <summary>
+		/// Sets whether or not experimental multiplayer speedboosts should be used.
+		/// </summary>
+		/// <param name="newValue">Whether or not experimental multiplayer speedboosts should be used.</param>
+		void SetUseExperimentalMultiplayerSpeedBoosts(bool newValue) { m_UseExperimentalMultiplayerSpeedBoosts = newValue; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -414,6 +450,7 @@ namespace RTE {
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.
+		bool m_AlwaysDisplayUnheldItemsInStrategicMode; //!< Whether or not devices on Scene should always show their pick-up HUD when when the player is in strategic mode.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
@@ -425,12 +462,14 @@ namespace RTE {
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
+		bool m_UseExperimentalMultiplayerSpeedBoosts; //!< Turns on/off code changes from topkek that may speed up multiplayer.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
+		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

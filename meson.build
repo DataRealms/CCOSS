@@ -1,19 +1,20 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.53')
+project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
 deps=[]
 if host_machine.system() in ['linux','osx']
   deps = [
-    dependency('allegro'),
+    dependency('allegro', version:'<5.0'),
     dependency('loadpng'),
     dependency('flac'),
+    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
-    dependency('minizip'),
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
     dependency('boost'), #needed for luabind
+    dependency(['lua52', 'lua5.2', 'lua-5.2']),
   ]
   if host_machine.system() == 'linux'
     deps += dependency('x11')
@@ -93,18 +94,19 @@ endif
 conf_data = configuration_data()
 prefix = get_option('prefix')
 
-conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
+conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'))
 if suffix==''
   suffix=[]
   conf_data.set('EXENAME', elfname)
 else
   conf_data.set('EXENAME', elfname + '.' + suffix)
 endif
-
 if get_option('install_runner')
   conf_data.set('EXERUNNER', 'CortexCommand')
+  conf_data.set('EXEPATH', prefix/get_option('libdir')/'CortexCommand')
 else
   conf_data.set('EXERUNNER', conf_data.get('EXENAME'))
+  conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
 #### Sources Setup ####
@@ -134,7 +136,7 @@ external_objects = []
 external_libs = []
 subdir('external')
 
-install_rpath = get_option('fmod_dir') + ':$ORIGIN'
+install_rpath = prefix/get_option('fmod_dir')
 
 #### Target Definitions ####
 cccpelf = executable(
@@ -143,8 +145,8 @@ cccpelf = executable(
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
-  gui_app:true,
-  install: true, install_rpath: install_rpath
+  install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),
+  win_subsystem:'windows' # Windows mark as GUI app
 )
 
 #### Installing #####

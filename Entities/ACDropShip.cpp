@@ -44,6 +44,7 @@ void ACDropShip::Clear()
 	m_LateralControlSpeed = 6.0f;
 	m_AutoStabilize = 1;
 	m_MaxEngineAngle = 20.0f;
+	m_HoverHeightModifier = 0;
 }
 
 
@@ -71,31 +72,21 @@ int ACDropShip::Create()
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
 int ACDropShip::Create(const ACDropShip &reference) {
-    if (reference.m_pRThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
-        SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone()));
-    }
-    if (reference.m_pLThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
-        SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone()));
-    }
-    if (reference.m_pURThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
-        SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone()));
-    }
-    if (reference.m_pULThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
-        SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone()));
-    }
-    if (reference.m_pRHatch) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRHatch->GetUniqueID());
-        SetRightHatch(dynamic_cast<Attachable *>(reference.m_pRHatch->Clone()));
-    }
-    if (reference.m_pLHatch) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLHatch->GetUniqueID());
-        SetLeftHatch(dynamic_cast<Attachable *>(reference.m_pLHatch->Clone()));
-    }
+    if (reference.m_pRThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID()); }
+    if (reference.m_pLThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID()); }
+    if (reference.m_pURThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID()); }
+    if (reference.m_pULThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID()); }
+    if (reference.m_pRHatch) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRHatch->GetUniqueID()); }
+    if (reference.m_pLHatch) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLHatch->GetUniqueID()); }
+
     ACraft::Create(reference);
+
+    if (reference.m_pRThruster) { SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone())); }
+    if (reference.m_pLThruster) { SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone())); }
+    if (reference.m_pURThruster) { SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone())); }
+    if (reference.m_pULThruster) { SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone())); }
+    if (reference.m_pRHatch) { SetRightHatch(dynamic_cast<Attachable *>(reference.m_pRHatch->Clone())); }
+    if (reference.m_pLHatch) { SetLeftHatch(dynamic_cast<Attachable *>(reference.m_pLHatch->Clone())); }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
@@ -107,6 +98,8 @@ int ACDropShip::Create(const ACDropShip &reference) {
     m_AutoStabilize = reference.m_AutoStabilize;
 
 	m_MaxEngineAngle = reference.m_MaxEngineAngle;
+
+	m_HoverHeightModifier = reference.m_HoverHeightModifier;
 
 	return 0;
 }
@@ -139,8 +132,10 @@ int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_AutoStabilize;
     } else if (propName == "MaxEngineAngle") {
         reader >> m_MaxEngineAngle;
-    } else if (propName == "LateralControlSpeed") {
-        reader >> m_LateralControlSpeed;
+	} else if (propName == "LateralControlSpeed") {
+		reader >> m_LateralControlSpeed;
+	} else if (propName == "HoverHeightModifier") {
+		reader >> m_HoverHeightModifier;
     } else {
         return ACraft::ReadProperty(propName, reader);
     }
@@ -179,6 +174,7 @@ int ACDropShip::Save(Writer &writer) const
 	writer << m_MaxEngineAngle;
 	writer.NewProperty("LateralControlSpeed");
 	writer << m_LateralControlSpeed;
+	writer.NewPropertyWithValue("HoverHeightModifier", m_HoverHeightModifier);
 
     return 0;
 }
@@ -323,7 +319,7 @@ void ACDropShip::UpdateAI()
     float angle = m_Rotation.GetRadAngle();
 
     // This is the altitude at which the craft will hover and unload its cargo
-    float hoverAltitude = m_CharHeight * 2;
+    float hoverAltitude = m_CharHeight * 2 + m_HoverHeightModifier;
     // The gutter range threshold for how much above and below the hovering altitude is ok to stay in
     float hoverRange = m_CharHeight / 4;
     // Get the altitude reading, within 25 pixels precision

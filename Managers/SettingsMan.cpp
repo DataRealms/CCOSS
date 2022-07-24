@@ -22,6 +22,7 @@ namespace RTE {
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
 		m_UnheldItemsHUDDisplayRange = 25;
+		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
@@ -33,6 +34,7 @@ namespace RTE {
 		m_NATServiceAddress = "127.0.0.1:61111";
 		m_NATServerName = "DefaultServerName";
 		m_NATServerPassword = "DefaultServerPassword";
+		m_UseExperimentalMultiplayerSpeedBoosts = true;
 
 		m_AllowSavingToBase = false;
 		m_ShowForeignItems = true;
@@ -40,6 +42,7 @@ namespace RTE {
 
 		m_RecommendedMOIDCount = 240;
 		m_SimplifiedCollisionDetection = false;
+		m_SceneBackgroundAutoScaleMode = 1;
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
@@ -139,6 +142,8 @@ namespace RTE {
 			reader >> g_MovableMan.m_MaxDroppedItems;
 		} else if (propName == "UnheldItemsHUDDisplayRange") {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
+		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
+			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
 		} else if (propName == "SloMoThreshold") {
 			reader >> g_MovableMan.m_SloMoThreshold;
 		} else if (propName == "SloMoDurationMS") {
@@ -167,6 +172,8 @@ namespace RTE {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "SimplifiedCollisionDetection") {
 			reader >> m_SimplifiedCollisionDetection;
+		} else if (propName == "SceneBackgroundAutoScaleMode") {
+			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -223,6 +230,8 @@ namespace RTE {
 			reader >> m_NATServerName;
 		} else if (propName == "NATServerPassword") {
 			reader >> m_NATServerPassword;
+		} else if (propName == "UseExperimentalMultiplayerSpeedBoosts") {
+			reader >> m_UseExperimentalMultiplayerSpeedBoosts;
 		} else if (propName == "ClientInputFps") {
 			reader >> g_NetworkClient.m_ClientInputFps;
 		} else if (propName == "ServerTransmitAsBoxes") {
@@ -314,6 +323,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("BlipOnRevealUnseen", m_BlipOnRevealUnseen);
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
 		writer.NewPropertyWithValue("UnheldItemsHUDDisplayRange", m_UnheldItemsHUDDisplayRange);
+		writer.NewPropertyWithValue("AlwaysDisplayUnheldItemsInStrategicMode", m_AlwaysDisplayUnheldItemsInStrategicMode);
 		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
 		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
@@ -338,6 +348,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("DisableLuaJIT", g_LuaMan.m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
+		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
@@ -386,6 +397,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("NATServiceAddress", m_NATServiceAddress);
 		writer.NewPropertyWithValue("NATServerName", m_NATServerName);
 		writer.NewPropertyWithValue("NATServerPassword", m_NATServerPassword);
+		writer.NewPropertyWithValue("UseExperimentalMultiplayerSpeedBoosts", m_UseExperimentalMultiplayerSpeedBoosts);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

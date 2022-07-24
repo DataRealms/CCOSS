@@ -308,6 +308,7 @@ protected:
     // Limb paths for different movement states.
     // [0] is for the right limbs, and [1] is for left.
     LimbPath m_Paths[2][GearStateCount];
+	float m_MaxGimbalAngle; //!< How much the main engine is able to tilt in order to stabilize the rocket.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

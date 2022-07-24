@@ -795,6 +795,31 @@ namespace RTE {
 		// Disallow the use of some implicit methods.
 		UInputMan(const UInputMan &reference) = delete;
 		UInputMan & operator=(const UInputMan &rhs) = delete;
+
+#ifdef __unix__
+		int m_AllegroMousePreviousX; //!< Stored mouse x position for the allegro event handler.
+		int m_AllegroMousePreviousY; //!< Stored mouse y position for the allegro event handler.
+
+		/// <summary>
+		/// Necessary static handler method ensuring mouse inputs work well on Linux. Must be applied to _xwin_input_handler when manager is initialized.
+		/// </summary>
+		static void XWinInputHandlerOverride() { g_UInputMan.HandleAllegroMouseInput(); }
+
+		/// <summary>
+		/// Mouse input handler to circumvent the input drops that Allegro does regularly, by replacing and disabling the default warping behavior.
+		/// Motion events that are generated while the handler is working are offset such that the Allegro driver doesn't mess up the mickeys.
+		/// This also handles the centering warp for relative mouse motion. Might not run in the main thread, depending on how Allegro was built.
+		/// </summary>
+		void HandleAllegroMouseInput();
+
+		/// <summary>
+		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events if the requested position is different from the actual mouse position.
+		/// Replaces position_mouse and sets the Allegro internal mouse position to the requested coordinates.
+		/// </summary>
+		/// <param name="x"> The x coordinate to warp to. </param>
+		/// <param name="y"> The y coordinate to warp to. </param>
+		void WarpMouse(int x, int y) const;
+#endif
 	};
 }
 #endif

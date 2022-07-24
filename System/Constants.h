@@ -10,7 +10,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr const char *c_GameVersion = "Pre-Release 3.0";
+	static constexpr const char *c_GameVersion = "Pre-Release 4.0";
 #pragma endregion
 
 #pragma region Physics Constants
@@ -46,8 +46,31 @@ namespace RTE {
 		g_NoMOID = 255
 	};
 
-	enum DotGlowColor { NoDot = 0, YellowDot, RedDot, BlueDot };
-	enum TransparencyPreset { LessTrans = 0, HalfTrans, MoreTrans };
+	enum MaterialColorKeys {
+		g_MaterialAir = 0,
+		g_MaterialOutOfBounds = 1,
+		g_MaterialCavity = 1,
+		g_MaterialGold = 2,
+		g_MaterialSand = 8,
+		g_MaterialGrass = 128,
+		g_MaterialDoor = 181
+	};
+
+	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
+	enum TransparencyPreset { LessTrans, HalfTrans, MoreTrans };
+
+	enum SpriteAnimMode {
+		NOANIM,
+		ALWAYSLOOP,
+		ALWAYSRANDOM,
+		ALWAYSPINGPONG,
+		LOOPWHENACTIVE,
+		LOOPWHENOPENCLOSE,
+		PINGPONGOPENCLOSE,
+		OVERLIFETIME,
+		ONCOLLIDE,
+		SpriteAnimModeCount
+	};
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)

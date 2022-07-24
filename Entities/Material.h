@@ -47,10 +47,16 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the texture bitmap of this Material, if any is associated with it.
+		/// Gets the foreground texture bitmap of this Material, if any is associated with it.
 		/// </summary>
-		/// <returns>Pointer to the texture bitmap of this Material.</returns>
-		BITMAP * GetTexture() const { return m_TerrainTexture; }
+		/// <returns>Pointer to the foreground texture bitmap of this Material.</returns>
+		BITMAP * GetFGTexture() const { return m_TerrainFGTexture; }
+
+		/// <summary>
+		/// Gets the background texture bitmap of this Material, if any is associated with it.
+		/// </summary>
+		/// <returns>Pointer to the background texture bitmap of this Material.</returns>
+		BITMAP * GetBGTexture() const { return m_TerrainBGTexture; }
 
 		/// <summary>
 		/// Gets the index of this Material in the material palette.
@@ -69,6 +75,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The drawing priority of this Material.</returns>
 		int GetPriority() const { return m_Priority; }
+
+		/// <summary>
+		/// Gets the amount of times a dislodged pixel of this Material will attempt to relocate to an open position.
+		/// </summary>
+		/// <returns>The amount of attempts at relocating.</returns>
+		int GetPiling() const { return m_Piling; }
 
 		/// <summary>
 		/// The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
@@ -152,6 +164,7 @@ namespace RTE {
 
 		unsigned char m_Index; //!< Index of this in the material palette. 0 - 255.
 		int m_Priority; //!< The priority that a pixel of this material has to be displayed. The higher the number, the higher chances that a pixel of this material will be drawn on top of others.
+		int m_Piling; //! The amount of times a dislodged pixel of this Material will attempt to relocate upwards, when intersecting a terrain pixel of the same Material. TODO: Better property name?
 
 		float m_Integrity; //!< The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
 		float m_Restitution; //!< A scalar value that defines the restitution (elasticity). 1.0 = no kinetic energy is lost in a collision, 0.0 = all energy is lost (plastic).
@@ -172,8 +185,10 @@ namespace RTE {
 		Color m_Color; //!< The natural color of this material.
 		bool m_UseOwnColor; //!< Whether or not to use the own color when a pixel of this material is knocked loose from the terrain. If 0, then the terrain pixel's color will be applied instead.
 
-		ContentFile m_TextureFile; //!< The file pointing to the terrain texture of this Material 
-		BITMAP *m_TerrainTexture; //!< The texture of this material, used when building an SLTerrain.
+		ContentFile m_FGTextureFile; //!< The file pointing to the terrain foreground texture of this Material.
+		ContentFile m_BGTextureFile; //!< The file pointing to the terrain background texture of this Material.
+		BITMAP *m_TerrainFGTexture; //!< The foreground texture of this Material, used when building an SLTerrain. Not owned.
+		BITMAP *m_TerrainBGTexture; //!< The background texture of this Material, used when building an SLTerrain. Not owned.
 
 	private:
 

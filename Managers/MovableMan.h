@@ -16,6 +16,7 @@
 
 #include "Serializable.h"
 #include "Entity.h"
+#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
 #include "Singleton.h"
@@ -39,11 +40,11 @@ class SceneLayer;
 // Parent(s):       None.
 // Class history:   10/3/2008  AlarmEvent created.
 
-struct AlarmEvent
-{
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
-    
+struct AlarmEvent {
+	AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1.0F; }
+	// TODO: Stop relying on screen width for this shit!
+	AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1.0F) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range * g_FrameMan.GetPlayerScreenWidth() * 0.51F; }
+
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event
@@ -254,7 +255,7 @@ public:
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
 
-    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis = 0);
+    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +285,7 @@ public:
 // Return value:    An Actor pointer to the first one of the requested team. If no Actor
 //                  is in that team, 0 is returned.
 
-    Actor * GetFirstTeamActor(int team, int player) { float temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
+	Actor * GetFirstTeamActor(int team, int player) { Vector temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -634,13 +635,19 @@ public:
 
     bool RemoveMO(MovableObject *pMOToRem);
 
+    /// <summary>
+    /// Kills and destroys all Actors of a specific Team.
+    /// </summary>
+    /// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
+    /// <returns>How many Actors were killed.</returns>
+    int KillAllTeamActors(int teamToKill) const;
 
 	/// <summary>
-	/// Kills and destroys all enemy actors of a specific team.
+	/// Kills and destroys all enemy Actors of a specific Team.
 	/// </summary>
-	/// <param name="exceptTeam">The team to NOT annihilate. If NoTeam is passed in, then ALL actors die.</param>
+	/// <param name="teamNotToKill">The team to NOT annihilate. If NoTeam is passed in, then ALL Actors die.</param>
 	/// <returns>How many Actors were killed.</returns>
-	int KillAllEnemyActors(int exceptTeam = Activity::NoTeam);
+	int KillAllEnemyActors(int teamNotToKill = Activity::NoTeam) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -63,6 +63,7 @@ namespace RTE {
 
 		g_UInputMan.Initialize();
 		g_ConsoleMan.Initialize();
+		g_SceneMan.Initialize();
 		g_MovableMan.Initialize();
 		g_MetaMan.Initialize();
 		g_MenuMan.Initialize();
@@ -195,9 +196,6 @@ namespace RTE {
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
 		while (!System::IsSetToQuit()) {
-			// Need to clear this out; sometimes background layers don't cover the whole back.
-			g_FrameMan.ClearBackBuffer8();
-
 			g_TimerMan.Update();
 
 			bool serverUpdated = false;
@@ -235,7 +233,7 @@ namespace RTE {
 					g_TimerMan.PauseSim(true);
 					if (g_MetaMan.GameInProgress()) {
 						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
-					} else {
+					} else if (!g_ActivityMan.ActivitySetToRestart()) {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu.
 						if (activity && activity->GetPresetName() == "None") {
@@ -244,7 +242,7 @@ namespace RTE {
 							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
 						}
 					}
-					RunMenuLoop();
+					if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }
 				}
 				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
 					break;

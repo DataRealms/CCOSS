@@ -62,7 +62,7 @@ namespace RTE {
 
 		m_EnabledState = EnabledState::Disabled;
 		m_EnableDisableAnimationTimer.Reset();
-		m_EnableDisableAnimationTimer.SetRealTimeLimitMS(300);
+		m_EnableDisableAnimationTimer.SetRealTimeLimitMS(100);
 
 		m_InventoryActorIsHuman = false;
 		m_InventoryActorEquippedItems.clear();
@@ -847,10 +847,8 @@ namespace RTE {
 					if (mouseHeld && !m_GUIEquippedItemButton->IsPushed()) {
 						m_GUIEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
-					} else if (mouseReleased && m_InventoryActorEquippedItems.empty()) {
-						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
+						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
 						m_GUIEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
@@ -860,10 +858,8 @@ namespace RTE {
 					if (mouseHeld && !m_GUIOffhandEquippedItemButton->IsPushed()) {
 						m_GUIOffhandEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
-					} else if (mouseReleased && m_InventoryActorEquippedItems.empty()) {
-						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1);
+						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1);
 						m_GUIOffhandEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
@@ -1169,6 +1165,10 @@ namespace RTE {
 				if (buttonEquippedItemIndex > -1) {
 					Arm *selectedItemArm = dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent());
 					Arm *buttonObjectArm = selectedItemArm && buttonObject ? dynamic_cast<Arm *>(buttonObject->GetParent()) : nullptr;
+					if (!buttonObject) {
+						const AHuman *inventoryActorAsAHuman = dynamic_cast<const AHuman *>(m_InventoryActor);
+						buttonObjectArm = buttonEquippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
+					}
 					if (selectedItemArm && buttonObjectArm) {
 						selectedItemArm->ReleaseHeldMO();
 						buttonObjectArm->ReleaseHeldMO();

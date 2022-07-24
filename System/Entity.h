@@ -52,19 +52,13 @@ namespace RTE {
 	/// Whether to draw the colors, or own material property, or to clear the corresponding non-key-color pixels of the Entity being drawn with key-color pixels on the target.
 	/// </summary>
 	enum DrawMode {
-		g_DrawColor = 0,
+		g_DrawColor,
 		g_DrawMaterial,
-		g_DrawAir,
-		g_DrawMask,
 		g_DrawWhite,
 		g_DrawMOID,
 		g_DrawNoMOID,
 		g_DrawDoor,
-		g_DrawDebug,
-		g_DrawLess,
 		g_DrawTrans,
-		g_DrawRedTrans,
-		g_DrawScreen,
 		g_DrawAlpha
 	};
 
@@ -382,7 +376,13 @@ namespace RTE {
 		/// Adds this Entity to a new grouping.
 		/// </summary>
 		/// <param name="newGroup">A string which describes the group to add this to. Duplicates will be ignored.</param>
-		void AddToGroup(std::string newGroup) { m_Groups.push_back(newGroup); m_Groups.sort(); m_Groups.unique(); m_LastGroupSearch.clear(); }
+		void AddToGroup(const std::string &newGroup) { m_Groups.push_back(newGroup); m_Groups.sort(); m_Groups.unique(); m_LastGroupSearch.clear(); }
+
+		/// <summary>
+		/// Removes this Entity from the specified grouping.
+		/// </summary>
+		/// <param name="groupToRemoveFrom">A string which describes the group to remove this from.</param>
+		void RemoveFromGroup(const std::string &groupToRemoveFrom) { m_Groups.remove(groupToRemoveFrom); m_LastGroupSearch.clear(); }
 
 		/// <summary>
 		/// Returns random weight used in PresetMan::GetRandomBuyableOfGroupFromTech.

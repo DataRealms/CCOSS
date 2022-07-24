@@ -162,7 +162,8 @@ namespace RTE {
 			}
 		}
 		// Do static particle bounce calculations.
-		int hitCount = m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked());
+		int hitCount = 0;
+		if (!IsTooFast()) { hitCount = m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); }
 
 		m_Atom->ClearMOIDIgnoreList();
 	}
@@ -234,12 +235,6 @@ namespace RTE {
 		switch (mode) {
 			case g_DrawMaterial:
 				drawColor = m_Atom->GetMaterial()->GetSettleMaterial();
-				break;
-			case g_DrawAir:
-				drawColor = g_MaterialAir;
-				break;
-			case g_DrawMask:
-				drawColor = g_MaskColor;
 				break;
 			case g_DrawMOID:
 				drawColor = m_MOID;

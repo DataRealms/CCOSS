@@ -150,6 +150,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="deadzoneType">The DeadZoneType this scheme should use. See DeadZoneType enumeration.</param>
 		void SetJoystickDeadzoneType(DeadZoneType deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
+
+		/// <summary>
+		/// Get the digital aim speed multiplier for this control scheme.
+		/// </summary>
+		/// <returns>The digital aim speed set to this scheme.</returns>
+		float GetDigitalAimSpeed() const { return m_DigitalAimSpeed; }
 #pragma endregion
 
 #pragma region Input Mapping Capture Handling
@@ -182,6 +188,7 @@ namespace RTE {
 
 		DeadZoneType m_JoystickDeadzoneType; //!< Which deadzone type is used.
 		float m_JoystickDeadzone; //!< How much of the input to treat as a deadzone input, i.e. one not registered by the game.
+		float m_DigitalAimSpeed; //!< A multiplier for the digital aim speed, where 1 represents the default legacy value.
 
 		std::array<InputMapping, InputElements::INPUT_COUNT> m_InputMappings; //!< The input element mappings of this InputScheme.
 

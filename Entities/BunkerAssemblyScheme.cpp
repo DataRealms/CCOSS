@@ -401,8 +401,6 @@ void BunkerAssemblyScheme::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, 
             masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pPresentationBitmap->w, m_pPresentationBitmap->h);
         else if (mode == g_DrawMaterial)
             masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pPresentationBitmap->w, m_pPresentationBitmap->h);
-        else if (mode == g_DrawLess)
-            masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pPresentationBitmap->w, m_pPresentationBitmap->h);
         else if (mode == g_DrawTrans)
             draw_trans_sprite(pTargetBitmap, m_pPresentationBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
     }

@@ -80,6 +80,7 @@ namespace RTE {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 						m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
 						m_TeamTechComboBoxes.at(team)->GetListPanel()->ScrollToTop();
+						m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
 					}
 				}
 			}
@@ -162,9 +163,6 @@ namespace RTE {
 		}
 
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-			m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
-			m_TeamAISkillSliders.at(team)->SetValue(Activity::AISkillSetting::DefaultSkill);
-
 			const Icon *teamIcon = nullptr;
 			if (m_SelectedActivity->TeamActive(team)) {
 				teamIcon = m_SelectedActivity->GetTeamIcon(team);
@@ -214,8 +212,7 @@ namespace RTE {
 				if (techItem->m_ExtraIndex == -2) {
 					gameActivity->SetTeamTech(team, "-All-");
 				} else if (techItem->m_ExtraIndex == -1) {
-					m_TeamTechComboBoxes.at(team)->SetSelectedIndex(RandomNum<int>(2, m_TeamTechComboBoxes.at(team)->GetListPanel()->GetItemList()->size() - 1));
-					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(m_TeamTechComboBoxes.at(team)->GetSelectedItem()->m_ExtraIndex));
+					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(m_TeamTechComboBoxes.at(team)->GetItem(RandomNum<int>(2, m_TeamTechComboBoxes.at(team)->GetListPanel()->GetItemList()->size() - 1))->m_ExtraIndex));
 				} else {
 					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 				}
@@ -393,7 +390,7 @@ namespace RTE {
 					m_ActivityDifficultyLabel->SetText(" " + Activity::GetDifficultyString(m_ActivityDifficultySlider->GetValue()));
 					if (!m_StartingGoldAdjustedManually) { UpdateStartingGoldSliderAndLabel(); }
 				} else if (guiEvent.GetControl() == m_StartingGoldSlider) {
-					if (m_StartingGoldSlider->HasFocus()) { m_StartingGoldAdjustedManually = true; }
+					if (guiEvent.GetMsg() == GUISlider::Clicked) { m_StartingGoldAdjustedManually = true; }
 					UpdateStartingGoldSliderAndLabel();
 				} else if (guiEvent.GetMsg() == GUISlider::Changed) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {

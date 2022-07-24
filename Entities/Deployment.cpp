@@ -253,20 +253,15 @@ Actor * Deployment::CreateDeployedActor(int player, float &costTally)
     }
 
     // Find the Loadout that this Deployment is referring to
-    const Loadout *pLoadout = dynamic_cast<const Loadout *>(g_PresetMan.GetEntityPreset("Loadout", m_LoadoutName, nativeModule));
-    if (pLoadout)
-    {
-        // Create and pass along the first Actor and his inventory defined in the Loadout
-        pReturnActor = pLoadout->CreateFirstActor(nativeModule, foreignCostMult, nativeCostMult, costTally);
-        // Set the position and team etc for the Actor we are prepping to spawn
-        if (pReturnActor)
-        {
-            pReturnActor->SetPos(m_Pos);
-            pReturnActor->SetTeam(m_Team);
-			pReturnActor->SetHFlipped(m_HFlipped);
-            pReturnActor->SetControllerMode(Controller::CIM_AI);
-            pReturnActor->SetAIMode(Actor::AIMODE_SENTRY);
-			pReturnActor->SetDeploymentID(m_ID);
+    if (const Loadout *pLoadout = dynamic_cast<const Loadout *>(g_PresetMan.GetEntityPreset("Loadout", m_LoadoutName, nativeModule))) {
+        if (std::unique_ptr<Actor> rawLoadoutActor = std::unique_ptr<Actor>(pLoadout->CreateFirstActor(nativeModule, foreignCostMult, nativeCostMult, costTally))) {
+			rawLoadoutActor->SetPos(m_Pos);
+			rawLoadoutActor->SetTeam(m_Team);
+			rawLoadoutActor->SetHFlipped(m_HFlipped);
+			rawLoadoutActor->SetControllerMode(Controller::CIM_AI);
+			rawLoadoutActor->SetAIMode(Actor::AIMODE_SENTRY);
+			rawLoadoutActor->SetDeploymentID(m_ID);
+			pReturnActor = dynamic_cast<Actor *>(rawLoadoutActor->Clone());
         }
     }
 
@@ -736,10 +731,6 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 				// Draw the spawn radius circle too
 				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, c_GUIColorGray);
 			}
-			else if (mode == g_DrawLess)
-			{
-				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
-			}
 			else if (mode == g_DrawTrans)
 			{
 				draw_trans_sprite(pTargetBitmap, pBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
@@ -809,10 +800,6 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 		for (int i = 0; i < passes; ++i)
 		{
 			if (mode == g_DrawColor)
-			{
-				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
-			}
-			else if (mode == g_DrawLess)
 			{
 				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
 			}

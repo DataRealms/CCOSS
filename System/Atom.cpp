@@ -549,7 +549,7 @@ namespace RTE {
 				}
 				return hitStep;
 			}
-			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!");
+			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!" + (m_OwnerMO ? " Owner is " + m_OwnerMO->GetPresetName() + "." : ""));
 			m_OwnerMO->SetToDelete();
 		}
 		m_StepWasTaken = false;
@@ -662,6 +662,7 @@ namespace RTE {
 
 			delta[X] = std::floor(position.m_X + segTraj.m_X) - intPos[X];
 			delta[Y] = std::floor(position.m_Y + segTraj.m_Y) - intPos[Y];
+			RTEAssert(std::abs(delta[X]) < 2500 && std::abs(delta[Y] < 2500), "Extremely long difference trajectory found during Atom::Travel. Owner is " + m_OwnerMO->GetPresetName() + ", with Vel (" + std::to_string(velocity.GetX()) + ", " + std::to_string(velocity.GetY()) + ").");
 
 			//segProgress = 0.0F;
 			//delta2[X] = 0;
@@ -885,7 +886,7 @@ namespace RTE {
 						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
-							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
+							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
 							m_OwnerMO->SetToDelete(true);
 							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
 							break;

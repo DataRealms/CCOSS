@@ -22,6 +22,7 @@ namespace RTE {
 		.def("Reset", &Entity::Reset)
 		.def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
 		.def("AddToGroup", &Entity::AddToGroup)
+		.def("RemoveFromGroup", &Entity::RemoveFromGroup)
 		.def("IsInGroup", &Entity::IsInGroup);
 	}
 
@@ -39,6 +40,7 @@ namespace RTE {
 		.property("MaxEngineAngle", &ACDropShip::GetMaxEngineAngle, &ACDropShip::SetMaxEngineAngle)
 		.property("LateralControlSpeed", &ACDropShip::GetLateralControlSpeed, &ACDropShip::SetLateralControlSpeed)
 		.property("LateralControl", &ACDropShip::GetLateralControl)
+		.property("HoverHeightModifier", &ACDropShip::GetHoverHeightModifier, &ACDropShip::SetHoverHeightModifier)
 
 		.def("DetectObstacle", &ACDropShip::DetectObstacle)
 		.def("GetAltitude", &ACDropShip::GetAltitude);
@@ -60,6 +62,7 @@ namespace RTE {
 		.property("StrideSound", &ACrab::GetStrideSound, &ACrabSetStrideSound)
 		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
 		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
+		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -220,6 +223,7 @@ namespace RTE {
 		.property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
 		.property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
 		.property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
+		.property("SharpAimProgress", &Actor::GetSharpAimProgress)
 		.property("Height", &Actor::GetHeight)
 		.property("AIMode", &Actor::GetAIMode, &Actor::SetAIMode)
 		.property("DeploymentID", &Actor::GetDeploymentID)
@@ -275,6 +279,8 @@ namespace RTE {
 		.def("UpdateMovePath", &Actor::UpdateMovePath)
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
+		.def("IsOrganic", &Actor::IsOrganic)
+		.def("IsRobotic", &Actor::IsRobotic)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),
@@ -368,6 +374,7 @@ namespace RTE {
 		.property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
 		.property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
 		.property("Throttle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
+		.property("ThrottleFactor", &AEmitter::GetThrottleFactor)
 		.property("NegativeThrottleMultiplier", &AEmitter::GetNegativeThrottleMultiplier, &AEmitter::SetNegativeThrottleMultiplier)
 		.property("PositiveThrottleMultiplier", &AEmitter::GetPositiveThrottleMultiplier, &AEmitter::SetPositiveThrottleMultiplier)
 		.property("BurstSpacing", &AEmitter::GetBurstSpacing, &AEmitter::SetBurstSpacing)
@@ -408,11 +415,13 @@ namespace RTE {
 		.property("StrideSound", &AHuman::GetStrideSound, &AHumanSetStrideSound)
 		.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
+		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
 		.property("EquippedBGItem", &AHuman::GetEquippedBGItem)
+		.property("EquippedMass", &AHuman::GetEquippedMass)
 		.property("FirearmIsReady", &AHuman::FirearmIsReady)
 		.property("ThrowableIsReady", &AHuman::ThrowableIsReady)
 		.property("FirearmIsEmpty", &AHuman::FirearmIsEmpty)
@@ -420,6 +429,8 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
+		.property("IsClimbing", &AHuman::IsClimbing)
+		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)
@@ -429,7 +440,9 @@ namespace RTE {
 		.def("EquipDeviceInGroup", &AHuman::EquipDeviceInGroup)
 		.def("EquipNamedDevice", &AHuman::EquipNamedDevice)
 		.def("EquipLoadedFirearmInGroup", &AHuman::EquipLoadedFirearmInGroup)
+		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
+		.def("UnequipArms", &AHuman::UnequipArms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)
@@ -441,6 +454,8 @@ namespace RTE {
 		.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 		.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
 		.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
+		.def("GetWalkAngle", &AHuman::GetWalkAngle)
+		.def("SetWalkAngle", &AHuman::SetWalkAngle)
 
 		.enum_("UpperBodyState")[
 			luabind::value("WEAPON_READY", AHuman::UpperBodyState::WEAPON_READY),
@@ -530,6 +545,7 @@ namespace RTE {
 		.property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
 		.property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
+		.property("JointPos", &Attachable::GetJointPos)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &AttachableSetParentBreakWound)
@@ -649,6 +665,7 @@ namespace RTE {
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
+		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
 
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
@@ -665,10 +682,10 @@ namespace RTE {
 		.def("DoneReloading", &HeldDevice::DoneReloading)
 		.def("NeedsReloading", &HeldDevice::NeedsReloading)
 		.def("IsFull", &HeldDevice::IsFull)
+		.def("IsEmpty", &HeldDevice::IsEmpty)
 		.def("IsPickupableBy", &HeldDevice::IsPickupableBy)
 		.def("AddPickupableByPresetName", &HeldDevice::AddPickupableByPresetName)
-		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName)
-		.def("SetSupported", &HeldDevice::SetSupported);
+		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -780,21 +797,23 @@ namespace RTE {
 		.def("FacingAngle", &MOSprite::FacingAngle)
 		.def("GetSpriteWidth", &MOSprite::GetSpriteWidth)
 		.def("GetSpriteHeight", &MOSprite::GetSpriteHeight)
+		.def("GetIconWidth", &MOSprite::GetIconWidth)
+		.def("GetIconHeight", &MOSprite::GetIconHeight)
 		.def("SetEntryWound", &MOSprite::SetEntryWound)
 		.def("SetExitWound", &MOSprite::SetExitWound)
 		.def("GetEntryWoundPresetName", &MOSprite::GetEntryWoundPresetName)
 		.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName)
 
 		.enum_("SpriteAnimMode")[
-			luabind::value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
-			luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
-			luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
-			luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-			luabind::value("LOOPWHENACTIVE", MOSprite::SpriteAnimMode::LOOPWHENACTIVE),
-			luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
-			luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
-			luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
-			luabind::value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+			luabind::value("NOANIM", SpriteAnimMode::NOANIM),
+			luabind::value("ALWAYSLOOP", SpriteAnimMode::ALWAYSLOOP),
+			luabind::value("ALWAYSRANDOM", SpriteAnimMode::ALWAYSRANDOM),
+			luabind::value("ALWAYSPINGPONG", SpriteAnimMode::ALWAYSPINGPONG),
+			luabind::value("LOOPWHENACTIVE", SpriteAnimMode::LOOPWHENACTIVE),
+			luabind::value("LOOPWHENOPENCLOSE", SpriteAnimMode::LOOPWHENOPENCLOSE),
+			luabind::value("PINGPONGOPENCLOSE", SpriteAnimMode::PINGPONGOPENCLOSE),
+			luabind::value("OVERLIFETIME", SpriteAnimMode::OVERLIFETIME),
+			luabind::value("ONCOLLIDE", SpriteAnimMode::ONCOLLIDE)
 		];
 	}
 
@@ -902,6 +921,7 @@ namespace RTE {
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)
 		.property("HUDVisible", &MovableObject::GetHUDVisible, &MovableObject::SetHUDVisible)
 		.property("PinStrength", &MovableObject::GetPinStrength, &MovableObject::SetPinStrength)
+		.property("RestThreshold", &MovableObject::GetRestThreshold, &MovableObject::SetRestThreshold)
 		.property("DamageOnCollision", &MovableObject::DamageOnCollision, &MovableObject::SetDamageOnCollision)
 		.property("DamageOnPenetration", &MovableObject::DamageOnPenetration, &MovableObject::SetDamageOnPenetration)
 		.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)
@@ -969,6 +989,7 @@ namespace RTE {
 		.property("EmitAngle", &PEmitter::GetEmitAngle, &PEmitter::SetEmitAngle)
 		.property("GetThrottle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
 		.property("Throttle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+		.property("ThrottleFactor", &PEmitter::GetThrottleFactor)
 		.property("BurstSpacing", &PEmitter::GetBurstSpacing, &PEmitter::SetBurstSpacing)
 		.property("EmitCountLimit", &PEmitter::GetEmitCountLimit, &PEmitter::SetEmitCountLimit)
 		.property("FlashScale", &PEmitter::GetFlashScale, &PEmitter::SetFlashScale)
@@ -1020,6 +1041,8 @@ namespace RTE {
 		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 
+		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
+
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)
@@ -1030,9 +1053,10 @@ namespace RTE {
 		.def("RetrieveResidentBrains", &Scene::RetrieveResidentBrains)
 		.def("GetResidentBrain", &Scene::GetResidentBrain)
 		.def("SetResidentBrain", &Scene::SetResidentBrain)
+		.def_readwrite("Areas", &Scene::m_AreaList, luabind::return_stl_iterator)
 		.def("SetArea", &Scene::SetArea)
 		.def("HasArea", &Scene::HasArea)
-		.def("GetArea", &Scene::GetArea)
+		.def("GetArea", (Scene::Area * (Scene:: *)(const std::string &areaName)) &Scene::GetArea)
 		.def("GetOptionalArea", &Scene::GetOptionalArea)
 		.def("WithinArea", &Scene::WithinArea)
 		.def("ResetPathFinding", &Scene::ResetPathFinding)
@@ -1061,7 +1085,9 @@ namespace RTE {
 		.property("Name", &Scene::Area::GetName)
 
 		.def("Reset", &Scene::Area::Reset)
+		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)
 		.def("AddBox", &Scene::Area::AddBox)
+		.def("RemoveBox", &Scene::Area::RemoveBox)
 		.def("HasNoArea", &Scene::Area::HasNoArea)
 		.def("IsInside", &Scene::Area::IsInside)
 		.def("IsInsideX", &Scene::Area::IsInsideX)
@@ -1070,6 +1096,12 @@ namespace RTE {
 		.def("RemoveBoxInside", &Scene::Area::RemoveBoxInside)
 		.def("GetCenterPoint", &Scene::Area::GetCenterPoint)
 		.def("GetRandomPoint", &Scene::Area::GetRandomPoint);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneLayer) {
+		return luabind::class_<SceneLayer, Entity>("SceneLayer");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1096,6 +1128,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
+		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
+
+		.property("Frame", &SLBackground::GetFrame, &SLBackground::SetFrame)
+		.property("SpriteAnimMode", &SLBackground::GetSpriteAnimMode, &SLBackground::SetSpriteAnimMode)
+		.property("SpriteAnimDuration", &SLBackground::GetSpriteAnimDuration, &SLBackground::SetSpriteAnimDuration)
+		.property("IsAnimatedManually", &SLBackground::IsAnimatedManually, &SLBackground::SetAnimatedManually)
+		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
+		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)
+		.property("AutoScrollStep", &SLBackground::GetAutoScrollStep, &SLBackground::SetAutoScrollStep)
+		.property("AutoScrollStepX", &SLBackground::GetAutoScrollStepX, &SLBackground::SetAutoScrollStepX)
+		.property("AutoScrollStepY", &SLBackground::GetAutoScrollStepY, &SLBackground::SetAutoScrollStepY)
+
+		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SoundContainer) {
 		return ConcreteTypeLuaClassDefinition(SoundContainer, Entity)
 
@@ -1110,6 +1161,7 @@ namespace RTE {
 		.property("Pos", &SoundContainer::GetPosition, &SoundContainer::SetPosition)
 		.property("Volume", &SoundContainer::GetVolume, &SoundContainer::SetVolume)
 		.property("Pitch", &SoundContainer::GetPitch, &SoundContainer::SetPitch)
+		.property("PitchVariation", &SoundContainer::GetPitchVariation, &SoundContainer::SetPitchVariation)
 
 		.def("HasAnySounds", &SoundContainer::HasAnySounds)
 		.def("GetTopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)

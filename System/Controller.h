@@ -232,6 +232,12 @@ namespace RTE {
 		const Vector & GetMouseMovement() const { return m_MouseMovement; }
 
 		/// <summary>
+		/// Get the digital aim speed multiplier of the scheme associated with this Controller.
+		/// </summary>
+		/// <returns>The digital aim speed set to the scheme of this Controller.</returns>
+		float GetDigitalAimSpeed() const;
+
+		/// <summary>
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>

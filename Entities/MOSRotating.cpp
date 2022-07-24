@@ -760,13 +760,6 @@ bool MOSRotating::OnBounce(HitData &hd)
 
 bool MOSRotating::OnSink(HitData &hd)
 {
-/*
-    Vector oldPos(m_Pos);
-    m_Pos = pos;
-    Draw(g_SceneMan.GetTerrainColorBitmap(), Vector(), g_DrawMask);
-    Draw(g_SceneMan.GetTerrainMaterialBitmap(), Vector(), g_DrawAir);
-    m_Pos = oldPos;
-*/
     return false;
 }
 
@@ -1031,8 +1024,10 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
 				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
-				gibParticleClone->SetTeam(m_Team);
-				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+				if (gibSettingsObject.IgnoresTeamHits()) {
+					gibParticleClone->SetTeam(m_Team);
+					gibParticleClone->SetIgnoresTeamHits(true);
+				}
 
 				g_MovableMan.AddParticle(gibParticleClone);
 			}
@@ -1069,8 +1064,10 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				}
 				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
-				gibParticleClone->SetTeam(m_Team);
-				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+				if (gibSettingsObject.IgnoresTeamHits()) {
+					gibParticleClone->SetTeam(m_Team);
+					gibParticleClone->SetIgnoresTeamHits(true);
+				}
 
 				g_MovableMan.AddParticle(gibParticleClone);
 			}
@@ -1312,14 +1309,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
     {
         m_ForceDeepCheck = false;
         m_DeepHardness = true;
-/*
-        // Just make the outline of this disappear from the terrain
-        {
-// TODO: These don't work at all because they're drawing shapes of color 0 to an intermediate field of 0!
-            Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawMask, true);
-            Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawAir, true);
-        }
-*/
+
 // TODO: This stuff is just way too slow, EraseSilhouette is a hog
         // Make particles fly at least somewhat
         float velMag = MAX(10.0f, m_Vel.GetMagnitude());
@@ -1781,10 +1771,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         // Draw the requested material silhouette on the material bitmap
         if (mode == g_DrawMaterial)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
-        else if (mode == g_DrawAir)
-            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialAir, -1);
-        else if (mode == g_DrawMask)
-            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, keyColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);
         else if (mode == g_DrawMOID)
@@ -1793,8 +1779,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
 		else if (mode == g_DrawDoor)
 			draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialDoor, -1);
-        else if (mode == g_DrawRedTrans)
-            draw_trans_sprite(pTempBitmap, m_aSprite[m_Frame], 0, 0);
         else
         {
 //            return;

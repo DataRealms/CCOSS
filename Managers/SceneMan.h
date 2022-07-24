@@ -44,20 +44,6 @@ enum LayerDrawMode
     g_LayerMOID
 };
 
-enum
-{
-    REGULAR_MAT_OFFSET = 8,
-    g_MaterialAir = 0,
-    g_MaterialDefault = 1,
-    g_MaterialOutOfBounds = 1,
-    g_MaterialCavity = 1,
-    g_MaterialGold = 2,
-    g_MaterialGrass = 128,
-    g_MaterialFlesh = 145,
-    g_MaterialSand = 8,
-    g_MaterialDoor = 181
-};
-
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11
@@ -133,6 +119,12 @@ public:
 // Arguments:       None.
 
 	~SceneMan() { Destroy(); }
+
+
+	/// <summary>
+	/// Makes the SceneMan object ready for use.
+	/// </summary>
+	void Initialize() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -864,8 +856,8 @@ public:
 //                  If the pixel location specified happens to be of the air material (0)
 //                  false will be returned here.
 
-    bool TryPenetrate(const int posX,
-                      const int posY,
+    bool TryPenetrate(int posX,
+                      int posY,
                       const Vector &impulse,
                       const Vector &velocity,
                       float &retardation,
@@ -1345,17 +1337,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StructuralCalc
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the structural integrity of the Terrain during a set time
-//                  and turns structurally unsound areas into MovableObject:s.
-// Arguments:       The amount of time in ms to use for these calculations this frame.
-// Return value:    None.
-
-    void StructuralCalc(unsigned long calcTime);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsWithinBounds
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whether the integer coordinates passed in are within the
@@ -1546,17 +1527,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddTerrainObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes TerrainObject and applies it to the terrain
-//					OWNERSHIP NOT TRANSFERED!
-// Arguments:       TerrainObject to add.
-// Return value:    True on success.
-
-	bool AddTerrainObject(TerrainObject *pObject);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddSceneObject
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Takes any scene object and adds it to the scene in the appropriate way.
@@ -1591,7 +1561,7 @@ public:
 //                  is located.
 // Return value:    None.
 
-    void Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap,  const Vector &targetPos = Vector(), bool skipSkybox = false, bool skipTerrain = false);
+	void Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap,  const Vector &targetPos = Vector(), bool skipBackgroundLayers = false, bool skipTerrain = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1647,6 +1617,13 @@ public:
 	void RegisterTerrainChange(int x, int y, int w, int h, unsigned char color, bool back);
 
 
+	/// <summary>
+	/// Gets an intermediate bitmap that is used for drawing a settled MovableObject into the terrain.
+	/// </summary>
+	/// <param name="moDiameter">The diameter of the MovableObject to calculate the required bitmap size.</param>
+	/// <returns>Pointer to the temp BITMAP of the appropriate size. Ownership is NOT transferred!</returns>
+	BITMAP * GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) const;
+
 	//	Struct to register terrain change events
 	struct TerrainChange
 	{
@@ -1668,6 +1645,7 @@ public:
 
   protected:
 
+	static std::vector<std::pair<int, BITMAP *>> m_IntermediateSettlingBitmaps; //!< Intermediate bitmaps of different sizes that are used to draw settled MovableObjects into the terrain.
 
     // Default Scene name to load if nothing else is specified
     std::string m_DefaultSceneName;

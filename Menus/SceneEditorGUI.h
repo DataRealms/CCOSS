@@ -308,16 +308,17 @@ protected:
 
     void UpdatePieMenu();
 
+	/// <summary>
+	/// Updates the path to the current brain in the cursor or resident in the scene, if any. If there's none, the path is cleared.
+	/// </summary>
+	/// <returns>Whether a brain was found in the cursor or the scene.</returns>
+	bool UpdateBrainPath();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateBrainPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the brain path to the current brain in cursor or resident
-//                  in the scene, if any. If there's none, the path is cleared.
-// Arguments:       None.
-// Return value:    Whether a resident brain was found in the scene.
-
-    bool UpdateBrainPath();
+	/// <summary>
+	/// Updates the path from the designated position to orbit, and its cost.
+	/// </summary>
+	/// <param name="brainPos">The designated position of the brain.</param>
+	void UpdateBrainSkyPathAndCost(Vector brainPos);
 
 
     enum BlinkMode

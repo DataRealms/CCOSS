@@ -1851,7 +1851,7 @@ void MovableMan::Update()
 				}
 				(*parIt)->SetPos(parPos.GetFloored());
 			}
-			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt); }
+			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
 			delete *(parIt++);
 		}
 		m_Particles.erase(midIt, m_Particles.end());

@@ -42,6 +42,7 @@ namespace RTE {
 
 		m_RecommendedMOIDCount = 240;
 		m_SimplifiedCollisionDetection = false;
+		m_SceneBackgroundAutoScaleMode = 1;
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
@@ -171,6 +172,8 @@ namespace RTE {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "SimplifiedCollisionDetection") {
 			reader >> m_SimplifiedCollisionDetection;
+		} else if (propName == "SceneBackgroundAutoScaleMode") {
+			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -345,6 +348,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("DisableLuaJIT", g_LuaMan.m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
+		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());

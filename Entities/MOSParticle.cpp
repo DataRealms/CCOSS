@@ -189,12 +189,6 @@ namespace RTE {
 				case g_DrawMaterial:
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
 					break;
-				case g_DrawAir:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), g_MaterialAir, -1);
-					break;
-				case g_DrawMask:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), g_MaskColor, -1);
-					break;
 				case g_DrawWhite:
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), g_WhiteColor, -1);
 					break;

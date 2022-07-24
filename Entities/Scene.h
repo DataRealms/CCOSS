@@ -15,10 +15,8 @@
 // Inclusions of header files
 
 #include "Entity.h"
-#include "SceneMan.h"
-#include "ActivityMan.h"
 #include "Box.h"
-#include "BunkerAssembly.h"
+#include "Activity.h"
 
 namespace RTE
 {
@@ -26,6 +24,12 @@ namespace RTE
 class ContentFile;
 class MovableObject;
 class PathFinder;
+class SLBackground;
+class SLTerrain;
+class SceneLayer;
+class BunkerAssembly;
+class SceneObject;
+class Deployment;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -597,7 +601,7 @@ EntityAllocation(Scene)
 // Return value:    A reference to the std::list containing all the background layers.
 //                  Ownership is NOT transferred!
 
-    std::list<SceneLayer *> & GetBackLayers() { return m_BackLayerList; }
+    std::list<SLBackground *> & GetBackLayers() { return m_BackLayerList; }
 
 
 
@@ -1346,7 +1350,7 @@ protected:
     // SceneObject:s to be placed in the scene, divided up by different sets - OWNED HERE
     std::list<SceneObject *> m_PlacedObjects[PLACEDSETSCOUNT];
     // List of background layers, first is the closest to the terrain, last is closest to the back
-    std::list<SceneLayer *> m_BackLayerList;
+    std::list<SLBackground *> m_BackLayerList;
     // Dimensions of the pixels of the unseen layers, when they are dynamically generated. If 0, the layer was not generated
     Vector m_UnseenPixelSize[Activity::MaxTeamCount];
     // Layers representing the unknown areas for each team

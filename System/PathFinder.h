@@ -2,12 +2,13 @@
 #define _RTEPATHFINDER_
 
 #include "Box.h"
-#include "Scene.h"
 #include "System/MicroPather/micropather.h"
 
 using namespace micropather;
 
 namespace RTE {
+
+	class Scene;
 
 	/// <summary>
 	/// Contains everything related to a node on the path grid used by PathFinder.
@@ -110,10 +111,10 @@ namespace RTE {
 		void RecalculateAllCosts();
 
 		/// <summary>
-		/// Recalculates the costs between all the nodes touching a list of specific rectangular areas (which will be wrapped). Also resets the pather itself.
+		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself.
 		/// </summary>
-		/// <param name="boxList">The list of Boxes representing the updated areas.</param>
-		void RecalculateAreaCosts(const std::list<Box> &boxList);
+		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
+		void RecalculateAreaCosts(const std::deque<Box> &boxList);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
@@ -164,7 +165,7 @@ namespace RTE {
 		/// <param name="start">Origin point.</param>
 		/// <param name="end">Destination point.</param>
 		/// <returns>The cost value.</returns>
-		float CostAlongLine(const Vector &start, const Vector &end) { return g_SceneMan.CastMaxStrengthRay(start, end, 0); }
+		float CostAlongLine(const Vector &start, const Vector &end);
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges going out from a specific node.

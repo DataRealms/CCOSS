@@ -805,15 +805,15 @@ namespace RTE {
 		.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName)
 
 		.enum_("SpriteAnimMode")[
-			luabind::value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
-			luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
-			luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
-			luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-			luabind::value("LOOPWHENACTIVE", MOSprite::SpriteAnimMode::LOOPWHENACTIVE),
-			luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
-			luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
-			luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
-			luabind::value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+			luabind::value("NOANIM", SpriteAnimMode::NOANIM),
+			luabind::value("ALWAYSLOOP", SpriteAnimMode::ALWAYSLOOP),
+			luabind::value("ALWAYSRANDOM", SpriteAnimMode::ALWAYSRANDOM),
+			luabind::value("ALWAYSPINGPONG", SpriteAnimMode::ALWAYSPINGPONG),
+			luabind::value("LOOPWHENACTIVE", SpriteAnimMode::LOOPWHENACTIVE),
+			luabind::value("LOOPWHENOPENCLOSE", SpriteAnimMode::LOOPWHENOPENCLOSE),
+			luabind::value("PINGPONGOPENCLOSE", SpriteAnimMode::PINGPONGOPENCLOSE),
+			luabind::value("OVERLIFETIME", SpriteAnimMode::OVERLIFETIME),
+			luabind::value("ONCOLLIDE", SpriteAnimMode::ONCOLLIDE)
 		];
 	}
 
@@ -1041,6 +1041,8 @@ namespace RTE {
 		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 
+		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
+
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)
@@ -1098,6 +1100,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneLayer) {
+		return luabind::class_<SceneLayer, Entity>("SceneLayer");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneObject) {
 		return AbstractTypeLuaClassDefinition(SceneObject, Entity)
 
@@ -1116,6 +1124,25 @@ namespace RTE {
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
 		.def("GetTotalValue", &GetTotalValue);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
+		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
+
+		.property("Frame", &SLBackground::GetFrame, &SLBackground::SetFrame)
+		.property("SpriteAnimMode", &SLBackground::GetSpriteAnimMode, &SLBackground::SetSpriteAnimMode)
+		.property("SpriteAnimDuration", &SLBackground::GetSpriteAnimDuration, &SLBackground::SetSpriteAnimDuration)
+		.property("IsAnimatedManually", &SLBackground::IsAnimatedManually, &SLBackground::SetAnimatedManually)
+		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
+		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)
+		.property("AutoScrollStep", &SLBackground::GetAutoScrollStep, &SLBackground::SetAutoScrollStep)
+		.property("AutoScrollStepX", &SLBackground::GetAutoScrollStepX, &SLBackground::SetAutoScrollStepX)
+		.property("AutoScrollStepY", &SLBackground::GetAutoScrollStepY, &SLBackground::SetAutoScrollStepY)
+
+		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

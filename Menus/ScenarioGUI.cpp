@@ -96,7 +96,7 @@ namespace RTE {
 		m_StartActivityConfigButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonStartActivityConfig"));
 
 		m_DefaultScenePreview.Create(ContentFile("Base.rte/GUIs/DefaultPreview.png"), 5);
-		m_DefaultScenePreview.SetSpriteAnimMode(MOSprite::SpriteAnimMode::ALWAYSLOOP);
+		m_DefaultScenePreview.SetSpriteAnimMode(SpriteAnimMode::ALWAYSLOOP);
 		m_DefaultScenePreview.SetSpriteAnimDuration(200);
 		m_DefaultScenePreview.SetPos(Vector(static_cast<float>(m_ScenePreviewImageBox->GetXPos() + (m_ScenePreviewImageBox->GetWidth() / 2)), static_cast<float>(m_ScenePreviewImageBox->GetYPos() + (m_ScenePreviewImageBox->GetHeight() / 2))));
 

@@ -22,6 +22,7 @@
 #include "SettingsMan.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "TerrainObject.h"
 #include "MovableObject.h"
 #include "ContentFile.h"
@@ -40,7 +41,7 @@ namespace RTE
 #define COMPACTINGHEIGHT 25
 
 const std::string SceneMan::c_ClassName = "SceneMan";
-
+std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IntersectionCut
@@ -116,6 +117,25 @@ void SceneMan::Clear()
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneMan::Initialize() const {
+	// Can't create these earlier in the static declaration because allegro_init needs to be called before create_bitmap
+	m_IntermediateSettlingBitmaps = {
+		{ 16, create_bitmap_ex(8, 16, 16) },
+		{ 32, create_bitmap_ex(8, 32, 32) },
+		{ 48, create_bitmap_ex(8, 48, 48) },
+		{ 64, create_bitmap_ex(8, 64, 64) },
+		{ 96, create_bitmap_ex(8, 96, 96) },
+		{ 128, create_bitmap_ex(8, 128, 128) },
+		{ 192, create_bitmap_ex(8, 192, 192) },
+		{ 256, create_bitmap_ex(8, 256, 256) },
+		{ 384, create_bitmap_ex(8, 384, 384) },
+		{ 512, create_bitmap_ex(8, 512, 512) }
+	};
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -314,15 +334,7 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 
 int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AddScene")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrain")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrainDebris")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrainObject")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddMaterial")
+    if (propName == "AddMaterial")
     {
         // Get this before reading Object, since if it's the last one in its datafile, the stream will show the parent file instead
         string objectFilePath = reader.GetCurrentFilePath();
@@ -408,6 +420,10 @@ void SceneMan::Destroy()
 
 	destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = 0;
+
+	for (const auto &[bitmapSize, bitmapPtr] : m_IntermediateSettlingBitmaps) {
+		destroy_bitmap(bitmapPtr);
+	}
 
     Clear();
 }
@@ -583,7 +599,6 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
     // If it's still below or to the sides out of bounds after
     // what is supposed to be wrapped, shit is out of bounds.
     if (pixelX < 0 || pixelX >= pTMatBitmap->w || pixelY >= pTMatBitmap->h)
-//        return g_MaterialOutOfBounds;
         return g_MaterialAir;
 
     // If above terrain bitmap, return air material.
@@ -1485,9 +1500,9 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
         return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_MaskColor;
     }
 
@@ -1510,9 +1525,9 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
@@ -1549,9 +1564,9 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
@@ -1588,11 +1603,11 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
-        int scaledW = width * scale.m_X;
-        int scaledH = height * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
+        int scaledW = width / scale.m_X;
+        int scaledH = height / scale.m_Y;
 
         // Fill the box
         rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
@@ -1615,11 +1630,11 @@ void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width,
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
-        int scaledW = width * scale.m_X;
-        int scaledH = height * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
+        int scaledW = width / scale.m_X;
+        int scaledH = height / scale.m_Y;
 
         // Fill the box
         rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_BlackColor);
@@ -2837,55 +2852,6 @@ Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accu
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StructuralCalc
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the structural integrity of the Terrain during a set time
-//                  and turns structurally unsound areas into MovableObject:s.
-
-void SceneMan::StructuralCalc(unsigned long calcTime) {
-
-// TODO: Develop this!")
-    return;
-
-
-    if (calcTime <= 0)
-        return;
-    // Pad the time a little for FPS smoothness.
-    calcTime -= 1;
-    m_CalcTimer.Reset();
-
-    SLTerrain *pTerrain = g_SceneMan.GetTerrain();
-    BITMAP *pColBitmap = pTerrain->GetFGColorBitmap();
-    BITMAP *pMatBitmap = pTerrain->GetMaterialBitmap();
-    BITMAP *pStructBitmap = pTerrain->GetStructuralBitmap();
-    int posX, posY, height = pColBitmap->h, width = pColBitmap->w;
-
-    // Lock all bitmaps involved, outside the loop.
-    acquire_bitmap(pColBitmap);
-    acquire_bitmap(pMatBitmap);
-    acquire_bitmap(pStructBitmap);
-
-    // Preprocess bottom row to have full support.
-    for (posX = width - 1; posX >= 0; --posX)
-        putpixel(pStructBitmap, posX, height - 1, 255);
-
-    // Start on the second row from bottom.
-    for (posY = height - 2; posY >= 0 && !m_CalcTimer.IsPastSimMS(calcTime); --posY) {
-        for (posX = width - 1; posX >= 0; --posX) {
-            getpixel(pColBitmap, posX, posY);
-            getpixel(pMatBitmap, posX, posY);
-            getpixel(pStructBitmap, posX, posY);
-        }
-    }
-
-    // Unlock all bitmaps involved.
-    release_bitmap(pColBitmap);
-    release_bitmap(pMatBitmap);
-    release_bitmap(pStructBitmap);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsWithinBounds
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whether the integer coordinates passed in are within the
@@ -3279,61 +3245,24 @@ int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
     return addedTimes;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddTerrainObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes TerrainObject and applies it to the terrain
-//					OWNERSHIP NOT TRANSFERED!
-
-bool SceneMan::AddTerrainObject(TerrainObject *pObject)
-{
-    if (!pObject)
-        return false;
-
-    bool result =  m_pCurrentScene->GetTerrain()->ApplyObject(pObject);
-	if (result)
-	{
-		Vector corner = pObject->GetPos() + pObject->GetBitmapOffset();
-		Box box = Box(corner, pObject->GetBitmapWidth(), pObject->GetBitmapHeight());
-		
-		m_pCurrentScene->GetTerrain()->CleanAirBox(box, GetScene()->WrapsX(), GetScene()->WrapsY());
+bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
+	bool result = false;
+	if (sceneObject) {
+		if (MovableObject *sceneObjectAsMovableObject = dynamic_cast<MovableObject *>(sceneObject)) {
+			return g_MovableMan.AddMO(sceneObjectAsMovableObject);
+		} else if (TerrainObject *sceneObjectAsTerrainObject = dynamic_cast<TerrainObject *>(sceneObject)) {
+			result = sceneObjectAsTerrainObject->PlaceOnTerrain(m_pCurrentScene->GetTerrain());
+			if (result) {
+				Box airBox(sceneObjectAsTerrainObject->GetPos() + sceneObjectAsTerrainObject->GetBitmapOffset(), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapWidth()), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapHeight()));
+				m_pCurrentScene->GetTerrain()->CleanAirBox(airBox, GetScene()->WrapsX(), GetScene()->WrapsY());
+			}
+		}
 	}
+	delete sceneObject;
 	return result;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddSceneObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes any scene object and adds it to the scene in the appropriate way.
-//                  If it's a TerrainObject, then it gets applied to the terrain, if it's
-//                  an MO, it gets added to the correct type group in MovableMan.
-
-bool SceneMan::AddSceneObject(SceneObject *pObject)
-{
-    if (!pObject)
-        return false;
-
-    // Find out what kind it is and apply accordingly
-    if (MovableObject *pMO = dynamic_cast<MovableObject *>(pObject))
-    {
-        // No need to clean up here, AddMO takes ownership and takes care of it in either case
-        return g_MovableMan.AddMO(pMO);
-    }
-    else if (TerrainObject *pTO = dynamic_cast<TerrainObject *>(pObject))
-    {
-        bool result = m_pCurrentScene->GetTerrain()->ApplyObject(pTO);
-        // Have to clean up the added object here, since ApplyObject doesn't take ownership
-        delete pTO;
-        pObject = pTO = 0;
-        return result;
-    }
-
-    delete pObject;
-    pObject = 0;
-    return false;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -3341,137 +3270,74 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 // Description:     Updates the state of this SceneMan. Supposed to be done every frame
 //                  before drawing.
 
-void SceneMan::Update(int screen)
-{
-    if (m_pCurrentScene == nullptr) {
-        return;
-    }
-
-    // Record screen was the last updated screen
-    m_LastUpdatedScreen = screen;
-
-    // Update the scene, only if doing the first screen, since it only needs done once per update
-    if (screen == 0)
-        m_pCurrentScene->Update();
-
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-
-    // Learn about the unseen layer, if any
-    int team = m_ScreenTeam[screen];
-    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
-
-    ////////////////////////////////
-    // Scrolling interpolation
-
-    // Only adjust wrapping if this is the frame to be drawn
-    if (g_TimerMan.DrawnSimUpdate())
-    {
-        // Adjust for wrapping, if the scrolltarget jumped a seam this frame, as reported by
-        // whatever client set it (the scrolltarget) this frame. This is to avoid big,
-        // scene-wide jumps in scrolling when traversing the seam.
-        if (m_TargetWrapped[screen])
-        {
-            if (pTerrain->WrapsX())
-            {
-                if (m_ScrollTarget[screen].m_X < (pTerrain->GetBitmap()->w / 2))
-                {
-                    m_Offset[screen].m_X -= pTerrain->GetBitmap()->w;
-                    m_SeamCrossCount[screen][X] += 1;
-                }
-                else
-                {
-                    m_Offset[screen].m_X += pTerrain->GetBitmap()->w;
-                    m_SeamCrossCount[screen][X] -= 1;
-                }
-            }
-
-            if (pTerrain->WrapsY())
-            {
-                if (m_ScrollTarget[screen].m_Y < (pTerrain->GetBitmap()->h / 2))
-                {
-                    m_Offset[screen].m_Y -= pTerrain->GetBitmap()->h;
-                    m_SeamCrossCount[screen][Y] += 1;
-                }
-                else
-                {
-                    m_Offset[screen].m_Y += pTerrain->GetBitmap()->h;
-                    m_SeamCrossCount[screen][Y] -= 1;
-                }
-            }
-        }
-        m_TargetWrapped[screen] = false;
-    }
-
-    Vector oldOffset(m_Offset[screen]);
-
-    // Get the offset target, since the scroll target is centered on the target in scene units.
-    Vector offsetTarget;
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		offsetTarget.m_X = m_ScrollTarget[screen].m_X - (g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2);
-		offsetTarget.m_Y = m_ScrollTarget[screen].m_Y - (g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2);
+void SceneMan::Update(int screen) {
+	if (!m_pCurrentScene) {
+		return;
 	}
-	else 
-	{
-		offsetTarget.m_X = m_ScrollTarget[screen].m_X - (g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2));
-		offsetTarget.m_Y = m_ScrollTarget[screen].m_Y - (g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2));
+	m_LastUpdatedScreen = screen;
+
+	// Update the scene, only if doing the first screen, since it only needs done once per update.
+	if (screen == 0) { m_pCurrentScene->Update(); }
+
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
+
+	if (g_TimerMan.DrawnSimUpdate()) {
+		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
+		if (m_TargetWrapped[screen]) {
+			if (terrain->WrapsX()) {
+				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
+				m_Offset[screen].SetX(m_Offset[screen].GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
+				m_SeamCrossCount[screen][X] += wrappingScrollDirection;
+			}
+			if (terrain->WrapsY()) {
+				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
+				m_Offset[screen].SetY(m_Offset[screen].GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
+				m_SeamCrossCount[screen][Y] += wrappingScrollDirection;
+			}
+		}
+		m_TargetWrapped[screen] = false;
+	}
+	Vector oldOffset(m_Offset[screen]);
+	Vector offsetTarget;
+
+	if (g_FrameMan.IsInMultiplayerMode()) {
+		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2));
+		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2));
+	} else {
+		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
+		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
+	}
+	// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
+	offsetTarget -= (m_ScreenOcclusion[screen] / 2);
+
+	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
+		Vector scrollVec(offsetTarget - m_Offset[screen]);
+		float scrollProgress = std::min(1.0F, static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F));
+		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
 	}
 
-    // Take the occlusion of the screens into account,
-    // so that the scrolltarget is still centered on the terrain-visible portion of the screen.
-    offsetTarget -= m_ScreenOcclusion[screen] / 2;
+	m_pMOColorLayer->SetOffset(m_Offset[screen]);
+	m_pMOIDLayer->SetOffset(m_Offset[screen]);
+	if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
 
-    if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored())
-    {
-        Vector scrollVec(offsetTarget - m_Offset[screen]);
-        // Figure out the scroll progress this frame, and cap it at 1.0
-        float scrollProgress = m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05;
-        if (scrollProgress > 1.0)
-            scrollProgress = 1.0;
-// TODO: Check if rounding is appropriate?
-        SetOffset(m_Offset[screen] + (scrollVec * scrollProgress).GetRounded(), screen);
-    }
+	terrain->SetOffset(m_Offset[screen]);
+	terrain->Update();
 
-    /////////////////////////////////
-    // Apply offsets to SceneLayer:s
+	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
+	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
+	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
+		backgroundLayer->SetOffset(unwrappedOffset);
+		backgroundLayer->Update();
+	}
+	// Update the unseen obstruction layer for this team's screen view, if there is one.
+	if (SceneLayer *unseenLayer = (m_ScreenTeam[screen] != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(m_ScreenTeam[screen]) : nullptr) { unseenLayer->SetOffset(m_Offset[screen]); }
 
-    m_pMOColorLayer->SetOffset(m_Offset[screen]);
-    m_pMOIDLayer->SetOffset(m_Offset[screen]);
-
-    if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
-
-    pTerrain->SetOffset(m_Offset[screen]);
-    pTerrain->Update();
-
-    // Scroll the unexplored/unseen layer, if there is one
-    if (pUnseenLayer)
-    {
-        // Update the unseen obstruction layer for this team's screen view
-        pUnseenLayer->SetOffset(m_Offset[screen]);
-    }
-
-    // Background layers may scroll in fractions of the real offset, and need special care to avoid jumping after having traversed wrapped edges
-    // Reconstruct and give them the total offset, not taking any wrappings into account
-    Vector offsetUnwrapped = m_Offset[screen];
-    offsetUnwrapped.m_X += pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X];
-    offsetUnwrapped.m_Y += pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y];
-
-    for (list<SceneLayer *>::iterator itr = m_pCurrentScene->GetBackLayers().begin(); itr != m_pCurrentScene->GetBackLayers().end(); ++itr)
-        (*itr)->SetOffset(offsetUnwrapped);
-
-    // Calculate delta offset.
-    m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
-
-    // Reset the timer so we can know the real time diff next frame
-    m_ScrollTimer[screen].Reset();
-
-    // Clean the color layer of the Terrain
-    if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL)
-    {
-        pTerrain->CleanAir();
-        m_CleanTimer.Reset();
-    }
+	if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL) {
+		terrain->CleanAir();
+		m_CleanTimer.Reset();
+	}
+	m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
+	m_ScrollTimer[screen].Reset();
 }
 
 
@@ -3481,81 +3347,60 @@ void SceneMan::Update(int screen)
 // Description:     Draws this SceneMan's current graphical representation to a
 //                  BITMAP of choice.
 
-void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
-{
-    if (m_pCurrentScene == nullptr) {
-        return;
-    }
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
+void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector &targetPos, bool skipBackgroundLayers, bool skipTerrain) {
+	if (!m_pCurrentScene) {
+		return;
+	}
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
+	// Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension.
+	Box targetBox(Vector(), static_cast<float>(targetBitmap->w), static_cast<float>(targetBitmap->h));
 
-    // Learn about the unseen layer, if any
-    int team = m_ScreenTeam[m_LastUpdatedScreen];
-    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
+	if (!terrain->WrapsX() && targetBitmap->w > GetSceneWidth()) {
+		targetBox.SetCorner(Vector(static_cast<float>((targetBitmap->w - GetSceneWidth()) / 2), targetBox.GetCorner().GetY()));
+		targetBox.SetWidth(static_cast<float>(GetSceneWidth()));
+	}
+	if (!terrain->WrapsY() && targetBitmap->h > GetSceneHeight()) {
+		targetBox.SetCorner(Vector(targetBox.GetCorner().GetX(), static_cast<float>((targetBitmap->h - GetSceneHeight()) / 2)));
+		targetBox.SetHeight(static_cast<float>(GetSceneHeight()));
+	}
 
-    // Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension
-    Box targetBox(Vector(0, 0), pTargetBitmap->w, pTargetBitmap->h);
+	switch (m_LayerDrawMode) {
+		case LayerDrawMode::g_LayerTerrainMatter:
+			terrain->SetLayerToDraw(SLTerrain::LayerType::MaterialLayer);
+			terrain->Draw(targetBitmap, targetBox);
+			break;
+		case LayerDrawMode::g_LayerMOID:
+			m_pMOIDLayer->Draw(targetBitmap, targetBox);
+			break;
+		default:
+			if (!skipBackgroundLayers) {
+				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {
+					(*backgroundLayer)->Draw(targetBitmap, targetBox);
+				}
+			}
+			if (!skipTerrain) {
+				terrain->SetLayerToDraw(SLTerrain::LayerType::BackgroundLayer);
+				terrain->Draw(targetBitmap, targetBox);
+			}
+			m_pMOColorLayer->Draw(targetBitmap, targetBox);
 
-    if (!pTerrain->WrapsX() && pTargetBitmap->w > GetSceneWidth())
-    {
-        targetBox.m_Corner.m_X = (pTargetBitmap->w - GetSceneWidth()) / 2;
-        targetBox.m_Width = GetSceneWidth();
-    }
-    if (!pTerrain->WrapsY() && pTargetBitmap->h > GetSceneHeight())
-    {
-        targetBox.m_Corner.m_Y = (pTargetBitmap->h - GetSceneHeight()) / 2;
-        targetBox.m_Height = GetSceneHeight();
-    }
-
-    switch (m_LayerDrawMode)
-    {
-        case g_LayerTerrainMatter:
-            pTerrain->SetToDrawMaterial(true);
-            pTerrain->Draw(pTargetBitmap, targetBox);
-            break;
-        case g_LayerMOID:
-            m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-            break;
-        // Draw normally
-        default:
-			if (skipSkybox)
-			{
-
-			} 
-			else
-			{
-				// Background Layers
-				for (list<SceneLayer *>::reverse_iterator itr = m_pCurrentScene->GetBackLayers().rbegin(); itr != m_pCurrentScene->GetBackLayers().rend(); ++itr)
-					(*itr)->Draw(pTargetBitmap, targetBox);
+			if (!skipTerrain) {
+				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
+				terrain->Draw(targetBitmap, targetBox);
+			}
+			if (!g_FrameMan.IsInMultiplayerMode()) {
+				int team = m_ScreenTeam[m_LastUpdatedScreen];
+				if (SceneLayer *unseenLayer = (team != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(team) : nullptr) { unseenLayer->Draw(targetBitmap, targetBox); }
 			}
 
-			if (!skipTerrain)
-				// Terrain background
-				pTerrain->DrawBackground(pTargetBitmap, targetBox);
-            // Movables' color layer
-            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
-            // Terrain foreground
-            pTerrain->SetToDrawMaterial(false);
-			if (!skipTerrain)
-				pTerrain->Draw(pTargetBitmap, targetBox);
+			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
+			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-            // Obscure unexplored/unseen areas
-            if (pUnseenLayer && !g_FrameMan.IsInMultiplayerMode())
-            {
-                // Draw the unseen obstruction layer so it obscures the team's view
-                pUnseenLayer->DrawScaled(pTargetBitmap, targetBox);
-            }
+			if (m_pDebugLayer) { m_pDebugLayer->Draw(targetBitmap, targetBox); }
 
-            // Actor and gameplay HUDs and GUIs
-            g_MovableMan.DrawHUD(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
-//            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
-            g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
-
-//            std::snprintf(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
-
-            if (m_pDebugLayer) { m_pDebugLayer->Draw(pTargetBitmap, targetBox); }
-    }
+			break;
+	}
 }
 
 
@@ -3602,6 +3447,18 @@ void SceneMan::ClearSeenPixels()
 
 void SceneMan::ClearCurrentScene() {
     m_pCurrentScene = nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) const {
+	int bitmapSizeNeeded = static_cast<int>(std::ceil(static_cast<float>(moDiameter) / 16.0F)) * 16;
+	for (const auto &[bitmapSize, bitmapPtr] : m_IntermediateSettlingBitmaps) {
+		if (std::min(bitmapSize, bitmapSizeNeeded) >= bitmapSizeNeeded) {
+			return bitmapPtr;
+		}
+	}
+	return m_IntermediateSettlingBitmaps.back().second;
 }
 
 } // namespace RTE

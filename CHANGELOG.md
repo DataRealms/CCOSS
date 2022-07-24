@@ -8,17 +8,123 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
+- New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
+
+- New `Actor` INI properties `Organic = 0/1` and `Robotic = 0/1` and supporting Lua functions `Actor:IsOrganic()` and `Actor:IsRobotic()`.  
+	These have no direct gameplay effect (and default to false), but will be very useful for inter-mod compatibility, as they allow scripts to know if an `Actor` is organic or robotic, and treat them accordingly.
+  
+- New INI and Lua (R/W) `ACDropShip` property `HoverHeightModifier`. This allows for modification of the height at which an `ACDropShip` will hover when unloading cargo, or staying at a location.
+
+- New `Scene` Lua property `BackgroundLayers` (R/O) to access an iterator of the `Scene`'s `SLBackground` layers.
+
+- `SLBackground` layers can now be animated using the same INI and Lua animation controls as everything else (`FrameCount`, `SpriteAnimMode`, etc). ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
+	The collection of the `Scene`'s background layers can be accessed via `scene.BackgroundLayers`.
+
+- Added `SLBackground` auto-scrolling INI and Lua controls. ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
+	The INI definition looks like this:  
+	```
+	CanAutoScrollX = 0/1 // Whether this can auto-scroll on the X axis. Scrolling will take effect only when combined with WrapX = 1, otherwise ignored.
+	CanAutoScrollY = 0/1 // Whether this can auto-scroll on the Y axis. Scrolling will take effect only when combined with WrapY = 1, otherwise ignored.
+
+	AutoScrollStepInterval = intValue // The duration between auto-scrolling steps on both axis, in milliseconds.
+
+	AutoScrollStep = Vector
+		X = intValue // The number of pixels to progress the scrolling on the X axis each step. Float values are supported but may end up choppy and inconsistent due to internal rounding and lack of sub-pixel precision.
+		Y = intValue // The number of pixels to progress the scrolling on the Y axis each step. Float values are supported but may end up choppy and inconsistent due to internal rounding and lack of sub-pixel precision.
+	```
+	You can read and write the following Lua properties:  
+	```
+	slBackground.CanAutoScrollX = bool -- this may be true even if X axis scrolling is not in effect due to WrapX = 0.
+	slBackground.CanAutoScrollY = bool -- this may be true even if Y axis scrolling is not in effect due to WrapY = 0.
+	slBackground.AutoScrollInterval = intValue
+	slBackground.AutoScrollStep = vector
+	slBackground.AutoScrollStepX = intValue
+	slBackground.AutoScrollStepY = intValue
+	```
+	`slBackground:IsAutoScrolling()` - (R/O) returns whether auto-scrolling is actually in effect on either axis (meaning either `WrapX` and `CanAutoScrollX` or `WrapY` and `CanAutoScrollY` are true).
+
+	The collection of the `Scene`'s background layers can be accessed via `scene.BackgroundLayers`.
+
+- New `Settings.ini` property `SceneBackgroundAutoScaleMode = 0/1/2`. ([Issue #243](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/243))  
+	Auto-scaling modes are: 0 = Off, 1 = Fit Screen, 2 = Always 2x.  
+	This will auto-scale all `Scene` background layers to cover the whole screen vertically in cases where the layer's sprite is too short and creates a gap at the bottom.  
+	In cases where a layer is short by design, auto-scaling behavior can be disabled on a per-layer basis using the `SLBackground` INI property `IgnoreAutoScaling`, otherwise it may be excessively scaled up to 2x (maximum).  
+	Note that any `ScaleFactor` definitions in layers that aren't set to ignore auto-scaling will be overridden.  
+
+	Only relevant when playing on un-scaled vertical resolutions of 640p and above as most background layer sprites are currently around 580px tall, and comes with a minor performance impact.  
+	Note that in fit screen mode each layer is scaled individually so some layers may be scaled more than others, or not scaled at all.  
+	In always 2x mode all layers will be equally scaled to 2x.
+
+- New `SLBackground` INI property `IgnoreAutoScaling = 0/1` to ignore the global background layer auto-scaling setting and use the `ScaleFactor` defined in the preset, if any.
+
+- New `SLBackground` INI property `OriginPointOffset` to offset the layer from the top left corner of the screen.
+
+- Added new `TerrainDebris` scattering functionality. ([Issue #152](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/152))  
+	New INI properties are:  
+	```
+	MinRotation/MaxRotation = angleDegrees // Rotates each debris piece to a random angle within the specified values. Values in degrees, negative values are counter-clockwise.  
+
+	FlipChance = floatValue // Chance for a debris piece to be flipped when either `CanHFlip` or `CanYFlip` are set true. 0-1, defaults to 0.5.  
+	
+	CanHFlip/CanVFlip = 0/1 // Flips each debris piece on the X, Y or both axis.
+	```
+
+- Added support for `Material` background textures with INI property `BGTextureFile`.
+
 - New `MovableObject` INI and Lua (R/W) property `SimUpdatesBetweenScriptedUpdates`, that lets `MovableObject`s run their Lua update function less frequently, for performance benefits.
 
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Completely replaced `ScriptFile` with `ScriptPath`.
+
+- `Scene` background layer presets in INI are now defined as `SLBackground` rather than `SceneLayer`.
+
+- `TerrainDebris` INI property `OnlyOnSurface = 0/1` replaced with `DebrisPlacementMode = 0-6`.  
+	Placement modes are:  
+	```
+	0 (NoPlacementRestrictions) // Debris will be placed anywhere where there is target material (currently not strictly enforced when being offset by min/max depth, so can end up being placed mid-air/cavity unless set to OnlyBuried = 1).
+
+	1 (OnSurfaceOnly) // Debris will be placed only on the surface (scanning from top to bottom) where no background cavity material (material index 1) was encountered before the target material.
+
+	2 (OnCavitySurfaceOnly) // Debris will be placed only on the surface (scanning from top to bottom) where background cavity material (material index 1) was encountered before the target material.
+
+	3 (OnSurfaceAndCavitySurface) // Debris will be placed only on the surface (scanning from top to bottom) regardless whether background cavity material (material index 1) was encountered before the target material.
+
+	4 (OnOverhangOnly) // Debris will be placed only on overhangs (scanning from bottom to top) where no background cavity material (material index 1) was encountered before the target material.
+
+	5 (OnCavityOverhangOnly) // Debris will be placed only on overhangs (scanning from bottom to top) where background cavity material (material index 1) was encountered before the target material.
+
+	6 (OnOverhangAndCavityOverhang) // Debris will be placed only on overhangs (scanning from bottom to top) regardless whether background cavity material (material index 1) was encountered before the target material.
+	```
+
+- `Material` INI property `TextureFile` renamed to `FGTextureFile` to accommodate new background texture property.
+
+- `TerrainObject`s no longer have a hard requirement for `FG` and `Mat` layer sprites. Any layer may be omitted as long as at least one is defined.
+
+- `Scene` layer data will now be saved as compressed PNG to reduce file sizes of MetaGame saves and is threaded to prevent the game from freezing when layer data is being saved. 
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
+
+- Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
 </details>
 
 <details><summary><b>Removed</b></summary>
+
+- Removed `SLTerrain` and `SLBackground` INI property `Offset`. Internal and shouldn't have been exposed.
+
+- Removed `SLTerrain` INI alt property `AddTerrainObject`. Use `PlaceTerrainObject` for consistency with similar properties.
+
+- Removed `TerrainObject` INI property `DisplayAsTerrain`. Wasn't implemented and did nothing.
+
+- Removed `SceneMan` Lua function `AddTerrainObject`. `SceneMan:AddSceneObject` should be used instead.
+
 </details>
 
 ***

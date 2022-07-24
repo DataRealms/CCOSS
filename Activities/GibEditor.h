@@ -306,6 +306,11 @@ protected:
 
 private:
 
+	/// <summary>
+	/// Clears all the layers of the testing area terrain so nothing that somehow settled lingers between edited object changes and testing phases.
+	/// </summary>
+	void ClearTestArea() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

@@ -98,18 +98,17 @@ namespace RTE {
 	int SLTerrain::Save(Writer &writer) const {
 		SceneLayer::Save(writer);
 
-		// Only write the background texture info if the background itself is not saved out as a file already.
+		// Only write the background texture info if the background itself is not saved out as a file already, since saved, pre-rendered bitmaps don't need texturing.
 		if (m_BGColorLayer->IsLoadedFromDisk()) {
 			writer.NewPropertyWithValue("BGColorLayer", m_BGColorLayer.get());
 		} else {
 			writer.NewPropertyWithValue("BackgroundTexture", m_DefaultBGTextureFile);
 		}
 
-		// Only write the procedural params if the foreground itself is not saved out as a file already.
+		// Only write the procedural parameters if the foreground itself is not saved out as a file already, since saved, pre-rendered bitmaps don't need procedural generation.
 		if (m_FGColorLayer->IsLoadedFromDisk()) {
 			writer.NewPropertyWithValue("FGColorLayer", m_FGColorLayer.get());
 		} else {
-			// Layer data is not saved into a bitmap file yet, so just write out the procedural params to build the terrain.
 			for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
 				writer.NewPropertyWithValue("AddTerrainFrosting", terrainFrosting);
 			}
@@ -417,6 +416,7 @@ namespace RTE {
 
 						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
 						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
+						terrainPixel->SetPresetName("Dislodged Terrain Pixel from Material " + std::to_string(sceneMat->GetIndex()));
 						terrainPixel->SetToHitMOs(false);
 						dislodgedMOPixels.emplace_back(terrainPixel.release());
 					}

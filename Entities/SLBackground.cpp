@@ -18,8 +18,8 @@ namespace RTE {
 		m_SpriteAnimIsReversingFrames = false;
 		m_SpriteAnimTimer.Reset();
 		m_IsAnimatedManually = false;
-		m_AutoScrollX = false;
-		m_AutoScrollY = false;
+		m_CanAutoScrollX = false;
+		m_CanAutoScrollY = false;
 		m_AutoScrollStep.Reset();
 		m_AutoScrollStepInterval = 0;
 		m_AutoScrollStepTimer.Reset();
@@ -80,8 +80,8 @@ namespace RTE {
 		m_SpriteAnimMode = reference.m_SpriteAnimMode;
 		m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
 
-		m_AutoScrollX = reference.m_AutoScrollX;
-		m_AutoScrollY = reference.m_AutoScrollY;
+		m_CanAutoScrollX = reference.m_CanAutoScrollX;
+		m_CanAutoScrollY = reference.m_CanAutoScrollY;
 		m_AutoScrollStep = reference.m_AutoScrollStep;
 		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
 
@@ -114,10 +114,10 @@ namespace RTE {
 			reader >> m_IgnoreAutoScale;
 		} else if (propName == "OriginPointOffset") {
 			reader >> m_OriginOffset;
-		} else if (propName == "AutoScrollX") {
-			reader >> m_AutoScrollX;
-		} else if (propName == "AutoScrollY") {
-			reader >> m_AutoScrollY;
+		} else if (propName == "CanAutoScrollX") {
+			reader >> m_CanAutoScrollX;
+		} else if (propName == "CanAutoScrollY") {
+			reader >> m_CanAutoScrollY;
 		} else if (propName == "AutoScrollStepInterval") {
 			reader >> m_AutoScrollStepInterval;
 		} else if (propName == "AutoScrollStep") {
@@ -142,8 +142,8 @@ namespace RTE {
 		writer.NewPropertyWithValue("ScaleFactor", m_ScaleFactor);
 		writer.NewPropertyWithValue("IgnoreAutoScaling", m_IgnoreAutoScale);
 		writer.NewPropertyWithValue("OriginPointOffset", m_OriginOffset);
-		writer.NewPropertyWithValue("AutoScrollX", m_AutoScrollX);
-		writer.NewPropertyWithValue("AutoScrollY", m_AutoScrollY);
+		writer.NewPropertyWithValue("CanAutoScrollX", m_CanAutoScrollX);
+		writer.NewPropertyWithValue("CanAutoScrollY", m_CanAutoScrollY);
 		writer.NewPropertyWithValue("AutoScrollStepInterval", m_AutoScrollStepInterval);
 		writer.NewPropertyWithValue("AutoScrollStep", m_AutoScrollStep);
 
@@ -206,8 +206,8 @@ namespace RTE {
 
 		if (IsAutoScrolling()) {
 			if (m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
-				if (m_WrapX && m_AutoScrollX) { m_AutoScrollOffset.SetX(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX()); }
-				if (m_WrapY && m_AutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
+				if (m_WrapX && m_CanAutoScrollX) { m_AutoScrollOffset.SetX(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX()); }
+				if (m_WrapY && m_CanAutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
 				WrapPosition(m_AutoScrollOffset);
 				m_AutoScrollStepTimer.Reset();
 			}

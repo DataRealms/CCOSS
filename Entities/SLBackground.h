@@ -104,31 +104,31 @@ namespace RTE {
 		/// Gets whether this SLBackground has auto-scrolling enabled and meets the requirements to actually auto-scroll.
 		/// </summary>
 		/// <returns>Whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.</returns>
-		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
+		bool IsAutoScrolling() const { return (m_WrapX && m_CanAutoScrollX) || (m_WrapY && m_CanAutoScrollY); }
 
 		/// <summary>
 		/// Gets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
 		/// <returns>Whether auto-scrolling is enabled on the X axis. This may be true even if auto-scrolling isn't actually happening due to not meeting requirements.</returns>
-		bool GetAutoScrollX() const { return m_AutoScrollX; }
+		bool GetAutoScrollX() const { return m_CanAutoScrollX; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
 		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not. If requirements aren't met, this will not auto-scroll even if set to true.</param>
-		void SetAutoScrollX(bool autoScroll) { m_AutoScrollX = autoScroll; }
+		void SetAutoScrollX(bool autoScroll) { m_CanAutoScrollX = autoScroll; }
 
 		/// <summary>
 		/// Gets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
 		/// <returns>Whether auto-scrolling is enabled on the Y axis. This may be true even if auto-scrolling isn't actually happening due to not meeting requirements.</returns>
-		bool GetAutoScrollY() const { return m_AutoScrollY; }
+		bool GetAutoScrollY() const { return m_CanAutoScrollY; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
 		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not. If requirements aren't met, this will not auto-scroll even if set to true.</param>
-		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
+		void SetAutoScrollY(bool autoScroll) { m_CanAutoScrollY = autoScroll; }
 
 		/// <summary>
 		/// Gets the duration between auto-scroll steps.
@@ -222,8 +222,8 @@ namespace RTE {
 
 		bool m_IsAnimatedManually; //!< Whether this SLBackground's animation is handled manually/externally and should not be handled during Update().
 
-		bool m_AutoScrollX; //!< Whether auto-scrolling is enabled on the X axis, but not whether auto-scrolling actually happens on this axis.
-		bool m_AutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis, but not whether auto-scrolling actually happens on this axis.
+		bool m_CanAutoScrollX; //!< Whether auto-scrolling is enabled on the X axis, but not whether auto-scrolling actually happens on this axis.
+		bool m_CanAutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis, but not whether auto-scrolling actually happens on this axis.
 		Vector m_AutoScrollStep; //!< Vector with the number of pixels on each axis to advance per interval when auto-scrolling. Can be fractions of a pixel, but will not be visible until AutoScrollOffset adds up to a full pixel step.
 		int m_AutoScrollStepInterval; //!< The duration between auto-scroll steps, in milliseconds.
 		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.

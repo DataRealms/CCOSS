@@ -23,8 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added `SLBackground` auto-scrolling INI and Lua controls. ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
 	The INI definition looks like this:  
 	```
-	AutoScrollX = 0/1 // Whether this should auto-scroll on the X axis. Will work only when WrapX = 1, otherwise ignored.
-	AutoScrollY = 0/1 // Whether this should auto-scroll on the Y axis. Will work only when WrapY = 1, otherwise ignored.
+	CanAutoScrollX = 0/1 // Whether this can auto-scroll on the X axis. Scrolling will take effect only when combined with WrapX = 1, otherwise ignored.
+	CanAutoScrollY = 0/1 // Whether this can auto-scroll on the Y axis. Scrolling will take effect only when combined with WrapY = 1, otherwise ignored.
 
 	AutoScrollStepInterval = intValue // The duration between auto-scrolling steps on both axis, in milliseconds.
 
@@ -34,14 +34,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 	You can read and write the following Lua properties:  
 	```
-	slBackground.AutoScrollX = bool -- this may be true even if X axis scrolling is not in effect due to WrapX = 0.
-	slBackground.AutoScrollY = bool -- this may be true even if Y axis scrolling is not in effect due to WrapY = 0.
+	slBackground.CanAutoScrollX = bool -- this may be true even if X axis scrolling is not in effect due to WrapX = 0.
+	slBackground.CanAutoScrollY = bool -- this may be true even if Y axis scrolling is not in effect due to WrapY = 0.
 	slBackground.AutoScrollInterval = intValue
 	slBackground.AutoScrollStep = vector
 	slBackground.AutoScrollStepX = intValue
 	slBackground.AutoScrollStepY = intValue
 	```
-	`slBackground:IsAutoScrolling()` - (R/O) returns whether auto-scrolling is actually in effect on either axis (meaning either `WrapX` and `AutoScrollX` or `WrapY` and `AutoScrollY` are true).
+	`slBackground:IsAutoScrolling()` - (R/O) returns whether auto-scrolling is actually in effect on either axis (meaning either `WrapX` and `CanAutoScrollX` or `WrapY` and `CanAutoScrollY` are true).
 
 	The collection of the `Scene`'s background layers can be accessed via `scene.BackgroundLayers`.
 

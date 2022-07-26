@@ -1494,6 +1494,18 @@ enum MOType
 
 	void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
 
+    /// <summary>
+    /// Gets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <returns>The number of Sim updates that run between each script update for this MovableObject.</returns>
+    int GetSimUpdatesBetweenScriptedUpdates() const { return m_SimUpdatesBetweenScriptedUpdates; }
+
+    /// <summary>
+    /// sets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <param name="newSimUpdatesBetweenScriptedUpdates">The new number of Sim updates that run between each script update for this MovableObject.</param>
+    void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
@@ -2014,6 +2026,9 @@ protected:
 	unsigned int m_LastCollisionSimFrameNumber;
 	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
 	bool m_ProvidesPieMenuContext;
+    // Update every n frames property
+    int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
+    int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

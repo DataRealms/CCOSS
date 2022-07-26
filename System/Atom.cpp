@@ -552,13 +552,13 @@ namespace RTE {
 			}
 			std::string abortString = "Atom shouldn't be taking steps beyond the trajectory!";
 			if (m_OwnerMO) {
-				abortString += " Root owner is " + m_OwnerMO->GetPresetName() + ".";
+				abortString += "\nRoot owner is " + m_OwnerMO->GetPresetName() + ".";
 				if (m_SubgroupID != 0) {
 					const MovableObject *realOwner = g_MovableMan.FindObjectByUniqueID(m_SubgroupID);
 					abortString += " Owner is " + realOwner->GetPresetName() + ".";
 				}
 			}
-			abortString += " DomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
+			abortString += "\n\nDomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
 			RTEAbort(abortString);
 			m_OwnerMO->SetToDelete();
 		}

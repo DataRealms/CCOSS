@@ -655,7 +655,7 @@ public:
     /// </summary>
     /// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
     /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
-    void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
+    void OpenAllDoors(bool open = true, int team = Activity::NoTeam) const;
 
     /// <summary>
     /// Temporarily erases or redraws any material door representations of a specific team.
@@ -663,7 +663,7 @@ public:
     /// </summary>
     /// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
     /// <param name="team">Which team to do this for, NoTeam means all teams.</param>
-    void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam);
+    void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

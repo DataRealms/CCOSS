@@ -1424,16 +1424,20 @@ int MovableMan::GetTeamMOIDCount(int team) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::OpenAllDoors(bool open, int team) {
-	for (std::deque<Actor *> actorDequeue : { m_Actors, m_AddedActors }) {
-		for (Actor *actor : actorDequeue) {
+void MovableMan::OpenAllDoors(bool open, int team) const {
+	for (std::deque<Actor *> actorDeque : { m_Actors, m_AddedActors }) {
+		for (Actor *actor : actorDeque) {
 			if (ADoor *actorAsADoor = dynamic_cast<ADoor *>(actor); actorAsADoor && (team == Activity::NoTeam || actorAsADoor->GetTeam() == team)) {
 				if (actorAsADoor->GetDoorState() != (open ? ADoor::DoorState::OPEN : ADoor::DoorState::CLOSED)) {
 					actorAsADoor->Update();
 					actorAsADoor->SetClosedByDefault(!open);
 				}
 				actorAsADoor->ResetSensorTimer();
-				open ? actorAsADoor->OpenDoor() : actorAsADoor->CloseDoor();
+				if (open) {
+					actorAsADoor->OpenDoor();
+				} else {
+					actorAsADoor->CloseDoor();
+				}
 			}
 		}
 	}
@@ -1441,9 +1445,9 @@ void MovableMan::OpenAllDoors(bool open, int team) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) {
-	for (std::deque<Actor *> actorDequeue : { m_Actors, m_AddedActors }) {
-		for (Actor *actor : actorDequeue) {
+void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) const {
+	for (std::deque<Actor *> actorDeque : { m_Actors, m_AddedActors }) {
+		for (Actor *actor : actorDeque) {
 			if (ADoor *actorAsDoor = dynamic_cast<ADoor *>(actor); actorAsDoor && (team == Activity::NoTeam || actorAsDoor->GetTeam() == team)) {
 				actorAsDoor->TempEraseOrRedrawDoorMaterial(eraseDoorMaterial);
 			}

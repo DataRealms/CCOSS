@@ -220,11 +220,11 @@ namespace RTE {
 		float GetJointStiffness() const { return m_JointStiffness; }
 
 		/// <summary>
-		/// Sets the stiffness scalar of the joint of this Attachable, normalized between 0 and 1.0.
+		/// Sets the stiffness scalar of the joint of this Attachable, limited between 0 and 1.0.
 		/// 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		/// </summary>
 		/// <param name="jointStiffness">A float describing the normalized stiffness scalar of this Attachable's joint. It will automatically be limited between 0 and 1.0.</param>
-		void SetJointStiffness(float jointStiffness) { m_JointStiffness = Limit(jointStiffness, 1.0F, 0.0F); }
+		virtual void SetJointStiffness(float jointStiffness) { m_JointStiffness = std::clamp(jointStiffness, 0.0F, 1.0F); }
 
 		/// <summary>
 		/// Gets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.

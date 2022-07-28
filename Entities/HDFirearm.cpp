@@ -74,6 +74,8 @@ void HDFirearm::Clear()
     m_AlreadyClicked = false;
 	m_RoundsFired = 0;
 	m_IsAnimatedManually = false;
+
+	m_LegacyCompatibilityRoundsAlwaysFireUnflipped = false;
 }
 
 
@@ -139,6 +141,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_MagOff = reference.m_MagOff;
 	m_RoundsFired = reference.m_RoundsFired;
 	m_IsAnimatedManually = reference.m_IsAnimatedManually;
+
+	m_LegacyCompatibilityRoundsAlwaysFireUnflipped = reference.m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
 
     return 0;
 }
@@ -223,8 +227,10 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_ShellVelVariation;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
-    } else if (propName == "EjectionOffset") {
-        reader >> m_EjectOff;
+	} else if (propName == "EjectionOffset") {
+		reader >> m_EjectOff;
+	} else if (propName == "LegacyCompatibilityRoundsAlwaysFireUnflipped") {
+		reader >> m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
     } else {
         return HeldDevice::ReadProperty(propName, reader);
     }
@@ -301,6 +307,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
     writer << m_EjectOff;
+
+	writer.NewPropertyWithValue("LegacyCompatibilityRoundsAlwaysFireUnflipped", m_LegacyCompatibilityRoundsAlwaysFireUnflipped);
 
     return 0;
 }
@@ -635,7 +643,7 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-	if (m_PreFireSound) { m_PreFireSound->FadeOut(); }
+	if (m_PreFireSound) { m_PreFireSound->Stop(); }
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
     if (m_DeactivationSound && wasActivated && m_FiredLastFrame) { m_DeactivationSound->Play(m_Pos); }
 }
@@ -668,8 +676,8 @@ void HDFirearm::StopActivationSound()
 void HDFirearm::Reload()
 {
 	if (!m_Reloading && m_Reloadable) {
-        if (m_pMagazine)
-        {
+		bool hadMagazineBeforeReloading = m_pMagazine != nullptr;
+        if (hadMagazineBeforeReloading) {
 			Vector constrainedMagazineOffset = g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2.0F);
 			Vector ejectVector = Vector(2.0F * GetFlipFactor(), 0.0F) + constrainedMagazineOffset.RadRotate(RandomNum(-0.2F, 0.2F));
 			m_pMagazine->SetVel(m_Vel + ejectVector);
@@ -684,6 +692,9 @@ void HDFirearm::Reload()
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
+
+		RunScriptedFunctionInAppropriateScripts("OnReload", false, false, {}, { hadMagazineBeforeReloading ? "true" : "false" });
+
 		m_Reloading = true;
     }
 }
@@ -853,9 +864,13 @@ void HDFirearm::Update()
                     particleVel = roundVel;
                     particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
-                    pParticle->SetVel(m_Vel + particleVel);
-                    pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
-					pParticle->SetHFlipped(m_HFlipped);
+                    pParticle->SetVel(pRound->GetInheritsFirerVelocity() ? (m_Vel + particleVel) : particleVel);
+					if (m_LegacyCompatibilityRoundsAlwaysFireUnflipped) {
+						pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
+					} else {
+						pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
+						pParticle->SetHFlipped(m_HFlipped);
+					}
 					if (lifeVariation != 0 && pParticle->GetLifetime() != 0) {
 						pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + (particleCountMax > 1 ? lifeVariation - (lifeVariation * 2.0F * (static_cast<float>(pRound->ParticleCount()) / static_cast<float>(particleCountMax - 1))) : lifeVariation * RandomNormalNum()))), 1));
 					}
@@ -933,6 +948,8 @@ void HDFirearm::Update()
                 delete pRound;
             }
             pRound = 0;
+
+			if (m_FireFrame) { RunScriptedFunctionInAppropriateScripts("OnFire", false, false); }
 		} else {
 			m_ActivationTimer.Reset();
 		}
@@ -1013,7 +1030,11 @@ void HDFirearm::Update()
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		m_RecoilForce *= 0.6F;
+		if (m_RecoilForce.GetMagnitude() > 0.01F) {
+			m_RecoilForce *= 0.6F;
+		} else {
+			m_RecoilForce.Reset();
+		}
 		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 

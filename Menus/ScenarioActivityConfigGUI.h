@@ -77,6 +77,7 @@ namespace RTE {
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		const GameActivity *m_SelectedActivity; //!< The Activity this ScenarioActivityConfigGUI is configuring.
+		const GameActivity *m_PreviouslySelectedActivity; //!< The Activity this ScenarioActivityConfigGUI was configuring last, before it got was disabled.
 		Scene *m_SelectedScene; //!< The Scene the selected Activity will be using.
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 

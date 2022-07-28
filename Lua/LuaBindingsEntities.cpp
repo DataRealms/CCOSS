@@ -63,6 +63,7 @@ namespace RTE {
 		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
 		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
 		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
+		.property("JetAngleRange", &ACrab::GetJetAngleRange, &ACrab::SetJetAngleRange)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -280,7 +281,7 @@ namespace RTE {
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
 		.def("IsOrganic", &Actor::IsOrganic)
-		.def("IsRobotic", &Actor::IsRobotic)
+		.def("IsMechanical", &Actor::IsMechanical)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),
@@ -833,6 +834,7 @@ namespace RTE {
 		.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 		.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 		.property("WoundCountAffectsImpulseLimitRatio", &MOSRotating::GetWoundCountAffectsImpulseLimitRatio)
+		.property("GibAtEndOfLifetime", &MOSRotating::GetGibAtEndOfLifetime, &MOSRotating::SetGibAtEndOfLifetime)
 		.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 		.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
@@ -1015,6 +1017,7 @@ namespace RTE {
 		.property("NextParticle", &Round::GetNextParticle)
 		.property("Shell", &Round::GetShell)
 		.property("FireVel", &Round::GetFireVel)
+		.property("InheritsFirerVelocity", &Round::GetInheritsFirerVelocity)
 		.property("ShellVel", &Round::GetShellVel)
 		.property("Separation", &Round::GetSeparation)
 		.property("ParticleCount", &Round::ParticleCount)
@@ -1237,7 +1240,9 @@ namespace RTE {
 		.property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
 		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
 		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
-		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset);
+		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset)
+			
+		.def("GetCalculatedMaxThrowVelIncludingArmThrowStrength", &ThrownDevice::GetCalculatedMaxThrowVelIncludingArmThrowStrength);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

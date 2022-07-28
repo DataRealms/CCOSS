@@ -28,6 +28,7 @@ namespace RTE
 
 class MovableObject;
 class Actor;
+class HeldDevice;
 class MOPixel;
 class AHuman;
 class SceneLayer;
@@ -421,55 +422,30 @@ public:
 
     void SortTeamRoster(int team) { m_SortTeamRoster[team] = true; }
 
+    /// <summary>
+    /// Adds a MovableObject to this, after it is determined what it is and the best way to add it is. E.g. if it's an Actor, it will be added as such. Ownership IS transferred!
+    /// </summary>
+    /// <param name="movableObjectToAdd">A pointer to the MovableObject to add. Ownership IS transferred!</param>
+    /// <returns>Whether the MovableObject was successfully added or not. Note that Ownership IS transferred either way, but the MovableObject will be deleted if this is not successful.</returns>
+    bool AddMO(MovableObject *movableObjectToAdd);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a MovableObject to this, after it is determined what it is and the
-//                  best way to add it is. E.g. if it's an Actor, it will be added as such.
-//                  Ownership IS transferred! TODO: ITEMS ARE NOT SORTED OUT YET
-// Arguments:       A pointer to the MovableObject to add. Ownership IS transferred!
-// Return value:    Whether the MovableObject was successfully added or not. Either way,
-//                  ownership was transferred. If no success, the object was deleted.
+    /// <summary>
+    /// Adds an Actor to the internal list of Actors. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+    /// <param name="actorToAdd">A pointer to the Actor to add. Ownership IS transferred!</param>
+    void AddActor(Actor *actorToAdd);
 
+    /// <summary>
+    /// Adds a pickup-able item to the internal list of items. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+	/// <param name="itemToAdd">A pointer to the item to add. Ownership IS transferred!</param>
+    void AddItem(HeldDevice *itemToAdd);
 
-    bool AddMO(MovableObject *pMOToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddActor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an Actor to the internal list of MO:s. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the Actor to add.
-// Return value:    None.
-
-    void AddActor(Actor *pActorToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a pickup-able item to the internal list of items. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the item MovableObject to add. Ownership is transferred.
-// Return value:    None.
-
-    void AddItem(MovableObject *pItemToAdd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddParticle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a MovableObject to the internal list of MO:s. Destruction and 
-//                  deletion will be taken care of automatically. Do NOT delete the passed
-//                  MO after adding it here! i.e. Ownership IS transferred!
-// Arguments:       A pointer to the MovableObject to add. Ownership is transferred.
-// Return value:    None.
-
-    void AddParticle(MovableObject *pMOToAdd);
+    /// <summary>
+    /// Adds a MovableObject to the internal list of particles. Destruction and deletion will be taken care of automatically. Ownership IS transferred!
+    /// </summary>
+    /// <param name="particleToAdd">A pointer to the MovableObject to add. Ownership is transferred!</param>
+    void AddParticle(MovableObject *particleToAdd);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -674,29 +650,20 @@ public:
 
     int EjectAllItems(std::list<SceneObject *> &itemList);
 
+    /// <summary>
+    /// Opens all doors and keeps them open until this is called again with false.
+    /// </summary>
+    /// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
+    /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
+    void OpenAllDoors(bool open = true, int team = Activity::NoTeam) const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OpenAllDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens all doors and keeps them open until this is called again with false.
-// Arguments:       Whether to open all doors (true), or undo this action (false)
-//                  Which team to do this for. NoTeam means all teams.
-// Return value:    None.
-
-    void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OverrideMaterialDoors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Temporarily erases any material door representations of a specific team.
-//                  Used for making pathfinding work better, allowing teammember to navigate
-//                  through friendly bases.
-// Arguments:       Whether to enable the override (true), or undo this action (false)
-//                  Which team to do this for. NoTeam means all teams.
-// Return value:    None.
-
-    void OverrideMaterialDoors(bool enable, int team = Activity::NoTeam);
+    /// <summary>
+    /// Temporarily erases or redraws any material door representations of a specific team.
+	/// Used to make pathfinding work better, allowing Actors to navigate through firendly bases despite the door material layer.
+    /// </summary>
+    /// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
+    /// <param name="team">Which team to do this for, NoTeam means all teams.</param>
+    void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

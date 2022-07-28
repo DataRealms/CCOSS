@@ -113,7 +113,9 @@ namespace RTE {
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {
-			reader >> m_JointStiffness;
+			float jointStiffness = 0;
+			reader >> jointStiffness;
+			SetJointStiffness(jointStiffness);
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {
@@ -199,6 +201,7 @@ namespace RTE {
 		jointStiffnessValueToUse = jointStiffnessValueToUse > 0 ? jointStiffnessValueToUse : m_JointStiffness;
 		jointStrengthValueToUse = jointStrengthValueToUse > 0 ? jointStrengthValueToUse : m_JointStrength;
 		gibImpulseLimitValueToUse = gibImpulseLimitValueToUse > 0 ? gibImpulseLimitValueToUse : m_GibImpulseLimit;
+		if (jointStrengthValueToUse == 0) { gibImpulseLimitValueToUse = 0; }
 		if (gibImpulseLimitValueToUse > 0) { gibImpulseLimitValueToUse = std::max(gibImpulseLimitValueToUse, jointStrengthValueToUse); }
 
 		Vector totalImpulseForce;
@@ -206,6 +209,15 @@ namespace RTE {
 			totalImpulseForce += impulseForce;
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
+
+		// Rough explanation of what this is doing:
+		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
+		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents (leaving none to affect the Attachable) and min stiffness transfer none.
+		if (!m_InheritsRotAngle) {
+			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+				if (!impulseForceOffset.IsZero()) { m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - std::clamp(jointStiffnessValueToUse, 0.0F, 1.0F)); }
+			}
+		}
 
 		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
 		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
@@ -218,17 +230,6 @@ namespace RTE {
 			return false;
 		} else {
 			jointImpulses += totalImpulseForce;
-		}
-
-		// Rough explanation of what this is doing:
-		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
-		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
-		if (!m_InheritsRotAngle) {
-			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
-				if (!impulseForceOffset.IsZero()) {
-					m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
-				}
-			}
 		}
 
 		m_ImpulseForces.clear();

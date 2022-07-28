@@ -21,7 +21,7 @@ namespace RTE {
 
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
-		m_UnheldItemsHUDDisplayRange = 25;
+		m_UnheldItemsHUDDisplayRange = 25 * c_PPM;
 		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;

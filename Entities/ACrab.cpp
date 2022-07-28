@@ -2389,6 +2389,26 @@ void ACrab::Update()
 		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way?
+				if (m_pLFGLeg) { m_pLFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLFGLeg->GetParentOffset()), m_pLFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pLFGLeg->GetMass(), deltaTime); }
+				if (m_pLBGLeg) { m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pLBGLeg->GetMass(), deltaTime); }
+				if (m_pRFGLeg) { m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRFGLeg->GetMass(), deltaTime); }
+				if (m_pRBGLeg) { m_pRBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRBGLeg->GetParentOffset()), m_pRBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRBGLeg->GetMass(), deltaTime); }
+
+				if (m_JetTimeLeft <= 0) {
+					m_MoveState = STAND;
+					m_Paths[LEFTSIDE][FGROUND][JUMP].Terminate();
+					m_Paths[LEFTSIDE][BGROUND][JUMP].Terminate();
+					m_Paths[LEFTSIDE][FGROUND][STAND].Terminate();
+					m_Paths[LEFTSIDE][BGROUND][STAND].Terminate();
+					m_Paths[LEFTSIDE][FGROUND][WALK].Terminate();
+					m_Paths[LEFTSIDE][BGROUND][WALK].Terminate();
+					m_Paths[RIGHTSIDE][FGROUND][JUMP].Terminate();
+					m_Paths[RIGHTSIDE][BGROUND][JUMP].Terminate();
+					m_Paths[RIGHTSIDE][FGROUND][STAND].Terminate();
+					m_Paths[RIGHTSIDE][BGROUND][STAND].Terminate();
+					m_Paths[RIGHTSIDE][FGROUND][WALK].Terminate();
+					m_Paths[RIGHTSIDE][BGROUND][WALK].Terminate();
+				}
 			} else {
 				for (int side = 0; side < SIDECOUNT; ++side) {
 					for (int layer = 0; layer < LAYERCOUNT; ++layer) {

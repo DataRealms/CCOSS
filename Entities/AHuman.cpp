@@ -3351,24 +3351,21 @@ void AHuman::Update()
 					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
 					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
+					float maxThrowVel = pThrown->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
 						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
-						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
-						if (maxThrowVel == 0) {
-							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
-							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
-							minThrowVel = maxThrowVel * 0.2F;
-						}
+						if (minThrowVel == 0) { minThrowVel = maxThrowVel * 0.2F; }
+
 						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
 						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
 						pMO->SetRotAngle(adjustedAimAngle);
 
-						if (pMO->IsHeldDevice()) {
-							pMO->SetTeam(m_Team);
-							pMO->SetIgnoresTeamHits(true);
-							g_MovableMan.AddItem(pMO);
+						if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
+							moAsHeldDevice->SetTeam(m_Team);
+							moAsHeldDevice->SetIgnoresTeamHits(true);
+							g_MovableMan.AddItem(moAsHeldDevice);
 						} else {
 							if (pMO->IsGold()) {
 								m_GoldInInventoryChunk = 0;
@@ -3442,8 +3439,8 @@ void AHuman::Update()
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (pMO->IsDevice()) {
-					g_MovableMan.AddItem(pMO);
+				if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
+					g_MovableMan.AddItem(moAsHeldDevice);
 				} else {
 					if (pMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
@@ -3463,8 +3460,8 @@ void AHuman::Update()
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (pMO->IsDevice()) {
-					g_MovableMan.AddItem(pMO);
+				if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
+					g_MovableMan.AddItem(moAsHeldDevice);
 				}
 				else {
 					if (pMO->IsGold()) {

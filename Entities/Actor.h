@@ -1318,10 +1318,10 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 	bool IsOrganic() const { return m_Organic; }
 
 	/// <summary>
-	/// Gets whether or not this Actor has the robotic flag set and should be considered as robotic.
+	/// Gets whether or not this Actor has the mechanical flag set and should be considered as mechanical.
 	/// </summary>
-	/// <returns>Whether or not this Actor has the robotic flag set and should be considered as robotic.</returns>
-	bool IsRobotic() const { return m_Robotic; }
+	/// <returns>Whether or not this Actor has the mechanical flag set and should be considered as mechanical.</returns>
+	bool IsMechanical() const { return m_Mechanical; }
 
     /// <summary>
     /// Gets a pointer to the PieMenu for this Actor. Ownership is NOT transferred.
@@ -1546,7 +1546,7 @@ protected:
     Timer m_FallTimer;
 
 	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
-	bool m_Robotic; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.
+	bool m_Mechanical; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

@@ -1,6 +1,8 @@
 #include "ThrownDevice.h"
 #include "PresetMan.h"
 
+#include "Arm.h"
+
 namespace RTE {
 
 	ConcreteClassInfo(ThrownDevice, HeldDevice, 50);
@@ -96,6 +98,17 @@ namespace RTE {
 		writer.NewProperty("StrikerLever");
 		writer << m_StrikerLever;
 
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float ThrownDevice::GetCalculatedMaxThrowVelIncludingArmThrowStrength() {
+		if (m_MaxThrowVel > 0) {
+			return m_MaxThrowVel;
+		} else if (const Arm *parentAsArm = dynamic_cast<Arm *>(GetParent())) {
+			return (parentAsArm->GetThrowStrength() + std::abs(GetRootParent()->GetAngularVel() * 0.5F)) / std::sqrt(std::abs(GetMass()) + 1.0F);
+		}
 		return 0;
 	}
 

@@ -6,6 +6,7 @@
 #include "GameActivity.h"
 #include "MetaPlayer.h"
 #include "SLTerrain.h"
+#include "TerrainObject.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -155,7 +156,9 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Round);
 		LuaBindingRegisterFunctionDeclarationForType(Scene);
 		LuaBindingRegisterFunctionDeclarationForType(SceneArea);
+		LuaBindingRegisterFunctionDeclarationForType(SceneLayer);
 		LuaBindingRegisterFunctionDeclarationForType(SceneObject);
+		LuaBindingRegisterFunctionDeclarationForType(SLBackground);
 		LuaBindingRegisterFunctionDeclarationForType(SoundContainer);
 		LuaBindingRegisterFunctionDeclarationForType(SoundSet);
 		LuaBindingRegisterFunctionDeclarationForType(TDExplosive);

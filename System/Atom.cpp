@@ -1,5 +1,6 @@
 #include "Atom.h"
 #include "SLTerrain.h"
+#include "MovableMan.h"
 #include "MovableObject.h"
 #include "MOSRotating.h"
 #include "PresetMan.h"
@@ -549,7 +550,16 @@ namespace RTE {
 				}
 				return hitStep;
 			}
-			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!" + (m_OwnerMO ? " Owner is " + m_OwnerMO->GetPresetName() + "." : ""));
+			std::string abortString = "Atom shouldn't be taking steps beyond the trajectory!";
+			if (m_OwnerMO) {
+				abortString += "\nRoot owner is " + m_OwnerMO->GetPresetName() + ".";
+				if (m_SubgroupID != 0) {
+					const MovableObject *realOwner = g_MovableMan.FindObjectByUniqueID(m_SubgroupID);
+					abortString += " Owner is " + realOwner->GetPresetName() + ".";
+				}
+			}
+			abortString += "\n\nDomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
+			RTEAbort(abortString);
 			m_OwnerMO->SetToDelete();
 		}
 		m_StepWasTaken = false;
@@ -886,7 +896,7 @@ namespace RTE {
 						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
-							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
+							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
 							m_OwnerMO->SetToDelete(true);
 							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
 							break;

@@ -1140,6 +1140,10 @@ namespace RTE {
 		if (buttonHeld && m_GUISelectedItem) {
 			return;
 		}
+		if ((buttonEquippedItemIndex == 1 && m_GUISelectedItem && !m_GUISelectedItem->Object->HasObjectInGroup("Shields") && !dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object)->IsDualWieldable()) || (m_GUISelectedItem && m_GUISelectedItem->EquippedItemIndex == 1 && buttonObject && !buttonObject->HasObjectInGroup("Shields") && !dynamic_cast<HeldDevice *>(buttonObject)->IsDualWieldable())) {
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+			return;
+		}
 
 		int pressedButtonItemIndex = buttonEquippedItemIndex;
 		if (pressedButtonItemIndex == -1) {
@@ -1211,7 +1215,7 @@ namespace RTE {
 		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
 		
 		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
-		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsOneHanded() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
+		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsDualWieldable() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
 		
 		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
 		MovableObject *equippedItemToSwapOut = equippedItemIndex == 0 ? equippedItem : offhandEquippedItem;
@@ -1298,7 +1302,7 @@ namespace RTE {
 		float enableDisableProgress = static_cast<float>(m_EnableDisableAnimationTimer.RealTimeLimitProgress());
 
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
-			if (carouselItemBox->Item || (carouselItemBox->IsForEquippedItems && !m_InventoryActorEquippedItems.empty())) {
+			if ((carouselItemBox->Item && carouselItemBox->Item->GetUniqueID() != 0) || (carouselItemBox->IsForEquippedItems && !m_InventoryActorEquippedItems.empty())) {
 				DrawCarouselItemBoxBackground(*carouselItemBox);
 				DrawCarouselItemBoxForeground(*carouselItemBox, &carouselAllegroBitmap);
 			} else if (m_CarouselDrawEmptyBoxes) {
@@ -1376,18 +1380,20 @@ namespace RTE {
 		if (itemBoxToDraw.RoundedAndBorderedSides.first) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		if (itemBoxToDraw.RoundedAndBorderedSides.second) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		std::for_each(itemIcons.crbegin(), itemIcons.crend(), [this, &itemBoxToDraw, &multiItemDrawOffset, &iconMaxSize](BITMAP *iconToDraw) {
-			float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY());
-			if (stretchRatio > 1.0F) {
-				float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
-				float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
-				stretch_sprite(m_CarouselBitmap.get(), iconToDraw,
-					itemBoxToDraw.IconCenterPosition.GetFloorIntX() - static_cast<int>(itemBoxToDraw.RoundedAndBorderedSides.first ? std::floor(stretchedWidth / 2.0F) : std::ceil(stretchedWidth / 2.0F)) + multiItemDrawOffset.GetFloorIntX() + (itemBoxToDraw.RoundedAndBorderedSides.first ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0) - (itemBoxToDraw.RoundedAndBorderedSides.second ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0),
-					itemBoxToDraw.IconCenterPosition.GetFloorIntY() - static_cast<int>(stretchedHeight / 2.0F) + multiItemDrawOffset.GetFloorIntY(),
-					static_cast<int>(itemBoxToDraw.RoundedAndBorderedSides.first ? std::ceil(stretchedWidth) : std::floor(stretchedWidth)), static_cast<int>(stretchedHeight));
-			} else {
-				draw_sprite(m_CarouselBitmap.get(), iconToDraw, itemBoxToDraw.IconCenterPosition.GetFloorIntX() - (iconToDraw->w / 2) + multiItemDrawOffset.GetFloorIntX(), itemBoxToDraw.IconCenterPosition.GetFloorIntY() - (iconToDraw->h / 2) + multiItemDrawOffset.GetFloorIntY());
+			if (iconToDraw) {
+				float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY());
+				if (stretchRatio > 1.0F) {
+					float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
+					float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
+					stretch_sprite(m_CarouselBitmap.get(), iconToDraw,
+						itemBoxToDraw.IconCenterPosition.GetFloorIntX() - static_cast<int>(itemBoxToDraw.RoundedAndBorderedSides.first ? std::floor(stretchedWidth / 2.0F) : std::ceil(stretchedWidth / 2.0F)) + multiItemDrawOffset.GetFloorIntX() + (itemBoxToDraw.RoundedAndBorderedSides.first ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0) - (itemBoxToDraw.RoundedAndBorderedSides.second ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0),
+						itemBoxToDraw.IconCenterPosition.GetFloorIntY() - static_cast<int>(stretchedHeight / 2.0F) + multiItemDrawOffset.GetFloorIntY(),
+						static_cast<int>(itemBoxToDraw.RoundedAndBorderedSides.first ? std::ceil(stretchedWidth) : std::floor(stretchedWidth)), static_cast<int>(stretchedHeight));
+				} else {
+					draw_sprite(m_CarouselBitmap.get(), iconToDraw, itemBoxToDraw.IconCenterPosition.GetFloorIntX() - (iconToDraw->w / 2) + multiItemDrawOffset.GetFloorIntX(), itemBoxToDraw.IconCenterPosition.GetFloorIntY() - (iconToDraw->h / 2) + multiItemDrawOffset.GetFloorIntY());
+				}
+				multiItemDrawOffset -= Vector(c_MultipleItemInBoxOffset, -c_MultipleItemInBoxOffset);
 			}
-			multiItemDrawOffset -= Vector(c_MultipleItemInBoxOffset, -c_MultipleItemInBoxOffset);
 		});
 
 		std::string massString = RoundFloatToPrecision(std::fminf(999, totalItemMass), 0) + (totalItemMass > 999 ? "+ " : " ") + "KG";

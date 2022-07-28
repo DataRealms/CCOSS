@@ -1822,6 +1822,11 @@ void MetagameGUI::Update()
                     continue;
 
                 screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
+
+				if (m_pSceneInfoPopup->GetVisible() && m_pSceneInfoPopup->PointInside(screenLocation.GetRoundIntX(), screenLocation.GetRoundIntY())) {
+					continue;
+				}
+
                 distance = (screenLocation - mousePos).GetMagnitude();
 
                 // The first new scene the mouse's position is close to when unlocked, make selected

@@ -63,6 +63,7 @@ namespace RTE {
 		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
 		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
 		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
+		.property("JetAngleRange", &ACrab::GetJetAngleRange, &ACrab::SetJetAngleRange)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -281,7 +282,7 @@ namespace RTE {
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
 		.def("IsOrganic", &Actor::IsOrganic)
-		.def("IsRobotic", &Actor::IsRobotic)
+		.def("IsMechanical", &Actor::IsMechanical)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),
@@ -807,15 +808,15 @@ namespace RTE {
 		.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName)
 
 		.enum_("SpriteAnimMode")[
-			luabind::value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
-			luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
-			luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
-			luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-			luabind::value("LOOPWHENACTIVE", MOSprite::SpriteAnimMode::LOOPWHENACTIVE),
-			luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
-			luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
-			luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
-			luabind::value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+			luabind::value("NOANIM", SpriteAnimMode::NOANIM),
+			luabind::value("ALWAYSLOOP", SpriteAnimMode::ALWAYSLOOP),
+			luabind::value("ALWAYSRANDOM", SpriteAnimMode::ALWAYSRANDOM),
+			luabind::value("ALWAYSPINGPONG", SpriteAnimMode::ALWAYSPINGPONG),
+			luabind::value("LOOPWHENACTIVE", SpriteAnimMode::LOOPWHENACTIVE),
+			luabind::value("LOOPWHENOPENCLOSE", SpriteAnimMode::LOOPWHENOPENCLOSE),
+			luabind::value("PINGPONGOPENCLOSE", SpriteAnimMode::PINGPONGOPENCLOSE),
+			luabind::value("OVERLIFETIME", SpriteAnimMode::OVERLIFETIME),
+			luabind::value("ONCOLLIDE", SpriteAnimMode::ONCOLLIDE)
 		];
 	}
 
@@ -835,6 +836,7 @@ namespace RTE {
 		.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 		.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 		.property("WoundCountAffectsImpulseLimitRatio", &MOSRotating::GetWoundCountAffectsImpulseLimitRatio)
+		.property("GibAtEndOfLifetime", &MOSRotating::GetGibAtEndOfLifetime, &MOSRotating::SetGibAtEndOfLifetime)
 		.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 		.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
@@ -932,6 +934,7 @@ namespace RTE {
 		.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID)
 		.property("ApplyWoundDamageOnCollision", &MovableObject::GetApplyWoundDamageOnCollision, &MovableObject::SetApplyWoundDamageOnCollision)
 		.property("ApplyWoundBurstDamageOnCollision", &MovableObject::GetApplyWoundBurstDamageOnCollision, &MovableObject::SetApplyWoundBurstDamageOnCollision)
+		.property("SimUpdatesBetweenScriptedUpdates", &MovableObject::GetSimUpdatesBetweenScriptedUpdates, &MovableObject::SetSimUpdatesBetweenScriptedUpdates)
 
 		.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
 		.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
@@ -1114,6 +1117,7 @@ namespace RTE {
 		.property("NextParticle", &Round::GetNextParticle)
 		.property("Shell", &Round::GetShell)
 		.property("FireVel", &Round::GetFireVel)
+		.property("InheritsFirerVelocity", &Round::GetInheritsFirerVelocity)
 		.property("ShellVel", &Round::GetShellVel)
 		.property("Separation", &Round::GetSeparation)
 		.property("ParticleCount", &Round::ParticleCount)
@@ -1140,6 +1144,8 @@ namespace RTE {
 
 		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
+
+		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
 
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
@@ -1198,6 +1204,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneLayer) {
+		return luabind::class_<SceneLayer, Entity>("SceneLayer");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneObject) {
 		return AbstractTypeLuaClassDefinition(SceneObject, Entity)
 
@@ -1216,6 +1228,25 @@ namespace RTE {
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
 		.def("GetTotalValue", &GetTotalValue);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
+		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
+
+		.property("Frame", &SLBackground::GetFrame, &SLBackground::SetFrame)
+		.property("SpriteAnimMode", &SLBackground::GetSpriteAnimMode, &SLBackground::SetSpriteAnimMode)
+		.property("SpriteAnimDuration", &SLBackground::GetSpriteAnimDuration, &SLBackground::SetSpriteAnimDuration)
+		.property("IsAnimatedManually", &SLBackground::IsAnimatedManually, &SLBackground::SetAnimatedManually)
+		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
+		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)
+		.property("AutoScrollStep", &SLBackground::GetAutoScrollStep, &SLBackground::SetAutoScrollStep)
+		.property("AutoScrollStepX", &SLBackground::GetAutoScrollStepX, &SLBackground::SetAutoScrollStepX)
+		.property("AutoScrollStepY", &SLBackground::GetAutoScrollStepY, &SLBackground::SetAutoScrollStepY)
+
+		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1309,7 +1340,9 @@ namespace RTE {
 		.property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
 		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
 		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
-		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset);
+		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset)
+			
+		.def("GetCalculatedMaxThrowVelIncludingArmThrowStrength", &ThrownDevice::GetCalculatedMaxThrowVelIncludingArmThrowStrength);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

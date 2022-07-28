@@ -400,28 +400,14 @@ ClassInfoGetters;
 
 	bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the global and accumulated forces. Then it clears
-//                  out the force list.Note that this does NOT apply the accumulated
-//                  impulses (impulse forces)!
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Gathers, clears and applies this MOSRotating's accumulated forces.
+	/// </summary>
 	void ApplyForces() override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyImpulses
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the accumulated impulse forces. Then it clears
-//                  out the impulse list.Note that this does NOT apply the accumulated
-//                  regular forces (non-impulse forces)!
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Gathers, clears and applies this MOSRotating's accumulated impulse forces, gibbing if appropriate.
+	/// </summary>
 	void ApplyImpulses() override;
 
     /// <summary>
@@ -648,6 +634,18 @@ ClassInfoGetters;
 	/// </summary>
 	/// <returns>The rate at which wound count affects the impulse limit.</returns>
 	float GetWoundCountAffectsImpulseLimitRatio() const { return m_WoundCountAffectsImpulseLimitRatio; }
+
+	/// <summary>
+	/// Gets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
+	/// </summary>
+	/// <returns>Whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.</returns>
+	bool GetGibAtEndOfLifetime() const { return m_GibAtEndOfLifetime; }
+	
+	/// <summary>
+	/// Sets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
+	/// </summary>
+	/// <param name="shouldGibAtEndOfLifetime">Whether or not this MOSRotating should gib at the end of its lifetime instead of just being deleted.</param>
+	void SetGibAtEndOfLifetime(bool shouldGibAtEndOfLifetime) { m_GibAtEndOfLifetime = shouldGibAtEndOfLifetime; }
 
     /// <summary>
     /// Gets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
@@ -881,6 +879,11 @@ ClassInfoGetters;
 	/// <param name="newSound">The new SoundContainer for this MOSRotating's gib sound.</param>
 	void SetGibSound(SoundContainer *newSound) { m_GibSound = newSound; }
 
+	/// <summary>
+	/// Ensures all attachables and wounds are positioned and rotated correctly. Must be run when this MOSRotating is added to MovableMan to avoid issues with Attachables spawning in at (0, 0).
+	/// </summary>
+	virtual void CorrectAttachableAndWoundPositionsAndRotations() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -966,6 +969,7 @@ protected:
 	int m_GibWoundLimit; //!< The number of wounds that will gib this MOSRotating. 0 means that it can't be gibbed via wounds.
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
 	float m_WoundCountAffectsImpulseLimitRatio; //!< The rate at which this MOSRotating's wound count will diminish the impulse limit.
+	bool m_GibAtEndOfLifetime; //!< Whether or not this MOSRotating should gib when it reaches the end of its lifetime, instead of just deleting.
     // Gib sound effect
     SoundContainer *m_GibSound;
     // Whether to flash effect on gib

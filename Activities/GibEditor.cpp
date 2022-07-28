@@ -338,7 +338,7 @@ void GibEditor::Update()
                 // Clear out the terrain after a few tests
                 if (m_TestCounter >= 3)
                 {
-                    g_SceneMan.GetScene()->GetTerrain()->ClearAllMaterial();
+					ClearTestArea();
                     m_TestCounter = 0;
                 }
                 // Clear all crap still flying around
@@ -529,7 +529,7 @@ void GibEditor::Update()
                     }
 
                     // Clear out the testing area
-                    g_SceneMan.GetScene()->GetTerrain()->ClearAllMaterial();
+					ClearTestArea();
                     m_TestCounter = 0;
 
                     m_pObjectToLoad = 0;
@@ -955,4 +955,11 @@ void GibEditor::UpdateOverwriteDialog()
         m_pOverwriteNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData/" + m_pEditedObject->GetPresetName() + ".ini");
 }
 
-} // namespace RTE
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void GibEditor::ClearTestArea() const {
+		clear_bitmap(g_SceneMan.GetTerrain()->GetFGColorBitmap());
+		clear_bitmap(g_SceneMan.GetTerrain()->GetBGColorBitmap());
+		clear_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
+	}
+}

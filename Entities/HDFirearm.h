@@ -42,6 +42,7 @@ public:
 EntityAllocation(HDFirearm);
 SerializableOverrideMethods;
 ClassInfoGetters;
+AddScriptFunctionNames(MOSRotating, "OnFire", "OnReload");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm
@@ -341,6 +342,13 @@ ClassInfoGetters;
 	/// </summary>
 	/// <param name = newValue>The new velocity variation scalar.</param>
 	void SetShellVelVariation(float newVariation) { m_ShellVelVariation = newVariation; }
+
+	/// <summary>
+	/// Sets the stiffness scalar of the joint of this HDFirearm. Unlike Attachable::SetJointStiffness, there are no limitations on this value.
+	/// 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all, negative values will apply negative force, which may behave oddly.
+	/// </summary>
+	/// <param name="jointStiffness">A float describing the normalized stiffness scalar of this Attachable's joint.</param>
+	void SetJointStiffness(float jointStiffness) override { m_JointStiffness = jointStiffness; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAIFireVel
@@ -895,6 +903,9 @@ protected:
 	// If true m_Frame is not changed during an update hence the animation 
 	// is done by external Lua code
 	bool m_IsAnimatedManually;
+
+
+	bool m_LegacyCompatibilityRoundsAlwaysFireUnflipped; //<! Legacy compatibility flag to make it so rounds don't flip with the gun. Useful for old mods with things like missiles that accounted for the old code that didn't flip them properly.
 
 /* TODO
     // Path the the script file that contains the ballistic solution function of this

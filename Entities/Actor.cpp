@@ -137,9 +137,9 @@ void Actor::Clear() {
     m_DamageMultiplier = 1.0F;
 
 	m_Organic = false;
-	m_Robotic = false;
+	m_Mechanical = false;
 
-    m_PieMenu.reset();
+	m_PieMenu.reset();
 }
 
 
@@ -292,7 +292,7 @@ int Actor::Create(const Actor &reference)
     m_TeamBlockState = reference.m_TeamBlockState;
 
 	m_Organic = reference.m_Organic;
-	m_Robotic = reference.m_Robotic;
+	m_Mechanical = reference.m_Mechanical;
 
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
 	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));
@@ -388,12 +388,12 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         m_AIMode = static_cast<AIMode>(mode);
 	} else if (propName == "Organic") {
 		reader >> m_Organic;
-	} else if (propName == "Robotic") {
-		reader >> m_Robotic;
-    } else if (propName == "PieMenu") {
-        m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
+	} else if (propName == "Mechanical") {
+		reader >> m_Mechanical;
+	} else if (propName == "PieMenu") {
+		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
-        m_PieMenu->Create(this);
+		m_PieMenu->Create(this);
 	} else
         return MOSRotating::ReadProperty(propName, reader);
 
@@ -469,7 +469,7 @@ int Actor::Save(Writer &writer) const
     writer << m_PieMenu.get();
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
-	writer.NewPropertyWithValue("Robotic", m_Robotic);
+	writer.NewPropertyWithValue("Mechanical", m_Mechanical);
 
     return 0;
 }
@@ -1922,8 +1922,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-    if (/*m_Controller.IsState(PIE_MENU_ACTIVE) || */m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP))
-    {
+	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
+	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int prevSpacing = m_Controller.IsState(ACTOR_PREV_PREP) ? 3 : 9;

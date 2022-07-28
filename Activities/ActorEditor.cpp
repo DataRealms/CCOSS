@@ -307,7 +307,6 @@ void ActorEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int wh
     if (m_pEditedActor)
     {
         m_pEditedActor->Draw(pTargetBitmap, targetPos, g_DrawColor);
-        m_pEditedActor->Draw(pTargetBitmap, targetPos, g_DrawDebug);
 		m_pEditedActor->GetPieMenu()->Draw(pTargetBitmap, targetPos);
     }
 

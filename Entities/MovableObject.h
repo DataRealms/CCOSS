@@ -44,6 +44,7 @@ struct HitData;
 
 class MOSRotating;
 class PieMenu;
+class SLTerrain;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -1494,6 +1495,18 @@ enum MOType
 
 	void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
 
+    /// <summary>
+    /// Gets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <returns>The number of Sim updates that run between each script update for this MovableObject.</returns>
+    int GetSimUpdatesBetweenScriptedUpdates() const { return m_SimUpdatesBetweenScriptedUpdates; }
+
+    /// <summary>
+    /// sets the number of Sim updates that run between each script update for this MovableObject.
+    /// </summary>
+    /// <param name="newSimUpdatesBetweenScriptedUpdates">The new number of Sim updates that run between each script update for this MovableObject.</param>
+    void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
@@ -1805,6 +1818,13 @@ enum MOType
     /// <returns>Whether this MO's RootParent can GetHitByMOs and is currently traveling.</returns>
     bool GetTraveling() const { return GetRootParent()->m_IsTraveling; }
 
+	/// <summary>
+	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
+	/// </summary>
+	/// <param name="terrain">The SLTerrain to draw this MovableObject to. Ownership is NOT transferred!</param>
+	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+	bool DrawToTerrain(SLTerrain *terrain);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1999,6 +2019,8 @@ protected:
 	long int m_ParticleUniqueIDHit;
 	// Number of sim update frame when last collision was detcted
 	unsigned int m_LastCollisionSimFrameNumber;
+    int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
+    int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

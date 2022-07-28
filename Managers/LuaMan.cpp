@@ -125,6 +125,8 @@ namespace RTE {
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
 			RegisterLuaBindingsOfType(EntityLuaBindings, SceneArea),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SceneLayer),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SLBackground),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Deployment),
 			RegisterLuaBindingsOfType(SystemLuaBindings, DataModule),
 			RegisterLuaBindingsOfType(ActivityLuaBindings, Activity),

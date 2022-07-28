@@ -100,11 +100,13 @@ namespace RTE {
 		m_ActivityConfigBox->SetEnabled(enable);
 		m_ActivityConfigBox->SetVisible(enable);
 
+		bool selectingPreviousActivityWithManuallyAdjustedGold = m_StartingGoldAdjustedManually && m_PreviouslySelectedActivity == selectedActivity;
 		if (enable) {
 			m_SelectedActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 			m_SelectedScene = selectedScene;
 			RTEAssert(m_SelectedActivity && m_SelectedScene, "Trying to start a scenario game without an Activity or a Scene!");
 		} else {
+			m_PreviouslySelectedActivity = m_SelectedActivity;
 			m_SelectedActivity = nullptr;
 			m_SelectedScene = nullptr;
 		}
@@ -114,7 +116,15 @@ namespace RTE {
 		}
 		if (enable && m_SelectedActivity && m_SelectedScene) {
 			if (!m_TechListFetched) { PopulateTechComboBoxes(); }
+
+			int startingGoldOverride = selectingPreviousActivityWithManuallyAdjustedGold ? m_StartingGoldSlider->GetValue() : -1;
 			ResetActivityConfigBox();
+
+			if (startingGoldOverride >= 0) {
+				m_StartingGoldSlider->SetValue(startingGoldOverride);
+				m_StartingGoldAdjustedManually = true;
+				UpdateStartingGoldSliderAndLabel();
+			}
 		}
 	}
 
@@ -283,6 +293,8 @@ namespace RTE {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
 			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			} else {
+				m_StartingGoldSlider->SetValue(2000);
 			}
 		}
 		std::string goldString(16, '\0');
@@ -331,13 +343,20 @@ namespace RTE {
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 
 		if (clickedPlayer == PlayerColumns::PlayerCPU) {
-			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Color);
-			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawColor(c_GUIColorBlue);
+			if (clickedTeam == TeamRows::DisabledTeam) {
+				for (int nonClickedTeam = Activity::Teams::TeamOne; nonClickedTeam < TeamRows::DisabledTeam; ++nonClickedTeam) {
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawColor(c_GUIColorBlue);
+				}
+			} else {
+				m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawColor(c_GUIColorBlue);
+			}
 		} else {
-			for (int nonHoveredTeam = Activity::Teams::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
-				if (nonHoveredTeam != clickedTeam) {
-					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
-					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
+			for (int nonClickedTeam = Activity::Teams::TeamOne; nonClickedTeam < TeamRows::TeamRowCount; ++nonClickedTeam) {
+				if (nonClickedTeam != clickedTeam) {
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes.at(clickedPlayer).at(nonClickedTeam)->SetDrawColor(c_GUIColorBlue);
 				}
 			}
 		}

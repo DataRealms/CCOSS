@@ -1039,9 +1039,12 @@ void SceneEditorGUI::Update()
                             // Deduct the cost from team funds
                             g_ActivityMan.GetActivity()->ChangeTeamFunds(-m_pCurrentObject->GetTotalValue(m_NativeTechModule, m_ForeignCostMult), m_pController->GetTeam());
 
-							g_SceneMan.GetTerrain()->ApplyTerrainObject(pTO);
+							pTO->PlaceOnTerrain(g_SceneMan.GetTerrain());
 							g_SceneMan.GetTerrain()->CleanAir();
-							g_SceneMan.GetTerrain()->RegisterTerrainChange(pTO);
+
+							Vector terrainObjectPos = pTO->GetPos() + pTO->GetBitmapOffset();
+							if (pTO->HasBGColorBitmap()) { g_SceneMan.RegisterTerrainChange(terrainObjectPos.GetFloorIntX(), terrainObjectPos.GetFloorIntY(), pTO->GetBitmapWidth(), pTO->GetBitmapHeight(), ColorKeys::g_MaskColor, true); }
+							if (pTO->HasFGColorBitmap()) { g_SceneMan.RegisterTerrainChange(terrainObjectPos.GetFloorIntX(), terrainObjectPos.GetFloorIntY(), pTO->GetBitmapWidth(), pTO->GetBitmapHeight(), ColorKeys::g_MaskColor, false); }
 
 // TODO: Make IsBrain function to see if one was placed
                             if (pTO->GetPresetName() == "Brain Vault")
@@ -1083,7 +1086,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pObject = pDep->CreateDeployedObject(pDep->GetPlacedByPlayer(), cost);
 									MovableObject *pMO = dynamic_cast<MovableObject *>(pObject);
 									if (pMO)
-										g_MovableMan.AddItem(pMO);
+										g_MovableMan.AddMO(pMO);
 									else
 									{
 										delete pObject;

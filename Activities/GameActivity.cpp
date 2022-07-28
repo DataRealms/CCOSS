@@ -664,8 +664,8 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
         MovableObject *pInventoryObject = 0;
-        Actor *pPassenger = 0;
-        Actor *pLastPassenger = 0;
+		Actor *pPassenger = 0;
+		Actor *pLastPassenger = 0;
         list<MovableObject *> cargoItems;
 
         for (list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
@@ -698,23 +698,28 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 				// If it's an actor, then set its team and add it to the Craft's inventory!
 				if (pPassenger)
 				{
-					// If this is the first passenger, then give him all the shit found in the list before him
-					if (!pLastPassenger)
-					{
-						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-							pPassenger->AddInventoryItem(*iItr);
-					}
-					// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
-					else
-					{
-						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-							pLastPassenger->AddInventoryItem(*iItr);
+					if (dynamic_cast<AHuman *>(pPassenger)) {
+						// If this is the first passenger, then give him all the shit found in the list before him
+						if (!pLastPassenger) {
+							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+								pPassenger->AddInventoryItem(*iItr);
+						}
+						// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
+						else {
+							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+								pLastPassenger->AddInventoryItem(*iItr);
+						}
+
+						// Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
+						pLastPassenger = pPassenger;
+					} else if (pLastPassenger) {
+						for (MovableObject *cargoItem : cargoItems) {
+							pLastPassenger->AddInventoryItem(cargoItem);
+						}
+						pLastPassenger = nullptr;
 					}
 					// Clear out the temporary cargo list since we've assign all the stuff in it to a passenger
 					cargoItems.clear();
-
-					// Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
-					pLastPassenger = pPassenger;
 					// Set the team etc for the current passenger and stuff him into the craft
 					pPassenger->SetTeam(team);
 					pPassenger->SetControllerMode(Controller::CIM_AI);
@@ -1739,18 +1744,26 @@ void GameActivity::Update()
 					}
 					g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+
+					CreateDelivery(player);
 				} else {
 					// Place the new marker above the cursor so that they don't intersect with each other.
 					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
 					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
-				}
 
-				if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
-					g_GUISound.UserErrorSound()->Play(player);
-					m_FundsChanged[team] = true;
-				} else {
-					CreateDelivery(player);
-					m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
+					if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
+						g_GUISound.UserErrorSound()->Play(player);
+						m_FundsChanged[team] = true;
+						if (!g_MovableMan.GetNextTeamActor(team)) {
+							m_ObservationTarget[player] = m_LandingZone[player];
+							m_ViewState[player] = ViewState::Observe;
+						} else {
+							m_ViewState[player] = ViewState::Normal;
+						}
+					} else {
+						CreateDelivery(player);
+						m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
+					}
 				}
 				// Revert the Y offset so that the cursor doesn't flinch.
 				m_LandingZone[player].m_Y -= lzOffsetY;

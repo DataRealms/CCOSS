@@ -29,6 +29,7 @@
 #include "MOSRotating.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "TerrainObject.h"
 #include "SoundContainer.h"
 #include "TDExplosive.h"
@@ -36,6 +37,7 @@
 #include "Turret.h"
 #include "PEmitter.h"
 #include "GlobalScript.h"
+#include "Deployment.h"
 
 #include "GameActivity.h"
 #include "GAScripted.h"

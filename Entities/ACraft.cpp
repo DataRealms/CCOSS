@@ -733,7 +733,7 @@ void ACraft::DropAllInventory()
                 // Avoid this immediate collisions with it
                 SetWhichMOToNotHit(*exitee, 0.5f);
                 // Add to scene
-                g_MovableMan.AddItem(*exitee);
+                g_MovableMan.AddMO(*exitee);
                 // Remove passenger from inventory
                 m_Inventory.erase(exitee);
                 // Reset timer interval and quit until next one is due

@@ -1504,7 +1504,7 @@ void BuyMenuGUI::Update()
 
         // Fire button removes items from the order list, including equipment on AHumans
         if (m_pController->IsState(PRESS_FACEBUTTON)) {
-            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman") {
+            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                 for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
                     GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
@@ -1819,7 +1819,7 @@ void BuyMenuGUI::Update()
                         m_ListItemIndex = m_pCartList->GetSelectedIndex();
                         m_pCartList->ScrollToSelected();
 
-                        if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman") {
+                        if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                             int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                             for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
                                 GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);

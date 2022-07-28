@@ -281,7 +281,7 @@ namespace RTE {
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
 		.def("IsOrganic", &Actor::IsOrganic)
-		.def("IsRobotic", &Actor::IsRobotic)
+		.def("IsMechanical", &Actor::IsMechanical)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),

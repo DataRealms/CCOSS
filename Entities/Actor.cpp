@@ -44,7 +44,7 @@ std::vector<BITMAP *> Actor::m_apAlarmExclamation;
 bool Actor::m_sIconsLoaded = false;
 
 #define ARROWTIME 1000
-	
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -244,28 +244,28 @@ int Actor::Create(const Actor &reference)
     {
         ContentFile("Base.rte/GUIs/TeamIcons/NoTeam.png").GetAsAnimation(m_apNoTeamIcon, 2);
 
-        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
+        ContentFile iconFile("Base.rte/GUIs/PieMenus/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
         m_apAIIcons[AIMODE_BOMB] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Eye000.png");
         m_apAIIcons[AIMODE_SENTRY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Cycle000.png");
         m_apAIIcons[AIMODE_PATROL] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/GoTo000.png");
         m_apAIIcons[AIMODE_GOTO] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Brain000.png");
         m_apAIIcons[AIMODE_BRAINHUNT] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Dig000.png");
         m_apAIIcons[AIMODE_GOLDDIG] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Return000.png");
         m_apAIIcons[AIMODE_RETURN] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Land000.png");
         m_apAIIcons[AIMODE_STAY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Launch000.png");
         m_apAIIcons[AIMODE_DELIVER] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Death000.png");
         m_apAIIcons[AIMODE_SCUTTLE] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
         ContentFile("Base.rte/GUIs/Indicators/SelectArrow.png").GetAsAnimation(m_apSelectArrow, 4);
@@ -618,7 +618,7 @@ void Actor::SetTeam(int team)
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pActor = dynamic_cast<Actor *>(*itr);
-        if (pActor) 
+        if (pActor)
             pActor->SetTeam(team);
     }
 }
@@ -781,7 +781,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  RemoveInventoryItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.     
+// Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.
 
 void Actor::RemoveInventoryItem(string presetName)
 {
@@ -1163,7 +1163,7 @@ BITMAP * Actor::GetAIModeIcon()
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-MOID Actor::GetAIMOWaypointID() 
+MOID Actor::GetAIMOWaypointID()
 {
 	if (g_MovableMan.ValidMO(m_pMOMoveTarget))
 		return m_pMOMoveTarget->GetID();
@@ -1421,7 +1421,7 @@ void Actor::Update()
         if (!m_MovePath.empty())
         {
 			Vector notUsed;
-			
+
             // See if we are close enough to the last point in the current path, in which case we can toss teh whole current path and start ont he next
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, m_MovePath.back());
             // Clear out the current path, the player apparently took a shortcut
@@ -1480,7 +1480,7 @@ void Actor::Update()
         // Only regain stability if we're not moving too fast and it's been a while since we lost it
 		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
     }
-    
+
     // Spread the carried items and gold around before death.
     if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
@@ -1550,9 +1550,9 @@ void Actor::Update()
         {
             if (m_Controller.IsState(MOVE_LEFT) || m_Controller.IsState(MOVE_RIGHT) || m_Controller.GetAnalogMove().GetLargest() > 0.1)
             {
-// TODO: improve; make this 
+// TODO: improve; make this
                 float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
+                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
             }
         }
     }
@@ -1912,7 +1912,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         else
         {
             // Draw it backwards so the dotted lines doesn't crawl
-            skipPhase = g_FrameMan.DrawLine(pTargetBitmap, m_MoveTarget - targetPos, m_Pos - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, skipPhase, true);            
+            skipPhase = g_FrameMan.DrawLine(pTargetBitmap, m_MoveTarget - targetPos, m_Pos - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, skipPhase, true);
             // Draw the first destination/waypoint point
             waypoint = m_MoveTarget - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
@@ -1942,7 +1942,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
             list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
             RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
-            
+
             // Find the adjacent actors
             if (selfItr != pRoster->end())
             {

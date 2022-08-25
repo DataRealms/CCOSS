@@ -81,7 +81,7 @@ namespace RTE {
 		std::vector<PieSlice *> pieSlices = GetFlattenedPieSlices(true);
 		int oddRoundedSliceCount = (2 * static_cast<int>(pieSlices.size() / 2)) + 1;
 		float angleOffset = NormalizeAngleBetween0And2PI(c_DirectionsToRadiansMap.at(Direction) - c_QuarterPI);
-		
+
 		int currentSlot = 0;
 		for (PieSlice *pieSlice : pieSlices) {
 			int sliceSlotCount = 1;
@@ -126,7 +126,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	PieSlice * PieMenu::PieQuadrant::RemovePieSlice(const PieSlice *pieSliceToRemove) {
 		if (pieSliceToRemove == MiddlePieSlice.get()) {
 			return MiddlePieSlice.release();
@@ -200,7 +200,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PieMenu::Create() {
-		if (!s_CursorBitmap) { s_CursorBitmap = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap(); }
+		if (!s_CursorBitmap) { s_CursorBitmap = ContentFile("Base.rte/GUIs/PieMenus/PieCursor.png").GetAsBitmap(); }
 
 		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
 
@@ -359,7 +359,7 @@ namespace RTE {
 		if (enabledStateDoesNotMatchInput) {
 			m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
 			m_EnableDisableAnimationTimer.Reset();
-			
+
 			PrepareMouseForEnableOrDisable(enable);
 
 			if (playSounds) {

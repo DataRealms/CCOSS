@@ -498,9 +498,8 @@ namespace RTE {
 			}
 			if (removedPieSlice) {
 				if (PieMenu *removedPieSliceSubPieMenu = removedPieSlice->GetSubPieMenu()) {
+					removedPieSliceSubPieMenu->SetEnabled(false);
 					removedPieSliceSubPieMenu->SetOwner(nullptr);
-					removedPieSliceSubPieMenu->m_EnabledState = EnabledState::Disabled;
-					removedPieSliceSubPieMenu->m_CurrentInnerRadius = 0;
 				}
 				RepopulateAndRealignCurrentPieSlices();
 			}

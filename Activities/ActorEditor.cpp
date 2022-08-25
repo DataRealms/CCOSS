@@ -202,7 +202,7 @@ void ActorEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }
@@ -322,7 +322,8 @@ void ActorEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int wh
     }
 
     // Clear out annoying blooms
-    g_PostProcessMan.ClearScenePostEffects();
+    // TODO: Figure out if this needs a button or piemenu toggle for some edge case
+    //g_PostProcessMan.ClearScenePostEffects();
 
     m_pPicker->Draw(pTargetBitmap);
     m_pPieMenu->Draw(pTargetBitmap, targetPos);

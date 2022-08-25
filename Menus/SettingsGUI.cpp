@@ -27,11 +27,11 @@ namespace RTE {
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, m_SettingsTabberBox->GetYPos() + m_SettingsTabberBox->GetHeight() + 10);
 
-		m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
-		m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
-		m_SettingsMenuTabs.at(SettingsMenuScreen::InputSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
-		m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
-		m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
+		m_SettingsMenuTabs[SettingsMenuScreen::VideoSettingsMenu] = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
+		m_SettingsMenuTabs[SettingsMenuScreen::AudioSettingsMenu] = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
+		m_SettingsMenuTabs[SettingsMenuScreen::InputSettingsMenu] = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
+		m_SettingsMenuTabs[SettingsMenuScreen::GameplaySettingsMenu] = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
+		m_SettingsMenuTabs[SettingsMenuScreen::MiscSettingsMenu] = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
 
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
@@ -40,7 +40,7 @@ namespace RTE {
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());
 
 		SetActiveSettingsMenuScreen(SettingsMenuScreen::VideoSettingsMenu, false);
-		m_SettingsMenuTabs.at(m_ActiveSettingsMenuScreen)->SetCheck(true);
+		m_SettingsMenuTabs[m_ActiveSettingsMenuScreen]->SetCheck(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,15 +140,15 @@ namespace RTE {
 				if ((guiEvent.GetMsg() == GUIButton::Focused) && dynamic_cast<GUIButton *>(guiEvent.GetControl()) || (guiEvent.GetMsg() == GUITab::Hovered && dynamic_cast<GUITab *>(guiEvent.GetControl()))) { g_GUISound.SelectionChangeSound()->Play(); }
 
 				if (guiEvent.GetMsg() == GUITab::UnPushed) {
-					if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu)) {
+					if (guiEvent.GetControl() == m_SettingsMenuTabs[SettingsMenuScreen::VideoSettingsMenu]) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::VideoSettingsMenu);
-					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu)) {
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs[SettingsMenuScreen::AudioSettingsMenu]) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::AudioSettingsMenu);
-					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::InputSettingsMenu)) {
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs[SettingsMenuScreen::InputSettingsMenu]) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::InputSettingsMenu);
-					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu)) {
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs[SettingsMenuScreen::GameplaySettingsMenu]) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::GameplaySettingsMenu);
-					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu)) {
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs[SettingsMenuScreen::MiscSettingsMenu]) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::MiscSettingsMenu);
 					}
 				}

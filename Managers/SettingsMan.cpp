@@ -268,8 +268,8 @@ namespace RTE {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
-					g_UInputMan.m_ControlScheme.at(player).Reset();
-					reader >> g_UInputMan.m_ControlScheme.at(player);
+					g_UInputMan.m_ControlScheme[player].Reset();
+					reader >> g_UInputMan.m_ControlScheme[player];
 					break;
 				}
 			}
@@ -462,7 +462,7 @@ namespace RTE {
 			writer.NewDivider(false);
 			writer.NewLineString("// Player " + playerNum, false);
 			writer.NewLine(false);
-			writer.NewPropertyWithValue("Player" + playerNum + "Scheme", g_UInputMan.m_ControlScheme.at(player));
+			writer.NewPropertyWithValue("Player" + playerNum + "Scheme", g_UInputMan.m_ControlScheme[player]);
 		}
 
 		writer.ObjectEnd();

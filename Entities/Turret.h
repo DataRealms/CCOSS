@@ -61,7 +61,7 @@ namespace RTE {
 		/// Gets the first mounted HeldDevice of this Turret, mostly here for Lua convenience.
 		/// </summary>
 		/// <returns>A pointer to mounted HeldDevice of this Turret. Ownership is NOT transferred!</returns>
-		HeldDevice * GetFirstMountedDevice() const { return m_MountedDevices.at(0); }
+		HeldDevice * GetFirstMountedDevice() const { return m_MountedDevices[0]; }
 
 		/// <summary>
 		/// Sets the first mounted HeldDevice for this Turret, mostly here for Lua convenience. Ownership IS transferred!

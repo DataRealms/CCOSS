@@ -30,7 +30,7 @@ namespace RTE {
 	int TerrainDebris::Create() {
 		Entity::Create();
 		m_DebrisFile.GetAsAnimation(m_Bitmaps, m_BitmapCount);
-		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps.at(0), "Failed to load debris bitmaps during TerrainDebris::Create!");
+		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps[0], "Failed to load debris bitmaps during TerrainDebris::Create!");
 		return 0;
 	}
 
@@ -240,8 +240,8 @@ namespace RTE {
 		for (int piece = 0; piece < possiblePieceToPlaceCount; ++piece) {
 			int pieceBitmapIndex = RandomNum(0, m_BitmapCount - 1);
 			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::ScatterOnTerrain!");
-			Box possiblePiecePosition(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
-			if (GetPiecePlacementPosition(terrain, possiblePiecePosition)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), possiblePiecePosition.GetCorner()); }
+			Box possiblePiecePosition(Vector(), static_cast<float>(m_Bitmaps[pieceBitmapIndex]->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
+			if (GetPiecePlacementPosition(terrain, possiblePiecePosition)) { DrawToTerrain(terrain, m_Bitmaps[pieceBitmapIndex], possiblePiecePosition.GetCorner()); }
 		}
 		// Reference. Do not remove.
 		//release_bitmap(terrain->GetMaterialBitmap());

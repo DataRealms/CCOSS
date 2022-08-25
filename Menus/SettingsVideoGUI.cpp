@@ -24,11 +24,11 @@ namespace RTE {
 
 		m_VideoSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxVideoSettings"));
 
-		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Windowed) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
-		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Borderless) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
-		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledBorderless) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
-		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Dedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
-		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledDedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Borderless] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledBorderless] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Dedicated] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledDedicated] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
 
 		m_TwoPlayerSplitscreenHSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenHoriz"));
 		m_TwoPlayerSplitscreenVSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenVert"));
@@ -191,7 +191,7 @@ namespace RTE {
 		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
 		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
-			const PresetResolutionRecord &resRecord = m_PresetResolutions.at(i);
+			const PresetResolutionRecord &resRecord = m_PresetResolutions[i];
 			m_PresetResolutionComboBox->AddItem(resRecord.GetDisplayString());
 			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (resRecord.Width == g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) && (resRecord.Height == g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) && (resRecord.Upscaled == g_FrameMan.GetResMultiplier() > 1)) {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
@@ -309,15 +309,15 @@ namespace RTE {
 	void SettingsVideoGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			if (guiEvent.GetMsg() == GUIButton::Pushed) {
-				if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Windowed)) {
+				if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Windowed);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Borderless)) {
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Borderless]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Borderless);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledBorderless)) {
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledBorderless]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledBorderless);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Dedicated)) {
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Dedicated]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Dedicated);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledDedicated)) {
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledDedicated]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledDedicated);
 				} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton) {
 					ApplyPresetResolution();

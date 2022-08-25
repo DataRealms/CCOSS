@@ -44,7 +44,7 @@ std::vector<BITMAP *> Actor::m_apAlarmExclamation;
 bool Actor::m_sIconsLoaded = false;
 
 #define ARROWTIME 1000
-	
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +235,7 @@ int Actor::Create(const Actor &reference)
 
     for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
-    
+
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
@@ -617,7 +617,7 @@ void Actor::SetTeam(int team)
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pActor = dynamic_cast<Actor *>(*itr);
-        if (pActor) 
+        if (pActor)
             pActor->SetTeam(team);
     }
 }
@@ -802,7 +802,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  RemoveInventoryItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.     
+// Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.
 
 void Actor::RemoveInventoryItem(string presetName)
 {
@@ -1184,7 +1184,7 @@ BITMAP * Actor::GetAIModeIcon()
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-MOID Actor::GetAIMOWaypointID() 
+MOID Actor::GetAIMOWaypointID()
 {
 	if (g_MovableMan.ValidMO(m_pMOMoveTarget))
 		return m_pMOMoveTarget->GetID();
@@ -1440,7 +1440,7 @@ void Actor::Update()
         if (!m_MovePath.empty())
         {
 			Vector notUsed;
-			
+
             // See if we are close enough to the last point in the current path, in which case we can toss teh whole current path and start ont he next
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, m_MovePath.back());
             // Clear out the current path, the player apparently took a shortcut
@@ -1499,7 +1499,7 @@ void Actor::Update()
         // Only regain stability if we're not moving too fast and it's been a while since we lost it
 		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
     }
-    
+
     // Spread the carried items and gold around before death.
     if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
@@ -1569,9 +1569,9 @@ void Actor::Update()
         {
             if (m_Controller.IsState(MOVE_LEFT) || m_Controller.IsState(MOVE_RIGHT) || m_Controller.GetAnalogMove().GetLargest() > 0.1)
             {
-// TODO: improve; make this 
+// TODO: improve; make this
                 float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
+                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
             }
         }
     }
@@ -1746,7 +1746,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					{
 						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps.at(0), pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps.at(0)->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps.at(0)->h / 2) + 8, apControllerBitmaps.at(0)->w, apControllerBitmaps.at(0)->h);
+						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps.at(0)->h);
 					}
 				}
 
@@ -1929,7 +1929,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         else
         {
             // Draw it backwards so the dotted lines doesn't crawl
-            skipPhase = g_FrameMan.DrawLine(pTargetBitmap, m_MoveTarget - targetPos, m_Pos - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, skipPhase, true);            
+            skipPhase = g_FrameMan.DrawLine(pTargetBitmap, m_MoveTarget - targetPos, m_Pos - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, skipPhase, true);
             // Draw the first destination/waypoint point
             waypoint = m_MoveTarget - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
@@ -1959,7 +1959,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
             list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
             RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
-            
+
             // Find the adjacent actors
             if (selfItr != pRoster->end())
             {

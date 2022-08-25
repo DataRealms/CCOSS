@@ -54,7 +54,7 @@ namespace RTE {
 
 		m_ExpandedModules.resize(g_PresetMan.GetTotalModuleCount());
 		std::fill(m_ExpandedModules.begin(), m_ExpandedModules.end(), false);
-		m_ExpandedModules.at(0) = true; // Base.rte is always expanded
+		m_ExpandedModules[0] = true; // Base.rte is always expanded
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

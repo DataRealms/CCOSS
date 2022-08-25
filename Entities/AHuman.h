@@ -452,7 +452,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipDeviceInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of the specified group in the inventory. If the held device already 
+//                  of the specified group in the inventory. If the held device already
 //                  is of that group, or no device is in inventory, nothing happens.
 // Arguments:       The group the device must belong to.
 //                  Whether to actually equip any matching item found in the inventory,
@@ -466,7 +466,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipLoadedFirearmInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first loaded HDFirearm
-//                  of the specified group in the inventory. If no such weapon is in the 
+//                  of the specified group in the inventory. If no such weapon is in the
 //                  inventory, nothing happens.
 // Arguments:       The group the HDFirearm must belong to. "Any" for all groups.
 //                  The group the HDFirearm must *not* belong to. "None" for no group.
@@ -481,7 +481,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipNamedDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of with the specified preset name in the inventory. If the held device already 
+//                  of with the specified preset name in the inventory. If the held device already
 //                  is of that preset name, or no device is in inventory, nothing happens.
 // Arguments:       The preset name the device must have.
 //                  Whether to actually equip any matching item found in the inventory,
@@ -885,7 +885,7 @@ ClassInfoGetters;
 // Method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       None.
 // Return value:    The default set force maximum, in kg * m/s^2.
 
@@ -896,7 +896,7 @@ ClassInfoGetters;
 // Method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       The default set force maximum, in kg * m/s^2.
 // Return value:    None
 
@@ -907,14 +907,14 @@ ClassInfoGetters;
     /// </summary>
     /// <param name="movementState">The MovementState to get the rot angle target for.</param>
     /// <returns>The target rot angle for the given MovementState.</returns>
-    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets.at(movementState); }
+    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets[movementState]; }
 
     /// <summary>
     /// Sets the target rot angle for the given MovementState.
     /// </summary>
     /// <param name="movementState">The MovementState to get the rot angle target for.</param>
     /// <param name="newRotAngleTarget">The new rot angle target to use.</param>
-    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets.at(movementState) = newRotAngleTarget; }
+    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets[movementState] = newRotAngleTarget; }
 
 	/// <summary>
 	/// Gets the duration it takes this AHuman to fully charge a throw.

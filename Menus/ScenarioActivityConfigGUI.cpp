@@ -37,27 +37,27 @@ namespace RTE {
 		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDeployUnits"));
 
 		m_PlayersAndTeamsConfigBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPlayersAndTeamsConfig"));
-		m_TeamIconBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxDisabledTeamIcon"));
-		m_TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDisabledTeam"));
+		m_TeamIconBoxes[TeamRows::DisabledTeam] = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxDisabledTeamIcon"));
+		m_TeamNameLabels[TeamRows::DisabledTeam] = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDisabledTeam"));
 
 		GUILabel *teamTechLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeamTech"));
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 			std::string teamNumber = std::to_string(team + 1);
-			m_TeamIconBoxes.at(team) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxTeam" + teamNumber + "Icon"));
-			m_TeamNameLabels.at(team) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeam" + teamNumber));
+			m_TeamIconBoxes[team] = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxTeam" + teamNumber + "Icon"));
+			m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeam" + teamNumber));
 
-			m_TeamTechComboBoxes.at(team) = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboBoxTeam" + teamNumber + "Tech"));
-			m_TeamTechComboBoxes.at(team)->Move(teamTechLabel->GetXPos(), teamTechLabel->GetYPos() + teamTechLabel->GetHeight() + 5 + (25 * (team + 1)));
-			m_TeamTechComboBoxes.at(team)->SetVisible(false);
+			m_TeamTechComboBoxes[team] = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboBoxTeam" + teamNumber + "Tech"));
+			m_TeamTechComboBoxes[team]->Move(teamTechLabel->GetXPos(), teamTechLabel->GetYPos() + teamTechLabel->GetHeight() + 5 + (25 * (team + 1)));
+			m_TeamTechComboBoxes[team]->SetVisible(false);
 
-			m_TeamAISkillSliders.at(team) = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderTeam" + teamNumber + "AISkill"));
-			m_TeamAISkillSliders.at(team)->SetValue(Activity::AISkillSetting::DefaultSkill);
-			m_TeamAISkillLabels.at(team) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeam" + teamNumber + "AISkill"));
-			m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue()));
+			m_TeamAISkillSliders[team] = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderTeam" + teamNumber + "AISkill"));
+			m_TeamAISkillSliders[team]->SetValue(Activity::AISkillSetting::DefaultSkill);
+			m_TeamAISkillLabels[team] = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeam" + teamNumber + "AISkill"));
+			m_TeamAISkillLabels[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSliders[team]->GetValue()));
 		}
 		for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
 			for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
-				m_PlayerBoxes.at(player).at(team) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box"));
+				m_PlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box"));
 			}
 		}
 		m_CPULockLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelCPUTeamLock"));
@@ -71,16 +71,16 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::PopulateTechComboBoxes() {
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-			m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
-			m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
+			m_TeamTechComboBoxes[team]->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
+			m_TeamTechComboBoxes[team]->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
 		}
 		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
 			if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
 				if (dataModule->IsFaction()) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-						m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
-						m_TeamTechComboBoxes.at(team)->GetListPanel()->ScrollToTop();
-						m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
+						m_TeamTechComboBoxes[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
+						m_TeamTechComboBoxes[team]->GetListPanel()->ScrollToTop();
+						m_TeamTechComboBoxes[team]->SetSelectedIndex(0);
 					}
 				}
 			}
@@ -112,7 +112,7 @@ namespace RTE {
 		}
 		// The tech select ComboBoxes aren't children of the config box (dirty hack to allow the drop-down list to extend beyond the parent box bounds without clipping) so we need to set their visibility separately.
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-			m_TeamTechComboBoxes.at(team)->SetVisible(enable);
+			m_TeamTechComboBoxes[team]->SetVisible(enable);
 		}
 		if (enable && m_SelectedActivity && m_SelectedScene) {
 			if (!m_TechListFetched) { PopulateTechComboBoxes(); }
@@ -151,12 +151,12 @@ namespace RTE {
 
 		for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
 			for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
-				m_PlayerBoxes.at(player).at(team)->SetDrawType(GUICollectionBox::Color);
-				m_PlayerBoxes.at(player).at(team)->SetDrawColor(c_GUIColorBlue);
+				m_PlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
 			}
 			if (player < Players::MaxPlayerCount) {
-				if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
-				m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+				if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes[player][TeamRows::DisabledTeam]->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
+				m_PlayerBoxes[player][TeamRows::DisabledTeam]->SetDrawType(GUICollectionBox::Image);
 			} else {
 				int cpuInitialTeam = TeamRows::DisabledTeam;
 				m_LockedCPUTeam = m_SelectedActivity->GetCPUTeam();

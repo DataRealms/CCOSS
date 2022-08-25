@@ -1125,22 +1125,22 @@ bool MovableObject::DrawToTerrain(SLTerrain *terrain) {
 			destPos.fill(Vector());
 
 			if (swapSourceWithDestination) {
-				std::swap(bitmaps.at(0), bitmaps.at(1));
+				std::swap(bitmaps[0], bitmaps[1]);
 				std::swap(srcPos, destPos);
 			}
-			masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(0).GetFloorIntX(), srcPos.at(0).GetFloorIntY(), destPos.at(0).GetFloorIntX(), destPos.at(0).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+			masked_blit(bitmaps[0], bitmaps[1], srcPos[0].GetFloorIntX(), srcPos[0].GetFloorIntY(), destPos[0].GetFloorIntX(), destPos[0].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 			if (g_SceneMan.SceneWrapsX()) {
 				if (bitmapPos.GetFloorIntX() < 0) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(1).GetFloorIntX(), srcPos.at(1).GetFloorIntY(), destPos.at(1).GetFloorIntX(), destPos.at(1).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[1].GetFloorIntX(), srcPos[1].GetFloorIntY(), destPos[1].GetFloorIntX(), destPos[1].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				} else if (bitmapPos.GetFloorIntX() + destinationBitmap->w > g_SceneMan.GetSceneWidth()) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(2).GetFloorIntX(), srcPos.at(2).GetFloorIntY(), destPos.at(2).GetFloorIntX(), destPos.at(2).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[2].GetFloorIntX(), srcPos[2].GetFloorIntY(), destPos[2].GetFloorIntX(), destPos[2].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
 				if (bitmapPos.GetFloorIntY() < 0) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(3).GetFloorIntX(), srcPos.at(3).GetFloorIntY(), destPos.at(3).GetFloorIntX(), destPos.at(3).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[3].GetFloorIntX(), srcPos[3].GetFloorIntY(), destPos[3].GetFloorIntX(), destPos[3].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				} else if (bitmapPos.GetFloorIntY() + destinationBitmap->h > g_SceneMan.GetSceneHeight()) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(4).GetFloorIntX(), srcPos.at(4).GetFloorIntY(), destPos.at(4).GetFloorIntX(), destPos.at(4).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[4].GetFloorIntX(), srcPos[4].GetFloorIntY(), destPos[4].GetFloorIntX(), destPos[4].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				}
 			}
 		};

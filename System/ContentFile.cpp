@@ -49,7 +49,7 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
-			for (const auto &[bitmapPath, bitmapPtr] : s_LoadedBitmaps.at(depth)) {
+			for (const auto &[bitmapPath, bitmapPtr] : s_LoadedBitmaps[depth]) {
 				destroy_bitmap(bitmapPtr);
 			}
 		}
@@ -112,8 +112,8 @@ namespace RTE {
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
-		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps.at(bitDepth).find(dataPathToLoad);
-		if (foundBitmap != s_LoadedBitmaps.at(bitDepth).end()) {
+		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
+		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
 			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
@@ -131,7 +131,7 @@ namespace RTE {
 			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).try_emplace(dataPathToLoad, returnBitmap); }
+			if (storeBitmap) { s_LoadedBitmaps[bitDepth].try_emplace(dataPathToLoad, returnBitmap); }
 		}
 		return returnBitmap;
 	}

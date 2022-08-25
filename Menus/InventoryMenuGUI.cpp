@@ -446,11 +446,11 @@ namespace RTE {
 			if (m_InventoryActor->GetController()->IsState(ControlState::WEAPON_CHANGE_PREV)) {
 				m_CarouselAnimationDirection = CarouselAnimationDirection::Right;
 				m_CarouselAnimationTimer.Reset();
-				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes.at(m_CarouselItemBoxes.size() - 1)->Item;
+				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes[m_CarouselItemBoxes.size() - 1]->Item;
 			} else if (m_InventoryActor->GetController()->IsState(ControlState::WEAPON_CHANGE_NEXT)) {
 				m_CarouselAnimationDirection = CarouselAnimationDirection::Left;
 				m_CarouselAnimationTimer.Reset();
-				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes.at(0)->Item;
+				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes[0]->Item;
 			}
 
 			if (m_CarouselAnimationDirection != CarouselAnimationDirection::None && m_CarouselAnimationTimer.IsPastRealTimeLimit()) {
@@ -526,7 +526,7 @@ namespace RTE {
 
 		if (!m_GUIShowEmptyRows) {
 			int numberOfRowsToShow = static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
-			int expectedInventoryHeight = m_GUIInventoryItemButtons.at(0).second->GetHeight() * numberOfRowsToShow;
+			int expectedInventoryHeight = m_GUIInventoryItemButtons[0].second->GetHeight() * numberOfRowsToShow;
 			if (numberOfRowsToShow * c_ItemsPerRow < c_FullViewPageItemLimit) { expectedInventoryHeight -= 1; }
 			if (m_GUIInventoryItemsBox->GetHeight() != expectedInventoryHeight) {
 				int inventoryItemsBoxPreviousHeight = m_GUIInventoryItemsBox->GetHeight();

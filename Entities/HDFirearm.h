@@ -42,7 +42,7 @@ public:
 EntityAllocation(HDFirearm);
 SerializableOverrideMethods;
 ClassInfoGetters;
-AddScriptFunctionNames(MOSRotating, "OnFire", "OnReload");
+AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm

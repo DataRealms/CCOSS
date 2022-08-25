@@ -369,7 +369,7 @@ namespace RTE {
 		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + m_FileName)) {
 			if (directoryEntry.path().extension() == ".ini" && directoryEntry.path().filename() != "Index.ini") {
 				Reader iniReader;
-				if (iniReader.Create(directoryEntry.path().generic_string(), false, progressCallback) >= 0) {
+				if (iniReader.Create(m_FileName + "/" + directoryEntry.path().filename().generic_string(), false, progressCallback) >= 0) {
 					result = Serializable::Create(iniReader, false, true);
 					if (progressCallback) { progressCallback(" ", true); }
 				}

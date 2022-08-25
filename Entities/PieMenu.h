@@ -124,7 +124,7 @@ namespace RTE {
 		/// Sets the absolute center position of this PieMenu in the scene.
 		/// </summary>
 		/// <param name="newPos">A Vector describing the new absolute position of this PieMenu in pixels, in the scene.</param>
-		void SetPos(const Vector &newPos) { m_CenterPos = newPos; }
+		void SetPos(const Vector &newPos);
 
 		/// <summary>
 		/// Gets the absolute rotation of this PieMenu.

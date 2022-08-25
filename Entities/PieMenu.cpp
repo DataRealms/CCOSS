@@ -511,46 +511,58 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PieMenu::RemovePieSlicesByPresetName(const std::string &presetNameToRemoveBy) {
-		bool anySlicesRemoved = false;
+		bool anyPieSlicesRemoved = false;
 
+		std::vector<const PieSlice *> pieSlicesToRemove;
 		for (const PieSlice *pieSlice : m_CurrentPieSlices) {
 			if (pieSlice->GetPresetName() == presetNameToRemoveBy) {
-				delete RemovePieSlice(pieSlice);
-				anySlicesRemoved = true;
+				pieSlicesToRemove.emplace_back(pieSlice);
+				anyPieSlicesRemoved = true;
 			}
 		}
 
-		return anySlicesRemoved;
+		for (const PieSlice *pieSliceToRemove : pieSlicesToRemove) {
+			delete RemovePieSlice(pieSliceToRemove);
+		}
+		return anyPieSlicesRemoved;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PieMenu::RemovePieSlicesByType(PieSlice::Type pieSliceTypeToRemoveBy) {
-		bool anySlicesRemoved = false;
+		bool anyPieSlicesRemoved = false;
 
+		std::vector<const PieSlice *> pieSlicesToRemove;
 		for (const PieSlice *pieSlice : m_CurrentPieSlices) {
 			if (pieSlice->GetType() == pieSliceTypeToRemoveBy) {
-				delete RemovePieSlice(pieSlice);
-				anySlicesRemoved = true;
+				pieSlicesToRemove.emplace_back(pieSlice);
+				anyPieSlicesRemoved = true;
 			}
 		}
+		for (const PieSlice *pieSliceToRemove : pieSlicesToRemove) {
+			delete RemovePieSlice(pieSliceToRemove);
+		}
 
-		return anySlicesRemoved;
+		return anyPieSlicesRemoved;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PieMenu::RemovePieSlicesByOriginalSource(const Entity *originalSource) {
-		bool anySlicesRemoved = false;
+		bool anyPieSlicesRemoved = false;
 
+		std::vector<const PieSlice *> pieSlicesToRemove;
 		for (const PieSlice *pieSlice : m_CurrentPieSlices) {
 			if (pieSlice->GetOriginalSource() == originalSource) {
-				delete RemovePieSlice(pieSlice);
-				anySlicesRemoved = true;
+				pieSlicesToRemove.emplace_back(pieSlice);
+				anyPieSlicesRemoved = true;
 			}
 		}
+		for (const PieSlice *pieSliceToRemove : pieSlicesToRemove) {
+			delete RemovePieSlice(pieSliceToRemove);
+		}
 
-		return anySlicesRemoved;
+		return anyPieSlicesRemoved;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

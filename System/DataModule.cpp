@@ -139,6 +139,23 @@ namespace RTE {
 		} else if (propName == "IconFile") {
 			reader >> m_IconFile;
 			m_Icon = m_IconFile.GetAsBitmap();
+		} else if (propName == "FactionBuyMenuTheme") {
+			if (reader.ReadPropValue() == "BuyMenuTheme") {
+				while (reader.NextProperty()) {
+					std::string themePropName = reader.ReadPropName();
+					if (themePropName == "SkinFile") {
+						m_BuyMenuTheme.SkinFilePath = reader.ReadPropValue();
+					} else if (themePropName == "BannerFile") {
+						m_BuyMenuTheme.BannerImagePath = reader.ReadPropValue();
+					} else if (themePropName == "LogoFile") {
+						m_BuyMenuTheme.LogoImagePath = reader.ReadPropValue();
+					} else if (themePropName == "BackgroundColorIndex") {
+						m_BuyMenuTheme.BackgroundColorIndex = std::clamp(std::stoi(reader.ReadPropValue()), 0, 255);
+					} else {
+						break;
+					}
+				}
+			}
 		} else if (propName == "AddMaterial") {
 			return g_SceneMan.ReadProperty(propName, reader);
 		} else {

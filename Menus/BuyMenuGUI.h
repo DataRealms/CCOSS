@@ -579,23 +579,40 @@ public:
 
 	bool CommitPurchase(string presetName);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetHeaderImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the header image to the one specified in path
-// Arguments:       Path to image to set as header.
-// Return value:    None.
 
-	void SetHeaderImage(string path);
+	/// <summary>
+	/// Changes the banner image to the one specified.
+	/// </summary>
+	/// <param name="imagePath">Path to image to set as banner.</param>
+	void SetBannerImage(std::string imagePath);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetLogoImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the logo image to the one specified in path
-// Arguments:       Path to image to set as logo.
-// Return value:    None.
+	/// <summary>
+	/// Changes the banner image to the default.
+	/// </summary>
+	void SetDefaultBannerImage() { SetBannerImage("Base.rte/GUIs/BuyMenu/BuyMenuBanner.png"); }
 
-	void SetLogoImage(string path);
+	/// <summary>
+	/// Changes the logo image to the one specified.
+	/// </summary>
+	/// <param name="imagePath">Path to image to set as logo.</param>
+	void SetLogoImage(std::string imagePath);
+
+	/// <summary>
+	/// Changes the logo image to the default.
+	/// </summary>
+	void SetDefaultLogoImage() { SetLogoImage("Base.rte/GUIs/BuyMenu/BuyMenuLogo.png"); }
+
+	/// <summary>
+	/// Changes this BuyMenu's GUIControlManager skin to the one specified.
+	/// </summary>
+	/// <param name="filePath">Path to the skin file to set.</param>
+	void SetSkin(std::string filePath);
+
+	/// <summary>
+	/// Changes this BuyMenu's parent CollectionBox background color to the one specified.
+	/// </summary>
+	/// <param name="backgroundColorIndex">The color index to change the parent CollectionBox background color to.</param>
+	void SetBackgroundColor(int backgroundColorIndex = 0);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -789,8 +806,10 @@ protected:
     GUICollectionBox *m_pPopupBox;
     // Label displaying the item popup description
     GUILabel *m_pPopupText;
+    // Top banner
+    GUICollectionBox *m_Banner;
     // Logo label that disappears when the sets category is selected
-    GUICollectionBox *m_pLogo;
+    GUICollectionBox *m_Logo;
     // All the radio buttons for the different shop categories
     GUITab *m_pCategoryTabs[CATEGORYCOUNT];
     // The Listbox which lists all the shop's items in the currently selected category

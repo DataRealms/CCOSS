@@ -72,7 +72,8 @@ void BuyMenuGUI::Clear()
     m_pParentBox = 0;
     m_pPopupBox = 0;
     m_pPopupText = 0;
-    m_pLogo = 0;
+	m_Banner = nullptr;
+    m_Logo = nullptr;
     for (int i = 0; i < CATEGORYCOUNT; ++i)
     {
         m_pCategoryTabs[i] = 0;
@@ -165,24 +166,17 @@ int BuyMenuGUI::Create(Controller *pController)
 	}
 
     // Make sure we have convenient points to teh containing GUI colleciton boxes that we will manipulate the positions of
-    if (!m_pParentBox)
-    {
-        m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BuyGUIBox"));
+	if (!m_pParentBox) {
+		m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BuyGUIBox"));
+		m_pParentBox->SetDrawBackground(true);
+		m_pParentBox->SetDrawType(GUICollectionBox::Color);
 
-        // Set the background settings of the parent collection box
-	    m_pParentBox->SetDrawBackground(true);
-        m_pParentBox->SetDrawType(GUICollectionBox::Color);
+		m_Banner = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
+		SetDefaultBannerImage();
 
-        // Set the images for the logo and header decorations
-        GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
-        m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
-        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
-        pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
-        m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
-        pHeader->SetDrawType(GUICollectionBox::Image);
-        m_pLogo->SetDrawType(GUICollectionBox::Image);
-    }
+		m_Logo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
+		SetDefaultLogoImage();
+	}
     m_pParentBox->SetPositionAbs(-m_pParentBox->GetWidth(), 0);
     m_pParentBox->SetEnabled(false);
     m_pParentBox->SetVisible(false);
@@ -316,30 +310,33 @@ void BuyMenuGUI::Destroy()
     Clear();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetHeaderImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the header image to the one specified in path
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetHeaderImage(string path)
-{
-	GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
-	ContentFile headerFile(path.c_str());
-	pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
-	pHeader->SetDrawType(GUICollectionBox::Image);
+void BuyMenuGUI::SetBannerImage(std::string imagePath) {
+	ContentFile bannerFile(imagePath.c_str());
+	m_Banner->SetDrawImage(new AllegroBitmap(bannerFile.GetAsBitmap()));
+	m_Banner->SetDrawType(GUICollectionBox::Image);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetLogoImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the logo image to the one specified in path
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetLogoImage(string path)
-{
-	m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-	ContentFile logoFile(path.c_str());
-	m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
-	m_pLogo->SetDrawType(GUICollectionBox::Image);
+void BuyMenuGUI::SetLogoImage(std::string imagePath) {
+	ContentFile logoFile(imagePath.c_str());
+	m_Logo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
+	m_Logo->SetDrawType(GUICollectionBox::Image);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::SetSkin(std::string filePath) {
+	// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+	m_pGUIController->ChangeSkin("", filePath);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::SetBackgroundColor(int backgroundColorIndex) {
+	m_pParentBox->SetDrawColor(std::clamp(backgroundColorIndex, 0, 255));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1971,7 +1968,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     // Hide/show the logo and special sets category buttons, and add all current presets to the list, and we're done.
     if (m_MenuCategory == SETS)
     {
-        m_pLogo->SetVisible(false);
+        m_Logo->SetVisible(false);
         m_pSaveButton->SetVisible(true);
         m_pClearButton->SetVisible(true);
         // Add and done!
@@ -1981,7 +1978,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     // Hide the sets buttons otherwise
     else
     {
-        m_pLogo->SetVisible(true);
+        m_Logo->SetVisible(true);
         m_pSaveButton->SetVisible(false);
         m_pClearButton->SetVisible(false);
     }

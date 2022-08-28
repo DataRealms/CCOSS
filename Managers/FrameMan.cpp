@@ -1,5 +1,6 @@
 #include "FrameMan.h"
 #include "PostProcessMan.h"
+#include "PresetMan.h"
 #include "PrimitiveMan.h"
 #include "PerformanceMan.h"
 #include "ActivityMan.h"
@@ -689,8 +690,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(const std::string &palettePath) {
-		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), m_Palette);
-		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
+		const std::string fullPalettePath = g_PresetMan.FullModulePath(palettePath);
+		BITMAP *tempBitmap = load_bitmap(fullPalettePath.c_str(), m_Palette);
+		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + fullPalettePath).c_str());
 
 		set_palette(m_Palette);
 

@@ -153,6 +153,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ObjectPickerGUI::SetSkin(std::string filePath) {
+		// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+		m_GUIControlManager->ChangeSkin("", filePath);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ObjectPickerGUI::SetBackgroundColor(int backgroundColorIndex) {
+		m_ParentBox->SetDrawColor(std::clamp(backgroundColorIndex, 0, 255));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool ObjectPickerGUI::SetListFocus(PickerFocus listToFocusOn) {
 		if (listToFocusOn == m_PickerFocus) {
 			return false;

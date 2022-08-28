@@ -579,7 +579,7 @@ public:
 
 	bool CommitPurchase(string presetName);
 
-
+#pragma region Faction Theme Handling
 	/// <summary>
 	/// Changes the banner image to the one specified.
 	/// </summary>
@@ -613,6 +613,7 @@ public:
 	/// </summary>
 	/// <param name="backgroundColorIndex">The color index to change the parent CollectionBox background color to.</param>
 	void SetBackgroundColor(int backgroundColorIndex = 0);
+#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

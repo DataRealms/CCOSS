@@ -136,6 +136,20 @@ namespace RTE {
 		const SceneObject * DonePicking() const { return (!IsEnabled() && m_PickedObject) ? m_PickedObject : nullptr; }
 #pragma endregion
 
+#pragma region Faction Theme Handling
+		/// <summary>
+		/// Changes this ObjectPicker's GUIControlManager skin to the one specified.
+		/// </summary>
+		/// <param name="filePath">Path to the skin file to set.</param>
+		void SetSkin(std::string filePath);
+
+		/// <summary>
+		/// Changes this ObjectPicker's parent CollectionBox background color to the one specified.
+		/// </summary>
+		/// <param name="backgroundColorIndex">The color index to change the parent CollectionBox background color to.</param>
+		void SetBackgroundColor(int backgroundColorIndex = 0);
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this ObjectPickerGUI each frame.

@@ -326,19 +326,6 @@ void BuyMenuGUI::SetLogoImage(std::string imagePath) {
 	m_Logo->SetDrawType(GUICollectionBox::Image);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void BuyMenuGUI::SetSkin(std::string filePath) {
-	// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
-	m_pGUIController->ChangeSkin("", filePath);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void BuyMenuGUI::SetBackgroundColor(int backgroundColorIndex) {
-	m_pParentBox->SetDrawColor(std::clamp(backgroundColorIndex, 0, 255));
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ClearCartList
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -606,24 +593,34 @@ void BuyMenuGUI::SetMetaPlayer(int metaPlayer)
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetNativeTechModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets which DataModule ID should be treated as the native tech of the
-//                  user of this menu.
+void BuyMenuGUI::SetNativeTechModule(int whichModule) {
+	if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
+		// Set the multipliers and refresh everything that needs refreshing to reflect the change.
+		m_NativeTechModule = whichModule;
+		SetModuleExpanded(m_NativeTechModule);
+		DeployLoadout(0);
 
-void BuyMenuGUI::SetNativeTechModule(int whichModule)
-{
-    if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount())
-    {
-        // Set the multipliers and refresh everything that needs refreshing to reflect the change
-        m_NativeTechModule = whichModule;
-        SetModuleExpanded(m_NativeTechModule);
-        DeployLoadout(0);
-    }
+		if (m_NativeTechModule > 0) {
+			if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
+				const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
+
+				if (!techBuyMenuTheme.SkinFilePath.empty()) {
+					// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+					m_pGUIController->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+
+					// Changing the skin resets the images that the GUICollectionBoxes of the banner and logo show. If no custom banner or logo were specified reset to default here otherwise they will be missing.
+					if (techBuyMenuTheme.BannerImagePath.empty()) { SetDefaultBannerImage(); }
+					if (techBuyMenuTheme.LogoImagePath.empty()) { SetDefaultLogoImage(); }
+				}
+				if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_pParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
+				if (!techBuyMenuTheme.BannerImagePath.empty()) { SetBannerImage(techBuyMenuTheme.BannerImagePath); }
+				if (!techBuyMenuTheme.LogoImagePath.empty()) { SetLogoImage(techBuyMenuTheme.LogoImagePath); }
+			}
+		}
+	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetModuleExpanded

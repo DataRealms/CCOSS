@@ -147,21 +147,21 @@ namespace RTE {
 	void ObjectPickerGUI::SetNativeTechModule(int whichModule) {
 		if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
 			m_NativeTechModuleID = whichModule;
-			if (m_NativeTechModuleID > 0) { SetObjectsListModuleGroupExpanded(m_NativeTechModuleID); }
+			if (m_NativeTechModuleID > 0) {
+				SetObjectsListModuleGroupExpanded(m_NativeTechModuleID);
+
+				if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
+					const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
+
+					// Match the ObjectPicker skin and background color with the BuyMenu for visual consistency.
+					if (!techBuyMenuTheme.SkinFilePath.empty()) {
+						// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+						m_GUIControlManager->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+					}
+					if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_ParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
+				}
+			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::SetSkin(std::string filePath) {
-		// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
-		m_GUIControlManager->ChangeSkin("", filePath);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::SetBackgroundColor(int backgroundColorIndex) {
-		m_ParentBox->SetDrawColor(std::clamp(backgroundColorIndex, 0, 255));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

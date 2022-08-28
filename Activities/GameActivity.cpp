@@ -920,32 +920,10 @@ int GameActivity::Start()
             m_pBuyGUI[player] = new BuyMenuGUI;
         m_pBuyGUI[player]->Create(&m_PlayerController[player]);
 
-		int techModuleID = g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player)));
-		const DataModule *techModule = g_PresetMan.GetDataModule(techModuleID);
-		if (techModuleID > 0 && (techModule && techModule->IsFaction())) {
-			const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
-
-			// Match the ObjectPicker skin and background color with the BuyMenu for consistency.
-			if (!techBuyMenuTheme.SkinFilePath.empty()) {
-				m_pBuyGUI[player]->SetSkin(techBuyMenuTheme.SkinFilePath);
-				m_pEditorGUI[player]->SetObjectPickerSkin(techBuyMenuTheme.SkinFilePath);
-
-				// Changing the skin resets the images that the GUICollectionBoxes of the banner and logo show. If no custom banner or logo were specified reset to default here otherwise they will be missing.
-				if (techBuyMenuTheme.BannerImagePath.empty()) { m_pBuyGUI[player]->SetDefaultBannerImage(); }
-				if (techBuyMenuTheme.LogoImagePath.empty()) { m_pBuyGUI[player]->SetDefaultLogoImage(); }
-			}
-			if (techBuyMenuTheme.BackgroundColorIndex >= 0) {
-				m_pBuyGUI[player]->SetBackgroundColor(techBuyMenuTheme.BackgroundColorIndex);
-				m_pEditorGUI[player]->SetObjectPickerBackgroundColor(techBuyMenuTheme.BackgroundColorIndex);
-			}
-			if (!techBuyMenuTheme.BannerImagePath.empty()) {
-				m_pBuyGUI[player]->SetBannerImage(techBuyMenuTheme.BannerImagePath);
-			}
-			if (!techBuyMenuTheme.LogoImagePath.empty()) { m_pBuyGUI[player]->SetLogoImage(techBuyMenuTheme.LogoImagePath); }
-		}
-
 		// Load correct loadouts into buy menu if we're starting a non meta-game activity
 		if (m_pBuyGUI[player]->GetMetaPlayer() == Players::NoPlayer) {
+			int techModuleID = g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player)));
+
 			m_pBuyGUI[player]->SetNativeTechModule(techModuleID);
 			m_pBuyGUI[player]->SetForeignCostMultiplier(1.0);
 			m_pBuyGUI[player]->LoadAllLoadoutsFromFile();

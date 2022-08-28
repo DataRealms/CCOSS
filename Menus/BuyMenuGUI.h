@@ -601,18 +601,6 @@ public:
 	/// Changes the logo image to the default.
 	/// </summary>
 	void SetDefaultLogoImage() { SetLogoImage("Base.rte/GUIs/BuyMenu/BuyMenuLogo.png"); }
-
-	/// <summary>
-	/// Changes this BuyMenu's GUIControlManager skin to the one specified.
-	/// </summary>
-	/// <param name="filePath">Path to the skin file to set.</param>
-	void SetSkin(std::string filePath);
-
-	/// <summary>
-	/// Changes this BuyMenu's parent CollectionBox background color to the one specified.
-	/// </summary>
-	/// <param name="backgroundColorIndex">The color index to change the parent CollectionBox background color to.</param>
-	void SetBackgroundColor(int backgroundColorIndex = 0);
 #pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////

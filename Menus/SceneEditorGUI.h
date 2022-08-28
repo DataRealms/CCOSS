@@ -292,19 +292,6 @@ public:
 
 	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
 
-#pragma region Faction Theme Handling
-	/// <summary>
-	/// Changes this SceneEditorGUI's ObjectPicker skin to the one specified.
-	/// </summary>
-	/// <param name="filePath">Path to the skin file to set.</param>
-	void SetObjectPickerSkin(std::string filePath);
-
-	/// <summary>
-	/// Changes this SceneEditorGUI's ObjectPicker background color to the one specified.
-	/// </summary>
-	/// <param name="backgroundColorIndex">The color index to change the background color to.</param>
-	void SetObjectPickerBackgroundColor(int backgroundColorIndex = 0);
-#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

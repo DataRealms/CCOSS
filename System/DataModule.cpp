@@ -28,6 +28,7 @@ namespace RTE {
 		m_CrabToHumanSpawnRatio = 0;
 		m_ScriptPath.clear();
 		m_IsFaction = false;
+		m_IsMarket = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,6 +117,10 @@ namespace RTE {
 			}
 		} else if (propName == "IsFaction") {
 			reader >> m_IsFaction;
+			if (m_IsMarket) { m_IsFaction = false; }
+		} else if (propName == "IsMarket") {
+			reader >> m_IsMarket;
+			if (m_IsFaction && m_IsMarket) { m_IsFaction = false; }
 		} else if (propName == "SupportedGameVersion") {
 			reader >> m_SupportedGameVersion;
 		} else if (propName == "Version") {

@@ -2248,7 +2248,7 @@ void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, strin
 		// Go through all the data modules, gathering the objects that match the criteria in each one
 		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
 		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule)
+			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMarket())
 			{
 				if (group.empty() || group == "All")
 					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);

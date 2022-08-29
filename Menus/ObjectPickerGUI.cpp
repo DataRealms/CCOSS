@@ -372,7 +372,7 @@ namespace RTE {
 					}
 				} else {
 					for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID) {
-						if (moduleID == 0 || moduleID == m_NativeTechModuleID) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
+						if (moduleID == 0 || moduleID == m_NativeTechModuleID || g_PresetMan.GetDataModule(moduleID)->IsMarket()) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
 					}
 				}
 			} else {

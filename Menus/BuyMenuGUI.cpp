@@ -602,7 +602,7 @@ void BuyMenuGUI::SetNativeTechModule(int whichModule) {
 		SetModuleExpanded(m_NativeTechModule);
 		DeployLoadout(0);
 
-		if (m_NativeTechModule > 0) {
+		if (!g_SettingsMan.FactionBuyMenuThemesDisabled() && m_NativeTechModule > 0) {
 			if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
 				const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
 

@@ -45,6 +45,9 @@ using namespace RTE;
 
 BITMAP *RTE::BuyMenuGUI::s_pCursor = 0;
 
+const std::string BuyMenuGUI::c_DefaultBannerImagePath = "Base.rte/GUIs/BuyMenu/BuyMenuBanner.png";
+const std::string BuyMenuGUI::c_DefaultLogoImagePath = "Base.rte/GUIs/BuyMenu/BuyMenuLogo.png";
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +75,8 @@ void BuyMenuGUI::Clear()
     m_pParentBox = 0;
     m_pPopupBox = 0;
     m_pPopupText = 0;
-    m_pLogo = 0;
+	m_Banner = nullptr;
+    m_Logo = nullptr;
     for (int i = 0; i < CATEGORYCOUNT; ++i)
     {
         m_pCategoryTabs[i] = 0;
@@ -139,7 +143,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(pController->GetPlayer()); 
+        m_pGUIInput = new AllegroInput(pController->GetPlayer());
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
@@ -158,31 +162,24 @@ int BuyMenuGUI::Create(Controller *pController)
 	if (g_FrameMan.IsInMultiplayerMode())
 	{
 		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(pController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(pController->GetPlayer()));
-	} 
+	}
 	else
 	{
 		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 	}
 
     // Make sure we have convenient points to teh containing GUI colleciton boxes that we will manipulate the positions of
-    if (!m_pParentBox)
-    {
-        m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BuyGUIBox"));
+	if (!m_pParentBox) {
+		m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BuyGUIBox"));
+		m_pParentBox->SetDrawBackground(true);
+		m_pParentBox->SetDrawType(GUICollectionBox::Color);
 
-        // Set the background settings of the parent collection box
-	    m_pParentBox->SetDrawBackground(true);
-        m_pParentBox->SetDrawType(GUICollectionBox::Color);
+		m_Banner = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
+		SetBannerImage(c_DefaultBannerImagePath);
 
-        // Set the images for the logo and header decorations
-        GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
-        m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
-        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
-        pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
-        m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
-        pHeader->SetDrawType(GUICollectionBox::Image);
-        m_pLogo->SetDrawType(GUICollectionBox::Image);
-    }
+		m_Logo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
+		SetLogoImage(c_DefaultLogoImagePath);
+	}
     m_pParentBox->SetPositionAbs(-m_pParentBox->GetWidth(), 0);
     m_pParentBox->SetEnabled(false);
     m_pParentBox->SetVisible(false);
@@ -316,30 +313,20 @@ void BuyMenuGUI::Destroy()
     Clear();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetHeaderImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the header image to the one specified in path
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetHeaderImage(string path)
-{
-	GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
-	ContentFile headerFile(path.c_str());
-	pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
-	pHeader->SetDrawType(GUICollectionBox::Image);
+void BuyMenuGUI::SetBannerImage(const std::string &imagePath) {
+	ContentFile bannerFile((imagePath.empty() ? c_DefaultBannerImagePath : imagePath).c_str());
+	m_Banner->SetDrawImage(new AllegroBitmap(bannerFile.GetAsBitmap()));
+	m_Banner->SetDrawType(GUICollectionBox::Image);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetLogoImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the logo image to the one specified in path
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetLogoImage(string path)
-{
-	m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-	ContentFile logoFile(path.c_str());
-	m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
-	m_pLogo->SetDrawType(GUICollectionBox::Image);
+void BuyMenuGUI::SetLogoImage(const std::string &imagePath) {
+	ContentFile logoFile((imagePath.empty() ? c_DefaultLogoImagePath : imagePath).c_str());
+	m_Logo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
+	m_Logo->SetDrawType(GUICollectionBox::Image);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -609,24 +596,29 @@ void BuyMenuGUI::SetMetaPlayer(int metaPlayer)
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetNativeTechModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets which DataModule ID should be treated as the native tech of the
-//                  user of this menu.
+void BuyMenuGUI::SetNativeTechModule(int whichModule) {
+	if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
+		m_NativeTechModule = whichModule;
+		SetModuleExpanded(m_NativeTechModule);
+		DeployLoadout(0);
 
-void BuyMenuGUI::SetNativeTechModule(int whichModule)
-{
-    if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount())
-    {
-        // Set the multipliers and refresh everything that needs refreshing to reflect the change
-        m_NativeTechModule = whichModule;
-        SetModuleExpanded(m_NativeTechModule);
-        DeployLoadout(0);
-    }
+		if (!g_SettingsMan.FactionBuyMenuThemesDisabled() && m_NativeTechModule > 0) {
+			if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
+				const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
+
+				if (!techBuyMenuTheme.SkinFilePath.empty()) {
+					// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+					m_pGUIController->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+				}
+				if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_pParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
+				SetBannerImage(techBuyMenuTheme.BannerImagePath);
+				SetLogoImage(techBuyMenuTheme.LogoImagePath);
+			}
+		}
+	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetModuleExpanded
@@ -738,7 +730,7 @@ float BuyMenuGUI::GetTotalOrderCost()
 			}
 		}
 	}
-	else 
+	else
 	{
 		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 			totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
@@ -1385,7 +1377,7 @@ void BuyMenuGUI::Update()
             // User mashed button on a regular shop item, add it to cargo, or select craft
             else if (pItem && pItem->m_pEntity)
             {
-                // Select the craft 
+                // Select the craft
                 if (m_MenuCategory == CRAFT)
                 {
                     if (m_pSelectedCraft = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
@@ -1706,7 +1698,7 @@ void BuyMenuGUI::Update()
                         m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex = m_pShopList->GetSelectedIndex();
                         m_pShopList->ScrollToSelected();
 
-                        // Select the craft 
+                        // Select the craft
                         if (m_MenuCategory == CRAFT)
                         {
                             if (m_pSelectedCraft = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
@@ -1739,7 +1731,7 @@ void BuyMenuGUI::Update()
 										if (IsAlwaysAllowedItem(pItem->m_Name))
 											m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
-									else 
+									else
 									{
 										m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
@@ -1749,7 +1741,7 @@ void BuyMenuGUI::Update()
 							{
 								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
-                            
+
                             // If I just selected an AHuman, enable equipment selection mode
                             if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
                             {
@@ -1802,7 +1794,7 @@ void BuyMenuGUI::Update()
 /*
                 // Somehting was just selected, so update the selection index to the new selected index
                 if(anEvent.GetMsg() == GUIListBox::Select)
-                {                   
+                {
                     if (m_ListItemIndex != m_pCartList->GetSelectedIndex())
                         g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     m_ListItemIndex = m_pCartList->GetSelectedIndex();
@@ -1860,7 +1852,7 @@ void BuyMenuGUI::Update()
 				}
                 // Mouse moved over the panel, show the popup with item description
                 else if(anEvent.GetMsg() == GUIListBox::MouseMove)
-                {                    
+                {
                     // Mouse is moving within the list, so make it focus on the list
                     m_pCartList->SetFocus();
                     m_MenuFocus = ORDER;
@@ -1899,7 +1891,7 @@ void BuyMenuGUI::Draw(BITMAP *drawBitmap) const
     AllegroScreen drawScreen(drawBitmap);
     m_pGUIController->Draw(&drawScreen);
 
-    // Draw the cursor on top of everything 
+    // Draw the cursor on top of everything
     if (IsEnabled() && m_pController->IsMouseControlled())
 //        m_pGUIController->DrawMouse();
         draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
@@ -1971,7 +1963,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     // Hide/show the logo and special sets category buttons, and add all current presets to the list, and we're done.
     if (m_MenuCategory == SETS)
     {
-        m_pLogo->SetVisible(false);
+        m_Logo->SetVisible(false);
         m_pSaveButton->SetVisible(true);
         m_pClearButton->SetVisible(true);
         // Add and done!
@@ -1981,7 +1973,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     // Hide the sets buttons otherwise
     else
     {
-        m_pLogo->SetVisible(true);
+        m_Logo->SetVisible(true);
         m_pSaveButton->SetVisible(false);
         m_pClearButton->SetVisible(false);
     }
@@ -2060,15 +2052,15 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                         pItemBitmap = new AllegroBitmap((*tItr)->GetGraphicalIcon());
                         // Passing in ownership of the bitmap, but not of the pSpriteObj
 						if (m_OwnedItems.size() > 0 || m_OnlyShowOwnedItems)
-						{ 
+						{
 							if (GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName()) > 0)
 							{
 								string amount = std::to_string(GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName())) + " pcs";
 
 								m_pShopList->AddItem((*tItr)->GetPresetName(), amount , pItemBitmap, *tItr);
-							} 
-							else 
-							{ 
+							}
+							else
+							{
 								if (!m_OnlyShowOwnedItems)
 									m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
 								else
@@ -2254,7 +2246,7 @@ void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, strin
 		// Go through all the data modules, gathering the objects that match the criteria in each one
 		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
 		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule)
+			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())
 			{
 				if (group.empty() || group == "All")
 					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);

@@ -132,7 +132,7 @@ namespace RTE {
 				newStar.Intensity = RandomNum(111, 185);
 			} else {
 				newStar.Size = Star::StarSize::StarHuge;
-				newStar.Bitmap = starHugeBitmaps.at(RandomNum(0, starLargeBitmapCount - 1));
+				newStar.Bitmap = starHugeBitmaps.at(RandomNum(0, starHugeBitmapCount - 1));
 				newStar.Intensity = RandomNum(166, 185);
 			}
 			newStar.Position = Vector(RandomNum(0.0F, static_cast<float>(g_FrameMan.GetResX())), RandomNum(-100.0F, static_cast<float>(m_Nebula.GetBitmap()->h)));

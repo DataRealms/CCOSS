@@ -120,7 +120,7 @@ namespace RTE {
 		.property("Description", &DataModule::GetDescription)
 		.property("Version", &DataModule::GetVersionNumber)
 		.property("IsFaction", &DataModule::IsFaction)
-		.property("IsMarket", &DataModule::IsMarket)
+		.property("IsMerchant", &DataModule::IsMerchant)
 
 		.def_readwrite("Presets", &DataModule::m_EntityList, luabind::return_stl_iterator);
 	}

@@ -97,11 +97,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
-- New `DataModule` INI and Lua (R/O) property `IsMarket` which determines whether a module is an independent market. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
-	A module defined as a market will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
+- New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
+	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
 	Only has a noticeable effect when the "Allow purchases from other factions" (`Settings.ini` `ShowForeignItems`) gameplay setting is disabled.
 
-	Note that this property takes priority over the `IsFaction` property. A module that is set as both `IsFaction = 1` and `IsMarket = 1` will be treated as `IsFaction = 0`.
+	Note that this property takes priority over the `IsFaction` property. A module that is set as both `IsFaction = 1` and `IsMerchant = 1` will be treated as `IsFaction = 0`.
 
 </details>
 

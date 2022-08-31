@@ -45,6 +45,9 @@ using namespace RTE;
 
 BITMAP *RTE::BuyMenuGUI::s_pCursor = 0;
 
+const std::string BuyMenuGUI::c_DefaultBannerImagePath = "Base.rte/GUIs/BuyMenu/BuyMenuBanner.png";
+const std::string BuyMenuGUI::c_DefaultLogoImagePath = "Base.rte/GUIs/BuyMenu/BuyMenuLogo.png";
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,10 +175,10 @@ int BuyMenuGUI::Create(Controller *pController)
 		m_pParentBox->SetDrawType(GUICollectionBox::Color);
 
 		m_Banner = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
-		SetDefaultBannerImage();
+		SetBannerImage(c_DefaultBannerImagePath);
 
 		m_Logo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-		SetDefaultLogoImage();
+		SetLogoImage(c_DefaultLogoImagePath);
 	}
     m_pParentBox->SetPositionAbs(-m_pParentBox->GetWidth(), 0);
     m_pParentBox->SetEnabled(false);
@@ -312,16 +315,16 @@ void BuyMenuGUI::Destroy()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetBannerImage(std::string imagePath) {
-	ContentFile bannerFile(imagePath.c_str());
+void BuyMenuGUI::SetBannerImage(const std::string &imagePath) {
+	ContentFile bannerFile((imagePath.empty() ? c_DefaultBannerImagePath : imagePath).c_str());
 	m_Banner->SetDrawImage(new AllegroBitmap(bannerFile.GetAsBitmap()));
 	m_Banner->SetDrawType(GUICollectionBox::Image);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::SetLogoImage(std::string imagePath) {
-	ContentFile logoFile(imagePath.c_str());
+void BuyMenuGUI::SetLogoImage(const std::string &imagePath) {
+	ContentFile logoFile((imagePath.empty() ? c_DefaultLogoImagePath : imagePath).c_str());
 	m_Logo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
 	m_Logo->SetDrawType(GUICollectionBox::Image);
 }
@@ -597,7 +600,6 @@ void BuyMenuGUI::SetMetaPlayer(int metaPlayer)
 
 void BuyMenuGUI::SetNativeTechModule(int whichModule) {
 	if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
-		// Set the multipliers and refresh everything that needs refreshing to reflect the change.
 		m_NativeTechModule = whichModule;
 		SetModuleExpanded(m_NativeTechModule);
 		DeployLoadout(0);
@@ -609,14 +611,10 @@ void BuyMenuGUI::SetNativeTechModule(int whichModule) {
 				if (!techBuyMenuTheme.SkinFilePath.empty()) {
 					// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
 					m_pGUIController->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
-
-					// Changing the skin resets the images that the GUICollectionBoxes of the banner and logo show. If no custom banner or logo were specified reset to default here otherwise they will be missing.
-					if (techBuyMenuTheme.BannerImagePath.empty()) { SetDefaultBannerImage(); }
-					if (techBuyMenuTheme.LogoImagePath.empty()) { SetDefaultLogoImage(); }
 				}
 				if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_pParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
-				if (!techBuyMenuTheme.BannerImagePath.empty()) { SetBannerImage(techBuyMenuTheme.BannerImagePath); }
-				if (!techBuyMenuTheme.LogoImagePath.empty()) { SetLogoImage(techBuyMenuTheme.LogoImagePath); }
+				SetBannerImage(techBuyMenuTheme.BannerImagePath);
+				SetLogoImage(techBuyMenuTheme.LogoImagePath);
 			}
 		}
 	}
@@ -2248,7 +2246,7 @@ void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, strin
 		// Go through all the data modules, gathering the objects that match the criteria in each one
 		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
 		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMarket())
+			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())
 			{
 				if (group.empty() || group == "All")
 					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);

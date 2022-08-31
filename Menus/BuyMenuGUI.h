@@ -203,14 +203,12 @@ public:
 
 	int GetMetaPlayer() const { return m_MetaPlayer; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetNativeTechModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets which DataModule ID should be treated as the native tech of the
-//                  user of this menu.
-// Arguments:       The module ID to set as the native one. 0 means everything is native.
-// Return value:    None.
 
+    /// <summary>
+    /// Sets which DataModule ID should be treated as the native tech of the user of this menu.
+	/// This will also apply the DataModule's faction BuyMenu theme, if applicable.
+    /// </summary>
+	/// <param name="whichModule">The module ID to set as the native one. 0 means everything is native.</param>
     void SetNativeTechModule(int whichModule);
 
 
@@ -584,23 +582,13 @@ public:
 	/// Changes the banner image to the one specified.
 	/// </summary>
 	/// <param name="imagePath">Path to image to set as banner.</param>
-	void SetBannerImage(std::string imagePath);
-
-	/// <summary>
-	/// Changes the banner image to the default.
-	/// </summary>
-	void SetDefaultBannerImage() { SetBannerImage("Base.rte/GUIs/BuyMenu/BuyMenuBanner.png"); }
+	void SetBannerImage(const std::string &imagePath);
 
 	/// <summary>
 	/// Changes the logo image to the one specified.
 	/// </summary>
 	/// <param name="imagePath">Path to image to set as logo.</param>
-	void SetLogoImage(std::string imagePath);
-
-	/// <summary>
-	/// Changes the logo image to the default.
-	/// </summary>
-	void SetDefaultLogoImage() { SetLogoImage("Base.rte/GUIs/BuyMenu/BuyMenuLogo.png"); }
+	void SetLogoImage(const std::string &imagePath);
 #pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -866,6 +854,9 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_DefaultBannerImagePath; //!< Path to the default banner image.
+	static const std::string c_DefaultLogoImagePath; //!< Path to the default logo image.
 
     /// <summary>
     /// Refresh tab disabled states, so tabs get properly enabled/disabled based on whether or not equipment selection mode is enabled.

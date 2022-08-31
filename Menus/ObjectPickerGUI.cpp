@@ -154,7 +154,6 @@ namespace RTE {
 					if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
 						const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
 
-						// Match the ObjectPicker skin and background color with the BuyMenu for visual consistency.
 						if (!techBuyMenuTheme.SkinFilePath.empty()) {
 							// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
 							m_GUIControlManager->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
@@ -374,7 +373,7 @@ namespace RTE {
 					}
 				} else {
 					for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID) {
-						if (moduleID == 0 || moduleID == m_NativeTechModuleID || g_PresetMan.GetDataModule(moduleID)->IsMarket()) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
+						if (moduleID == 0 || moduleID == m_NativeTechModuleID || g_PresetMan.GetDataModule(moduleID)->IsMerchant()) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
 					}
 				}
 			} else {

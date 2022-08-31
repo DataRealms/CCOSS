@@ -369,9 +369,9 @@ namespace RTE {
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {
 					if (m_DrawMasked) {
-						masked_blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
+						masked_blit(m_MainBitmap, targetBitmap, sourcePosX[j], sourcePosY[i], destPosX[j], destPosY[i], sourceWidth[j], sourceHeight[i]);
 					} else {
-						blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
+						blit(m_MainBitmap, targetBitmap, sourcePosX[j], sourcePosY[i], destPosX[j], destPosY[i], sourceWidth[j], sourceHeight[i]);
 					}
 				}
 			}
@@ -384,9 +384,9 @@ namespace RTE {
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {
 					if (m_DrawMasked) {
-						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
+						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth[j], sourceHeight[i], destPosX[j], destPosY[i], sourceWidth[j] * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight[i] * m_ScaleFactor.GetFloorIntY() + 1);
 					} else {
-						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
+						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth[j], sourceHeight[i], destPosX[j], destPosY[i], sourceWidth[j] * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight[i] * m_ScaleFactor.GetFloorIntY() + 1);
 					}
 				}
 			}

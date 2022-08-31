@@ -88,7 +88,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>
 		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
-		InputScheme * GetControlScheme(int whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme.at(Players::PlayerOne) : &m_ControlScheme.at(whichPlayer); }
+		InputScheme * GetControlScheme(int whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme[Players::PlayerOne] : &m_ControlScheme.at(whichPlayer); }
 
 		/// <summary>
 		/// Get the current device Icon of a specific player's scheme.
@@ -192,7 +192,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether there are any start key/button presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
-		/// <param="includeSpacebar">Whether to check for space bar presses or not. 
+		/// <param="includeSpacebar">Whether to check for space bar presses or not.
 		/// <returns>Whether any start buttons or keys have been pressed at all since last frame.</returns>
 		bool AnyStartPress(bool includeSpacebar = true);
 
@@ -662,13 +662,13 @@ namespace RTE {
 		/// This is to avoid having the window fly away because the user clicked the title bar.
 		/// </summary>
 		bool m_PrepareToEnableMouseMoving;
- 
+
 		bool m_NetworkAccumulatedElementState[InputElements::INPUT_COUNT][InputState::InputStateCount]; //!< The state of an input element during network multiplayer.
 		bool m_NetworkInputElementState[Players::MaxPlayerCount][InputElements::INPUT_COUNT][InputState::InputStateCount]; //!< The state of a player's input element during network multiplayer.
-		bool m_NetworkMouseButtonState[Players::MaxPlayerCount][MouseButtons::MAX_MOUSE_BUTTONS][InputState::InputStateCount]; //!< The state of a player's mouse button during network multiplayer. 
+		bool m_NetworkMouseButtonState[Players::MaxPlayerCount][MouseButtons::MAX_MOUSE_BUTTONS][InputState::InputStateCount]; //!< The state of a player's mouse button during network multiplayer.
 
 		Vector m_NetworkAccumulatedRawMouseMovement[Players::MaxPlayerCount]; //!< The position of the mouse for each player during network multiplayer.
-		Vector m_NetworkAnalogMoveData[Players::MaxPlayerCount]; //!< Mouse analog movement data for each player during network multiplayer. 
+		Vector m_NetworkAnalogMoveData[Players::MaxPlayerCount]; //!< Mouse analog movement data for each player during network multiplayer.
 		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
 
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.

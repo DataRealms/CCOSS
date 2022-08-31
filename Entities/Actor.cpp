@@ -1727,7 +1727,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					{
 						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps.at(0), pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps.at(0)->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps.at(0)->h / 2) + 8, apControllerBitmaps.at(0)->w, apControllerBitmaps.at(0)->h);
+						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps[0]->h);
 					}
 				}
 

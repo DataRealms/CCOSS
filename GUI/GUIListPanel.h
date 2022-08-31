@@ -570,6 +570,7 @@ private:
 	std::vector<Item *> m_Items;
 	std::vector<Item *> m_SelectedList;
 	unsigned long m_SelectedColorIndex;
+	unsigned long m_UnselectedColorIndex;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildDrawBitmap

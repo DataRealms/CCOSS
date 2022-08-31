@@ -141,13 +141,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="otherThanPlayer">If you want to check if it's controlled by a player, AND that player is someone else than a specific one, pass in that player number here.</param>
 		/// <returns>Whether input mode is set to player input.</returns>
-		bool IsPlayerControlled(int otherThanPlayer = Players::NoPlayer) const { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < Players::PlayerOne || m_Player != otherThanPlayer)); }
+		bool IsPlayerControlled(int otherThanPlayer = Players::NoPlayer) const { return (m_InputMode == InputMode::CIM_PLAYER && (otherThanPlayer < Players::PlayerOne || m_Player != otherThanPlayer)); }
 
 		/// <summary>
 		/// Shows whether this controller is disabled.
 		/// </summary>
 		/// <returns>Whether disabled.</returns>
-		bool IsDisabled() const { return m_InputMode == CIM_DISABLED || m_Disabled; }
+		bool IsDisabled() const { return m_InputMode == InputMode::CIM_DISABLED || m_Disabled; }
 
 		/// <summary>
 		/// Sets whether this is a disabled controller that doesn't give any new output.
@@ -167,7 +167,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="controlState>Which state to set.</param>
 		/// <param name="setting">Value of the state being set.</param>
-		void SetState(ControlState controlState, bool setting = true) { RTEAssert(controlState >= 0 && controlState < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[controlState] = setting; };
+		void SetState(ControlState controlState, bool setting = true) { RTEAssert(controlState >= 0 && controlState < ControlState::CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[controlState] = setting; };
 
 		/// <summary>
 		/// Gets the current mode of input for this Controller.
@@ -259,13 +259,13 @@ namespace RTE {
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>
-		int GetPlayer() const { return (m_InputMode == CIM_PLAYER) ? m_Player : Players::NoPlayer; }
+		int GetPlayer() const { return (m_InputMode == InputMode::CIM_PLAYER) ? m_Player : Players::NoPlayer; }
 
 		/// <summary>
 		/// Sets which player's input this is listening to, and will enable player input mode.
 		/// </summary>
 		/// <param name="player">The player number.</param>
-		void SetPlayer(int player) { m_Player = player; if (m_Player >= Players::PlayerOne) { m_InputMode = CIM_PLAYER; } }
+		void SetPlayer(int player) { m_Player = player; if (m_Player >= Players::PlayerOne) { m_InputMode = InputMode::CIM_PLAYER; } }
 
 		/// <summary>
 		/// Gets the Team number using this controller.

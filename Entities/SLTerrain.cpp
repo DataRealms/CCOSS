@@ -31,8 +31,8 @@ namespace RTE {
 	int SLTerrain::Create() {
 		SceneLayer::Create();
 
-		m_FGColorLayer = std::make_unique<SceneLayer>();
-		m_BGColorLayer = std::make_unique<SceneLayer>();
+		if (!m_FGColorLayer.get()) { m_FGColorLayer = std::make_unique<SceneLayer>(); }
+		if (!m_BGColorLayer.get()) { m_BGColorLayer = std::make_unique<SceneLayer>(); }
 
 		return 0;
 	}

@@ -77,8 +77,8 @@ namespace RTE {
 		}
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_ControlScheme.at(player).Reset();
-			m_ControlScheme.at(player).ResetToPlayerDefaults(static_cast<Players>(player));
+			m_ControlScheme[player].Reset();
+			m_ControlScheme[player].ResetToPlayerDefaults(static_cast<Players>(player));
 
 			for (int inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
 				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
@@ -342,7 +342,7 @@ namespace RTE {
 
 	int UInputMan::MouseUsedByPlayer() const {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			if (m_ControlScheme.at(player).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+			if (m_ControlScheme[player].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 				return player;
 			}
 		}
@@ -613,7 +613,7 @@ namespace RTE {
 	bool UInputMan::GetMenuButtonState(int whichButton, InputState whichState) {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			bool buttonState = false;
-			InputDevice device = m_ControlScheme.at(player).GetDevice();
+			InputDevice device = m_ControlScheme[player].GetDevice();
 			if (!buttonState && whichButton >= MenuCursorButtons::MENU_PRIMARY) {
 				buttonState = GetInputElementState(player, InputElements::INPUT_FIRE, whichState) || GetMouseButtonState(player, MouseButtons::MOUSE_LEFT, whichState);
 			}
@@ -948,23 +948,23 @@ namespace RTE {
 			float deadZone = 0.0F;
 			int deadZoneType = DeadZoneType::CIRCLE;
 			for (int playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; playerToCheck++) {
-				InputDevice device = m_ControlScheme.at(playerToCheck).GetDevice();
+				InputDevice device = m_ControlScheme[playerToCheck].GetDevice();
 				int whichJoy = GetJoystickIndex(device);
 				if (whichJoy == joystick) {
-					deadZone = m_ControlScheme.at(playerToCheck).GetJoystickDeadzone();
-					deadZoneType = m_ControlScheme.at(playerToCheck).GetJoystickDeadzoneType();
+					deadZone = m_ControlScheme[playerToCheck].GetJoystickDeadzone();
+					deadZoneType = m_ControlScheme[playerToCheck].GetJoystickDeadzoneType();
 					joystickPlayer = static_cast<Players>(playerToCheck);
 					break;
 				}
 			}
 			if (joystickPlayer > Players::NoPlayer && deadZoneType == DeadZoneType::CIRCLE && deadZone > 0.0F) {
 				Vector aimValues;
-				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(joystickPlayer).GetInputMappings();
+				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme[joystickPlayer].GetInputMappings();
 				std::array<InputElements, 4> elementsToCheck = { InputElements::INPUT_L_LEFT, InputElements::INPUT_L_UP, InputElements::INPUT_R_LEFT, InputElements::INPUT_R_UP };
 
 				for (int i = 0; i < elementsToCheck.size() - 1; i += 2) {
-					if (inputElements->at(elementsToCheck.at(i)).JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, inputElements->at(elementsToCheck.at(i)).GetStick(), inputElements->at(elementsToCheck.at(i)).GetAxis()); }
-					if (inputElements->at(elementsToCheck.at(i + 1)).JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, inputElements->at(elementsToCheck.at(i + 1)).GetStick(), inputElements->at(elementsToCheck.at(i + 1)).GetAxis()); }
+					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i]).GetStick(), inputElements->at(elementsToCheck[i]).GetAxis()); }
+					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i + 1]).GetStick(), inputElements->at(elementsToCheck[i + 1]).GetAxis()); }
 
 					if (aimValues.GetMagnitude() < deadZone * 2) {
 						for (int j = 0; j < 2; j++) {

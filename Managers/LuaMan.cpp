@@ -406,7 +406,7 @@ namespace RTE {
 	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
 		int fileIndex = -1;
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
-			if (!m_OpenedFiles.at(i)) {
+			if (!m_OpenedFiles[i]) {
 				fileIndex = i;
 				break;
 			}
@@ -419,7 +419,7 @@ namespace RTE {
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
 		if ((fullPath.find("..") == std::string::npos) && (System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
 			if (FILE *file = fopen(fullPath.c_str(), accessMode.c_str())) {
-				m_OpenedFiles.at(fileIndex) = file;
+				m_OpenedFiles[fileIndex] = file;
 				return fileIndex;
 			}
 		}
@@ -433,8 +433,8 @@ namespace RTE {
 
 	void LuaMan::FileClose(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			fclose(m_OpenedFiles.at(fileIndex));
-			m_OpenedFiles.at(fileIndex) = nullptr;
+			fclose(m_OpenedFiles[fileIndex]);
+			m_OpenedFiles[fileIndex] = nullptr;
 		}
 	}
 
@@ -451,7 +451,7 @@ namespace RTE {
 	std::string LuaMan::FileReadLine(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
 			char buf[4096];
-			if (fgets(buf, sizeof(buf), m_OpenedFiles.at(fileIndex)) != nullptr) {
+			if (fgets(buf, sizeof(buf), m_OpenedFiles[fileIndex]) != nullptr) {
 				return buf;
 			}
 #ifndef RELEASE_BUILD
@@ -467,7 +467,7 @@ namespace RTE {
 
 	void LuaMan::FileWriteLine(int fileIndex, const std::string &line) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			if (fputs(line.c_str(), m_OpenedFiles.at(fileIndex)) == EOF) {
+			if (fputs(line.c_str(), m_OpenedFiles[fileIndex]) == EOF) {
 				g_ConsoleMan.PrintString("ERROR: Failed to write to file. File might have been opened without writing permissions or is corrupt.");
 			}
 		} else {
@@ -479,7 +479,7 @@ namespace RTE {
 
 	bool LuaMan::FileEOF(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			return feof(m_OpenedFiles.at(fileIndex));
+			return feof(m_OpenedFiles[fileIndex]);
 		}
 		g_ConsoleMan.PrintString("ERROR: Tried to check EOF for an invalid or closed file.");
 		return false;

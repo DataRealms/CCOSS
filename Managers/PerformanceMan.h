@@ -170,7 +170,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="counter">Counter to update.</param>
 		/// <param name="value">Value to add to this counter.</param>
-		void AddPerformanceSample(PerformanceCounters counter, uint64_t value) { m_PerfData.at(counter).at(m_Sample) += value; }
+		void AddPerformanceSample(PerformanceCounters counter, uint64_t value) { m_PerfData[counter].at(m_Sample) += value; }
 
 		/// <summary>
 		/// Calculates current sample's percentages from SIM_TOTAL for all performance counters and stores them to m_PerfPercenrages.

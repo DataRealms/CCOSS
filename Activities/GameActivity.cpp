@@ -914,14 +914,15 @@ int GameActivity::Start()
         m_pBuyGUI[player]->Create(&m_PlayerController[player]);
 
 		// Load correct loadouts into buy menu if we're starting a non meta-game activity
-		if (m_pBuyGUI[player]->GetMetaPlayer() == Players::NoPlayer)
-		{
-			m_pBuyGUI[player]->SetNativeTechModule(g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player))));
+		if (m_pBuyGUI[player]->GetMetaPlayer() == Players::NoPlayer) {
+			int techModuleID = g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player)));
+
+			m_pBuyGUI[player]->SetNativeTechModule(techModuleID);
 			m_pBuyGUI[player]->SetForeignCostMultiplier(1.0);
 			m_pBuyGUI[player]->LoadAllLoadoutsFromFile();
 
 			// Change Editor GUI native tech module so it could load and show correct deployment prices
-			m_pEditorGUI[player]->SetNativeTechModule(g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player))));
+			m_pEditorGUI[player]->SetNativeTechModule(techModuleID);
 		}
 
         ////////////////////////////////////

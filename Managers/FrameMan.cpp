@@ -23,10 +23,16 @@
 
 namespace RTE {
 
+	bool FrameMan::m_DisableFrameBufferFlip = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::DisplaySwitchOut() {
 		g_UInputMan.DisableMouseMoving(true);
+
+#ifdef _WIN32
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = true; }
+#endif
 
 #ifdef __unix__
 		// In fullscreen regrab focus because the window is lost otherwise. Only applies to X11 since XWayland handles this differently.
@@ -38,6 +44,10 @@ namespace RTE {
 
 	void FrameMan::DisplaySwitchIn() {
 		g_UInputMan.DisableMouseMoving(false);
+
+#ifdef _WIN32
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = false; }
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +153,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetDisplaySwitchMode() const {
+#ifdef _WIN32
+		set_display_switch_mode((m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL) ? SWITCH_BACKAMNESIA : SWITCH_BACKGROUND);
+#else
 		set_display_switch_mode(SWITCH_BACKGROUND);
+#endif
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
@@ -662,6 +676,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() const {
+		if (m_DisableFrameBufferFlip) {
+			return;
+		}
+
 		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {

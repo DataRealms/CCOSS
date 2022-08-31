@@ -142,7 +142,7 @@ namespace RTE {
 		/// <param name="">The path to the ASCII file to search.</param>
 		/// <param name="">The exact string to look for. Case sensitive!</param>
 		/// <returns>0 if the string was found in the file or 1 if not. -1 if the file was inaccessible.</returns>
-		static int ASCIIFileContainsString(const std::string &filePath, const std::string &findString);
+		static int ASCIIFileContainsString(const std::string &filePath, const std::string_view &findString);
 #pragma endregion
 
 	private:

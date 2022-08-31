@@ -140,7 +140,7 @@ namespace RTE {
 			m_Rotation += m_AngularVel * deltaTime;
 
 			if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
-		}			
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,12 +170,12 @@ namespace RTE {
 				}
 			} else if (m_WrapDoubleDraw) {
 				if (targetPos.m_X < 0) {
-					drawPositions.at(drawPasses) = drawPositions.at(0);
+					drawPositions.at(drawPasses) = drawPositions[0];
 					drawPositions.at(drawPasses).m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
 					drawPasses++;
 				}
 				if (targetPos.GetFloorIntX() + targetBitmap->w > g_SceneMan.GetSceneWidth()) {
-					drawPositions.at(drawPasses) = drawPositions.at(0);
+					drawPositions.at(drawPasses) = drawPositions[0];
 					drawPositions.at(drawPasses).m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
 					drawPasses++;
 				}
@@ -211,7 +211,7 @@ namespace RTE {
 					break;
 			}
 		}
-		
+
 		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { SetPostScreenEffectToDraw(); }
 	}
 

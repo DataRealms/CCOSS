@@ -394,7 +394,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			AddAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an item to the list of allowed items. 
+// Description:     Adds an item to the list of allowed items.
 //					If the list is not empty then everything not in the list is removed from the buy menu
 //					Items will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
 // Arguments:       Full preset name to add.
@@ -405,7 +405,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes an item from the list of allowed items. 
+// Description:     Removes an item from the list of allowed items.
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
@@ -441,7 +441,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAlwaysAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes an item from the list of always allowed items. 
+// Description:     Removes an item from the list of always allowed items.
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
@@ -470,7 +470,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			AddProhibitedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an item prohibited to buy from the buy menu. 
+// Description:     Adds an item prohibited to buy from the buy menu.
 //					The item will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
 // Arguments:       Full preset name to add.
 // Return value:    None.
@@ -520,7 +520,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-	void ClearCartList(); 
+	void ClearCartList();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			LoadDefaultLoadoutToCart
@@ -563,7 +563,7 @@ public:
 // Method:			GetOwnedItemsAmount
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the amount of specified items owned in this buy menu
-// Arguments:       Full preset name of item. 
+// Arguments:       Full preset name of item.
 // Return value:    Amount of owned items.
 
 	int GetOwnedItemsAmount(std::string presetName) { if (m_OwnedItems.find(presetName) != m_OwnedItems.end()) return m_OwnedItems[presetName]; else return 0; };
@@ -572,7 +572,7 @@ public:
 // Method:			CommitPurchase
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Deducts 1 piece of owned item and return true if purchase can be made or false if the item is out of stock.
-// Arguments:       Full preset name of item. 
+// Arguments:       Full preset name of item.
 // Return value:    Whether the purchase can be conducted or the item is out of stock.
 
 	bool CommitPurchase(string presetName);

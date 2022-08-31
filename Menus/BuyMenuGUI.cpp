@@ -143,7 +143,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(pController->GetPlayer()); 
+        m_pGUIInput = new AllegroInput(pController->GetPlayer());
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
@@ -162,7 +162,7 @@ int BuyMenuGUI::Create(Controller *pController)
 	if (g_FrameMan.IsInMultiplayerMode())
 	{
 		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(pController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(pController->GetPlayer()));
-	} 
+	}
 	else
 	{
 		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
@@ -730,7 +730,7 @@ float BuyMenuGUI::GetTotalOrderCost()
 			}
 		}
 	}
-	else 
+	else
 	{
 		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 			totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
@@ -1377,7 +1377,7 @@ void BuyMenuGUI::Update()
             // User mashed button on a regular shop item, add it to cargo, or select craft
             else if (pItem && pItem->m_pEntity)
             {
-                // Select the craft 
+                // Select the craft
                 if (m_MenuCategory == CRAFT)
                 {
                     if (m_pSelectedCraft = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
@@ -1698,7 +1698,7 @@ void BuyMenuGUI::Update()
                         m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex = m_pShopList->GetSelectedIndex();
                         m_pShopList->ScrollToSelected();
 
-                        // Select the craft 
+                        // Select the craft
                         if (m_MenuCategory == CRAFT)
                         {
                             if (m_pSelectedCraft = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
@@ -1731,7 +1731,7 @@ void BuyMenuGUI::Update()
 										if (IsAlwaysAllowedItem(pItem->m_Name))
 											m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
-									else 
+									else
 									{
 										m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
@@ -1741,7 +1741,7 @@ void BuyMenuGUI::Update()
 							{
 								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
-                            
+
                             // If I just selected an AHuman, enable equipment selection mode
                             if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
                             {
@@ -1794,7 +1794,7 @@ void BuyMenuGUI::Update()
 /*
                 // Somehting was just selected, so update the selection index to the new selected index
                 if(anEvent.GetMsg() == GUIListBox::Select)
-                {                   
+                {
                     if (m_ListItemIndex != m_pCartList->GetSelectedIndex())
                         g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     m_ListItemIndex = m_pCartList->GetSelectedIndex();
@@ -1852,7 +1852,7 @@ void BuyMenuGUI::Update()
 				}
                 // Mouse moved over the panel, show the popup with item description
                 else if(anEvent.GetMsg() == GUIListBox::MouseMove)
-                {                    
+                {
                     // Mouse is moving within the list, so make it focus on the list
                     m_pCartList->SetFocus();
                     m_MenuFocus = ORDER;
@@ -1891,7 +1891,7 @@ void BuyMenuGUI::Draw(BITMAP *drawBitmap) const
     AllegroScreen drawScreen(drawBitmap);
     m_pGUIController->Draw(&drawScreen);
 
-    // Draw the cursor on top of everything 
+    // Draw the cursor on top of everything
     if (IsEnabled() && m_pController->IsMouseControlled())
 //        m_pGUIController->DrawMouse();
         draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
@@ -2052,15 +2052,15 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                         pItemBitmap = new AllegroBitmap((*tItr)->GetGraphicalIcon());
                         // Passing in ownership of the bitmap, but not of the pSpriteObj
 						if (m_OwnedItems.size() > 0 || m_OnlyShowOwnedItems)
-						{ 
+						{
 							if (GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName()) > 0)
 							{
 								string amount = std::to_string(GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName())) + " pcs";
 
 								m_pShopList->AddItem((*tItr)->GetPresetName(), amount , pItemBitmap, *tItr);
-							} 
-							else 
-							{ 
+							}
+							else
+							{
 								if (!m_OnlyShowOwnedItems)
 									m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
 								else

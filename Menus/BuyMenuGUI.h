@@ -579,13 +579,13 @@ public:
 
 #pragma region Faction Theme Handling
 	/// <summary>
-	/// Changes the banner image to the one specified.
+	/// Changes the banner image to the one specified. If none is specified, resets it to the default banner image.
 	/// </summary>
 	/// <param name="imagePath">Path to image to set as banner.</param>
 	void SetBannerImage(const std::string &imagePath);
 
 	/// <summary>
-	/// Changes the logo image to the one specified.
+	/// Changes the logo image to the one specified. If none is specified, resets it to the default logo image.
 	/// </summary>
 	/// <param name="imagePath">Path to image to set as logo.</param>
 	void SetLogoImage(const std::string &imagePath);

@@ -34,7 +34,6 @@
 #include "GUI.h"
 #include "GUIFont.h"
 #include "AllegroBitmap.h"
-#include "PieMenu.h"
 #include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
@@ -336,7 +335,7 @@ void GameActivity::Destroy(bool notInherited)
 // Method:          GetCrabToHumanSpawnRatio
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns CrabToHumanSpawnRatio for specified module
-	float GameActivity::GetCrabToHumanSpawnRatio(int moduleid) 
+	float GameActivity::GetCrabToHumanSpawnRatio(int moduleid)
 	{
 		if (moduleid > -1)
 		{
@@ -542,7 +541,7 @@ int GameActivity::SetOverridePurchaseList(const Loadout *pLoadout, int player)
         const Loadout *pDefault = dynamic_cast<const Loadout *>(g_PresetMan.GetEntityPreset("Loadout", "Default", -1));
         if (pDefault)
             pCraftPreset = pDefault->GetDeliveryCraft();
-        
+
         // If still no go, then fuck it
         if (!pCraftPreset)
         {
@@ -1585,7 +1584,7 @@ void GameActivity::Update()
 						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
 					else
 						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
-	
+
 			// Limit selection range
 			relativeToActor = relativeToActor.CapMagnitude(350);
 			m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + relativeToActor;
@@ -1806,7 +1805,7 @@ void GameActivity::Update()
 			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE)) {
 				if (!m_BuyMenuEnabled && controlledActorPieMenu->IsEnabling()) {
-					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::Type::BuyMenu);
+					controlledActorPieMenu->RemovePieSlicesByType(PieSlice::SliceType::BuyMenu);
 				}
 
 				if (controlledActorPieMenu->IsEnabled() && controlledActorPieMenu->HasSubPieMenuOpen() && m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) {
@@ -1819,21 +1818,21 @@ void GameActivity::Update()
 				m_InventoryMenuGUI[player]->SetEnabled(false);
 			}
 
-			if (PieSlice::Type command = controlledActorPieMenu->GetPieCommand(); command != PieSlice::Type::NoType) {
+			if (PieSlice::SliceType command = controlledActorPieMenu->GetPieCommand(); command != PieSlice::SliceType::NoType) {
 				// AI mode commands that need extra points set in special view modes here
 				//TODO I don't think these viewstates are actually used?!
-				if (command == PieSlice::Type::Sentry) {
+				if (command == PieSlice::SliceType::Sentry) {
 					m_ViewState[player] = ViewState::AISentryPoint;
-				} else if (command == PieSlice::Type::Patrol) {
+				} else if (command == PieSlice::SliceType::Patrol) {
 					m_ViewState[player] = ViewState::AIPatrolPoints;
-				} else if (command == PieSlice::Type::GoldDig) {
+				} else if (command == PieSlice::SliceType::GoldDig) {
 					m_ViewState[player] = ViewState::AIGoldDigPoint;
-				} else if (command == PieSlice::Type::GoTo) {
+				} else if (command == PieSlice::SliceType::GoTo) {
 					m_ViewState[player] = ViewState::AIGoToPoint;
 					m_ControlledActor[player]->ClearAIWaypoints();
 					m_ActorCursor[player] = m_ControlledActor[player]->GetPos();
 					m_ControlledActor[player]->GetController()->SetDisabled(true);
-				} else if (command == PieSlice::Type::FormSquad) {
+				} else if (command == PieSlice::SliceType::FormSquad) {
 					//Find out if we have any connected units, and disconnect them
 					bool isCommander = false;
 
@@ -1866,10 +1865,10 @@ void GameActivity::Update()
 						m_ControlledActor[player]->GetController()->SetDisabled(true);
 						m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
 					}
-				} else if (command == PieSlice::Type::BuyMenu) {
+				} else if (command == PieSlice::SliceType::BuyMenu) {
 					m_pBuyGUI[player]->SetEnabled(true);
 					skipBuyUpdate = true;
-				} else if (command == PieSlice::Type::FullInventory) {
+				} else if (command == PieSlice::SliceType::FullInventory) {
 					controlledActorPieMenu->SetEnabled(false);
 					m_InventoryMenuGUI[player]->SetEnabled(false);
 					m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Full);
@@ -2261,7 +2260,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
                 }
                 else if (objScenePos.m_Y < nearestBoxItr->GetCorner().m_Y)
                     itr->Draw(pTargetBitmap, m_aObjCursor[cursor][frame], nearestBoxItr->GetWithinBox(objScenePos) - targetPos, ARROWUP);
-                else                        
+                else
                     itr->Draw(pTargetBitmap, m_aObjCursor[cursor][frame], nearestBoxItr->GetWithinBox(objScenePos) - targetPos, ARROWDOWN);
             }
         }
@@ -2399,7 +2398,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 				//Calculate unwrapped cursor position, or it won't glow
 				unwrappedPos = m_ActorCursor[PoS] - m_ControlledActor[PoS]->GetPos();
 				float sceneWidth = g_SceneMan.GetSceneWidth();
-				
+
 				if (unwrappedPos.GetMagnitude() > sceneWidth / 2 && unwrappedPos.GetMagnitude() > 350)
 				{
 					if (m_ActorCursor->m_X < sceneWidth / 2)

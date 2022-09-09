@@ -238,10 +238,10 @@ namespace RTE {
 		const PieSlice * GetActivatedPieSlice() const;
 		
 		/// <summary>
-		/// Gets the command issued by this PieMenu in the last update, i.e. the PieSlice Type of the currently activated PieSlice, or None if no slice was activated.
+		/// Gets the command issued by this PieMenu in the last update, i.e. the PieSlice SliceType of the currently activated PieSlice, or None if no slice was activated.
 		/// </summary>
 		/// <returns>The PieSlice type which has been picked, or None if none has been picked.</returns>
-		PieSlice::Type GetPieCommand() const;
+		PieSlice::SliceType GetPieCommand() const;
 
 		/// <summary>
 		/// Gets a const reference to the vector containing pointers to all the PieSlices in this PieMenu.
@@ -257,11 +257,11 @@ namespace RTE {
 		PieSlice * GetFirstPieSliceByPresetName(const std::string &presetName) const;
 
 		/// <summary>
-		/// Gets the first found PieSlice with the passed in PieSlice Type, if there is one. Ownership is NOT transferred!
+		/// Gets the first found PieSlice with the passed in PieSlice SliceType, if there is one. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="pieSliceType">The type of PieSlice to look for.</param>
-		/// <returns>The first found PieSlice with the passed in PieSlice Type, or nullptr if there are no PieSlices with that Type in this PieMenu.</returns>
-		PieSlice * GetFirstPieSliceByType(PieSlice::Type pieSliceType) const;
+		/// <returns>The first found PieSlice with the passed in PieSlice SliceType, or nullptr if there are no PieSlices with that SliceType in this PieMenu.</returns>
+		PieSlice * GetFirstPieSliceByType(PieSlice::SliceType pieSliceType) const;
 		
 		/// <summary>
 		/// Adds a PieSlice to the PieMenu, setting its original source to the specified sliceSource. Ownership IS transferred!
@@ -300,11 +300,11 @@ namespace RTE {
 		bool RemovePieSlicesByPresetName(const std::string &presetNameToRemoveBy);
 
 		/// <summary>
-		/// Removes any PieSlices in this PieMenu whose PieSlice Type matches the passed in PieSlice Type.
+		/// Removes any PieSlices in this PieMenu whose PieSlice SliceType matches the passed in PieSlice SliceType.
 		/// </summary>
-		/// <param name="pieSliceTypeToRemoveBy">The PieSlice Type to check against.</param>
+		/// <param name="pieSliceTypeToRemoveBy">The PieSlice SliceType to check against.</param>
 		/// <returns>Whether or not any PieSlices were removed from this PieMenu.</returns>
-		bool RemovePieSlicesByType(PieSlice::Type pieSliceTypeToRemoveBy);
+		bool RemovePieSlicesByType(PieSlice::SliceType pieSliceTypeToRemoveBy);
 
 		/// <summary>
 		/// Removes any PieSlices in this PieMenu whose original source matches the passed in Entity.

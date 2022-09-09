@@ -31,7 +31,6 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "ObjectPickerGUI.h"
-#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "Deployment.h"
@@ -260,7 +259,7 @@ bool SceneEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::Type SceneEditorGUI::GetActivatedPieSlice() const {
+PieSlice::SliceType SceneEditorGUI::GetActivatedPieSlice() const {
     return m_PieMenu->GetPieCommand();
 }
 
@@ -465,7 +464,7 @@ void SceneEditorGUI::Update()
 		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 		m_PieMenu->SetEnabled(true);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::InFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::Type::Behind) };
+		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
 		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
 			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
 		}
@@ -476,29 +475,29 @@ void SceneEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_PieMenu->GetPieCommand() != PieSlice::Type::NoType) {
-		if (m_PieMenu->GetPieCommand() == PieSlice::Type::Pick) {
+    if (m_PieMenu->GetPieCommand() != PieSlice::SliceType::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorPick) {
 			m_EditorGUIMode = PICKINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Move) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorMove) {
 			m_EditorGUIMode = MOVINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Remove) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorRemove) {
 			m_EditorGUIMode = DELETINGOBJECT;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::BrainHunt) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::BrainHunt) {
 			m_EditorGUIMode = INSTALLINGBRAIN;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Done) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorDone) {
 			m_EditorGUIMode = DONEEDITING;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::InFront) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorInFront) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEINFRONT;
-        } else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Behind) {
+        } else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorBehind) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEBEHIND;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Team1) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam1) {
 			m_PlaceTeam = Activity::TeamOne;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Team2) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam2) {
 			m_PlaceTeam = Activity::TeamTwo;
 			// Toggle between normal scene object editing, and AI plan editing
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Map) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::Map) {
 			SetFeatureSet(m_FeatureSet == FeatureSets::ONLOADEDIT ? FeatureSets::AIPLANEDIT : FeatureSets::ONLOADEDIT);
 		}
 
@@ -529,7 +528,7 @@ void SceneEditorGUI::Update()
             m_pCurrentObject->Update();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
-                
+
             // If done picking, revert to moving object mode
             if (m_pPicker->DonePicking())
             {
@@ -538,7 +537,7 @@ void SceneEditorGUI::Update()
 					m_EditorGUIMode = INSTALLINGBRAIN;
                 else
                     m_EditorGUIMode = ADDINGOBJECT;
-                
+
                 UpdateBrainPath();
                 m_ModeChanged = true;
             }
@@ -644,7 +643,7 @@ void SceneEditorGUI::Update()
                 m_pCurrentObject->SetTeam(m_PlaceTeam);
         }
     }
-    
+
     /////////////////////////////////////
     // INSTALLING BRAIN MODE
 
@@ -742,7 +741,7 @@ void SceneEditorGUI::Update()
                 nextItr++;
                 smashedPoint = g_SceneMan.MovePointToGround((*lItr), 20, 10);
 			    Vector notUsed;
-    			
+
                 // Only smash if the new location doesn't cause the path to intersect hard terrain ahead or behind of it
                 // Try three times to halve the height to see if that won't intersect
                 for (int i = 0; i < 3; i++)
@@ -955,7 +954,7 @@ void SceneEditorGUI::Update()
 							if (pPickedSceneObject)
 							{
 								pAHuman = dynamic_cast<const AHuman *>(pPickedSceneObject);
-								
+
 								if (!pAHuman)
 								{
 									// Maybe we clicked the underlying bunker module, search for actor in range
@@ -1323,7 +1322,7 @@ void SceneEditorGUI::Update()
                 }
                 else
                     g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }   
+            }
         }
     }
     else if (m_EditorGUIMode == DONEEDITING)
@@ -1443,7 +1442,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
             // Is the placed object an actor?
             pActor = dynamic_cast<Actor *>(*itr);
-//            pItem = dynamic_cast<MovableObject *>(*itr);            
+//            pItem = dynamic_cast<MovableObject *>(*itr);
 
             // Blink trans if we are supposed to blink this one
             if ((*itr) == m_pObjectToBlink)

@@ -24,7 +24,6 @@
 #include "HeldDevice.h"
 #include "Scene.h"
 #include "DataModule.h"
-#include "PieMenu.h"
 
 #include "GUI.h"
 #include "GUIFont.h"

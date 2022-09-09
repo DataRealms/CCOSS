@@ -42,7 +42,6 @@
 #include "GUIComboBox.h"
 
 #include "ObjectPickerGUI.h"
-#include "PieMenu.h"
 
 namespace RTE {
 
@@ -280,15 +279,11 @@ void ActorEditor::Update()
 
 	if (m_pEditedActor) {
 		PieMenu *editedActorPieMenu = m_pEditedActor->GetPieMenu();
-		if (m_PlayerController[0].IsState(PIE_MENU_ACTIVE) && m_EditorMode != EditorActivity::LOADDIALOG) {
-			editedActorPieMenu->SetEnabled(true);
-		} else {
-			editedActorPieMenu->SetEnabled(false);
-		}
+		editedActorPieMenu->SetEnabled(m_PlayerController[0].IsState(ControlState::PIE_MENU_ACTIVE) && m_EditorMode != EditorActivity::LOADDIALOG);
 
-		if (editedActorPieMenu->GetPieCommand() == PieSlice::Type::Load) {
+		if (editedActorPieMenu->GetPieCommand() == PieSlice::SliceType::EditorLoad) {
 			ReloadActorData();
-		} else if (editedActorPieMenu->GetPieCommand() == PieSlice::Type::Pick) {
+		} else if (editedActorPieMenu->GetPieCommand() == PieSlice::SliceType::EditorPick) {
 			m_EditorMode = EditorActivity::LOADDIALOG;
 			m_ModeChange = true;
 		}

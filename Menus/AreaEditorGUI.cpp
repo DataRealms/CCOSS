@@ -26,7 +26,6 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "AreaPickerGUI.h"
-#include "PieMenu.h"
 #include "Scene.h"
 
 using namespace RTE;
@@ -144,7 +143,7 @@ void AreaEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-PieSlice::Type AreaEditorGUI::GetActivatedPieSlice() const {
+PieSlice::SliceType AreaEditorGUI::GetActivatedPieSlice() const {
 	return m_PieMenu->GetPieCommand();
 }
 
@@ -288,14 +287,14 @@ void AreaEditorGUI::Update()
 
 	if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGAREA) { m_PieMenu->SetEnabled(false); }
 
-    if (m_PieMenu->GetPieCommand() != PieSlice::Type::NoType) {
-		if (m_PieMenu->GetPieCommand() == PieSlice::Type::Pick) {
+    if (m_PieMenu->GetPieCommand() != PieSlice::SliceType::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorPick) {
 			m_EditorGUIMode = PICKINGAREA;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Move) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorMove) {
 			m_EditorGUIMode = PREADDMOVEBOX;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Remove) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorRemove) {
 			m_EditorGUIMode = DELETINGBOX;
-		} else if (m_PieMenu->GetPieCommand() == PieSlice::Type::Done) {
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorDone) {
 			m_EditorGUIMode = DONEEDITING;
 		}
     }

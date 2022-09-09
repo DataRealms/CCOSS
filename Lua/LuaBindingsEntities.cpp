@@ -1030,41 +1030,41 @@ namespace RTE {
 		.property("DrawFlippedToMatchAbsoluteAngle", &PieSlice::GetDrawFlippedToMatchAbsoluteAngle, &PieSlice::SetDrawFlippedToMatchAbsoluteAngle)
 
 		.enum_("PieSliceType")[
-			luabind::value("NoType", PieSlice::Type::NoType),
-			luabind::value("Pickup", PieSlice::Type::Pickup),
-			luabind::value("Drop", PieSlice::Type::Drop),
-			luabind::value("NextItem", PieSlice::Type::NextItem),
-			luabind::value("PreviousItem", PieSlice::Type::PreviousItem),
-			luabind::value("Reload", PieSlice::Type::Reload),
-			luabind::value("BuyMenu", PieSlice::Type::BuyMenu),
-			luabind::value("Stats", PieSlice::Type::Stats),
-			luabind::value("Map", PieSlice::Type::Map),
-			luabind::value("FormSquad", PieSlice::Type::FormSquad),
-			luabind::value("Ceasefire", PieSlice::Type::Ceasefire),
-			luabind::value("Sentry", PieSlice::Type::Sentry),
-			luabind::value("Patrol", PieSlice::Type::Patrol),
-			luabind::value("BrainHunt", PieSlice::Type::BrainHunt),
-			luabind::value("GoldDig", PieSlice::Type::GoldDig),
-			luabind::value("GoTo", PieSlice::Type::GoTo),
-			luabind::value("Return", PieSlice::Type::Return),
-			luabind::value("Stay", PieSlice::Type::Stay),
-			luabind::value("Deliver", PieSlice::Type::Deliver),
-			luabind::value("Scuttle", PieSlice::Type::Scuttle),
-			luabind::value("Done", PieSlice::Type::Done),
-			luabind::value("Load", PieSlice::Type::Load),
-			luabind::value("Save", PieSlice::Type::SaveType),
-			luabind::value("New", PieSlice::Type::New),
-			luabind::value("Pick", PieSlice::Type::Pick),
-			luabind::value("Move", PieSlice::Type::Move),
-			luabind::value("Remove", PieSlice::Type::Remove),
-			luabind::value("InFront", PieSlice::Type::InFront),
-			luabind::value("Behind", PieSlice::Type::Behind),
-			luabind::value("ZoomIn", PieSlice::Type::ZoomIn),
-			luabind::value("ZoomOut", PieSlice::Type::ZoomOut),
-			luabind::value("Team1", PieSlice::Type::Team1),
-			luabind::value("Team2", PieSlice::Type::Team2),
-			luabind::value("Team3", PieSlice::Type::Team3),
-			luabind::value("Team4", PieSlice::Type::Team4)
+			luabind::value("NoType", PieSlice::SliceType::NoType),
+			luabind::value("Pickup", PieSlice::SliceType::Pickup),
+			luabind::value("Drop", PieSlice::SliceType::Drop),
+			luabind::value("NextItem", PieSlice::SliceType::NextItem),
+			luabind::value("PreviousItem", PieSlice::SliceType::PreviousItem),
+			luabind::value("Reload", PieSlice::SliceType::Reload),
+			luabind::value("BuyMenu", PieSlice::SliceType::BuyMenu),
+			luabind::value("Stats", PieSlice::SliceType::Stats),
+			luabind::value("Map", PieSlice::SliceType::Map),
+			luabind::value("FormSquad", PieSlice::SliceType::FormSquad),
+			luabind::value("Ceasefire", PieSlice::SliceType::Ceasefire),
+			luabind::value("Sentry", PieSlice::SliceType::Sentry),
+			luabind::value("Patrol", PieSlice::SliceType::Patrol),
+			luabind::value("BrainHunt", PieSlice::SliceType::BrainHunt),
+			luabind::value("GoldDig", PieSlice::SliceType::GoldDig),
+			luabind::value("GoTo", PieSlice::SliceType::GoTo),
+			luabind::value("Return", PieSlice::SliceType::Return),
+			luabind::value("Stay", PieSlice::SliceType::Stay),
+			luabind::value("Deliver", PieSlice::SliceType::Deliver),
+			luabind::value("Scuttle", PieSlice::SliceType::Scuttle),
+			luabind::value("Done", PieSlice::SliceType::EditorDone),
+			luabind::value("Load", PieSlice::SliceType::EditorLoad),
+			luabind::value("Save", PieSlice::SliceType::EditorSave),
+			luabind::value("New", PieSlice::SliceType::EditorNew),
+			luabind::value("Pick", PieSlice::SliceType::EditorPick),
+			luabind::value("Move", PieSlice::SliceType::EditorMove),
+			luabind::value("Remove", PieSlice::SliceType::EditorRemove),
+			luabind::value("InFront", PieSlice::SliceType::EditorInFront),
+			luabind::value("Behind", PieSlice::SliceType::EditorBehind),
+			luabind::value("ZoomIn", PieSlice::SliceType::EditorZoomIn),
+			luabind::value("ZoomOut", PieSlice::SliceType::EditorZoomOut),
+			luabind::value("Team1", PieSlice::SliceType::EditorTeam1),
+			luabind::value("Team2", PieSlice::SliceType::EditorTeam2),
+			luabind::value("Team3", PieSlice::SliceType::EditorTeam3),
+			luabind::value("Team4", PieSlice::SliceType::EditorTeam4)
 		];
 	}
 
@@ -1341,7 +1341,7 @@ namespace RTE {
 		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
 		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
 		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset)
-			
+
 		.def("GetCalculatedMaxThrowVelIncludingArmThrowStrength", &ThrownDevice::GetCalculatedMaxThrowVelIncludingArmThrowStrength);
 	}
 

@@ -18,7 +18,7 @@
 #include "UInputMan.h"
 #include "ConsoleMan.h"
 #include "AudioMan.h"
-#include "SettingsMan.h" 
+#include "SettingsMan.h"
 #include "AHuman.h"
 #include "ACrab.h"
 #include "ACraft.h"
@@ -26,7 +26,6 @@
 #include "Controller.h"
 #include "Scene.h"
 #include "Actor.h"
-#include "PieMenu.h"
 
 #include "GUI.h"
 #include "GUIFont.h"
@@ -290,7 +289,7 @@ int GAScripted::Start()
 	// Clear active global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
 		delete (*sItr);
-	
+
 	m_GlobalScriptsList.clear();
 
 	// Get all global scripts and add to execution list

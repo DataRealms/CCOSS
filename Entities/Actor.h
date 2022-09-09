@@ -400,7 +400,7 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSharpAimProgress
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the normalized amount of sharp aim that has been achieved by this. 
+// Description:     Gets the normalized amount of sharp aim that has been achieved by this.
 // Arguments:       None.
 // Return value:    Sharp aim progress between 0 - 1.0. 1.0 is fully aimed.
 
@@ -603,11 +603,11 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
     bool IsDead() const { return m_Status == DEAD; }
 
     /// <summary>
-    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its Type.
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its SliceType.
     /// </summary>
-    /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
-    /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
-    virtual bool HandlePieCommand(PieSlice::Type pieSliceType) { return false; }
+    /// <param name="pieSliceType">The SliceType of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
+    virtual bool HandlePieCommand(PieSlice::SliceType pieSliceType) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

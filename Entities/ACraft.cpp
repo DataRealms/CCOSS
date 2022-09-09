@@ -19,7 +19,6 @@
 #include "AEmitter.h"
 #include "HDFirearm.h"
 #include "Controller.h"
-#include "PieMenu.h"
 #include "SceneMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"
@@ -537,19 +536,19 @@ void ACraft::SetTeam(int team)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACraft::HandlePieCommand(PieSlice::Type pieSliceIndex) {
-    if (pieSliceIndex != PieSlice::Type::NoType) {
-        if (pieSliceIndex == PieSlice::Type::Deliver) {
+bool ACraft::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Deliver) {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
-        } else if (pieSliceIndex == PieSlice::Type::Return) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Return) {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
-        } else if (pieSliceIndex == PieSlice::Type::Stay) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Stay) {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
-        } else if (pieSliceIndex == PieSlice::Type::Scuttle) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Scuttle) {
             m_AIMode = AIMODE_SCUTTLE;
         } else {
             return Actor::HandlePieCommand(pieSliceIndex);

@@ -21,7 +21,6 @@
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
-#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "PresetMan.h"
@@ -653,18 +652,18 @@ bool ACrab::OnSink(const Vector &pos)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACrab::HandlePieCommand(PieSlice::Type pieSliceIndex) {
-    if (pieSliceIndex != PieSlice::Type::NoType) {
-        if (pieSliceIndex == PieSlice::Type::Reload) {
+bool ACrab::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Reload) {
             m_Controller.SetState(WEAPON_RELOAD);
-        } else if (pieSliceIndex == PieSlice::Type::Sentry) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Sentry) {
             m_AIMode = AIMODE_SENTRY;
-        } else if (pieSliceIndex == PieSlice::Type::Patrol) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Patrol) {
             m_AIMode = AIMODE_PATROL;
-        } else if (pieSliceIndex == PieSlice::Type::BrainHunt) {
+        } else if (pieSliceIndex == PieSlice::SliceType::BrainHunt) {
             m_AIMode = AIMODE_BRAINHUNT;
             ClearAIWaypoints();
-        } else if (pieSliceIndex == PieSlice::Type::GoTo) {
+        } else if (pieSliceIndex == PieSlice::SliceType::GoTo) {
             m_AIMode = AIMODE_GOTO;
             ClearAIWaypoints();
             m_UpdateMovePath = true;
@@ -2880,7 +2879,7 @@ int ACrab::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 	int result = Actor::WhilePieMenuOpenListener(pieMenu);
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
-		if (pieSlice->GetType() == PieSlice::Type::Reload) {
+		if (pieSlice->GetType() == PieSlice::SliceType::Reload) {
 			if (m_pTurret && m_pTurret->HasMountedDevice()) {
 				pieSlice->SetDescription("Reload");
 				pieSlice->SetEnabled(!FirearmsAreFull());

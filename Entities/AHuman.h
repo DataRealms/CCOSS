@@ -403,11 +403,11 @@ DefaultPieMenuName("Default Human Pie Menu");
     bool CollideAtPoint(HitData &hitData) override;
 
     /// <summary>
-    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its Type.
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its SliceType.
     /// </summary>
-    /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
-    /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
-    bool HandlePieCommand(PieSlice::Type pieSliceType) override;
+    /// <param name="pieSliceType">The SliceType of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
+    bool HandlePieCommand(PieSlice::SliceType pieSliceType) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

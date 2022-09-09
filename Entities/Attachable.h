@@ -2,8 +2,7 @@
 #define _RTEATTACHABLE_
 
 #include "MOSRotating.h"
-
-#include "PieMenu.h"
+#include "PieSlice.h"
 
 namespace RTE {
 
@@ -68,7 +67,7 @@ namespace RTE {
 		MOSRotating * GetParent() override { return m_Parent; }
 
 		/// <summary>
-		/// Gets the MOSRotating which is the parent of this Attachable. 
+		/// Gets the MOSRotating which is the parent of this Attachable.
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
 		const MOSRotating * GetParent() const override { return m_Parent; }

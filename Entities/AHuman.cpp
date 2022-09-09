@@ -22,7 +22,6 @@
 #include "HDFirearm.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"
-#include "PieMenu.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 
@@ -747,30 +746,30 @@ bool AHuman::OnSink(const Vector &pos)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool AHuman::HandlePieCommand(PieSlice::Type pieSliceIndex) {
-    if (pieSliceIndex != PieSlice::Type::NoType) {
-        if (pieSliceIndex == PieSlice::Type::Pickup) {
+bool AHuman::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Pickup) {
             m_Controller.SetState(WEAPON_PICKUP);
-        } else if (pieSliceIndex == PieSlice::Type::Drop) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Drop) {
             m_Controller.SetState(WEAPON_DROP);
-        } else if (pieSliceIndex == PieSlice::Type::Reload) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Reload) {
             m_Controller.SetState(WEAPON_RELOAD);
-        } else if (pieSliceIndex == PieSlice::Type::NextItem) {
+        } else if (pieSliceIndex == PieSlice::SliceType::NextItem) {
             m_Controller.SetState(WEAPON_CHANGE_NEXT, true);
-        } else if (pieSliceIndex == PieSlice::Type::PreviousItem) {
+        } else if (pieSliceIndex == PieSlice::SliceType::PreviousItem) {
             m_Controller.SetState(WEAPON_CHANGE_PREV, true);
-        } else if (pieSliceIndex == PieSlice::Type::Sentry) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Sentry) {
             m_AIMode = AIMODE_SENTRY;
-        } else if (pieSliceIndex == PieSlice::Type::Patrol) {
+        } else if (pieSliceIndex == PieSlice::SliceType::Patrol) {
             m_AIMode = AIMODE_PATROL;
-        } else if (pieSliceIndex == PieSlice::Type::BrainHunt) {
+        } else if (pieSliceIndex == PieSlice::SliceType::BrainHunt) {
             m_AIMode = AIMODE_BRAINHUNT;
             ClearAIWaypoints();
-        } else if (pieSliceIndex == PieSlice::Type::GoTo) {
+        } else if (pieSliceIndex == PieSlice::SliceType::GoTo) {
             m_AIMode = AIMODE_GOTO;
             ClearAIWaypoints();
             m_UpdateMovePath = true;
-        } else if (pieSliceIndex == PieSlice::Type::GoldDig) {
+        } else if (pieSliceIndex == PieSlice::SliceType::GoldDig) {
             m_AIMode = AIMODE_GOLDDIG;
         } else {
             return Actor::HandlePieCommand(pieSliceIndex);
@@ -4436,12 +4435,12 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 
 	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
 		switch (pieSlice->GetType()) {
-			case PieSlice::Type::Pickup:
-			case PieSlice::Type::Reload:
-				pieSlice->SetType(m_pItemInReach ? PieSlice::Type::Pickup : PieSlice::Type::Reload);
+			case PieSlice::SliceType::Pickup:
+			case PieSlice::SliceType::Reload:
+				pieSlice->SetType(m_pItemInReach ? PieSlice::SliceType::Pickup : PieSlice::SliceType::Reload);
 				pieSlice->SetIcon(dynamic_cast<Icon *>(g_PresetMan.GetEntityPreset("Icon", m_pItemInReach ? "Pick Up" : "Refresh")->Clone()));
 				
-				if (pieSlice->GetType() == PieSlice::Type::Pickup) {
+				if (pieSlice->GetType() == PieSlice::SliceType::Pickup) {
 					if (m_pFGArm || (m_pBGArm && m_pItemInReach->IsOneHanded())) {
 						pieSlice->SetEnabled(true);
 						pieSlice->SetDescription("Pick Up " + m_pItemInReach->GetPresetName());
@@ -4461,7 +4460,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 					}
 				}
 				break;
-			case PieSlice::Type::NextItem:
+			case PieSlice::SliceType::NextItem:
 				if (!IsInventoryEmpty() && (m_pFGArm || (m_pBGArm && dynamic_cast<const HeldDevice *>(m_Inventory.front()) && dynamic_cast<const HeldDevice *>(m_Inventory.front())->IsOneHanded()))) {
 					pieSlice->SetEnabled(true);
 					pieSlice->SetDescription("Next Item");
@@ -4470,7 +4469,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 					pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
 				}
 				break;
-			case PieSlice::Type::PreviousItem:
+			case PieSlice::SliceType::PreviousItem:
 				if (!IsInventoryEmpty() && (m_pFGArm || (m_pBGArm && dynamic_cast<const HeldDevice *>(m_Inventory.front()) && dynamic_cast<const HeldDevice *>(m_Inventory.front())->IsOneHanded()))) {
 					pieSlice->SetEnabled(true);
 					pieSlice->SetDescription("Prev Item");
@@ -4479,7 +4478,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 					pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
 				}
 				break;
-			case PieSlice::Type::Drop:
+			case PieSlice::SliceType::Drop:
 				if (const MovableObject *equippedFGItem = GetEquippedItem()) {
 					pieSlice->SetEnabled(true);
 					pieSlice->SetDescription("Drop " + equippedFGItem->GetPresetName());

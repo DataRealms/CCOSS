@@ -183,9 +183,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 // Arguments:       None.
-// Return value:    The enum'd int of any slice activated. See the PieSlice::Type enum.
+// Return value:    The enum'd int of any slice activated. See the PieSlice::SliceType enum.
 
-	PieSlice::Type GetActivatedPieSlice() const;
+	PieSlice::SliceType GetActivatedPieSlice() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

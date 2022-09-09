@@ -39,7 +39,6 @@
 #include "GUIComboBox.h"
 
 #include "MultiplayerGameGUI.h"
-#include "PieMenu.h"
 
 #include "NetworkClient.h"
 

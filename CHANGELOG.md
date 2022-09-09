@@ -107,68 +107,91 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `HDFirearm` Lua function `GetNextMagazineName()`, that gets the name of the next `Magazine` to be loaded into the `HDFirearm`.
 
-- New INI and Lua (R/W) `Actor` property `PieMenu`. This allows you to set an `Actor`'s `PieMenu` via INI and Lua. If no value is set for this, the default `PieMenu` for the type of `Actor` will be used, these can be found in `Base.rte/PieMenus.ini`.
+- New INI and Lua (R/W) `Actor` property `PieMenu`. This allows you to set an `Actor`'s `PieMenu` via INI and Lua. If no value is set for this, the default `PieMenu` for the type of `Actor` will be used, these can be found in `Base.rte/GUIs/PieMenus/PieMenus.ini`.
 
-- `PieMenu`s have been completely redone, and are now fully defined in INI and customizable in Lua.	Additionally, `PieMenu`s can have sub-`PieMenu`s to allow for better organization and more controls.	
-	You can define `PieMenu`s in INI using standard INI concepts like CopyOf and PresetName, and modify their visuals as you please. They have the following INI properties:	
-	`IconSeparatorMode` - The visuals style of the `PieMenu`'s separators. The options are the `Line`, `Circle`, and `Square`. Defaults to `Line`.	
-	`FullInnerRadius` - The inner radius of the `PieMenu` when it's fully expanded, in pixels. Defaults to 58.	
-	`BackgroundThickness` - The thickness of the background ring of the `PieMenu`. Defaults to 16.	
-	`BackgroundSeparatorSize` - The size of the background separators (lines, circles, squares). Defaults to 2.	
-	`DrawBackgroundTransparent` - Whether or not the `PieMenu`'s background should be drawn transparent. Default to true.	
-	`BackgroundColor` - The color used to draw the background ring of the `PieMenu`. Color values are palette indexes.	
-	`BackgroundBorderColor` - The color used to draw the border around the background ring of the `PieMenu`. Color values are palette indexes.	
-	`SelectedItemBackgroundColor` - The color used to highlight selected `PieSlice`s in the `PieMenu`. Color values are palette indexes.	
-	`AddPieSlice = PieSlice` - Add a `PieSlice` to the `PieMenu`. Standard INI concepts like CopyOf, etc. apply.	
-		
-	Additionally, `PieMenu`s have the following Lua properties and functions.
-	`Owner` (R) - Gets the owning `Actor` for the `PieMenu`, if there is one.	
-	`Controller` (R) - Gets the `Controller` controlling the `PieMenu`. If there's an `Actor` owner, it'll be that `Actor`'s `Controller`, otherwise it's probably a general `Controller` used for handling in-game menu inputs.	
-	`AffectedObject` (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.	
-	`Pos` (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.	
-	`RotAngle` (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the `PieMenu` is currently visible.	
-	`FullInnerRadius` (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.	
-	`IsEnabled()` - Gets whether or not the `PieMenu` is enabled or enabling.	
-	`IsEnabling()` - Gets whether or not the `PieMenu` is currently enabling.	
-	`IsDisabling()` - Gets whether or not the `PieMenu` is currently disabling.	
-	`IsEnablingOrDisabling()` - Gets whether or not the `PieMenu` is currently enabling or disabling.	
-	`IsVisible()` - Gets whether or not the `PieMenu` is currently visible (i.e. not disabled).	
-	`HasSubPieMenuOpen()` - Gets whether the `PieMenu` has a sub-`PieMenu` open, and is thus transferring commands to that sub-`PieMenu`.	
-	`SetAnimationModeToNormal()` - Sets the `PieMenu` back to normal animation mode, and disables it so it's ready for use.	
-	`DoDisableAnimation()` - Makes the `PieMenu` do its disabling animation.	
-	`Wobble()` - Makes the `PieMenu` do its wobbling animation .	
-	`FreezeAtRadius(radius)` - Makes the `PieMenu` freeze open at the given radius.	
-	`GetPieCommand()` - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.	
-	`GetPieSlices()` - Gets all of the `PieSlice`s in the `PieMenu`.	
-	`GetFirstPieSliceByPresetName(presetName)` - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given PresetName.	
-	`GetFirstPieSliceByType(pieSliceType)` - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.	
-	`AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, optional_onlyCheckPieSlicesWithSameOriginalSource, optional_allowQuadrantOverflow)` - Adds the given `PieSlice` to the `PieMenu`, returning whether or not the `PieSlice` was added. The pieSliceOriginalSource is the object that added the `PieSlice` to the `PieMenu`, and it's very important you set this properly (much of the time you'll want it to be `self` if, say, you have a gun adding a `PieSlice`), otherwise you can end up with ghost `PieSlice`s. allowQuadrantOverflow is optional and defaults to false, it determines whether the `PieSlice` can only be added in its specified direction (false), or if it can overflow if that direction is full of `PieSlice`s (true).	
-	`AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, optionalAllowQuadrantOverflow)` - Like `AddPieSlice`, this adds the given `PieSlice` to the `PieMenu` and returns whether or not the `PieSlice` was added, but only if the `PieMenu` doesn't contain a `PieSlice` with this `PieSlice`'s preset name, optionally only checking `PieSlice`s with the same original source (by default it checks all `PieSlice`s in the `PieMenu`). `PieSlice`s with no preset name will always be added by this.
-	`RemovePieSlice(pieSliceToRemove)` - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.	
-	`RemovePieSlicesByPresetName()` - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.	
-	`RemovePieSlicesByType()` - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
-	`RemovePieSlicesByOriginalSource()` - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.	
+- `PieMenu`s have been completely redone, and are now fully defined in INI and customizable in Lua.	Additionally, `PieMenu`s can have sub-`PieMenu`s to allow for better organization and more controls.
 
-- `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:	
-	`Type` (INI, Lua R/W) - Gets or sets the `PieSlice`'s type, useful for invoking hardcoded game actions (e.g. pickup).	
-	`Direction` (INI, Lua R/W) - Gets or sets the `PieSlice`'s direction, i.e what direction the `PieSlice` should be added in to a `PieMenu`. Defaults to `Any`, which means it will be added to the least populated direction. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.	
-	`CanBeMiddleSlice` (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` can be the middle slice (i.e. a cardinal one like reload) in its direction, when added to a `PieMenu`. Defaults to true. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.	
-	`Enabled` (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` is enabled and usable.	
-	`ScriptPath` (INI, Lua R/W) - Gets or sets the filepath to the script that should be run when this `PieSlice` is activated. A script function name is also required for this to work.	
-	`ScriptFunctionName` (INI Lua R/W) - Gets or sets the name of the function that should be run when this `PieSlice` is activated. A script path is also required for this to work.	
-	`SubPieMenu` (INI Lua R/W) - Gets or sets the sub-`PieMenu` that should be opened when this `PieSlice` is activated. Note that `PieSlice`s with sub-`PieMenu`s will not perform any other actions, though they will run scripts.	
-	`Icon` (INI) - The icon for this `PieSlice` to show in its `PieMenu`.	
-	`OriginalSource` (Lua R) - The object that added this `PieSlice` to its `PieMenu`.
+	You can define `PieMenu`s in INI using standard INI concepts like `CopyOf` and `PresetName`, and modify their visuals as you please. They have the following INI properties:  
+	```
+	IconSeparatorMode // The visuals style of the PieMenu's separators. The options are "Line", "Circle" and "Square". Defaults to "Line".  
+	FullInnerRadius // The inner radius of the PieMenu when it's fully expanded, in pixels. Defaults to 58.  
+	BackgroundThickness // The thickness of the background ring of the PieMenu. Defaults to 16.  
+	BackgroundSeparatorSize // The size of the background separators (lines, circles, squares). Defaults to 2.  
+	DrawBackgroundTransparent // Whether or not the PieMenu's background should be drawn transparent. Defaults to true.  
+	BackgroundColor // The color used to draw the background ring of the PieMenu. Color values are palette indexes.  
+	BackgroundBorderColor // The color used to draw the border around the background ring of the PieMenu. Color values are palette indexes.  
+	SelectedItemBackgroundColor // The color used to highlight selected PieSlices in the PieMenu. Color values are palette indexes.  
+	AddPieSlice = PieSlice // Add a PieSlice to the PieMenu. Standard INI concepts like CopyOf, etc. apply.
+	```	
+
+	Additionally, `PieMenu`s have the following Lua properties and functions:  
+
+	**`Owner`** (R) - Gets the owning `Actor` for the `PieMenu`, if there is one.  
+	**`Controller`** (R) - Gets the `Controller` controlling the `PieMenu`. If there's an `Actor` owner, it'll be that `Actor`'s `Controller`, otherwise it's probably a general `Controller` used for handling in-game menu inputs.  
+	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
+	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
+	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+
+	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
+	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
+	**`IsDisabling()`** - Gets whether or not the `PieMenu` is currently disabling.  
+	**`IsEnablingOrDisabling()`** - Gets whether or not the `PieMenu` is currently enabling or disabling.  
+	**`IsVisible()`** - Gets whether or not the `PieMenu` is currently visible (i.e. not disabled).  
+	**`HasSubPieMenuOpen()`** - Gets whether the `PieMenu` has a sub-`PieMenu` open, and is thus transferring commands to that sub-`PieMenu`.  
+	**`SetAnimationModeToNormal()`** - Sets the `PieMenu` back to normal animation mode, and disables it so it's ready for use.  
+	**`DoDisableAnimation()`** - Makes the `PieMenu` do its disabling animation.  
+	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
+	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
+	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
+	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
+	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
+	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
+
+	**`AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, optional_onlyCheckPieSlicesWithSameOriginalSource, optional_allowQuadrantOverflow)`** - Adds the given `PieSlice` to the `PieMenu`, returning whether or not the `PieSlice` was added.  
+	The `pieSliceOriginalSource` is the object that added the `PieSlice` to the `PieMenu`, and it's very important you set this properly (much of the time you'll want it to be `self` if, say, you have a gun adding a `PieSlice`), otherwise you can end up with ghost `PieSlice`s.  
+	`allowQuadrantOverflow` is optional and defaults to false, it determines whether the `PieSlice` can only be added in its specified direction (false), or if it can overflow if that direction is full of `PieSlice`s (true).
+
+	**`AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, optionalAllowQuadrantOverflow)`** - Like `AddPieSlice`, this adds the given `PieSlice` to the `PieMenu` and returns whether or not the `PieSlice` was added, but only if the `PieMenu` doesn't contain a `PieSlice` with this `PieSlice`'s preset name, optionally only checking `PieSlice`s with the same original source (by default it checks all `PieSlice`s in the `PieMenu`).  
+	`PieSlice`s with no preset name will always be added by this.
+
+	**`RemovePieSlice(pieSliceToRemove)`** - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.  
+	**`RemovePieSlicesByPresetName()`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByType()`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByOriginalSource()`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
+
+- `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:  
+
+	**`Type`** (INI, Lua R/W) - Gets or sets the `PieSlice`'s type, useful for invoking hardcoded game actions (e.g. pickup).  
+	**`Direction`** (INI, Lua R/W) - Gets or sets the `PieSlice`'s direction, i.e what direction the `PieSlice` should be added in to a `PieMenu`. Defaults to `Any`, which means it will be added to the least populated direction. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.  
+	**`CanBeMiddleSlice`** (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` can be the middle slice (i.e. a cardinal one like reload) in its direction, when added to a `PieMenu`. Defaults to true. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.  
+	**`Enabled`** (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` is enabled and usable.  
+	**`ScriptPath`** (INI, Lua R/W) - Gets or sets the filepath to the script that should be run when this `PieSlice` is activated. A script function name is also required for this to work.  
+	**`ScriptFunctionName`** (INI Lua R/W) - Gets or sets the name of the function that should be run when this `PieSlice` is activated. A script path is also required for this to work.  
+	**`SubPieMenu`** (INI Lua R/W) - Gets or sets the sub-`PieMenu` that should be opened when this `PieSlice` is activated. Note that `PieSlice`s with sub-`PieMenu`s will not perform any other actions, though they will run scripts.  
+	**`Icon`** (INI) - The icon for this `PieSlice` to show in its `PieMenu`.  
+	**`OriginalSource`** (Lua R) - The object that added this `PieSlice` to its `PieMenu`.
 	
-- Added `Directions` enum with the following values: None: -1, Up: 0, Down: 1, Left: 2, Right: 3, Any: 4
+- Added `Directions` enum with the following values:  
+	```
+	(-1) None
+	(0)  Up
+	(1)  Down
+	(2)  Left
+	(3)  Right
+	(4)  Any
+	```
 
-- Added `GameActivity` INI property `BuyMenuEnabled` to match the Lua property, and made the buy menu `PieSlice` disappear if `BuyMenuEnabled` is false. Note that, if you toggle this from off to on in Lua for a running `GameActivity`, you'll need to readd the buy menu `PieSlice` manually.
+- Added `GameActivity` INI property `BuyMenuEnabled` to match the Lua property, and made the buy menu `PieSlice` disappear if `BuyMenuEnabled` is false.  
+	Note that, if you toggle this from off to on in Lua for a running `GameActivity`, you'll need to re-add the buy menu `PieSlice` manually.
 
-- Added some useful global angle helper functions:	
-	`NormalizeAngleBetween0And2PI(angle)` - Takes an angle in radians, and returns that angle modified so it's not negative or larger than 2PI.	
-	`NormalizeAngleBetweenNegativePIAndPI(angle)` - Takes an angle in radians, and returns that angle modified so angles larger than PI are instead represented as negative angles, and no angle is larger than PI or smaller than -PI.
-	`AngleWithinRange(float angleToCheck, float startAngle, float endAngle)` - Returns whether or not the angleToCheck is between the startAngle and endAngle, in a counter-clockwise direction (e.g. 0.5rad is between 0rad and 1rad, and 0.3rad is between 2.5rad and 1 rad).	 
-	`ClampAngle(float angleToClamp, float startAngle, float endAngle)` - Returns the angleToClamp, clamped between the startAngle and endAngle.
+- Added some useful global angle helper functions:  
+	```lua
+	NormalizeAngleBetween0And2PI(angle) -- Takes an angle in radians, and returns that angle modified so it's not negative or larger than 2PI.	
+	NormalizeAngleBetweenNegativePIAndPI(angle) -- Takes an angle in radians, and returns that angle modified so angles larger than PI are instead represented as negative angles, and no angle is larger than PI or smaller than -PI.
+	AngleWithinRange(float angleToCheck, float startAngle, float endAngle) -- Returns whether or not the angleToCheck is between the startAngle and endAngle, in a counter-clockwise direction (e.g. 0.5rad is between 0rad and 1rad, and 0.3rad is between 2.5rad and 1 rad).	 
+	ClampAngle(float angleToClamp, float startAngle, float endAngle) -- Returns the angleToClamp, clamped between the startAngle and endAngle.
+	```
 
 </details>
 
@@ -208,59 +231,64 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
 
-- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:	
-	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.	
-	`pieSlice` - The `PieSlice` that has been activated to call this function.	
+- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:  
+	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.  
+	`pieSlice` - The `PieSlice` that has been activated to call this function.  
 	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 
 - `OnPieMenu(self)` event function has been changed to `WhilePieMenuOpen(self, openedPieMenu)` and will run as long as the `PieMenu` is open.
 
 - Any `Attachable` on an `Actor` (not just `HeldDevice`s) can now have a `WhilePieMenuOpen(self, openedPieMenu)` function, and can add `PieSlice`s and run functions when they're pressed.
 
-- `PieSliceIndex` enum has been renamed to `Type` to better match the source. More relevantly for modders, its values have also been renamed, they are as follows:	
+- `PieSliceIndex` enum has been renamed to `SliceType` to better match the source. More relevantly for modders, its values have also been renamed, they are as follows:	 
 	```
-	NoType = 0,
-	-- The following are used for inventory management
-	Pickup,
-	Drop,
-	NextItem,
-	PreviousItem,
-	Reload,
-	-- The following are used for menu and GUI activation
-	BuyMenu,
-	FullInventory,
-	Stats,
-	Map,
-	Ceasefire,
-	-- The following is used for squad management
-	FormSquad,
-	-- The following are used for AI mode management
-	AIModes,
-	Sentry,
-	Patrol,
-	BrainHunt,
-	GoldDig,
-	GoTo,
-	Return,
-	Stay,
-	Deliver,
-	Scuttle,
-	-- The following are used for game editors
-	EditorDone,
-	EditorLoad,
-	EditorSave,
-	EditorNew,
-	EditorPick,
-	EditorMove,
-	EditorRemove,
-	EditorInFront,
-	EditorBehind,
-	EditorZoomIn,
-	EditorZoomOut,
-	EditorTeam1,
-	EditorTeam2,
-	EditorTeam3,
-	EditorTeam4
+	(0)  NoType
+
+	// The following are used for inventory management:
+	(1)  Pickup
+	(2)  Drop
+	(3)  NextItem
+	(4)  PreviousItem
+	(5)  Reload
+
+	// The following are used for menu and GUI activation:
+	(6)  BuyMenu
+	(7)  FullInventory
+	(8)  Stats
+	(9)  Map
+	(10) Ceasefire
+
+	// The following is used for squad management:
+	(11) FormSquad
+
+	// The following are used for AI mode management:
+	(12) AIModes
+	(13) Sentry
+	(14) Patrol
+	(15) BrainHunt
+	(16) GoldDig
+	(17) GoTo
+	(18) Return
+	(19) Stay
+	(20) Deliver
+	(21) Scuttle
+
+	// The following are used for game editors:
+	(22) EditorDone
+	(23) EditorLoad
+	(24) EditorSave
+	(25) EditorNew
+	(26) EditorPick
+	(27) EditorMove
+	(28) EditorRemove
+	(29) EditorInFront
+	(30) EditorBehind
+	(31) EditorZoomIn
+	(32) EditorZoomOut
+	(33) EditorTeam1
+	(34) EditorTeam2
+	(35) EditorTeam3
+	(36) EditorTeam4
 	```
 
 </details>

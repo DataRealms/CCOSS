@@ -22,11 +22,8 @@ namespace RTE
 
 
 #pragma region Global Macro Definitions
-#define DefaultPieMenuNameVirtual(DEFAULTPIEMENUNAME) \
-        virtual std::string GetDefaultPieMenuName() const { return DEFAULTPIEMENUNAME; }
-
-#define DefaultPieMenuName(DEFAULTPIEMENUNAME) \
-        std::string GetDefaultPieMenuName() const override { return DEFAULTPIEMENUNAME; }
+	#define DefaultPieMenuNameGetter(DEFAULTPIEMENUNAME) \
+		std::string GetDefaultPieMenuName() const override { return DEFAULTPIEMENUNAME; }
 #pragma endregion
 
 class AtomGroup;
@@ -81,7 +78,6 @@ EntityAllocation(Actor);
 AddScriptFunctionNames(MOSRotating, "UpdateAI");
 SerializableOverrideMethods;
 ClassInfoGetters;
-DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Actor
@@ -1322,6 +1318,12 @@ DefaultPieMenuNameVirtual("Default Actor Pie Menu");
 	/// </summary>
 	/// <returns>Whether or not this Actor has the mechanical flag set and should be considered as mechanical.</returns>
 	bool IsMechanical() const { return m_Mechanical; }
+
+	/// <summary>
+	/// Gets the default PieMenu name for this type.
+	/// </summary>
+	/// <returns>The default PieMenu name for this type.</returns>
+	virtual std::string GetDefaultPieMenuName() const { return "Default Actor Pie Menu"; }
 
     /// <summary>
     /// Gets a pointer to the PieMenu for this Actor. Ownership is NOT transferred.

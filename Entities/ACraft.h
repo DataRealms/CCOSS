@@ -41,7 +41,7 @@ public:
 
 	SerializableOverrideMethods;
 	ClassInfoGetters;
-	DefaultPieMenuName("Default Craft Pie Menu");
+	DefaultPieMenuNameGetter("Default Craft Pie Menu");
 
 
 enum HatchState

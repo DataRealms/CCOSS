@@ -672,7 +672,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetScreenEffectHash
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the hash of the path of this object's screen effect file. Used to 
+// Description:     Gets the hash of the path of this object's screen effect file. Used to
 //					transfer glow effects over network. The hash itself is calculated during
 //					load.
 // Arguments:       None.
@@ -1566,6 +1566,8 @@ enum MOType
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.
 	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	virtual int WhilePieMenuOpenListener(const PieMenu *pieMenu);
 
 
@@ -1650,7 +1652,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnCollision
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applyies specified ammount of damage points to actors on 
+// Description:     If not zero applyies specified ammount of damage points to actors on
 //					collision even without penetration.
 // Arguments:       None
 // Return value:    Amount of damage to apply.
@@ -1661,7 +1663,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDamageOnCollision
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applyies specified ammount of damage points to actors on 
+// Description:     If not zero applyies specified ammount of damage points to actors on
 //					collision even without penetration.
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
@@ -1672,7 +1674,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnPenetration
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applies specified ammount of damage points to actors on 
+// Description:     If not zero applies specified ammount of damage points to actors on
 //					collision if penetration occured.
 // Arguments:       None
 // Return value:    Amount of damage to apply.
@@ -1683,7 +1685,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDamageOnPenetration
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applies specified ammount of damage points to actors on 
+// Description:     If not zero applies specified ammount of damage points to actors on
 //					collision if penetration occured.
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
@@ -1994,7 +1996,7 @@ protected:
 
 	// This object's unique persistent ID
 	long int m_UniqueID;
-	// In which radis should we look to remove orphaned terrain on terrain penetration, 
+	// In which radis should we look to remove orphaned terrain on terrain penetration,
 	// must not be greater than SceneMan::ORPHANSIZE, or will be truncated
 	int m_RemoveOrphanTerrainRadius;
 	// What is the max orphan area to trigger terrain removal

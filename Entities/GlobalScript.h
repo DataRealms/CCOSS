@@ -28,14 +28,14 @@ namespace RTE {
 		/// <summary>
 		/// Makes the GlobalScript object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override { return 0; }
 
 		/// <summary>
 		/// Creates an GlobalScript to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the GlobalScript to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const GlobalScript &reference);
 #pragma endregion
 
@@ -87,26 +87,26 @@ namespace RTE {
 		/// <summary>
 		/// Reloads the Lua script specified by this GlobalScript. This will also update the original preset in the PresetMan with the update scripts so future objects spawned will use the new scripts.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int ReloadScripts() override;
 
 		/// <summary>
 		/// Starts this GlobalScript by running the appropriate Lua function.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Start();
 
 		/// <summary>
 		/// Pauses and unpauses this GlobalScript by running the appropriate Lua function.
 		/// </summary>
 		/// <param name="pause">Whether or not this GlobalScript should be paused.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Pause(bool pause = true) const;
 
 		/// <summary>
 		/// Ends this GlobalScript by running the appropriate Lua function
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int End() const;
 
 		/// <summary>
@@ -123,9 +123,9 @@ namespace RTE {
 
 	private:
 
-		static Entity::ClassInfo m_sClass;
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		std::string m_ScriptPath; //!< The path to the lua script file that defines this' behaviors in update
+		std::string m_ScriptPath; //!< The path to the Lua script file that defines this' behaviors in update.
 		std::string m_LuaClassName; //!< The name of the class (table) defining the logic of this in Lua, as specified in the script file.
 		bool m_IsActive; //!< Whether this GlobalScript is currently allowed to run.
 		bool m_LateUpdate; //!< Whether or not this GlobalScript should be updated late, i.e. after the standard MovableMan update.

@@ -99,15 +99,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float NormalizeAngleBetween0And2PI(float angle) {
-		while (angle < 0) { angle += c_TwoPI; }
-		return angle > c_TwoPI ? fmodf(angle + c_TwoPI, c_TwoPI) : angle;
+		while (angle < 0) {
+			angle += c_TwoPI;
+		}
+		return (angle > c_TwoPI) ? std::fmodf(angle + c_TwoPI, c_TwoPI) : angle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float NormalizeAngleBetweenNegativePIAndPI(float angle) {
-		while (angle < 0) { angle += c_TwoPI; }
-		return angle > c_PI ? fmodf(angle + c_PI, c_TwoPI) - c_PI : angle;
+		while (angle < 0) {
+			angle += c_TwoPI;
+		}
+		return (angle > c_PI) ? std::fmodf(angle + c_PI, c_TwoPI) - c_PI : angle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -90,7 +90,7 @@ EntityAllocation(AHuman);
 AddScriptFunctionNames(Actor, "OnStride");
 SerializableOverrideMethods;
 ClassInfoGetters;
-DefaultPieMenuName("Default Human Pie Menu");
+DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AHuman
@@ -1104,6 +1104,8 @@ protected:
 	/// <summary>
 	/// Event listener to be run while this AHuman's PieMenu is opened.
 	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	int WhilePieMenuOpenListener(const PieMenu *pieMenu) override;
 #pragma endregion
 

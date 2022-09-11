@@ -1010,8 +1010,6 @@ namespace RTE {
 		.def("CanTriggerBurst", &PEmitter::CanTriggerBurst);
 	}
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, PieSlice) {

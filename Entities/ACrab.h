@@ -69,7 +69,7 @@ public:
 	EntityAllocation(ACrab);
 	SerializableOverrideMethods;
 	ClassInfoGetters;
-	//Note: Default pie menu name changes for ACrab if it's in the Turret group, so it defines the GetDefaultPieMenuName method directly, instead of using the DefaultPieMenuName macro.
+	DefaultPieMenuNameGetter(HasObjectInGroup("Turrets") ? "Default Turret Pie Menu" : "Default Crab Pie Menu");
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Constructor:     ACrab
@@ -522,7 +522,7 @@ int FirearmActivationDelay() const;
 // Method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       None.
 // Return value:    The default set force maximum, in kg * m/s^2.
 
@@ -533,7 +533,7 @@ int FirearmActivationDelay() const;
 // Method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       The default set force maximum, in kg * m/s^2.
 // Return value:    None
 
@@ -680,16 +680,12 @@ protected:
 	// Timer for how long to be firing the jetpack in a direction
 	Timer m_JumpTimer;
 
-	/// <summary>
-	/// Gets the default PieMenu name for this type.
-	/// </summary>
-	/// <returns>The default PieMenu name for this type.</returns>
-	std::string GetDefaultPieMenuName() const override { return HasObjectInGroup("Turrets") ? "Default Turret Pie Menu" : "Default Crab Pie Menu"; }
-
 #pragma region Event Handling
 	/// <summary>
 	/// Event listener to be run while this ACrab's PieMenu is opened.
 	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	int WhilePieMenuOpenListener(const PieMenu *pieMenu) override;
 #pragma endregion
 

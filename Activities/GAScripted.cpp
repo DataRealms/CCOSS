@@ -91,7 +91,7 @@ int GAScripted::Create(const GAScripted &reference)
     m_ScriptPath = reference.m_ScriptPath;
     m_LuaClassName = reference.m_LuaClassName;
 	for (const std::string &referenceRequiredArea : reference.m_RequiredAreas) {
-		m_RequiredAreas.insert(referenceRequiredArea);
+		m_RequiredAreas.emplace(referenceRequiredArea);
 	}
 	for (const std::unique_ptr<PieSlice> &referencePieSliceToAdd : reference.m_PieSlicesToAdd) {
 		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(referencePieSliceToAdd->Clone())));

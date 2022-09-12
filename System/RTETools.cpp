@@ -102,7 +102,7 @@ namespace RTE {
 		while (angle < 0) {
 			angle += c_TwoPI;
 		}
-		return (angle > c_TwoPI) ? std::fmodf(angle + c_TwoPI, c_TwoPI) : angle;
+		return (angle > c_TwoPI) ? fmodf(angle + c_TwoPI, c_TwoPI) : angle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ namespace RTE {
 		while (angle < 0) {
 			angle += c_TwoPI;
 		}
-		return (angle > c_PI) ? std::fmodf(angle + c_PI, c_TwoPI) - c_PI : angle;
+		return (angle > c_PI) ? fmodf(angle + c_PI, c_TwoPI) - c_PI : angle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

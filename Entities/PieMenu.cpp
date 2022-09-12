@@ -24,127 +24,6 @@ namespace RTE {
 
 	BITMAP *PieMenu::s_CursorBitmap;
 
-#pragma region PieQuadrant
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PieMenu::PieQuadrant::Reset() {
-		Enabled = true;
-		Direction = Directions::None;
-		MiddlePieSlice.reset();
-		for (std::unique_ptr<PieSlice> &pieSlice : LeftPieSlices) { pieSlice.reset(); }
-		for (std::unique_ptr<PieSlice> &pieSlice : RightPieSlices) { pieSlice.reset(); }
-		SlotsForPieSlices.fill(nullptr);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PieMenu::PieQuadrant::Create(const PieQuadrant &reference) {
-		Enabled = reference.Enabled;
-		Direction = reference.Direction;
-		for (const PieSlice *pieSlice : reference.GetFlattenedPieSlices()) { AddPieSlice(dynamic_cast<PieSlice *>(pieSlice->Clone())); }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::vector<PieSlice *> PieMenu::PieQuadrant::GetFlattenedPieSlices(bool inCCWOrder) const {
-		std::vector<PieSlice *> pieSlices;
-		if (inCCWOrder) {
-			for (auto pieSliceReverseIterator = RightPieSlices.crbegin(); pieSliceReverseIterator < RightPieSlices.crend(); pieSliceReverseIterator++) {
-				if (*pieSliceReverseIterator) { pieSlices.emplace_back((*pieSliceReverseIterator).get()); }
-			}
-			if (MiddlePieSlice) { pieSlices.emplace_back(MiddlePieSlice.get()); }
-			for (const std::unique_ptr<PieSlice> &pieSlice : LeftPieSlices) {
-				if (pieSlice) { pieSlices.emplace_back(pieSlice.get()); }
-			}
-		} else {
-			if (MiddlePieSlice) { pieSlices.emplace_back(MiddlePieSlice.get()); }
-			const std::array<std::unique_ptr<PieSlice>, 2> &firstSliceArray = Direction == Directions::Left ? RightPieSlices : LeftPieSlices;
-			const std::array<std::unique_ptr<PieSlice>, 2> &secondSliceArray = Direction == Directions::Left ? LeftPieSlices : RightPieSlices;
-			for (int i = 0; i < firstSliceArray.size(); i++) {
-				if (firstSliceArray.at(i)) { pieSlices.push_back(firstSliceArray.at(i).get()); }
-				if (secondSliceArray.at(i)) { pieSlices.push_back(secondSliceArray.at(i).get()); }
-			}
-		}
-		return pieSlices;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PieMenu::PieQuadrant::RealignPieSlices() {
-		if ((RightPieSlices.at(0) && !LeftPieSlices.at(0)) || (RightPieSlices.at(1) && !LeftPieSlices.at(1))) {
-			for (const PieSlice *pieSliceToRealign : GetFlattenedPieSlices()) {
-				AddPieSlice(RemovePieSlice(pieSliceToRealign));
-			}
-		}
-
-		SlotsForPieSlices.fill(nullptr);
-		std::vector<PieSlice *> pieSlices = GetFlattenedPieSlices(true);
-		int oddRoundedSliceCount = (2 * static_cast<int>(pieSlices.size() / 2)) + 1;
-		float angleOffset = NormalizeAngleBetween0And2PI(c_DirectionsToRadiansMap.at(Direction) - c_QuarterPI);
-
-		int currentSlot = 0;
-		for (PieSlice *pieSlice : pieSlices) {
-			int sliceSlotCount = 1;
-			if (oddRoundedSliceCount < c_PieQuadrantSlotCount && pieSlice == MiddlePieSlice.get()) { sliceSlotCount = oddRoundedSliceCount == 1 ? c_PieQuadrantSlotCount : c_PieQuadrantSlotCount - 2; }
-			if ((currentSlot == 0 || SlotsForPieSlices.at(currentSlot - 1) == nullptr) && pieSlices.size() % 2 == 0) {
-				currentSlot++;
-				angleOffset = NormalizeAngleBetween0And2PI(angleOffset + c_PieSliceSlotSize);
-			}
-
-			pieSlice->SetStartAngle(angleOffset);
-			pieSlice->SetSlotCount(sliceSlotCount);
-
-			for (int slot = currentSlot; slot < currentSlot + sliceSlotCount; slot++) {
-				SlotsForPieSlices.at(slot) = pieSlice;
-			}
-			currentSlot += sliceSlotCount;
-			angleOffset = NormalizeAngleBetween0And2PI(angleOffset + (c_PieSliceSlotSize * static_cast<float>(pieSlice->GetSlotCount())));
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool PieMenu::PieQuadrant::AddPieSlice(PieSlice *pieSliceToAdd) {
-		if (!pieSliceToAdd) {
-			return false;
-		}
-		bool sliceWasAdded = false;
-		if (!MiddlePieSlice && pieSliceToAdd->GetCanBeMiddleSlice()) {
-			MiddlePieSlice = std::unique_ptr<PieSlice>(pieSliceToAdd);
-			sliceWasAdded = true;
-		}
-		if (!sliceWasAdded && (!LeftPieSlices.at(1) || !RightPieSlices.at(1))) {
-			bool bothSidesEqual = ((!LeftPieSlices.at(0) && !RightPieSlices.at(0)) || (LeftPieSlices.at(0) && RightPieSlices.at(0))) && ((!LeftPieSlices.at(1) && !RightPieSlices.at(1)) || (LeftPieSlices.at(1) && RightPieSlices.at(1)));
-			bool leftSideHasMoreSlices = !bothSidesEqual && ((LeftPieSlices.at(0) && !RightPieSlices.at(0)) || LeftPieSlices.at(1));
-
-			std::array<std::unique_ptr<PieSlice>, 2> &sliceArrayToAddTo = leftSideHasMoreSlices ? RightPieSlices : LeftPieSlices;
-			sliceArrayToAddTo.at(sliceArrayToAddTo.at(0) ? 1 : 0) = std::unique_ptr<PieSlice>(pieSliceToAdd);
-			sliceWasAdded = true;
-		}
-
-		return sliceWasAdded;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	PieSlice * PieMenu::PieQuadrant::RemovePieSlice(const PieSlice *pieSliceToRemove) {
-		if (pieSliceToRemove == MiddlePieSlice.get()) {
-			return MiddlePieSlice.release();
-		}
-		for (std::unique_ptr<PieSlice> &pieSlice : LeftPieSlices) {
-			if (pieSliceToRemove == pieSlice.get()) {
-				return pieSlice.release();
-			}
-		}
-		for (std::unique_ptr<PieSlice> &pieSlice : RightPieSlices) {
-			if (pieSliceToRemove == pieSlice.get()) {
-				return pieSlice.release();
-			}
-		}
-		return nullptr;
-	}
-#pragma endregion
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenu::Clear() {
@@ -175,7 +54,7 @@ namespace RTE {
 
 		for (int i = 0; i < m_PieQuadrants.size(); i++) {
 			m_PieQuadrants.at(i).Reset();
-			m_PieQuadrants.at(i).Direction = static_cast<Directions>(i);
+			m_PieQuadrants.at(i).m_Direction = static_cast<Directions>(i);
 		}
 		m_HoveredPieSlice = nullptr;
 		m_ActivatedPieSlice = nullptr;
@@ -290,8 +169,8 @@ namespace RTE {
 		} else if (propName == "SelectedItemBackgroundColor") {
 			reader >> m_SelectedItemBackgroundColor;
 		} else if (propName == "AddPieSlice") {
-			if (m_CurrentPieSlices.size() == 4 * c_PieQuadrantSlotCount) {
-				reader.ReportError("Pie menus cannot have more than " + std::to_string(4 * c_PieQuadrantSlotCount) + " slices. Use sub-pie menus to better organize your pie slices.");
+			if (m_CurrentPieSlices.size() == 4 * PieQuadrant::c_PieQuadrantSlotCount) {
+				reader.ReportError("Pie menus cannot have more than " + std::to_string(4 * PieQuadrant::c_PieQuadrantSlotCount) + " slices. Use sub-pie menus to better organize your pie slices.");
 			}
 			if (!AddPieSlice(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)), this)) {
 				reader.ReportError("Tried to add pie slice but that direction was full. Set direction to None if you don't care where the pie slice ends up.");
@@ -432,13 +311,13 @@ namespace RTE {
 
 	bool PieMenu::AddPieSlice(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow) {
 		Directions pieSliceDirection = pieSliceToAdd->GetDirection();
-		if (pieSliceDirection != Directions::Any && !m_PieQuadrants.at(pieSliceDirection).Enabled) { pieSliceToAdd->SetDirection(Directions::Any); }
+		if (pieSliceDirection != Directions::Any && !m_PieQuadrants.at(pieSliceDirection).m_Enabled) { pieSliceToAdd->SetDirection(Directions::Any); }
 
 		bool sliceWasAdded = false;
 		if (pieSliceDirection == Directions::Any) {
 			PieQuadrant *leastFullPieQuadrant = nullptr;
 			for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
-				if (pieQuadrant.Enabled && (!leastFullPieQuadrant || pieQuadrant.GetFlattenedPieSlices().size() < leastFullPieQuadrant->GetFlattenedPieSlices().size())) {
+				if (pieQuadrant.m_Enabled && (!leastFullPieQuadrant || pieQuadrant.GetFlattenedPieSlices().size() < leastFullPieQuadrant->GetFlattenedPieSlices().size())) {
 					leastFullPieQuadrant = &pieQuadrant;
 				}
 			}
@@ -715,7 +594,7 @@ namespace RTE {
 
 			for (const PieSlice *pieSlice : m_CurrentPieSlices) {
 				float absolutePieSliceStartAngle = pieSlice->GetStartAngle() + GetRotAngle();
-				if (AngleWithinRange(m_CursorAngle, absolutePieSliceStartAngle, absolutePieSliceStartAngle + (c_PieSliceSlotSize * static_cast<float>(pieSlice->GetSlotCount())))) {
+				if (AngleWithinRange(m_CursorAngle, absolutePieSliceStartAngle, absolutePieSliceStartAngle + (PieQuadrant::c_PieSliceSlotSize * static_cast<float>(pieSlice->GetSlotCount())))) {
 					pieSliceToSelect = pieSlice;
 					break;
 				}
@@ -775,11 +654,11 @@ namespace RTE {
 			if (pieQuadrant.GetFlattenedPieSlices().empty()) {
 				SetHoveredPieSlice(nullptr);
 				m_CursorInVisiblePosition = true;
-				m_CursorAngle = c_DirectionsToRadiansMap.at(pieQuadrant.Direction) + GetRotAngle();
+				m_CursorAngle = c_DirectionsToRadiansMap.at(pieQuadrant.m_Direction) + GetRotAngle();
 			} else if (moveToPieQuadrantMode == MoveToPieQuadrantMode::Start) {
 				SetHoveredPieSlice(*(pieQuadrant.GetFlattenedPieSlices(true).begin()), true);
 			} else if (moveToPieQuadrantMode == MoveToPieQuadrantMode::Middle) {
-				SetHoveredPieSlice(pieQuadrant.MiddlePieSlice ? pieQuadrant.MiddlePieSlice.get() : pieQuadrant.LeftPieSlices.at(0).get(), true);
+				SetHoveredPieSlice(pieQuadrant.m_MiddlePieSlice ? pieQuadrant.m_MiddlePieSlice.get() : pieQuadrant.m_LeftPieSlices.at(0).get(), true);
 			} else if (moveToPieQuadrantMode == MoveToPieQuadrantMode::End) {
 				SetHoveredPieSlice(*(pieQuadrant.GetFlattenedPieSlices(true).end() - 1), true);
 			}
@@ -789,7 +668,7 @@ namespace RTE {
 			std::vector<PieSlice *> flattenedPieSlices = hoveredPieSlicePieQuadrant->GetFlattenedPieSlices(true);
 			auto hoveredSliceIterator = std::find(flattenedPieSlices.begin(), flattenedPieSlices.end(), m_HoveredPieSlice);
 			if ((counterClockwiseMovement && hoveredSliceIterator == flattenedPieSlices.end() - 1) || (!counterClockwiseMovement && hoveredSliceIterator == flattenedPieSlices.begin())) {
-				if (m_PieQuadrants.at(controlStateDirection).Enabled) {
+				if (m_PieQuadrants.at(controlStateDirection).m_Enabled) {
 					MoveToPieQuadrant(m_PieQuadrants.at(controlStateDirection), counterClockwiseMovement ? MoveToPieQuadrantMode::Start : MoveToPieQuadrantMode::End);
 				} else {
 					g_GUISound.HoverDisabledSound()->Play();
@@ -802,34 +681,34 @@ namespace RTE {
 		for (const auto &[controlState, controlStateDirection] : controlStateDirections) {
 			if (controller->IsState(controlState)) {
 				const PieQuadrant &pieQuadrantAtControlStateDirection = m_PieQuadrants.at(controlStateDirection);
-				if (!m_HoveredPieSlice && pieQuadrantAtControlStateDirection.Enabled) {
+				if (!m_HoveredPieSlice && pieQuadrantAtControlStateDirection.m_Enabled) {
 					MoveToPieQuadrant(pieQuadrantAtControlStateDirection);
 				} else if (const PieQuadrant *hoveredPieSlicePieQuadrant = GetPieQuadrantContainingHoveredSlice()) {
-					if (controlStateDirection == oppositeDirections.at(hoveredPieSlicePieQuadrant->Direction)) {
+					if (controlStateDirection == oppositeDirections.at(hoveredPieSlicePieQuadrant->m_Direction)) {
 						if (IsSubPieMenu()) {
 							SetEnabled(false);
-						} else if (pieQuadrantAtControlStateDirection.Enabled) {
+						} else if (pieQuadrantAtControlStateDirection.m_Enabled) {
 							MoveToPieQuadrant(pieQuadrantAtControlStateDirection);
 						} else {
 							g_GUISound.HoverDisabledSound()->Play();
 						}
-					} else if (hoveredPieSlicePieQuadrant->Direction == controlStateDirection) {
-						if (m_HoveredPieSlice == pieQuadrantAtControlStateDirection.MiddlePieSlice.get()) {
+					} else if (hoveredPieSlicePieQuadrant->m_Direction == controlStateDirection) {
+						if (m_HoveredPieSlice == pieQuadrantAtControlStateDirection.m_MiddlePieSlice.get()) {
 							if (IsSubPieMenu()) {
 								g_GUISound.HoverDisabledSound()->Play();
 							} else {
 								SetHoveredPieSlice(nullptr);
 							}
 						} else {
-							bool hoveredPieSliceIsInPieQuadrantRightSide = (m_HoveredPieSlice == hoveredPieSlicePieQuadrant->RightPieSlices.at(0).get() || m_HoveredPieSlice == hoveredPieSlicePieQuadrant->RightPieSlices.at(1).get());
+							bool hoveredPieSliceIsInPieQuadrantRightSide = (m_HoveredPieSlice == hoveredPieSlicePieQuadrant->m_RightPieSlices.at(0).get() || m_HoveredPieSlice == hoveredPieSlicePieQuadrant->m_RightPieSlices.at(1).get());
 							std::vector<PieSlice *> flattenedPieSlices = hoveredPieSlicePieQuadrant->GetFlattenedPieSlices(true);
 							auto hoveredPieSliceIterator = std::find(flattenedPieSlices.begin(), flattenedPieSlices.end(), m_HoveredPieSlice);
 							SetHoveredPieSlice(*(hoveredPieSliceIterator + (hoveredPieSliceIsInPieQuadrantRightSide ? 1 : -1)), true);
 						}
 					} else {
-						bool counterClockwiseMovement = controlStateDirection == counterClockwiseDirections.at(hoveredPieSlicePieQuadrant->Direction);
-						const std::array<std::unique_ptr<PieSlice>, c_PieQuadrantSlotCount / 2> &pieSlicesToMovePieQuadrantsFor = counterClockwiseMovement ? hoveredPieSlicePieQuadrant->RightPieSlices : hoveredPieSlicePieQuadrant->LeftPieSlices;
-						if (pieQuadrantAtControlStateDirection.Enabled && (m_HoveredPieSlice == pieSlicesToMovePieQuadrantsFor.at(0).get() || m_HoveredPieSlice == pieSlicesToMovePieQuadrantsFor.at(1).get())) {
+						bool counterClockwiseMovement = controlStateDirection == counterClockwiseDirections.at(hoveredPieSlicePieQuadrant->m_Direction);
+						const std::array<std::unique_ptr<PieSlice>, PieQuadrant::c_PieQuadrantSlotCount / 2> &pieSlicesToMovePieQuadrantsFor = counterClockwiseMovement ? hoveredPieSlicePieQuadrant->m_RightPieSlices : hoveredPieSlicePieQuadrant->m_LeftPieSlices;
+						if (pieQuadrantAtControlStateDirection.m_Enabled && (m_HoveredPieSlice == pieSlicesToMovePieQuadrantsFor.at(0).get() || m_HoveredPieSlice == pieSlicesToMovePieQuadrantsFor.at(1).get())) {
 							MoveToPieQuadrant(pieQuadrantAtControlStateDirection);
 						} else {
 							StepToNeighbouringPieSlice(hoveredPieSlicePieQuadrant, controlStateDirection, counterClockwiseMovement);
@@ -863,7 +742,7 @@ namespace RTE {
 				m_ActiveSubPieMenu = m_ActivatedPieSlice ? m_ActivatedPieSlice->GetSubPieMenu() : m_HoveredPieSlice->GetSubPieMenu();
 				m_ActiveSubPieMenu->m_Owner = m_Owner;
 				m_ActiveSubPieMenu->SetEnabled(true);
-				m_ActiveSubPieMenu->SetHoveredPieSlice(m_ActiveSubPieMenu->m_PieQuadrants.at(m_ActiveSubPieMenu->m_DirectionIfSubPieMenu).MiddlePieSlice.get(), true);
+				m_ActiveSubPieMenu->SetHoveredPieSlice(m_ActiveSubPieMenu->m_PieQuadrants.at(m_ActiveSubPieMenu->m_DirectionIfSubPieMenu).m_MiddlePieSlice.get(), true);
 				m_ActiveSubPieMenu->m_HoverTimer.SetRealTimeLimitMS(2000);
 				m_ActiveSubPieMenu->m_HoverTimer.Reset();
 			} else if (m_ActivatedPieSlice && !m_ActivatedPieSlice->GetScriptPath().empty() && !m_ActivatedPieSlice->GetFunctionName().empty()) {
@@ -983,8 +862,8 @@ namespace RTE {
 				float pieSliceRotation = NormalizeAngleBetween0And2PI(pieSlice->GetMidAngle() + GetRotAngle());
 
 				Vector pieSliceCenteringOffset(1.0F - static_cast<float>(pieSliceIcon->w / 2), 1.0F - static_cast<float>(pieSliceIcon->h / 2));
-				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Right).MiddlePieSlice.get()) { pieSliceCenteringOffset.SetX(pieSliceCenteringOffset.GetX() - 1.0F); }
-				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Down).MiddlePieSlice.get()) { pieSliceCenteringOffset.SetY(pieSliceCenteringOffset.GetY() - 1.0F); }
+				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Right).m_MiddlePieSlice.get()) { pieSliceCenteringOffset.SetX(pieSliceCenteringOffset.GetX() - 1.0F); }
+				if (GetRotAngle() == 0 && pieSlice == m_PieQuadrants.at(Directions::Down).m_MiddlePieSlice.get()) { pieSliceCenteringOffset.SetY(pieSliceCenteringOffset.GetY() - 1.0F); }
 
 				Vector pieSliceIconOffset = Vector(static_cast<float>(m_CurrentInnerRadius + (m_BackgroundThickness / 2) + (pieSlice->GetSubPieMenu() && m_IconSeparatorMode == IconSeparatorMode::Line ? 2 : 0)), 0).RadRotate(pieSliceRotation) + pieSliceCenteringOffset;
 
@@ -1014,7 +893,7 @@ namespace RTE {
 			Vector textPos = Vector(static_cast<float>(m_CurrentInnerRadius + std::max(m_BackgroundThickness, m_BackgroundSeparatorSize) + (m_LargeFont->GetFontHeight() * 0.5)), 0).RadRotate(textRotation) - textCenteringOffset;
 
 			AllegroBitmap allegroBitmap(targetBitmap);
-			if (GetRotAngle() <= c_EighthPI && (m_HoveredPieSlice == m_PieQuadrants.at(Directions::Up).MiddlePieSlice.get() || m_HoveredPieSlice == m_PieQuadrants.at(Directions::Down).MiddlePieSlice.get())) {
+			if (GetRotAngle() <= c_EighthPI && (m_HoveredPieSlice == m_PieQuadrants.at(Directions::Up).m_MiddlePieSlice.get() || m_HoveredPieSlice == m_PieQuadrants.at(Directions::Down).m_MiddlePieSlice.get())) {
 				m_LargeFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredPieSlice->GetDescription().c_str(), GUIFont::Centre);
 			} else if (textRotation < c_HalfPI - 0.01 || textRotation > c_PI + c_HalfPI + 0.01) {
 				m_LargeFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredPieSlice->GetDescription().c_str(), GUIFont::Left);
@@ -1030,19 +909,19 @@ namespace RTE {
 		m_CurrentPieSlices.clear();
 		for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
 			pieQuadrant.RealignPieSlices();
-			if (pieQuadrant.MiddlePieSlice) { m_CurrentPieSlices.push_back(pieQuadrant.MiddlePieSlice.get()); }
+			if (pieQuadrant.m_MiddlePieSlice) { m_CurrentPieSlices.push_back(pieQuadrant.m_MiddlePieSlice.get()); }
 		}
 		for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
-			if (pieQuadrant.LeftPieSlices.at(0)) { m_CurrentPieSlices.push_back(pieQuadrant.LeftPieSlices.at(0).get()); }
+			if (pieQuadrant.m_LeftPieSlices.at(0)) { m_CurrentPieSlices.push_back(pieQuadrant.m_LeftPieSlices.at(0).get()); }
 		}
 		for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
-			if (pieQuadrant.RightPieSlices.at(0)) { m_CurrentPieSlices.push_back(pieQuadrant.RightPieSlices.at(0).get()); }
+			if (pieQuadrant.m_RightPieSlices.at(0)) { m_CurrentPieSlices.push_back(pieQuadrant.m_RightPieSlices.at(0).get()); }
 		}
 		for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
-			if (pieQuadrant.LeftPieSlices.at(1)) { m_CurrentPieSlices.push_back(pieQuadrant.LeftPieSlices.at(1).get()); }
+			if (pieQuadrant.m_LeftPieSlices.at(1)) { m_CurrentPieSlices.push_back(pieQuadrant.m_LeftPieSlices.at(1).get()); }
 		}
 		for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
-			if (pieQuadrant.RightPieSlices.at(1)) { m_CurrentPieSlices.push_back(pieQuadrant.RightPieSlices.at(1).get()); }
+			if (pieQuadrant.m_RightPieSlices.at(1)) { m_CurrentPieSlices.push_back(pieQuadrant.m_RightPieSlices.at(1).get()); }
 		}
 		ExpandPieSliceIntoEmptySpaceIfPossible();
 	}
@@ -1053,13 +932,13 @@ namespace RTE {
 		const std::unordered_map<Directions, Directions> nextDirectionForGivenDirection{ {Directions::Right, Directions::Up}, {Directions::Up, Directions::Left}, {Directions::Left, Directions::Down}, {Directions::Down, Directions::Right} };
 
 		for (const PieQuadrant &pieQuadrant : m_PieQuadrants) {
-			if (pieQuadrant.Enabled) {
-				const std::unique_ptr<PieSlice> &leftMostPieSlice = !pieQuadrant.LeftPieSlices.at(1) ? pieQuadrant.LeftPieSlices.at(0) : pieQuadrant.LeftPieSlices.at(1);
-				PieQuadrant &neighbouringPieQuadrant = m_PieQuadrants.at(nextDirectionForGivenDirection.at(pieQuadrant.Direction));
+			if (pieQuadrant.m_Enabled) {
+				const std::unique_ptr<PieSlice> &leftMostPieSlice = !pieQuadrant.m_LeftPieSlices.at(1) ? pieQuadrant.m_LeftPieSlices.at(0) : pieQuadrant.m_LeftPieSlices.at(1);
+				PieQuadrant &neighbouringPieQuadrant = m_PieQuadrants.at(nextDirectionForGivenDirection.at(pieQuadrant.m_Direction));
 
-				if (leftMostPieSlice && leftMostPieSlice->GetSlotCount() == 1 && neighbouringPieQuadrant.Enabled && neighbouringPieQuadrant.SlotsForPieSlices.at(0) == nullptr) {
+				if (leftMostPieSlice && leftMostPieSlice->GetSlotCount() == 1 && neighbouringPieQuadrant.m_Enabled && neighbouringPieQuadrant.m_SlotsForPieSlices.at(0) == nullptr) {
 					leftMostPieSlice->SetSlotCount(leftMostPieSlice->GetSlotCount() + 1);
-					neighbouringPieQuadrant.SlotsForPieSlices.at(0) = leftMostPieSlice.get();
+					neighbouringPieQuadrant.m_SlotsForPieSlices.at(0) = leftMostPieSlice.get();
 				}
 			}
 		}
@@ -1102,21 +981,21 @@ namespace RTE {
 		switch (m_IconSeparatorMode) {
 			case IconSeparatorMode::Line:
 				for (const PieQuadrant &pieQuadrant : m_PieQuadrants) {
-					float currentAngle = c_DirectionsToRadiansMap.at(pieQuadrant.Direction) - c_QuarterPI + subPieMenuRotationOffset;
-					bool pieQuadrantIsEmpty = !pieQuadrant.Enabled || pieQuadrant.GetFlattenedPieSlices().empty();
-					for (int currentSlot = 0; currentSlot < c_PieQuadrantSlotCount;) {
-						if (const PieSlice *pieSliceInSlot = pieQuadrant.SlotsForPieSlices.at(currentSlot)) {
+					float currentAngle = c_DirectionsToRadiansMap.at(pieQuadrant.m_Direction) - c_QuarterPI + subPieMenuRotationOffset;
+					bool pieQuadrantIsEmpty = !pieQuadrant.m_Enabled || pieQuadrant.GetFlattenedPieSlices().empty();
+					for (int currentSlot = 0; currentSlot < PieQuadrant::c_PieQuadrantSlotCount;) {
+						if (const PieSlice *pieSliceInSlot = pieQuadrant.m_SlotsForPieSlices.at(currentSlot)) {
 							// We don't draw lines if the current slot is the first slot, since a line will be drawn by the previous PieQuadrant's last PieSlice, or if it's a 2-size, since that means it's spreading over PieQuadrants and a line will be drawn at the next PieSlice's start.
 							if (currentSlot > 0 || pieSliceInSlot->GetSlotCount() != 2) {
 								currentAngle = pieSliceInSlot->GetStartAngle() + subPieMenuRotationOffset;
 								DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, currentAngle, false, pieSliceInSlot->GetSubPieMenu());
 								currentSlot += pieSliceInSlot->GetSlotCount();
-								DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, currentAngle + (static_cast<float>(pieSliceInSlot->GetSlotCount()) * c_PieSliceSlotSize), pieSliceInSlot == m_HoveredPieSlice && m_HoveredPieSlice->IsEnabled(), pieSliceInSlot->GetSubPieMenu(), IsSubPieMenu() && currentSlot == c_PieQuadrantSlotCount);
+								DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, currentAngle + (static_cast<float>(pieSliceInSlot->GetSlotCount()) * PieQuadrant::c_PieSliceSlotSize), pieSliceInSlot == m_HoveredPieSlice && m_HoveredPieSlice->IsEnabled(), pieSliceInSlot->GetSubPieMenu(), IsSubPieMenu() && currentSlot == PieQuadrant::c_PieQuadrantSlotCount);
 								continue;
 							}
 						} else {
 							if (!pieQuadrantIsEmpty && currentSlot == 0) { DrawBackgroundPieSliceSeparator(backgroundBitmapToDrawTo, pieCircleCenterX, pieCircleCenterY, currentAngle, false, false); }
-							currentAngle += c_PieSliceSlotSize;
+							currentAngle += PieQuadrant::c_PieSliceSlotSize;
 						}
 						currentSlot++;
 					}
@@ -1162,7 +1041,7 @@ namespace RTE {
 				}
 
 				if (isHoveredPieSlice) {
-					separatorOffset.SetXY(static_cast<float>(m_CurrentInnerRadius + (m_BackgroundThickness / 2)), 0).RadRotate(rotAngle - (c_PieSliceSlotSize / 2.0F));
+					separatorOffset.SetXY(static_cast<float>(m_CurrentInnerRadius + (m_BackgroundThickness / 2)), 0).RadRotate(rotAngle - (PieQuadrant::c_PieSliceSlotSize / 2.0F));
 					floodfill(backgroundBitmapToDrawTo, pieCircleCenterX + separatorOffset.GetFloorIntX(), pieCircleCenterY + separatorOffset.GetFloorIntY(), m_SelectedItemBackgroundColor);
 					if (pieSliceHasSubPieMenu) { floodfill(m_BGPieSlicesWithSubPieMenuBitmap, pieCircleCenterX + separatorOffset.GetFloorIntX(), pieCircleCenterY + separatorOffset.GetFloorIntY(), m_SelectedItemBackgroundColor); }
 				}
@@ -1228,7 +1107,7 @@ namespace RTE {
 		}
 		for (const PieQuadrant &pieQuadrant : m_PieQuadrants) {
 			if (pieQuadrant.ContainsPieSlice(pieSliceWithSubPieMenu)) {
-				subPieMenu->m_DirectionIfSubPieMenu = pieQuadrant.Direction;
+				subPieMenu->m_DirectionIfSubPieMenu = pieQuadrant.m_Direction;
 				break;
 			}
 		}
@@ -1238,8 +1117,8 @@ namespace RTE {
 		subPieMenu->SetRotAngle(subPieMenuRotAngle);
 		subPieMenu->SetFullInnerRadius(m_FullInnerRadius + std::max(m_BackgroundThickness * 2, m_BackgroundSeparatorSize * 3) + c_PieSliceWithSubPieMenuExtraThickness);
 
-		for (PieMenu::PieQuadrant &pieQuadrant : subPieMenu->m_PieQuadrants) {
-			if (pieQuadrant.Direction != subPieMenu->m_DirectionIfSubPieMenu) { pieQuadrant.Enabled = false; }
+		for (PieQuadrant &pieQuadrant : subPieMenu->m_PieQuadrants) {
+			if (pieQuadrant.m_Direction != subPieMenu->m_DirectionIfSubPieMenu) { pieQuadrant.m_Enabled = false; }
 		}
 		std::vector<PieSlice *> existingPieSlices = subPieMenu->GetPieSlices();
 		std::vector<PieSlice *> pieSlicesToReadd;
@@ -1263,7 +1142,7 @@ namespace RTE {
 				g_UInputMan.SetMouseValueMagnitude(0, controller->GetPlayer());
 				controller->m_AnalogCursor.Reset();
 			} else if (enable) {
-				controller->SetAnalogAimValueAngleLimits(GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) - c_QuarterPI + (c_PieSliceSlotSize / 2.0F), GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) + c_QuarterPI - (c_PieSliceSlotSize / 2.0F));
+				controller->SetAnalogAimValueAngleLimits(GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) - c_QuarterPI + (PieQuadrant::c_PieSliceSlotSize / 2.0F), GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) + c_QuarterPI - (PieQuadrant::c_PieSliceSlotSize / 2.0F));
 				if (!controller->m_AnalogCursor.IsZero()) {
 					float mouseAngleToSet = GetRotAngle() + (m_HoveredPieSlice ? m_HoveredPieSlice->GetMidAngle() :  c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu));
 					g_UInputMan.SetMouseValueAngle(mouseAngleToSet, controller->GetPlayer());

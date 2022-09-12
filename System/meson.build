@@ -21,4 +21,5 @@ sources += files(
 'RTEError.cpp',
 'Matrix.cpp',
 'Serializable.cpp',
+'PieQuadrant.cpp',
 )

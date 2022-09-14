@@ -509,7 +509,7 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-	if (!(*m_FunctionsAndScripts.find("Create")).second.empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+	if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
 		m_ScriptObjectName = "ERROR";
 		return -3;
 	}
@@ -722,7 +722,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 
 int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) {
     int status = 0;
-    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end() || m_FunctionsAndScripts.find(functionName)->second.empty()) {
         status = -1;
     } else if (!ObjectScriptsInitialized()) {
         status = InitializeObjectScripts();

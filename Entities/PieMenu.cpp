@@ -4,7 +4,6 @@
 #include "UInputMan.h"
 #include "PresetMan.h"
 
-#include "Controller.h"
 #include "AHuman.h"
 #include "ContentFile.h"
 

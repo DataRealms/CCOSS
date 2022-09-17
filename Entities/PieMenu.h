@@ -2,8 +2,7 @@
 #define _RTEPIEMENU_
 
 #include "PieQuadrant.h"
-#include "Timer.h"
-#include "Vector.h"
+#include "Controller.h"
 #include "Matrix.h"
 
 namespace RTE {
@@ -12,7 +11,6 @@ namespace RTE {
 	class MovableObject;
 	class GUIFont;
 	class Actor;
-	enum ControlState;
 
 	/// <summary>
 	/// A PieMenu for managing interactions with objects and Actors.

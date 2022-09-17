@@ -6,6 +6,8 @@
 
 #include "HeldDevice.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 namespace RTE {
 
 #pragma region Manager Lua Adapters
@@ -127,4 +129,5 @@ namespace RTE {
 	}
 #pragma endregion
 }
+#pragma GCC diagnostic pop
 #endif

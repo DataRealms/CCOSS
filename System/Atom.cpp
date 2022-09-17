@@ -48,6 +48,13 @@ namespace RTE {
 		m_SegProgress = 0.0F;
 
 		m_IgnoreMOIDsByGroup = 0;
+
+		// Note: These fields must be cleared to avoid a very edge case bug.
+		// While an AtomGroup is travelling, the OnCollideWithTerrain Lua function can run, which will in turn force Create to run if it hasn't already.
+		// If this Create function adds to an AtomGroup (e.g. adds an Attachable to it), there will be problems.
+		// Setting these values in Clear doesn't help if Atoms are removed at this point, but helps if Atoms are added, since these values mean the added Atoms won't try to step forwards.
+		//m_Dom = 0;
+		//m_Delta[m_Dom] = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -558,7 +565,7 @@ namespace RTE {
 					abortString += " Owner is " + realOwner->GetPresetName() + ".";
 				}
 			}
-			abortString += "\n\nDomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]);
+			abortString += "\n\nDomSteps: " + std::to_string(m_DomSteps) + ", Dominant Direction: " + std::to_string(m_Dom) + ", Delta[Dom]: " + std::to_string(m_Delta[m_Dom]) + ", Trajectory: (" + std::to_string(m_SegTraj.m_X) + ", " + std::to_string(m_SegTraj.m_Y) + ")";
 			RTEAbort(abortString);
 			m_OwnerMO->SetToDelete();
 		}

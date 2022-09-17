@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(PieSlice, Entity, 80)
+	ConcreteClassInfo(PieSlice, Entity, 80);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,13 +71,12 @@ namespace RTE {
 		if (propName == "Type") {
 			m_Type = static_cast<SliceType>(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "Direction") {
-			std::string directionString = reader.ReadPropValue();
-			if (c_DirectionNameToDirectionsMap.find(directionString) != c_DirectionNameToDirectionsMap.end()) {
+			if (std::string directionString = reader.ReadPropValue(); c_DirectionNameToDirectionsMap.find(directionString) != c_DirectionNameToDirectionsMap.end()) {
 				m_Direction = c_DirectionNameToDirectionsMap.find(directionString)->second;
 			} else {
 				try {
 					m_Direction = static_cast<Directions>(std::stoi(directionString));
-				} catch (const std::exception &) {
+				} catch (const std::invalid_argument &) {
 					reader.ReportError("Direction " + directionString + " is invalid.");
 				}
 			}

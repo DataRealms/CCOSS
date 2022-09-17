@@ -1,5 +1,5 @@
-#ifndef _PIEMENUGUI_
-#define _PIEMENUGUI_
+#ifndef _RTEPIEMENU_
+#define _RTEPIEMENU_
 
 #include "PieQuadrant.h"
 #include "Timer.h"
@@ -12,12 +12,13 @@ namespace RTE {
 	class MovableObject;
 	class GUIFont;
 	class Actor;
+	enum ControlState;
 
 	/// <summary>
 	/// A PieMenu for managing interactions with objects and Actors.
 	/// </summary>
 	class PieMenu : public Entity {
-		
+
 		friend class PieSlice;
 
 	public:
@@ -77,7 +78,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The owner Actor of this PieMenu. Ownership is NOT transferred!</returns>
 		const Actor * GetOwner() const { return m_Owner; }
-		
+
 		/// <summary>
 		/// Sets the owner Actor of this PieMenu, ensuring this is that Actor's PieMenu, and updates PieSlice sources accordingly. Ownership is NOT transferred!
 		/// </summary>
@@ -236,7 +237,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The activated PieSlice for this PieMenu.</returns>
 		const PieSlice * GetActivatedPieSlice() const;
-		
+
 		/// <summary>
 		/// Gets the command issued by this PieMenu in the last update, i.e. the PieSlice SliceType of the currently activated PieSlice, or None if no slice was activated.
 		/// </summary>
@@ -262,7 +263,7 @@ namespace RTE {
 		/// <param name="pieSliceType">The type of PieSlice to look for.</param>
 		/// <returns>The first found PieSlice with the passed in PieSlice SliceType, or nullptr if there are no PieSlices with that SliceType in this PieMenu.</returns>
 		PieSlice * GetFirstPieSliceByType(PieSlice::SliceType pieSliceType) const;
-		
+
 		/// <summary>
 		/// Adds a PieSlice to the PieMenu, setting its original source to the specified sliceSource. Ownership IS transferred!
 		/// The slice will be placed in the appropriate PieQuadrant for its Direction, with Any Direction using the first available PieQuadrant.
@@ -334,7 +335,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="listeningObject">The MovableObject listening.</param>
 		/// <param name="listenerFunction">The function to be run on the MovableObject.</param>
-		void AddWhilePieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { if (listeningObject) { m_WhilePieMenuOpenListeners.insert({ listeningObject, listenerFunction }); } }
+		void AddWhilePieMenuOpenListener(const MovableObject *listeningObject, const std::function<void()> &listenerFunction) { if (listeningObject) { m_WhilePieMenuOpenListeners.try_emplace(listeningObject, listenerFunction); } }
 
 		/// <summary>
 		/// Removes the passed in MovableObject and its listening function as a listener for when this PieMenu is opened.
@@ -361,12 +362,20 @@ namespace RTE {
 		/// </summary>
 		enum class IconSeparatorMode { Line, Circle, Square };
 
+		/// <summary>
+		///
+		/// </summary>
+		enum class MoveToPieQuadrantMode { Start, Middle, End };
+
 		static constexpr int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
 		static constexpr int c_DefaultFullRadius = 58; //!< The radius the menu should have when fully enabled, in pixels.
 		static constexpr int c_PieSliceWithSubPieMenuHoverOpenInterval = 1000; //!< The number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
 		static constexpr int c_PieSliceWithSubPieMenuExtraThickness = 3; //!< The extra thickness to be added to PieSlices with a sub-PieMenu.
 
-		static const std::unordered_map<std::string, IconSeparatorMode> c_IconSeparatorModeMap; //!< A map of strings to IconSeparatorModes to support string parsing for the IconSeparatorMode enum. Populated in the implementing cpp file.
+		static const std::unordered_map<std::string, IconSeparatorMode> c_IconSeparatorModeMap; //!< A map of strings to IconSeparatorModes to support string parsing for the IconSeparatorMode enum.
+		static const std::unordered_map<ControlState, Directions> c_ControlStateDirections; //!<
+		static const std::unordered_map<Directions, Directions> c_OppositeDirections; //!<
+		static const std::unordered_map<Directions, Directions> c_CounterClockwiseDirections; //!<
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static BITMAP *s_CursorBitmap; //!< A static pointer to the bitmap to use as the cursor in any menu.
@@ -400,7 +409,7 @@ namespace RTE {
 		const PieSlice *m_ActivatedPieSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
 		const PieSlice *m_AlreadyActivatedPieSlice; //!< The PieSlice that was most recently activated by pressing primary. Used to avoid duplicate activation when disabling.
 		std::vector<PieSlice *> m_CurrentPieSlices; //!< All the PieSlices in this PieMenu in INI order. Not owned here, just pointing to the ones above.
-		
+
 		PieMenu *m_ActiveSubPieMenu; //!< The currently active sub-PieMenu, if any.
 
 		std::unordered_map<const MovableObject *, std::function<void()>> m_WhilePieMenuOpenListeners; //!< Unordered map of MovableObject pointers to functions to be called while the PieMenu is open. Pointers are NOT owned.
@@ -444,7 +453,7 @@ namespace RTE {
 		void UpdateSliceActivation();
 
 		/// <summary>
-		/// Redraws the predrawn background bitmap so it's up-to-date.
+		/// Redraws the pre-drawn background bitmap so it's up-to-date.
 		/// </summary>
 		void UpdatePredrawnMenuBackgroundBitmap();
 #pragma endregion
@@ -455,7 +464,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to the BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the scene.</param>
-		/// <param name="drawPos">Out param, a Vector to be filled in with the position at which the PieMenu should be drawn.</param>
+		/// <param name="drawPos">Out parameter, a Vector to be filled in with the position at which the PieMenu should be drawn.</param>
 		void CalculateDrawPosition(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const;
 
 		/// <summary>
@@ -498,7 +507,7 @@ namespace RTE {
 		void DrawBackgroundPieSliceSeparators(BITMAP *backgroundBitmapToDrawTo, int pieCircleCenterX, int pieCircleCenterY, float subPieMenuRotationOffset) const;
 
 		/// <summary>
-		/// Draws a backgound separator, based on this PieMenu's IconSeparatorMode, to the passed in bitmap.
+		/// Draws a background separator, based on this PieMenu's IconSeparatorMode, to the passed in bitmap.
 		/// </summary>
 		/// <param name="backgroundBitmapToDrawTo">The bitmap to draw the separator onto.</param>
 		/// <param name="pieCircleCenterX">The center X position of the circle the separator is drawn onto.</param>
@@ -537,7 +546,7 @@ namespace RTE {
 
 		// Disallow the use of some implicit methods.
 		PieMenu(const PieMenu &reference) = delete;
-		PieMenu & operator=(const PieMenu & rhs) = delete;
+		PieMenu & operator=(const PieMenu &rhs) = delete;
 	};
 }
 #endif

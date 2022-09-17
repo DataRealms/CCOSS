@@ -2,13 +2,11 @@
 #define _RTEPIESLICE_
 
 #include "Constants.h"
-
 #include "Icon.h"
 
 namespace RTE {
 
 	class PieMenu;
-	class Actor;
 
 	/// <summary>
 	/// An individual PieSlice in a PieMenu.
@@ -285,7 +283,7 @@ namespace RTE {
 		bool m_CanBeMiddleSlice; //!< Whether or not this PieSlice is allowed to be the middle slice. Defaults to true and should usually stay that way.
 		const Entity *m_OriginalSource; //!< A pointer to the original source of this PieSlice, normally filled in when PieSlices are added to PieMenus by objects other than the PieMenu's owner, and nullptr otherwise.
 
-		bool m_Enabled; //!< Whether this PieSlice is enabled or disabled and greyed out.
+		bool m_Enabled; //!< Whether this PieSlice is enabled or disabled and grayed out.
 		std::unique_ptr<Icon> m_Icon; //!< The icon of this PieSlice.
 
 		std::string m_ScriptPath; //!< Path to the script file this should run when activated.
@@ -296,7 +294,7 @@ namespace RTE {
 		int m_SlotCount; //!< The arc length of the PieSlice area, so that the icon should be drawn at the AreaStart + halfway of this.
 		float m_MidAngle; //!< The mid angle of this PieSlice.
 
-		bool m_DrawFlippedToMatchAbsoluteAngle; //!< Whether or not this PieSlice should draw flipped based on its absolute angle (i.e. its angle accounting for its pie menu's rotation)
+		bool m_DrawFlippedToMatchAbsoluteAngle; //!< Whether or not this PieSlice should draw flipped based on its absolute angle (i.e. its angle accounting for its pie menu's rotation).
 
 		/// <summary>
 		/// Recalculates this PieSlice's mid angle based on its start angle and slot count.

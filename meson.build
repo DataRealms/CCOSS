@@ -42,10 +42,10 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   if buildtype_debug
 
     elfname += '_debug' # add _debug suffix for debug builds
-    extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations'] # Disable #pragma region complaints and luabind auto_ptr warning
+    extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
 
     if get_option('sane_warnings')
-      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual']
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-inconsistent-missing-override']
     endif
 
     debug_type = get_option('debug_type')

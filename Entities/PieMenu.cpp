@@ -332,7 +332,10 @@ namespace RTE {
 
 	bool PieMenu::AddPieSlice(PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool allowQuadrantOverflow) {
 		Directions pieSliceDirection = pieSliceToAdd->GetDirection();
-		if (pieSliceDirection != Directions::Any && !m_PieQuadrants.at(pieSliceDirection).m_Enabled) { pieSliceToAdd->SetDirection(Directions::Any); }
+		if (pieSliceDirection != Directions::Any && !m_PieQuadrants.at(pieSliceDirection).m_Enabled) {
+			pieSliceToAdd->SetDirection(Directions::Any);
+			pieSliceDirection = Directions::Any;
+		}
 
 		bool sliceWasAdded = false;
 		if (pieSliceDirection == Directions::Any) {

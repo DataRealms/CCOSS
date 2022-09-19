@@ -361,7 +361,7 @@ namespace RTE {
 		enum class IconSeparatorMode { Line, Circle, Square };
 
 		/// <summary>
-		///
+		/// Enumeration for helping keyboard PieMenu navigation. Specifies the ways the cursor should move from one PieQuadrant to another.
 		/// </summary>
 		enum class MoveToPieQuadrantMode { Start, Middle, End };
 
@@ -371,9 +371,9 @@ namespace RTE {
 		static constexpr int c_PieSliceWithSubPieMenuExtraThickness = 3; //!< The extra thickness to be added to PieSlices with a sub-PieMenu.
 
 		static const std::unordered_map<std::string, IconSeparatorMode> c_IconSeparatorModeMap; //!< A map of strings to IconSeparatorModes to support string parsing for the IconSeparatorMode enum.
-		static const std::unordered_map<ControlState, Directions> c_ControlStateDirections; //!<
-		static const std::unordered_map<Directions, Directions> c_OppositeDirections; //!<
-		static const std::unordered_map<Directions, Directions> c_CounterClockwiseDirections; //!<
+		static const std::unordered_map<ControlState, Directions> c_ControlStateDirections; //!< A map of ControlStates to Directions, for translating between the two.
+		static const std::unordered_map<Directions, Directions> c_OppositeDirections; //!< A map of Directions to their opposite Directions, for zooming between PieQuadrants with the keyboard.
+		static const std::unordered_map<Directions, Directions> c_CounterClockwiseDirections; //!< A map of Directions to the Direction that is CCW from them, for moving between PieQuadrants with the keyboard.
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static BITMAP *s_CursorBitmap; //!< A static pointer to the bitmap to use as the cursor in any menu.

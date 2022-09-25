@@ -21,6 +21,7 @@ GUIListPanel::GUIListPanel(GUIManager *Manager) : GUIPanel(Manager) {
 	m_FontColor = 0;
 	m_FontSelectColor = 0;
 	m_SelectedColorIndex = 0;
+	m_UnselectedColorIndex = 0;
 	m_CapturedHorz = false;
 	m_CapturedVert = false;
 	m_ExternalCapture = false;
@@ -50,6 +51,7 @@ GUIListPanel::GUIListPanel() : GUIPanel() {
 	m_FontColor = 0;
 	m_FontSelectColor = 0;
 	m_SelectedColorIndex = 0;
+	m_UnselectedColorIndex = 0;
 	m_CapturedHorz = false;
 	m_CapturedVert = false;
 	m_ExternalCapture = false;
@@ -250,6 +252,9 @@ void GUIListPanel::BuildBitmap(bool UpdateBase, bool UpdateText) {
 		m_Skin->GetValue("Listbox", "SelectedColorIndex", &m_SelectedColorIndex);
 		m_SelectedColorIndex = m_Skin->ConvertColor(m_SelectedColorIndex, m_BaseBitmap->GetColorDepth());
 
+		m_Skin->GetValue("Listbox", "UnselectedColorIndex", &m_UnselectedColorIndex);
+		m_UnselectedColorIndex = m_Skin->ConvertColor(m_UnselectedColorIndex, m_BaseBitmap->GetColorDepth());
+
 		// Load the font
 		m_Skin->GetValue("Listbox", "Font", &Filename);
 		m_Font = m_Skin->GetFont(Filename);
@@ -346,9 +351,8 @@ void GUIListPanel::BuildDrawBitmap() {
 				m_Font->DrawAligned(m_DrawBitmap, textX, textY, I->m_Name, GUIFont::Left, GUIFont::Middle, mainTextWidth);
 			} else {
 				// Unselected
-				// TODO: Don't hardcode unselected color index
-				m_DrawBitmap->DrawLine(4, y + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + 1, 144);
-				m_DrawBitmap->DrawLine(4, y + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + itemHeight, 144);
+				m_DrawBitmap->DrawLine(4, y + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + 1, m_UnselectedColorIndex);
+				m_DrawBitmap->DrawLine(4, y + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + itemHeight, m_UnselectedColorIndex);
 				m_Font->SetColor(m_FontColor);
 				m_Font->SetKerning(m_FontKerning);
 				m_Font->DrawAligned(m_DrawBitmap, x - 6 - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0) + m_Width, textY, I->m_RightText, GUIFont::Right, GUIFont::Middle, m_Width, m_FontShadow);
@@ -356,7 +360,7 @@ void GUIListPanel::BuildDrawBitmap() {
 			}
 
 			// Draw another line to make sure the last item has two
-			if (it == m_Items.end() - 1) { m_DrawBitmap->DrawLine(4, y + itemHeight + 1, m_Width - 5, y + itemHeight + 1, 144); }
+			if (it == m_Items.end() - 1) { m_DrawBitmap->DrawLine(4, y + itemHeight + 1, m_Width - 5, y + itemHeight + 1, m_UnselectedColorIndex); }
 
 			// Save the item height for later use in selection routines etc
 			I->m_Height = itemHeight;

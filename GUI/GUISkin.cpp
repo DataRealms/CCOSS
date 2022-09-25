@@ -38,10 +38,10 @@ bool GUISkin::Load(const std::string &directory, const std::string &fileName) {
 	// Destroy any previous instances
 	Destroy();
 
-	m_Directory = g_PresetMan.FullModulePath(directory);
+	m_Directory = g_PresetMan.FullModulePath(!directory.empty() ? (directory + "/") : "");
 
 	GUIReader skinFile;
-	if (skinFile.Create((m_Directory + "/" + fileName).c_str()) == -1) {
+	if (skinFile.Create(m_Directory + fileName) == -1) {
 		return false;
 	}
 
@@ -211,7 +211,7 @@ GUIBitmap * GUISkin::CreateBitmap(int Width, int Height) {
 
 GUIBitmap * GUISkin::CreateBitmap(const std::string &Filename) {
 	// Add the filename onto the current directory
-	std::string File = m_Directory + "/" + Filename;
+	std::string File = m_Directory + Filename;
 
 	// Check if the image is in our cache
 	std::vector<GUIBitmap *>::iterator it;
@@ -249,7 +249,7 @@ GUIFont * GUISkin::GetFont(const std::string &Name) {
 
 	// Not found, so we create the font
 	GUIFont *Font = new GUIFont(Name);
-	if (!Font->Load(m_Screen, m_Directory + "/" + Name)) {
+	if (!Font->Load(m_Screen, m_Directory + Name)) {
 		delete Font;
 		return nullptr;
 	}

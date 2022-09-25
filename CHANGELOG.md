@@ -81,6 +81,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `MovableObject` INI and Lua (R/W) property `SimUpdatesBetweenScriptedUpdates`, that lets `MovableObject`s run their Lua update function less frequently, for performance benefits.
 
+- Added faction themes.  
+	Faction themes apply to the `BuyMenu` when the faction is set as the native module (i.e. playing as the faction) in both Conquest and Scenario battle.
+
+	The theme properties are defined in the `DataModule`'s `Index.ini` (before any `IncludeFile` lines) like so:
+	```
+	FactionBuyMenuTheme = BuyMenuTheme
+		SkinFile = pathToSkinFile // GUI element visuals (NOT actual layout).
+		BackgroundColorIndex = paletteIndex // Color of the parent box that holds all the elements. Palette colors only, no support for images.
+		BannerFile = pathToBannerImage
+		LogoFile = pathToLogoImage
+	```
+	All properties are optional, any combination works.  
+	The skin and background color are also applied to the `ObjectPicker` (scene object placer) for visual consistency.
+
+- New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
+
+- New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
+	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
+	Only has a noticeable effect when the "Allow purchases from other factions" (`Settings.ini` `ShowForeignItems`) gameplay setting is disabled.
+
+	Note that this property takes priority over the `IsFaction` property. A module that is set as both `IsFaction = 1` and `IsMerchant = 1` will be treated as `IsFaction = 0`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -116,6 +138,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `TerrainObject`s no longer have a hard requirement for `FG` and `Mat` layer sprites. Any layer may be omitted as long as at least one is defined.
 
 - `Scene` layer data will now be saved as compressed PNG to reduce file sizes of MetaGame saves and is threaded to prevent the game from freezing when layer data is being saved. 
+
+- Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
 
 </details>
 

@@ -102,6 +102,7 @@ namespace RTE {
 		m_Moon.Create(ContentFile("Base.rte/GUIs/Title/Moon.png"));
 		m_Station.Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
 		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
+		m_Nebula.SetScrollRatio(Vector(-1.0F, 1.0F / 3.0F));
 
 		set_write_alpha_blender();
 		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
@@ -145,7 +146,7 @@ namespace RTE {
 	void TitleScreen::CreateIntroSequenceSlides() {
 		std::string highRes = (g_FrameMan.GetResY() >= 680) ? "HD" : "";
 		for (int slideNum = 0; slideNum < m_IntroSlides.size(); ++slideNum) {
-			m_IntroSlides.at(slideNum) = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
+			m_IntroSlides[slideNum] = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
 		}
 	}
 

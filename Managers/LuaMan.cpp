@@ -326,7 +326,7 @@ namespace RTE {
 		lua_getfield( m_MasterState, -1, "path" ); // get field "path" from table at top of stack (-1)
 		std::string cur_path = lua_tostring( m_MasterState, -1 ); // grab path string from top of stack
 
-		if( cur_path.find( scriptPath ) == cur_path.npos ) { // check if scriptPath is already in there
+		if (cur_path.find(scriptPath) == cur_path.npos) { // check if scriptPath is already in there
 			cur_path.append( ";" );
 			cur_path.append( scriptPath ); // if not add it
 		}

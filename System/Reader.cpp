@@ -33,7 +33,7 @@ namespace RTE {
 			return -1;
 		}
 		// Extract the file name and module name from the path
-		m_FileName =  m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
+		m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
 		m_DataModuleName = g_PresetMan.GetModuleNameFromPath(m_FilePath);
 		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
 

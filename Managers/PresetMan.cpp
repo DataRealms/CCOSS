@@ -300,20 +300,20 @@ int PresetMan::GetModuleID(string moduleName)
 // Description:     Gets the Name of a loaded DataModule, from a full data file path.
 std::string PresetMan::GetModuleNameFromPath( std::string dataPath )
 {
-    if( dataPath.empty() ) {
+    if (dataPath.empty()) {
         return "";
     }
 
     int slashPos = dataPath.find_first_of( '/' );
-    if( slashPos == string::npos ) {
+    if (slashPos == string::npos) {
         slashPos = dataPath.find_first_of( '\\' );
     }
     std::string moduleName = dataPath.substr( 0, slashPos );
     // check if path starts with Data/ or Mods/ and remove that part to get to the actual module name
-    if( moduleName == "Data" || moduleName == "Mods" ) {
+    if (moduleName == "Data" || moduleName == "Mods") {
         std::string shortenPath = dataPath.substr( slashPos + 1 );
         slashPos = shortenPath.find_first_of( '/' );
-        if( slashPos == string::npos ) {
+        if (slashPos == string::npos) {
             slashPos = shortenPath.find_first_of( '\\' );
         }
         moduleName = shortenPath.substr( 0, slashPos );
@@ -329,7 +329,7 @@ std::string PresetMan::GetModuleNameFromPath( std::string dataPath )
 
 int PresetMan::GetModuleIDFromPath( std::string dataPath )
 {
-    if( dataPath.empty() ) {
+    if (dataPath.empty()) {
         return -1;
     }
 
@@ -353,7 +353,7 @@ bool PresetMan::IsModuleOfficial(std::string moduleName)
 // Description:     Returns the Full path to the module including Data/ or Mods/.
 // Arguments:       The Path to be completed.
 //                  The ID of the module to check.
-// Return value:    The complete path to the file, including Data/ or Mods/ wether or not it's part of an official module.
+// Return value:    The complete path to the file, including Data/ or Mods/ based on whether or not it's part of an official module.
 
 std::string PresetMan::FullModulePath(std::string modulePath)
 {

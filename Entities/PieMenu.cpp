@@ -624,7 +624,7 @@ namespace RTE {
 				}
 			}
 			SetHoveredPieSlice(pieSliceToSelect);
-			m_HoverTimer.SetRealTimeLimitMS(50);
+			m_HoverTimer.SetRealTimeLimitMS(controller->IsMouseControlled() ? 50 : 500);
 			return true;
 		} else if (IsSubPieMenu() && m_HoverTimer.IsPastRealTimeLimit()) {
 			SetEnabled(false);

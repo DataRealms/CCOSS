@@ -269,7 +269,7 @@ namespace RTE {
 			m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
 			m_EnableDisableAnimationTimer.Reset();
 
-			PrepareMouseForEnableOrDisable(enable);
+			PrepareAnalogCursorForEnableOrDisable(enable);
 
 			if (playSounds) {
 				SoundContainer *soundToPlay = enable ? g_GUISound.PieMenuEnterSound() : g_GUISound.PieMenuExitSound();
@@ -520,7 +520,7 @@ namespace RTE {
 						m_SubPieMenuHoverOpenTimer.Reset();
 						m_HoverTimer.SetRealTimeLimitMS(2000);
 						if (IsSubPieMenu()) {
-							PrepareMouseForEnableOrDisable(true);
+							PrepareAnalogCursorForEnableOrDisable(true);
 							m_CursorInVisiblePosition = true;
 						} else {
 							SetHoveredPieSlice(nullptr);
@@ -1138,13 +1138,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieMenu::PrepareMouseForEnableOrDisable(bool enable) const {
-		if (Controller *controller = GetController(); controller && controller->IsMouseControlled()) {
+	void PieMenu::PrepareAnalogCursorForEnableOrDisable(bool enable) const {
+		if (Controller *controller = GetController(); controller && (controller->IsMouseControlled() || controller->IsGamepadControlled())) {
 			if (!IsSubPieMenu()) {
 				g_UInputMan.SetMouseValueMagnitude(0, controller->GetPlayer());
 				controller->m_AnalogCursor.Reset();
 			} else if (enable) {
-				controller->SetAnalogAimValueAngleLimits(GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) - c_QuarterPI + (PieQuadrant::c_PieSliceSlotSize / 2.0F), GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) + c_QuarterPI - (PieQuadrant::c_PieSliceSlotSize / 2.0F));
+				controller->SetAnalogCursorAngleLimits(GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) - c_QuarterPI + (PieQuadrant::c_PieSliceSlotSize / 2.0F), GetRotAngle() + c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu) + c_QuarterPI - (PieQuadrant::c_PieSliceSlotSize / 2.0F));
 				if (!controller->m_AnalogCursor.IsZero()) {
 					float mouseAngleToSet = GetRotAngle() + (m_HoveredPieSlice ? m_HoveredPieSlice->GetMidAngle() :  c_DirectionsToRadiansMap.at(m_DirectionIfSubPieMenu));
 					g_UInputMan.SetMouseValueAngle(mouseAngleToSet, controller->GetPlayer());
@@ -1153,7 +1153,7 @@ namespace RTE {
 					controller->m_AnalogCursor.SetMagnitude(0.75F);
 				}
 			} else {
-				controller->ClearAnalogAimValueAngleLimits();
+				controller->ClearAnalogCursorAngleLimits();
 			}
 		}
 	}

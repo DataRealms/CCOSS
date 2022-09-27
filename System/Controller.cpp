@@ -26,7 +26,7 @@ namespace RTE {
 		m_WeaponDropIgnore = false;
 		m_WeaponReloadIgnore = false;
 		m_MouseMovement.Reset();
-		m_AnalogAimValueAngleLimits = { {0, 0}, false };
+		m_AnalogCursorAngleLimits = { {0, 0}, false };
 		m_ReleaseTimer.Reset();
 		m_JoyAccelTimer.Reset();
 		m_KeyAccelTimer.Reset();
@@ -63,7 +63,7 @@ namespace RTE {
 		m_WeaponDropIgnore = reference.m_WeaponDropIgnore;
 		m_WeaponReloadIgnore = reference.m_WeaponReloadIgnore;
 
-		m_AnalogAimValueAngleLimits = reference.m_AnalogAimValueAngleLimits;
+		m_AnalogCursorAngleLimits = reference.m_AnalogCursorAngleLimits;
 
 		return 0;
 	}
@@ -333,7 +333,6 @@ namespace RTE {
 		// ANALOG joystick values
 		Vector move = g_UInputMan.AnalogMoveValues(m_Player);
 		Vector aim = g_UInputMan.AnalogAimValues(m_Player);
-		if (m_AnalogAimValueAngleLimits.second) { aim.SetAbsRadAngle(ClampAngle(aim.GetAbsRadAngle(), m_AnalogAimValueAngleLimits.first.first, m_AnalogAimValueAngleLimits.first.second)); }
 
 		bool pieMenuActive = m_ControlStates.at(ControlState::PIE_MENU_ACTIVE);
 
@@ -343,6 +342,9 @@ namespace RTE {
 			m_AnalogAim = aim;
 		} else {
 			m_AnalogCursor = move.GetLargest() > aim.GetLargest() ? move : aim;
+			if (m_AnalogCursorAngleLimits.second) {
+				m_AnalogCursor.SetAbsRadAngle(ClampAngle(m_AnalogCursor.GetAbsRadAngle(), m_AnalogCursorAngleLimits.first.first, m_AnalogCursorAngleLimits.first.second));
+			}
 		}
 
 		// If the joystick-controlled analog cursor is less than at the edge of input range, don't accelerate

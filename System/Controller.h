@@ -218,16 +218,16 @@ namespace RTE {
 		void SetAnalogCursor(const Vector &newAnalogCursor) { m_AnalogCursor = newAnalogCursor; }
 
 		/// <summary>
-		/// Sets the analog aim angle limits for the given player (does nothing for player -1). The limit end is always CCW from the limit start.
+		/// Sets the analog cursor angle limits for the given player (does nothing for player -1). The limit end is always CCW from the limit start.
 		/// </summary>
-		/// <param name="angleLimitStart">The starting angle limit for analog aiming.</param>
-		/// <param name="angleLimitEnd">The ending angle limit for analog aiming.</param>
-		void SetAnalogAimValueAngleLimits(float angleLimitStart, float angleLimitEnd) { m_AnalogAimValueAngleLimits = { {angleLimitStart, angleLimitEnd}, true }; }
+		/// <param name="angleLimitStart">The starting angle limit for the analog cursor.</param>
+		/// <param name="angleLimitEnd">The ending angle limit for the analog cursor.</param>
+		void SetAnalogCursorAngleLimits(float angleLimitStart, float angleLimitEnd) { m_AnalogCursorAngleLimits = { {angleLimitStart, angleLimitEnd}, true }; }
 
 		/// <summary>
-		/// Clears the analog aim limits for the given player (does nothing for player -1).
+		/// Clears the analog cursor aim limits for the given player (does nothing for player -1).
 		/// </summary>
-		void ClearAnalogAimValueAngleLimits() { m_AnalogAimValueAngleLimits.second = false; }
+		void ClearAnalogCursorAngleLimits() { m_AnalogCursorAngleLimits.second = false; }
 
 		/// <summary>
 		/// Adds relative movement to a passed-in vector. Uses the appropriate input method currently of this.
@@ -353,7 +353,7 @@ namespace RTE {
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.
 
-		std::pair<std::pair<float, float>, bool> m_AnalogAimValueAngleLimits; //!< Analog aim value limits, as well as whether or not the limit is actually enabled.
+		std::pair<std::pair<float, float>, bool> m_AnalogCursorAngleLimits; //!< Analog aim value limits, as well as whether or not the limit is actually enabled.
 
 	private:
 

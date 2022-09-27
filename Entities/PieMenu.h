@@ -532,10 +532,10 @@ namespace RTE {
 		bool PreparePieSliceSubPieMenuForUse(const PieSlice *pieSliceWithSubPieMenu) const;
 
 		/// <summary>
-		/// If the Controller for this PieMenu is mouse controlled, sets up mouse angle limits and positions for when the pie menu is enabled or disabled. Also used when a sub-PieMenu of this PieMenu is disabled.
+		/// If the Controller for this PieMenu is mouse or gamepad controlled, sets up analog cursor angle limits and positions for when the pie menu is enabled or disabled. Also used when a sub-PieMenu of this PieMenu is disabled.
 		/// </summary>
 		/// <param name="enable">Whether the PieMenu is being enabled or disabled.</param>
-		void PrepareMouseForEnableOrDisable(bool enable) const;
+		void PrepareAnalogCursorForEnableOrDisable(bool enable) const;
 
 		/// <summary>
 		/// Clears all the member variables of this PieMenu, effectively resetting the members of this abstraction level only.

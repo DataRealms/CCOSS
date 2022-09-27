@@ -52,6 +52,7 @@ namespace RTE {
 		.def("IsPlayerControlled", &Controller::IsPlayerControlled)
 		.def("RelativeCursorMovement", &Controller::RelativeCursorMovement)
 		.def("IsMouseControlled", &Controller::IsMouseControlled)
+		.def("IsGamepadControlled", &Controller::IsGamepadControlled)
 		.def("SetState", &Controller::SetState)
 		.def("IsState", &Controller::IsState)
 

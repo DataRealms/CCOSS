@@ -124,6 +124,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool Controller::IsGamepadControlled() const {
+		bool isGamepadControlled = false;
+		if (m_Player != Players::NoPlayer) {
+			InputDevice inputDevice = g_UInputMan.GetControlScheme(m_Player)->GetDevice();
+			if (inputDevice >= InputDevice::DEVICE_GAMEPAD_1 && inputDevice <= InputDevice::DEVICE_GAMEPAD_4) {
+				isGamepadControlled = true;
+			}
+		}
+		return isGamepadControlled;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Controller::GetTeam() const {
 		return m_ControlledActor ? m_ControlledActor->GetTeam() : m_Team;
 	}

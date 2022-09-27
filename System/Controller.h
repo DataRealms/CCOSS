@@ -244,6 +244,12 @@ namespace RTE {
 		bool IsMouseControlled() const;
 
 		/// <summary>
+		/// Indicates whether this is listening to gamepad at all.
+		/// </summary>
+		/// <returns>Whether this is using gamepad input at all.</returns>
+		bool IsGamepadControlled() const;
+
+		/// <summary>
 		/// Gets the relative movement of the mouse since last update.
 		/// </summary>
 		/// <returns>The relative mouse movements, in both axes.</returns>

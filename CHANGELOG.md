@@ -184,6 +184,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `GameActivity` INI property `BuyMenuEnabled` to match the Lua property, and made the buy menu `PieSlice` disappear if `BuyMenuEnabled` is false.  
 	Note that, if you toggle this from off to on in Lua for a running `GameActivity`, you'll need to re-add the buy menu `PieSlice` manually.
+	
+- Added `Controller` Lua function `IsGamepadControlled()`, that lets you tell if a `Controller` is being controlled by any of the gamepad inputs, much like the pre-existing `IsMouseControlled()` function.
 
 - Added some useful global angle helper functions:  
 	```lua
@@ -198,7 +200,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 <details><summary><b>Changed</b></summary>
 
 - Completely replaced `ScriptFile` with `ScriptPath`.
-	
+
 - Changed the `Vector` function `ClampMagnitude` so its parameter order makes sense, it's now `Vector:ClampMagnitude(lowerMagnitudeLimit, upperMagnitudeLimit)`.
 
 - Changed the `MovableMan` function `AddItem` so it now only accepts `HeldDevice`s and sub-classes (i.e. `HDFirearm`, `ThrownDevice`, `TDExplosive`), because it always expected that anyway, and it's good to enforce it.

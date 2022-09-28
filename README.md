@@ -62,7 +62,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `lz4>=1.9.0`
 * `libpng`
 * `libX11`
-* [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
+* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson=0.63.0 ninja=1.11.0` if your distro doesn't include a recent version)
 * `boost>=1.55`
 * (optional) `xmessage`
 

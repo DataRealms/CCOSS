@@ -109,4 +109,19 @@ namespace RTE {
 			luabind::value("JOYDIR_TWO", JoyDirections::JOYDIR_TWO)
 		];
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(MiscLuaBindings, Directions) {
+		return luabind::class_<directions>("Directions")
+
+		.enum_("Directions")[
+			luabind::value("None", Directions::None),
+			luabind::value("Up", Directions::Up),
+			luabind::value("Down", Directions::Down),
+			luabind::value("Left", Directions::Left),
+			luabind::value("Right", Directions::Right),
+			luabind::value("Any", Directions::Any)
+		];
+	}
 }

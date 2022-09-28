@@ -106,11 +106,9 @@ void Actor::Clear() {
     m_Inventory.clear();
 	m_MaxInventoryMass = -1.0F;
 	m_pItemInReach = nullptr;
-    m_PieNeedsUpdate = false;
     m_HUDStack = 0;
     m_FlashWhiteMS = 0;
     m_WhiteFlashTimer.Reset();
-    m_PieSlices.clear();
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
@@ -140,6 +138,8 @@ void Actor::Clear() {
 
 	m_Organic = false;
 	m_Mechanical = false;
+
+	m_PieMenu.reset();
 }
 
 
@@ -172,6 +172,12 @@ int Actor::Create()
 	// All brain actors by default avoid hitting each other ont he same team
 	if (IsInGroup("Brains"))
 		m_IgnoresTeamHits = true;
+
+	if (!m_PieMenu) {
+		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
+	} else {
+		m_PieMenu->SetOwner(this);
+	}
 
     return 0;
 }
@@ -233,36 +239,33 @@ int Actor::Create(const Actor &reference)
 
     m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
-    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
-        m_PieSlices.push_back(*itr);
-
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
         ContentFile("Base.rte/GUIs/TeamIcons/NoTeam.png").GetAsAnimation(m_apNoTeamIcon, 2);
 
-        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
+        ContentFile iconFile("Base.rte/GUIs/PieMenus/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
         m_apAIIcons[AIMODE_BOMB] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Eye000.png");
         m_apAIIcons[AIMODE_SENTRY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Cycle000.png");
         m_apAIIcons[AIMODE_PATROL] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/GoTo000.png");
         m_apAIIcons[AIMODE_GOTO] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Brain000.png");
         m_apAIIcons[AIMODE_BRAINHUNT] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Dig000.png");
         m_apAIIcons[AIMODE_GOLDDIG] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Return000.png");
         m_apAIIcons[AIMODE_RETURN] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Land000.png");
         m_apAIIcons[AIMODE_STAY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Launch000.png");
         m_apAIIcons[AIMODE_DELIVER] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Death000.png");
         m_apAIIcons[AIMODE_SCUTTLE] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
+        iconFile.SetDataPath("Base.rte/GUIs/PieMenus/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
         ContentFile("Base.rte/GUIs/Indicators/SelectArrow.png").GetAsAnimation(m_apSelectArrow, 4);
@@ -290,6 +293,10 @@ int Actor::Create(const Actor &reference)
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
+
+	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
+	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));
+	m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get()));
 
     return 0;
 }
@@ -369,18 +376,11 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
+		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
         m_Inventory.push_back(pInvMO);
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
-    else if (propName == "AddPieSlice")
-    {
-        PieSlice newSlice;
-        reader >> newSlice;
-        m_PieSlices.push_back(newSlice);
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-    }
     else if (propName == "AIMode")
     {
         int mode;
@@ -390,6 +390,10 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 		reader >> m_Organic;
 	} else if (propName == "Mechanical") {
 		reader >> m_Mechanical;
+	} else if (propName == "PieMenu") {
+		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
+		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
+		m_PieMenu->Create(this);
 	} else
         return MOSRotating::ReadProperty(propName, reader);
 
@@ -459,13 +463,10 @@ int Actor::Save(Writer &writer) const
     }
     writer.NewProperty("MaxInventoryMass");
     writer << m_MaxInventoryMass;
-    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
-    {
-        writer.NewProperty("AddPieSlice");
-        writer << *itr;
-    }
     writer.NewProperty("AIMode");
     writer << m_AIMode;
+    writer.NewProperty("PieMenu");
+    writer << m_PieMenu.get();
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
 	writer.NewPropertyWithValue("Mechanical", m_Mechanical);
@@ -633,9 +634,6 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
 
-    // Needs to update the pie menu if we were switched to/from
-    m_PieNeedsUpdate = true;
-
     // So the AI doesn't jerk around
     m_StuckTimer.Reset();
 
@@ -654,9 +652,6 @@ Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, 
     Controller::InputMode returnMode = m_Controller.GetInputMode();
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
-
-    // Needs to update the pie menu if we were switched to/from
-    m_PieNeedsUpdate = true;
 
     // So the AI doesn't jerk around
     m_StuckTimer.Reset();
@@ -738,22 +733,6 @@ void Actor::RestDetection()
         m_RestTimer.Reset();
         m_ToSettle = false;
     }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-
-bool Actor::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-    // Add the custom scripted options of this Actor
-    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
-        pPieMenu->AddSlice(*itr);
-
-    m_PieNeedsUpdate = false;
-    return true;
 }
 
 
@@ -1390,6 +1369,8 @@ void Actor::Update()
     // Hit Body update and handling
     MOSRotating::Update();
 
+	m_PieMenu->Update();
+
     // Update the viewpoint to be at least what the position is
     m_ViewPoint = m_Pos;
 
@@ -1746,7 +1727,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					{
 						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps.at(0)->h);
+						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps[0]->h);
 					}
 				}
 
@@ -1864,6 +1845,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // Don't proceed to draw all the secret stuff below if this screen is for a player on the other team!
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)
         return;
+
+	if (m_PieMenu->IsVisible()) { m_PieMenu->Draw(pTargetBitmap, targetPos); }
 
     // AI waypoints or points of interest
     if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))

@@ -90,6 +90,7 @@ EntityAllocation(AHuman);
 AddScriptFunctionNames(Actor, "OnStride");
 SerializableOverrideMethods;
 ClassInfoGetters;
+DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AHuman
@@ -401,27 +402,12 @@ ClassInfoGetters;
 
     bool CollideAtPoint(HitData &hitData) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-   bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-// Arguments:       The pie menu command to handle. See the PieSliceIndex enum.
-// Return value:    Whetehr any slice was handled. False if no matching slice handler was
-//                  found, or there was no slice currently activated by the pie menu.
-
-    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
+    /// <summary>
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its SliceType.
+    /// </summary>
+    /// <param name="pieSliceType">The SliceType of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
+    bool HandlePieCommand(PieSlice::SliceType pieSliceType) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -815,13 +801,6 @@ ClassInfoGetters;
 
 	void Update() override;
 
-    /// <summary>
-    /// Executes the Lua-defined OnPieMenu event handler for this AHuman.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	int OnPieMenu(Actor *pieMenuActor) override;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -1120,6 +1099,15 @@ protected:
     Timer m_PatrolTimer;
     // Timer for how long to be firing the jetpack in a direction
     Timer m_JumpTimer;
+
+#pragma region Event Handling
+	/// <summary>
+	/// Event listener to be run while this AHuman's PieMenu is opened.
+	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int WhilePieMenuOpenListener(const PieMenu *pieMenu) override;
+#pragma endregion
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

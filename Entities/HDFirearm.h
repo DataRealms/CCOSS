@@ -42,7 +42,7 @@ public:
 EntityAllocation(HDFirearm);
 SerializableOverrideMethods;
 ClassInfoGetters;
-AddScriptFunctionNames(MOSRotating, "OnFire", "OnReload");
+AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm
@@ -154,6 +154,11 @@ AddScriptFunctionNames(MOSRotating, "OnFire", "OnReload");
     /// <param name="newTurret">The new flash to use.</param>
     void SetFlash(Attachable *newFlash);
 
+	/// <summary>
+	/// Gets the preset name of the next Magazine that will be loaded into this gun.
+	/// </summary>
+	/// <returns>The preset name of the next Magazine that will be loaded into this gun.</returns>
+	std::string GetNextMagazineName() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  SetNextMagazineName

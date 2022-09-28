@@ -26,6 +26,7 @@ namespace RTE {
 		m_WeaponDropIgnore = false;
 		m_WeaponReloadIgnore = false;
 		m_MouseMovement.Reset();
+		m_AnalogCursorAngleLimits = { {0, 0}, false };
 		m_ReleaseTimer.Reset();
 		m_JoyAccelTimer.Reset();
 		m_KeyAccelTimer.Reset();
@@ -61,6 +62,8 @@ namespace RTE {
 		m_WeaponPickupIgnore = reference.m_WeaponPickupIgnore;
 		m_WeaponDropIgnore = reference.m_WeaponDropIgnore;
 		m_WeaponReloadIgnore = reference.m_WeaponReloadIgnore;
+
+		m_AnalogCursorAngleLimits = reference.m_AnalogCursorAngleLimits;
 
 		return 0;
 	}
@@ -117,6 +120,19 @@ namespace RTE {
 
 	bool Controller::IsMouseControlled() const {
 		return m_Player != Players::NoPlayer && g_UInputMan.GetControlScheme(m_Player)->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Controller::IsGamepadControlled() const {
+		bool isGamepadControlled = false;
+		if (m_Player != Players::NoPlayer) {
+			InputDevice inputDevice = g_UInputMan.GetControlScheme(m_Player)->GetDevice();
+			if (inputDevice >= InputDevice::DEVICE_GAMEPAD_1 && inputDevice <= InputDevice::DEVICE_GAMEPAD_4) {
+				isGamepadControlled = true;
+			}
+		}
+		return isGamepadControlled;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +333,8 @@ namespace RTE {
 		// ANALOG joystick values
 		Vector move = g_UInputMan.AnalogMoveValues(m_Player);
 		Vector aim = g_UInputMan.AnalogAimValues(m_Player);
-		bool pieMenuActive = m_ControlStates[ControlState::PIE_MENU_ACTIVE];
+
+		bool pieMenuActive = m_ControlStates.at(ControlState::PIE_MENU_ACTIVE);
 
 		// Only change aim and move if not holding actor switch buttons - don't want to mess up AI's aim
 		if (!pieMenuActive && !m_ControlStates[ControlState::ACTOR_PREV_PREP] && !m_ControlStates[ControlState::ACTOR_NEXT_PREP] && m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
@@ -325,6 +342,9 @@ namespace RTE {
 			m_AnalogAim = aim;
 		} else {
 			m_AnalogCursor = move.GetLargest() > aim.GetLargest() ? move : aim;
+			if (m_AnalogCursorAngleLimits.second) {
+				m_AnalogCursor.SetAbsRadAngle(ClampAngle(m_AnalogCursor.GetAbsRadAngle(), m_AnalogCursorAngleLimits.first.first, m_AnalogCursorAngleLimits.first.second));
+			}
 		}
 
 		// If the joystick-controlled analog cursor is less than at the edge of input range, don't accelerate

@@ -21,7 +21,6 @@
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
-#include "PieMenuGUI.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "PresetMan.h"
@@ -651,83 +650,31 @@ bool ACrab::OnSink(const Vector &pos)
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, !FirearmsAreFull() && m_Status != INACTIVE);
-    pPieMenu->AddSlice(reloadSlice);
-
-	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
-    pPieMenu->AddSlice(sentryAISlice);
-
-    if (!HasObjectInGroup("Turrets"))
-    {
-	    PieSlice aiModeSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
-        pPieMenu->AddSlice(aiModeSlice);
-    }
-
-	PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
-	pPieMenu->AddSlice(patrolAISlice);
-
-    if (!HasObjectInGroup("Turrets"))
-    {
-	    PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
-        pPieMenu->AddSlice(formSquadSlice);
-    }
-
-//    pPieMenu->AddSlice(PieSlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieSlice::DOWN));
-
-    Actor::AddPieMenuSlices(pPieMenu);
-
-    // Add any custom slices from a currently held device
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
-        m_pTurret->GetFirstMountedDevice()->AddPieMenuSlices(pPieMenu); //TODO This should care about all devices but all this will be redone soon so I'm leaving it as-is.
-
-    return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool ACrab::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
-{
-    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
-    {
-        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
+bool ACrab::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Reload) {
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
+        } else if (pieSliceIndex == PieSlice::SliceType::Sentry) {
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
+        } else if (pieSliceIndex == PieSlice::SliceType::Patrol) {
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::BrainHunt) {
             m_AIMode = AIMODE_BRAINHUNT;
-            // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::GoTo) {
             m_AIMode = AIMODE_GOTO;
-            // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
             m_UpdateMovePath = true;
-        }
-//        else if (pieSliceIndex == PieMenuGUI::PSI_GOLDDIG)
-//            m_AIMode = AIMODE_GOLDDIG;
-        else
+        } else {
             return Actor::HandlePieCommand(pieSliceIndex);
+        }
     }
-
     return false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2926,6 +2873,25 @@ void ACrab::SetLimbPathPushForce(float force)
 	m_Paths[RIGHTSIDE][BGROUND][WALK].OverridePushForce(force);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int ACrab::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
+	int result = Actor::WhilePieMenuOpenListener(pieMenu);
+
+	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
+		if (pieSlice->GetType() == PieSlice::SliceType::Reload) {
+			if (m_pTurret && m_pTurret->HasMountedDevice()) {
+				pieSlice->SetDescription("Reload");
+				pieSlice->SetEnabled(!FirearmsAreFull());
+			} else {
+				pieSlice->SetDescription(m_pTurret ? "No Weapons" : "No Turret");
+				pieSlice->SetEnabled(false);
+			}
+			break;
+		}
+	}
+	return result;
+}
 
 
 } // namespace RTE

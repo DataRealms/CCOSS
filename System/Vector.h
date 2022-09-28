@@ -193,10 +193,22 @@ namespace RTE {
 		float GetAbsRadAngle() const;
 
 		/// <summary>
+		/// Sets this Vector's absolute angle in radians.
+		/// </summary>
+		/// <param name="newAbsRadAngle">The Vector's new absolute angle in radians.</param>
+		void SetAbsRadAngle(float newAbsRadAngle) { RadRotate(newAbsRadAngle - GetAbsRadAngle()); }
+
+		/// <summary>
 		/// Get this Vector's absolute angle in degrees. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -90 here.
 		/// </summary>
 		/// <returns>The absolute angle in degrees, in the interval [-90, 270).</returns>
 		float GetAbsDegAngle() const { return GetAbsRadAngle() / c_PI * 180.0F; }
+
+		/// <summary>
+		/// Sets this Vector's absolute angle in degrees.
+		/// </summary>
+		/// <param name="newAbsDegAngle">The Vector's new absolute angle in degrees.</param>
+		void SetAbsDegAngle(float newAbsDegAngle) { DegRotate(newAbsDegAngle - GetAbsDegAngle()); }
 
 		/// <summary>
 		/// Returns a copy of this Vector, rotated relatively by an angle in radians.

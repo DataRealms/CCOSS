@@ -212,6 +212,24 @@ namespace RTE {
 		Vector GetAnalogCursor() const { return m_AnalogCursor; }
 
 		/// <summary>
+		/// Sets the analog cursor to the specified position.
+		/// </summary>
+		/// <param name="newAnalogCursor">The position the analog cursor should be set to.</param>
+		void SetAnalogCursor(const Vector &newAnalogCursor) { m_AnalogCursor = newAnalogCursor; }
+
+		/// <summary>
+		/// Sets the analog cursor angle limits for the given player (does nothing for player -1). The limit end is always CCW from the limit start.
+		/// </summary>
+		/// <param name="angleLimitStart">The starting angle limit for the analog cursor.</param>
+		/// <param name="angleLimitEnd">The ending angle limit for the analog cursor.</param>
+		void SetAnalogCursorAngleLimits(float angleLimitStart, float angleLimitEnd) { m_AnalogCursorAngleLimits = { {angleLimitStart, angleLimitEnd}, true }; }
+
+		/// <summary>
+		/// Clears the analog cursor aim limits for the given player (does nothing for player -1).
+		/// </summary>
+		void ClearAnalogCursorAngleLimits() { m_AnalogCursorAngleLimits.second = false; }
+
+		/// <summary>
 		/// Adds relative movement to a passed-in vector. Uses the appropriate input method currently of this.
 		/// </summary>
 		/// <param name="cursorPos"> The vector to alter.</param>
@@ -224,6 +242,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this is using mouse input at all.</returns>
 		bool IsMouseControlled() const;
+
+		/// <summary>
+		/// Indicates whether this is listening to gamepad at all.
+		/// </summary>
+		/// <returns>Whether this is using gamepad input at all.</returns>
+		bool IsGamepadControlled() const;
 
 		/// <summary>
 		/// Gets the relative movement of the mouse since last update.
@@ -328,6 +352,8 @@ namespace RTE {
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.
+
+		std::pair<std::pair<float, float>, bool> m_AnalogCursorAngleLimits; //!< Analog aim value limits, as well as whether or not the limit is actually enabled.
 
 	private:
 

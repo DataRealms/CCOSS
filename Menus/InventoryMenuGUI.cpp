@@ -269,7 +269,8 @@ namespace RTE {
 		m_InventoryActor = newInventoryActor;
 		if (m_InventoryActor) {
 			m_InventoryActorIsHuman = dynamic_cast<AHuman *>(m_InventoryActor);
-			m_CenterPos = m_InventoryActor->GetCPUPos();
+
+			if (g_SceneMan.ShortestDistance(m_CenterPos, m_InventoryActor->GetCPUPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > 2.0F) { m_CenterPos = m_InventoryActor->GetCPUPos(); }
 		}
 	}
 

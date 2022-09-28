@@ -1482,32 +1482,6 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
-
-void MovableMan::OnPieMenu(Actor * pActor)
-{
-	deque<Actor *>::iterator aIt;
-	deque<MovableObject *>::iterator iIt;
-	deque<MovableObject *>::iterator parIt;
-
-	for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-	{
-		if ((*aIt)->ProvidesPieMenuContext())
-			(*aIt)->OnPieMenu(pActor);
-	}
-
-	for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
-	{
-		if ((*iIt)->ProvidesPieMenuContext())
-			(*iIt)->OnPieMenu(pActor);
-	}
-
-	for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-	{
-		if ((*parIt)->ProvidesPieMenuContext())
-			(*parIt)->OnPieMenu(pActor);
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////

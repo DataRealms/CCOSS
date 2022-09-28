@@ -75,6 +75,10 @@ namespace RTE {
 			luabind::def("EaseOut", &EaseOut),
 			luabind::def("EaseInOut", &EaseInOut),
 			luabind::def("Clamp", &Limit),
+			luabind::def("NormalizeAngleBetween0And2PI", &NormalizeAngleBetween0And2PI),
+			luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
+			luabind::def("AngleWithinRange", &AngleWithinRange),
+			luabind::def("ClampAngle", &ClampAngle),
 			luabind::def("GetPPM", &GetPPM),
 			luabind::def("GetMPP", &GetMPP),
 			luabind::def("GetPPL", &GetPPL),
@@ -115,6 +119,8 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HDFirearm),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ThrownDevice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
@@ -125,7 +131,6 @@ namespace RTE {
 			RegisterLuaBindingsOfType(SystemLuaBindings, DataModule),
 			RegisterLuaBindingsOfType(ActivityLuaBindings, Activity),
 			RegisterLuaBindingsOfAbstractType(ActivityLuaBindings, GameActivity),
-			RegisterLuaBindingsOfType(SystemLuaBindings, PieSlice),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, GlobalScript),
 			RegisterLuaBindingsOfType(EntityLuaBindings, MetaPlayer),
 			RegisterLuaBindingsOfType(GUILuaBindings, GUIBanner),
@@ -149,7 +154,8 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons)
+			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
 		];
 
 		// Assign the manager instances to globals in the lua master state
@@ -217,11 +223,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
+		m_TempEntityVector.reserve(entityVector.size());
+		for (const Entity *entity : entityVector) {
+			m_TempEntityVector.emplace_back(const_cast<Entity *>(entity));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
-			for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
+			for (const std::string_view &variableToSafetyCheck : variablesToSafetyCheck) {
 				if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) { scriptString << " and "; }
 				scriptString << variableToSafetyCheck;
 			}
@@ -229,23 +244,31 @@ namespace RTE {
 		}
 		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
 
-		scriptString << functionName + "(" + selfObjectName;
+		scriptString << functionName + "(";
+		if (!selfObjectName.empty()) { scriptString << selfObjectName; }
+		bool isFirstFunctionArgument = selfObjectName.empty();
 		if (!functionEntityArguments.empty()) {
 			SetTempEntityVector(functionEntityArguments);
 			for (const Entity *functionEntityArgument : functionEntityArguments) {
-				scriptString << ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
+				scriptString << "(To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				isFirstFunctionArgument = false;
 			}
 		}
 		if (!functionLiteralArguments.empty()) {
-			for (const std::string &functionLiteralArgument : functionLiteralArguments) {
-				scriptString << ", " + functionLiteralArgument;
+			for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
+				scriptString << ", " + std::string(functionLiteralArgument);
+				isFirstFunctionArgument = false;
 			}
 		}
 		scriptString << ");";
 
 		if (!variablesToSafetyCheck.empty()) { scriptString << " end;"; }
 
-		return RunScriptString(scriptString.str());
+		int result = RunScriptString(scriptString.str());
+		m_TempEntityVector.clear();
+		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

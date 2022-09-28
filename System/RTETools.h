@@ -172,6 +172,40 @@ namespace RTE {
 	float Limit(float value, float upperLimit, float lowerLimit);
 #pragma endregion
 
+#pragma region Angle Helpers
+	/// <summary>
+	/// Returns a copy of the angle normalized so it's between 0 and 2PI.
+	/// </summary>
+	/// <param name="angle">The angle to normalize, in radians.</param>
+	/// <returns>The angle, normalized so it's between 0 and 2PI</returns>
+	float NormalizeAngleBetween0And2PI(float angle);
+
+	/// <summary>
+	/// Returns a copy of the angle normalized so it's between -PI and PI.
+	/// </summary>
+	/// <param name="angle">The angle to normalize, in radians.</param>
+	/// <returns>The angle, normalized so it's between -PI and PI</returns>
+	float NormalizeAngleBetweenNegativePIAndPI(float angle);
+
+	/// <summary>
+	/// Returns whether or not the angle to check is between the start and end angles. Note that, because of how angles work (when normalized), the start angle may be greater than the end angle.
+	/// </summary>
+	/// <param name="angleToCheck">The angle to check, in radians.</param>
+	/// <param name="startAngle">The starting angle for the range.</param>
+	/// <param name="endAngle">The ending angle for the range.</param>
+	/// <returns>Whether or not the angle to check is between the start and end angle.</returns>
+	bool AngleWithinRange(float angleToCheck, float startAngle, float endAngle);
+
+	/// <summary>
+	/// Clamps the passed in angle between the specified lower and upper limits, in a CCW direction.
+	/// </summary>
+	/// <param name="angleToClamp">The angle to clamp.</param>
+	/// <param name="startAngle">The lower limit for clamping.</param>
+	/// <param name="endAngle">The upper limit for clamping.</param>
+	/// <returns>The angle, clamped between the start and end angle.</returns>
+	float ClampAngle(float angleToClamp, float startAngle, float endAngle);
+#pragma endregion
+
 #pragma region Detection
 	/// <summary>
 	/// Tells whether a point is within a specified box.

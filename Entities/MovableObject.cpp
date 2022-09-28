@@ -108,8 +108,6 @@ void MovableObject::Clear()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
-	m_ProvidesPieMenuContext = false;
-
 	m_SimUpdatesBetweenScriptedUpdates = 1;
     m_SimUpdatesSinceLastScriptedUpdate = 0;
 }
@@ -263,8 +261,6 @@ int MovableObject::Create(const MovableObject &reference)
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
 
-	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
-
     return 0;
 }
 
@@ -333,14 +329,6 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_CanBeSquished;
 	else if (propName == "HUDVisible")
 		reader >> m_HUDVisible;
-	else if (propName == "ProvidesPieMenuContext")
-		reader >> m_ProvidesPieMenuContext;
-	else if (propName == "AddPieSlice")
-	{
-		PieSlice newSlice;
-		reader >> newSlice;
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-	}
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
         switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
@@ -701,7 +689,7 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) const {
+int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) const {
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
@@ -720,7 +708,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
     int status = 0;
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end() || m_FunctionsAndScripts.find(functionName)->second.empty()) {
         status = -1;
@@ -1038,12 +1026,8 @@ int MovableObject::UpdateScripts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::OnPieMenu(Actor *pieMenuActor) {
-    if (!pieMenuActor) {
-        return -1;
-    }
-
-    return RunScriptedFunctionInAppropriateScripts("OnPieMenu", false, false, {pieMenuActor});
+int MovableObject::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
+	return RunScriptedFunctionInAppropriateScripts("WhilePieMenuOpen", false, false, { pieMenu });
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

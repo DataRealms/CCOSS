@@ -30,7 +30,7 @@ namespace RTE
 
 class SceneObject;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -173,9 +173,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 // Arguments:       None.
-// Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
+// Return value:    The enum'd int of any slice activated. See the PieSlice::SliceType enum.
 
-    PieSlice::PieSliceIndex GetActivatedPieSlice() { return m_ActivatedPieSliceType; }
+	PieSlice::SliceType GetActivatedPieSlice() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -381,9 +381,7 @@ protected:
 	// Whether we need a clear path to orbit to place brain
 	bool m_RequireClearPathToOrbit;
 
-    // The pie menu
-    PieMenuGUI *m_pPieMenu;
-    PieSlice::PieSliceIndex m_ActivatedPieSliceType; //!< The activated PieSliceType, reset every frame.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this AssemblyEditorGUI.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

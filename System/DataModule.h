@@ -22,6 +22,17 @@ namespace RTE {
 		SerializableClassNameGetter;
 		SerializableOverrideMethods;
 
+		/// <summary>
+		/// Struct that holds data about the custom BuyMenu/ObjectPicker theme of this DataModule.
+		/// Themes are used when a DataModule is considered a faction and is selected to be played as in an Activity.
+		/// </summary>
+		struct BuyMenuTheme {
+			std::string SkinFilePath = ""; //!< Path to the custom BuyMenu skin file.
+			std::string BannerImagePath = ""; //!< Path to the custom BuyMenu banner image.
+			std::string LogoImagePath = ""; //< Path to the custom BuyMenu logo.
+			int BackgroundColorIndex = -1; //!< The custom BuyMenu background color.
+		};
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a DataModule object in system memory. Create() should be called before using the object.
@@ -111,6 +122,12 @@ namespace RTE {
 		bool IsFaction() const { return m_IsFaction; }
 
 		/// <summary>
+		/// Gets whether this DataModule is considered a merchant.
+		/// </summary>
+		/// <returns>Whether this DataModule is considered a merchant or not.</returns>
+		bool IsMerchant() const { return m_IsMerchant; }
+
+		/// <summary>
 		/// Gets the version number of this DataModule.
 		/// </summary>
 		/// <returns>An int with the version number, starting at 1.</returns>
@@ -127,6 +144,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Crab-to-human spawn ration value.</returns>
 		float GetCrabToHumanSpawnRatio() const { return m_CrabToHumanSpawnRatio; }
+
+		/// <summary>
+		/// Gets the faction BuyMenu theme data of this DataModule.
+		/// </summary>
+		/// <returns>The faction BuyMenu theme information of this DataModule</returns>
+		const BuyMenuTheme & GetFactionBuyMenuTheme() const { return m_BuyMenuTheme; }
 #pragma endregion
 
 #pragma region Entity Mapping
@@ -265,11 +288,15 @@ namespace RTE {
 		std::string m_Description; //!< Brief description of what this module is and contains.
 		std::string m_ScriptPath; //!< Path to script to execute when this module is loaded.
 		bool m_IsFaction; //!< Whether this data module is considered a faction.
+		bool m_IsMerchant; //!< Whether this data module is considered a merchant.
+		std::string m_SupportedGameVersion; //!< Game version this DataModule supports. Needs to match exactly for this DataModule to be allowed. Base DataModules don't need this.
 		int m_Version; //!< Version number, starting with 1.
 		int m_ModuleID; //!< ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
 
 		ContentFile m_IconFile; //!< File to the icon/symbol bitmap.
 		BITMAP *m_Icon; //!< Bitmap with the icon loaded from above file.
+
+		BuyMenuTheme m_BuyMenuTheme; //!< Faction BuyMenu theme data.
 
 		float m_CrabToHumanSpawnRatio; //!< Crab-to-human Spawn ratio to replace value from Constants.lua.
 

@@ -14,18 +14,20 @@ namespace RTE {
 		m_Integrity = 0.0F;
 		m_Restitution = 0.0F;
 		m_Friction = 0.0F;
-		m_Stickiness = 0.0F;	
+		m_Stickiness = 0.0F;
 		m_VolumeDensity = 0.0F;
 		m_PixelDensity = 0.0F;
 		m_GibImpulseLimitPerLiter = 0.0F;
-		m_GibWoundLimitPerLiter = 0.0F;	
+		m_GibWoundLimitPerLiter = 0.0F;
 		m_SettleMaterialIndex = 0;
 		m_SpawnMaterialIndex = 0;
 		m_IsScrap = false;
 		m_Color.Reset();
 		m_UseOwnColor = false;
-		m_TextureFile.Reset();
-		m_TerrainTexture = 0;
+		m_FGTextureFile.Reset();
+		m_BGTextureFile.Reset();
+		m_TerrainFGTexture = nullptr;
+		m_TerrainBGTexture = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,8 +51,10 @@ namespace RTE {
 		m_IsScrap = reference.m_IsScrap;
 		m_Color = reference.m_Color;
 		m_UseOwnColor = reference.m_UseOwnColor;
-		m_TextureFile = reference.m_TextureFile;
-		m_TerrainTexture = reference.m_TerrainTexture;
+		m_FGTextureFile = reference.m_FGTextureFile;
+		m_BGTextureFile = reference.m_BGTextureFile;
+		m_TerrainFGTexture = reference.m_TerrainFGTexture;
+		m_TerrainBGTexture = reference.m_TerrainBGTexture;
 
 		return 0;
 	}
@@ -60,7 +64,7 @@ namespace RTE {
 	int Material::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Index") {
 			// TODO: Check for index collisions here
-			reader >> m_Index;	
+			reader >> m_Index;
 		} else if (propName == "Priority") {
 			reader >> m_Priority;
 		} else if (propName == "Piling") {
@@ -95,9 +99,12 @@ namespace RTE {
 			reader >> m_Color;
 		} else if (propName == "UseOwnColor") {
 			reader >> m_UseOwnColor;
-		} else if (propName == "TextureFile") {
-			reader >> m_TextureFile;
-			m_TerrainTexture = m_TextureFile.GetAsBitmap();
+		} else if (propName == "FGTextureFile") {
+			reader >> m_FGTextureFile;
+			m_TerrainFGTexture = m_FGTextureFile.GetAsBitmap();
+		} else if (propName == "BGTextureFile") {
+			reader >> m_BGTextureFile;
+			m_TerrainBGTexture = m_BGTextureFile.GetAsBitmap();
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -110,36 +117,22 @@ namespace RTE {
 		Entity::Save(writer);
 		// Materials should never be altered, so no point in saving additional properties when it's a copy
 		if (m_IsOriginalPreset) {
-			writer.NewProperty("Priority");
-			writer << m_Priority;
-			writer.NewProperty("Piling");
-			writer << m_Piling;
-			writer.NewProperty("StructuralIntegrity");
-			writer << m_Integrity;
-			writer.NewProperty("Restitution");
-			writer << m_Restitution;
-			writer.NewProperty("Friction");
-			writer << m_Friction;
-			writer.NewProperty("Stickiness");
-			writer << m_Stickiness;
-			writer.NewProperty("DensityKGPerVolumeL");
-			writer << m_VolumeDensity;
-			writer.NewProperty("GibImpulseLimitPerVolumeL");
-			writer << m_GibImpulseLimitPerLiter;
-			writer.NewProperty("GibWoundLimitPerVolumeL");
-			writer << m_GibWoundLimitPerLiter;
-			writer.NewProperty("SettleMaterial");
-			writer << m_SettleMaterialIndex;
-			writer.NewProperty("SpawnMaterial");
-			writer << m_SpawnMaterialIndex;
-			writer.NewProperty("IsScrap");
-			writer << m_IsScrap;
-			writer.NewProperty("Color");
-			writer << m_Color;
-			writer.NewProperty("UseOwnColor");
-			writer << m_UseOwnColor;
-			writer.NewProperty("TextureFile");
-			writer << m_TextureFile;
+			writer.NewPropertyWithValue("Priority", m_Priority);
+			writer.NewPropertyWithValue("Piling", m_Piling);
+			writer.NewPropertyWithValue("StructuralIntegrity", m_Integrity);
+			writer.NewPropertyWithValue("Restitution", m_Restitution);
+			writer.NewPropertyWithValue("Friction", m_Friction);
+			writer.NewPropertyWithValue("Stickiness", m_Stickiness);
+			writer.NewPropertyWithValue("DensityKGPerVolumeL", m_VolumeDensity);
+			writer.NewPropertyWithValue("GibImpulseLimitPerVolumeL", m_GibImpulseLimitPerLiter);
+			writer.NewPropertyWithValue("GibWoundLimitPerVolumeL", m_GibWoundLimitPerLiter);
+			writer.NewPropertyWithValue("SettleMaterial", m_SettleMaterialIndex);
+			writer.NewPropertyWithValue("SpawnMaterial", m_SpawnMaterialIndex);
+			writer.NewPropertyWithValue("IsScrap", m_IsScrap);
+			writer.NewPropertyWithValue("Color", m_Color);
+			writer.NewPropertyWithValue("UseOwnColor", m_UseOwnColor);
+			writer.NewPropertyWithValue("FGTextureFile", m_FGTextureFile);
+			writer.NewPropertyWithValue("BGTextureFile", m_BGTextureFile);
 		}
 		return 0;
 	}

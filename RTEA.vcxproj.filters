@@ -375,8 +375,8 @@
     <ClInclude Include="Menus\ObjectPickerGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\PieMenuGUI.h">
-      <Filter>Menus</Filter>
+    <ClInclude Include="Entities\PieMenu.h">
+      <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Menus\ScenarioGUI.h">
       <Filter>Menus</Filter>
@@ -510,8 +510,8 @@
     <ClInclude Include="Menus\ScenarioActivityConfigGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
-    <ClInclude Include="System\PieSlice.h">
-      <Filter>System</Filter>
+    <ClInclude Include="Entities\PieSlice.h">
+      <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
@@ -536,6 +536,15 @@
     </ClInclude>
     <ClInclude Include="Lua\LuaAdapters.h">
       <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\TerrainFrosting.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\SLBackground.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\PieQuadrant.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -875,8 +884,8 @@
     <ClCompile Include="Menus\ObjectPickerGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\PieMenuGUI.cpp">
-      <Filter>Menus</Filter>
+    <ClCompile Include="Entities\PieMenu.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Menus\ScenarioGUI.cpp">
       <Filter>Menus</Filter>
@@ -1002,8 +1011,8 @@
     <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
-    <ClCompile Include="System\PieSlice.cpp">
-      <Filter>System</Filter>
+    <ClCompile Include="Entities\PieSlice.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Menus\InventoryMenuGUI.cpp">
       <Filter>Menus</Filter>
@@ -1034,6 +1043,15 @@
     </ClCompile>
     <ClCompile Include="Lua\LuaBindingsSystem.cpp">
       <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\TerrainFrosting.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\SLBackground.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PieQuadrant.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

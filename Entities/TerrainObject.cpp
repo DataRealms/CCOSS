@@ -1,447 +1,257 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            TerrainObject.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the TerrainObject class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "TerrainObject.h"
-#include "PresetMan.h"
-#include "ContentFile.h"
+#include "SLTerrain.h"
+#include "SceneMan.h"
 
 namespace RTE {
 
-ConcreteClassInfo(TerrainObject, SceneObject, 0);
+	ConcreteClassInfo(TerrainObject, SceneObject, 0);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this TerrainObject, effectively
-//                  resetting the members of this abstraction level only.
-
-void TerrainObject::Clear()
-{
-    m_FGColorFile.Reset();
-    m_MaterialFile.Reset();
-    m_BGColorFile.Reset();
-    m_pFGColor = 0;
-    m_pMaterial = 0;
-    m_pBGColor = 0;
-    m_BitmapOffset.Reset();
-    m_OffsetDefined = false;
-    m_ChildObjects.clear();
-	m_DisplayAsTerrain = false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the TerrainObject object ready for use.
-
-int TerrainObject::Create()
-{
-    if (SceneObject::Create() < 0)
-        return -1;
-
-    // If no bitmapoffset is set, make it point to dead center by default
-    if (!m_OffsetDefined && m_pFGColor)
-    {
-/*
-        if (m_pFGColor->w > 24)
-            m_BitmapOffset.m_X = -std::ceil(((float)m_pFGColor->w / (float)2) + 0.5f);
-        if (m_pFGColor->h > 24)
-            m_BitmapOffset.m_Y = -std::ceil(((float)m_pFGColor->h / (float)2) + 0.5f);
-*/
-        if (m_pFGColor->w > 24)
-            m_BitmapOffset.m_X = -(m_pFGColor->w / 2);
-        if (m_pFGColor->h > 24)
-            m_BitmapOffset.m_Y = -(m_pFGColor->h / 2);
-    }
-
-    return 0;
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the TerrainObject object ready for use.
-
-int TerrainObject::Create(ContentFile *pBitmapFile,
-                       bool drawTrans,
-                       Vector offset,
-                       bool wrapX,
-                       bool wrapY,
-                       Vector scrollInfo)
-{
-    m_pBitmapFile = pBitmapFile;
-
-    m_pBitmap = new BITMAP();
-    RTEAssert(m_pBitmap, "Failed to allocate BITMAP in TerrainObject::Create");
-
-    if (FAILED(m_pBitmap->Create(g_FrameMan.GetScreen(), m_pBitmapFile->GetDataSize(), m_pBitmapFile->GetContent()))) {
-        CDXError(g_FrameMan.GetScreen(), "Could not create TerrainObject bitmap");
-        return -1;
-    }
-
-    if (m_DrawTrans = drawTrans)
-        m_pBitmap->SetColorKey(g_MaskColor);
-
-    m_Offset = offset;
-
-    m_WrapX = wrapX;
-    m_WrapY = wrapY;
-
-    if (m_WrapX)
-        m_ScrollRatio.m_X = scrollInfo.m_X;
-    else
-        if (scrollInfo.m_X == -1.0)
-            m_ScrollRatio.m_X = 1.0;
-        else
-            m_ScrollRatio.m_X = (float)(m_pBitmap->GetWidth() - g_FrameMan.GetResX()) /
-                                (float)(scrollInfo.m_X - g_FrameMan.GetResX());
-
-    if (m_WrapY)
-        m_ScrollRatio.m_Y = scrollInfo.m_Y;
-    else
-        if (scrollInfo.m_Y == -1.0)
-            m_ScrollRatio.m_Y = 1.0;
-        else
-            m_ScrollRatio.m_Y = (float)(m_pBitmap->GetHeight() - g_FrameMan.GetResY()) /
-                                (float)(scrollInfo.m_Y - g_FrameMan.GetResY());
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a MOPixel to be identical to another, by deep copy.
-
-int TerrainObject::Create(const TerrainObject &reference)
-{
-    SceneObject::Create(reference);
-
-    m_FGColorFile = reference.m_FGColorFile;
-    m_MaterialFile = reference.m_MaterialFile;
-    m_BGColorFile = reference.m_BGColorFile;
-
-    m_pFGColor = reference.m_pFGColor;
-    m_pMaterial = reference.m_pMaterial;
-    m_pBGColor = reference.m_pBGColor;
-
-    m_BitmapOffset = reference.m_BitmapOffset;
-    m_OffsetDefined = reference.m_OffsetDefined;
-
-    for (list<SOPlacer>::const_iterator itr = reference.m_ChildObjects.begin(); itr != reference.m_ChildObjects.end(); ++itr)
-        m_ChildObjects.push_back(*itr);
-
-	m_DisplayAsTerrain = reference.m_DisplayAsTerrain;
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int TerrainObject::ReadProperty(const std::string_view &propName, Reader &reader)
-{
-    if (propName == "FGColorFile")
-    {
-        reader >> m_FGColorFile;
-        m_pFGColor = m_FGColorFile.GetAsBitmap();
-    }
-    else if (propName == "MaterialFile")
-    {
-        reader >> m_MaterialFile;
-        m_pMaterial = m_MaterialFile.GetAsBitmap();
-    }
-    else if (propName == "BGColorFile")
-    {
-        reader >> m_BGColorFile;
-        m_pBGColor = m_BGColorFile.GetAsBitmap();
-    }
-    else if (propName == "BitmapOffset")
-    {
-        reader >> m_BitmapOffset;
-        m_OffsetDefined = true;
-    }
-    // This is to handle legacy placement of terrain objects, without the bitmap offset
-    else if (propName == "Location")
-    {
-        reader >> m_Pos;
-        m_Pos -= m_BitmapOffset;
-    }
-    else if (propName == "AddChildObject")
-    {
-        SOPlacer newChild;
-        reader >> newChild;
-        newChild.SetTeam(m_Team);
-        m_ChildObjects.push_back(newChild);
-    }
-    else if (propName == "DisplayAsTerrain")
-    {
-		reader >> m_DisplayAsTerrain;
+	void TerrainObject::Clear() {
+		m_FGColorFile.Reset();
+		m_FGColorBitmap = nullptr;
+		m_BGColorFile.Reset();
+		m_BGColorBitmap = nullptr;
+		m_MaterialFile.Reset();
+		m_MaterialBitmap = nullptr;
+		m_BitmapOffset.Reset();
+		m_OffsetDefined = false;
+		m_ChildObjects.clear();
 	}
-    else
-        return SceneObject::ReadProperty(propName, reader);
 
-    return 0;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TerrainObject::Create() {
+		SceneObject::Create();
+
+		if (!m_OffsetDefined) {
+			int bitmapWidth = GetBitmapWidth();
+			int bitmapHeight = GetBitmapHeight();
+
+			if (bitmapWidth > 24) { m_BitmapOffset.SetX(-(static_cast<float>(bitmapWidth / 2))); }
+			if (bitmapHeight > 24) { m_BitmapOffset.SetY(-(static_cast<float>(bitmapHeight / 2))); }
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TerrainObject::Create(const TerrainObject &reference) {
+		SceneObject::Create(reference);
+
+		m_FGColorFile = reference.m_FGColorFile;
+		m_FGColorBitmap = reference.m_FGColorBitmap;
+		m_BGColorFile = reference.m_BGColorFile;
+		m_BGColorBitmap = reference.m_BGColorBitmap;
+		m_MaterialFile = reference.m_MaterialFile;
+		m_MaterialBitmap = reference.m_MaterialBitmap;
+		m_BitmapOffset = reference.m_BitmapOffset;
+		m_OffsetDefined = reference.m_OffsetDefined;
+
+		for (const SceneObject::SOPlacer &childObject : reference.m_ChildObjects) {
+			m_ChildObjects.emplace_back(childObject);
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TerrainObject::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "FGColorFile") {
+			reader >> m_FGColorFile;
+			m_FGColorBitmap = m_FGColorFile.GetAsBitmap();
+		} else if (propName == "BGColorFile") {
+			reader >> m_BGColorFile;
+			m_BGColorBitmap = m_BGColorFile.GetAsBitmap();
+		} else if (propName == "MaterialFile") {
+			reader >> m_MaterialFile;
+			m_MaterialBitmap = m_MaterialFile.GetAsBitmap();
+		} else if (propName == "BitmapOffset") {
+			reader >> m_BitmapOffset;
+			m_OffsetDefined = true;
+		} else if (propName == "AddChildObject") {
+			SceneObject::SOPlacer newChildObject;
+			reader >> newChildObject;
+			newChildObject.SetTeam(m_Team);
+			m_ChildObjects.emplace_back(newChildObject);
+		} else {
+			return SceneObject::ReadProperty(propName, reader);
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TerrainObject::Save(Writer &writer) const {
+		SceneObject::Save(writer);
+
+		if (!m_FGColorFile.GetDataPath().empty()) { writer.NewPropertyWithValue("FGColorFile", m_FGColorFile); }
+		if (!m_BGColorFile.GetDataPath().empty()) { writer.NewPropertyWithValue("BGColorFile", m_BGColorFile); }
+		if (!m_MaterialFile.GetDataPath().empty()) { writer.NewPropertyWithValue("MaterialFile", m_MaterialFile); }
+
+		if (m_OffsetDefined) { writer.NewPropertyWithValue("BitmapOffset", m_BitmapOffset); }
+
+		for (const SceneObject::SOPlacer &childObject : m_ChildObjects) {
+			writer.NewPropertyWithValue("AddChildObject", childObject);
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	BITMAP * TerrainObject::GetGraphicalIcon() const {
+		if (m_FGColorBitmap) {
+			// Check several spots on the FG bitmap, to be sure it has parts that aren't transparent. If not, show the background layer instead.
+			int piece = m_FGColorBitmap->w / 10;
+			if (_getpixel(m_FGColorBitmap, m_FGColorBitmap->w / 2, m_FGColorBitmap->h / 2) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, piece, piece) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, m_FGColorBitmap->w - piece, piece) != ColorKeys::g_MaskColor || _getpixel(m_FGColorBitmap, piece, m_FGColorBitmap->h - piece) != ColorKeys::g_MaskColor) {
+				return m_FGColorBitmap;
+			}
+		}
+		return m_BGColorBitmap;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TerrainObject::SetTeam(int team) {
+		SceneObject::SetTeam(team);
+		for (SceneObject::SOPlacer &childObject : m_ChildObjects) {
+			childObject.SetTeam(team);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool TerrainObject::IsOnScenePoint(Vector &scenePoint) const {
+		BITMAP *bitmapToCheck = nullptr;
+		if (m_FGColorBitmap) {
+			bitmapToCheck = m_FGColorBitmap;
+		} else {
+			bitmapToCheck = m_BGColorBitmap ? m_BGColorBitmap : m_MaterialBitmap;
+		}
+		// TODO: TAKE CARE OF WRAPPING
+		Vector bitmapPos = m_Pos + m_BitmapOffset;
+		if (WithinBox(scenePoint, bitmapPos, static_cast<float>(GetBitmapWidth()), static_cast<float>(GetBitmapHeight()))) {
+			Vector bitmapPoint = scenePoint - bitmapPos;
+			if (getpixel(bitmapToCheck, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool TerrainObject::PlaceOnTerrain(SLTerrain *terrain) {
+		if (!terrain) {
+			return false;
+		}
+		DrawToTerrain(terrain);
+
+		// Reapply the team so all children are guaranteed to be on the same team.
+		SetTeam(GetTeam());
+
+		for (const SceneObject::SOPlacer &childObject : GetChildObjects()) {
+			// TODO: check if we're placing a brain, and have it replace the resident brain of the scene!
+			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(this));
+		}
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TerrainObject::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode drawMode, bool onlyPhysical) const {
+		std::array<Vector, 4> drawPos = { m_Pos + m_BitmapOffset - targetPos };
+		int wrapPasses = 1;
+
+		// See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap.
+		if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= targetBitmap->w) {
+			if (drawPos[0].GetFloorIntX() < m_FGColorBitmap->w) {
+				drawPos.at(wrapPasses) = drawPos[0];
+				drawPos.at(wrapPasses).m_X += static_cast<float>(targetBitmap->w);
+				wrapPasses++;
+			} else if (drawPos[0].GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
+				drawPos.at(wrapPasses) = drawPos[0];
+				drawPos.at(wrapPasses).m_X -= static_cast<float>(targetBitmap->w);
+				wrapPasses++;
+			}
+		} else {
+			// Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam.
+			if (g_SceneMan.SceneWrapsX()) {
+				float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
+				if (targetPos.m_X < 0) {
+					drawPos.at(wrapPasses) = drawPos[0];
+					drawPos.at(wrapPasses).m_X -= sceneWidth;
+					wrapPasses++;
+				}
+				if (targetPos.m_X + static_cast<float>(targetBitmap->w) > sceneWidth) {
+					drawPos.at(wrapPasses) = drawPos[0];
+					drawPos.at(wrapPasses).m_X += sceneWidth;
+					wrapPasses++;
+				}
+			}
+		}
+		for (int i = 0; i < wrapPasses; ++i) {
+			switch (drawMode) {
+				case DrawMode::g_DrawColor:
+					if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
+					if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
+					break;
+				case DrawMode::g_DrawMaterial:
+					if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
+					break;
+				case DrawMode::g_DrawTrans:
+					if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+					if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TerrainObject::DrawToTerrain(SLTerrain *terrain) {
+		BITMAP *terrainMatBitmap = terrain->GetMaterialBitmap();
+		BITMAP *terrainBGBitmap = terrain->GetBGColorBitmap();
+		BITMAP *terrainFGBitmap = terrain->GetFGColorBitmap();
+
+		Vector posOnScene = m_Pos + m_BitmapOffset;
+
+		if (terrain->WrapsX()) {
+			if (posOnScene.GetFloorIntX() < 0) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX() + terrainMatBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX() + terrainBGBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX() + terrainFGBitmap->w, posOnScene.GetFloorIntY()); }
+			} else if (posOnScene.GetFloorIntX() >= terrainMatBitmap->w - GetBitmapWidth()) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX() - terrainMatBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX() - terrainBGBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX() - terrainFGBitmap->w, posOnScene.GetFloorIntY()); }
+			}
+		}
+		if (terrain->WrapsY()) {
+			if (posOnScene.GetFloorIntY() < 0) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainMatBitmap->h); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainBGBitmap->h); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainFGBitmap->h); }
+			} else if (posOnScene.GetFloorIntY() >= terrainMatBitmap->h - GetBitmapHeight()) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainMatBitmap->h); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainBGBitmap->h); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainFGBitmap->h); }
+			}
+		}
+		if (HasMaterialBitmap()) {
+			draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			terrain->AddUpdatedMaterialArea(Box(posOnScene, static_cast<float>(m_MaterialBitmap->w), static_cast<float>(m_MaterialBitmap->h)));
+		}
+		if (HasBGColorBitmap()) {
+			draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			g_SceneMan.RegisterTerrainChange(posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h, ColorKeys::g_MaskColor, true);
+		}
+		if (HasFGColorBitmap()) {
+			draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			g_SceneMan.RegisterTerrainChange(posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h, ColorKeys::g_MaskColor, false);
+		}
+	}
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this TerrainObject with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int TerrainObject::Save(Writer &writer) const
-{
-    SceneObject::Save(writer);
-
-    writer.NewProperty("FGColorFile");
-    writer << m_FGColorFile;
-    writer.NewProperty("MaterialFile");
-    writer << m_MaterialFile;
-    writer.NewProperty("BGColorFile");
-    writer << m_BGColorFile;
-    if (m_OffsetDefined)
-    {
-        writer.NewProperty("BitmapOffset");
-        writer << m_BitmapOffset;
-    }
-    for (list<SOPlacer>::const_iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
-    {
-        writer.NewProperty("AddChildObject");
-        writer << (*itr);
-    }
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the TerrainObject object.
-
-void TerrainObject::Destroy(bool notInherited)
-{
-/* None of these owned by this
-    delete m_pFGColor;
-    delete m_pMaterial;
-    if (m_pBGColor)
-        delete m_pBGColor;
-*/
-
-    if (!notInherited)
-        SceneObject::Destroy();
-    Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGraphicalIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a bitmap showing a good identifyable icon of this, for use in
-//                  GUI lists etc.
-
-BITMAP * TerrainObject::GetGraphicalIcon() const
-{
-    if (!m_pFGColor)
-        return m_pBGColor;
-
-    // Checking if the FG has anything to show, if not, show the bg layer isntead
-    int piece = m_pFGColor->w / 10;
-    if (getpixel(m_pFGColor, m_pFGColor->w / 2, m_pFGColor->h / 2) != g_MaskColor ||
-        getpixel(m_pFGColor, piece, piece) != g_MaskColor ||
-        getpixel(m_pFGColor, m_pFGColor->w - piece, piece) != g_MaskColor ||
-        getpixel(m_pFGColor, piece, m_pFGColor->h - piece) != g_MaskColor)
-        return m_pFGColor;
-    else
-        return m_pBGColor;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool TerrainObject::IsOnScenePoint(Vector &scenePoint) const
-{
-    if (!m_pFGColor)
-        return false;
-// TODO: TAKE CARE OF WRAPPING
-/*
-    // Take care of wrapping situations
-    bitmapPos = m_Pos + m_BitmapOffset;
-    Vector aScenePoint[4];
-    aScenePoint[0] = scenePoint;
-    int passes = 1;
-
-    // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-    if (targetPos.IsZero())
-    {
-        if (g_SceneMan.SceneWrapsX())
-        {
-            if (bitmapPos.m_X < m_pFGColor->w)
-            {
-                aScenePoint[passes] = aScenePoint[0];
-                aScenePoint[passes].m_X += g_SceneMan.GetSceneWidth();
-                passes++;
-            }
-            else if (aScenePoint[0].m_X > pTargetBitmap->w - m_pFGColor->w)
-            {
-                aScenePoint[passes] = aScenePoint[0];
-                aScenePoint[passes].m_X -= g_SceneMan.GetSceneWidth();
-                passes++;
-            }
-        }
-        if (g_SceneMan.SceneWrapsY())
-        {
-            
-        }
-    }
-
-    // Check all the passes needed
-    for (int i = 0; i < passes; ++i)
-    {
-
-        if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
-        {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
-               (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
-               return true;
-        }
-    }
-*/
-    Vector bitmapPos = m_Pos + m_BitmapOffset;
-    if (WithinBox(scenePoint, bitmapPos, m_pFGColor->w, m_pFGColor->h))
-    {
-        // Scene point on the bitmap
-        Vector bitmapPoint = scenePoint - bitmapPos;
-        if (getpixel(m_pFGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor ||
-           (m_pBGColor && getpixel(m_pBGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor) ||
-           (m_pMaterial && getpixel(m_pMaterial, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaterialAir))
-           return true;
-    }
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetTeam
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets which team this Actor belongs to.
-
-void TerrainObject::SetTeam(int team)
-{
-    SceneObject::SetTeam(team);
-
-    // Make sure all the objects to be placed will be of the same team
-    for (list<SOPlacer>::iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
-        (*itr).SetTeam(team);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this TerrainObject's current graphical representation to a
-//                  BITMAP of choice.
-
-void TerrainObject::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
-{
-    if (!m_pFGColor)
-        RTEAbort("TerrainObject's bitmaps are null when drawing!");
-
-    // Take care of wrapping situations
-    Vector aDrawPos[4];
-    aDrawPos[0] = m_Pos + m_BitmapOffset - targetPos;
-    int passes = 1;
-
-    // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-	if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= pTargetBitmap->w)
-    {
-        if (aDrawPos[0].m_X < m_pFGColor->w)
-        {
-            aDrawPos[passes] = aDrawPos[0];
-            aDrawPos[passes].m_X += pTargetBitmap->w;
-            passes++;
-        }
-        else if (aDrawPos[0].m_X > pTargetBitmap->w - m_pFGColor->w)
-        {
-            aDrawPos[passes] = aDrawPos[0];
-            aDrawPos[passes].m_X -= pTargetBitmap->w;
-            passes++;
-        }
-    }
-    // Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
-    else
-    {
-        if (g_SceneMan.SceneWrapsX())
-        {
-            int sceneWidth = g_SceneMan.GetSceneWidth();
-            if (targetPos.m_X < 0)
-            {
-                aDrawPos[passes] = aDrawPos[0];
-                aDrawPos[passes].m_X -= sceneWidth;
-                passes++;
-            }
-            if (targetPos.m_X + pTargetBitmap->w > sceneWidth)
-            {
-                aDrawPos[passes] = aDrawPos[0];
-                aDrawPos[passes].m_X += sceneWidth;
-                passes++;
-            }
-        }
-    }
-
-    // Draw all the passes needed
-    for (int i = 0; i < passes; ++i)
-    {
-        if (mode == g_DrawColor)
-        {
-            masked_blit(m_pBGColor, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pBGColor->w, m_pBGColor->h);
-            masked_blit(m_pFGColor, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pFGColor->w, m_pFGColor->h);
-        }
-        else if (mode == g_DrawMaterial)
-        {
-            masked_blit(m_pMaterial, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pMaterial->w, m_pMaterial->h);
-        }
-        else if (mode == g_DrawLess)
-        {
-            masked_blit(m_pFGColor, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pFGColor->w, m_pFGColor->h);
-        }
-        else if (mode == g_DrawTrans)
-        {
-            draw_trans_sprite(pTargetBitmap, m_pFGColor, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
-            draw_trans_sprite(pTargetBitmap, m_pBGColor, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
-        }
-    }
-}
-
-
-
-} // namespace RTE

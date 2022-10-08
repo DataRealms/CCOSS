@@ -179,7 +179,6 @@ namespace RTE {
 		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
 
 		Vector m_ScrollOffset; //!< The scrolling position of the whole title screen scene.
-		float m_BackdropScrollRatio; //!< The scrolling ratio of the whole title screen scene background (nebula and stars).
 		float m_PlanetViewScrollOffsetY; //!< The title screen scene scroll position when in planet overview menus.
 
 		bool m_FinishedPlayingIntro; //!< Whether the intro sequence finished playing.

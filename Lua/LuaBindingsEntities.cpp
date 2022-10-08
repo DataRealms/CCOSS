@@ -40,6 +40,7 @@ namespace RTE {
 		.property("MaxEngineAngle", &ACDropShip::GetMaxEngineAngle, &ACDropShip::SetMaxEngineAngle)
 		.property("LateralControlSpeed", &ACDropShip::GetLateralControlSpeed, &ACDropShip::SetLateralControlSpeed)
 		.property("LateralControl", &ACDropShip::GetLateralControl)
+		.property("HoverHeightModifier", &ACDropShip::GetHoverHeightModifier, &ACDropShip::SetHoverHeightModifier)
 
 		.def("DetectObstacle", &ACDropShip::DetectObstacle)
 		.def("GetAltitude", &ACDropShip::GetAltitude);
@@ -62,6 +63,7 @@ namespace RTE {
 		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
 		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
 		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
+		.property("JetAngleRange", &ACrab::GetJetAngleRange, &ACrab::SetJetAngleRange)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -234,6 +236,7 @@ namespace RTE {
 		.property("MovePathSize", &Actor::GetMovePathSize)
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
+		.property("PieMenu", &Actor::GetPieMenu, &ActorSetPieMenu)
 
 		.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
 		.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)
@@ -278,6 +281,8 @@ namespace RTE {
 		.def("UpdateMovePath", &Actor::UpdateMovePath)
 		.def("SetAlarmPoint", &Actor::AlarmPoint)
 		.def("GetAlarmPoint", &Actor::GetAlarmPoint)
+		.def("IsOrganic", &Actor::IsOrganic)
+		.def("IsMechanical", &Actor::IsMechanical)
 
 		.enum_("Status")[
 			luabind::value("STABLE", Actor::Status::STABLE),
@@ -598,7 +603,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, GlobalScript) {
 		return AbstractTypeLuaClassDefinition(GlobalScript, Entity)
 
-		.def("Deactivate", &GlobalScript::Deactivate);
+		.def("Deactivate", &DeactivateGlobalScript);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -642,6 +647,7 @@ namespace RTE {
 		.def("GetAIBlastRadius", &HDFirearm::GetAIBlastRadius)
 		.def("GetAIPenetration", &HDFirearm::GetAIPenetration)
 		.def("CompareTrajectories", &HDFirearm::CompareTrajectories)
+		.def("GetNextMagazineName", &HDFirearm::GetNextMagazineName)
 		.def("SetNextMagazineName", &HDFirearm::SetNextMagazineName);
 	}
 
@@ -802,15 +808,15 @@ namespace RTE {
 		.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName)
 
 		.enum_("SpriteAnimMode")[
-			luabind::value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
-			luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
-			luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
-			luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-			luabind::value("LOOPWHENACTIVE", MOSprite::SpriteAnimMode::LOOPWHENACTIVE),
-			luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
-			luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
-			luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
-			luabind::value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+			luabind::value("NOANIM", SpriteAnimMode::NOANIM),
+			luabind::value("ALWAYSLOOP", SpriteAnimMode::ALWAYSLOOP),
+			luabind::value("ALWAYSRANDOM", SpriteAnimMode::ALWAYSRANDOM),
+			luabind::value("ALWAYSPINGPONG", SpriteAnimMode::ALWAYSPINGPONG),
+			luabind::value("LOOPWHENACTIVE", SpriteAnimMode::LOOPWHENACTIVE),
+			luabind::value("LOOPWHENOPENCLOSE", SpriteAnimMode::LOOPWHENOPENCLOSE),
+			luabind::value("PINGPONGOPENCLOSE", SpriteAnimMode::PINGPONGOPENCLOSE),
+			luabind::value("OVERLIFETIME", SpriteAnimMode::OVERLIFETIME),
+			luabind::value("ONCOLLIDE", SpriteAnimMode::ONCOLLIDE)
 		];
 	}
 
@@ -830,6 +836,7 @@ namespace RTE {
 		.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 		.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 		.property("WoundCountAffectsImpulseLimitRatio", &MOSRotating::GetWoundCountAffectsImpulseLimitRatio)
+		.property("GibAtEndOfLifetime", &MOSRotating::GetGibAtEndOfLifetime, &MOSRotating::SetGibAtEndOfLifetime)
 		.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 		.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
@@ -924,10 +931,10 @@ namespace RTE {
 		.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)
 		.property("HitWhatMOID", &MovableObject::HitWhatMOID)
 		.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
-		.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
 		.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID)
 		.property("ApplyWoundDamageOnCollision", &MovableObject::GetApplyWoundDamageOnCollision, &MovableObject::SetApplyWoundDamageOnCollision)
 		.property("ApplyWoundBurstDamageOnCollision", &MovableObject::GetApplyWoundBurstDamageOnCollision, &MovableObject::SetApplyWoundBurstDamageOnCollision)
+		.property("SimUpdatesBetweenScriptedUpdates", &MovableObject::GetSimUpdatesBetweenScriptedUpdates, &MovableObject::SetSimUpdatesBetweenScriptedUpdates)
 
 		.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
 		.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
@@ -1005,12 +1012,110 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, PieSlice) {
+		return ConcreteTypeLuaClassDefinition(PieSlice, Entity)
+
+		.property("Type", &PieSlice::GetType, &PieSlice::SetType)
+		.property("Direction", &PieSlice::GetDirection, &PieSlice::SetDirection)
+		.property("CanBeMiddleSlice", &PieSlice::GetCanBeMiddleSlice, &PieSlice::SetCanBeMiddleSlice)
+		.property("OriginalSource", &PieSlice::GetOriginalSource)
+		.property("Enabled", &PieSlice::IsEnabled, &PieSlice::SetEnabled)
+
+		.property("ScriptPath", &PieSlice::GetScriptPath, &PieSlice::SetScriptPath)
+		.property("FunctionName", &PieSlice::GetFunctionName, &PieSlice::SetFunctionName)
+		.property("SubPieMenu", &PieSlice::GetSubPieMenu, &PieSlice::SetSubPieMenu)
+
+		.property("DrawFlippedToMatchAbsoluteAngle", &PieSlice::GetDrawFlippedToMatchAbsoluteAngle, &PieSlice::SetDrawFlippedToMatchAbsoluteAngle)
+
+		.enum_("SliceType")[
+			luabind::value("NoType", PieSlice::SliceType::NoType),
+			luabind::value("Pickup", PieSlice::SliceType::Pickup),
+			luabind::value("Drop", PieSlice::SliceType::Drop),
+			luabind::value("NextItem", PieSlice::SliceType::NextItem),
+			luabind::value("PreviousItem", PieSlice::SliceType::PreviousItem),
+			luabind::value("Reload", PieSlice::SliceType::Reload),
+			luabind::value("BuyMenu", PieSlice::SliceType::BuyMenu),
+			luabind::value("Stats", PieSlice::SliceType::Stats),
+			luabind::value("Map", PieSlice::SliceType::Map),
+			luabind::value("FormSquad", PieSlice::SliceType::FormSquad),
+			luabind::value("Ceasefire", PieSlice::SliceType::Ceasefire),
+			luabind::value("Sentry", PieSlice::SliceType::Sentry),
+			luabind::value("Patrol", PieSlice::SliceType::Patrol),
+			luabind::value("BrainHunt", PieSlice::SliceType::BrainHunt),
+			luabind::value("GoldDig", PieSlice::SliceType::GoldDig),
+			luabind::value("GoTo", PieSlice::SliceType::GoTo),
+			luabind::value("Return", PieSlice::SliceType::Return),
+			luabind::value("Stay", PieSlice::SliceType::Stay),
+			luabind::value("Deliver", PieSlice::SliceType::Deliver),
+			luabind::value("Scuttle", PieSlice::SliceType::Scuttle),
+			luabind::value("Done", PieSlice::SliceType::EditorDone),
+			luabind::value("Load", PieSlice::SliceType::EditorLoad),
+			luabind::value("Save", PieSlice::SliceType::EditorSave),
+			luabind::value("New", PieSlice::SliceType::EditorNew),
+			luabind::value("Pick", PieSlice::SliceType::EditorPick),
+			luabind::value("Move", PieSlice::SliceType::EditorMove),
+			luabind::value("Remove", PieSlice::SliceType::EditorRemove),
+			luabind::value("InFront", PieSlice::SliceType::EditorInFront),
+			luabind::value("Behind", PieSlice::SliceType::EditorBehind),
+			luabind::value("ZoomIn", PieSlice::SliceType::EditorZoomIn),
+			luabind::value("ZoomOut", PieSlice::SliceType::EditorZoomOut),
+			luabind::value("Team1", PieSlice::SliceType::EditorTeam1),
+			luabind::value("Team2", PieSlice::SliceType::EditorTeam2),
+			luabind::value("Team3", PieSlice::SliceType::EditorTeam3),
+			luabind::value("Team4", PieSlice::SliceType::EditorTeam4)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, PieMenu) {
+		return ConcreteTypeLuaClassDefinition(PieMenu, Entity)
+
+		.property("Owner", &PieMenu::GetOwner)
+		.property("Controller", &PieMenu::GetController)
+		.property("AffectedObject", &PieMenu::GetAffectedObject)
+		.property("Pos", &PieMenu::GetPos)
+		.property("RotAngle", &PieMenu::GetRotAngle, &PieMenu::SetRotAngle)
+		.property("FullInnerRadius", &PieMenu::GetFullInnerRadius, &PieMenu::SetFullInnerRadius)
+
+		.def("IsSubPieMenu", &PieMenu::IsSubPieMenu)
+
+		.def("IsEnabled", &PieMenu::IsEnabled)
+		.def("IsEnabling", &PieMenu::IsEnabling)
+		.def("IsDisabling", &PieMenu::IsDisabling)
+		.def("IsEnablingOrDisabling", &PieMenu::IsEnablingOrDisabling)
+		.def("IsVisible", &PieMenu::IsVisible)
+		.def("HasSubPieMenuOpen", &PieMenu::HasSubPieMenuOpen)
+
+		.def("SetAnimationModeToNormal", &PieMenu::SetAnimationModeToNormal)
+		.def("DoDisableAnimation", &PieMenu::DoDisableAnimation)
+		.def("Wobble", &PieMenu::Wobble)
+		.def("FreezeAtRadius", &PieMenu::FreezeAtRadius)
+
+		.def("GetPieCommand", &PieMenu::GetPieCommand)
+		.def("GetPieSlices", &PieMenu::GetPieSlices, luabind::return_stl_iterator)
+		.def("GetFirstPieSliceByPresetName", &PieMenu::GetFirstPieSliceByPresetName)
+		.def("GetFirstPieSliceByType", &PieMenu::GetFirstPieSliceByType)
+		.def("AddPieSlice", &PieMenu::AddPieSlice, luabind::adopt(_2))
+		.def("AddPieSlice", &PieMenuAddPieSlice, luabind::adopt(_2))
+		.def("AddPieSliceIfPresetNameIsUnique", &PieMenu::AddPieSliceIfPresetNameIsUnique, luabind::adopt(_2))
+		.def("AddPieSliceIfPresetNameIsUnique", &PieMenuAddPieSliceIfPresetNameIsUnique1, luabind::adopt(_2))
+		.def("AddPieSliceIfPresetNameIsUnique", &PieMenuAddPieSliceIfPresetNameIsUnique2, luabind::adopt(_2))
+		.def("RemovePieSlice", &PieMenu::RemovePieSlice, luabind::adopt(luabind::return_value))
+		.def("RemovePieSlicesByPresetName", &PieMenu::RemovePieSlicesByPresetName)
+		.def("RemovePieSlicesByType", &PieMenu::RemovePieSlicesByType)
+		.def("RemovePieSlicesByOriginalSource", &PieMenu::RemovePieSlicesByOriginalSource);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Round) {
 		return ConcreteTypeLuaClassDefinition(Round, Entity)
 
 		.property("NextParticle", &Round::GetNextParticle)
 		.property("Shell", &Round::GetShell)
 		.property("FireVel", &Round::GetFireVel)
+		.property("InheritsFirerVelocity", &Round::GetInheritsFirerVelocity)
 		.property("ShellVel", &Round::GetShellVel)
 		.property("Separation", &Round::GetSeparation)
 		.property("ParticleCount", &Round::ParticleCount)
@@ -1037,6 +1142,8 @@ namespace RTE {
 
 		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
+
+		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
 
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
@@ -1095,6 +1202,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneLayer) {
+		return luabind::class_<SceneLayer, Entity>("SceneLayer");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneObject) {
 		return AbstractTypeLuaClassDefinition(SceneObject, Entity)
 
@@ -1113,6 +1226,25 @@ namespace RTE {
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
 		.def("GetTotalValue", &GetTotalValue);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
+		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
+
+		.property("Frame", &SLBackground::GetFrame, &SLBackground::SetFrame)
+		.property("SpriteAnimMode", &SLBackground::GetSpriteAnimMode, &SLBackground::SetSpriteAnimMode)
+		.property("SpriteAnimDuration", &SLBackground::GetSpriteAnimDuration, &SLBackground::SetSpriteAnimDuration)
+		.property("IsAnimatedManually", &SLBackground::IsAnimatedManually, &SLBackground::SetAnimatedManually)
+		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
+		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)
+		.property("AutoScrollStep", &SLBackground::GetAutoScrollStep, &SLBackground::SetAutoScrollStep)
+		.property("AutoScrollStepX", &SLBackground::GetAutoScrollStepX, &SLBackground::SetAutoScrollStepX)
+		.property("AutoScrollStepY", &SLBackground::GetAutoScrollStepY, &SLBackground::SetAutoScrollStepY)
+
+		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1206,7 +1338,9 @@ namespace RTE {
 		.property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
 		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
 		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
-		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset);
+		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset)
+
+		.def("GetCalculatedMaxThrowVelIncludingArmThrowStrength", &ThrownDevice::GetCalculatedMaxThrowVelIncludingArmThrowStrength);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

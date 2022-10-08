@@ -74,10 +74,10 @@ namespace RTE {
 		void SetTempEntity(Entity *entity) { m_TempEntity = entity; }
 
 		/// <summary>
-		/// Sets a temporary vector of entities that can be accessed in the Lua state.
+		/// Sets a temporary vector of Entities that can be accessed in the Lua state. These Entities are const_cast so they're non-const, for ease-of-use in Lua.
 		/// </summary>
 		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
-		void SetTempEntityVector(std::vector<Entity *> entityVector) { m_TempEntityVector = entityVector; }
+		void SetTempEntityVector(const std::vector<const Entity *> &entityVector);
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -91,7 +91,7 @@ namespace RTE {
 		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck = std::vector<std::string>(), std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+		int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck = std::vector<std::string_view>(), const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 		/// <summary>
 		/// Takes a string containing a script snippet and runs it on the master state.

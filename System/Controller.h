@@ -141,13 +141,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="otherThanPlayer">If you want to check if it's controlled by a player, AND that player is someone else than a specific one, pass in that player number here.</param>
 		/// <returns>Whether input mode is set to player input.</returns>
-		bool IsPlayerControlled(int otherThanPlayer = Players::NoPlayer) const { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < Players::PlayerOne || m_Player != otherThanPlayer)); }
+		bool IsPlayerControlled(int otherThanPlayer = Players::NoPlayer) const { return (m_InputMode == InputMode::CIM_PLAYER && (otherThanPlayer < Players::PlayerOne || m_Player != otherThanPlayer)); }
 
 		/// <summary>
 		/// Shows whether this controller is disabled.
 		/// </summary>
 		/// <returns>Whether disabled.</returns>
-		bool IsDisabled() const { return m_InputMode == CIM_DISABLED || m_Disabled; }
+		bool IsDisabled() const { return m_InputMode == InputMode::CIM_DISABLED || m_Disabled; }
 
 		/// <summary>
 		/// Sets whether this is a disabled controller that doesn't give any new output.
@@ -167,7 +167,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="controlState>Which state to set.</param>
 		/// <param name="setting">Value of the state being set.</param>
-		void SetState(ControlState controlState, bool setting = true) { RTEAssert(controlState >= 0 && controlState < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[controlState] = setting; };
+		void SetState(ControlState controlState, bool setting = true) { RTEAssert(controlState >= 0 && controlState < ControlState::CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[controlState] = setting; };
 
 		/// <summary>
 		/// Gets the current mode of input for this Controller.
@@ -212,6 +212,24 @@ namespace RTE {
 		Vector GetAnalogCursor() const { return m_AnalogCursor; }
 
 		/// <summary>
+		/// Sets the analog cursor to the specified position.
+		/// </summary>
+		/// <param name="newAnalogCursor">The position the analog cursor should be set to.</param>
+		void SetAnalogCursor(const Vector &newAnalogCursor) { m_AnalogCursor = newAnalogCursor; }
+
+		/// <summary>
+		/// Sets the analog cursor angle limits for the given player (does nothing for player -1). The limit end is always CCW from the limit start.
+		/// </summary>
+		/// <param name="angleLimitStart">The starting angle limit for the analog cursor.</param>
+		/// <param name="angleLimitEnd">The ending angle limit for the analog cursor.</param>
+		void SetAnalogCursorAngleLimits(float angleLimitStart, float angleLimitEnd) { m_AnalogCursorAngleLimits = { {angleLimitStart, angleLimitEnd}, true }; }
+
+		/// <summary>
+		/// Clears the analog cursor aim limits for the given player (does nothing for player -1).
+		/// </summary>
+		void ClearAnalogCursorAngleLimits() { m_AnalogCursorAngleLimits.second = false; }
+
+		/// <summary>
 		/// Adds relative movement to a passed-in vector. Uses the appropriate input method currently of this.
 		/// </summary>
 		/// <param name="cursorPos"> The vector to alter.</param>
@@ -224,6 +242,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this is using mouse input at all.</returns>
 		bool IsMouseControlled() const;
+
+		/// <summary>
+		/// Indicates whether this is listening to gamepad at all.
+		/// </summary>
+		/// <returns>Whether this is using gamepad input at all.</returns>
+		bool IsGamepadControlled() const;
 
 		/// <summary>
 		/// Gets the relative movement of the mouse since last update.
@@ -241,13 +265,13 @@ namespace RTE {
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>
-		int GetPlayer() const { return (m_InputMode == CIM_PLAYER) ? m_Player : Players::NoPlayer; }
+		int GetPlayer() const { return (m_InputMode == InputMode::CIM_PLAYER) ? m_Player : Players::NoPlayer; }
 
 		/// <summary>
 		/// Sets which player's input this is listening to, and will enable player input mode.
 		/// </summary>
 		/// <param name="player">The player number.</param>
-		void SetPlayer(int player) { m_Player = player; if (m_Player >= Players::PlayerOne) { m_InputMode = CIM_PLAYER; } }
+		void SetPlayer(int player) { m_Player = player; if (m_Player >= Players::PlayerOne) { m_InputMode = InputMode::CIM_PLAYER; } }
 
 		/// <summary>
 		/// Gets the Team number using this controller.
@@ -328,6 +352,8 @@ namespace RTE {
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.
+
+		std::pair<std::pair<float, float>, bool> m_AnalogCursorAngleLimits; //!< Analog aim value limits, as well as whether or not the limit is actually enabled.
 
 	private:
 

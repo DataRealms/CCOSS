@@ -88,6 +88,12 @@ namespace RTE {
 		float GetFireVel() const { return m_FireVel; }
 
 		/// <summary>
+		/// Gets whether or not this Round should inherit velocity from its firer.
+		/// </summary>
+		/// <returns>Whether or not this Round should inherit velocity from its firer.</returns>
+		bool GetInheritsFirerVelocity() const { return m_InheritsFirerVelocity; }
+
+		/// <summary>
 		/// Gets the separation of particles in this round.
 		/// </summary>
 		/// <returns>A float with the separation range in pixels.</returns>
@@ -151,6 +157,7 @@ namespace RTE {
 		const MovableObject *m_Particle; //!< Round particle MovableObject preset instance.
 		int m_ParticleCount; //!< How many particle copies there are in this Round.
 		float m_FireVel; //!< The velocity with which this Round is fired.
+		bool m_InheritsFirerVelocity; //!< Whether or not this Round should inherit velocity from its firer.
 		float m_Separation; //!< The range of separation between particles in this Round, in pixels.
 		float m_LifeVariation; //!< The random variation in life time of each fired particle, in percentage of their life time.
 

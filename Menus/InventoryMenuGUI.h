@@ -486,7 +486,7 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Clears all the member variables of this PieMenuGUI, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this InventoryMenuGUI, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
 

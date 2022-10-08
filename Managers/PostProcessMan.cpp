@@ -19,7 +19,7 @@ namespace RTE {
 		m_BlueGlowHash = 0;
 		m_TempEffectBitmaps.clear();
 		for (int i = 0; i < c_MaxScreenCount; ++i) {
-			m_ScreenRelativeEffects.at(i).clear();
+			m_ScreenRelativeEffects[i].clear();
 		}
 	}
 

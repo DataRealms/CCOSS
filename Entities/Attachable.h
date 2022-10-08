@@ -2,6 +2,7 @@
 #define _RTEATTACHABLE_
 
 #include "MOSRotating.h"
+#include "PieSlice.h"
 
 namespace RTE {
 
@@ -66,7 +67,7 @@ namespace RTE {
 		MOSRotating * GetParent() override { return m_Parent; }
 
 		/// <summary>
-		/// Gets the MOSRotating which is the parent of this Attachable. 
+		/// Gets the MOSRotating which is the parent of this Attachable.
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
 		const MOSRotating * GetParent() const override { return m_Parent; }
@@ -220,11 +221,11 @@ namespace RTE {
 		float GetJointStiffness() const { return m_JointStiffness; }
 
 		/// <summary>
-		/// Sets the stiffness scalar of the joint of this Attachable, normalized between 0 and 1.0.
+		/// Sets the stiffness scalar of the joint of this Attachable, limited between 0 and 1.0.
 		/// 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		/// </summary>
 		/// <param name="jointStiffness">A float describing the normalized stiffness scalar of this Attachable's joint. It will automatically be limited between 0 and 1.0.</param>
-		void SetJointStiffness(float jointStiffness) { m_JointStiffness = Limit(jointStiffness, 1.0F, 0.0F); }
+		virtual void SetJointStiffness(float jointStiffness) { m_JointStiffness = std::clamp(jointStiffness, 0.0F, 1.0F); }
 
 		/// <summary>
 		/// Gets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
@@ -553,6 +554,8 @@ namespace RTE {
 
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+
+		std::vector<std::unique_ptr<PieSlice>> m_PieSlices; //!< The vector of PieSlices belonging to this Attachable. Added to and removed from the RootParent as appropriate, when a parent is set.
 
 		Vector m_PrevParentOffset; //!< The previous frame's parent offset.
 		Vector m_PrevJointOffset; //!< The previous frame's joint offset.

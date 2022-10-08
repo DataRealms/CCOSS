@@ -29,6 +29,7 @@
 #include "MOSRotating.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "TerrainObject.h"
 #include "SoundContainer.h"
 #include "TDExplosive.h"
@@ -36,10 +37,13 @@
 #include "Turret.h"
 #include "PEmitter.h"
 #include "GlobalScript.h"
+#include "Deployment.h"
 
 #include "GameActivity.h"
 #include "GAScripted.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 namespace RTE {
 
 #pragma region Entity Lua Adapter Macros
@@ -104,12 +108,12 @@ namespace RTE {
 	#define LuaEntityCast(TYPE) \
 		static TYPE * To##TYPE(Entity *entity) { \
 			TYPE *targetType = dynamic_cast<TYPE *>(entity); \
-			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference! Entity was ") + (entity ? entity->GetPresetName() : "nil")); } \
 			return targetType; \
 		} \
 		static const TYPE * ToConst##TYPE(const Entity *entity) { \
 			const TYPE *targetType = dynamic_cast<const TYPE *>(entity); \
-			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference! Entity was ") + (entity ? entity->GetPresetName() : "nil")); } \
 			return targetType; \
 		} \
 		static bool Is##TYPE(Entity *entity) { \
@@ -159,6 +163,22 @@ namespace RTE {
 		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
 	}
 
+	static void DeactivateGlobalScript(GlobalScript *luaSelfObject) {
+		luaSelfObject->SetActive(false);
+	}
+
+	static bool PieMenuAddPieSlice(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
+		return luaSelfObject->AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, false);
+	}
+
+	static bool PieMenuAddPieSliceIfPresetNameIsUnique1(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource) {
+		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, false, false);
+	}
+
+	static bool PieMenuAddPieSliceIfPresetNameIsUnique2(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource, bool onlyCheckPieSlicesWithSameOriginalSource) {
+		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, onlyCheckPieSlicesWithSameOriginalSource, false);
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);
@@ -184,6 +204,8 @@ namespace RTE {
 	LuaEntityCreate(TDExplosive);
 	LuaEntityCreate(TerrainObject);
 	LuaEntityCreate(PEmitter);
+	LuaEntityCreate(PieSlice);
+	LuaEntityCreate(PieMenu);
 
 	LuaEntityClone(Entity);
 	LuaEntityClone(SoundContainer);
@@ -214,6 +236,8 @@ namespace RTE {
 	LuaEntityClone(TDExplosive);
 	LuaEntityClone(TerrainObject);
 	LuaEntityClone(PEmitter);
+	LuaEntityClone(PieSlice);
+	LuaEntityClone(PieMenu);
 
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
@@ -249,6 +273,8 @@ namespace RTE {
 	LuaEntityCast(TDExplosive);
 	LuaEntityCast(TerrainObject);
 	LuaEntityCast(PEmitter);
+	LuaEntityCast(PieSlice);
+	LuaEntityCast(PieMenu);
 
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetBreakWound);
@@ -259,6 +285,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetEndSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, Attachable, SetDoor);
 	LuaPropertyOwnershipSafetyFaker(Leg, Attachable, SetFoot);
+	LuaPropertyOwnershipSafetyFaker(Actor, PieMenu, SetPieMenu);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetBodyHitSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetAlarmSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetPainSound);
@@ -313,4 +340,5 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadEndSound);
 #pragma endregion
 }
+#pragma GCC diagnostic pop
 #endif

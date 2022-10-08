@@ -167,6 +167,11 @@ namespace RTE {
 		/// </summary>
 		/// <param name="erase">Whether to erase door material (true) or draw it (false).</param>
 		void TempEraseOrRedrawDoorMaterial(bool erase);
+
+		/// <summary>
+		/// Resets the sensor Timer for this ADoor, effectively making it ignore Actors.
+		/// </summary>
+		void ResetSensorTimer() { m_SensorTimer.Reset(); }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -177,6 +182,11 @@ namespace RTE {
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
 		/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
 		void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
+
+		/// <summary>
+		/// Ensures all attachables and wounds are positioned and rotated correctly. Must be run when this ADoor is added to MovableMan to avoid issues with Attachables spawning in at (0, 0).
+		/// </summary>
+		void CorrectAttachableAndWoundPositionsAndRotations() const override;
 
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.

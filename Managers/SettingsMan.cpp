@@ -21,7 +21,7 @@ namespace RTE {
 
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
-		m_UnheldItemsHUDDisplayRange = 25;
+		m_UnheldItemsHUDDisplayRange = 25 * c_PPM;
 		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
@@ -42,6 +42,8 @@ namespace RTE {
 
 		m_RecommendedMOIDCount = 240;
 		m_SimplifiedCollisionDetection = false;
+		m_SceneBackgroundAutoScaleMode = 1;
+		m_DisableFactionBuyMenuThemes = false;
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
@@ -171,6 +173,10 @@ namespace RTE {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "SimplifiedCollisionDetection") {
 			reader >> m_SimplifiedCollisionDetection;
+		} else if (propName == "SceneBackgroundAutoScaleMode") {
+			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
+		} else if (propName == "DisableFactionBuyMenuThemes") {
+			reader >> m_DisableFactionBuyMenuThemes;
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -265,8 +271,8 @@ namespace RTE {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
-					g_UInputMan.m_ControlScheme.at(player).Reset();
-					reader >> g_UInputMan.m_ControlScheme.at(player);
+					g_UInputMan.m_ControlScheme[player].Reset();
+					reader >> g_UInputMan.m_ControlScheme[player];
 					break;
 				}
 			}
@@ -345,6 +351,8 @@ namespace RTE {
 		writer.NewPropertyWithValue("DisableLuaJIT", g_LuaMan.m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
+		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
+		writer.NewPropertyWithValue("DisableFactionBuyMenuThemes", m_DisableFactionBuyMenuThemes);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
@@ -458,7 +466,7 @@ namespace RTE {
 			writer.NewDivider(false);
 			writer.NewLineString("// Player " + playerNum, false);
 			writer.NewLine(false);
-			writer.NewPropertyWithValue("Player" + playerNum + "Scheme", g_UInputMan.m_ControlScheme.at(player));
+			writer.NewPropertyWithValue("Player" + playerNum + "Scheme", g_UInputMan.m_ControlScheme[player]);
 		}
 
 		writer.ObjectEnd();

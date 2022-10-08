@@ -54,7 +54,7 @@ namespace RTE {
 
 		m_ExpandedModules.resize(g_PresetMan.GetTotalModuleCount());
 		std::fill(m_ExpandedModules.begin(), m_ExpandedModules.end(), false);
-		m_ExpandedModules.at(0) = true; // Base.rte is always expanded
+		m_ExpandedModules[0] = true; // Base.rte is always expanded
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,21 @@ namespace RTE {
 	void ObjectPickerGUI::SetNativeTechModule(int whichModule) {
 		if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
 			m_NativeTechModuleID = whichModule;
-			if (m_NativeTechModuleID > 0) { SetObjectsListModuleGroupExpanded(m_NativeTechModuleID); }
+			if (m_NativeTechModuleID > 0) {
+				SetObjectsListModuleGroupExpanded(m_NativeTechModuleID);
+
+				if (!g_SettingsMan.FactionBuyMenuThemesDisabled()) {
+					if (const DataModule *techModule = g_PresetMan.GetDataModule(whichModule); techModule->IsFaction()) {
+						const DataModule::BuyMenuTheme &techBuyMenuTheme = techModule->GetFactionBuyMenuTheme();
+
+						if (!techBuyMenuTheme.SkinFilePath.empty()) {
+							// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
+							m_GUIControlManager->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+						}
+						if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_ParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
+					}
+				}
+			}
 		}
 	}
 
@@ -359,7 +373,7 @@ namespace RTE {
 					}
 				} else {
 					for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID) {
-						if (moduleID == 0 || moduleID == m_NativeTechModuleID) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
+						if (moduleID == 0 || moduleID == m_NativeTechModuleID || g_PresetMan.GetDataModule(moduleID)->IsMerchant()) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
 					}
 				}
 			} else {

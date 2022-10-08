@@ -42,7 +42,6 @@ namespace RTE {
 		m_SectionProgress = 0;
 
 		m_ScrollOffset.Reset();
-		m_BackdropScrollRatio = 1.0F / 3.0F;
 		m_PlanetViewScrollOffsetY = 325 + m_PlanetRadius - (static_cast<float>(g_FrameMan.GetResY()) / 2);
 
 		m_FinishedPlayingIntro = false;
@@ -70,7 +69,7 @@ namespace RTE {
 	void TitleScreen::Create(AllegroScreen *guiScreen) {
 		CreateTitleElements();
 
-		m_IntroScrollStartOffsetY = (static_cast<float>(m_Nebula.GetBitmap()->h) / m_BackdropScrollRatio) - (static_cast<float>(g_FrameMan.GetResY()) / m_BackdropScrollRatio);
+		m_IntroScrollStartOffsetY = (static_cast<float>(m_Nebula.GetBitmap()->h) / m_Nebula.GetScrollRatio().GetY()) - (static_cast<float>(g_FrameMan.GetResY()) / m_Nebula.GetScrollRatio().GetY());
 		m_ScrollOffset.SetXY(0, m_IntroScrollStartOffsetY);
 
 		m_StationOrbitTimer.SetElapsedRealTimeS(15);
@@ -103,6 +102,7 @@ namespace RTE {
 		m_Moon.Create(ContentFile("Base.rte/GUIs/Title/Moon.png"));
 		m_Station.Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
 		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
+		m_Nebula.SetScrollRatio(Vector(-1.0F, 1.0F / 3.0F));
 
 		set_write_alpha_blender();
 		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
@@ -132,7 +132,7 @@ namespace RTE {
 				newStar.Intensity = RandomNum(111, 185);
 			} else {
 				newStar.Size = Star::StarSize::StarHuge;
-				newStar.Bitmap = starHugeBitmaps.at(RandomNum(0, starLargeBitmapCount - 1));
+				newStar.Bitmap = starHugeBitmaps.at(RandomNum(0, starHugeBitmapCount - 1));
 				newStar.Intensity = RandomNum(166, 185);
 			}
 			newStar.Position = Vector(RandomNum(0.0F, static_cast<float>(g_FrameMan.GetResX())), RandomNum(-100.0F, static_cast<float>(m_Nebula.GetBitmap()->h)));
@@ -146,7 +146,7 @@ namespace RTE {
 	void TitleScreen::CreateIntroSequenceSlides() {
 		std::string highRes = (g_FrameMan.GetResY() >= 680) ? "HD" : "";
 		for (int slideNum = 0; slideNum < m_IntroSlides.size(); ++slideNum) {
-			m_IntroSlides.at(slideNum) = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
+			m_IntroSlides[slideNum] = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
 		}
 	}
 
@@ -532,15 +532,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::DrawTitleScreenScene() {
-		Vector nebulaPos(0, m_ScrollOffset.GetY() * m_BackdropScrollRatio);
-		if (m_Nebula.GetBitmap()->w != g_FrameMan.GetResX()) { nebulaPos.SetX(static_cast<float>((m_Nebula.GetBitmap()->w - g_FrameMan.GetResX()) / 2)); }
 		Box nebulaTargetBox;
-		m_Nebula.Draw(g_FrameMan.GetBackBuffer32(), nebulaTargetBox, nebulaPos);
+		m_Nebula.SetOffset(Vector(static_cast<float>((g_FrameMan.GetResX() - m_Nebula.GetBitmap()->w) / 2), m_ScrollOffset.GetY()));
+		m_Nebula.Draw(g_FrameMan.GetBackBuffer32(), nebulaTargetBox, true);
 
 		for (const Star &star : m_BackdropStars) {
 			int intensity = star.Intensity + RandomNum(0, (star.Size == Star::StarSize::StarSmall) ? 35 : 70);
 			set_screen_blender(intensity, intensity, intensity, intensity);
-			int starPosY = static_cast<int>(star.Position.GetY() - (m_ScrollOffset.GetY() * (m_BackdropScrollRatio * ((star.Size == Star::StarSize::StarSmall) ? 0.8F : 1.0F))));
+			int starPosY = static_cast<int>(star.Position.GetY() - (m_ScrollOffset.GetY() * (m_Nebula.GetScrollRatio().GetY() * ((star.Size == Star::StarSize::StarSmall) ? 0.8F : 1.0F))));
 			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), star.Bitmap, star.Position.GetFloorIntX(), starPosY);
 		}
 

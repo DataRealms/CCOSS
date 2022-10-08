@@ -1,20 +1,20 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.53')
+project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
 deps=[]
 if host_machine.system() in ['linux','osx']
   deps = [
-    dependency('allegro'),
+    dependency('allegro', version:'<5.0'),
     dependency('loadpng'),
     dependency('flac'),
-    dependency('minizip'),
+    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
-    dependency('lua52'),
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
     dependency('boost'), #needed for luabind
+    dependency(['lua52', 'lua5.2', 'lua-5.2']),
   ]
   if host_machine.system() == 'linux'
     deps += dependency('x11')
@@ -42,7 +42,11 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   if buildtype_debug
 
     elfname += '_debug' # add _debug suffix for debug builds
-    extra_args = ['-Wno-unknown-pragmas'] # Disable #pragma region complaints
+    extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
+
+    if get_option('sane_warnings')
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-inconsistent-missing-override']
+    endif
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
@@ -94,7 +98,7 @@ endif
 conf_data = configuration_data()
 prefix = get_option('prefix')
 
-conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
+conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'))
 if suffix==''
   suffix=[]
   conf_data.set('EXENAME', elfname)
@@ -145,8 +149,8 @@ cccpelf = executable(
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
-  gui_app:true,
-  install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir')
+  install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),
+  win_subsystem:'windows' # Windows mark as GUI app
 )
 
 #### Installing #####

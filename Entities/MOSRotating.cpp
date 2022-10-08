@@ -1995,10 +1995,10 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 
-std::string MOSRotating::GetStringValue(std::string key)
+std::string MOSRotating::GetStringValue(std::string key) const
 {
 	if (StringValueExists(key))
-		return m_StringValueMap[key];
+		return m_StringValueMap.at(key);
 	else
 		return "";
 }
@@ -2010,10 +2010,10 @@ std::string MOSRotating::GetStringValue(std::string key)
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-double MOSRotating::GetNumberValue(std::string key)
+double MOSRotating::GetNumberValue(std::string key) const
 {
 	if (NumberValueExists(key))
-		return m_NumberValueMap[key];
+		return m_NumberValueMap.at(key);
 	else
 		return 0;
 }
@@ -2025,10 +2025,10 @@ double MOSRotating::GetNumberValue(std::string key)
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-Entity * MOSRotating::GetObjectValue(std::string key)
+Entity * MOSRotating::GetObjectValue(std::string key) const
 {
 	if (ObjectValueExists(key))
-		return m_ObjectValueMap[key];
+		return m_ObjectValueMap.at(key);
 	else
 		return 0;
 }
@@ -2098,7 +2098,7 @@ void MOSRotating::RemoveObjectValue(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::StringValueExists(std::string key)
+bool MOSRotating::StringValueExists(std::string key) const
 {
 	if (m_StringValueMap.find(key) != m_StringValueMap.end())
 		return true;
@@ -2110,7 +2110,7 @@ bool MOSRotating::StringValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::NumberValueExists(std::string key)
+bool MOSRotating::NumberValueExists(std::string key) const
 {
 	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
 		return true;
@@ -2122,7 +2122,7 @@ bool MOSRotating::NumberValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::ObjectValueExists(std::string key)
+bool MOSRotating::ObjectValueExists(std::string key) const
 {
 	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
 		return true;

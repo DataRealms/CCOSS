@@ -710,7 +710,7 @@ ClassInfoGetters;
 // Arguments:       Key to retrieve value.
 // Return value:    String value.
 
-	std::string GetStringValue(std::string key);
+	std::string GetStringValue(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetNumberValue
@@ -719,7 +719,7 @@ ClassInfoGetters;
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-	double GetNumberValue(std::string key);
+	double GetNumberValue(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetObjectValue
@@ -728,7 +728,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-	Entity * GetObjectValue(std::string key);
+	Entity * GetObjectValue(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  SetStringValue
@@ -791,7 +791,7 @@ ClassInfoGetters;
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	bool StringValueExists(std::string key);
+	bool StringValueExists(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  NumberValueExists
@@ -800,7 +800,7 @@ ClassInfoGetters;
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	bool NumberValueExists(std::string key);
+	bool NumberValueExists(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ObjectValueExists
@@ -809,7 +809,7 @@ ClassInfoGetters;
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	bool ObjectValueExists(std::string key);
+	bool ObjectValueExists(std::string key) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetDamageMultiplier

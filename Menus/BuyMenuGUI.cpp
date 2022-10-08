@@ -37,6 +37,7 @@
 #include "SceneObject.h"
 #include "MovableObject.h"
 #include "MOSprite.h"
+#include "MOSRotating.h"
 #include "HeldDevice.h"
 #include "AHuman.h"
 #include "ACraft.h"
@@ -1325,7 +1326,20 @@ void BuyMenuGUI::Update()
                 } else {
                     const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                     if (itemAsMO) {
-                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+						const MOSRotating *itemAsMOSRotating = dynamic_cast<const MOSRotating*>(currentItem);
+						float extraMass = 0;
+						if (itemAsMOSRotating) {
+							if (itemAsMOSRotating->NumberValueExists("Grenade Count")) {
+								description += "\nGrenade Count: " + RoundFloatToPrecision(itemAsMOSRotating->GetNumberValue("Grenade Count"), 0, 2);
+							}
+							if (itemAsMOSRotating->NumberValueExists("Replenish Delay") && itemAsMOSRotating->GetNumberValue("Replenish Delay") > 0) {
+								description += "\nReplenish Delay: " + RoundFloatToPrecision(itemAsMOSRotating->GetNumberValue("Replenish Delay") / 1000.0F, 3, 2) + " seconds";
+							}
+							if (itemAsMOSRotating->NumberValueExists("Belt Mass")) {
+								extraMass = itemAsMOSRotating->GetNumberValue("Belt Mass");
+							}
+						}
+                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, 1, 2) + " kg";
                     }
                 }
             }

@@ -42,8 +42,11 @@
 #include "GameActivity.h"
 #include "GAScripted.h"
 
+#ifndef _MSC_VER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
 namespace RTE {
 
 #pragma region Entity Lua Adapter Macros
@@ -340,5 +343,8 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadEndSound);
 #pragma endregion
 }
+
+#ifndef _MSC_VER
 #pragma GCC diagnostic pop
+#endif
 #endif

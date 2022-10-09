@@ -164,6 +164,7 @@ namespace RTE {
 #pragma region File I/O Handling
 		/// <summary>
 		/// Opens a file or creates one if it does not exist, depending on access mode. You can open files only inside .rte folders in the working directly. You can't open more that c_MaxOpenFiles file simultaneously.
+		/// On Linux will attempt to open a file case insensitively.
 		/// </summary>
 		/// <param name="filename">Path to the file. All paths are made absolute by adding current working directory to the specified path.</param>
 		/// <param name="mode">File access mode. See 'fopen' for list of modes.</param>

@@ -418,8 +418,11 @@ namespace RTE {
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
 		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
-			FILE *file = nullptr;
 
+#ifdef _WIN32
+			FILE *file = fopen(fullPath.c_str(), accessMode.c_str());
+#else
+			FILE *file = nullptr;
 			std::filesystem::path inspectedPath = System::GetWorkingDirectory();
 			const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath).generic_string();
 
@@ -441,7 +444,7 @@ namespace RTE {
 				}
 			}
 			if (!file) { file = fopen(inspectedPath.generic_string().c_str(), accessMode.c_str()); }
-
+#endif
 			if (file) {
 				m_OpenedFiles[fileIndex] = file;
 				return fileIndex;

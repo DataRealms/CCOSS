@@ -1,5 +1,6 @@
 sources += files(
 'MicroPather/micropather.cpp',
+'glad/gl.c',
 'StandardIncludes.cpp',
 'Atom.cpp',
 'ContentFile.cpp',

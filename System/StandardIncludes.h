@@ -78,6 +78,8 @@
 #include <array>
 #include <filesystem>
 
+#include "glad/gl.h"
+
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;
 using std::list;

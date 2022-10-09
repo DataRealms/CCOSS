@@ -94,15 +94,6 @@ namespace RTE {
 		/// <param name="pathToCheck">The path to check.</param>
 		/// <returns>Whether the file exists.</returns>
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
-
-		/// <summary>
-		/// Attempts to open a file case insensitively, and creates one if it doesn't exist yet, as long as all of its parent directories exist.
-		/// This means that if "mod.rte/foo/bar.txt" exists, calling this method with filePath "mod.rte/foo/BAR.txt" will open and return that same file, even on case sensitive operating systems.
-		/// </summary>
-		/// <param name="filePath">The file path to open case insensitively.</param>
-		/// <param name="mode">File access mode passed on to fopen().</param>
-		/// <returns>A pointer to the opened or created file, or nullptr when the file couldn't be created due to a missing parent directory.</returns>
-		static FILE* OpenFileCaseInsensitive(const std::filesystem::path filePath, const std::string &mode);
 #pragma endregion
 
 #pragma region Command-Line Interface

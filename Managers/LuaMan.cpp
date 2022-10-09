@@ -418,14 +418,36 @@ namespace RTE {
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
 		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
-			if (FILE *file = System::OpenFileCaseInsensitive(fullPath, accessMode)) {
-				m_OpenedFiles.at(fileIndex) = file;
+			FILE *file = nullptr;
+
+			std::filesystem::path inspectedPath = System::GetWorkingDirectory();
+			const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath).generic_string();
+
+			for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator) {
+				bool pathPartExists = false;
+
+				// Check if a path part (directory or file) exists in the filesystem.
+				for (const std::filesystem::path &filesystemEntryPath : std::filesystem::directory_iterator(inspectedPath)) {
+					if (StringsEqualCaseInsensitive(filesystemEntryPath.filename().generic_string(), (*relativeFilePathIterator).generic_string())) {
+						inspectedPath = filesystemEntryPath;
+						pathPartExists = true;
+						break;
+					}
+				}
+				// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
+				if (!pathPartExists && std::next(relativeFilePathIterator) == relativeFilePath.end()) {
+					file = fopen((inspectedPath / relativeFilePath.filename()).generic_string().c_str(), accessMode.c_str());
+					break;
+				}
+			}
+			if (!file) { file = fopen(inspectedPath.generic_string().c_str(), accessMode.c_str()); }
+
+			if (file) {
+				m_OpenedFiles[fileIndex] = file;
 				return fileIndex;
 			}
 		}
-#ifndef RELEASE_BUILD
 		g_ConsoleMan.PrintString("ERROR: Failed to open file " + fileName);
-#endif
 		return -1;
 	}
 

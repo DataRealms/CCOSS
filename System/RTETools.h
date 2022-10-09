@@ -260,6 +260,16 @@ namespace RTE {
 	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
 
+#pragma region Comparison
+	/// <summary>
+	/// Checks whether two strings are equal when the casing is disregarded.
+	/// </summary>
+	/// <param name="strA">First string.</param>
+	/// <param name="strB">Second string.</param>
+	/// <returns>Whether the two strings are equal case insensitively.</returns>
+	inline bool StringsEqualCaseInsensitive(const std::string_view &strA, const std::string_view &strB) { return std::equal(strA.begin(), strA.end(), strB.begin(), strB.end(), [](char strAChar, char strBChar) { return std::tolower(strAChar) == std::tolower(strBChar); }); }
+#pragma endregion
+
 #pragma region Misc
 	/// <summary>
 	/// Convenience method that takes in a double pointer array and returns a std::vector with its contents, because pointers-to-pointers are the devil. The passed in array is deleted in the process so no need to delete it manually.

@@ -152,15 +152,6 @@ namespace RTE {
 		/// <param name="">The exact string to look for. Case sensitive!</param>
 		/// <returns>0 if the string was found in the file or 1 if not. -1 if the file was inaccessible.</returns>
 		static int ASCIIFileContainsString(const std::string & filePath, const std::string_view & findString);
-
-		/// <summary>
-		/// Checks whether two strings are equal when the casing is disregarded.
-		/// </summary>
-		/// <param name="a">First string.</param>
-		/// <param name="b">Second string.</param>
-		/// <returns>Whether the two strings are equal case insensitively.</returns>
-		static bool StringsEqualCaseInsensitive(const std::string &a, const std::string &b);
-
 #pragma endregion
 
 	private:

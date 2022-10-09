@@ -19,6 +19,9 @@
 /// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
 
+#include "allegro.h"
+#include "SDL2/SDL.h"
+
 #include "GUI.h"
 #include "AllegroInput.h"
 #include "AllegroScreen.h"
@@ -280,9 +283,11 @@ namespace RTE {
 /// </summary>
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
+	//install_allegro(SYSTEM_NONE, &errno, atexit);
 	allegro_init();
 	loadpng_init();
-	set_close_button_callback(System::WindowCloseButtonHandler);
+
+	SDL_Init(SDL_INIT_VIDEO);
 
 	System::Initialize();
 	SeedRNG();
@@ -309,6 +314,9 @@ int main(int argc, char **argv) {
 	RunGameLoop();
 
 	DestroyManagers();
+
+	allegro_exit();
+	SDL_Quit();
 	return 0;
 }
 

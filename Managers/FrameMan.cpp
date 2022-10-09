@@ -15,6 +15,8 @@
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
 
+#include <SDL2/SDL.h>
+
 #ifdef _WIN32
 #include "winalleg.h"
 #elif __unix__
@@ -53,6 +55,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
+		m_Window = nullptr;
+		m_GLContext = nullptr;
+		m_ScreenTexture = 0;
 		m_GfxDriverMessage.clear();
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_ForceVirtualFullScreenGfxDriver = false;
@@ -278,6 +283,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Initialize() {
+		m_Window = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+		m_GLContext = SDL_GL_CreateContext(m_Window);
+
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+		if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)){
+			RTEAbort("Failed to load opengl.");
+		}
+
+
+
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 		SetInitialGraphicsDriver();
 		set_color_depth(m_BPP);

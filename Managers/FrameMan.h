@@ -11,13 +11,22 @@
 	// Define the missing Windows drivers as autodetect drivers so we don't need to add directives in every place they are used.
 	#define GFX_DIRECTX_ACCEL GFX_AUTODETECT_FULLSCREEN
 	#define GFX_DIRECTX_WIN_BORDERLESS GFX_AUTODETECT_WINDOWED
+
+
 #endif
+
+
+extern "C" {
+	struct SDL_Window;
+	typedef void* SDL_GLContext;
+}
 
 namespace RTE {
 
 	class AllegroScreen;
 	class AllegroBitmap;
 	class GUIFont;
+	class ScreenShader;
 
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
@@ -527,6 +536,12 @@ namespace RTE {
 	protected:
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
+
+		SDL_Window* m_Window;
+		SDL_GLContext m_GLContext;
+		GLuint m_ScreenTexture;
+		std::shared_ptr<ScreenShader> m_ScreenShader;
+
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.

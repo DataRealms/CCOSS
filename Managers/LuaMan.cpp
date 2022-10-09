@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Clear() {
@@ -404,6 +406,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
+		if (c_FileAccessModes.find(accessMode) == c_FileAccessModes.end()) {
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, invalid file access mode specified.");
+			return -1;
+		}
+
 		int fileIndex = -1;
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
 			if (!m_OpenedFiles[i]) {
@@ -412,7 +419,7 @@ namespace RTE {
 			}
 		}
 		if (fileIndex == -1) {
-			g_ConsoleMan.PrintString("ERROR: Can't open file, maximum number of files already open.");
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, maximum number of files already open.");
 			return -1;
 		}
 

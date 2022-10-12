@@ -382,7 +382,7 @@ namespace RTE {
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
 			return m_UpdateResult;
 		}
-		if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 			g_GUISound.BackButtonPressSound()->Play();
 			if (m_ActivityConfigBox->IsEnabled()) {
 				m_ActivityConfigBox->SetEnabled(false);

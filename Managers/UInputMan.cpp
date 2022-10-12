@@ -50,7 +50,7 @@ namespace RTE {
 		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
 		std::fill(s_CurrentMouseButtonStates.begin(), s_CurrentMouseButtonStates.end(), false);
 		std::fill(s_PrevMouseButtonStates.begin(), s_PrevMouseButtonStates.end(), false);
-		std::fill(s_ChangedMouseButtonStates.begin(), s_CurrentMouseButtonStates.end(), false);
+		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ControlScheme[player].Reset();
@@ -920,7 +920,7 @@ namespace RTE {
 			// Translate motion into discrete ticks.
 			if (std::abs(mouse_z) >= 1) {
 				m_MouseWheelChange = mouse_z;
-				position_mouse_z(0);
+				// position_mouse_z(0);
 			} else {
 				m_MouseWheelChange = 0;
 			}

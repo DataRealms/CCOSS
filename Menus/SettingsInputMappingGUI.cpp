@@ -190,7 +190,7 @@ namespace RTE {
 
 	void SettingsInputMappingGUI::HandleManualConfigSequence() {
 		bool inputCaptured = false;
-		if (g_UInputMan.KeyReleased(KEY_DEL)) {
+		if (g_UInputMan.KeyReleased(SDLK_DELETE)) {
 			m_ConfiguringPlayerInputScheme->ClearMapping(m_InputElementCapturingInput);
 			inputCaptured = true;
 		}

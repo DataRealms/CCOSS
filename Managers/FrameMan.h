@@ -104,20 +104,35 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
+
+
+		SDL_Window* GetWindow() const { return m_Window;}
 #pragma endregion
 
+#pragma region Display Switch Callbacks
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
+		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
+		/// </summary>
+		void DisplaySwitchOut();
+
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
+		/// </summary>
+		void DisplaySwitchIn();
+#pragma endregion
 #pragma region Resolution Handling
 		/// <summary>
 		/// Gets the graphics driver that is used for rendering.
 		/// </summary>
 		/// <returns>The graphics driver that is used for rendering.</returns>
-		int GetGraphicsDriver() const { return m_GfxDriver; }
+		int GetGraphicsDriver() const { return m_Fullscreen; }
 
 		/// <summary>
 		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
 		/// </summary>
 		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
-		bool IsUsingDedicatedGraphicsDriver() const { return m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL; }
+		bool IsUsingDedicatedGraphicsDriver() const { return m_Fullscreen == GFX_AUTODETECT_FULLSCREEN || m_Fullscreen == GFX_DIRECTX_ACCEL; }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
@@ -168,7 +183,7 @@ namespace RTE {
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, int newGfxDriver);
+		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -541,10 +556,13 @@ namespace RTE {
 		SDL_GLContext m_GLContext;
 		GLuint m_ScreenTexture;
 		std::shared_ptr<ScreenShader> m_ScreenShader;
+		GLuint m_ScreenVBO;
+		GLuint m_ScreenVAO;
+		std::vector<float> m_ScreenVertices;
 
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
-		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
+		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
 		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
 		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
 
@@ -647,18 +665,6 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
-#pragma region Display Switch Callbacks
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
-		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-		/// </summary>
-		static void DisplaySwitchOut();
-
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-		/// </summary>
-		static void DisplaySwitchIn();
-#pragma endregion
 
 #pragma region Create Breakdown
 		/// <summary>

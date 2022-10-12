@@ -4,6 +4,8 @@
 #include "Singleton.h"
 #include "Vector.h"
 #include "InputScheme.h"
+#include "Gamepad.h"
+#include "SDL2/SDL_keyboard.h"
 
 #define g_UInputMan UInputMan::Instance()
 
@@ -233,27 +235,32 @@ namespace RTE {
 		/// </summary>
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <returns>Whether the key is held or not.</returns>
-		bool KeyHeld(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
+		bool KeyHeld(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
+		bool KeyHeld(SDL_Keycode keyToTest) const { return KeyHeld(SDL_GetScancodeFromKey(keyToTest));}
 
 		/// <summary>
 		/// Shows the scancode of the keyboard key which is currently down.
 		/// </summary>
 		/// <returns>The scancode of the first keyboard key in the keyboard buffer. 0 means none.</returns>
-		int WhichKeyHeld() const { int key = readkey(); return key >> 8; }
+		int WhichKeyHeld() const { return 0; } // int key = readkey(); return key >> 8; }
 
 		/// <summary>
 		/// Gets whether a key was pressed between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <returns>Whether the key is pressed or not.</returns>
-		bool KeyPressed(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+		bool KeyPressed(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+
+		bool KeyPressed(SDL_Keycode keyToTest) const { return KeyPressed(SDL_GetScancodeFromKey(keyToTest)); }
 
 		/// <summary>
 		/// Gets whether a key was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <returns>Whether the key is released or not.</returns>
-		bool KeyReleased(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+		bool KeyReleased(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+
+		bool KeyReleased(SDL_Keycode keyToTest) const { return KeyReleased(SDL_GetScancodeFromKey(keyToTest)); }
 
 		/// <summary>
 		/// Return true if there are any keyboard button presses at all.
@@ -629,15 +636,15 @@ namespace RTE {
 
 		static GUIInput *s_GUIInputInstanceToCaptureKeyStateFrom; //!< Pointer to the GUIInput instance to capture key state from, if any. This is used for better key detection during input mapping input capture.
 
-		static char *s_PrevKeyStates; //!< Key states as they were the previous update.
-		static char *s_ChangedKeyStates; //!< Key states that have changed.
+		static std::array<uint8_t, SDL_NUM_SCANCODES> s_PrevKeyStates; //!< Key states as they were the previous update.
+		static std::array<uint8_t, SDL_NUM_SCANCODES> s_ChangedKeyStates; //!< Key states that have changed.
 
-		static bool s_CurrentMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Current mouse button states.
-		static bool s_PrevMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states as they were the previous update.
-		static bool s_ChangedMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states that have changed since previous update.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_CurrentMouseButtonStates; //!< Current mouse button states.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_PrevMouseButtonStates; //!< Mouse button states as they were the previous update.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_ChangedMouseButtonStates; //!< Mouse button states that have changed since previous update.
 
-		static JOYSTICK_INFO s_PrevJoystickStates[Players::MaxPlayerCount]; //!< Joystick states as they were the previous update.
-		static JOYSTICK_INFO s_ChangedJoystickStates[Players::MaxPlayerCount]; //!< Joystick states that have changed.
+		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
+		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
@@ -699,7 +706,7 @@ namespace RTE {
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the keyboard key is in the specified state or not.</returns>
-		bool GetKeyboardButtonState(const char keyToTest, InputState whichState) const;
+		bool GetKeyboardButtonState(SDL_Scancode keyToTest, InputState whichState) const;
 
 		/// <summary>
 		/// Gets whether a mouse button is in the specified state.

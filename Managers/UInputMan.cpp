@@ -11,28 +11,21 @@
 #include "GameActivity.h"
 #include "NetworkServer.h"
 
-#ifdef _WIN32
-#include "joystickapi.h"
-#elif __unix__
-#include <fcntl.h>
-#include "allegro/internal/aintern.h"
-#include "allegro/platform/aintunix.h"
-#include "xalleg.h"
-#endif
+#include "SDL2/SDL.h"
 
 namespace RTE {
 
 	GUIInput *UInputMan::s_GUIInputInstanceToCaptureKeyStateFrom = nullptr;
 
-	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
-	char *UInputMan::s_ChangedKeyStates = new char[KEY_MAX];
+	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_PrevKeyStates;
+	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_ChangedKeyStates;
 
-	bool UInputMan::s_CurrentMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS];
-	bool UInputMan::s_PrevMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS];
-	bool UInputMan::s_ChangedMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS];
+	std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> UInputMan::s_CurrentMouseButtonStates;
+	std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> UInputMan::s_PrevMouseButtonStates;
+	std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> UInputMan::s_ChangedMouseButtonStates;
 
-	JOYSTICK_INFO UInputMan::s_PrevJoystickStates[Players::MaxPlayerCount];
-	JOYSTICK_INFO UInputMan::s_ChangedJoystickStates[Players::MaxPlayerCount];
+	std::vector<Gamepad> UInputMan::s_PrevJoystickStates(Players::MaxPlayerCount);
+	std::vector<Gamepad> UInputMan::s_ChangedJoystickStates(Players::MaxPlayerCount);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,29 +45,12 @@ namespace RTE {
 		std::fill(std::begin(m_DeviceIcons), std::end(m_DeviceIcons), nullptr);
 
 		// Init the previous keys, mouse and joy buttons so they don't make it seem like things have changed and also neutralize the changed keys so that no Releases will be detected initially
-		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
-		std::fill_n(s_ChangedKeyStates, KEY_MAX, false);
-		std::fill_n(s_CurrentMouseButtonStates, MouseButtons::MAX_MOUSE_BUTTONS, false);
-		std::fill_n(s_PrevMouseButtonStates, MouseButtons::MAX_MOUSE_BUTTONS, false);
-		std::fill_n(s_ChangedMouseButtonStates, MouseButtons::MAX_MOUSE_BUTTONS, false);
-		position_mouse_z(0);
-
-		// This has to use Players::MaxPlayerCount instead of num_joysticks, because the latter may not have been initialized yet
-		for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; ++joystick) {
-			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
-				s_PrevJoystickStates[joystick].button[button].b = false;
-				s_ChangedJoystickStates[joystick].button[button].b = false;
-			}
-			// Init stick-axis-direction change state detection data
-			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
-				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
-					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d1 = 0;
-					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d2 = 0;
-					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d1 = 0;
-					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d2 = 0;
-				}
-			}
-		}
+		std::fill(s_PrevKeyStates.begin(), s_PrevKeyStates.end(), SDL_RELEASED);
+		// std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
+		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
+		std::fill(s_CurrentMouseButtonStates.begin(), s_CurrentMouseButtonStates.end(), false);
+		std::fill(s_PrevMouseButtonStates.begin(), s_PrevMouseButtonStates.end(), false);
+		std::fill(s_ChangedMouseButtonStates.begin(), s_CurrentMouseButtonStates.end(), false);
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ControlScheme[player].Reset();
@@ -109,29 +85,29 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::Initialize() {
-		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
-		setlocale(LC_ALL, "C");
+// 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
+// 		setlocale(LC_ALL, "C");
 
-#ifdef _WIN32
-		// JOY_TYPE_AUTODETECT is failing to select the correct joystick driver, so a dual analog ends up with a non-functional right stick and the triggers being treated as one instead.
-		// This overrides the setting to force it to use the correct driver (without modifying AllegroConfig). Not sure why this is happening but appears to have started after updating Allegro.
-		const char *overrideData = "[joystick]\njoytype=W32";
-		override_config_data(overrideData, ustrsize(overrideData));
-#endif
+// #ifdef _WIN32
+// 		// JOY_TYPE_AUTODETECT is failing to select the correct joystick driver, so a dual analog ends up with a non-functional right stick and the triggers being treated as one instead.
+// 		// This overrides the setting to force it to use the correct driver (without modifying AllegroConfig). Not sure why this is happening but appears to have started after updating Allegro.
+// 		const char *overrideData = "[joystick]\njoytype=W32";
+// 		override_config_data(overrideData, ustrsize(overrideData));
+// #endif
 
-		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
-		poll_joystick();
+// 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
+// 		poll_joystick();
 
-#ifdef __unix__
-		_xwin_input_handler = XWinInputHandlerOverride;
-#endif
+// #ifdef __unix__
+// 		_xwin_input_handler = XWinInputHandlerOverride;
+// #endif
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool UInputMan::DetectJoystickHotPlug() const {
+		#if 0
 #ifdef _WIN32
 		int numDevices = joyGetNumDevs();
 		if (numDevices > 0) {
@@ -178,6 +154,7 @@ namespace RTE {
 			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 			return true;
 		}
+#endif
 #endif
 		return false;
 	}
@@ -305,7 +282,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyStartPress(bool includeSpacebar) {
-		if (KeyPressed(KEY_ESC) || (includeSpacebar && KeyPressed(KEY_SPACE))) {
+		if (KeyPressed(SDLK_ESCAPE) || (includeSpacebar && KeyPressed(SDLK_SPACE))) {
 			return true;
 		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
@@ -330,7 +307,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyKeyPress() const {
-		for (char testKey = KEY_A; testKey < KEY_MAX; ++testKey) {
+		for (size_t testKey = SDL_SCANCODE_A; testKey < SDL_NUM_SCANCODES; ++testKey) {
 			if (s_PrevKeyStates[testKey] && s_ChangedKeyStates[testKey]) {
 				return true;
 			}
@@ -355,8 +332,6 @@ namespace RTE {
 		if (disable) {
 			m_DisableMouseMoving = true;
 			m_PrepareToEnableMouseMoving = false;
-			// Set these to outside the screen so the mouse has to be updated first before checking if they're in the screen or not
-			mouse_x = mouse_y = -1;
 		} else {
 			m_PrepareToEnableMouseMoving = true;
 		}
@@ -397,11 +372,7 @@ namespace RTE {
 	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-#ifndef __unix__
-			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
-#else
-			WarpMouse(newPos.m_X * g_FrameMan.GetResMultiplier(), newPos.m_Y * g_FrameMan.GetResMultiplier());
-#endif
+			SDL_WarpMouseGlobal(newPos.GetX(), newPos.GetY());
 		}
 	}
 
@@ -419,20 +390,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
+		SDL_SetRelativeMouseMode(static_cast<SDL_bool>(trap));
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
-#ifdef __unix__
-			bool prevTrapStatus = m_TrapMousePos;
-#endif
 			m_TrapMousePos = trap;
-#ifdef __unix__
-			if (m_TrapMousePos != prevTrapStatus) {
-				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
-				// Note - Discard mickeys after this warp otherwise mouse will probably jump.
-				int discard;
-				get_mouse_mickeys(&discard, &discard);
-				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
-			}
-#endif
 		}
 		m_TrapMousePosPerPlayer[whichPlayer] = trap;
 	}
@@ -442,11 +402,9 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-#ifndef __unix__
-			position_mouse(Limit(mouse_x, x + width, x), Limit(mouse_y, y + height, y));
-#else
-			WarpMouse(Limit(mouse_x, x + width, x), Limit(mouse_y, y + height, y));
-#endif
+			int mouseX, mouseY;
+			SDL_GetGlobalMouseState(&mouseX, &mouseY);
+			SDL_WarpMouseGlobal(Limit(mouseX, x+ width, x), Limit(mouseY, y+width, y));
 		}
 	}
 
@@ -484,6 +442,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::WhichJoyButtonHeld(int whichJoy) const {
+		#if 0
 		if (whichJoy >= 0 || whichJoy < num_joysticks) {
 			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
 				if (joy[whichJoy].button[button].b) {
@@ -491,12 +450,14 @@ namespace RTE {
 				}
 			}
 		}
+		#endif
 		return JoyButtons::JOY_NONE;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::WhichJoyButtonPressed(int whichJoy) const {
+		#if 0
 		if (whichJoy >= 0 || whichJoy < num_joysticks) {
 			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
 				if (joy[whichJoy].button[button].b && JoyButtonPressed(whichJoy, button)) {
@@ -504,12 +465,14 @@ namespace RTE {
 				}
 			}
 		}
+		#endif
 		return JoyButtons::JOY_NONE;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float UInputMan::AnalogAxisValue(int whichJoy, int whichStick, int whichAxis) const {
+		#if 0
 		if (whichJoy < num_joysticks && whichStick < joy[whichJoy].num_sticks && whichAxis < joy[whichJoy].stick[whichStick].num_axis) {
 			if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED) {
 				// Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
@@ -519,12 +482,14 @@ namespace RTE {
 				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos) / 128.0F;
 			}
 		}
+		#endif
 		return  0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyJoyInput(bool checkForPresses) const {
+		#if 0
 		poll_joystick();
 
 		for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; ++joystick) {
@@ -553,17 +518,20 @@ namespace RTE {
 				}
 			}
 		}
+		#endif
 		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyJoyButtonPress(int whichJoy) const {
+		#if 0
 		for (int button = JoyButtons::JOY_1; button < JoyButtons::MAX_JOY_BUTTONS; ++button) {
 			if (JoyButtonPressed(whichJoy, button)) {
 				return true;
 			}
 		}
+		#endif
 		return false;
 	}
 
@@ -596,7 +564,7 @@ namespace RTE {
 		const InputMapping *element = &(m_ControlScheme.at(whichPlayer).GetInputMappings()->at(whichElement));
 
 		if (!elementState && device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN))) {
-			elementState = GetKeyboardButtonState(static_cast<char>(element->GetKey()),whichState);
+			elementState = GetKeyboardButtonState(static_cast<SDL_Scancode>(element->GetKey()), whichState);
 		}
 		if (!elementState && device == InputDevice::DEVICE_MOUSE_KEYB && m_TrapMousePos) { elementState = GetMouseButtonState(whichPlayer, element->GetMouseButton(), whichState); }
 
@@ -630,8 +598,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetKeyboardButtonState(const char keyToTest, InputState whichState) const {
-		if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC)) {
+	bool UInputMan::GetKeyboardButtonState(SDL_Scancode keyToTest, InputState whichState) const {
+		if (m_DisableKeyboard && (keyToTest >= SDL_SCANCODE_0 && keyToTest < SDL_SCANCODE_ESCAPE)) {
 			return false;
 		}
 		switch (whichState) {
@@ -681,6 +649,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::GetJoystickButtonState(int whichJoy, int whichButton, InputState whichState) const {
+		#if 0
 		if (whichJoy < 0 || whichJoy >= num_joysticks || whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
 			return false;
 		}
@@ -695,11 +664,14 @@ namespace RTE {
 				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
 				return false;
 		}
+		#endif
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const {
+		#if 0
 		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
 			return false;
 		}
@@ -730,6 +702,8 @@ namespace RTE {
 					return false;
 			}
 		}
+		#endif
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -737,20 +711,47 @@ namespace RTE {
 	int UInputMan::Update() {
 		m_LastDeviceWhichControlledGUICursor = InputDevice::DEVICE_KEYB_ONLY;
 
-		if (keyboard_needs_poll()) { poll_keyboard(); }
-		if (mouse_needs_poll()) { poll_mouse(); }
-		poll_joystick();
+		// if (keyboard_needs_poll()) { poll_keyboard(); }
+		// if (mouse_needs_poll()) { poll_mouse(); }
+		// poll_joystick();
 
-		for (char keyToCheck = KEY_A; keyToCheck < KEY_MAX; ++keyToCheck) {
-			s_ChangedKeyStates[keyToCheck] = key[keyToCheck] != s_PrevKeyStates[keyToCheck];
+		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
+		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
+		for (Gamepad& pad: s_ChangedJoystickStates) {
+			std::fill(pad.m_Buttons.begin(), pad.m_Buttons.end(), false);
+			std::fill(pad.m_Axis.begin(), pad.m_Axis.end(), Vector{0.0, 0.0});
 		}
 
-		// Store mouse movement
-		int mickeyX;
-		int mickeyY;
-		get_mouse_mickeys(&mickeyX, &mickeyY);
-		m_RawMouseMovement.SetXY(mickeyX, mickeyY);
+		SDL_Event e;
 
+		while(SDL_PollEvent(&e)){
+			if(e.type == SDL_QUIT) {
+				System::SetQuit(true);
+			}
+			if(e.type == SDL_KEYUP || e.type == SDL_KEYDOWN) {
+				std::cout << "DEBUG: Keyboard event: " << SDL_GetKeyName(e.key.keysym.sym) << " " << (e.key.state ? "pressed" : "released") << std::endl;
+				s_ChangedKeyStates[e.key.keysym.scancode] = (e.key.state != s_PrevKeyStates[e.key.keysym.scancode]);
+				s_PrevKeyStates[e.key.keysym.scancode] = e.key.state;
+			}
+			if(e.type == SDL_MOUSEMOTION) {
+				std::cout << "DEBUG: Mouse motion event: x " << e.motion.x << " y " << e.motion.y << " | xrel" << e.motion.xrel << " yrel " << e.motion.yrel << std::endl;
+				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);
+			}
+			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
+				if(e.button.button == SDL_BUTTON_X1 || e.button.button == SDL_BUTTON_X2)
+					continue;
+				std::cout << "DEBUG: Mouse button event: " << (int)e.button.button << " was " << (e.button.state ? "pressed" : "released") << std::endl;
+				s_ChangedMouseButtonStates[e.button.button] = (e.button.state != s_PrevMouseButtonStates[e.button.button]);
+				s_PrevKeyStates[e.button.button] = e.button.state;
+				s_CurrentMouseButtonStates[e.button.button] = e.button.state;
+			}
+			if (e.type == SDL_WINDOWEVENT_FOCUS_GAINED) {
+				g_FrameMan.DisplaySwitchIn();
+			}
+			if (e.type == SDL_WINDOWEVENT_FOCUS_LOST) {
+				g_FrameMan.DisplaySwitchOut();
+			}
+		}
 		// TODO: Add sensitivity slider to settings menu
 		m_RawMouseMovement *= m_MouseSensitivity;
 
@@ -762,7 +763,7 @@ namespace RTE {
 		}
 
 		UpdateMouseInput();
-		if (num_joysticks > 0) { UpdateJoystickInput(); }
+		// if (num_joysticks > 0) { UpdateJoystickInput(); }
 		HandleSpecialInput();
 		StoreInputEventsForNextUpdate();
 
@@ -773,7 +774,7 @@ namespace RTE {
 
 	void UInputMan::HandleSpecialInput() {
 		// If we launched into editor directly, skip the logic and quit quickly.
-		if (g_ActivityMan.IsSetToLaunchIntoEditor() && KeyPressed(KEY_ESC)) {
+		if (g_ActivityMan.IsSetToLaunchIntoEditor() && KeyPressed(SDLK_ESCAPE)) {
 			System::SetQuit();
 			return;
 		}
@@ -786,7 +787,7 @@ namespace RTE {
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
-			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) { g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress()); }
+			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) { g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(SDLK_r) || AnyBackPress()); }
 			if (g_ActivityMan.ActivitySetToRestart()) {
 				return;
 			}
@@ -797,58 +798,58 @@ namespace RTE {
 		}
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
-			if (KeyHeld(KEY_S)) {
+			if (KeyHeld(SDLK_s)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			// Ctrl+W to save a WorldDump
-			} else if (KeyPressed(KEY_W)) {
+			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldToPNG("WorldDump");
 			// Ctrl+M to cycle draw modes
-			} else if (KeyPressed(KEY_M)) {
+			} else if (KeyPressed(SDLK_m)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
 			// Ctrl+P to toggle performance stats
-			} else if (KeyPressed(KEY_P)) {
+			} else if (KeyPressed(SDLK_p)) {
 				g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
 			// Ctrl+O to toggle one sim update per frame
-			} else if (KeyPressed(KEY_O)) {
+			} else if (KeyPressed(SDLK_o)) {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			}
 		} else if (!FlagCtrlState() && FlagAltState()) {
 			// Alt+Enter to switch resolution multiplier
-			if (KeyPressed(KEY_ENTER)) {
+			if (KeyPressed(SDLK_RETURN)) {
 				g_FrameMan.ChangeResolutionMultiplier((g_FrameMan.GetResMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
-			} else if (KeyPressed(KEY_W)) {
+			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
 			}
 		} else {
 			// PrntScren to save a single ScreenDump
-			if (KeyPressed(KEY_PRTSCR)) {
+			if (KeyPressed(SDLK_PRINTSCREEN)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-			} else if (KeyPressed(KEY_F1)) {
+			} else if (KeyPressed(SDLK_F1)) {
 				g_ConsoleMan.ShowShortcuts();
-			} else if (KeyPressed(KEY_F2)) {
+			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.ReloadAllScripts();
 				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
-			} else if (KeyPressed(KEY_F3)) {
+			} else if (KeyPressed(SDLK_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
-			} else if (KeyPressed(KEY_F4)) {
+			} else if (KeyPressed(SDLK_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
-			} else if (KeyPressed(KEY_F5)) {
+			} else if (KeyPressed(SDLK_F5)) {
 				g_ConsoleMan.ClearLog();
 			}
 
 			if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				// Manipulate time scaling
-				if (KeyHeld(KEY_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
-				if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
+				if (KeyHeld(SDLK_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
+				if (KeyHeld(SDLK_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
 
 				// Manipulate real to sim cap
-				if (KeyHeld(KEY_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
-				if (KeyHeld(KEY_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
+				if (KeyHeld(SDLK_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
+				if (KeyHeld(SDLK_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
 
 				// Manipulate DeltaTime
-				if (KeyHeld(KEY_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
-				if (KeyHeld(KEY_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
+				if (KeyHeld(SDLK_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
+				if (KeyHeld(SDLK_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
 			}
 		}
 	}
@@ -884,14 +885,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::UpdateMouseInput() {
-		// Detect and store mouse button inputs and their changes from last frame
-		s_CurrentMouseButtonStates[MouseButtons::MOUSE_LEFT] = mouse_b & 1;
-		s_CurrentMouseButtonStates[MouseButtons::MOUSE_RIGHT] = mouse_b & 2;
-		s_CurrentMouseButtonStates[MouseButtons::MOUSE_MIDDLE] = mouse_b & 4;
-		for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
-			s_ChangedMouseButtonStates[mouseButton] = s_CurrentMouseButtonStates[mouseButton] != s_PrevMouseButtonStates[mouseButton];
-		}
-
 		// Detect and store mouse movement input, translated to analog stick emulation
 		int mousePlayer = MouseUsedByPlayer();
 		if (mousePlayer != Players::NoPlayer) {
@@ -937,6 +930,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::UpdateJoystickInput() {
+		#if 0
 		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
 			// Detect and store joystick button changed since last Update()
 			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
@@ -1003,11 +997,13 @@ namespace RTE {
 				}
 			}
 		}
+		#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::StoreInputEventsForNextUpdate() {
+#if 0
 		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
 		std::memcpy(s_PrevMouseButtonStates, s_CurrentMouseButtonStates, MouseButtons::MAX_MOUSE_BUTTONS);
 		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
@@ -1019,69 +1015,8 @@ namespace RTE {
 				m_NetworkAccumulatedElementState[element][inputState] = GetInputElementState(Players::PlayerOne, element, static_cast<InputState>(inputState));
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef __unix__
-	void UInputMan::HandleAllegroMouseInput() {
-		if (_xwin.display == 0) {
-			return;
-		}
-
-		std::vector<XEvent> events;
-		events.reserve(XPending(_xwin.display) + 10);
-		while(XPending(_xwin.display) > 0) {
-			XEvent e;
-			XNextEvent(_xwin.display, &e);
-			events.push_back(e);
-		}
-
-		m_AllegroMousePreviousX = mouse_x;
-		m_AllegroMousePreviousY = mouse_y;
-		int mouseDeltaX = 0;
-		int mouseDeltaY = 0;
-
-		int halfResX = _xwin.window_width / 2;
-		int halfResY = _xwin.window_height / 2;
-		for (std::vector<XEvent>::reverse_iterator event = events.rbegin(); event < events.rend(); ++event) {
-			switch (event->type) {
-				case MotionNotify: {
-					mouseDeltaX = event->xmotion.x - m_AllegroMousePreviousX;
-					mouseDeltaY = event->xmotion.y - m_AllegroMousePreviousY;
-					_xwin_mouse_interrupt(mouseDeltaX, mouseDeltaY, 0, 0, mouse_b);
-					_mouse_x = m_AllegroMousePreviousX = !m_TrapMousePos ? event->xmotion.x : halfResX;
-					_mouse_y = m_AllegroMousePreviousY = !m_TrapMousePos ? event->xmotion.y : halfResY;
-
-					if (m_TrapMousePos && (mouseDeltaX != 0 || mouseDeltaY != 0)) {
-						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, halfResX, halfResY);
-					}
-					break;
-				}
-				default:
-					XPutBackEvent(_xwin.display, &(*event));
-					break;
-			}
-		}
-		XFlush(_xwin.display);
-
-		_xwin.mouse_warped = 0;
-		_xwin_private_handle_input();
-
-		if (m_TrapMousePos) {
-			mouse_x = _xwin.window_width / 2;
-			mouse_y = _xwin.window_height / 2;
-		}
-		_mouse_x = mouse_x;
-		_mouse_y = mouse_y;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::WarpMouse(int x, int y) const {
-		if (mouse_x != x || mouse_y != y) { XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y); }
-		_mouse_x = mouse_x = x;
-		_mouse_y = mouse_y = y;
-	}
 #endif
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -201,8 +201,8 @@ namespace RTE {
 	enum MouseButtons {
 		MOUSE_NONE = -1,
 		MOUSE_LEFT = 0,
-		MOUSE_RIGHT,
 		MOUSE_MIDDLE,
+		MOUSE_RIGHT,
 		MAX_MOUSE_BUTTONS
 	};
 

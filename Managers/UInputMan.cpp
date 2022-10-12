@@ -76,10 +76,6 @@ namespace RTE {
 			}
 		}
 
-#ifdef __unix__
-		m_AllegroMousePreviousX = 0;
-		m_AllegroMousePreviousY = 0;
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +386,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
-		SDL_SetRelativeMouseMode(static_cast<SDL_bool>(trap));
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_TrapMousePos = trap;
 		}
@@ -888,19 +883,16 @@ namespace RTE {
 		// Detect and store mouse movement input, translated to analog stick emulation
 		int mousePlayer = MouseUsedByPlayer();
 		if (mousePlayer != Players::NoPlayer) {
-			// TODO: Figure out why we're multiplying by 3 here. Possibly related to mouse sensitivity.
-			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
-			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
+			// Multiplying by 30 for sensitivity. TODO: Make sensitivity slider 1-50;
+			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 30;
+			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 30;
 			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
 
 			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					// Note - on linux the centering is done in the event loop.
-#ifndef __unix__
-					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-#endif
+					SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);

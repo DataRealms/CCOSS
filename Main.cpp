@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
 	loadpng_init();
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_ShowCursor(SDL_DISABLE);
+	// SDL_ShowCursor(SDL_DISABLE);
 
 	System::Initialize();
 	SeedRNG();

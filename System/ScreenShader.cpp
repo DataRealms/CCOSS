@@ -1,5 +1,4 @@
 #include "ScreenShader.h"
-#include "glad/gl.h"
 #include "RTEError.h"
 namespace RTE{
 	ScreenShader::ScreenShader() {
@@ -11,11 +10,14 @@ namespace RTE{
 
 		RTEAssert(vertexShader && fragmentShader, "Failed to compile OpenGL shaders with error: " + error);
 
+		m_ProgramID = glCreateProgram();
+
 		m_ProgramID = LinkShader(m_ProgramID, vertexShader, fragmentShader, error);
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
 		RTEAssert(m_ProgramID, "Failed to link shader with error: " + error);
+		std::cout << m_VertexShader << std::endl;
 	}
 
 	ScreenShader::~ScreenShader() {
@@ -24,6 +26,15 @@ namespace RTE{
 
 	void ScreenShader::Destroy() {
 		glDeleteProgram(m_ProgramID);
+	}
+
+	void ScreenShader::Use() {
+		glUseProgram(m_ProgramID);
+	}
+
+	void ScreenShader::SetInt(const std::string& uniformName, GLint value) {
+		glUseProgram(m_ProgramID);
+		glUniform1i(glGetUniformLocation(m_ProgramID, uniformName.c_str()), value);
 	}
 
 	GLuint ScreenShader::CompileShader(GLuint shaderID, const char* shaderCode, std::string& error) {
@@ -59,6 +70,7 @@ namespace RTE{
 		glGetProgramiv(program, GL_LINK_STATUS, &success);
 
 		if (success == GL_FALSE) {
+			std::cout << program << std::endl;
 			GLint infoLength;
 			error += "\nFailed to link program:\n";
 			size_t errorPrevLen = error.size();

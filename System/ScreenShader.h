@@ -12,6 +12,10 @@ namespace RTE {
 		/// </summary>
 		void Destroy();
 
+		void Use();
+
+		void SetInt(const std::string& uniformName, GLint value);
+
 	private:
 		/// <summary>
 		/// Compile a Shader component.
@@ -45,7 +49,7 @@ namespace RTE {
 		static constexpr const char *m_VertexShader = ""
 			"#version 330 core\n"
 			"layout(location = 0) in vec2 aPos;"
-			"(location = 1) in vec2 texST;"
+			"layout(location = 1) in vec2 texST;"
 			"out vec2 texCoord;"
 			"void main() {"
 			"gl_Position = vec4(aPos.xy, 0.0, 1.0);"

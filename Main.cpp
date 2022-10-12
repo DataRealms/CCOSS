@@ -18,7 +18,6 @@
 /// Cortex Command Community Project Discord - https://discord.gg/TSU6StNQUG
 /// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
-
 #include "allegro.h"
 #include "SDL2/SDL.h"
 
@@ -44,6 +43,14 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 using namespace RTE;
 
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
+                                GLenum severity, GLsizei length,
+                                const GLchar *message, const void *userParam) {
+	fprintf(stderr,
+	        "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+	        (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+	        message);
+}
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,16 +290,19 @@ namespace RTE {
 /// </summary>
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
-	//install_allegro(SYSTEM_NONE, &errno, atexit);
-	allegro_init();
+	// allegro_init();
+    install_allegro(SYSTEM_NONE, &errno, atexit);
 	loadpng_init();
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	System::Initialize();
 	SeedRNG();
 
 	InitializeManagers();
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
 
 	HandleMainArgs(argc, argv);
 

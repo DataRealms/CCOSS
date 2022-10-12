@@ -19,7 +19,7 @@ namespace RTE {
 
 #ifndef GUI_STANDALONE
 		// SDL_SetWindowGrab(g_FrameMan.GetWindow(), SDL_TRUE);
-		SDL_CaptureMouse(SDL_TRUE);
+		// SDL_CaptureMouse(SDL_TRUE);
 		//set_mouse_range(0, 0, (g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) - 3, (g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) - 3);
 		AdjustMouseMovementSpeedToGraphicsDriver(g_FrameMan.GetGraphicsDriver());
 #endif
@@ -153,9 +153,10 @@ namespace RTE {
 	void AllegroInput::UpdateMouseInput() {
 		int mouseX, mouseY;
 		Uint32 buttonState = SDL_GetMouseState(&mouseX, &mouseY);
+		std::cout << "x: " << mouseX << "y: " << mouseY << std::endl;
 
 		if (!m_OverrideInput) {
-
+			std::cout << "no override input" << std::endl;
 #ifndef GUI_STANDALONE
 		} else {
 
@@ -190,30 +191,37 @@ namespace RTE {
 
 		m_LastFrameMouseX = mouseX;
 		m_LastFrameMouseY = mouseY;
+		std::cout << "prevx: " << mouseX << " prevy: " << mouseY;
 
 		if (!m_OverrideInput) {
 			if (!m_KeyJoyMouseCursor) {
 				if (buttonState & SDL_BUTTON_LMASK) {
 					m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Up) ? Pushed : Repeat;
 					m_MouseButtonsStates[0] = Down;
+					std::cout << " ml down";
 				} else {
 					m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Down) ? Released : None;
 					m_MouseButtonsStates[0] = Up;
+					std::cout << " ml up";
 				}
 			}
 			if (buttonState & SDL_BUTTON_MMASK) {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[1] = Down;
+				std::cout << " mm down";
 			} else {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Down) ? Released : None;
 				m_MouseButtonsStates[1] = Up;
+				std::cout << " mm up";
 			}
 			if (buttonState & SDL_BUTTON_RMASK) {
 				m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[2] = Down;
+				std::cout << " mr down";
 			} else {
 				m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Down) ? Released : None;
 				m_MouseButtonsStates[2] = Up;
+				std::cout << " mr up";
 			}
 
 #ifndef GUI_STANDALONE
@@ -240,6 +248,7 @@ namespace RTE {
 			m_PrevNetworkMouseButtonsStates[player][2] = m_NetworkMouseButtonsEvents[player][2];
 #endif
 		}
+		std::cout << std::endl;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

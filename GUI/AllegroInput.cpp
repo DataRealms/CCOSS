@@ -5,6 +5,7 @@
 #ifndef GUI_STANDALONE
 #include "FrameMan.h"
 #include "UInputMan.h"
+#include "SDL2/SDL.h"
 #endif
 
 namespace RTE {
@@ -12,12 +13,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor) : GUIInput(whichPlayer, keyJoyMouseCursor) {
-		install_keyboard();
+		//install_keyboard();
 		setlocale(LC_ALL, "C");
-		install_mouse();
+		//install_mouse();
 
 #ifndef GUI_STANDALONE
-		set_mouse_range(0, 0, (g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) - 3, (g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) - 3);
+		// SDL_SetWindowGrab(g_FrameMan.GetWindow(), SDL_TRUE);
+		SDL_CaptureMouse(SDL_TRUE);
+		//set_mouse_range(0, 0, (g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) - 3, (g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) - 3);
 		AdjustMouseMovementSpeedToGraphicsDriver(g_FrameMan.GetGraphicsDriver());
 #endif
 
@@ -33,6 +36,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AllegroInput::AdjustMouseMovementSpeedToGraphicsDriver(int graphicsDriver) const {
+#if 0
 #ifndef GUI_STANDALONE
 		if (graphicsDriver == GFX_AUTODETECT_WINDOWED || graphicsDriver == GFX_DIRECTX_WIN_BORDERLESS) {
 			set_mouse_speed(2, 2);
@@ -42,12 +46,15 @@ namespace RTE {
 #else
 		set_mouse_speed(2, 2);
 #endif
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AllegroInput::ConvertKeyEvent(int allegroKey, int guilibKey, float elapsedS) {
-		if (key[allegroKey]) {
+	void AllegroInput::ConvertKeyEvent(SDL_Scancode sdlKey, int guilibKey, float elapsedS) {
+		int nKeys;
+		const Uint8* sdlKeyState = SDL_GetKeyboardState(&nKeys);
+		if (sdlKeyState[sdlKey]) {
 			if (m_KeyHoldDuration.at(guilibKey) < 0) {
 				m_KeyboardBuffer[guilibKey] = Pushed;
 				m_KeyHoldDuration.at(guilibKey) = 0;
@@ -82,8 +89,10 @@ namespace RTE {
 
 		// Update the mouse position of this GUIInput, based on the Allegro mouse vars (which may have been altered by joystick or keyboard input)
 #ifndef GUI_STANDALONE
-		m_MouseX = static_cast<int>(static_cast<float>(mouse_x) / static_cast<float>(g_FrameMan.GetResMultiplier()));
-		m_MouseY = static_cast<int>(static_cast<float>(mouse_y) / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		int mouseX, mouseY;
+		SDL_GetMouseState(&mouseX, &mouseY);
+		m_MouseX = static_cast<int>(static_cast<float>(mouseX) / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		m_MouseY = static_cast<int>(static_cast<float>(mouseY) / static_cast<float>(g_FrameMan.GetResMultiplier()));
 #else
 		m_MouseX = mouse_x;
 		m_MouseY = mouse_y;
@@ -96,38 +105,41 @@ namespace RTE {
 		// Clear the keyboard buffer, we need it to check for changes
 		memset(m_KeyboardBuffer, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
 		memset(m_ScanCodeState, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
-		while (keypressed()) {
-			uint32_t rawkey = readkey();
-			uint8_t ascii = rawkey & 0xff;
-			uint8_t scancode = (rawkey >> 8);
+		int nKeys;
+		const Uint8* keyboardState = SDL_GetKeyboardState(&nKeys);
 
-			m_ScanCodeState[scancode] = Pushed;
-			m_KeyboardBuffer[ascii] = Pushed;
+		std::memcpy(m_ScanCodeState, keyboardState, nKeys);
+
+		for( uint8_t k = 0; k<255; ++k) {
+			uint8_t keyName = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(k));
+			m_KeyboardBuffer[keyName] = m_ScanCodeState[k];
 		}
 
-		ConvertKeyEvent(KEY_SPACE, ' ', keyElapsedTime);
-		ConvertKeyEvent(KEY_BACKSPACE, Key_Backspace, keyElapsedTime);
-		ConvertKeyEvent(KEY_TAB, Key_Tab, keyElapsedTime);
-		ConvertKeyEvent(KEY_ENTER, Key_Enter, keyElapsedTime);
-		ConvertKeyEvent(KEY_ESC, Key_Escape, keyElapsedTime);
-		ConvertKeyEvent(KEY_LEFT, Key_LeftArrow, keyElapsedTime);
-		ConvertKeyEvent(KEY_RIGHT, Key_RightArrow, keyElapsedTime);
-		ConvertKeyEvent(KEY_UP, Key_UpArrow, keyElapsedTime);
-		ConvertKeyEvent(KEY_DOWN, Key_DownArrow, keyElapsedTime);
-		ConvertKeyEvent(KEY_INSERT, Key_Insert, keyElapsedTime);
-		ConvertKeyEvent(KEY_DEL, Key_Delete, keyElapsedTime);
-		ConvertKeyEvent(KEY_HOME, Key_Home, keyElapsedTime);
-		ConvertKeyEvent(KEY_END, Key_End, keyElapsedTime);
-		ConvertKeyEvent(KEY_PGUP, Key_PageUp, keyElapsedTime);
-		ConvertKeyEvent(KEY_PGDN, Key_PageDown, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_SPACE, ' ', keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_BACKSPACE, Key_Backspace, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_TAB, Key_Tab, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_RETURN, Key_Enter, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_ESCAPE, Key_Escape, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_LEFT, Key_LeftArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_RIGHT, Key_RightArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_UP, Key_UpArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_DOWN, Key_DownArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_INSERT, Key_Insert, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_DELETE, Key_Delete, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_HOME, Key_Home, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_END, Key_End, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_PAGEUP, Key_PageUp, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_PAGEDOWN, Key_PageDown, keyElapsedTime);
 
 		m_Modifier = ModNone;
 
+		SDL_Keymod keyShifts = SDL_GetModState();
+
 #ifndef GUI_STANDALONE
-		if (key_shifts & KB_SHIFT_FLAG) { m_Modifier |= ModShift; }
-		if (key_shifts & KB_ALT_FLAG) { m_Modifier |= ModAlt; }
-		if (key_shifts & KB_CTRL_FLAG) { m_Modifier |= ModCtrl; }
-		if (key_shifts & KB_COMMAND_FLAG) { m_Modifier |= ModCommand; }
+		if (keyShifts & KMOD_SHIFT) { m_Modifier |= ModShift; }
+		if (keyShifts & KMOD_ALT) { m_Modifier |= ModAlt; }
+		if (keyShifts & KMOD_CTRL) { m_Modifier |= ModCtrl; }
+		if (keyShifts & KMOD_GUI) { m_Modifier |= ModCommand; }
 #else
 		if (key[KEY_LSHIFT] || key[KEY_RSHIFT]) { m_Modifier |= ModShift; }
 		if (key[KEY_ALT]) { m_Modifier |= ModAlt; }
@@ -139,46 +151,49 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AllegroInput::UpdateMouseInput() {
+		int mouseX, mouseY;
+		Uint32 buttonState = SDL_GetMouseState(&mouseX, &mouseY);
+
 		if (!m_OverrideInput) {
-			if (mouse_needs_poll()) { poll_mouse(); }
 
 #ifndef GUI_STANDALONE
 		} else {
-			mouse_x = m_LastFrameMouseX;
-			mouse_y = m_LastFrameMouseY;
+
+			mouseX = m_LastFrameMouseX;
+			mouseY = m_LastFrameMouseY;
 
 			if (m_Player >= 0 && m_Player < 4) {
 				if (m_NetworkMouseX[m_Player] != 0) {
 					if (m_NetworkMouseX[m_Player] < 0) m_NetworkMouseX[m_Player] = 1;
 					if (m_NetworkMouseX[m_Player] >= g_FrameMan.GetPlayerFrameBufferWidth(m_Player)) m_NetworkMouseX[m_Player] = g_FrameMan.GetPlayerFrameBufferWidth(m_Player) - 2;
-					mouse_x = m_NetworkMouseX[m_Player];
+					mouseX = m_NetworkMouseX[m_Player];
 				}
 				if (m_NetworkMouseY[m_Player] != 0) {
 					if (m_NetworkMouseY[m_Player] < 0) m_NetworkMouseY[m_Player] = 1;
 					if (m_NetworkMouseY[m_Player] >= g_FrameMan.GetPlayerFrameBufferHeight(m_Player)) m_NetworkMouseY[m_Player] = g_FrameMan.GetPlayerFrameBufferHeight(m_Player) - 2;
-					mouse_y = m_NetworkMouseY[m_Player];
+					mouseY = m_NetworkMouseY[m_Player];
 				}
 			} else {
 				if (m_NetworkMouseX[0] != 0) {
 					if (m_NetworkMouseX[0] < 0) m_NetworkMouseX[0] = 1;
 					if (m_NetworkMouseX[0] >= g_FrameMan.GetPlayerFrameBufferWidth(0)) m_NetworkMouseX[0] = g_FrameMan.GetPlayerFrameBufferWidth(0) - 2;
-					mouse_x = m_NetworkMouseX[0];
+					mouseX = m_NetworkMouseX[0];
 				}
 				if (m_NetworkMouseY[0] != 0) {
 					if (m_NetworkMouseY[0] < 0) m_NetworkMouseY[0] = 1;
 					if (m_NetworkMouseY[0] >= g_FrameMan.GetPlayerFrameBufferHeight(0)) m_NetworkMouseY[0] = g_FrameMan.GetPlayerFrameBufferHeight(0) - 2;
-					mouse_y = m_NetworkMouseY[0];
+					mouseY = m_NetworkMouseY[0];
 				}
 			}
 #endif
 		}
 
-		m_LastFrameMouseX = mouse_x;
-		m_LastFrameMouseY = mouse_y;
+		m_LastFrameMouseX = mouseX;
+		m_LastFrameMouseY = mouseY;
 
 		if (!m_OverrideInput) {
 			if (!m_KeyJoyMouseCursor) {
-				if (mouse_b & AllegroMouseButtons::ButtonLeft) {
+				if (buttonState & SDL_BUTTON_LMASK) {
 					m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Up) ? Pushed : Repeat;
 					m_MouseButtonsStates[0] = Down;
 				} else {
@@ -186,14 +201,14 @@ namespace RTE {
 					m_MouseButtonsStates[0] = Up;
 				}
 			}
-			if (mouse_b & AllegroMouseButtons::ButtonMiddle) {
+			if (buttonState & SDL_BUTTON_MMASK) {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[1] = Down;
 			} else {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Down) ? Released : None;
 				m_MouseButtonsStates[1] = Up;
 			}
-			if (mouse_b & AllegroMouseButtons::ButtonRight) {
+			if (buttonState & SDL_BUTTON_RMASK) {
 				m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[2] = Down;
 			} else {
@@ -230,6 +245,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AllegroInput::UpdateKeyJoyMouseInput(float keyElapsedTime) {
+#if 0
 #ifndef GUI_STANDALONE
 		int mouseDenominator = g_FrameMan.GetResMultiplier();
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
@@ -264,6 +280,7 @@ namespace RTE {
 			m_MouseButtonsStates[0] = Up;
 			m_MouseButtonsEvents[0] = None;
 		}
+#endif
 #endif
 	}
 }

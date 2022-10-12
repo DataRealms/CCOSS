@@ -2,6 +2,7 @@
 #define _ALLEGROINPUT_
 
 #include "GUIInput.h"
+#include "SDL2/SDL_scancode.h"
 
 namespace RTE {
 
@@ -78,7 +79,7 @@ namespace RTE {
 		/// <param name="allegroKey">The Allegro scancode.</param>
 		/// <param name="guilibKey">The corresponding GUIlib scancode</param>
 		/// <param name="elapsedS">The elapsed time since the last update, in seconds.</param>
-		void ConvertKeyEvent(int allegroKey, int guilibKey, float elapsedS);
+		void ConvertKeyEvent(SDL_Scancode sdlKey, int guilibKey, float elapsedS);
 
 		// Disallow the use of some implicit methods.
 		AllegroInput(const AllegroInput &reference) = delete;

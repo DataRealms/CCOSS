@@ -24,14 +24,6 @@ namespace RTE {
 		AllegroInput(int whichPlayer, bool keyJoyMouseCursor = false);
 #pragma endregion
 
-#pragma region Concrete Methods
-		/// <summary>
-		/// Changes the mouse movement speed based on the graphics driver in use. The default (2) movement speed is slow and sluggish in dedicated fullscreen so this is used to change between default and faster (1) when switching drivers.
-		/// </summary>
-		/// <param name="graphicsDriver">The graphics driver to adjust mouse movement speed to.</param>
-		void AdjustMouseMovementSpeedToGraphicsDriver(int graphicsDriver) const;
-#pragma endregion
-
 #pragma region Virtual Override Methods
 		/// <summary>
 		/// Updates the input.

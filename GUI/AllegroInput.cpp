@@ -13,17 +13,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor) : GUIInput(whichPlayer, keyJoyMouseCursor) {
-		//install_keyboard();
-		setlocale(LC_ALL, "C");
-		//install_mouse();
-
-#ifndef GUI_STANDALONE
-		// SDL_SetWindowGrab(g_FrameMan.GetWindow(), SDL_TRUE);
-		// SDL_CaptureMouse(SDL_TRUE);
-		//set_mouse_range(0, 0, (g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) - 3, (g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) - 3);
-		AdjustMouseMovementSpeedToGraphicsDriver(g_FrameMan.GetGraphicsDriver());
-#endif
-
 		m_KeyTimer = std::make_unique<Timer>();
 		m_CursorAccelTimer = std::make_unique<Timer>();
 
@@ -31,22 +20,6 @@ namespace RTE {
 		memset(m_ScanCodeState, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
 
 		m_KeyHoldDuration.fill(-1);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AllegroInput::AdjustMouseMovementSpeedToGraphicsDriver(int graphicsDriver) const {
-#if 0
-#ifndef GUI_STANDALONE
-		if (graphicsDriver == GFX_AUTODETECT_WINDOWED || graphicsDriver == GFX_DIRECTX_WIN_BORDERLESS) {
-			set_mouse_speed(2, 2);
-		} else {
-			set_mouse_speed(1, 1);
-		}
-#else
-		set_mouse_speed(2, 2);
-#endif
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

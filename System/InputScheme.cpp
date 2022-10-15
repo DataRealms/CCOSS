@@ -258,18 +258,20 @@ namespace RTE {
 				break;
 			case InputPreset::PresetGenericDPad:
 				// TODO: Don't have any SNES style controllers to test with so no idea what would work or make sense here.
-				//m_InputMappings[InputElements::INPUT_L_UP].SetKey();
-				//m_InputMappings[InputElements::INPUT_L_DOWN].SetKey();
-				//m_InputMappings[InputElements::INPUT_L_LEFT].SetKey();
-				//m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey();
-				m_InputMappings[InputElements::INPUT_FIRE].SetJoyButton(JoyButtons::JOY_1);
-				m_InputMappings[InputElements::INPUT_AIM].SetJoyButton(JoyButtons::JOY_2);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetJoyButton(JoyButtons::JOY_3);
-				m_InputMappings[InputElements::INPUT_JUMP].SetJoyButton(JoyButtons::JOY_4);
-				m_InputMappings[InputElements::INPUT_NEXT].SetJoyButton(JoyButtons::JOY_6);
-				m_InputMappings[InputElements::INPUT_PREV].SetJoyButton(JoyButtons::JOY_5);
-				m_InputMappings[InputElements::INPUT_START].SetJoyButton(JoyButtons::JOY_8);
-				m_InputMappings[InputElements::INPUT_BACK].SetJoyButton(JoyButtons::JOY_7);
+				m_InputMappings[InputElements::INPUT_L_UP].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_UP);
+				m_InputMappings[InputElements::INPUT_L_DOWN].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+				m_InputMappings[InputElements::INPUT_L_LEFT].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+				m_InputMappings[InputElements::INPUT_L_RIGHT].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+				m_InputMappings[InputElements::INPUT_AIM_UP].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_UP);
+				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+				m_InputMappings[InputElements::INPUT_FIRE].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
+				m_InputMappings[InputElements::INPUT_AIM].SetJoyButton(SDL_CONTROLLER_BUTTON_Y);
+				m_InputMappings[InputElements::INPUT_PIEMENU].SetJoyButton(SDL_CONTROLLER_BUTTON_A);
+				m_InputMappings[InputElements::INPUT_JUMP].SetJoyButton(SDL_CONTROLLER_BUTTON_X);
+				m_InputMappings[InputElements::INPUT_NEXT].SetJoyButton(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+				m_InputMappings[InputElements::INPUT_PREV].SetJoyButton(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+				m_InputMappings[InputElements::INPUT_START].SetJoyButton(SDL_CONTROLLER_BUTTON_START);
+				m_InputMappings[InputElements::INPUT_BACK].SetJoyButton(SDL_CONTROLLER_BUTTON_BACK);
 				//m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey();
 				//m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey();
 				//m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey();

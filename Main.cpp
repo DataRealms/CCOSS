@@ -294,8 +294,9 @@ int main(int argc, char **argv) {
     install_allegro(SYSTEM_NONE, &errno, atexit);
 	loadpng_init();
 
-	SDL_Init(SDL_INIT_EVERYTHING);
-	// SDL_ShowCursor(SDL_DISABLE);
+	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_GAMECONTROLLER|SDL_INIT_TIMER);
+	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
+	SDL_ShowCursor(SDL_DISABLE);
 
 	System::Initialize();
 	SeedRNG();

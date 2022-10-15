@@ -208,19 +208,19 @@ namespace RTE {
 		/// Gets the state of the Ctrl key.
 		/// </summary>
 		/// <returns>The state of the Ctrl key.</returns>
-		bool FlagCtrlState() const { return ((key_shifts & KB_CTRL_FLAG) > 0) ? true : false; }
+		bool FlagCtrlState() const { return ((SDL_GetModState() & KMOD_CTRL) > 0) ? true : false; }
 
 		/// <summary>
 		/// Gets the state of the Alt key.
 		/// </summary>
 		/// <returns>The state of the Alt key.</returns>
-		bool FlagAltState() const { return ((key_shifts & KB_ALT_FLAG) > 0) ? true : false; }
+		bool FlagAltState() const { return ((SDL_GetModState() & KMOD_ALT) > 0) ? true : false; }
 
 		/// <summary>
 		/// Gets the state of the Shift key.
 		/// </summary>
 		/// <returns>The state of the Shift key.</returns>
-		bool FlagShiftState() const { return ((key_shifts & KB_SHIFT_FLAG) > 0) ? true : false; }
+		bool FlagShiftState() const { return ((SDL_GetModState() & KMOD_SHIFT) > 0) ? true : false; }
 #pragma endregion
 
 #pragma region Keyboard Handling

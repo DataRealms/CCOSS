@@ -331,6 +331,10 @@ namespace RTE {
 
 		SetDisplaySwitchMode();
 
+		int windowW;
+		int windowH;
+		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		glViewport(0, 0, windowW, windowH);
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
 
@@ -467,6 +471,13 @@ namespace RTE {
 			}
 		}
 
+		m_ScreenShader->Destroy();
+		glDeleteTextures(1, &m_ScreenTexture);
+		glDeleteVertexArrays(1, &m_ScreenVAO);
+		glDeleteBuffers(1, &m_ScreenVBO);
+		SDL_GL_DeleteContext(m_GLContext);
+		SDL_DestroyWindow(m_Window);
+
 		m_ResChanged = false;
 	}
 
@@ -518,6 +529,11 @@ namespace RTE {
 		}
 		m_ResMultiplier = newMultiplier;
 
+		int windowW;
+		int windowH;
+		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		glViewport(0, 0, windowW, windowH);
+
 		set_palette(m_Palette);
 		SetDisplaySwitchMode();
 
@@ -557,6 +573,11 @@ namespace RTE {
 		m_ResX = newResX;
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
+
+		int windowW;
+		int windowH;
+		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();

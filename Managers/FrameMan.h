@@ -552,13 +552,13 @@ namespace RTE {
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
-		SDL_Window* m_Window;
-		SDL_GLContext m_GLContext;
-		GLuint m_ScreenTexture;
-		std::shared_ptr<ScreenShader> m_ScreenShader;
-		GLuint m_ScreenVBO;
-		GLuint m_ScreenVAO;
-		std::vector<float> m_ScreenVertices;
+		SDL_Window* m_Window; //!< The main Window.
+		SDL_GLContext m_GLContext; //!< Opaque GL context pointer.
+		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
+		std::shared_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
+		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
+		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
+		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
 
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.

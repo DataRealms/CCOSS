@@ -17,7 +17,6 @@ namespace RTE{
 		glDeleteShader(fragmentShader);
 
 		RTEAssert(m_ProgramID, "Failed to link shader with error: " + error);
-		std::cout << m_VertexShader << std::endl;
 	}
 
 	ScreenShader::~ScreenShader() {
@@ -70,7 +69,6 @@ namespace RTE{
 		glGetProgramiv(program, GL_LINK_STATUS, &success);
 
 		if (success == GL_FALSE) {
-			std::cout << program << std::endl;
 			GLint infoLength;
 			error += "\nFailed to link program:\n";
 			size_t errorPrevLen = error.size();

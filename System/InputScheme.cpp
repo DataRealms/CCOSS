@@ -446,7 +446,7 @@ namespace RTE {
 			if (whichKey == SDL_SCANCODE_ESCAPE || whichKey == SDL_SCANCODE_GRAVE || whichKey == SDL_SCANCODE_PRINTSCREEN || whichKey == SDL_SCANCODE_F1 || whichKey == SDL_SCANCODE_F2 || whichKey == SDL_SCANCODE_F3 || whichKey == SDL_SCANCODE_F4 || whichKey == SDL_SCANCODE_F5) {
 				continue;
 			}
-			if (g_UInputMan.KeyReleased(static_cast<char>(whichKey))) {
+			if (g_UInputMan.KeyReleased(static_cast<SDL_Scancode>(whichKey))) {
 				m_InputMappings.at(whichInput).Reset();
 				SetKeyMapping(whichInput, whichKey);
 				return true;

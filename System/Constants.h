@@ -223,6 +223,15 @@ namespace RTE {
 		JOY_10,
 		JOY_11,
 		JOY_12,
+		JOY_13,
+		JOY_15,
+		JOY_16,
+		JOY_17,
+		JOY_18,
+		JOY_19,
+		JOY_20,
+		JOY_21,
+		JOY_22,
 		MAX_JOY_BUTTONS
 	};
 

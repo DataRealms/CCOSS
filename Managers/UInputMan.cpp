@@ -30,6 +30,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::Clear() {
+		m_NumJoysticks = 0;
 		m_OverrideInput = false;
 		m_AbsoluteMousePos.Reset();
 		m_RawMouseMovement.Reset();
@@ -52,6 +53,12 @@ namespace RTE {
 		std::fill(s_CurrentMouseButtonStates.begin(), s_CurrentMouseButtonStates.end(), false);
 		std::fill(s_PrevMouseButtonStates.begin(), s_PrevMouseButtonStates.end(), false);
 		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
+
+		for (Gamepad& gp: s_PrevJoystickStates) {
+			if (gp.m_JoystickID != -1) {
+				SDL_GameControllerClose(SDL_GameControllerFromInstanceID(gp.m_JoystickID));
+			}
+		}
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ControlScheme[player].Reset();
@@ -82,6 +89,26 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::Initialize() {
+		int nKeys;
+		const Uint8* keyboardState = SDL_GetKeyboardState(&nKeys);
+		std::copy(keyboardState, keyboardState + nKeys, s_PrevKeyStates.begin());
+
+		int controllerIndex = 0;
+
+		for(size_t index = 0; index < std::min(SDL_NumJoysticks(), static_cast<int>(Players::MaxPlayerCount)); ++index) {
+			if (SDL_IsGameController(index)) {
+				SDL_GameController* controller = SDL_GameControllerOpen(index);
+				if (!controller) {
+					g_ConsoleMan.PrintString("ERROR: Failed to open controller " + std::to_string(index) + " " + std::string(SDL_GetError()));
+					continue;
+				}
+				SDL_JoystickID id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
+				s_PrevJoystickStates[controllerIndex] = Gamepad(index, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
+				s_ChangedJoystickStates[controllerIndex] = Gamepad(index, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
+				controllerIndex++;
+				m_NumJoysticks++;
+			}
+		}
 // 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
 // 		setlocale(LC_ALL, "C");
 
@@ -183,8 +210,12 @@ namespace RTE {
 			const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(whichPlayer).GetInputMappings();
 
 			// Assume axes are stretched out over up-down, and left-right
-			if (inputElements->at(InputElements::INPUT_L_LEFT).JoyDirMapped()) { moveValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_LEFT).GetStick(), inputElements->at(InputElements::INPUT_L_LEFT).GetAxis())); }
-			if (inputElements->at(InputElements::INPUT_L_UP).JoyDirMapped()) { moveValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_UP).GetStick(), inputElements->at(InputElements::INPUT_L_UP).GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_L_LEFT).JoyDirMapped()) {
+				moveValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_LEFT).GetStick(), inputElements->at(InputElements::INPUT_L_LEFT).GetAxis()));
+			}
+			if (inputElements->at(InputElements::INPUT_L_UP).JoyDirMapped()) {
+				moveValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_UP).GetStick(), inputElements->at(InputElements::INPUT_L_UP).GetAxis()));
+			}
 		}
 		return moveValues;
 	}
@@ -205,8 +236,12 @@ namespace RTE {
 			const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(whichPlayer).GetInputMappings();
 
 			// Assume axes are stretched out over up-down, and left-right
-			if (inputElements->at(InputElements::INPUT_R_LEFT).JoyDirMapped()) { aimValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_LEFT).GetStick(), inputElements->at(InputElements::INPUT_R_LEFT).GetAxis())); }
-			if (inputElements->at(InputElements::INPUT_R_UP).JoyDirMapped()) { aimValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_UP).GetStick(), inputElements->at(InputElements::INPUT_R_UP).GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_R_LEFT).JoyDirMapped()) {
+				aimValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_LEFT).GetStick(), inputElements->at(InputElements::INPUT_R_LEFT).GetAxis()));
+			}
+			if (inputElements->at(InputElements::INPUT_R_UP).JoyDirMapped()) {
+				aimValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_UP).GetStick(), inputElements->at(InputElements::INPUT_R_UP).GetAxis()));
+			}
 		}
 		return aimValues;
 	}
@@ -327,9 +362,11 @@ namespace RTE {
 
 	void UInputMan::DisableMouseMoving(bool disable) {
 		if (disable) {
+			SDL_SetRelativeMouseMode(SDL_FALSE);
 			m_DisableMouseMoving = true;
 			m_PrepareToEnableMouseMoving = false;
 		} else {
+			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(m_TrapMousePos));
 			m_PrepareToEnableMouseMoving = true;
 		}
 	}
@@ -438,7 +475,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::WhichJoyButtonHeld(int whichJoy) const {
-		#if 0
+		if (whichJoy >= 0 && whichJoy < s_PrevJoystickStates.size()) {
+			for (int button = 0; button < s_PrevJoystickStates[whichJoy].m_Buttons.size(); ++button) {
+				if (s_PrevJoystickStates[whichJoy].m_Buttons[button]) {
+					return button;
+				}
+			}
+		}
+
+#if 0
 		if (whichJoy >= 0 || whichJoy < num_joysticks) {
 			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
 				if (joy[whichJoy].button[button].b) {
@@ -453,6 +498,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::WhichJoyButtonPressed(int whichJoy) const {
+		if (whichJoy >=0 && whichJoy < s_PrevJoystickStates.size()) {
+			for (int button = 0; button < s_PrevJoystickStates[whichJoy].m_Buttons.size(); ++button) {
+				if (s_PrevJoystickStates[whichJoy].m_Buttons[button] && s_ChangedJoystickStates[whichJoy].m_Buttons[button]) {
+					return button;
+				}
+			}
+		}
 		#if 0
 		if (whichJoy >= 0 || whichJoy < num_joysticks) {
 			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
@@ -468,7 +520,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float UInputMan::AnalogAxisValue(int whichJoy, int whichStick, int whichAxis) const {
-		#if 0
+		if (whichJoy < s_PrevJoystickStates.size() && whichAxis < s_PrevJoystickStates[whichJoy].m_Axis.size()) {
+			if (s_PrevJoystickStates[whichJoy].m_JoystickID != -1) {
+				float analogValue = static_cast<float>(s_PrevJoystickStates[whichJoy].m_Axis[whichAxis]) / 32767.0f;
+				return analogValue;
+			}
+		}
+#if 0
 		if (whichJoy < num_joysticks && whichStick < joy[whichJoy].num_sticks && whichAxis < joy[whichJoy].stick[whichStick].num_axis) {
 			if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED) {
 				// Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
@@ -478,14 +536,37 @@ namespace RTE {
 				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos) / 128.0F;
 			}
 		}
-		#endif
+#endif
 		return  0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyJoyInput(bool checkForPresses) const {
-		#if 0
+		size_t gpIndex = 0;
+		for (const Gamepad &gp: s_PrevJoystickStates) {
+			for (int button = 0; button < gp.m_Buttons.size(); ++button) {
+				if (!checkForPresses) {
+					if (gp.m_Buttons[button]) {
+						return true;
+					}
+				} else if (JoyButtonPressed(gpIndex, button)) {
+						return true;
+					}
+			}
+			for (int axis = 0; axis < gp.m_Axis.size(); ++axis){
+				if(!checkForPresses) {
+					if (gp.m_Axis[axis] != 0){
+						return true;
+					}
+				} else if(JoyDirectionPressed(gpIndex, 0, axis, JoyDirections::JOYDIR_ONE) || JoyDirectionPressed(gpIndex, 0, axis, JoyDirections::JOYDIR_TWO)){
+					return true;
+				}
+			}
+
+			gpIndex++;
+		}
+#if 0
 		poll_joystick();
 
 		for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; ++joystick) {
@@ -514,7 +595,7 @@ namespace RTE {
 				}
 			}
 		}
-		#endif
+#endif
 		return false;
 	}
 
@@ -615,6 +696,7 @@ namespace RTE {
 
 	bool UInputMan::GetMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
 		if (whichButton < MouseButtons::MOUSE_LEFT || whichButton >= MouseButtons::MAX_MOUSE_BUTTONS) {
+			RTEAbort("Invalid button passed!");
 			return false;
 		}
 		if (IsInMultiplayerMode()) {
@@ -629,6 +711,7 @@ namespace RTE {
 				return m_NetworkMouseButtonState[whichPlayer][whichButton][whichState];
 			}
 		}
+
 		switch (whichState) {
 			case InputState::Held:
 				return s_CurrentMouseButtonStates[whichButton];
@@ -643,9 +726,34 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	int UInputMan::GetJoystickAxisCount(int whichJoy) const {
+		if(whichJoy >= 0 && whichJoy < s_PrevJoystickStates.size()) {
+			return s_PrevJoystickStates[whichJoy].m_Axis.size();
+		}
+		return 0;
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::GetJoystickButtonState(int whichJoy, int whichButton, InputState whichState) const {
-		#if 0
+		if (whichJoy < 0 || whichJoy >= s_PrevJoystickStates.size() || whichButton < 0 || whichButton >= s_PrevJoystickStates[whichJoy].m_Buttons.size()) {
+			return false;
+		}
+
+		bool button = s_PrevJoystickStates[whichJoy].m_Buttons[whichButton];
+
+		switch (whichState) {
+			case InputState::Held:
+				return button;
+			case InputState::Pressed:
+				return button && s_ChangedJoystickStates[whichJoy].m_Buttons[whichButton];
+			case InputState::Released:
+				return !button && s_ChangedJoystickStates[whichJoy].m_Buttons[whichButton];
+			default:
+				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
+				return false;
+		}
+
+#if 0
 		if (whichJoy < 0 || whichJoy >= num_joysticks || whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
 			return false;
 		}
@@ -667,7 +775,38 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const {
-		#if 0
+		if (whichJoy < 0 || whichJoy >= s_PrevJoystickStates.size() || whichAxis < 0 || whichAxis >= s_PrevJoystickStates[whichJoy].m_DigitalAxis.size()) {
+			return false;
+		}
+		int axis = s_PrevJoystickStates[whichJoy].m_DigitalAxis[whichAxis];
+
+		if (whichDir == JoyDirections::JOYDIR_ONE) {
+			switch (whichState) {
+				case InputState::Held:
+					return axis == -1;
+				case InputState::Pressed:
+					return axis == -1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
+				case InputState::Released:
+					return axis == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
+				default:
+					RTEAbort("Undefined InputState value passed in. See InputState enumeration");
+					return false;
+			}
+		} else {
+			switch (whichState) {
+				case InputState::Held:
+					return axis == 1;
+				case InputState::Pressed:
+					return axis == 1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
+				case InputState::Released:
+					return axis == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
+				default:
+					RTEAbort("Undefined InputState value passed in. See InputState enumeration");
+					return false;
+			}
+		}
+
+#if 0
 		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
 			return false;
 		}
@@ -715,38 +854,113 @@ namespace RTE {
 		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
 		for (Gamepad& pad: s_ChangedJoystickStates) {
 			std::fill(pad.m_Buttons.begin(), pad.m_Buttons.end(), false);
-			std::fill(pad.m_Axis.begin(), pad.m_Axis.end(), Vector{0.0, 0.0});
+			std::fill(pad.m_Axis.begin(), pad.m_Axis.end(), 0);
+			std::fill(pad.m_DigitalAxis.begin(), pad.m_DigitalAxis.end(), 0);
 		}
+		m_MouseWheelChange = 0;
+		m_RawMouseMovement.Reset();
 
 		SDL_Event e;
 
-		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT) {
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) {
 				System::SetQuit(true);
 			}
-			if(e.type == SDL_KEYUP || e.type == SDL_KEYDOWN) {
-				std::cout << "DEBUG: Keyboard event: " << SDL_GetKeyName(e.key.keysym.sym) << " " << (e.key.state ? "pressed" : "released") << std::endl;
+			if (e.type == SDL_KEYUP || e.type == SDL_KEYDOWN) {
 				s_ChangedKeyStates[e.key.keysym.scancode] = (e.key.state != s_PrevKeyStates[e.key.keysym.scancode]);
 				s_PrevKeyStates[e.key.keysym.scancode] = e.key.state;
 			}
-			if(e.type == SDL_MOUSEMOTION) {
-				std::cout << "DEBUG: Mouse motion event: x " << e.motion.x << " y " << e.motion.y << " | xrel" << e.motion.xrel << " yrel " << e.motion.yrel << std::endl;
+			if (e.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);
 				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
 			}
 			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
-				if(e.button.button == SDL_BUTTON_X1 || e.button.button == SDL_BUTTON_X2)
+				if (e.button.button == SDL_BUTTON_X1 || e.button.button == SDL_BUTTON_X2)
 					continue;
-				std::cout << "DEBUG: Mouse button event: " << (int)e.button.button << " was " << (e.button.state ? "pressed" : "released") << std::endl;
 				s_ChangedMouseButtonStates[e.button.button] = (e.button.state != s_PrevMouseButtonStates[e.button.button]);
-				s_PrevKeyStates[e.button.button] = e.button.state;
+				s_PrevMouseButtonStates[e.button.button] = e.button.state;
 				s_CurrentMouseButtonStates[e.button.button] = e.button.state;
+			}
+			if(e.type == SDL_MOUSEWHEEL) {
+				m_MouseWheelChange = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? e.wheel.y : -e.wheel.y;
 			}
 			if (e.type == SDL_WINDOWEVENT_FOCUS_GAINED) {
 				g_FrameMan.DisplaySwitchIn();
 			}
 			if (e.type == SDL_WINDOWEVENT_FOCUS_LOST) {
 				g_FrameMan.DisplaySwitchOut();
+			}
+			if (e.type == SDL_CONTROLLERAXISMOTION) {
+				UpdateJoystickAxis(e);
+			}
+			if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP) {
+				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.cbutton.which);
+				if (device != s_PrevJoystickStates.end()) {
+					int index = device - s_PrevJoystickStates.begin();
+					s_ChangedJoystickStates[index].m_Buttons[e.cbutton.button] = e.cbutton.state != device->m_Buttons[e.cbutton.button];
+					device->m_Buttons[e.cbutton.button] = e.cbutton.state;
+				}
+			}
+			if (e.type == SDL_CONTROLLERDEVICEADDED) {
+				SDL_GameController *controller = nullptr;
+				size_t controllerIndex = 0;
+				for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
+					if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == e.jdevice.which) {
+						controller = SDL_GameControllerOpen(e.jdevice.which);
+						if (!controller) {
+							g_ConsoleMan.PrintString("ERROR: Failed to reconnect Gamepad " + std::to_string(controllerIndex + 1));
+							break;
+						}
+						g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " reconnected");
+						break;
+					} else if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == -1) {
+						controller = SDL_GameControllerOpen(e.jdevice.which);
+						if (!controller) {
+							g_ConsoleMan.PrintString("ERROR: Failed to connect Gamepad " + std::to_string(controllerIndex + 1));
+							break;
+						}
+						g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " connected");
+						break;
+					}
+				}
+				if (!controller && controllerIndex == s_PrevJoystickStates.size()) {
+					controllerIndex = 0;
+					for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
+						if (s_PrevJoystickStates[controllerIndex].m_JoystickID == -1) {
+							controller = SDL_GameControllerOpen(e.jdevice.which);
+							if (!controller) {
+								g_ConsoleMan.PrintString("ERROR: Failed to connect controller!");
+								break;
+							}
+							g_ConsoleMan.PrintString("INFO: New Gamepad connected as Gamepad " + std::to_string(controllerIndex + 1));
+							break;
+						}
+					}
+					g_ConsoleMan.PrintString("ERROR: Too many gamepads connected!");
+				}
+				if (controller) {
+					SDL_JoystickID id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
+					s_PrevJoystickStates[controllerIndex] = Gamepad(e.jdevice.which, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
+					s_ChangedJoystickStates[controllerIndex] = Gamepad(e.jdevice.which, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
+					m_NumJoysticks++;
+				}
+			}
+			if (e.type == SDL_CONTROLLERDEVICEREMOVED) {
+				std::vector<Gamepad>::iterator prevDevice = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.jdevice.which);
+				if (prevDevice != s_PrevJoystickStates.end()) {
+					g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(prevDevice->m_DeviceIndex + 1) + " disconnected!");
+					SDL_GameControllerClose(SDL_GameControllerFromInstanceID(prevDevice->m_JoystickID));
+					prevDevice->m_JoystickID = -1;
+					std::fill(prevDevice->m_Axis.begin(), prevDevice->m_Axis.end(), 0);
+					std::fill(prevDevice->m_Buttons.begin(), prevDevice->m_Buttons.end(), false);
+					m_NumJoysticks--;
+				}
+				std::vector<Gamepad>::iterator changedDevice = std::find(s_ChangedJoystickStates.begin(), s_ChangedJoystickStates.end(), e.jdevice.which);
+				if (changedDevice != s_ChangedJoystickStates.end()) {
+					changedDevice->m_JoystickID = -1;
+					std::fill(changedDevice->m_Axis.begin(), changedDevice->m_Axis.end(), false);
+					std::fill(changedDevice->m_Buttons.begin(), changedDevice->m_Buttons.end(), false);
+				}
 			}
 		}
 		// TODO: Add sensitivity slider to settings menu
@@ -903,20 +1117,10 @@ namespace RTE {
 
 			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
 			// won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
-			int mousePosX = mouse_x / g_FrameMan.GetResMultiplier();
-			int mousePosY = mouse_y / g_FrameMan.GetResMultiplier();
+			int mousePosX = m_AbsoluteMousePos.m_X / g_FrameMan.GetResMultiplier();
+			int mousePosY = m_AbsoluteMousePos.m_Y / g_FrameMan.GetResMultiplier();
 			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_FrameMan.GetResX() && mousePosY >= 0 && mousePosY < g_FrameMan.GetResY())) {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
-			}
-		}
-		if (mousePlayer != Players::NoPlayer || !g_ActivityMan.IsInActivity()) {
-			// Mouse wheel update happens while a device is kb+mouse and while in the menus regardless of player devices.
-			// Translate motion into discrete ticks.
-			if (std::abs(mouse_z) >= 1) {
-				m_MouseWheelChange = mouse_z;
-				// position_mouse_z(0);
-			} else {
-				m_MouseWheelChange = 0;
 			}
 		}
 	}
@@ -924,7 +1128,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::UpdateJoystickInput() {
-		#if 0
+
+#if 0
 		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
 			// Detect and store joystick button changed since last Update()
 			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
@@ -994,22 +1199,103 @@ namespace RTE {
 		#endif
 	}
 
+	void UInputMan::UpdateJoystickAxis(const SDL_Event &e) {
+
+		std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.caxis.which);
+		if (device != s_PrevJoystickStates.end()) {
+			int joystickIndex = device - s_PrevJoystickStates.begin();
+
+			int prevAxisValue = device->m_Axis[e.caxis.axis];
+			int prevDigitalValue = device->m_DigitalAxis[e.caxis.axis];
+
+			int newDigitalState = 0;
+			if (e.caxis.value > 8912) {
+				newDigitalState = 1;
+			} else if (e.caxis.value < -8912) {
+				newDigitalState = -1;
+			}
+
+			s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(e.caxis.value - device->m_Axis[e.caxis.axis]);
+			s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[e.caxis.axis] = Sign(newDigitalState - prevDigitalValue);
+			device->m_Axis[e.caxis.axis] = e.caxis.value;
+			device->m_DigitalAxis[e.caxis.axis] = newDigitalState;
+
+			Players joystickPlayer = Players::NoPlayer;
+			float deadZone = 0.0f;
+			int deadZoneType = DeadZoneType::CIRCLE;
+
+			for (int playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; ++playerToCheck) {
+				InputDevice device = m_ControlScheme[playerToCheck].GetDevice();
+				int whichJoy = GetJoystickIndex(device);
+				if (whichJoy == joystickIndex) {
+					deadZone = m_ControlScheme[playerToCheck].GetJoystickDeadzone();
+					deadZoneType = m_ControlScheme[playerToCheck].GetJoystickDeadzoneType();
+					joystickPlayer = static_cast<Players>(playerToCheck);
+				}
+			}
+
+			bool isAxisMapped{false};
+			if (joystickPlayer != Players::NoPlayer && deadZone > 0.0f) {
+				Vector aimValues;
+				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme[joystickPlayer].GetInputMappings();
+				std::array<InputElements, 4> elementsToCheck = {InputElements::INPUT_L_LEFT, InputElements::INPUT_L_UP, InputElements::INPUT_R_LEFT, InputElements::INPUT_R_UP};
+
+				for (size_t i = 0; i < elementsToCheck.size(); i += 2) {
+					int axisLeft{SDL_CONTROLLER_AXIS_INVALID};
+					int axisUp{SDL_CONTROLLER_AXIS_INVALID};
+					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) {
+						axisLeft = inputElements->at(elementsToCheck[i]).GetAxis();
+
+						aimValues.m_X = AnalogAxisValue(joystickIndex, 0, axisLeft);
+						isAxisMapped |= axisLeft == e.caxis.axis;
+					}
+					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) {
+						axisUp = inputElements->at(elementsToCheck[i+1]).GetAxis();
+						aimValues.m_Y = AnalogAxisValue(joystickIndex, 0, axisUp);
+						isAxisMapped |= axisUp == e.caxis.axis;
+					}
+					if (!isAxisMapped) {
+						continue;
+					}
+
+					if (deadZoneType == DeadZoneType::CIRCLE) {
+						if (aimValues.GetMagnitude() < deadZone) {
+							if (axisLeft != SDL_CONTROLLER_AXIS_INVALID) {
+								s_ChangedJoystickStates[joystickIndex].m_Axis[axisLeft] = Sign(axisLeft == e.caxis.axis ? -prevAxisValue : -device->m_Axis[axisLeft]);
+								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisLeft] = Sign(axisLeft == e.caxis.axis ? -prevDigitalValue : -device->m_DigitalAxis[axisLeft]);
+								device->m_Axis[axisLeft] = 0;
+								device->m_DigitalAxis[axisLeft] = 0;
+							}
+							if(axisUp != SDL_CONTROLLER_AXIS_INVALID) {
+								s_ChangedJoystickStates[joystickIndex].m_Axis[axisUp] = Sign(axisUp == e.caxis.axis ? -prevAxisValue : -device->m_Axis[axisUp]);
+								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisUp] = Sign(axisLeft == e.caxis.axis ? -prevDigitalValue : -device->m_DigitalAxis[axisUp]);
+								device->m_Axis[axisUp] = 0;
+								device->m_DigitalAxis[axisUp] = 0;
+							}
+						}
+					}
+				}
+			}
+			if(!isAxisMapped && deadZoneType == DeadZoneType::SQUARE && deadZone >0.f) {
+				if (std::abs(e.caxis.value / 32767.0) < deadZone) {
+					s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(-prevAxisValue);
+					s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(-prevDigitalValue);
+					device->m_Axis[e.caxis.axis] = 0;
+					device->m_DigitalAxis[e.caxis.axis] = 0;
+				}
+			}
+		}
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::StoreInputEventsForNextUpdate() {
-#if 0
-		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
-		std::memcpy(s_PrevMouseButtonStates, s_CurrentMouseButtonStates, MouseButtons::MAX_MOUSE_BUTTONS);
-		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
-			std::memcpy(s_PrevJoystickStates, &joy[joystick], sizeof(joy[joystick]));
-		}
 		// Store pressed and released events to be picked by NetworkClient during it's update. These will be cleared after update so we don't care about false but we store the result regardless.
 		for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++){
 			for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
 				m_NetworkAccumulatedElementState[element][inputState] = GetInputElementState(Players::PlayerOne, element, static_cast<InputState>(inputState));
 			}
 		}
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -8,7 +8,9 @@
 #include "SDL2/SDL_keyboard.h"
 
 #define g_UInputMan UInputMan::Instance()
-
+extern "C" {
+union SDL_Event;
+}
 namespace RTE {
 
 	class GUIInput;
@@ -419,7 +421,7 @@ namespace RTE {
 		/// Gets the number of active joysticks.
 		/// </summary>
 		/// <returns>The number of active joysticks.</returns>
-		int GetJoystickCount() const { return (num_joysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : num_joysticks; }
+		int GetJoystickCount() const { return (m_NumJoysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : m_NumJoysticks; }
 
 		/// <summary>
 		/// Gets the index number of a joystick from InputDevice. Basically just subtract 2 from the passed in value because the Allegro joystick indices are 0-3 and ours are 2-5.
@@ -428,12 +430,14 @@ namespace RTE {
 		/// <returns>The corrected index. A non-joystick device will result in an out of range value returned which will not affect any active joysticks.</returns>
 		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT ; }
 
+		int GetJoystickAxisCount(int whichJoy) const;
+
 		/// <summary>
 		/// Gets whether the specified joystick is active. The joystick number does not correspond to the player number.
 		/// </summary>
 		/// <param name="joystickNumber">Joystick to check for.</param>
 		/// <returns>Whether the specified joystick is active.</returns>
-		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && joystickNumber < num_joysticks; }
+		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && s_PrevJoystickStates[joystickNumber].m_JoystickID   != -1; }
 
 		/// <summary>
 		/// Gets whether a joystick button is being held down right now.
@@ -661,6 +665,7 @@ namespace RTE {
 
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
+		int m_NumJoysticks; //!< The number of currently connected gamecontrollers;
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
@@ -811,6 +816,8 @@ namespace RTE {
 		/// Handles the joysticks input. This is called from Update().
 		/// </summary>
 		void UpdateJoystickInput();
+
+		void UpdateJoystickAxis(const SDL_Event& e);
 
 		/// <summary>
 		/// Stores all the input events that happened during this update to be compared to in the next update. This is called from Update().

@@ -422,14 +422,15 @@ namespace RTE {
 		} else if (m_ActiveDevice >= InputDevice::DEVICE_GAMEPAD_1) {
 			if (inputElement->GetJoyButton() != JoyButtons::JOY_NONE) {
 				if (g_UInputMan.GetJoystickCount() > 0) {
-					std::string buttonName = joy[g_UInputMan.GetJoystickIndex(m_ActiveDevice)].button[inputElement->GetJoyButton()].name;
+					std::string buttonName = SDL_GameControllerGetStringForButton(static_cast<SDL_GameControllerButton>(inputElement->GetJoyButton()));
 					return (buttonName != "unused") ? buttonName : "";
 				} else {
 					// If no joysticks connected the joystick handler can't resolve names because it's not installed, so just return generics (which it does anyway).
 					return "Button " + std::to_string(inputElement->GetJoyButton() + 1);
 				}
 			} else if (inputElement->JoyDirMapped()) {
-				return "Analog Stick";
+				std::string axisName = SDL_GameControllerGetStringForAxis(static_cast<SDL_GameControllerAxis>(inputElement->GetAxis()));
+				return axisName;
 			}
 		}
 		return "";

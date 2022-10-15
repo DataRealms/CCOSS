@@ -56,12 +56,6 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Workaround for Allegro being unable to detect joystick plugging/unplugging at runtime to enable/disable them accordingly. Uses OS functions to check if the number of connected joysticks changed and reinitializes the joystick handler if necessary.
-		/// </summary>
-		/// <returns>Whether plugging/unplugging was detected and the joystick handler was reinitialized.</returns>
-		bool DetectJoystickHotPlug() const;
-
-		/// <summary>
 		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.
 		/// </summary>
 		void LoadDeviceIcons();
@@ -481,48 +475,36 @@ namespace RTE {
 		/// Gets whether a joystick axis is being held down in a specific direction right now. Two adjacent directions can be held down to produce diagonals.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is held in the specified direction or not.</returns>
-		bool JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Held); }
+		bool JoyDirectionHeld(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Held); }
 
 		/// <summary>
 		/// Gets whether a joystick axis direction was pressed between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is pressed or not.</returns>
-		bool JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Pressed); }
+		bool JoyDirectionPressed(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Pressed); }
 
 		/// <summary>
 		/// Gets whether a joystick axis direction was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is released or not.</returns>
-		bool JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Released); }
+		bool JoyDirectionReleased(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Released); }
 
 		/// <summary>
 		/// Gets the normalized value of a certain joystick's stick's axis.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <returns>The analog axis value ranging between -1.0 to 1.0, or 0.0 to 1.0 if it's a throttle type control.</returns>
-		float AnalogAxisValue(int whichJoy = 0, int whichStick = 0, int whichAxis = 0) const;
-
-		/// <summary>
-		/// Gets the analog values of a certain joystick device stick.
-		/// </summary>
-		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
-		/// <returns>The analog axis values ranging between -1.0 to 1.0.</returns>
-		Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0) const { return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1)); }
+		float AnalogAxisValue(int whichJoy = 0, int whichAxis = 0) const;
 
 		/// <summary>
 		/// Gets whether there is any joystick input at all, buttons or D-pad.
@@ -752,12 +734,11 @@ namespace RTE {
 		/// Gets whether a joystick axis direction is in the specified state or not.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for. See JoyDirections enumeration.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the joystick stick axis is in the specified state or not.</returns>
-		bool GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const;
+		bool GetJoystickDirectionState(int whichJoy, int whichAxis, int whichDir, InputState whichState) const;
 
 		/// <summary>
 		/// Sets an input element of a player to the specified state during network multiplayer.
@@ -813,10 +794,8 @@ namespace RTE {
 		void UpdateMouseInput();
 
 		/// <summary>
-		/// Handles the joysticks input. This is called from Update().
+		/// Handles a joystick axis input. This is called from Update().
 		/// </summary>
-		void UpdateJoystickInput();
-
 		void UpdateJoystickAxis(const SDL_Event& e);
 
 		/// <summary>

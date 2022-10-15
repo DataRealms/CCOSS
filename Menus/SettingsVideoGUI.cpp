@@ -221,7 +221,6 @@ namespace RTE {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
 			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
-			dynamic_cast<AllegroInput *>(m_GUIControlManager->GetManager()->GetInputController())->AdjustMouseMovementSpeedToGraphicsDriver(m_NewGraphicsDriver);
 		}
 	}
 

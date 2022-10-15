@@ -368,7 +368,6 @@ namespace RTE {
 		.def("AnalogAimValues", &UInputMan::AnalogAimValues)
 		.def("SetMouseValueMagnitude", &UInputMan::SetMouseValueMagnitude)
 		.def("AnalogAxisValue", &UInputMan::AnalogAxisValue)
-		.def("AnalogStickValues", &UInputMan::AnalogStickValues)
 		.def("MouseUsedByPlayer", &UInputMan::MouseUsedByPlayer)
 		.def("AnyMouseButtonPress", &UInputMan::AnyMouseButtonPress)
 		.def("GetMouseMovement", &UInputMan::GetMouseMovement)

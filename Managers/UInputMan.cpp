@@ -130,60 +130,6 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool UInputMan::DetectJoystickHotPlug() const {
-		#if 0
-#ifdef _WIN32
-		int numDevices = joyGetNumDevs();
-		if (numDevices > 0) {
-			static JOYINFOEX joyInfo = { sizeof(JOYINFOEX), JOY_RETURNBUTTONS };
-			int numDetectedJoysticks = 0;
-
-			for (int i = 0; i < numDevices; ++i) {
-				if (joyGetPosEx(i, &joyInfo) == JOYERR_NOERROR) { numDetectedJoysticks++; }
-			}
-			if (numDetectedJoysticks != num_joysticks) {
-				remove_joystick();
-				if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
-				return true;
-			}
-		}
-#elif defined(__unix__)
-		int numDetectedJoysticks = 0;
-		for (numDetectedJoysticks = 0; numDetectedJoysticks < MAX_JOYSTICKS; ++numDetectedJoysticks) {
-			std::string devName = "/dev/input/js" + std::to_string(numDetectedJoysticks);
-			std::string devNameFallback = "/dev/js" + std::to_string(numDetectedJoysticks);
-
-			// Note - Allegro only checks until the first missing joystick, so there's no point in checking any more than that.
-			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback)) {
-				break;
-			}
-		}
-
-		if (numDetectedJoysticks != num_joysticks) {
-			if (numDetectedJoysticks > 0) {
-				for (int i = 0; i < numDetectedJoysticks; ++i) {
-					std::string devName = "/dev/input/js" + std::to_string(i);
-					std::string devNameFallback = "/dev/js" + std::to_string(i);
-
-					int joystickDescriptor = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
-					joystickDescriptor = joystickDescriptor == -1 ? open(devNameFallback.c_str(), O_RDONLY | O_NONBLOCK) : joystickDescriptor;
-					if (joystickDescriptor == -1) {
-						return false;
-					}
-					close(joystickDescriptor);
-				}
-			}
-
-			remove_joystick();
-			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) { RTEAbort("Failed to initialize joysticks!"); }
-			return true;
-		}
-#endif
-#endif
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::LoadDeviceIcons() {
 		m_DeviceIcons[InputDevice::DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
@@ -211,10 +157,10 @@ namespace RTE {
 
 			// Assume axes are stretched out over up-down, and left-right
 			if (inputElements->at(InputElements::INPUT_L_LEFT).JoyDirMapped()) {
-				moveValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_LEFT).GetStick(), inputElements->at(InputElements::INPUT_L_LEFT).GetAxis()));
+				moveValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_LEFT).GetAxis()));
 			}
 			if (inputElements->at(InputElements::INPUT_L_UP).JoyDirMapped()) {
-				moveValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_UP).GetStick(), inputElements->at(InputElements::INPUT_L_UP).GetAxis()));
+				moveValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_UP).GetAxis()));
 			}
 		}
 		return moveValues;
@@ -237,10 +183,10 @@ namespace RTE {
 
 			// Assume axes are stretched out over up-down, and left-right
 			if (inputElements->at(InputElements::INPUT_R_LEFT).JoyDirMapped()) {
-				aimValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_LEFT).GetStick(), inputElements->at(InputElements::INPUT_R_LEFT).GetAxis()));
+				aimValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_LEFT).GetAxis()));
 			}
 			if (inputElements->at(InputElements::INPUT_R_UP).JoyDirMapped()) {
-				aimValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_UP).GetStick(), inputElements->at(InputElements::INPUT_R_UP).GetAxis()));
+				aimValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_UP).GetAxis()));
 			}
 		}
 		return aimValues;
@@ -483,15 +429,6 @@ namespace RTE {
 			}
 		}
 
-#if 0
-		if (whichJoy >= 0 || whichJoy < num_joysticks) {
-			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
-				if (joy[whichJoy].button[button].b) {
-					return button;
-				}
-			}
-		}
-		#endif
 		return JoyButtons::JOY_NONE;
 	}
 
@@ -505,38 +442,18 @@ namespace RTE {
 				}
 			}
 		}
-		#if 0
-		if (whichJoy >= 0 || whichJoy < num_joysticks) {
-			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
-				if (joy[whichJoy].button[button].b && JoyButtonPressed(whichJoy, button)) {
-					return button;
-				}
-			}
-		}
-		#endif
 		return JoyButtons::JOY_NONE;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float UInputMan::AnalogAxisValue(int whichJoy, int whichStick, int whichAxis) const {
+	float UInputMan::AnalogAxisValue(int whichJoy, int whichAxis) const {
 		if (whichJoy < s_PrevJoystickStates.size() && whichAxis < s_PrevJoystickStates[whichJoy].m_Axis.size()) {
 			if (s_PrevJoystickStates[whichJoy].m_JoystickID != -1) {
 				float analogValue = static_cast<float>(s_PrevJoystickStates[whichJoy].m_Axis[whichAxis]) / 32767.0f;
 				return analogValue;
 			}
 		}
-#if 0
-		if (whichJoy < num_joysticks && whichStick < joy[whichJoy].num_sticks && whichAxis < joy[whichJoy].stick[whichStick].num_axis) {
-			if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED) {
-				// Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
-				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos - 128) / 128.0F;
-			} else {
-				// Regular signed axis with range of -128 to 128
-				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos) / 128.0F;
-			}
-		}
-#endif
 		return  0;
 	}
 
@@ -559,56 +476,24 @@ namespace RTE {
 					if (gp.m_Axis[axis] != 0){
 						return true;
 					}
-				} else if(JoyDirectionPressed(gpIndex, 0, axis, JoyDirections::JOYDIR_ONE) || JoyDirectionPressed(gpIndex, 0, axis, JoyDirections::JOYDIR_TWO)){
+				} else if(JoyDirectionPressed(gpIndex, axis, JoyDirections::JOYDIR_ONE) || JoyDirectionPressed(gpIndex, axis, JoyDirections::JOYDIR_TWO)){
 					return true;
 				}
 			}
 
 			gpIndex++;
 		}
-#if 0
-		poll_joystick();
-
-		for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; ++joystick) {
-			for (int button = JoyButtons::JOY_1; button < JoyButtons::MAX_JOY_BUTTONS; ++button) {
-				if (!checkForPresses) {
-					if (joy[joystick].button[button].b) {
-						return true;
-					}
-				} else {
-					if (JoyButtonPressed(joystick, button)) {
-						return true;
-					}
-				}
-			}
-			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
-				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
-					if (!checkForPresses){
-						if (JoyDirectionHeld(joystick, stick, axis, JoyDirections::JOYDIR_ONE) || JoyDirectionHeld(joystick, stick, axis, JoyDirections::JOYDIR_TWO)) {
-							return true;
-						}
-					} else {
-						if (JoyDirectionPressed(joystick, stick, axis, JoyDirections::JOYDIR_ONE) || JoyDirectionPressed(joystick, stick, axis, JoyDirections::JOYDIR_TWO)) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-#endif
 		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyJoyButtonPress(int whichJoy) const {
-		#if 0
-		for (int button = JoyButtons::JOY_1; button < JoyButtons::MAX_JOY_BUTTONS; ++button) {
+		for (int button = 0; button < s_PrevJoystickStates[whichJoy].m_Buttons.size(); ++button) {
 			if (JoyButtonPressed(whichJoy, button)) {
 				return true;
 			}
 		}
-		#endif
 		return false;
 	}
 
@@ -648,7 +533,7 @@ namespace RTE {
 		if (!elementState && device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
 			elementState = GetJoystickButtonState(whichJoy, element->GetJoyButton(), whichState);
-			if (!elementState && element->JoyDirMapped()) { elementState = GetJoystickDirectionState(whichJoy, element->GetStick(), element->GetAxis(), element->GetDirection(), whichState); }
+			if (!elementState && element->JoyDirMapped()) { elementState = GetJoystickDirectionState(whichJoy, element->GetAxis(), element->GetDirection(), whichState); }
 		}
 		return elementState;
 	}
@@ -753,28 +638,12 @@ namespace RTE {
 				return false;
 		}
 
-#if 0
-		if (whichJoy < 0 || whichJoy >= num_joysticks || whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
-			return false;
-		}
-		switch (whichState) {
-			case InputState::Held:
-				return joy[whichJoy].button[whichButton].b;
-			case InputState::Pressed:
-				return joy[whichJoy].button[whichButton].b && s_ChangedJoystickStates[whichJoy].button[whichButton].b;
-			case InputState::Released:
-				return !joy[whichJoy].button[whichButton].b && s_ChangedJoystickStates[whichJoy].button[whichButton].b;
-			default:
-				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
-				return false;
-		}
-		#endif
 		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const {
+	bool UInputMan::GetJoystickDirectionState(int whichJoy, int whichAxis, int whichDir, InputState whichState) const {
 		if (whichJoy < 0 || whichJoy >= s_PrevJoystickStates.size() || whichAxis < 0 || whichAxis >= s_PrevJoystickStates[whichJoy].m_DigitalAxis.size()) {
 			return false;
 		}
@@ -806,38 +675,6 @@ namespace RTE {
 			}
 		}
 
-#if 0
-		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
-			return false;
-		}
-		const JOYSTICK_AXIS_INFO *joystickAxis = &joy[whichJoy].stick[whichStick].axis[whichAxis];
-
-		if (whichDir == JoyDirections::JOYDIR_ONE) {
-			switch (whichState) {
-				case InputState::Held:
-					return joystickAxis->d1;
-				case InputState::Pressed:
-					return joystickAxis->d1 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d1;
-				case InputState::Released:
-					return !joystickAxis->d1 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d1;
-				default:
-					RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
-					return false;
-			}
-		} else {
-			switch (whichState) {
-				case InputState::Held:
-					return joystickAxis->d2;
-				case InputState::Pressed:
-					return joystickAxis->d2 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d2;
-				case InputState::Released:
-					return !joystickAxis->d2 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d2;
-				default:
-					RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
-					return false;
-			}
-		}
-		#endif
 		return false;
 	}
 
@@ -1127,80 +964,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::UpdateJoystickInput() {
-
-#if 0
-		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
-			// Detect and store joystick button changed since last Update()
-			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
-				s_ChangedJoystickStates[joystick].button[button].b = joy[joystick].button[button].b != s_PrevJoystickStates[joystick].button[button].b;
-			}
-
-			Players joystickPlayer = Players::NoPlayer;
-
-			float deadZone = 0.0F;
-			int deadZoneType = DeadZoneType::CIRCLE;
-			for (int playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; playerToCheck++) {
-				InputDevice device = m_ControlScheme[playerToCheck].GetDevice();
-				int whichJoy = GetJoystickIndex(device);
-				if (whichJoy == joystick) {
-					deadZone = m_ControlScheme[playerToCheck].GetJoystickDeadzone();
-					deadZoneType = m_ControlScheme[playerToCheck].GetJoystickDeadzoneType();
-					joystickPlayer = static_cast<Players>(playerToCheck);
-					break;
-				}
-			}
-			if (joystickPlayer > Players::NoPlayer && deadZoneType == DeadZoneType::CIRCLE && deadZone > 0.0F) {
-				Vector aimValues;
-				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme[joystickPlayer].GetInputMappings();
-				std::array<InputElements, 4> elementsToCheck = { InputElements::INPUT_L_LEFT, InputElements::INPUT_L_UP, InputElements::INPUT_R_LEFT, InputElements::INPUT_R_UP };
-
-				for (int i = 0; i < elementsToCheck.size() - 1; i += 2) {
-					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i]).GetStick(), inputElements->at(elementsToCheck[i]).GetAxis()); }
-					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i + 1]).GetStick(), inputElements->at(elementsToCheck[i + 1]).GetAxis()); }
-
-					if (aimValues.GetMagnitude() < deadZone * 2) {
-						for (int j = 0; j < 2; j++) {
-							InputElements whichElementDirection = elementsToCheck[i + j];
-							if (inputElements->at(whichElementDirection).JoyDirMapped()) {
-								JOYSTICK_AXIS_INFO *joystickAxis = &joy[joystick].stick[inputElements->at(whichElementDirection).GetStick()].axis[inputElements->at(whichElementDirection).GetAxis()];
-								if (joy[joystick].stick[inputElements->at(whichElementDirection).GetStick()].flags & JOYFLAG_UNSIGNED) {
-									joystickAxis->pos = 128;
-									joystickAxis->d1 = joystickAxis->d2 = 0;
-								} else {
-									joystickAxis->pos = joystickAxis->d1 = joystickAxis->d2 = 0;
-								}
-							}
-						}
-					}
-					aimValues.Reset();
-				}
-			}
-			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
-				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
-					JOYSTICK_AXIS_INFO *joystickAxis = &joy[joystick].stick[stick].axis[axis];
-
-					if (joystickPlayer > Players::NoPlayer && deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
-						// Adjust joystick values to eliminate values in deadzone. This heavily relies on AnalogAxisValue method of processing joystick data.
-						if (joy[joystick].stick[stick].flags & JOYFLAG_UNSIGNED) {
-							if (std::abs(joystickAxis->pos - 128) > 0 && std::fabs(joystickAxis->pos - 128) / 128 < deadZone) {
-								joystickAxis->pos = 128;
-								joystickAxis->d1 = joystickAxis->d2 = 0;
-							}
-						} else {
-							if (std::abs(joystickAxis->pos) > 0 && std::fabs(joystickAxis->pos) / 128 < deadZone) { joystickAxis->pos = joystickAxis->d1 = joystickAxis->d2 = 0; }
-						}
-					}
-					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d1 = joystickAxis->d1 != s_PrevJoystickStates[joystick].stick[stick].axis[axis].d1;
-					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d2 = joystickAxis->d2 != s_PrevJoystickStates[joystick].stick[stick].axis[axis].d2;
-				}
-			}
-		}
-		#endif
-	}
-
 	void UInputMan::UpdateJoystickAxis(const SDL_Event &e) {
-
 		std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.caxis.which);
 		if (device != s_PrevJoystickStates.end()) {
 			int joystickIndex = device - s_PrevJoystickStates.begin();
@@ -1246,12 +1010,12 @@ namespace RTE {
 					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) {
 						axisLeft = inputElements->at(elementsToCheck[i]).GetAxis();
 
-						aimValues.m_X = AnalogAxisValue(joystickIndex, 0, axisLeft);
+						aimValues.m_X = AnalogAxisValue(joystickIndex, axisLeft);
 						isAxisMapped |= axisLeft == e.caxis.axis;
 					}
 					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) {
 						axisUp = inputElements->at(elementsToCheck[i+1]).GetAxis();
-						aimValues.m_Y = AnalogAxisValue(joystickIndex, 0, axisUp);
+						aimValues.m_Y = AnalogAxisValue(joystickIndex, axisUp);
 						isAxisMapped |= axisUp == e.caxis.axis;
 					}
 					if (!isAxisMapped) {

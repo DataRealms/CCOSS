@@ -12,7 +12,6 @@ namespace RTE {
 		m_MouseButtonMap = -1;
 		m_DirectionMapped = false;
 		m_JoyButtonMap = -1;
-		m_StickMap = 0;
 		m_AxisMap = 0;
 		m_DirectionMap = 0;
 	}
@@ -24,7 +23,6 @@ namespace RTE {
 		m_MouseButtonMap = reference.m_MouseButtonMap;
 		m_DirectionMapped = reference.m_DirectionMapped;
 		m_JoyButtonMap = reference.m_JoyButtonMap;
-		m_StickMap = reference.m_StickMap;
 		m_AxisMap = reference.m_AxisMap;
 		m_DirectionMap = reference.m_DirectionMap;
 
@@ -40,9 +38,6 @@ namespace RTE {
 			reader >> m_MouseButtonMap;
 		} else if (propName == "JoyButtonMap") {
 			reader >> m_JoyButtonMap;
-		} else if (propName == "StickMap") {
-			reader >> m_StickMap;
-			m_DirectionMapped = true;
 		} else if (propName == "AxisMap") {
 			reader >> m_AxisMap;
 			m_DirectionMapped = true;
@@ -66,7 +61,6 @@ namespace RTE {
 		if (m_JoyButtonMap >= 0) { writer.NewPropertyWithValue("JoyButtonMap", m_JoyButtonMap); }
 
 		if (m_DirectionMapped) {
-			writer.NewPropertyWithValue("StickMap", m_StickMap);
 			writer.NewPropertyWithValue("AxisMap", m_AxisMap);
 			writer.NewPropertyWithValue("DirectionMap", m_DirectionMap);
 		}

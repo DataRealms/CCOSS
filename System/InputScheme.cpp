@@ -467,17 +467,16 @@ namespace RTE {
 			SetJoyButtonMapping(whichInput, whichButton);
 			return true;
 		}
-		for (int stick = 0; stick < joy[whichJoy].num_sticks; ++stick) {
-			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
-				if (g_UInputMan.JoyDirectionReleased(whichJoy, stick, axis, JoyDirections::JOYDIR_ONE)) {
-					m_InputMappings.at(whichInput).Reset();
-					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_ONE);
-					return true;
-				} else if (g_UInputMan.JoyDirectionReleased(whichJoy, stick, axis, JoyDirections::JOYDIR_TWO)) {
-					m_InputMappings.at(whichInput).Reset();
-					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_TWO);
-					return true;
-				}
+
+		for (int axis = 0; axis < g_UInputMan.GetJoystickAxisCount(whichJoy); ++axis) {
+			if (g_UInputMan.JoyDirectionReleased(whichJoy, 0, axis, JoyDirections::JOYDIR_ONE)) {
+				m_InputMappings.at(whichInput).Reset();
+				m_InputMappings.at(whichInput).SetDirection(0, axis, JoyDirections::JOYDIR_ONE);
+				return true;
+			} else if (g_UInputMan.JoyDirectionReleased(whichJoy, 0, axis, JoyDirections::JOYDIR_TWO)) {
+				m_InputMappings.at(whichInput).Reset();
+				m_InputMappings.at(whichInput).SetDirection(0, axis, JoyDirections::JOYDIR_TWO);
+				return true;
 			}
 		}
 		return false;

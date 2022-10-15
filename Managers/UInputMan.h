@@ -284,6 +284,22 @@ namespace RTE {
 		void DisableMouseMoving(bool disable = true);
 
 		/// <summary>
+		/// Get the absolute mouse position in window coordinates.
+		/// </summary>
+		/// <returns>
+		/// The absoulte mouse position.
+		/// </returns>
+		Vector GetAbsoluteMousePosition() const { return m_AbsoluteMousePos; }
+
+		/// <summary>
+		/// Set the absolute mouse position (e.g. for player input mouse movement). Does not move the system cursor.
+		/// </summary>
+		/// <param name="pos">
+		/// The new mouse position.
+		/// </param>
+		void SetAbsoluteMousePosition(const Vector pos) { m_AbsoluteMousePos = pos; }
+
+		/// <summary>
 		/// Gets the relative movement of the mouse since last update. Only returns true if the selected player is actually using the mouse.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get movement for. If the player doesn't use the mouse this always returns a zero vector.</param>
@@ -651,6 +667,7 @@ namespace RTE {
 		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
 
+		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
 		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.
 		float m_MouseSensitivity; //!< Mouse sensitivity, to replace hardcoded 0.6 value in Update.

@@ -31,6 +31,7 @@ namespace RTE {
 
 	void UInputMan::Clear() {
 		m_OverrideInput = false;
+		m_AbsoluteMousePos.Reset();
 		m_RawMouseMovement.Reset();
 		m_AnalogMouseData.Reset();
 		m_MouseSensitivity = 0.6F;
@@ -731,6 +732,7 @@ namespace RTE {
 			if(e.type == SDL_MOUSEMOTION) {
 				std::cout << "DEBUG: Mouse motion event: x " << e.motion.x << " y " << e.motion.y << " | xrel" << e.motion.xrel << " yrel " << e.motion.yrel << std::endl;
 				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);
+				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
 			}
 			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
 				if(e.button.button == SDL_BUTTON_X1 || e.button.button == SDL_BUTTON_X2)

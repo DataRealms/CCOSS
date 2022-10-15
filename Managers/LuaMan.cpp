@@ -429,28 +429,33 @@ namespace RTE {
 #ifdef _WIN32
 			FILE *file = fopen(fullPath.c_str(), accessMode.c_str());
 #else
-			FILE *file = nullptr;
-			std::filesystem::path inspectedPath = System::GetWorkingDirectory();
-			const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath).generic_string();
+			FILE *file = [&fullPath, &accessMode]() -> FILE* {
+				std::filesystem::path inspectedPath = System::GetWorkingDirectory();
+				const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath);
 
-			for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator) {
-				bool pathPartExists = false;
+				for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator) {
+					bool pathPartExists = false;
 
-				// Check if a path part (directory or file) exists in the filesystem.
-				for (const std::filesystem::path &filesystemEntryPath : std::filesystem::directory_iterator(inspectedPath)) {
-					if (StringsEqualCaseInsensitive(filesystemEntryPath.filename().generic_string(), (*relativeFilePathIterator).generic_string())) {
-						inspectedPath = filesystemEntryPath;
-						pathPartExists = true;
-						break;
+					// Check if a path part (directory or file) exists in the filesystem.
+					for (const std::filesystem::path &filesystemEntryPath : std::filesystem::directory_iterator(inspectedPath)) {
+						if (StringsEqualCaseInsensitive(filesystemEntryPath.filename().generic_string(), (*relativeFilePathIterator).generic_string())) {
+							inspectedPath = filesystemEntryPath;
+							pathPartExists = true;
+							break;
+						}
+					}
+					if (!pathPartExists) {
+						// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
+						if (std::next(relativeFilePathIterator) == relativeFilePath.end()) {
+							return fopen((inspectedPath / relativeFilePath.filename()).generic_string().c_str(), accessMode.c_str());
+						}
+						// Some directory in relativeFilePath doesn't exist, so the file can't be created.
+						return nullptr;
 					}
 				}
-				// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
-				if (!pathPartExists && std::next(relativeFilePathIterator) == relativeFilePath.end()) {
-					file = fopen((inspectedPath / relativeFilePath.filename()).generic_string().c_str(), accessMode.c_str());
-					break;
-				}
-			}
-			if (!file) { file = fopen(inspectedPath.generic_string().c_str(), accessMode.c_str()); }
+				// If the file exists, open it.
+				return fopen(inspectedPath.generic_string().c_str(), accessMode.c_str());
+			}();
 #endif
 			if (file) {
 				m_OpenedFiles[fileIndex] = file;

@@ -89,10 +89,9 @@ namespace RTE {
 
 		// Update the mouse position of this GUIInput, based on the Allegro mouse vars (which may have been altered by joystick or keyboard input)
 #ifndef GUI_STANDALONE
-		int mouseX, mouseY;
-		SDL_GetMouseState(&mouseX, &mouseY);
-		m_MouseX = static_cast<int>(static_cast<float>(mouseX) / static_cast<float>(g_FrameMan.GetResMultiplier()));
-		m_MouseY = static_cast<int>(static_cast<float>(mouseY) / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		Vector mousePos = g_UInputMan.GetAbsoluteMousePosition();
+		m_MouseX = static_cast<int>(static_cast<float>(mousePos.m_X) / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		m_MouseY = static_cast<int>(static_cast<float>(mousePos.m_Y) / static_cast<float>(g_FrameMan.GetResMultiplier()));
 #else
 		m_MouseX = mouse_x;
 		m_MouseY = mouse_y;
@@ -108,9 +107,11 @@ namespace RTE {
 		int nKeys;
 		const Uint8* keyboardState = SDL_GetKeyboardState(&nKeys);
 
+		nKeys = std::min(nKeys, static_cast<int>(KEYBOARD_BUFFER_SIZE));
+
 		std::memcpy(m_ScanCodeState, keyboardState, nKeys);
 
-		for( uint8_t k = 0; k<255; ++k) {
+		for( size_t k = 0; k<nKeys; ++k) {
 			uint8_t keyName = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(k));
 			m_KeyboardBuffer[keyName] = m_ScanCodeState[k];
 		}
@@ -151,77 +152,70 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AllegroInput::UpdateMouseInput() {
-		int mouseX, mouseY;
-		Uint32 buttonState = SDL_GetMouseState(&mouseX, &mouseY);
-		std::cout << "x: " << mouseX << "y: " << mouseY << std::endl;
+		int discard;
+		Uint32 buttonState = SDL_GetMouseState(&discard, &discard);
+		Vector mousePos = g_UInputMan.GetAbsoluteMousePosition();
 
 		if (!m_OverrideInput) {
-			std::cout << "no override input" << std::endl;
 #ifndef GUI_STANDALONE
 		} else {
 
-			mouseX = m_LastFrameMouseX;
-			mouseY = m_LastFrameMouseY;
+			mousePos.m_X = m_LastFrameMouseX;
+			mousePos.m_Y = m_LastFrameMouseY;
 
 			if (m_Player >= 0 && m_Player < 4) {
 				if (m_NetworkMouseX[m_Player] != 0) {
 					if (m_NetworkMouseX[m_Player] < 0) m_NetworkMouseX[m_Player] = 1;
 					if (m_NetworkMouseX[m_Player] >= g_FrameMan.GetPlayerFrameBufferWidth(m_Player)) m_NetworkMouseX[m_Player] = g_FrameMan.GetPlayerFrameBufferWidth(m_Player) - 2;
-					mouseX = m_NetworkMouseX[m_Player];
+					mousePos.m_X = m_NetworkMouseX[m_Player];
 				}
 				if (m_NetworkMouseY[m_Player] != 0) {
 					if (m_NetworkMouseY[m_Player] < 0) m_NetworkMouseY[m_Player] = 1;
 					if (m_NetworkMouseY[m_Player] >= g_FrameMan.GetPlayerFrameBufferHeight(m_Player)) m_NetworkMouseY[m_Player] = g_FrameMan.GetPlayerFrameBufferHeight(m_Player) - 2;
-					mouseY = m_NetworkMouseY[m_Player];
+					mousePos.m_Y = m_NetworkMouseY[m_Player];
 				}
 			} else {
 				if (m_NetworkMouseX[0] != 0) {
 					if (m_NetworkMouseX[0] < 0) m_NetworkMouseX[0] = 1;
 					if (m_NetworkMouseX[0] >= g_FrameMan.GetPlayerFrameBufferWidth(0)) m_NetworkMouseX[0] = g_FrameMan.GetPlayerFrameBufferWidth(0) - 2;
-					mouseX = m_NetworkMouseX[0];
+					mousePos.m_X = m_NetworkMouseX[0];
 				}
 				if (m_NetworkMouseY[0] != 0) {
 					if (m_NetworkMouseY[0] < 0) m_NetworkMouseY[0] = 1;
 					if (m_NetworkMouseY[0] >= g_FrameMan.GetPlayerFrameBufferHeight(0)) m_NetworkMouseY[0] = g_FrameMan.GetPlayerFrameBufferHeight(0) - 2;
-					mouseY = m_NetworkMouseY[0];
+					mousePos.m_Y = m_NetworkMouseY[0];
 				}
 			}
+			g_UInputMan.SetAbsoluteMousePosition(mousePos);
 #endif
 		}
 
-		m_LastFrameMouseX = mouseX;
-		m_LastFrameMouseY = mouseY;
-		std::cout << "prevx: " << mouseX << " prevy: " << mouseY;
+		m_LastFrameMouseX = mousePos.m_X;
+		m_LastFrameMouseY = mousePos.m_Y;
 
 		if (!m_OverrideInput) {
 			if (!m_KeyJoyMouseCursor) {
 				if (buttonState & SDL_BUTTON_LMASK) {
 					m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Up) ? Pushed : Repeat;
 					m_MouseButtonsStates[0] = Down;
-					std::cout << " ml down";
 				} else {
 					m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Down) ? Released : None;
 					m_MouseButtonsStates[0] = Up;
-					std::cout << " ml up";
 				}
 			}
 			if (buttonState & SDL_BUTTON_MMASK) {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[1] = Down;
-				std::cout << " mm down";
 			} else {
 				m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Down) ? Released : None;
 				m_MouseButtonsStates[1] = Up;
-				std::cout << " mm up";
 			}
 			if (buttonState & SDL_BUTTON_RMASK) {
 				m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Up) ? Pushed : Repeat;
 				m_MouseButtonsStates[2] = Down;
-				std::cout << " mr down";
 			} else {
 				m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Down) ? Released : None;
 				m_MouseButtonsStates[2] = Up;
-				std::cout << " mr up";
 			}
 
 #ifndef GUI_STANDALONE
@@ -248,13 +242,11 @@ namespace RTE {
 			m_PrevNetworkMouseButtonsStates[player][2] = m_NetworkMouseButtonsEvents[player][2];
 #endif
 		}
-		std::cout << std::endl;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AllegroInput::UpdateKeyJoyMouseInput(float keyElapsedTime) {
-#if 0
 #ifndef GUI_STANDALONE
 		int mouseDenominator = g_FrameMan.GetResMultiplier();
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
@@ -263,16 +255,19 @@ namespace RTE {
 		if (joyKeyDirectional.GetMagnitude() < 0.95F) { m_CursorAccelTimer->Reset(); }
 
 		float acceleration = 0.25F + static_cast<float>(std::min(m_CursorAccelTimer->GetElapsedRealTimeS(), 0.5)) * 20.0F;
+		Vector newMousePos = g_UInputMan.GetAbsoluteMousePosition();
 
 		// Manipulate the mouse position with the joysticks or keys
-		mouse_x = mouse_x + static_cast<volatile int>(joyKeyDirectional.GetX() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration);
-		mouse_y = mouse_y + static_cast<volatile int>(joyKeyDirectional.GetY() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration);
+		newMousePos.m_X += joyKeyDirectional.GetX() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration;
+		newMousePos.m_Y += joyKeyDirectional.GetY() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration;
 		// Prevent mouse from flying out of the screen
-		mouse_x = std::max(0, static_cast<int>(mouse_x));
-		mouse_y = std::max(0, static_cast<int>(mouse_y));
+		newMousePos.m_X = std::max(0.0f, newMousePos.m_X);
+		newMousePos.m_Y = std::max(0.0f, newMousePos.m_Y);
 		// Pull in a bit so cursor doesn't completely disappear
-		mouse_x = std::min((g_FrameMan.GetResX() * mouseDenominator) - 3, static_cast<int>(mouse_x));
-		mouse_y = std::min((g_FrameMan.GetResY() * mouseDenominator) - 3, static_cast<int>(mouse_y));
+		newMousePos.m_X = std::min((g_FrameMan.GetResX() * mouseDenominator) - 3.0f, newMousePos.m_X);
+		newMousePos.m_Y = std::min((g_FrameMan.GetResY() * mouseDenominator) - 3.0f, newMousePos.m_Y);
+
+		g_UInputMan.SetAbsoluteMousePosition(newMousePos);
 
 		// Button states/presses, Primary - ACTUALLY make either button work, we don't have use for secondary in menus
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MenuCursorButtons::MENU_EITHER)) {
@@ -289,7 +284,6 @@ namespace RTE {
 			m_MouseButtonsStates[0] = Up;
 			m_MouseButtonsEvents[0] = None;
 		}
-#endif
 #endif
 	}
 }

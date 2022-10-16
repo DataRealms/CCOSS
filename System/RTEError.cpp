@@ -1,26 +1,31 @@
 #include "RTEError.h"
 
+#include "SDL2/SDL_messagebox.h"
+#include "FrameMan.h"
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ShowMessageBox(const std::string &message) { allegro_message(message.c_str()); }
+	void ShowMessageBox(const std::string &message) { SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "RTE Aborted *.*", message.c_str(), NULL); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool RTEAbortFunc(const std::string &description, const std::string &file, int line) {
 		// Save out the screen bitmap, after making a copy of it, faster sometimes
 		if (screen) {
-			BITMAP *abortScreenBuffer = create_bitmap(screen->w, screen->h);
-			blit(screen, abortScreenBuffer, 0, 0, 0, 0, screen->w, screen->h);
+			BITMAP *abortScreenBuffer = create_bitmap(g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
+			blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
 			PALETTE palette;
 			get_palette(palette);
 			save_bmp("AbortScreen.bmp", abortScreenBuffer, palette);
 			destroy_bitmap(abortScreenBuffer);
 		}
 		// Ditch the video mode so the message box appears without problems
-		if (screen != nullptr) { set_gfx_mode(GFX_TEXT, 0, 0, 0, 0); }
-		set_window_title("RTE Aborted! (x_x)");
+		if (g_FrameMan.GetWindow()) {
+			SDL_SetWindowFullscreen(g_FrameMan.GetWindow(), 0);
+			SDL_SetWindowTitle(g_FrameMan.GetWindow(), "RTE Aborted! (x_x)");
+		}
 
 		std::string abortMessage;
 

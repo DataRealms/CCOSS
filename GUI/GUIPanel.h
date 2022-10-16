@@ -248,6 +248,7 @@ public:
 
     virtual void OnKeyPress(int KeyCode, int Modifier);
 
+	virtual void OnTextInput(std::string_view inputText);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  OnGainFocus

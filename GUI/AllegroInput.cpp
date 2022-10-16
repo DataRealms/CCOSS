@@ -77,17 +77,15 @@ namespace RTE {
 		// Clear the keyboard buffer, we need it to check for changes
 		memset(m_KeyboardBuffer, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
 		memset(m_ScanCodeState, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
-		int nKeys;
-		const Uint8* keyboardState = SDL_GetKeyboardState(&nKeys);
 
-		nKeys = std::min(nKeys, static_cast<int>(KEYBOARD_BUFFER_SIZE));
-
-		std::memcpy(m_ScanCodeState, keyboardState, nKeys);
-
-		for( size_t k = 0; k<nKeys; ++k) {
-			uint8_t keyName = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(k));
-			m_KeyboardBuffer[keyName] = m_ScanCodeState[k];
+		for (size_t k = 0; k < KEYBOARD_BUFFER_SIZE; ++k) {
+			if(g_UInputMan.KeyPressed(static_cast<SDL_Scancode>(k))){
+				m_ScanCodeState[k] = Pushed;
+				uint8_t keyName = static_cast<uint8_t>(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(k)));
+				m_KeyboardBuffer[keyName] = Pushed;
+			}
 		}
+		m_HasTextInput = g_UInputMan.GetTextInput(m_TextInput);
 
 		ConvertKeyEvent(SDL_SCANCODE_SPACE, ' ', keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_BACKSPACE, Key_Backspace, keyElapsedTime);

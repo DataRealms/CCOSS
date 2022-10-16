@@ -22,6 +22,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player this AllegroInput will handle input for. -1 means no specific player and will default to player 1.</param>
 		/// <param name="keyJoyMouseCursor">Whether the keyboard and joysticks also can control the mouse cursor.</param>
 		AllegroInput(int whichPlayer, bool keyJoyMouseCursor = false);
+		~AllegroInput() = default;
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -47,6 +48,7 @@ namespace RTE {
 
 		std::unique_ptr<Timer> m_KeyTimer; //!< Timer for checking key hold duration.
 		std::unique_ptr<Timer> m_CursorAccelTimer; //!< Timer to calculate the mouse cursor acceleration when it is controller with the keyboard or joysticks.
+
 
 #pragma region Update Breakdown
 		/// <summary>

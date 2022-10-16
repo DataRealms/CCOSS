@@ -262,7 +262,10 @@ namespace RTE {
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		m_GLContext = SDL_GL_CreateContext(m_Window);
 
-		glewInit();
+		if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
+			RTEAbort("Failed to load OpenGL");
+		}
+
 		SDL_GL_SetSwapInterval(0);
 
 		m_ScreenShader = std::make_unique<ScreenShader>();

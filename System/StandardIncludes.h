@@ -78,7 +78,7 @@
 #include <array>
 #include <filesystem>
 
-#include <GL/glew.h>
+#include "glad/gl.h"
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;

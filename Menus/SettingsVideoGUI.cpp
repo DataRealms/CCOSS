@@ -157,22 +157,19 @@ namespace RTE {
 		m_PresetResolutions.clear();
 
 		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
-#ifdef _WIN32
-		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-#elif __unix__
-		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
-#endif
 
 		std::vector<SDL_DisplayMode> modeList;
 
 		std::set<PresetResolutionRecord> resRecords;
-		for (int i = 0; i < SDL_GetNumDisplayModes(0); ++i) {
+		int dpIndex= SDL_GetWindowDisplayIndex(g_FrameMan.GetWindow());
+		for (int i = 0; i < SDL_GetNumDisplayModes(dpIndex); ++i) {
 			SDL_DisplayMode mode;
-			if (SDL_GetDisplayMode(0, i, &mode) != 0) {
+			if (SDL_GetDisplayMode(dpIndex, i, &mode) != 0) {
 				(void)SDL_GetError();
 				continue;
 			}
-			if (SDL_BITSPERPIXEL(mode.format) == 32) {
+
+			if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
 				if (IsSupportedResolution(mode.w, mode.h)) {
 					resRecords.emplace(mode.w, mode.h, false);
 				}
@@ -208,7 +205,6 @@ namespace RTE {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
 			}
 		}
-		destroy_gfx_mode_list(resList);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

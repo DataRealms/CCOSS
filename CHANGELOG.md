@@ -296,6 +296,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(35) EditorTeam3
 	(36) EditorTeam4
 	```
+    
+- UInputMan switches from polling based allegro input to event based sdl input.
+
+  - `UInputMan::JoyDirection*` `UInputMan::GetJoystickDirectionState`, `UInputMan::Analog*Value` `InputMapping::SetDirection` Removed whichStick parameter. No longer used or meaningful.
+
+  - `UInputMan::Key*` now takes `SDL_Scancode` or `SDL_Keycode` values. `SDL_Scancode` maps to physical key locations independent of layout, `SDL_Keycode` takes keyboard layout into account. This applies to all functions and values that take keycodes. Scancodes may be found at https://github.com/libsdl-org/SDL/blob/main/include/SDL_scancode.h
+
+  - Gamecontroller axis and buttons are now shared between almost all different controller types (any included in `SDL_gamecontrollerdb.h`, adding additional mappings not yet implemented) labels can be found at https://wiki.libsdl.org/SDL_GameControllerButton and https://wiki.libsdl.org/SDL_GameControllerAxis
+
+  - Gamecontroller hotplug and disconnect is now porperly detected at any point and will attempt to reconnect devices to the same gamepad slot.
+  
 
 </details>
 
@@ -321,6 +332,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
 
+- Removed `InputMapping::GetStick` as there is no more stick mapping.
 </details>
 
 ***

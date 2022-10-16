@@ -137,7 +137,7 @@ namespace RTE {
 		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
 		/// </summary>
 		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
-		bool IsUsingDedicatedGraphicsDriver() const { return m_Fullscreen == GFX_AUTODETECT_FULLSCREEN || m_Fullscreen == GFX_DIRECTX_ACCEL; }
+		bool IsUsingDedicatedGraphicsDriver() const { return false; }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).

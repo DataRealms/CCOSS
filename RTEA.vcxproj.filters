@@ -28,6 +28,9 @@
     <Filter Include="Lua">
       <UniqueIdentifier>{ac503e37-087b-40b8-b1b8-427ab55a4f9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\glad">
+      <UniqueIdentifier>{767bbe15-b790-48a2-89dc-4d0f36143c71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -546,6 +549,12 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\ScreenShader.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Gamepad.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1052,6 +1061,12 @@
     </ClCompile>
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\ScreenShader.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\glad\gl.c">
+      <Filter>System\glad</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

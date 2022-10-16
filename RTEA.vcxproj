@@ -137,7 +137,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -186,7 +186,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -234,7 +234,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -283,7 +283,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -337,7 +337,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -396,7 +396,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -451,7 +451,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -508,7 +508,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -894,6 +894,84 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PreprocessorDefinitions>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PrecompiledHeaderOutputFile>
+      <UndefineAllPreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</UndefineAllPreprocessorDefinitions>
+      <UndefineAllPreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</UndefineAllPreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">Default</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">Default</LanguageStandard_C>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">CompileAsC</CompileAs>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">ProgramDatabase</DebugInformationFormat>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="System\PathFinder.cpp" />
     <ClCompile Include="System\Reader.cpp" />

@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Clear() {
@@ -404,6 +406,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
+		if (c_FileAccessModes.find(accessMode) == c_FileAccessModes.end()) {
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, invalid file access mode specified.");
+			return -1;
+		}
+
 		int fileIndex = -1;
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
 			if (!m_OpenedFiles[i]) {
@@ -412,20 +419,50 @@ namespace RTE {
 			}
 		}
 		if (fileIndex == -1) {
-			g_ConsoleMan.PrintString("ERROR: Can't open file, maximum number of files already open.");
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, maximum number of files already open.");
 			return -1;
 		}
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
-		if ((fullPath.find("..") == std::string::npos) && (System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
-			if (FILE *file = fopen(fullPath.c_str(), accessMode.c_str())) {
+		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
+
+#ifdef _WIN32
+			FILE *file = fopen(fullPath.c_str(), accessMode.c_str());
+#else
+			FILE *file = [&fullPath, &accessMode]() -> FILE* {
+				std::filesystem::path inspectedPath = System::GetWorkingDirectory();
+				const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath);
+
+				for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator) {
+					bool pathPartExists = false;
+
+					// Check if a path part (directory or file) exists in the filesystem.
+					for (const std::filesystem::path &filesystemEntryPath : std::filesystem::directory_iterator(inspectedPath)) {
+						if (StringsEqualCaseInsensitive(filesystemEntryPath.filename().generic_string(), (*relativeFilePathIterator).generic_string())) {
+							inspectedPath = filesystemEntryPath;
+							pathPartExists = true;
+							break;
+						}
+					}
+					if (!pathPartExists) {
+						// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
+						if (std::next(relativeFilePathIterator) == relativeFilePath.end()) {
+							return fopen((inspectedPath / relativeFilePath.filename()).generic_string().c_str(), accessMode.c_str());
+						}
+						// Some directory in relativeFilePath doesn't exist, so the file can't be created.
+						return nullptr;
+					}
+				}
+				// If the file exists, open it.
+				return fopen(inspectedPath.generic_string().c_str(), accessMode.c_str());
+			}();
+#endif
+			if (file) {
 				m_OpenedFiles[fileIndex] = file;
 				return fileIndex;
 			}
 		}
-#ifndef RELEASE_BUILD
 		g_ConsoleMan.PrintString("ERROR: Failed to open file " + fileName);
-#endif
 		return -1;
 	}
 

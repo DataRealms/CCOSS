@@ -51,17 +51,9 @@ namespace RTE {
 		m_ForceVirtualFullScreenGfxDriver = false;
 		m_ForceDedicatedFullScreenGfxDriver = false;
 		m_DisableMultiScreenResolutionValidation = false;
-#ifdef _WIN32
-		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
-		m_MaxResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		m_MaxResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		m_PrimaryScreenResX = GetSystemMetrics(SM_CXSCREEN);
-		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
-#elif __unix__
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = m_PrimaryScreenResX = 0;
 		m_MaxResY = m_PrimaryScreenResY = 0;
-#endif
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
@@ -156,7 +148,6 @@ namespace RTE {
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 
-#ifndef __unix__
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
 			settingsNeedOverwrite = true;
 			resX = 1360 / resMultiplier;
@@ -174,7 +165,6 @@ namespace RTE {
 				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
 			};
 			ShowMessageBox(invalidResolutionMessage);
-#endif
 
 		}
 
@@ -255,7 +245,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Initialize() {
-		m_Window = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX, m_ResY, SDL_WINDOW_OPENGL);
+		m_Window = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX, m_ResY, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -291,6 +281,10 @@ namespace RTE {
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = 0;
 		m_MaxResY = 0;
+		SDL_Rect primaryDisplayBounds;
+		SDL_GetDisplayBounds(0, &primaryDisplayBounds);
+		m_PrimaryScreenResX = primaryDisplayBounds.w;
+		m_PrimaryScreenResY = primaryDisplayBounds.h;
 		for (int i = 0; i< m_NumScreens; ++i) {
 			SDL_Rect res;
 			if (SDL_GetDisplayBounds(i, &res) != 0) {

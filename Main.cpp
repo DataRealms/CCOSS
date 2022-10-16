@@ -287,7 +287,9 @@ int main(int argc, char **argv) {
 	loadpng_init();
 
 	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_GAMECONTROLLER|SDL_INIT_TIMER);
+	#if SDL_MINOR_VERSION > 22
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
+	#endif
 	SDL_ShowCursor(SDL_DISABLE);
 
 	System::Initialize();

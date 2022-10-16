@@ -151,7 +151,6 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 
 	// To convert to allegro's crazy scheme with their keyboard function returning the order of the letter when ctrl is pressed
 	int asciiChar = KeyCode;
-	std::cout << (char)asciiChar << std::endl;
 
 	if (m_Locked) {
 		return;

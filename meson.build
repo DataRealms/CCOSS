@@ -7,8 +7,6 @@ if host_machine.system() in ['linux','osx']
   deps = [
     dependency('allegro', version:'<5.0'),
     dependency('sdl2'),
-    dependency('gl'),
-    dependency('glew'),
     dependency('loadpng'),
     dependency('flac'),
     dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),

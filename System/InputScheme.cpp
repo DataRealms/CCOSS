@@ -430,6 +430,7 @@ namespace RTE {
 				}
 			} else if (inputElement->JoyDirMapped()) {
 				std::string axisName = SDL_GameControllerGetStringForAxis(static_cast<SDL_GameControllerAxis>(inputElement->GetAxis()));
+				axisName += inputElement->GetDirection() == JoyDirections::JOYDIR_ONE ? '-' : '+';
 				return axisName;
 			}
 		}

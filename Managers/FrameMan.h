@@ -105,7 +105,12 @@ namespace RTE {
 		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
 
-
+		/// <summary>
+		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
+		/// </summary>
+		/// <returns>
+		/// The pointer to the main window.
+		/// </returns>
 		SDL_Window* GetWindow() const { return m_Window;}
 #pragma endregion
 

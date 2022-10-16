@@ -122,19 +122,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetInitialGraphicsDriver() {
-#ifdef _WIN32
-		if (m_ForceVirtualFullScreenGfxDriver) {
-			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-			m_GfxDriverMessage = "SYSTEM: Using DirectX borderless window driver!";
-		} else if (m_ForceDedicatedFullScreenGfxDriver) {
-			m_GfxDriver = GFX_DIRECTX_ACCEL;
-			m_GfxDriverMessage = "SYSTEM: Using DirectX dedicated fullscreen driver!";
-		} else {
-			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-		}
-#else
 		m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY);
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -451,6 +439,12 @@ namespace RTE {
 		delete m_LargeFont;
 		delete m_SmallFont;
 
+		m_ScreenShader->Destroy();
+		glDeleteTextures(1, &m_ScreenTexture);
+		glDeleteVertexArrays(1, &m_ScreenVAO);
+		glDeleteBuffers(1, &m_ScreenVBO);
+		SDL_GL_DeleteContext(m_GLContext);
+		SDL_DestroyWindow(m_Window);
 		Clear();
 	}
 
@@ -470,13 +464,6 @@ namespace RTE {
 				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
-
-		m_ScreenShader->Destroy();
-		glDeleteTextures(1, &m_ScreenTexture);
-		glDeleteVertexArrays(1, &m_ScreenVAO);
-		glDeleteBuffers(1, &m_ScreenVBO);
-		SDL_GL_DeleteContext(m_GLContext);
-		SDL_DestroyWindow(m_Window);
 
 		m_ResChanged = false;
 	}
@@ -515,10 +502,8 @@ namespace RTE {
 
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
-		SDL_SetWindowSize(m_Window, m_ResX * newMultiplier, m_ResY * newMultiplier);
-
 		if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
-			SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+			//SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 			if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
 				RTEAbort("Unable to set back to previous windowed mode multiplier because: " + std::string(SDL_GetError()) + "!");
 			}
@@ -526,6 +511,9 @@ namespace RTE {
 			set_palette(m_Palette);
 			SetDisplaySwitchMode();
 			return;
+		}
+		if (!m_Fullscreen) {
+			SDL_SetWindowSize(m_Window, m_ResX * newMultiplier, m_ResY * newMultiplier);
 		}
 		m_ResMultiplier = newMultiplier;
 
@@ -535,6 +523,7 @@ namespace RTE {
 		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
+		RecreateBackBuffers();
 		SetDisplaySwitchMode();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
@@ -556,8 +545,6 @@ namespace RTE {
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		SDL_SetWindowSize(m_Window, newResX * newResMultiplier, newResY * newResMultiplier);
-
 		if (SDL_SetWindowFullscreen(m_Window, newFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
 			SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 			if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -568,6 +555,9 @@ namespace RTE {
 			set_palette(m_Palette);
 			SetDisplaySwitchMode();
 			return;
+		}
+		if (!newFullscreen) {
+			SDL_SetWindowSize(m_Window, newResX * newResMultiplier, newResY * newResMultiplier);
 		}
 		m_Fullscreen = newFullscreen;
 		m_ResX = newResX;
@@ -587,6 +577,7 @@ namespace RTE {
 		g_SettingsMan.UpdateSettingsFile();
 
 		m_ResChanged = true;
+		FlipFrameBuffers();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

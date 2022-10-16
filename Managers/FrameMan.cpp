@@ -203,7 +203,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const {
-#ifdef _WIN32
+#if 0
 		POINT pointOnScreen;
 		HMONITOR screenHandle;
 		MONITORINFO screenInfo = { sizeof(MONITORINFO) };

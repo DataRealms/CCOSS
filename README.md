@@ -54,6 +54,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 * `g++>=8.1` (needs to support c++17 filesystem)
 * `allegro4`
+* `sdl2`
 * `loadpng`
 * `flac`
 * `luajit`
@@ -61,7 +62,6 @@ The Linux build uses the meson build system, and builds against system libraries
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
-* `libX11`
 * [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson=0.63.0 ninja=1.11.0` if your distro doesn't include a recent version)
 * `boost>=1.55`
 * (optional) `xmessage`
@@ -106,11 +106,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 ## Troubleshooting
 
-* On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
-
 * `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
-
-* Gamepad triggers may be inverted, to work around that: Hold down the trigger, select the input you want it assigned to and release to assign it, then it will be correct in use.
 
 ***
 

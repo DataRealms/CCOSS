@@ -580,6 +580,7 @@
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
     <ClInclude Include="System\GraphicalPrimitive.h" />
+    <ClInclude Include="System\Gamepad.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\PieQuadrant.h" />
     <ClInclude Include="System\StandardIncludes.h" />
@@ -594,6 +595,7 @@
     <ClInclude Include="System\Reader.h" />
     <ClInclude Include="System\Serializable.h" />
     <ClInclude Include="System\Singleton.h" />
+    <ClInclude Include="System\ScreenShader.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\Timer.h" />
     <ClInclude Include="System\Vector.h" />
@@ -887,6 +889,7 @@
     <ClCompile Include="System\PathFinder.cpp" />
     <ClCompile Include="System\Reader.cpp" />
     <ClCompile Include="System\System.cpp" />
+    <ClCompile Include="System\ScreenShader.cpp" />
     <ClCompile Include="System\Timer.cpp" />
     <ClCompile Include="System\Vector.cpp" />
     <ClCompile Include="System\Writer.cpp" />

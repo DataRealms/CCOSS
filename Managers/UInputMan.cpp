@@ -107,6 +107,17 @@ namespace RTE {
 				s_ChangedJoystickStates[controllerIndex] = Gamepad(index, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
 				controllerIndex++;
 				m_NumJoysticks++;
+			} else {
+				SDL_Joystick* joy =  SDL_JoystickOpen(index);
+				if (!joy) {
+					g_ConsoleMan.PrintString("ERROR: Failed to open joystick.");
+					continue;
+				}
+				SDL_JoystickID id = SDL_JoystickInstanceID(joy);
+				s_PrevJoystickStates[controllerIndex] = Gamepad(index, id, SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy));
+				s_ChangedJoystickStates[controllerIndex] = Gamepad(index, id, SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy));
+				controllerIndex++;
+				m_NumJoysticks++;
 			}
 		}
 // 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
@@ -739,62 +750,43 @@ namespace RTE {
 			if (e.type == SDL_WINDOWEVENT_FOCUS_LOST) {
 				g_FrameMan.DisplaySwitchOut();
 			}
-			if (e.type == SDL_CONTROLLERAXISMOTION) {
-				UpdateJoystickAxis(e);
-			}
-			if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP) {
-				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.cbutton.which);
+			if (e.type == SDL_CONTROLLERAXISMOTION || e.type == SDL_JOYAXISMOTION) {
+				SDL_JoystickID id = e.type == SDL_CONTROLLERAXISMOTION ? e.caxis.which : e.jaxis.which;
+				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
 				if (device != s_PrevJoystickStates.end()) {
+					if (SDL_IsGameController(device->m_DeviceIndex) && e.type == SDL_CONTROLLERAXISMOTION) {
+						UpdateJoystickAxis(device, e.caxis.axis, e.caxis.value);
+					} else if (!SDL_IsGameController(device->m_DeviceIndex)) {
+						UpdateJoystickAxis(device, e.jaxis.axis, e.jaxis.value);
+					}
+				}
+			}
+			if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP ||e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP) {
+				SDL_JoystickID id = e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP ? e.cbutton.which : e.jbutton.which;
+				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
+				if (device != s_PrevJoystickStates.end()) {
+					int button = -1;
+					int state = -1;
+					if (SDL_IsGameController(device->m_DeviceIndex)) {
+						if (e.type == SDL_CONTROLLERBUTTONUP || e.type == SDL_CONTROLLERBUTTONDOWN) {
+							button = e.cbutton.button;
+							state = e.cbutton.state;
+						} else {
+							continue;
+						}
+					} else {
+						button = e.jbutton.button;
+						state = e.jbutton.state;
+					}
 					int index = device - s_PrevJoystickStates.begin();
-					s_ChangedJoystickStates[index].m_Buttons[e.cbutton.button] = e.cbutton.state != device->m_Buttons[e.cbutton.button];
-					device->m_Buttons[e.cbutton.button] = e.cbutton.state;
+					s_ChangedJoystickStates[index].m_Buttons[button] = state != device->m_Buttons[button];
+					device->m_Buttons[button] = state;
 				}
 			}
-			if (e.type == SDL_CONTROLLERDEVICEADDED) {
-				SDL_GameController *controller = nullptr;
-				size_t controllerIndex = 0;
-				for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
-					if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == e.jdevice.which) {
-						controller = SDL_GameControllerOpen(e.jdevice.which);
-						if (!controller) {
-							g_ConsoleMan.PrintString("ERROR: Failed to reconnect Gamepad " + std::to_string(controllerIndex + 1));
-							break;
-						}
-						g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " reconnected");
-						break;
-					} else if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == -1) {
-						controller = SDL_GameControllerOpen(e.jdevice.which);
-						if (!controller) {
-							g_ConsoleMan.PrintString("ERROR: Failed to connect Gamepad " + std::to_string(controllerIndex + 1));
-							break;
-						}
-						g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " connected");
-						break;
-					}
-				}
-				if (!controller && controllerIndex == s_PrevJoystickStates.size()) {
-					controllerIndex = 0;
-					for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
-						if (s_PrevJoystickStates[controllerIndex].m_JoystickID == -1) {
-							controller = SDL_GameControllerOpen(e.jdevice.which);
-							if (!controller) {
-								g_ConsoleMan.PrintString("ERROR: Failed to connect controller!");
-								break;
-							}
-							g_ConsoleMan.PrintString("INFO: New Gamepad connected as Gamepad " + std::to_string(controllerIndex + 1));
-							break;
-						}
-					}
-					g_ConsoleMan.PrintString("ERROR: Too many gamepads connected!");
-				}
-				if (controller) {
-					SDL_JoystickID id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
-					s_PrevJoystickStates[controllerIndex] = Gamepad(e.jdevice.which, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
-					s_ChangedJoystickStates[controllerIndex] = Gamepad(e.jdevice.which, id, SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX);
-					m_NumJoysticks++;
-				}
+			if (e.type == SDL_JOYDEVICEADDED) {
+				OpenJoystick(e.jdevice.which);
 			}
-			if (e.type == SDL_CONTROLLERDEVICEREMOVED) {
+			if (e.type == SDL_JOYDEVICEREMOVED) {
 				std::vector<Gamepad>::iterator prevDevice = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.jdevice.which);
 				if (prevDevice != s_PrevJoystickStates.end()) {
 					g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(prevDevice->m_DeviceIndex + 1) + " disconnected!");
@@ -976,25 +968,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::UpdateJoystickAxis(const SDL_Event &e) {
-		std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), e.caxis.which);
+	void UInputMan::UpdateJoystickAxis(std::vector<Gamepad>::iterator device, int axis, int value) {
 		if (device != s_PrevJoystickStates.end()) {
 			int joystickIndex = device - s_PrevJoystickStates.begin();
 
-			int prevAxisValue = device->m_Axis[e.caxis.axis];
-			int prevDigitalValue = device->m_DigitalAxis[e.caxis.axis];
+			int prevAxisValue = device->m_Axis[axis];
+			int prevDigitalValue = device->m_DigitalAxis[axis];
 
 			int newDigitalState = 0;
-			if (e.caxis.value > 8912) {
+			if (value > 8912) {
 				newDigitalState = 1;
-			} else if (e.caxis.value < -8912) {
+			} else if (value < -8912) {
 				newDigitalState = -1;
 			}
 
-			s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(e.caxis.value - device->m_Axis[e.caxis.axis]);
-			s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[e.caxis.axis] = Sign(newDigitalState - prevDigitalValue);
-			device->m_Axis[e.caxis.axis] = e.caxis.value;
-			device->m_DigitalAxis[e.caxis.axis] = newDigitalState;
+			s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(value - device->m_Axis[axis]);
+			s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axis] = Sign(newDigitalState - prevDigitalValue);
+			device->m_Axis[axis] = value;
+			device->m_DigitalAxis[axis] = newDigitalState;
 
 			Players joystickPlayer = Players::NoPlayer;
 			float deadZone = 0.0f;
@@ -1023,12 +1014,12 @@ namespace RTE {
 						axisLeft = inputElements->at(elementsToCheck[i]).GetAxis();
 
 						aimValues.m_X = AnalogAxisValue(joystickIndex, axisLeft);
-						isAxisMapped |= axisLeft == e.caxis.axis;
+						isAxisMapped |= axisLeft == axis;
 					}
 					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) {
 						axisUp = inputElements->at(elementsToCheck[i+1]).GetAxis();
 						aimValues.m_Y = AnalogAxisValue(joystickIndex, axisUp);
-						isAxisMapped |= axisUp == e.caxis.axis;
+						isAxisMapped |= axisUp == axis;
 					}
 					if (!isAxisMapped) {
 						continue;
@@ -1037,14 +1028,14 @@ namespace RTE {
 					if (deadZoneType == DeadZoneType::CIRCLE) {
 						if (aimValues.GetMagnitude() < deadZone) {
 							if (axisLeft != SDL_CONTROLLER_AXIS_INVALID) {
-								s_ChangedJoystickStates[joystickIndex].m_Axis[axisLeft] = Sign(axisLeft == e.caxis.axis ? -prevAxisValue : -device->m_Axis[axisLeft]);
-								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisLeft] = Sign(axisLeft == e.caxis.axis ? -prevDigitalValue : -device->m_DigitalAxis[axisLeft]);
+								s_ChangedJoystickStates[joystickIndex].m_Axis[axisLeft] = Sign(axisLeft == axis ? -prevAxisValue : -device->m_Axis[axisLeft]);
+								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisLeft] = Sign(axisLeft == axis ? -prevDigitalValue : -device->m_DigitalAxis[axisLeft]);
 								device->m_Axis[axisLeft] = 0;
 								device->m_DigitalAxis[axisLeft] = 0;
 							}
 							if(axisUp != SDL_CONTROLLER_AXIS_INVALID) {
-								s_ChangedJoystickStates[joystickIndex].m_Axis[axisUp] = Sign(axisUp == e.caxis.axis ? -prevAxisValue : -device->m_Axis[axisUp]);
-								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisUp] = Sign(axisLeft == e.caxis.axis ? -prevDigitalValue : -device->m_DigitalAxis[axisUp]);
+								s_ChangedJoystickStates[joystickIndex].m_Axis[axisUp] = Sign(axisUp == axis ? -prevAxisValue : -device->m_Axis[axisUp]);
+								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisUp] = Sign(axisLeft == axis ? -prevDigitalValue : -device->m_DigitalAxis[axisUp]);
 								device->m_Axis[axisUp] = 0;
 								device->m_DigitalAxis[axisUp] = 0;
 							}
@@ -1053,13 +1044,95 @@ namespace RTE {
 				}
 			}
 			if(!isAxisMapped && deadZoneType == DeadZoneType::SQUARE && deadZone >0.f) {
-				if (std::abs(e.caxis.value / 32767.0) < deadZone) {
-					s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(-prevAxisValue);
-					s_ChangedJoystickStates[joystickIndex].m_Axis[e.caxis.axis] = Sign(-prevDigitalValue);
-					device->m_Axis[e.caxis.axis] = 0;
-					device->m_DigitalAxis[e.caxis.axis] = 0;
+				if (std::abs(value / 32767.0) < deadZone) {
+					s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevAxisValue);
+					s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevDigitalValue);
+					device->m_Axis[axis] = 0;
+					device->m_DigitalAxis[axis] = 0;
 				}
 			}
+		}
+	}
+
+	void UInputMan::OpenJoystick(int deviceIndex) {
+
+		SDL_Joystick *controller = nullptr;
+		size_t controllerIndex = 0;
+		for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
+			if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == deviceIndex) {
+				if (SDL_IsGameController(deviceIndex)) {
+					SDL_GameController* gameController = SDL_GameControllerOpen(deviceIndex);
+					if (!gameController) {
+						g_ConsoleMan.PrintString("ERROR: Failed to reconnect Gamepad " + std::to_string(controllerIndex + 1));
+						break;
+					}
+					controller = SDL_GameControllerGetJoystick(gameController);
+				} else {
+					controller = SDL_JoystickOpen(deviceIndex);
+				}
+				if (!controller) {
+					g_ConsoleMan.PrintString("ERROR: Failed to reconnect Gamepad " + std::to_string(controllerIndex + 1));
+					break;
+				}
+				g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " reconnected");
+				break;
+			} else if (s_PrevJoystickStates[controllerIndex].m_DeviceIndex == -1) {
+				if (SDL_IsGameController(deviceIndex)) {
+					SDL_GameController *gameController = SDL_GameControllerOpen(deviceIndex);
+					if (!gameController) {
+						g_ConsoleMan.PrintString("ERROR: Failed to connect Gamepad " + std::to_string(controllerIndex + 1));
+						break;
+					}
+					controller = SDL_GameControllerGetJoystick(gameController);
+				} else {
+					controller = SDL_JoystickOpen(deviceIndex);
+				}
+				if (!controller) {
+					g_ConsoleMan.PrintString("ERROR: Failed to connect Gamepad " + std::to_string(controllerIndex + 1));
+					break;
+				}
+				g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(controllerIndex + 1) + " connected");
+				break;
+			}
+		}
+		if (!controller && controllerIndex == s_PrevJoystickStates.size()) {
+			controllerIndex = 0;
+			for (; controllerIndex < s_PrevJoystickStates.size(); ++controllerIndex) {
+				if (s_PrevJoystickStates[controllerIndex].m_JoystickID == -1) {
+					if (SDL_IsGameController(deviceIndex)) {
+						SDL_GameController *gameController = SDL_GameControllerOpen(deviceIndex);
+						if (!gameController) {
+							g_ConsoleMan.PrintString("ERROR: Failed to connect controller.");
+							break;
+						}
+						controller = SDL_GameControllerGetJoystick(gameController);
+					} else {
+						controller = SDL_JoystickOpen(deviceIndex);
+					}
+					if (!controller) {
+						g_ConsoleMan.PrintString("ERROR: Failed to connect controller!");
+						break;
+					}
+					g_ConsoleMan.PrintString("INFO: New Gamepad connected as Gamepad " + std::to_string(controllerIndex + 1));
+					break;
+				}
+			}
+			g_ConsoleMan.PrintString("ERROR: Too many gamepads connected!");
+		}
+		if (controller) {
+			SDL_JoystickID id = SDL_JoystickInstanceID(controller);
+			int nAxis = 0;
+			int nButtons = 0;
+			if(SDL_IsGameController(deviceIndex)) {
+				nAxis = SDL_CONTROLLER_AXIS_MAX;
+				nButtons = SDL_CONTROLLER_BUTTON_MAX;
+			} else {
+				nAxis = SDL_JoystickNumAxes(controller);
+				nButtons = SDL_JoystickNumButtons(controller);
+			}
+			s_PrevJoystickStates[controllerIndex] = Gamepad(deviceIndex, id, nAxis, nButtons);
+			s_ChangedJoystickStates[controllerIndex] = Gamepad(deviceIndex, id, nAxis, nButtons);
+			m_NumJoysticks++;
 		}
 	}
 

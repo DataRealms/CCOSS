@@ -243,10 +243,15 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether a key was pressed between the last update and the one previous to it.
 		/// </summary>
-		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="keyToTest">A SDL_Scancode with the SDL scancode enumeration to test (follows usb-hid definitions).</param>
 		/// <returns>Whether the key is pressed or not.</returns>
 		bool KeyPressed(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
 
+		/// <summary>
+		/// Gets whether a key was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="keyToTest">A SDL_Keycode with the SDL key enumeration to test.</param>
+		/// <returns>Whether the key is pressed or not.</returns>
 		bool KeyPressed(SDL_Keycode keyToTest) const { return KeyPressed(SDL_GetScancodeFromKey(keyToTest)); }
 
 		/// <summary>
@@ -263,6 +268,17 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether any keyboard buttons have been pressed at all since last frame.</returns>
 		bool AnyKeyPress() const;
+
+		/// <summary>
+		/// Fills the given string with the text input since the last frame (if any).
+		/// </summary>
+		/// <param name="text">
+		/// The std::string to fill.
+		/// </param>
+		/// <returns>
+		/// Whether there is text input.
+		/// </returns>
+		bool GetTextInput(std::string& text) const {text = m_TextInput; return !m_TextInput.empty();}
 #pragma endregion
 
 #pragma region Mouse Handling
@@ -640,6 +656,7 @@ namespace RTE {
 
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_PrevKeyStates; //!< Key states as they were the previous update.
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_ChangedKeyStates; //!< Key states that have changed.
+		std::string m_TextInput;
 
 		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_CurrentMouseButtonStates; //!< Current mouse button states.
 		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_PrevMouseButtonStates; //!< Mouse button states as they were the previous update.

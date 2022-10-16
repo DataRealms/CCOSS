@@ -694,6 +694,7 @@ namespace RTE {
 			std::fill(pad.m_Axis.begin(), pad.m_Axis.end(), 0);
 			std::fill(pad.m_DigitalAxis.begin(), pad.m_DigitalAxis.end(), 0);
 		}
+		m_TextInput.clear();
 		m_MouseWheelChange = 0;
 		m_RawMouseMovement.Reset();
 
@@ -706,6 +707,17 @@ namespace RTE {
 			if (e.type == SDL_KEYUP || e.type == SDL_KEYDOWN) {
 				s_ChangedKeyStates[e.key.keysym.scancode] = (e.key.state != s_PrevKeyStates[e.key.keysym.scancode]);
 				s_PrevKeyStates[e.key.keysym.scancode] = e.key.state;
+			}
+			if (e.type == SDL_TEXTINPUT) {
+				char input = e.text.text[0];
+				size_t i = 0;
+				while(input != 0 && i < 32) {
+					++i;
+					if (input <= 127) {
+						m_TextInput += input;
+					}
+					input = e.text.text[i];
+				}
 			}
 			if (e.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);

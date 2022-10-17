@@ -745,7 +745,6 @@ namespace RTE {
 				m_MouseWheelChange = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? e.wheel.y : -e.wheel.y;
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-				std::cout << "focus gained" << std::endl;
 				g_FrameMan.DisplaySwitchIn();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {

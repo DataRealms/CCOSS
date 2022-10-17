@@ -251,8 +251,9 @@ namespace RTE {
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		m_GLContext = SDL_GL_CreateContext(m_Window);
+		int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
-		if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
+		if (version == 0 || (GLAD_VERSION_MAJOR(version) < 3 && GLAD_VERSION_MINOR(version) < 3)) {
 			RTEAbort("Failed to load OpenGL");
 		}
 
@@ -539,6 +540,9 @@ namespace RTE {
 		}
 		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
 		//m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
+		if(!newFullscreen) {
+			SDL_RestoreWindow(m_Window);
+		}
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
@@ -564,6 +568,14 @@ namespace RTE {
 		int windowW;
 		int windowH;
 		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+
+		if (windowW % m_ResMultiplier != 0) {
+			windowW += m_ResMultiplier - windowW % m_ResMultiplier;
+		}
+		if(windowH % m_ResMultiplier != 0) {
+			windowH += m_ResMultiplier - windowH % m_ResMultiplier;
+		}
+
 		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
@@ -574,6 +586,34 @@ namespace RTE {
 		g_SettingsMan.UpdateSettingsFile();
 
 		m_ResChanged = true;
+		FlipFrameBuffers();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::WindowResizedCallback(int newResX, int newResY) {
+		m_Fullscreen = false;
+		m_ResX = newResX / m_ResMultiplier;
+		m_ResY = newResY / m_ResMultiplier;
+
+		int windowW;
+		int windowH;
+		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+
+		if (windowW % m_ResMultiplier != 0) {
+			windowW += m_ResMultiplier - windowW % m_ResMultiplier;
+		}
+		if (windowH % m_ResMultiplier != 0) {
+			windowH += m_ResMultiplier - windowH % m_ResMultiplier;
+		}
+
+		glViewport(0, 0, windowW, windowH);
+		set_palette(m_Palette);
+		RecreateBackBuffers();
+		SetDisplaySwitchMode();
+
+		m_ResChanged = true;
+
 		FlipFrameBuffers();
 	}
 

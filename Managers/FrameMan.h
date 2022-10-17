@@ -176,6 +176,14 @@ namespace RTE {
 		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
+		/// Checks whether the game window is currently in fullscreen mode.
+		/// </summary>
+		/// <returns>
+		/// Whether the window is fullscreen.
+		/// </returns>
+		bool IsWindowFullscreen() const { return m_Fullscreen; }
+
+		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="newMultiplier">The multiplier to switch to.</param>
@@ -189,6 +197,17 @@ namespace RTE {
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
 		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
+
+		/// <summary>
+		/// Apply resolution change after window resize.
+		/// </summary>
+		/// <param name="newResX">
+		/// The new horizontal resolution.
+		/// </param>
+		/// <param name="newResY">
+		/// The new verticla resolution.
+		/// </param>
+		void WindowResizedCallback(int newResX, int newResY);
 #pragma endregion
 
 #pragma region Split-Screen Handling

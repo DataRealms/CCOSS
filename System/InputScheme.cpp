@@ -321,7 +321,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_R_LEFT].SetPresetDescription("R. Stick Left");
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetDirection(SDL_CONTROLLER_AXIS_RIGHTX, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetPresetDescription("R. Stick Right");
-				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_ONE);
+				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_FIRE].SetPresetDescription("R. Trigger");
 				m_InputMappings[InputElements::INPUT_PIEMENU].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("L. Trigger");
@@ -375,7 +375,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_R_LEFT].SetPresetDescription("R. Stick Left");
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetDirection(SDL_CONTROLLER_AXIS_RIGHTX, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetPresetDescription("R. Stick Right");
-				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_ONE);
+				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_FIRE].SetPresetDescription("R. Trigger");
 				m_InputMappings[InputElements::INPUT_PIEMENU].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("L. Trigger");

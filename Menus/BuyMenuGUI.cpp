@@ -201,6 +201,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
     m_pCategoryTabs[BODIES] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BodiesTab"));
+	m_pCategoryTabs[MECHA] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("MechaTab"));
     m_pCategoryTabs[TOOLS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ToolsTab"));
     m_pCategoryTabs[GUNS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("GunsTab"));
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
@@ -828,14 +829,15 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::RefreshTabDisabledStates() {
-    bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
-    m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
+	m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[MECHA]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1995,32 +1997,23 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     // The vector of lists which will be filled with catalog objects, grouped by which data module they were read from
     vector<list<Entity *> > catalogList;
 
-    if (m_MenuCategory == CRAFT)
-    {
-        AddObjectsToItemList(catalogList, "ACRocket");
-        AddObjectsToItemList(catalogList, "ACDropShip");
-    }
-    else if (m_MenuCategory == BODIES)
-    {
-        AddObjectsToItemList(catalogList, "AHuman");
-        AddObjectsToItemList(catalogList, "ACrab");
-    }
-    else if (m_MenuCategory == TOOLS)
-    {
+	if (m_MenuCategory == CRAFT) {
+		AddObjectsToItemList(catalogList, "ACRocket");
+		AddObjectsToItemList(catalogList, "ACDropShip");
+	} else if (m_MenuCategory == BODIES) {
+		AddObjectsToItemList(catalogList, "AHuman");
+		AddObjectsToItemList(catalogList, "ACrab");
+	} else if (m_MenuCategory == MECHA) {
+
+	} else if (m_MenuCategory == TOOLS) {
 		AddObjectsToItemList(catalogList, "HeldDevice", "Tools");
-    }
-    else if (m_MenuCategory == GUNS)
-    {
-        AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
-    }
-    else if (m_MenuCategory == BOMBS)
-    {
-        AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
-    }
-    else if (m_MenuCategory == SHIELDS)
-    {
-        AddObjectsToItemList(catalogList, "HeldDevice", "Shields");
-    }
+	} else if (m_MenuCategory == GUNS) {
+		AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
+	} else if (m_MenuCategory == BOMBS) {
+		AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
+	} else if (m_MenuCategory == SHIELDS) {
+		AddObjectsToItemList(catalogList, "HeldDevice", "Shields");
+	}
 
     SceneObject *pSObject = 0;
     const DataModule *pModule = 0;

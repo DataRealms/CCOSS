@@ -706,6 +706,7 @@ protected:
     {
         CRAFT = 0,
         BODIES,
+		MECHA,
         TOOLS,
         GUNS,
         BOMBS,

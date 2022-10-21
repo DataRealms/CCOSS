@@ -306,6 +306,26 @@ public:
 
     bool GetAllOfGroup(std::list<Entity *> &entityList, std::string group, std::string type = "All", int whichModule = -1);
 
+	/// <summary>
+	/// Adds to a list all previously read in (defined) Entities which are associated with several specific groups.
+	/// </summary>
+	/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
+	/// <param name="groups">The groups to look for. "All" will look in all.</param>
+	/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
+	/// <param name="whichModule">Whether to only get those of one specific DataModule (0-n), or all (-1).</param>
+	/// <returns>Whether any Entity:s were found and added to the list.</returns>
+	bool GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type = "All", int whichModule = -1);
+
+	/// <summary>
+	/// Adds to a list all previously read in (defined) Entities which are not associated with several specific groups.
+	/// </summary>
+	/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
+	/// <param name="groups">The groups to exclude.</param>
+	/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
+	/// <param name="whichModule">Whether to only get those of one specific DataModule (0-n), or all (-1).</param>
+	/// <returns>Whether any Entity:s were found and added to the list.</returns>
+	bool GetAllNotOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type = "All", int whichModule = -1);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRandomOfGroup

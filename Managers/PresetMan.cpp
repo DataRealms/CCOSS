@@ -575,6 +575,47 @@ bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string t
     return foundAny;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
+	RTEAssert(!groups.empty(), "Looking for empty groups!");
+	bool foundAny = false;
+
+	if (whichModule < 0) {
+		for (DataModule *dataModule : m_pDataModules) {
+			foundAny = dataModule->GetAllOfGroups(entityList, groups, type) || foundAny;
+		}
+	} else {
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, groups, type);
+	}
+	return foundAny;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
+	RTEAssert(!type.empty(), "Looking presets of type without specifying type in PresetMan::GetAllNotOfGroups");
+
+	if (groups.empty()) {
+		RTEAbort("Looking for empty groups in PresetMan::GetAllNotOfGroups");
+	} else if (std::find(groups.begin(), groups.end(), "All") != groups.end()) {
+		RTEAbort("Trying to exclude all groups while looking for presets in PresetMan::GetAllNotOfGroups");
+	}
+
+	bool foundAny = false;
+
+	if (whichModule < 0) {
+		for (DataModule *dataModule : m_pDataModules) {
+			foundAny = dataModule->GetAllNotOfGroups(entityList, groups, type) || foundAny;
+		}
+	} else {
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+		foundAny = m_pDataModules[whichModule]->GetAllNotOfGroups(entityList, groups, type);
+	}
+	return foundAny;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRandomOfGroup

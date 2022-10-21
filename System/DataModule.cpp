@@ -316,23 +316,45 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool DataModule::GetAllOfGroup(std::list<Entity *> &entityList, const std::string &group, const std::string &type) {
-		if (group.empty()) {
+
+	bool DataModule::GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::variant<const std::string, const std::vector<std::string>> &groups, bool excludeGroups) {
+		std::vector<std::string> groupsList;
+		if (const std::string *group = std::get_if<const std::string>(&groups)) {
+			if (!group->empty()) { groupsList.emplace_back(*group); }
+		} else {
+			groupsList = std::get<const std::vector<std::string>>(groups);
+		}
+		if (groupsList.empty()) {
 			return false;
 		}
 
 		bool foundAny = false;
 
-		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too)
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
-
-		if (classItr != m_TypeMap.end()) {
+		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too).
+		if (std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type); classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
-			for (const std::pair<std::string, Entity *> &instance : classItr->second) {
-				if (instance.second->IsInGroup(group)) {
-					entityList.push_back(instance.second); // Get the grouped entities, without transferring ownership
-					foundAny = true;
+			for (const auto &[instanceName, entity] : classItr->second) {
+				if (excludeGroups) {
+					bool excludeEntity = false;
+					for (const std::string &group : groupsList) {
+						if (entity->IsInGroup(group)) {
+							excludeEntity = true;
+							break;
+						}
+					}
+					if (!excludeEntity) {
+						entityList.emplace_back(entity);
+						foundAny = true;
+					}
+				} else {
+					for (const std::string &group : groupsList) {
+						if (entity->IsInGroup(group)) {
+							entityList.emplace_back(entity);
+							foundAny = true;
+							break;
+						}
+					}
 				}
 			}
 		}

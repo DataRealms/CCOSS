@@ -77,6 +77,7 @@
 #include <random>
 #include <array>
 #include <filesystem>
+#include <variant>
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;

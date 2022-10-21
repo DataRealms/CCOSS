@@ -1472,6 +1472,10 @@ void GameActivity::Update()
 				m_ViewState[player] = ViewState::Normal;
                 g_GUISound.UserErrorSound()->Play(player);
 				m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
+				if (pMarkedActor) {
+					pMarkedActor->GetPieMenu()->DoDisableAnimation();
+				}
             }
             // Player is done selecting new actor; switch to it if we have anything marked
             else if (m_PlayerController[player].IsState(ACTOR_NEXT) || m_PlayerController[player].IsState(ACTOR_PREV) || m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY)) {

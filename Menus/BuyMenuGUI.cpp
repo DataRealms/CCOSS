@@ -1995,24 +1995,26 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
 
     // The vector of lists which will be filled with catalog objects, grouped by which data module they were read from
-    vector<list<Entity *> > catalogList;
+    std::vector<std::list<Entity *>> catalogList;
+	std::vector<std::string> mechaCategoryGroups = { "Actors - Mecha", "Actors - Turrets" };
 
 	if (m_MenuCategory == CRAFT) {
 		AddObjectsToItemList(catalogList, "ACRocket");
 		AddObjectsToItemList(catalogList, "ACDropShip");
 	} else if (m_MenuCategory == BODIES) {
-		AddObjectsToItemList(catalogList, "AHuman");
-		AddObjectsToItemList(catalogList, "ACrab");
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, true);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, true);
 	} else if (m_MenuCategory == MECHA) {
-
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, false);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, false);
 	} else if (m_MenuCategory == TOOLS) {
-		AddObjectsToItemList(catalogList, "HeldDevice", "Tools");
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Tools" });
 	} else if (m_MenuCategory == GUNS) {
-		AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
+		AddObjectsToItemList(catalogList, "HDFirearm", { "Weapons" });
 	} else if (m_MenuCategory == BOMBS) {
-		AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
+		AddObjectsToItemList(catalogList, "ThrownDevice", { "Bombs" });
 	} else if (m_MenuCategory == SHIELDS) {
-		AddObjectsToItemList(catalogList, "HeldDevice", "Shields");
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Shields" });
 	}
 
     SceneObject *pSObject = 0;

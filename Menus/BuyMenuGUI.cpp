@@ -2220,45 +2220,22 @@ bool BuyMenuGUI::DeployLoadout(int index)
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  AddObjectsToItemList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all objects of a specific type already defined in PresetMan
-//                  to the current shop/item list. They will be grouped into the different
-//                  data modules they were read from.
-
-void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, string type, string group)
-{
-
-	if (g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0)
-	{
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (group.empty() || group == "All")
+void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups) {
+	while (moduleList.size() < g_PresetMan.GetTotalModuleCount()) {
+		moduleList.emplace_back();
+	}
+	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+		if ((g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0) || (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())) {
+			if (groups.empty() || std::find(groups.begin(), groups.end(), "All") != groups.end()) {
 				g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-			else
-				g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
-		}
-	} else {
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())
-			{
-				if (group.empty() || group == "All")
-					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-				else
-					g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
+			} else {
+				if (excludeGroups) {
+					g_PresetMan.GetAllNotOfGroups(moduleList[moduleID], groups, type, moduleID);
+				} else {
+					g_PresetMan.GetAllOfGroups(moduleList[moduleID], groups, type, moduleID);
+				}
 			}
 		}
 	}

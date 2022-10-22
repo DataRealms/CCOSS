@@ -617,18 +617,14 @@ protected:
     bool DeployLoadout(int index);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddObjectsToItemList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all objects of a specific type already defined in PresetMan
-//                  to the current shop/item list. They will be grouped into the different
-//                  data modules they were read from.
-// Arguments:       Reference to the data module vector of entity lists to add the items to.
-//                  The name of the class to add all objects of. "" or "All" looks for all.
-//                  The name of the group to add all objects of. "" or "All" looks for all.
-// Return value:    None.
-
-    void AddObjectsToItemList(std::vector<std::list<Entity *> > &moduleList, std::string type = "", std::string group = "");
+	/// <summary>
+	/// Adds all objects of a specific type already defined in PresetMan to the current shop/item list. They will be grouped into the different data modules they were read from.
+	/// </summary>
+	/// <param name="moduleList">Reference to the data module vector of entity lists to add the items to.</param>
+	/// <param name="type">The name of the class to add all objects of. "" or "All" looks for all.</param>
+	/// <param name="groups">The name of the groups to add all objects of. An empty vector or "All" looks for all.</param>
+	/// <param name="excludeGroups">Whether the specified groups should be excluded, meaning all objects NOT associated with the groups will be added.</param>
+	void AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleList, const std::string &type = "", const std::vector<std::string> &groups = {}, bool excludeGroups = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

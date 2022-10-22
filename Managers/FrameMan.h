@@ -404,7 +404,7 @@ namespace RTE {
 		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
+		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
@@ -418,7 +418,7 @@ namespace RTE {
 		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
+		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
@@ -433,7 +433,7 @@ namespace RTE {
 
 		// TODO: Figure out.
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="screen"></param>
 		/// <returns></returns>
@@ -633,7 +633,7 @@ namespace RTE {
 
 #pragma region Display Switch Callbacks
 		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
 		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
 		/// </summary>
 		static void DisplaySwitchOut();

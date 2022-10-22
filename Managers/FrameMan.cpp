@@ -632,7 +632,7 @@ namespace RTE {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				int height = GetResY();
 				for (int i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) { 
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) {
 						height = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
 					}
 				}
@@ -1086,7 +1086,7 @@ namespace RTE {
 			set_clip_state(drawScreen, 1);
 
 			DrawScreenText(playerScreen, playerGUIBitmap);
-			
+
 			// The position of the current draw screen on the backbuffer
 			Vector screenOffset;
 
@@ -1094,11 +1094,11 @@ namespace RTE {
 			if (screenCount > 1) { UpdateScreenOffsetForSplitScreen(playerScreen, screenOffset); }
 
 			DrawScreenFlash(playerScreen, drawScreenGUI);
-			
-			if (!IsInMultiplayerMode()) { 
+
+			if (!IsInMultiplayerMode()) {
 				// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
 				blit(drawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), drawScreen->w, drawScreen->h);
-		
+
 				g_PostProcessMan.AdjustEffectsPosToPlayerScreen(playerScreen, drawScreen, screenOffset, screenRelativeEffects, screenRelativeGlowBoxes);
 			}
 		}

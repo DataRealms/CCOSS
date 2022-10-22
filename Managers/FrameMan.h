@@ -317,10 +317,11 @@ namespace RTE {
 		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
-		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
+		/// Sets a specific pre-calculated transparency table which is used for any subsequent transparency drawing.
 		/// </summary>
-		/// <param name="transSetting">The transparency setting, see the enumerator.</param>
-		void SetTransTable(TransparencyPreset transSetting);
+		/// <param name="transValue">The transparency preset value. See the TransparencyPreset enumeration for values.</param>
+		/// <returns>Whether a preset transparency table was found and applied.</returns>
+		bool SetTransTableFromPreset(TransparencyPreset transValue);
 
 		/// <summary>
 		/// Flashes any of the players' screen with the specified color for this frame.

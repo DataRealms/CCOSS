@@ -319,8 +319,7 @@ namespace RTE {
 			int blendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
 			create_trans_table(&m_TransparencyTablePresets.at(presetTransValue), ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
 		}
-		// Set the one Allegro currently uses
-		color_map = &m_TransparencyTablePresets[4].second;
+		SetTransTableFromPreset(TransparencyPreset::Trans50);
 
 		CreateBackBuffers();
 
@@ -698,20 +697,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetTransTable(TransparencyPreset transSetting) {
-		switch (transSetting) {
-			case LessTrans:
-				color_map = &m_LessTransTable;
-				break;
-			case MoreTrans:
-				color_map = &m_MoreTransTable;
-				break;
-			case HalfTrans:
-				color_map = &m_HalfTransTable;
-				break;
-			default:
-				RTEAbort("Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+	bool FrameMan::SetTransTableFromPreset(TransparencyPreset transValue) {
+		RTEAssert(transValue >= TransparencyPreset::Trans0 || transValue < TransparencyPreset::TransPresetCount, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+		if (m_TransparencyTablePresets.find(transValue) != m_TransparencyTablePresets.end()) {
+			color_map = &m_TransparencyTablePresets.at(transValue);
+			return true;
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

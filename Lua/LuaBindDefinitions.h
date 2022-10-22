@@ -40,6 +40,7 @@ namespace RTE {
 	struct joy_buttons : public luabind::enum_wrapper {};
 	struct joy_directions : public luabind::enum_wrapper {};
 	struct directions : public luabind::enum_wrapper {};
+	struct trans_presets : public luabind::enum_wrapper {};;
 
 	/// <summary>
 	/// Special callback function for adding file name and line number to error messages when calling functions incorrectly.

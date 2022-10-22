@@ -157,7 +157,8 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(MiscLuaBindings, TransparencyPreset)
 		];
 
 		// Assign the manager instances to globals in the lua master state

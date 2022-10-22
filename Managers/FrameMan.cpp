@@ -21,6 +21,14 @@
 
 namespace RTE {
 
+	void SdlWindowDeleter::operator()(SDL_Window* window) {
+		SDL_DestroyWindow(window);
+	}
+
+	void SdlContextDeleter::operator()(SDL_GLContext context) {
+		SDL_GL_DeleteContext(context);
+	}
+
 	bool FrameMan::m_DisableFrameBufferFlip = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,8 +52,9 @@ namespace RTE {
 			1.0f, -1.0f, 1.0f, 1.0f,
 			-1.0f, 1.0f, 0.0f, 0.0f,
 			-1.0f, -1.0f, 0.0f, 1.0f,};
-		m_Window = nullptr;
-		m_GLContext = nullptr;
+		m_Window.reset();
+		m_GLContext.reset();
+		m_ScreenShader.reset();
 		m_ScreenTexture = 0;
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
@@ -252,12 +261,12 @@ namespace RTE {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
-		m_Window = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX, m_ResY, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+		m_Window.get() = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX, m_ResY, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		m_GLContext = SDL_GL_CreateContext(m_Window);
+		m_GLContext.get() = SDL_GL_CreateContext(m_Window.get());
 		int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
 		if (version == 0 || (GLAD_VERSION_MAJOR(version) < 3 && GLAD_VERSION_MINOR(version) < 3)) {
@@ -308,12 +317,12 @@ namespace RTE {
 		SetInitialGraphicsDriver();
 		set_color_depth(m_BPP);
 
-		SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-		if (SDL_SetWindowFullscreen(m_Window, (m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)) != 0) {//( set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
+		SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+		if (SDL_SetWindowFullscreen(m_Window.get(), (m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)) != 0) {//( set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
 			// If a bad resolution somehow slipped past the validation, revert to defaults.
 			ShowMessageBox("Unable to set specified graphics mode because: " + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults...");
-			SDL_SetWindowSize(m_Window, c_DefaultResX, c_DefaultResY);
-			if (SDL_SetWindowFullscreen(m_Window, 0) != 0) {
+			SDL_SetWindowSize(m_Window.get(), c_DefaultResX, c_DefaultResY);
+			if (SDL_SetWindowFullscreen(m_Window.get(), 0) != 0) {
 				RTEAbort("Unable to set any graphics mode because " + std::string(SDL_GetError()) + "!");
 				return 1;
 			}
@@ -327,7 +336,7 @@ namespace RTE {
 		int windowW = m_ResX * m_ResMultiplier;
 		int windowH = m_ResY * m_ResMultiplier;
 		if (m_Fullscreen) {
-			SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+			SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		}
 		glViewport(0, 0, windowW, windowH);
 		// Sets the allowed color conversions when loading bitmaps from files
@@ -450,8 +459,6 @@ namespace RTE {
 		glDeleteTextures(1, &m_ScreenTexture);
 		glDeleteVertexArrays(1, &m_ScreenVAO);
 		glDeleteBuffers(1, &m_ScreenVBO);
-		SDL_GL_DeleteContext(m_GLContext);
-		SDL_DestroyWindow(m_Window);
 		Clear();
 	}
 
@@ -509,9 +516,9 @@ namespace RTE {
 
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
-		if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
-			//SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-			if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+		if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+			//SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+			if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
 				RTEAbort("Unable to set back to previous windowed mode multiplier because: " + std::string(SDL_GetError()) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
@@ -520,13 +527,13 @@ namespace RTE {
 			return;
 		}
 		if (!m_Fullscreen) {
-			SDL_SetWindowSize(m_Window, m_ResX * newMultiplier, m_ResY * newMultiplier);
+			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
 		}
 		m_ResMultiplier = newMultiplier;
 
 		int windowW;
 		int windowH;
-		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
@@ -550,14 +557,14 @@ namespace RTE {
 		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
 		//m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
 		if(!newFullscreen) {
-			SDL_RestoreWindow(m_Window);
+			SDL_RestoreWindow(m_Window.get());
 		}
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		if (SDL_SetWindowFullscreen(m_Window, newFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
-			SDL_SetWindowSize(m_Window, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-			if (SDL_SetWindowFullscreen(m_Window, m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+		if (SDL_SetWindowFullscreen(m_Window.get(), newFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+			SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+			if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
 				RTEAbort("Unable to set back to previous resolution because: " + std::string(SDL_GetError()) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
@@ -567,7 +574,7 @@ namespace RTE {
 			return;
 		}
 		if (!newFullscreen) {
-			SDL_SetWindowSize(m_Window, newResX * newResMultiplier, newResY * newResMultiplier);
+			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 		}
 		m_Fullscreen = newFullscreen;
 		m_ResX = newResX;
@@ -577,7 +584,7 @@ namespace RTE {
 		int windowW = m_ResX * m_ResMultiplier;
 		int windowH = m_ResY * m_ResMultiplier;
 		if (m_Fullscreen) {
-			SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+			SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		}
 		glViewport(0, 0, windowW, windowH);
 
@@ -601,7 +608,7 @@ namespace RTE {
 
 		int windowW;
 		int windowH;
-		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 
 		glViewport(0, 0, windowW, windowH);
 		set_palette(m_Palette);
@@ -761,7 +768,7 @@ namespace RTE {
 		m_ScreenShader->SetInt("tex", 0);
 		glBindVertexArray(m_ScreenVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		SDL_GL_SwapWindow(m_Window);
+		SDL_GL_SwapWindow(m_Window.get());
 #if 0
 		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);

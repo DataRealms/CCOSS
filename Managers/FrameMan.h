@@ -28,6 +28,13 @@ namespace RTE {
 	class GUIFont;
 	class ScreenShader;
 
+	struct SdlWindowDeleter {
+		void operator()(SDL_Window *window);
+	};
+
+	struct SdlContextDeleter {
+		void operator()(SDL_GLContext context);
+	};
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
 	/// </summary>
@@ -578,10 +585,10 @@ namespace RTE {
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
-		SDL_Window* m_Window; //!< The main Window.
-		SDL_GLContext m_GLContext; //!< Opaque GL context pointer.
+		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
+		std::unique_ptr<SDL_GLContext, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
 		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
-		std::shared_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
+		std::unique_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
 		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
 		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
 		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
@@ -823,6 +830,7 @@ namespace RTE {
 		/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
 
 		// Disallow the use of some implicit methods.
 		FrameMan(const FrameMan &reference) = delete;

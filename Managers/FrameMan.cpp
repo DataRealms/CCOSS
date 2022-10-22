@@ -36,7 +36,8 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	FrameMan::FrameMan() {Clear();}
+	FrameMan::~FrameMan() {Destroy();}
 	void FrameMan::Clear() {
 		m_ScreenVertices = {
 			1.0f, 1.0f, 1.0f, 0.0f,
@@ -245,6 +246,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Initialize() {
+
+		int windowFlags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
+		if (m_Fullscreen) {
+			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		}
+
 		m_Window = SDL_CreateWindow("Cortex Command Community Project", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX, m_ResY, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -317,9 +324,11 @@ namespace RTE {
 
 		SetDisplaySwitchMode();
 
-		int windowW;
-		int windowH;
-		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		int windowW = m_ResX * m_ResMultiplier;
+		int windowH = m_ResY * m_ResMultiplier;
+		if (m_Fullscreen) {
+			SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
+		}
 		glViewport(0, 0, windowW, windowH);
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
@@ -565,17 +574,11 @@ namespace RTE {
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
 
-		int windowW;
-		int windowH;
-		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
-
-		if (windowW % m_ResMultiplier != 0) {
-			windowW += m_ResMultiplier - windowW % m_ResMultiplier;
+		int windowW = m_ResX * m_ResMultiplier;
+		int windowH = m_ResY * m_ResMultiplier;
+		if (m_Fullscreen) {
+			SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
 		}
-		if(windowH % m_ResMultiplier != 0) {
-			windowH += m_ResMultiplier - windowH % m_ResMultiplier;
-		}
-
 		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
@@ -599,13 +602,6 @@ namespace RTE {
 		int windowW;
 		int windowH;
 		SDL_GL_GetDrawableSize(m_Window, &windowW, &windowH);
-
-		if (windowW % m_ResMultiplier != 0) {
-			windowW += m_ResMultiplier - windowW % m_ResMultiplier;
-		}
-		if (windowH % m_ResMultiplier != 0) {
-			windowH += m_ResMultiplier - windowH % m_ResMultiplier;
-		}
 
 		glViewport(0, 0, windowW, windowH);
 		set_palette(m_Palette);

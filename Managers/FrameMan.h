@@ -42,7 +42,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a FrameMan object in system memory. Create() should be called before using the object.
 		/// </summary>
-		FrameMan() { Clear(); }
+		FrameMan();
 
 		/// <summary>
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
@@ -55,7 +55,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		~FrameMan() { Destroy(); }
+		~FrameMan();
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
@@ -112,6 +112,8 @@ namespace RTE {
 		/// The pointer to the main window.
 		/// </returns>
 		SDL_Window* GetWindow() const { return m_Window;}
+
+		SDL_GLContext GetContext() const { return m_GLContext; }
 #pragma endregion
 
 #pragma region Display Switch Callbacks

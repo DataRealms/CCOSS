@@ -307,11 +307,15 @@ namespace RTE {
 		// Create transparency color table
 		PALETTE ccPalette;
 		get_palette(ccPalette);
-		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, nullptr);
-		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, nullptr);
-		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, nullptr);
+
+		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
+			auto &[presetTransValue, presetColorMap] = m_TransparencyTablePresets[index];
+			presetTransValue = (index + 1) * 10;
+			int blendAmount = 255 - (static_cast<int>(255.0F * 0.1F * static_cast<float>(index + 1)));
+			create_trans_table(&presetColorMap, ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
+		}
 		// Set the one Allegro currently uses
-		color_map = &m_HalfTransTable;
+		color_map = &m_TransparencyTablePresets[4].second;
 
 		CreateBackBuffers();
 

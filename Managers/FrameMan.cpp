@@ -92,6 +92,7 @@ namespace RTE {
 		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
+		m_TransparencyTablePresets.clear();
 		m_GUIScreen = nullptr;
 		m_LargeFont = nullptr;
 		m_SmallFont = nullptr;
@@ -304,15 +305,15 @@ namespace RTE {
 
 		LoadPalette(m_PaletteFile.GetDataPath());
 
-		// Create transparency color table
 		PALETTE ccPalette;
 		get_palette(ccPalette);
 
+		// Create transparency color tables.
 		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
-			auto &[presetTransValue, presetColorMap] = m_TransparencyTablePresets[index];
-			presetTransValue = (index + 1) * 10;
-			int blendAmount = 255 - (static_cast<int>(255.0F * 0.1F * static_cast<float>(index + 1)));
-			create_trans_table(&presetColorMap, ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
+			int presetTransValue = index * 5;
+			m_TransparencyTablePresets.try_emplace(presetTransValue);
+			int blendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
+			create_trans_table(&m_TransparencyTablePresets.at(presetTransValue), ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
 		}
 		// Set the one Allegro currently uses
 		color_map = &m_TransparencyTablePresets[4].second;

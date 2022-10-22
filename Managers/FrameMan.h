@@ -557,7 +557,7 @@ namespace RTE {
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
-		std::array<std::pair<int, COLOR_MAP>, TransparencyPreset::TransPresetCount> m_TransparencyTablePresets; //!< Pre-calculated color tables for transparent drawing in indexed color mode.
+		std::unordered_map<int, COLOR_MAP> m_TransparencyTablePresets; //!< Pre-calculated color tables for transparent drawing in indexed color mode.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.

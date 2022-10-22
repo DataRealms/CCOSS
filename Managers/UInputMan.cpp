@@ -392,9 +392,9 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			int mouseX, mouseY;
-			SDL_GetGlobalMouseState(&mouseX, &mouseY);
-			SDL_WarpMouseGlobal(Limit(mouseX, x+ width, x), Limit(mouseY, y+width, y));
+			int limitX = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_X), x, x + width);
+			int limitY = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_Y), y, y + height);
+			SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), limitX, limitY);
 		}
 	}
 
@@ -592,7 +592,6 @@ namespace RTE {
 
 	bool UInputMan::GetMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
 		if (whichButton < MouseButtons::MOUSE_LEFT || whichButton >= MouseButtons::MAX_MOUSE_BUTTONS) {
-			RTEAbort("Invalid button passed!");
 			return false;
 		}
 		if (IsInMultiplayerMode()) {
@@ -735,7 +734,7 @@ namespace RTE {
 				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
 			}
 			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
-				if (e.button.button == SDL_BUTTON_X1 || e.button.button == SDL_BUTTON_X2)
+				if (e.button.button > SDL_BUTTON_RIGHT)
 					continue;
 				s_ChangedMouseButtonStates[e.button.button] = (e.button.state != s_PrevMouseButtonStates[e.button.button]);
 				s_PrevMouseButtonStates[e.button.button] = e.button.state;

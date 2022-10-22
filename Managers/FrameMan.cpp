@@ -308,6 +308,10 @@ namespace RTE {
 		PALETTE ccPalette;
 		get_palette(ccPalette);
 
+		// Create RGB lookup table that supposedly speeds up calculation of other color tables.
+		create_rgb_table(&m_RGBTable, ccPalette, nullptr);
+		rgb_map = &m_RGBTable;
+
 		// Create transparency color tables.
 		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
 			int presetTransValue = index * 5;

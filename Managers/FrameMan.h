@@ -553,6 +553,7 @@ namespace RTE {
 
 		ContentFile m_PaletteFile; //!< File of the screen palette.
 		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
+		RGB_MAP m_RGBTable; //!< RGB mapping table to speed up calculation of Allegro color maps.
 
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.

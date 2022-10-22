@@ -607,8 +607,8 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     if (m_FullFeatured)
     {
         // Set the drawin mode to be transparent and use the
-//        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
-        g_FrameMan.SetTransTable(MoreTrans);
+//        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? Trans30 : Trans50);
+        g_FrameMan.SetTransTable(Trans70);
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
 
         // Draw all already placed Box:es, and the currently edited one

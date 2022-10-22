@@ -57,7 +57,19 @@ namespace RTE {
 	};
 
 	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
-	enum TransparencyPreset { LessTrans, HalfTrans, MoreTrans };
+
+	enum TransparencyPreset {
+		Trans10 = 10,
+		Trans20 = 20,
+		Trans30 = 30,
+		Trans40 = 40,
+		Trans50 = 50,
+		Trans60 = 60,
+		Trans70 = 70,
+		Trans80 = 80,
+		Trans90 = 90,
+		TransPresetCount = 9
+	};
 
 	enum SpriteAnimMode {
 		NOANIM,

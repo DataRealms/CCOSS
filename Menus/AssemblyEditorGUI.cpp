@@ -982,7 +982,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
             // Draw the currently held object into the order of the list if it is to be placed inside
             if (m_pCurrentObject && m_DrawCurrentObject && i == m_ObjectListOrder)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? Trans30 : Trans50);
                 m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
                 pActor = dynamic_cast<Actor *>(m_pCurrentObject);
                 if (pActor)
@@ -996,7 +996,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
             // Blink trans if we are supposed to blink this one
             if ((*itr) == m_pObjectToBlink)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) ? Trans30 : Trans50);
                 (*itr)->Draw(pTargetBitmap, targetPos, g_DrawTrans);
             }
             // Drawing of already placed objects that aren't highlighted or anything
@@ -1024,7 +1024,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
     // If the held object will be placed at the end of the list, draw it last to the scene, transperent blinking
 	else if (m_pCurrentObject && (m_ObjectListOrder < 0 || (pSceneObjectList && m_ObjectListOrder == pSceneObjectList->size())))
     {
-        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? Trans30 : Trans50);
         m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
         Actor *pActor = dynamic_cast<Actor *>(m_pCurrentObject);
         if (pActor)

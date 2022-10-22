@@ -46,25 +46,27 @@ namespace RTE {
 
 		/// TODO: unhardcode
 		//!< Vertex shader. Simple shader to draw a texture to the entire screen.
-		static constexpr const char *m_VertexShader = ""
+		static constexpr const char *m_VertexShader =
 			"#version 330 core\n"
-			"layout(location = 0) in vec2 aPos;"
-			"layout(location = 1) in vec2 texST;"
-			"out vec2 texCoord;"
-			"void main() {"
-			"gl_Position = vec4(aPos.xy, 0.0, 1.0);"
-			"texCoord = texST;"
+			"layout(location = 0) in vec2 rtePos;\n"
+			"layout(location = 1) in vec2 rteUV;\n"
+			"out vec2 texCoord;\n"
+			"uniform mat4 rteProjMatrix;\n"
+			"uniform mat4 rteUVTransform"
+			"void main() {\n"
+			"gl_Position = rteProjMatrix * vec4(rtePos.xy, 0.0, 1.0);\n"
+			"texCoord = rteUVTransform * rteUV;\n"
 			"};";
 
 		//!< Fragment shader. Simple shader to draw a texture to the entire screen.
-		static constexpr const char *m_FragmentShader = ""
+		static constexpr const char *m_FragmentShader =
 			"#version 330 core\n"
-			"in vec2 texCoord;"
-			"out vec4 color;"
-			"uniform float time;"
-			"uniform sampler2D tex;"
-			"void main() {"
-			"color = vec4(texture(tex, texCoord).rgb, 1.0);"
+			"in vec2 texCoord;\n"
+			"out vec4 color;\n"
+			"uniform float rteTime;\n"
+			"uniform sampler2D rteTex0;\n"
+			"void main() {\n"
+			"color = vec4(texture(rteTex0, texCoord).rgb, 1.0);\n"
 			"}";
 	};
 } // namespace RTE

@@ -62,7 +62,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
-* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson=0.63.0 ninja=1.11.0` if your distro doesn't include a recent version)
+* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson` if your distro doesn't include a recent version)
 * `boost>=1.55`
 * (optional) `xmessage`
 
@@ -93,8 +93,6 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
 
-3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
-
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
 ## Installing Dependencies
@@ -103,10 +101,12 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `# pacman -S allegro4 boost flac luajit lua52 minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build python-pip`  
+
+`# python -m pip install meson`
 ## Troubleshooting
 
-* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
+* older versions of `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
 
 ***
 

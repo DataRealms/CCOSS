@@ -159,6 +159,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
+		g_FrameMan.ClearFrame();
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -179,6 +180,7 @@ namespace RTE {
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 		}
 	}
 
@@ -198,6 +200,7 @@ namespace RTE {
 
 		while (!System::IsSetToQuit()) {
 			g_TimerMan.Update();
+			g_FrameMan.ClearFrame();
 
 			bool serverUpdated = false;
 
@@ -271,6 +274,7 @@ namespace RTE {
 			}
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 		}
 	}
 }

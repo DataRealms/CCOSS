@@ -1,5 +1,7 @@
 #ifndef RTESCREENSHADER_H
 #define RTESCREENSHADER_H
+#include "glm/glm.hpp"
+
 namespace RTE {
 
 	class ScreenShader {
@@ -15,6 +17,7 @@ namespace RTE {
 		void Use();
 
 		void SetInt(const std::string& uniformName, GLint value);
+		void SetMatrix(const char* uniformName, const glm::mat4& value);
 
 	private:
 		/// <summary>
@@ -52,10 +55,10 @@ namespace RTE {
 			"layout(location = 1) in vec2 rteUV;\n"
 			"out vec2 texCoord;\n"
 			"uniform mat4 rteProjMatrix;\n"
-			"uniform mat4 rteUVTransform"
+			"uniform mat4 rteUVTransform;\n"
 			"void main() {\n"
-			"gl_Position = rteProjMatrix * vec4(rtePos.xy, 0.0, 1.0);\n"
-			"texCoord = rteUVTransform * rteUV;\n"
+			"gl_Position = rteProjMatrix * vec4(rtePos.xy, 0.1, 1.0);\n"
+			"texCoord = (rteUVTransform * vec4(rteUV, 0.0, 1.0)).st;\n"
 			"};";
 
 		//!< Fragment shader. Simple shader to draw a texture to the entire screen.

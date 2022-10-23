@@ -4,6 +4,7 @@
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
+#include "glm/glm.hpp"
 
 #define g_FrameMan FrameMan::Instance()
 
@@ -118,9 +119,9 @@ namespace RTE {
 		/// <returns>
 		/// The pointer to the main window.
 		/// </returns>
-		SDL_Window* GetWindow() const { return m_Window;}
+		SDL_Window* GetWindow() const { return m_Window.get();}
 
-		SDL_GLContext GetContext() const { return m_GLContext; }
+		SDL_GLContext GetContext() const { return m_GLContext.get(); }
 #pragma endregion
 
 #pragma region Display Switch Callbacks
@@ -359,9 +360,19 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// Flips the frame buffers, showing the backbuffer on the current display.
+		/// Clear the GL backbuffer to start a new frame.
+		/// </summary>
+		void ClearFrame() const;
+
+		/// <summary>
+		/// Flips the frame buffers, draws the software backbuffer to the gl backbuffer. Draw other gl things (imgui) after this.
 		/// </summary>
 		void FlipFrameBuffers() const;
+
+		/// <summary>
+		/// Present the window content.
+		/// </summary>
+		void SwapWindow() const;
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
@@ -586,7 +597,10 @@ namespace RTE {
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
-		std::unique_ptr<SDL_GLContext, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
+		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
+		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
+		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
+		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
 		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
 		std::unique_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
 		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
@@ -732,6 +746,23 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();
+
+		/// <summary>
+		/// Create additional windows for multi display fullscreen. Will create as many windows as necessary to fulfill resXxresY resolution.
+		/// </summary>
+		/// <param name="resX">
+		/// Requested horizontal resolution (not including scaling).
+		/// </param>
+		/// <param name="resY">
+		/// Requested vertical resolution (not including scaling).
+		/// </param>
+		/// <param name="resMultiplier">
+		/// Requested resolution multiplier.
+		/// </param>
+		/// <returns>
+		/// Whether all displays were created successfully.
+		/// </returns>
+		bool CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier);
 #pragma endregion
 
 #pragma region Resolution Handling

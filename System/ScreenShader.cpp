@@ -1,5 +1,6 @@
 #include "ScreenShader.h"
 #include "RTEError.h"
+#include "glm/gtc/type_ptr.hpp"
 namespace RTE{
 	ScreenShader::ScreenShader() {
 		std::string error;
@@ -34,6 +35,11 @@ namespace RTE{
 	void ScreenShader::SetInt(const std::string& uniformName, GLint value) {
 		glUseProgram(m_ProgramID);
 		glUniform1i(glGetUniformLocation(m_ProgramID, uniformName.c_str()), value);
+	}
+
+	void ScreenShader::SetMatrix(const char* uniformName, const glm::mat4 &value) {
+		glUseProgram(m_ProgramID);
+		glUniformMatrix4fv(glGetUniformLocation(m_ProgramID, uniformName), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	GLuint ScreenShader::CompileShader(GLuint shaderID, const char* shaderCode, std::string& error) {

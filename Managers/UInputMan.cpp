@@ -756,6 +756,11 @@ namespace RTE {
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 				g_FrameMan.DisplaySwitchOut();
 			}
+			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
+				if ( g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+					SDL_SetWindowInputFocus(SDL_GetWindowFromID(e.window.windowID));
+				}
+			}
 			if (e.type == SDL_WINDOWEVENT && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {
 				if (!g_FrameMan.IsWindowFullscreen()) {
 					g_FrameMan.WindowResizedCallback(e.window.data1, e.window.data2);

@@ -471,6 +471,7 @@ namespace RTE {
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right){return left.second.x < right.second.x;});
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right){return left.second.y < right.second.y;});
 		// Move main window to primary display (at 0,0).
+		SDL_SetWindowFullscreen(m_Window.get(), 0);
 		SDL_SetWindowPosition(m_Window.get(), 0,0);
 		SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 		int mainWindowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
@@ -488,7 +489,7 @@ namespace RTE {
 			if (actualResY < displayBounds[index].second.y + displayBounds[index].second.h) {
 				actualResY = displayBounds[index].second.y + displayBounds[index].second.h;
 			}
-			std::cout << "i " << index << "x " << displayBounds[index].second.x << " y " << displayBounds[index].second.y << " w " << displayBounds[index].second.w << " h " << displayBounds[index].second.h << std::endl;
+			std::cout << "i " << displayBounds[index].first << "x " << displayBounds[index].second.x << " y " << displayBounds[index].second.y << " w " << displayBounds[index].second.w << " h " << displayBounds[index].second.h << std::endl;
 
 			glm::mat4 projection = glm::ortho<float>(0.0f, displayBounds[index].second.w, 0.0f, displayBounds[index].second.h, -1.0f, 1.0f);
 			float width = resX * resMultiplier - displayBounds[index].second.x;
@@ -502,7 +503,7 @@ namespace RTE {
 			uvTransform = glm::translate<float>(uvTransform , {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
 			uvTransform = glm::scale(uvTransform, {width / static_cast<float>(resX * resMultiplier), height / static_cast<float>(resY * resMultiplier), 1.0f});
 		
-			if (index != mainWindowDisplay) {
+			if (displayBounds[index].first != mainWindowDisplay) {
 				m_MultiWindows.emplace_back(SDL_CreateWindow("",
 										displayBounds[index].second.x,
 										displayBounds[index].second.y,
@@ -644,6 +645,7 @@ namespace RTE {
 				return;
 			}
 		} else {
+			m_MultiWindows.clear();
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
 		}
@@ -698,6 +700,7 @@ namespace RTE {
 			SetDisplaySwitchMode();
 			return;
 		} else if (!newFullscreen) {
+			m_MultiWindows.clear();
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 		}
@@ -892,6 +895,7 @@ namespace RTE {
 			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
+		SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
 	}
 
 	void FrameMan::SwapWindow() const {

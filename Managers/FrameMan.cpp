@@ -488,15 +488,20 @@ namespace RTE {
 			if (actualResY < displayBounds[index].second.y + displayBounds[index].second.h) {
 				actualResY = displayBounds[index].second.y + displayBounds[index].second.h;
 			}
+			std::cout << "i " << index << "x " << displayBounds[index].second.x << " y " << displayBounds[index].second.y << " w " << displayBounds[index].second.w << " h " << displayBounds[index].second.h << std::endl;
 
 			glm::mat4 projection = glm::ortho<float>(0.0f, displayBounds[index].second.w, 0.0f, displayBounds[index].second.h, -1.0f, 1.0f);
-			float width = resX - displayBounds[index].second.x;
-			float height = resY - displayBounds[index].second.y;
-			std::clamp<float>(width, 0.0f, displayBounds[index].second.w);
-			std::clamp<float>(height, 0.0f, displayBounds[index].second.h);
+			float width = resX * resMultiplier - displayBounds[index].second.x;
+			float height = resY * resMultiplier - displayBounds[index].second.y;
+			
+			width = std::clamp<float>(width, 0.0f, displayBounds[index].second.w);
+			height = std::clamp<float>(height, 0.0f, displayBounds[index].second.h);
+			std::cout << "w "<< width << " h " << height << " rx " << displayBounds[index].second.x / static_cast<float>(resX* resMultiplier) << " ry " << displayBounds[index].second.y / static_cast<float>(resY * resMultiplier) << std::endl;
 
 			glm::mat4 uvTransform(1.0f);
+			uvTransform = glm::translate<float>(uvTransform , {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
 			uvTransform = glm::scale(uvTransform, {width / static_cast<float>(resX * resMultiplier), height / static_cast<float>(resY * resMultiplier), 1.0f});
+		
 			if (index != mainWindowDisplay) {
 				m_MultiWindows.emplace_back(SDL_CreateWindow("",
 										displayBounds[index].second.x,
@@ -882,6 +887,11 @@ namespace RTE {
 	void FrameMan::ClearFrame() const {
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		for (auto& window: m_MultiWindows) {
+			SDL_GL_MakeCurrent(window.get(), m_GLContext.get());
+			glClearColor(0.0, 0.0, 0.0, 1.0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 	}
 
 	void FrameMan::SwapWindow() const {
@@ -904,14 +914,13 @@ namespace RTE {
 		int windowH = 0;
 		glm::mat4 preScaleProjection(1.0f);
 		if (m_MultiWindows.size() > 0) {
-			std::cout << "drawing multi windows" << std::endl;
 			for (int i = 0; i < m_MultiWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiWindows[i].get(), m_GLContext.get());
 				SDL_GL_GetDrawableSize(m_MultiWindows[i].get(), &windowW, &windowH);
 				glViewport(0, 0, windowW, windowH);
 
-				preScaleProjection = m_WindowView[i+1];
-				preScaleProjection = glm::scale<float>(preScaleProjection, {windowW, windowH, 1.0f});
+				preScaleProjection = glm::translate(m_WindowView[i+1], {windowW/2, windowH/2, 0.0f});
+				preScaleProjection = glm::scale<float>(preScaleProjection, {windowW/2, windowH/2, 1.0f});
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
@@ -923,6 +932,7 @@ namespace RTE {
 
 				glBindVertexArray(m_ScreenVAO);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				SDL_GL_SwapWindow(m_MultiWindows[i].get());
 			}
 			SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
 			SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);

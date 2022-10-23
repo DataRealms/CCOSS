@@ -370,7 +370,7 @@ namespace RTE {
 
 		glEnable(GL_DEPTH_TEST);
 
-		if (m_NumScreens> 1 && m_Fullscreen) {
+		if (m_NumScreens > 1 && m_Fullscreen) {
 			CreateFullscreenMultiWindows(m_ResX, m_ResY, m_ResMultiplier);
 		}
 
@@ -389,6 +389,7 @@ namespace RTE {
 		color_map = &m_HalfTransTable;
 
 		CreateBackBuffers();
+		ClearFrame();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
@@ -514,7 +515,7 @@ namespace RTE {
 										displayBounds[index].second.y,
 										displayBounds[index].second.w,
 										displayBounds[index].second.h,
-										SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP));
+										SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
 				if(m_MultiWindows.back() == nullptr) {
 					actualResX = -1;
 					actualResY = -1;
@@ -653,6 +654,8 @@ namespace RTE {
 		} else {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
+			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
+			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
 		}
 		m_ResMultiplier = newMultiplier;
 
@@ -708,6 +711,8 @@ namespace RTE {
 		} else if (!newFullscreen) {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
+			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
+			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
 		}
 		m_Fullscreen = newFullscreen;
 		m_ResX = newResX;

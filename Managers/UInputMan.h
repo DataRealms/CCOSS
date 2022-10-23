@@ -672,6 +672,7 @@ namespace RTE {
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
 
 		bool m_GameHasAnyFocus; //!< Whether any game window might have focus.
+		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.

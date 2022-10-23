@@ -33,6 +33,7 @@ namespace RTE {
 		m_NumJoysticks = 0;
 		m_OverrideInput = false;
 		m_GameHasAnyFocus = false;
+		m_PrevLostFocus= false;
 		m_AbsoluteMousePos.Reset();
 		m_RawMouseMovement.Reset();
 		m_AnalogMouseData.Reset();
@@ -753,17 +754,21 @@ namespace RTE {
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
 				std::cout << "focus gained "<< e.window.windowID << std::endl;
+				if(!m_PrevLostFocus)
+					g_FrameMan.DisplaySwitchIn();
 				m_GameHasAnyFocus = true;
-				g_FrameMan.DisplaySwitchIn();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 				std::cout << "focus lost " << e.window.windowID << std::endl;
 				m_GameHasAnyFocus = false;
+				m_PrevLostFocus = true;
 				g_FrameMan.DisplaySwitchOut();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
 				if (m_GameHasAnyFocus && g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
-					SDL_SetWindowInputFocus(SDL_GetWindowFromID(e.window.windowID));
+					SDL_RaiseWindow(SDL_GetWindowFromID(e.window.windowID));
+					m_GameHasAnyFocus = true;
+					std::cout << SDL_GetGrabbedWindow() << std::endl;
 				}
 			}
 			if (e.type == SDL_WINDOWEVENT && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {
@@ -827,14 +832,13 @@ namespace RTE {
 		}
 		// TODO: Add sensitivity slider to settings menu
 		m_RawMouseMovement *= m_MouseSensitivity;
-
+		m_PrevLostFocus = false;
 		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
 		if (IsInMultiplayerMode()) {
 			UpdateNetworkMouseMovement();
 		} else {
 			m_NetworkAccumulatedRawMouseMovement[Players::PlayerOne] += m_RawMouseMovement;
 		}
-
 		UpdateMouseInput();
 		// if (num_joysticks > 0) { UpdateJoystickInput(); }
 		HandleSpecialInput();

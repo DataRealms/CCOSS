@@ -41,6 +41,8 @@ namespace RTE {
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
 		if (!progressReportDisabled) { draw_sprite(g_FrameMan.GetBackBuffer32(), m_ProgressListboxBitmap, m_ProgressListboxPosX, m_ProgressListboxPosY); }
+		
+		g_FrameMan.ClearFrame();
 		g_FrameMan.FlipFrameBuffers();
 		g_FrameMan.SwapWindow();
 

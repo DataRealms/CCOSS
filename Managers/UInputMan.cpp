@@ -32,6 +32,7 @@ namespace RTE {
 	void UInputMan::Clear() {
 		m_NumJoysticks = 0;
 		m_OverrideInput = false;
+		m_GameHasAnyFocus = false;
 		m_AbsoluteMousePos.Reset();
 		m_RawMouseMovement.Reset();
 		m_AnalogMouseData.Reset();
@@ -751,13 +752,17 @@ namespace RTE {
 				m_MouseWheelChange = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? e.wheel.y : -e.wheel.y;
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
+				std::cout << "focus gained "<< e.window.windowID << std::endl;
+				m_GameHasAnyFocus = true;
 				g_FrameMan.DisplaySwitchIn();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+				std::cout << "focus lost " << e.window.windowID << std::endl;
+				m_GameHasAnyFocus = false;
 				g_FrameMan.DisplaySwitchOut();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
-				if ( g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_GameHasAnyFocus && g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(e.window.windowID));
 				}
 			}

@@ -671,6 +671,8 @@ namespace RTE {
 		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
 
+		bool m_GameHasAnyFocus; //!< Whether any game window might have focus.
+
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
 		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.

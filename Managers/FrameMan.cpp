@@ -43,6 +43,11 @@ namespace RTE {
 
 	void FrameMan::DisplaySwitchIn() {
 		g_UInputMan.DisableMouseMoving(false);
+		if (m_MultiWindows.size()>0) {
+			for(auto& window: m_MultiWindows) {
+				SDL_RaiseWindow(window.get());
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -618,6 +623,7 @@ namespace RTE {
 			return;
 		}
 
+		m_MultiWindows.clear();
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
 		if (m_Fullscreen) {
@@ -645,7 +651,6 @@ namespace RTE {
 				return;
 			}
 		} else {
-			m_MultiWindows.clear();
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
 		}
@@ -655,7 +660,7 @@ namespace RTE {
 		int windowH;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
-		if(!m_Fullscreen || m_NumScreens == 1) {
+		if(!m_Fullscreen || m_MultiWindows.empty()) {
 			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
@@ -678,6 +683,7 @@ namespace RTE {
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_Fullscreen == newFullscreen) {
 			return;
 		}
+		m_MultiWindows.clear();
 		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
 		//m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
 		if(!newFullscreen) {
@@ -700,7 +706,6 @@ namespace RTE {
 			SetDisplaySwitchMode();
 			return;
 		} else if (!newFullscreen) {
-			m_MultiWindows.clear();
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 		}
@@ -712,7 +717,7 @@ namespace RTE {
 		int windowW = m_ResX * m_ResMultiplier;
 		int windowH = m_ResY * m_ResMultiplier;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-		if (!m_Fullscreen || m_NumScreens == 1) {
+		if (!m_Fullscreen || m_MultiWindows.empty()) {
 			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
@@ -733,6 +738,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::WindowResizedCallback(int newResX, int newResY) {
+		RTEAssert(!m_Fullscreen, "ERROR: Somehow the fullscreen window was resized!");
 		m_Fullscreen = false;
 		m_ResX = newResX / m_ResMultiplier;
 		m_ResY = newResY / m_ResMultiplier;

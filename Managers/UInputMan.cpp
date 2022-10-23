@@ -711,7 +711,6 @@ namespace RTE {
 		SDL_Event e;
 
 		while (SDL_PollEvent(&e)) {
-			g_DebugMan.UpdateImGuiInput(&e);
 			if (e.type == SDL_QUIT) {
 				System::SetQuit(true);
 			}

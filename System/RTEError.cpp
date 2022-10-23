@@ -36,6 +36,9 @@ namespace RTE {
 		// Shortened and less confusing one. users have no use of knowing which source file and where.
 		abortMessage = description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
 #endif
+
+		System::PrintToCLI(abortMessage);
+
 		ShowMessageBox(abortMessage);
 
 		// True so that the debugbreak code is run and the debugger goes there.

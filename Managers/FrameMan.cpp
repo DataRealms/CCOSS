@@ -44,6 +44,7 @@ namespace RTE {
 	void FrameMan::DisplaySwitchIn() {
 		g_UInputMan.DisableMouseMoving(false);
 		if (m_MultiWindows.size()>0) {
+			SDL_RaiseWindow(m_Window.get());
 			for(auto& window: m_MultiWindows) {
 				SDL_RaiseWindow(window.get());
 			}

@@ -33,7 +33,7 @@ namespace RTE {
 		m_NumJoysticks = 0;
 		m_OverrideInput = false;
 		m_GameHasAnyFocus = false;
-		m_PrevLostFocus= false;
+		m_FrameLostFocus= false;
 		m_AbsoluteMousePos.Reset();
 		m_RawMouseMovement.Reset();
 		m_AnalogMouseData.Reset();
@@ -754,14 +754,14 @@ namespace RTE {
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
 				std::cout << "focus gained "<< e.window.windowID << std::endl;
-				if(!m_PrevLostFocus)
+				if(!m_FrameLostFocus)
 					g_FrameMan.DisplaySwitchIn();
 				m_GameHasAnyFocus = true;
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 				std::cout << "focus lost " << e.window.windowID << std::endl;
 				m_GameHasAnyFocus = false;
-				m_PrevLostFocus = true;
+				m_FrameLostFocus = true;
 				g_FrameMan.DisplaySwitchOut();
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
@@ -832,7 +832,7 @@ namespace RTE {
 		}
 		// TODO: Add sensitivity slider to settings menu
 		m_RawMouseMovement *= m_MouseSensitivity;
-		m_PrevLostFocus = false;
+		m_FrameLostFocus = false;
 		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
 		if (IsInMultiplayerMode()) {
 			UpdateNetworkMouseMovement();

@@ -732,6 +732,13 @@ namespace RTE {
 			if (e.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);
 				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
+				if (g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+					int x{0};
+					int y{0};
+					SDL_GetWindowPosition(SDL_GetWindowFromID(e.motion.windowID), &x, &y);
+					Vector windowCoord(x,y);
+					m_AbsoluteMousePos += windowCoord;
+				}
 			}
 			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
 				if (e.button.button > SDL_BUTTON_RIGHT)

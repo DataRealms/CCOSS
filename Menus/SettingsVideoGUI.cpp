@@ -278,7 +278,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck();
+		m_NewGraphicsDriver = m_CustomResolutionDedicatedRadioButton->GetCheck();
 
 		bool invalidResolution = false;
 

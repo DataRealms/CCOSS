@@ -14,6 +14,34 @@ namespace RTE {
 
 	public:
 
+		/// <summary>
+		/// Convenience macro to cut down on duplicate GetPrimtiveType methods in classes that extend GraphicalPrimitive.
+		/// </summary>
+		#define GraphicalPrimitiveTypeGetter \
+			const PrimitiveType GetPrimtiveType() const override { return c_PrimitiveType; }
+
+		/// <summary>
+		///
+		/// </summary>
+		enum class PrimitiveType {
+			None,
+			Line,
+			Arc,
+			Spline,
+			Box,
+			BoxFill,
+			RoundedBox,
+			RoundedBoxFill,
+			Circle,
+			CircleFill,
+			Ellipse,
+			EllipseFill,
+			Triangle,
+			TriangleFill,
+			Text,
+			Bitmap
+		};
+
 		Vector m_StartPos = Vector(); //!< Start position of the primitive.
 		Vector m_EndPos = Vector(); //!< End position of the primitive.
 		unsigned char m_Color = 0; //!< Color to draw this primitive with.
@@ -47,6 +75,16 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		virtual void Draw(BITMAP *drawScreen, const Vector &targetPos) = 0;
+
+		/// <summary>
+		/// Gets the type identifier of this primitive.
+		/// </summary>
+		/// <returns>The type identifier of this primitive.</returns>
+		virtual const PrimitiveType GetPrimtiveType() const = 0;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -57,6 +95,8 @@ namespace RTE {
 	class LinePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
@@ -78,6 +118,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -88,6 +132,8 @@ namespace RTE {
 	class ArcPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		float m_StartAngle = 0; //!< The angle from which the arc begins.
 		float m_EndAngle = 0; //!< The angle at which the arc ends.
@@ -117,6 +163,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -127,6 +177,8 @@ namespace RTE {
 	class SplinePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		Vector m_GuidePointAPos = Vector(); //!< A guide point that controls the curve of the spline.
 		Vector m_GuidePointBPos = Vector(); //!< A guide point that controls the curve of the spline.
@@ -155,6 +207,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -165,6 +221,8 @@ namespace RTE {
 	class BoxPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		/// <summary>
 		/// Constructor method for BoxPrimitive object.
@@ -186,6 +244,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -196,6 +258,8 @@ namespace RTE {
 	class BoxFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		/// <summary>
 		/// Constructor method for BoxFillPrimitive object.
@@ -217,6 +281,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -227,6 +295,8 @@ namespace RTE {
 	class RoundedBoxPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
@@ -253,6 +323,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -263,6 +337,8 @@ namespace RTE {
 	class RoundedBoxFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
@@ -289,6 +365,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -299,6 +379,8 @@ namespace RTE {
 	class CirclePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_Radius = 0; //!< Radius of the circle primitive.
 
@@ -323,6 +405,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -333,6 +419,8 @@ namespace RTE {
 	class CircleFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_Radius = 0; //!< Radius of the circle primitive.
 
@@ -357,6 +445,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -367,6 +459,8 @@ namespace RTE {
 	class EllipsePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
 		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
@@ -393,6 +487,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -403,6 +501,8 @@ namespace RTE {
 	class EllipseFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
 		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
@@ -428,6 +528,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -438,6 +542,8 @@ namespace RTE {
 	class TrianglePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		Vector m_PointAPos = Vector(); //!< First point of the triangle.
 		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
@@ -464,6 +570,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -474,6 +584,8 @@ namespace RTE {
 	class TriangleFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		Vector m_PointAPos = Vector(); //!< First point of the triangle.
 		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
@@ -500,6 +612,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -510,6 +626,8 @@ namespace RTE {
 	class TextPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		std::string m_Text = ""; //!< String containing text to draw.
 		bool m_IsSmall = false; //!< Use small or large font. True for small font.
@@ -536,6 +654,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -546,6 +668,8 @@ namespace RTE {
 	class BitmapPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveTypeGetter;
 
 		BITMAP *m_Bitmap = nullptr; //!< Bitmap to draw.
 		float m_RotAngle = 0; //!< Angle to rotate bitmap in radians.
@@ -574,6 +698,10 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 }

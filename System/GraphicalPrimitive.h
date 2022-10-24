@@ -14,10 +14,10 @@ namespace RTE {
 
 	public:
 
-		Vector m_StartPos; //!< Start position of the primitive.
-		Vector m_EndPos; //!< End position of the primitive.
-		unsigned char m_Color; //!< Color to draw this primitive with.
-		int m_Player; //!< Player screen to draw this primitive on.
+		Vector m_StartPos = Vector(); //!< Start position of the primitive.
+		Vector m_EndPos = Vector(); //!< End position of the primitive.
+		unsigned char m_Color = 0; //!< Color to draw this primitive with.
+		int m_Player = -1; //!< Player screen to draw this primitive on.
 
 		/// <summary>
 		/// Destructor method used to clean up a GraphicalPrimitive object before deletion from system memory.
@@ -89,10 +89,10 @@ namespace RTE {
 
 	public:
 
-		float m_StartAngle; //!< The angle from which the arc begins.
-		float m_EndAngle; //!< The angle at which the arc ends.
-		int m_Radius; //!< Radius of the arc primitive.
-		int m_Thickness; //!< Thickness of the arc primitive in pixels.
+		float m_StartAngle = 0; //!< The angle from which the arc begins.
+		float m_EndAngle = 0; //!< The angle at which the arc ends.
+		int m_Radius = 0; //!< Radius of the arc primitive.
+		int m_Thickness = 0; //!< Thickness of the arc primitive in pixels.
 
 		/// <summary>
 		/// Constructor method for ArcPrimitive object.
@@ -128,8 +128,8 @@ namespace RTE {
 
 	public:
 
-		Vector m_GuidePointAPos; //!< A guide point that controls the curve of the spline.
-		Vector m_GuidePointBPos; //!< A guide point that controls the curve of the spline.
+		Vector m_GuidePointAPos = Vector(); //!< A guide point that controls the curve of the spline.
+		Vector m_GuidePointBPos = Vector(); //!< A guide point that controls the curve of the spline.
 
 		/// <summary>
 		/// Constructor method for SplinePrimitive object.
@@ -228,7 +228,7 @@ namespace RTE {
 
 	public:
 
-		int m_CornerRadius; //!< The radius of the corners of the box.
+		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxPrimitive object.
@@ -264,7 +264,7 @@ namespace RTE {
 
 	public:
 
-		int m_CornerRadius; //!< The radius of the corners of the box.
+		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxFillPrimitive object.
@@ -300,7 +300,7 @@ namespace RTE {
 
 	public:
 
-		int m_Radius; //!< Radius of the circle primitive.
+		int m_Radius = 0; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
@@ -334,7 +334,7 @@ namespace RTE {
 
 	public:
 
-		int m_Radius; //!< Radius of the circle primitive.
+		int m_Radius = 0; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -368,8 +368,8 @@ namespace RTE {
 
 	public:
 
-		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipsePrimitive object.
@@ -404,8 +404,8 @@ namespace RTE {
 
 	public:
 
-		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipseFillPrimitive object.
@@ -439,9 +439,9 @@ namespace RTE {
 
 	public:
 
-		Vector m_PointAPos; //!< First point of the triangle.
-		Vector m_PointBPos; //!< Second point of the triangle.
-		Vector m_PointCPos; //!< Third point of the triangle.
+		Vector m_PointAPos = Vector(); //!< First point of the triangle.
+		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
+		Vector m_PointCPos = Vector(); //!< Third point of the triangle.
 
 		/// <summary>
 		/// Constructor method for TrianglePrimitive object.
@@ -475,9 +475,9 @@ namespace RTE {
 
 	public:
 
-		Vector m_PointAPos; //!< First point of the triangle.
-		Vector m_PointBPos; //!< Second point of the triangle.
-		Vector m_PointCPos; //!< Third point of the triangle.
+		Vector m_PointAPos = Vector(); //!< First point of the triangle.
+		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
+		Vector m_PointCPos = Vector(); //!< Third point of the triangle.
 
 		/// <summary>
 		/// Constructor method for TriangleFillPrimitive object.
@@ -511,9 +511,9 @@ namespace RTE {
 
 	public:
 
-		std::string m_Text; //!< String containing text to draw.
-		bool m_IsSmall; //!< Use small or large font. True for small font.
-		int m_Alignment; //!< Alignment of text.
+		std::string m_Text = ""; //!< String containing text to draw.
+		bool m_IsSmall = false; //!< Use small or large font. True for small font.
+		int m_Alignment = 0; //!< Alignment of text.
 
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
@@ -547,10 +547,10 @@ namespace RTE {
 
 	public:
 
-		BITMAP *m_Bitmap; //!< Bitmap to draw.
-		float m_RotAngle; //!< Angle to rotate bitmap in radians.
-		bool m_HFlipped; //!< Whether the Bitmap to draw should be horizontally flipped.
-		bool m_VFlipped; //!< Whether the Bitmap to draw should be vertically flipped.
+		BITMAP *m_Bitmap = nullptr; //!< Bitmap to draw.
+		float m_RotAngle = 0; //!< Angle to rotate bitmap in radians.
+		bool m_HFlipped = false; //!< Whether the Bitmap to draw should be horizontally flipped.
+		bool m_VFlipped = false; //!< Whether the Bitmap to draw should be vertically flipped.
 
 		/// <summary>
 		/// Constructor method for BitmapPrimitive object.

@@ -753,13 +753,11 @@ namespace RTE {
 				m_MouseWheelChange = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? e.wheel.y : -e.wheel.y;
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-				std::cout << "focus gained "<< e.window.windowID << std::endl;
 				if(!m_FrameLostFocus)
 					g_FrameMan.DisplaySwitchIn();
 				m_GameHasAnyFocus = true;
 			}
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-				std::cout << "focus lost " << e.window.windowID << std::endl;
 				m_GameHasAnyFocus = false;
 				m_FrameLostFocus = true;
 				g_FrameMan.DisplaySwitchOut();
@@ -767,8 +765,8 @@ namespace RTE {
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
 				if (m_GameHasAnyFocus && g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(e.window.windowID));
+					SDL_SetWindowInputFocus(SDL_GetWindowFromID(e.window.windowID));
 					m_GameHasAnyFocus = true;
-					std::cout << SDL_GetGrabbedWindow() << std::endl;
 				}
 			}
 			if (e.type == SDL_WINDOWEVENT && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {

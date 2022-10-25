@@ -122,23 +122,6 @@ namespace RTE {
 				m_NumJoysticks++;
 			}
 		}
-// 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
-// 		setlocale(LC_ALL, "C");
-
-// #ifdef _WIN32
-// 		// JOY_TYPE_AUTODETECT is failing to select the correct joystick driver, so a dual analog ends up with a non-functional right stick and the triggers being treated as one instead.
-// 		// This overrides the setting to force it to use the correct driver (without modifying AllegroConfig). Not sure why this is happening but appears to have started after updating Allegro.
-// 		const char *overrideData = "[joystick]\njoytype=W32";
-// 		override_config_data(overrideData, ustrsize(overrideData));
-// #endif
-
-// 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
-// 		poll_joystick();
-
-// #ifdef __unix__
-// 		_xwin_input_handler = XWinInputHandlerOverride;
-// #endif
-
 		return 0;
 	}
 
@@ -211,9 +194,11 @@ namespace RTE {
 		Vector allInput(0,0);
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			InputDevice device = m_ControlScheme.at(player).GetDevice();
+			std::cout << player << " " << device << std::endl;
 
 			switch (device) {
 				case InputDevice::DEVICE_KEYB_ONLY:
+					std::cout << "keyboard move" << std::endl;
 					if (ElementHeld(player, InputElements::INPUT_L_UP)) {
 						allInput.m_Y += -1.0F;
 					} else if (ElementHeld(player, InputElements::INPUT_L_DOWN)) {

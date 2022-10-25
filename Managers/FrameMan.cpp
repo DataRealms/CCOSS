@@ -27,9 +27,13 @@ namespace RTE {
 		SDL_DestroyWindow(window);
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SdlContextDeleter::operator()(SDL_GLContext context) {
 		SDL_GL_DeleteContext(context);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::m_DisableFrameBufferFlip = false;
 
@@ -52,7 +56,11 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	FrameMan::FrameMan() {Clear();}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	FrameMan::~FrameMan() {Destroy();}
 	void FrameMan::Clear() {
 		m_ScreenVertices = {
@@ -468,8 +476,9 @@ namespace RTE {
 		CreateBackBuffers();
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool FrameMan::CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier) {
-		std::cout << "Creating windows" << std::endl;
 		std::vector<std::pair<int,SDL_Rect>> displayBounds(m_NumScreens);
 		for (int i = 0; i < m_NumScreens; ++i){
 			displayBounds[i].first = i;
@@ -496,20 +505,18 @@ namespace RTE {
 			if (actualResY < displayBounds[index].second.y + displayBounds[index].second.h) {
 				actualResY = displayBounds[index].second.y + displayBounds[index].second.h;
 			}
-			std::cout << "i " << displayBounds[index].first << "x " << displayBounds[index].second.x << " y " << displayBounds[index].second.y << " w " << displayBounds[index].second.w << " h " << displayBounds[index].second.h << std::endl;
 
 			glm::mat4 projection = glm::ortho<float>(0.0f, displayBounds[index].second.w, 0.0f, displayBounds[index].second.h, -1.0f, 1.0f);
 			float width = resX * resMultiplier - displayBounds[index].second.x;
 			float height = resY * resMultiplier - displayBounds[index].second.y;
-			
+
 			width = std::clamp<float>(width, 0.0f, displayBounds[index].second.w);
 			height = std::clamp<float>(height, 0.0f, displayBounds[index].second.h);
-			std::cout << "w "<< width << " h " << height << " rx " << displayBounds[index].second.x / static_cast<float>(resX* resMultiplier) << " ry " << displayBounds[index].second.y / static_cast<float>(resY * resMultiplier) << std::endl;
 
 			glm::mat4 uvTransform(1.0f);
 			uvTransform = glm::translate<float>(uvTransform , {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
 			uvTransform = glm::scale(uvTransform, {width / static_cast<float>(resX * resMultiplier), height / static_cast<float>(resY * resMultiplier), 1.0f});
-		
+
 			if (displayBounds[index].first != mainWindowDisplay) {
 				m_MultiWindows.emplace_back(SDL_CreateWindow("",
 										displayBounds[index].second.x,
@@ -654,6 +661,7 @@ namespace RTE {
 			}
 		} else {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
+			SDL_RestoreWindow(m_Window.get());
 			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
 			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
 			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
@@ -711,6 +719,7 @@ namespace RTE {
 			return;
 		} else if (!newFullscreen) {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
+			SDL_RestoreWindow(m_Window.get());
 			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
 			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));

@@ -3486,32 +3486,35 @@ void AHuman::Update()
 	Vector reachPoint = m_Pos;
 
 	// Try to detect a new item
-	if (m_pFGArm && m_Status == STABLE) {
-		reach += m_pFGArm->GetMaxLength();
-		reachPoint = m_pFGArm->GetJointPos();
+	if ((m_pFGArm || m_pBGArm) && m_Status == STABLE) {
+		reach += m_pFGArm ? m_pFGArm->GetMaxLength() : m_pBGArm->GetMaxLength();
+		reachPoint = m_pFGArm ? m_pFGArm->GetJointPos() : m_pBGArm->GetJointPos();
 
 		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
 		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
-			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent()); foundDevice && (m_pFGArm || foundDevice->IsOneHanded())) {
 				m_pItemInReach = foundDevice;
 			}
 		}
 	}
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!m_pFGArm || m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
+    if (m_pItemInReach && (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
         m_pItemInReach = nullptr;
     }
 
-	if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
-        MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
+		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
+        MovableObject *pMO = armToUse->ReleaseHeldMO();
 		if (pMO) { m_Inventory.push_back(pMO); }
-        m_pFGArm->SetHeldMO(m_pItemInReach);
-        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		armToUse->SetHeldMO(m_pItemInReach);
+		armToUse->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 		m_pItemInReach = nullptr;
 
-		EquipShieldInBGArm();
+		if (armToUse != m_pBGArm) {
+			EquipShieldInBGArm();
+		}
 		m_SharpAimProgress = 0;
 		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
@@ -4456,26 +4459,26 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 						pieSlice->SetDescription("Reload");
 					} else {
 						pieSlice->SetEnabled(false);
-						pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
+						pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
 					}
 				}
 				break;
 			case PieSlice::SliceType::NextItem:
-				if (!IsInventoryEmpty() && (m_pFGArm || (m_pBGArm && dynamic_cast<const HeldDevice *>(m_Inventory.front()) && dynamic_cast<const HeldDevice *>(m_Inventory.front())->IsOneHanded()))) {
+				if (!IsInventoryEmpty() && m_pFGArm) {
 					pieSlice->SetEnabled(true);
 					pieSlice->SetDescription("Next Item");
 				} else {
 					pieSlice->SetEnabled(false);
-					pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
+					pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
 				}
 				break;
 			case PieSlice::SliceType::PreviousItem:
-				if (!IsInventoryEmpty() && (m_pFGArm || (m_pBGArm && dynamic_cast<const HeldDevice *>(m_Inventory.front()) && dynamic_cast<const HeldDevice *>(m_Inventory.front())->IsOneHanded()))) {
+				if (!IsInventoryEmpty() && m_pFGArm) {
 					pieSlice->SetEnabled(true);
 					pieSlice->SetDescription("Prev Item");
 				} else {
 					pieSlice->SetEnabled(false);
-					pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
+					pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
 				}
 				break;
 			case PieSlice::SliceType::Drop:

@@ -326,7 +326,7 @@ namespace RTE {
 		/// There can be multiple entries of the same instance name in any of the type sub-maps, but only ONE whose exact class is that of the type-list!
 		/// The Entity instances are NOT owned by this map.
 		/// </summary>
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>> m_TypeMap;
+		std::unordered_map<std::string, std::list<std::pair<std::string, Entity *>>> m_TypeMap;
 
 	private:
 

@@ -28,6 +28,7 @@ namespace RTE {
 		m_CrabToHumanSpawnRatio = 0;
 		m_ScriptPath.clear();
 		m_IsFaction = false;
+		m_IsMerchant = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,8 +52,8 @@ namespace RTE {
 			int result = Serializable::Create(reader);
 
 			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && m_SupportedGameVersion != c_GameVersion) {
-				RTEAssert(!m_SupportedGameVersion.empty(), m_FriendlyName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
-				RTEAbort(m_FriendlyName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.
@@ -116,6 +117,10 @@ namespace RTE {
 			}
 		} else if (propName == "IsFaction") {
 			reader >> m_IsFaction;
+			if (m_IsMerchant) { m_IsFaction = false; }
+		} else if (propName == "IsMerchant") {
+			reader >> m_IsMerchant;
+			if (m_IsMerchant) { m_IsFaction = false; }
 		} else if (propName == "SupportedGameVersion") {
 			reader >> m_SupportedGameVersion;
 		} else if (propName == "Version") {
@@ -139,6 +144,23 @@ namespace RTE {
 		} else if (propName == "IconFile") {
 			reader >> m_IconFile;
 			m_Icon = m_IconFile.GetAsBitmap();
+		} else if (propName == "FactionBuyMenuTheme") {
+			if (reader.ReadPropValue() == "BuyMenuTheme") {
+				while (reader.NextProperty()) {
+					std::string themePropName = reader.ReadPropName();
+					if (themePropName == "SkinFile") {
+						m_BuyMenuTheme.SkinFilePath = reader.ReadPropValue();
+					} else if (themePropName == "BannerFile") {
+						m_BuyMenuTheme.BannerImagePath = reader.ReadPropValue();
+					} else if (themePropName == "LogoFile") {
+						m_BuyMenuTheme.LogoImagePath = reader.ReadPropValue();
+					} else if (themePropName == "BackgroundColorIndex") {
+						m_BuyMenuTheme.BackgroundColorIndex = std::clamp(std::stoi(reader.ReadPropValue()), 0, 255);
+					} else {
+						break;
+					}
+				}
+			}
 		} else if (propName == "AddMaterial") {
 			return g_SceneMan.ReadProperty(propName, reader);
 		} else {
@@ -369,7 +391,7 @@ namespace RTE {
 		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + m_FileName)) {
 			if (directoryEntry.path().extension() == ".ini" && directoryEntry.path().filename() != "Index.ini") {
 				Reader iniReader;
-				if (iniReader.Create(directoryEntry.path().generic_string(), false, progressCallback) >= 0) {
+				if (iniReader.Create(m_FileName + "/" + directoryEntry.path().filename().generic_string(), false, progressCallback) >= 0) {
 					result = Serializable::Create(iniReader, false, true);
 					if (progressCallback) { progressCallback(" ", true); }
 				}

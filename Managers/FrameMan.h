@@ -225,6 +225,13 @@ namespace RTE {
 		int GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
 
 		/// <summary>
+		/// Gets a Vector with the absolute position of the middle of the specified player's screen.
+		/// </summary>
+		/// <param name="whichPlayer">Player to get the middle of the screen for. -1 will give the middle of the entire game window.</param>
+		/// <returns>The middle of the screen for the specified player, or the middle of the game window if that player is -1.</returns>
+		Vector GetMiddleOfPlayerScreen(int whichPlayer);
+
+		/// <summary>
 		/// Gets the width of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>
@@ -601,6 +608,16 @@ namespace RTE {
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
 		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
+
+		/// <summary>
+		/// Stupid Windows-only problems:
+		/// Allowing execution to continue in the background while in dedicated fullscreen mode requires using a display switch mode which clears out the screen's video memory when the process window is not in focus.
+		/// Trying to access the screen BITMAP to figure out if it was cleared does not seem to work because the pointer isn't getting nulled, and trying to read dimensions/anything returns valid values,
+		/// but then everything implodes when the blit happens because there's actually nothing to blit to (and of course when everything has already imploded it does report that dimensions are 0 and everything is cleared. Very helpful indeed).
+		/// This flag does the job. While true blitting the backbuffer to the screen will be skipped during FlipFrameBuffers().
+		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
+		/// </summary>
+		static bool m_DisableFrameBufferFlip;
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.

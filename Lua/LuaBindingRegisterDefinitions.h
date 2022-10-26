@@ -29,7 +29,7 @@
 #include "Box.h"
 #include "Controller.h"
 #include "DataModule.h"
-#include "PieSlice.h"
+#include "PieMenu.h"
 
 namespace RTE {
 
@@ -97,7 +97,6 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Box);
 		LuaBindingRegisterFunctionDeclarationForType(Controller);
 		LuaBindingRegisterFunctionDeclarationForType(DataModule);
-		LuaBindingRegisterFunctionDeclarationForType(PieSlice);
 		LuaBindingRegisterFunctionDeclarationForType(Timer);
 		LuaBindingRegisterFunctionDeclarationForType(Vector);
 	};
@@ -152,6 +151,8 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(MOSRotating);
 		LuaBindingRegisterFunctionDeclarationForType(MovableObject);
 		LuaBindingRegisterFunctionDeclarationForType(PEmitter);
+		LuaBindingRegisterFunctionDeclarationForType(PieSlice);
+		LuaBindingRegisterFunctionDeclarationForType(PieMenu);
 		LuaBindingRegisterFunctionDeclarationForType(Round);
 		LuaBindingRegisterFunctionDeclarationForType(Scene);
 		LuaBindingRegisterFunctionDeclarationForType(SceneArea);
@@ -193,6 +194,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(MouseButtons);
 		LuaBindingRegisterFunctionDeclarationForType(JoyButtons);
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
+		LuaBindingRegisterFunctionDeclarationForType(Directions);
 	};
 }
 #endif

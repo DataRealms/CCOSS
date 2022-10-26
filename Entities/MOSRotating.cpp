@@ -74,6 +74,7 @@ void MOSRotating::Clear()
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
 	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
+	m_GibAtEndOfLifetime = false;
     m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
@@ -256,6 +257,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
 	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
+	m_GibAtEndOfLifetime = reference.m_GibAtEndOfLifetime;
 	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
 	m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
@@ -329,7 +331,9 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "GibBlastStrength") {
 		reader >> m_GibBlastStrength;
 	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
-        reader >> m_WoundCountAffectsImpulseLimitRatio;
+		reader >> m_WoundCountAffectsImpulseLimitRatio;
+	} else if (propName == "GibAtEndOfLifetime") {
+		reader >> m_GibAtEndOfLifetime;
 	} else if (propName == "GibSound") {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
@@ -411,6 +415,7 @@ int MOSRotating::Save(Writer &writer) const
     writer << m_GibImpulseLimit;
     writer.NewProperty("GibWoundLimit");
     writer << m_GibWoundLimit;
+	writer.NewPropertyWithValue("GibAtEndOfLifetime", m_GibAtEndOfLifetime);
     writer.NewProperty("GibSound");
     writer << m_GibSound;
     writer.NewProperty("EffectOnGib");
@@ -1117,65 +1122,40 @@ bool MOSRotating::MoveOutOfTerrain(unsigned char strongerThan)
     return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, strongerThan);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the global and accumulated forces. Then it clears
-//                  out the force list.Note that this does NOT apply the accumulated
-//                  impulses (impulse forces)!
-
-void MOSRotating::ApplyForces()
-{
+void MOSRotating::ApplyForces() {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
-    // Apply the rotational effects of all the forces accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator fItr = m_Forces.begin();
-         fItr != m_Forces.end(); ++fItr) {
-        // Continuous force application to rotational velocity.
-        if (!(*fItr).second.IsZero())
-            m_AngularVel += ((*fItr).second.GetPerpendicular().Dot((*fItr).first) /
-                            m_pAtomGroup->GetMomentOfInertia()) * deltaTime;
-    }
+	for (const auto &[forceVector, forceOffset] : m_Forces) {
+		if (!forceOffset.IsZero()) { m_AngularVel += (forceOffset.GetPerpendicular().Dot(forceVector) / m_pAtomGroup->GetMomentOfInertia()) * deltaTime; }
+	}
 
     MOSprite::ApplyForces();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyImpulses
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gathers and applies the accumulated impulse forces. Then it clears
-//                  out the impulse list.Note that this does NOT apply the accumulated
-//                  regular forces (non-impulse forces)!
+void MOSRotating::ApplyImpulses() {
+	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
+		if (!impulseForceOffset.IsZero()) { m_AngularVel += impulseForceOffset.GetPerpendicular().Dot(impulseForceVector) / m_pAtomGroup->GetMomentOfInertia(); }
+	}
 
-void MOSRotating::ApplyImpulses()
-{
-    // Apply the rotational effects of all the impulses accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin();
-         iItr != m_ImpulseForces.end(); ++iItr) {
-        // Impulse force application to the rotational velocity of this MO.
-        if (!(*iItr).second.IsZero())
-            m_AngularVel += (*iItr).second.GetPerpendicular().Dot((*iItr).first) /
-                            m_pAtomGroup->GetMomentOfInertia();
-    }
+	Vector totalImpulse;
+	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
+		totalImpulse += impulseForceVector;
+	}
 
-    // See if the impulses are enough to gib this
-    Vector totalImpulse;
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr)
-    {
-        totalImpulse += (*iItr).first;
-    }
-    // If impulse gibbing threshold is enabled for this, see if it's below the total impulse force
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
-		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
-			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
-		}
+		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) { impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio; }
 		if (totalImpulse.IsMagnitudeGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 	}
-    MOSprite::ApplyImpulses();
+
+	MOSprite::ApplyImpulses();
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1434,6 +1414,9 @@ void MOSRotating::PostTravel()
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
     if (IsTooFast())
         GibThis();
+
+	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
+	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }
 
     MOSprite::PostTravel();
 
@@ -1752,7 +1735,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 		keyColor = g_MOIDMaskColor;
 	}
 
-    Vector spritePos(m_Pos.GetFloored() - targetPos);
+    Vector spritePos(m_Pos.GetRounded() - targetPos);
 
     if (m_Recoiled)
         spritePos += m_RecoilOffset;
@@ -1974,6 +1957,23 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
+	for (Attachable *attachable : m_Attachables) {
+		attachable->PreUpdate();
+		attachable->m_PreUpdateHasRunThisFrame = false;
+		attachable->UpdatePositionAndJointPositionBasedOnOffsets();
+		attachable->CorrectAttachableAndWoundPositionsAndRotations();
+	}
+	for (Attachable *wound : m_Wounds) {
+		wound->PreUpdate();
+		wound->m_PreUpdateHasRunThisFrame = false;
+		wound->UpdatePositionAndJointPositionBasedOnOffsets();
+		wound->CorrectAttachableAndWoundPositionsAndRotations();
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
     Vector forces;
@@ -1990,10 +1990,10 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 
-std::string MOSRotating::GetStringValue(std::string key)
+std::string MOSRotating::GetStringValue(std::string key) const
 {
 	if (StringValueExists(key))
-		return m_StringValueMap[key];
+		return m_StringValueMap.at(key);
 	else
 		return "";
 }
@@ -2005,10 +2005,10 @@ std::string MOSRotating::GetStringValue(std::string key)
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-double MOSRotating::GetNumberValue(std::string key)
+double MOSRotating::GetNumberValue(std::string key) const
 {
 	if (NumberValueExists(key))
-		return m_NumberValueMap[key];
+		return m_NumberValueMap.at(key);
 	else
 		return 0;
 }
@@ -2020,10 +2020,10 @@ double MOSRotating::GetNumberValue(std::string key)
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-Entity * MOSRotating::GetObjectValue(std::string key)
+Entity * MOSRotating::GetObjectValue(std::string key) const
 {
 	if (ObjectValueExists(key))
-		return m_ObjectValueMap[key];
+		return m_ObjectValueMap.at(key);
 	else
 		return 0;
 }
@@ -2093,7 +2093,7 @@ void MOSRotating::RemoveObjectValue(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::StringValueExists(std::string key)
+bool MOSRotating::StringValueExists(std::string key) const
 {
 	if (m_StringValueMap.find(key) != m_StringValueMap.end())
 		return true;
@@ -2105,7 +2105,7 @@ bool MOSRotating::StringValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::NumberValueExists(std::string key)
+bool MOSRotating::NumberValueExists(std::string key) const
 {
 	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
 		return true;
@@ -2117,7 +2117,7 @@ bool MOSRotating::NumberValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::ObjectValueExists(std::string key)
+bool MOSRotating::ObjectValueExists(std::string key) const
 {
 	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
 		return true;

@@ -308,7 +308,7 @@ namespace RTE {
 			std::string nextString = m_MusicPlayList.front();
 			m_MusicPlayList.pop_front();
 
-			if (!nextString.empty() && nextString.at(0) == '@') {
+			if (!nextString.empty() && nextString[0] == '@') {
 				try {
 					int seconds = std::stoi(nextString.substr(1, nextString.size()));
 					m_SilenceTimer.SetRealTimeLimitS((seconds > 0) ? seconds : 0);
@@ -721,7 +721,7 @@ namespace RTE {
 			float channel3dLevel;
 			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
 			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
-				float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions.at(0).get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
+				float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
 				float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
 				if (sqrDistanceToPlayer < m_MinimumDistanceForPanning*m_MinimumDistanceForPanning) {
 					soundChannel->set3DLevel(0);

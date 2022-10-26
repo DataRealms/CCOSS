@@ -108,7 +108,8 @@ void MovableObject::Clear()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
-	m_ProvidesPieMenuContext = false;
+	m_SimUpdatesBetweenScriptedUpdates = 1;
+    m_SimUpdatesSinceLastScriptedUpdate = 0;
 }
 
 
@@ -254,10 +255,11 @@ int MovableObject::Create(const MovableObject &reference)
 	m_TerrainMatHit = reference.m_TerrainMatHit;
 	m_ParticleUniqueIDHit = reference.m_ParticleUniqueIDHit;
 
+	m_SimUpdatesBetweenScriptedUpdates = reference.m_SimUpdatesBetweenScriptedUpdates;
+	m_SimUpdatesSinceLastScriptedUpdate = reference.m_SimUpdatesSinceLastScriptedUpdate;
+
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
-
-	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
 
     return 0;
 }
@@ -327,14 +329,6 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_CanBeSquished;
 	else if (propName == "HUDVisible")
 		reader >> m_HUDVisible;
-	else if (propName == "ProvidesPieMenuContext")
-		reader >> m_ProvidesPieMenuContext;
-	else if (propName == "AddPieSlice")
-	{
-		PieSlice newSlice;
-		reader >> newSlice;
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-	}
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
         switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
@@ -402,6 +396,8 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
         reader >> m_ApplyWoundBurstDamageOnCollision;
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
+    else if (propName == "SimUpdatesBetweenScriptedUpdates")
+        reader >> m_SimUpdatesBetweenScriptedUpdates;
 	else
         return SceneObject::ReadProperty(propName, reader);
 
@@ -501,7 +497,7 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-	if (!(*m_FunctionsAndScripts.find("Create")).second.empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+	if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
 		m_ScriptObjectName = "ERROR";
 		return -3;
 	}
@@ -693,7 +689,7 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) const {
+int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) const {
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
@@ -712,9 +708,9 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
     int status = 0;
-    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end() || m_FunctionsAndScripts.find(functionName)->second.empty()) {
         status = -1;
     } else if (!ObjectScriptsInitialized()) {
         status = InitializeObjectScripts();
@@ -1008,9 +1004,18 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::UpdateScripts() {
+    m_SimUpdatesSinceLastScriptedUpdate++;
+    
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
     }
+
+    if (m_SimUpdatesSinceLastScriptedUpdate < m_SimUpdatesBetweenScriptedUpdates) {
+        return 1;
+    }
+
+	m_SimUpdatesSinceLastScriptedUpdate = 0;
+
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
@@ -1021,12 +1026,8 @@ int MovableObject::UpdateScripts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::OnPieMenu(Actor *pieMenuActor) {
-    if (!pieMenuActor) {
-        return -1;
-    }
-
-    return RunScriptedFunctionInAppropriateScripts("OnPieMenu", false, false, {pieMenuActor});
+int MovableObject::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
+	return RunScriptedFunctionInAppropriateScripts("WhilePieMenuOpen", false, false, { pieMenu });
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,22 +1109,22 @@ bool MovableObject::DrawToTerrain(SLTerrain *terrain) {
 			destPos.fill(Vector());
 
 			if (swapSourceWithDestination) {
-				std::swap(bitmaps.at(0), bitmaps.at(1));
+				std::swap(bitmaps[0], bitmaps[1]);
 				std::swap(srcPos, destPos);
 			}
-			masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(0).GetFloorIntX(), srcPos.at(0).GetFloorIntY(), destPos.at(0).GetFloorIntX(), destPos.at(0).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+			masked_blit(bitmaps[0], bitmaps[1], srcPos[0].GetFloorIntX(), srcPos[0].GetFloorIntY(), destPos[0].GetFloorIntX(), destPos[0].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 			if (g_SceneMan.SceneWrapsX()) {
 				if (bitmapPos.GetFloorIntX() < 0) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(1).GetFloorIntX(), srcPos.at(1).GetFloorIntY(), destPos.at(1).GetFloorIntX(), destPos.at(1).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[1].GetFloorIntX(), srcPos[1].GetFloorIntY(), destPos[1].GetFloorIntX(), destPos[1].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				} else if (bitmapPos.GetFloorIntX() + destinationBitmap->w > g_SceneMan.GetSceneWidth()) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(2).GetFloorIntX(), srcPos.at(2).GetFloorIntY(), destPos.at(2).GetFloorIntX(), destPos.at(2).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[2].GetFloorIntX(), srcPos[2].GetFloorIntY(), destPos[2].GetFloorIntX(), destPos[2].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
 				if (bitmapPos.GetFloorIntY() < 0) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(3).GetFloorIntX(), srcPos.at(3).GetFloorIntY(), destPos.at(3).GetFloorIntX(), destPos.at(3).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[3].GetFloorIntX(), srcPos[3].GetFloorIntY(), destPos[3].GetFloorIntX(), destPos[3].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				} else if (bitmapPos.GetFloorIntY() + destinationBitmap->h > g_SceneMan.GetSceneHeight()) {
-					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(4).GetFloorIntX(), srcPos.at(4).GetFloorIntY(), destPos.at(4).GetFloorIntX(), destPos.at(4).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+					masked_blit(bitmaps[0], bitmaps[1], srcPos[4].GetFloorIntX(), srcPos[4].GetFloorIntY(), destPos[4].GetFloorIntX(), destPos[4].GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
 				}
 			}
 		};

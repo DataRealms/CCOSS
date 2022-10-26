@@ -166,12 +166,12 @@ namespace RTE {
 
 		// See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap.
 		if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= targetBitmap->w) {
-			if (drawPos.at(0).GetFloorIntX() < m_FGColorBitmap->w) {
-				drawPos.at(wrapPasses) = drawPos.at(0);
+			if (drawPos[0].GetFloorIntX() < m_FGColorBitmap->w) {
+				drawPos.at(wrapPasses) = drawPos[0];
 				drawPos.at(wrapPasses).m_X += static_cast<float>(targetBitmap->w);
 				wrapPasses++;
-			} else if (drawPos.at(0).GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
-				drawPos.at(wrapPasses) = drawPos.at(0);
+			} else if (drawPos[0].GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
+				drawPos.at(wrapPasses) = drawPos[0];
 				drawPos.at(wrapPasses).m_X -= static_cast<float>(targetBitmap->w);
 				wrapPasses++;
 			}
@@ -180,12 +180,12 @@ namespace RTE {
 			if (g_SceneMan.SceneWrapsX()) {
 				float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
 				if (targetPos.m_X < 0) {
-					drawPos.at(wrapPasses) = drawPos.at(0);
+					drawPos.at(wrapPasses) = drawPos[0];
 					drawPos.at(wrapPasses).m_X -= sceneWidth;
 					wrapPasses++;
 				}
 				if (targetPos.m_X + static_cast<float>(targetBitmap->w) > sceneWidth) {
-					drawPos.at(wrapPasses) = drawPos.at(0);
+					drawPos.at(wrapPasses) = drawPos[0];
 					drawPos.at(wrapPasses).m_X += sceneWidth;
 					wrapPasses++;
 				}

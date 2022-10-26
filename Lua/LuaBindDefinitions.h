@@ -39,6 +39,7 @@ namespace RTE {
 	struct mouse_buttons : public luabind::enum_wrapper {};
 	struct joy_buttons : public luabind::enum_wrapper {};
 	struct joy_directions : public luabind::enum_wrapper {};
+	struct directions : public luabind::enum_wrapper {};
 
 	/// <summary>
 	/// Special callback function for adding file name and line number to error messages when calling functions incorrectly.

@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Clear() {
@@ -75,6 +77,10 @@ namespace RTE {
 			luabind::def("EaseOut", &EaseOut),
 			luabind::def("EaseInOut", &EaseInOut),
 			luabind::def("Clamp", &Limit),
+			luabind::def("NormalizeAngleBetween0And2PI", &NormalizeAngleBetween0And2PI),
+			luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
+			luabind::def("AngleWithinRange", &AngleWithinRange),
+			luabind::def("ClampAngle", &ClampAngle),
 			luabind::def("GetPPM", &GetPPM),
 			luabind::def("GetMPP", &GetMPP),
 			luabind::def("GetPPL", &GetPPL),
@@ -115,6 +121,8 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HDFirearm),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ThrownDevice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
@@ -125,7 +133,6 @@ namespace RTE {
 			RegisterLuaBindingsOfType(SystemLuaBindings, DataModule),
 			RegisterLuaBindingsOfType(ActivityLuaBindings, Activity),
 			RegisterLuaBindingsOfAbstractType(ActivityLuaBindings, GameActivity),
-			RegisterLuaBindingsOfType(SystemLuaBindings, PieSlice),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, GlobalScript),
 			RegisterLuaBindingsOfType(EntityLuaBindings, MetaPlayer),
 			RegisterLuaBindingsOfType(GUILuaBindings, GUIBanner),
@@ -149,7 +156,8 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons)
+			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
 		];
 
 		// Assign the manager instances to globals in the lua master state
@@ -217,11 +225,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
+		m_TempEntityVector.reserve(entityVector.size());
+		for (const Entity *entity : entityVector) {
+			m_TempEntityVector.emplace_back(const_cast<Entity *>(entity));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
-			for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
+			for (const std::string_view &variableToSafetyCheck : variablesToSafetyCheck) {
 				if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) { scriptString << " and "; }
 				scriptString << variableToSafetyCheck;
 			}
@@ -229,23 +246,31 @@ namespace RTE {
 		}
 		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
 
-		scriptString << functionName + "(" + selfObjectName;
+		scriptString << functionName + "(";
+		if (!selfObjectName.empty()) { scriptString << selfObjectName; }
+		bool isFirstFunctionArgument = selfObjectName.empty();
 		if (!functionEntityArguments.empty()) {
 			SetTempEntityVector(functionEntityArguments);
 			for (const Entity *functionEntityArgument : functionEntityArguments) {
-				scriptString << ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
+				scriptString << "(To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				isFirstFunctionArgument = false;
 			}
 		}
 		if (!functionLiteralArguments.empty()) {
-			for (const std::string &functionLiteralArgument : functionLiteralArguments) {
-				scriptString << ", " + functionLiteralArgument;
+			for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+				if (!isFirstFunctionArgument) { scriptString << ", "; }
+				scriptString << std::string(functionLiteralArgument);
+				isFirstFunctionArgument = false;
 			}
 		}
 		scriptString << ");";
 
 		if (!variablesToSafetyCheck.empty()) { scriptString << " end;"; }
 
-		return RunScriptString(scriptString.str());
+		int result = RunScriptString(scriptString.str());
+		m_TempEntityVector.clear();
+		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,28 +406,63 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
+		if (c_FileAccessModes.find(accessMode) == c_FileAccessModes.end()) {
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, invalid file access mode specified.");
+			return -1;
+		}
+
 		int fileIndex = -1;
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
-			if (!m_OpenedFiles.at(i)) {
+			if (!m_OpenedFiles[i]) {
 				fileIndex = i;
 				break;
 			}
 		}
 		if (fileIndex == -1) {
-			g_ConsoleMan.PrintString("ERROR: Can't open file, maximum number of files already open.");
+			g_ConsoleMan.PrintString("ERROR: Cannot open file, maximum number of files already open.");
 			return -1;
 		}
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
-		if ((fullPath.find("..") == std::string::npos) && (System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
-			if (FILE *file = fopen(fullPath.c_str(), accessMode.c_str())) {
-				m_OpenedFiles.at(fileIndex) = file;
+		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
+
+#ifdef _WIN32
+			FILE *file = fopen(fullPath.c_str(), accessMode.c_str());
+#else
+			FILE *file = [&fullPath, &accessMode]() -> FILE* {
+				std::filesystem::path inspectedPath = System::GetWorkingDirectory();
+				const std::filesystem::path relativeFilePath = std::filesystem::path(fullPath).lexically_relative(inspectedPath);
+
+				for (std::filesystem::path::const_iterator relativeFilePathIterator = relativeFilePath.begin(); relativeFilePathIterator != relativeFilePath.end(); ++relativeFilePathIterator) {
+					bool pathPartExists = false;
+
+					// Check if a path part (directory or file) exists in the filesystem.
+					for (const std::filesystem::path &filesystemEntryPath : std::filesystem::directory_iterator(inspectedPath)) {
+						if (StringsEqualCaseInsensitive(filesystemEntryPath.filename().generic_string(), (*relativeFilePathIterator).generic_string())) {
+							inspectedPath = filesystemEntryPath;
+							pathPartExists = true;
+							break;
+						}
+					}
+					if (!pathPartExists) {
+						// If this is the last part, then all directories in relativeFilePath exist, but the file doesn't.
+						if (std::next(relativeFilePathIterator) == relativeFilePath.end()) {
+							return fopen((inspectedPath / relativeFilePath.filename()).generic_string().c_str(), accessMode.c_str());
+						}
+						// Some directory in relativeFilePath doesn't exist, so the file can't be created.
+						return nullptr;
+					}
+				}
+				// If the file exists, open it.
+				return fopen(inspectedPath.generic_string().c_str(), accessMode.c_str());
+			}();
+#endif
+			if (file) {
+				m_OpenedFiles[fileIndex] = file;
 				return fileIndex;
 			}
 		}
-#ifndef RELEASE_BUILD
 		g_ConsoleMan.PrintString("ERROR: Failed to open file " + fileName);
-#endif
 		return -1;
 	}
 
@@ -410,8 +470,8 @@ namespace RTE {
 
 	void LuaMan::FileClose(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			fclose(m_OpenedFiles.at(fileIndex));
-			m_OpenedFiles.at(fileIndex) = nullptr;
+			fclose(m_OpenedFiles[fileIndex]);
+			m_OpenedFiles[fileIndex] = nullptr;
 		}
 	}
 
@@ -428,7 +488,7 @@ namespace RTE {
 	std::string LuaMan::FileReadLine(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
 			char buf[4096];
-			if (fgets(buf, sizeof(buf), m_OpenedFiles.at(fileIndex)) != nullptr) {
+			if (fgets(buf, sizeof(buf), m_OpenedFiles[fileIndex]) != nullptr) {
 				return buf;
 			}
 #ifndef RELEASE_BUILD
@@ -444,7 +504,7 @@ namespace RTE {
 
 	void LuaMan::FileWriteLine(int fileIndex, const std::string &line) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			if (fputs(line.c_str(), m_OpenedFiles.at(fileIndex)) == EOF) {
+			if (fputs(line.c_str(), m_OpenedFiles[fileIndex]) == EOF) {
 				g_ConsoleMan.PrintString("ERROR: Failed to write to file. File might have been opened without writing permissions or is corrupt.");
 			}
 		} else {
@@ -456,7 +516,7 @@ namespace RTE {
 
 	bool LuaMan::FileEOF(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			return feof(m_OpenedFiles.at(fileIndex));
+			return feof(m_OpenedFiles[fileIndex]);
 		}
 		g_ConsoleMan.PrintString("ERROR: Tried to check EOF for an invalid or closed file.");
 		return false;

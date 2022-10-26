@@ -6,6 +6,8 @@
 #include "FrameMan.h"
 #include "MetaMan.h"
 
+#include "ACraft.h"
+
 #include "GUI.h"
 #include "GUIFont.h"
 #include "AllegroBitmap.h"
@@ -732,7 +734,7 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Activity::EnteredOrbit(Actor *orbitedCraft) {
+	void Activity::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
 		if (!orbitedCraft) {
 			return;
 		}
@@ -740,7 +742,7 @@ void Activity::Clear() {
 		char messageString[64];
 		float foreignCostMult = 0.9F;
 		float nativeCostMult = 0.9F;
-		int orbitedCraftTeam = orbitedCraft->GetTeam(); //TODO this should be explicitly casted. Preferred solution would be to use int consistently for teams.
+		int orbitedCraftTeam = orbitedCraft->GetTeam();
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
 		
 		if (g_MetaMan.GameInProgress()) {

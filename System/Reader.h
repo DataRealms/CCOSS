@@ -215,6 +215,8 @@ namespace RTE {
 		bool m_SkipIncludes; //!< Indicates whether reader should skip included files.
 		bool m_CanFail; //!< Whether it's ok for the Reader to fail reading a file and fail silently instead of aborting.
 
+		std::stack<int> m_BlockCommentOpenTagLines; //<! Stores lines on which block comment open tags are encountered. Used for error reporting when a file stream ends with an open block comment.
+
 		/// <summary>
 		/// When NextProperty() has returned false, indicating that there were no more properties to read on that object,
 		/// this is incremented until it matches -m_IndentDifference, and then NextProperty will start returning true again.

@@ -62,7 +62,7 @@ namespace RTE {
 			.def("ForceRefresh", &BuyMenuGUI::ForceRefresh)
 			.def("SetOwnedItemsAmount", &BuyMenuGUI::SetOwnedItemsAmount)
 			.def("GetOwnedItemsAmount", &BuyMenuGUI::GetOwnedItemsAmount)
-			.def("SetHeaderImage", &BuyMenuGUI::SetHeaderImage)
+			.def("SetBannerImage", &BuyMenuGUI::SetBannerImage)
 			.def("SetLogoImage", &BuyMenuGUI::SetLogoImage)
 			.def("ClearCartList", &BuyMenuGUI::ClearCartList)
 			.def("LoadDefaultLoadoutToCart", &BuyMenuGUI::LoadDefaultLoadoutToCart);

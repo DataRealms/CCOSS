@@ -501,7 +501,7 @@ bool PresetMan::GetAllOfType(list<Entity *> &entityList, string type, int whichM
     {
         // Send the list to each module
         for (int i = 0; i < m_pDataModules.size(); ++i)
-            foundAny = m_pDataModules[i]->GetAllOfType(entityList, type) || foundAny; 
+            foundAny = m_pDataModules[i]->GetAllOfType(entityList, type) || foundAny;
     }
     // Specific module
     else
@@ -730,7 +730,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 				return (*itr);
 		}
 	}
-	else 
+	else
 	{
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
@@ -955,7 +955,7 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
 
             foundAny = !pGroupList->empty();
         }
-        // Get only modules that contain an entity of valid type 
+        // Get only modules that contain an entity of valid type
         else
             foundAny = m_pDataModules[whichModule]->GetGroupsWithType(groupList, withType) || foundAny;
     }
@@ -991,7 +991,7 @@ bool PresetMan::GetModuleSpaceGroups(list<string> &groupList, int whichModule, s
         else
         {
             for (int module = 0; module < (int)m_pDataModules.size(); ++module)
-                foundAny = GetGroups(groupList, module, withType) || foundAny;            
+                foundAny = GetGroups(groupList, module, withType) || foundAny;
         }
     }
     // Getting modulespace of specific module

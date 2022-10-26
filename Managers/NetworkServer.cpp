@@ -6,6 +6,7 @@
 
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "GameActivity.h"
 
 #include "SettingsMan.h"
@@ -678,15 +679,15 @@ namespace RTE {
 
 		Scene *scene = g_SceneMan.GetScene();
 
-		std::list<SceneLayer *> sceneLayers = scene->GetBackLayers();
+		std::list<SLBackground *> sceneLayers = scene->GetBackLayers();
 		short index = 0;
 
-		for (SceneLayer * &layer : sceneLayers) {
+		for (SLBackground * &layer : sceneLayers) {
 			// Recalculate layers internal values for this player
-			layer->UpdateScrollRatiosForNetworkPlayer(player);
-			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->GetBitmapHash();
+			layer->InitScrollRatios(true, player);
+			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->m_BitmapFile.GetHash();
 
-			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawTrans;
+			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawMasked;
 			msgSceneSetup.BackgroundLayers[index].OffsetX = layer->m_Offset.m_X;
 			msgSceneSetup.BackgroundLayers[index].OffsetY = layer->m_Offset.m_Y;
 
@@ -696,18 +697,16 @@ namespace RTE {
 			msgSceneSetup.BackgroundLayers[index].ScrollRatioY = layer->m_ScrollRatio.m_Y;
 			msgSceneSetup.BackgroundLayers[index].ScaleFactorX = layer->m_ScaleFactor.m_X;
 			msgSceneSetup.BackgroundLayers[index].ScaleFactorY = layer->m_ScaleFactor.m_Y;
-			msgSceneSetup.BackgroundLayers[index].ScaleInverseX = layer->m_ScaleInverse.m_X;
-			msgSceneSetup.BackgroundLayers[index].ScaleInverseY = layer->m_ScaleInverse.m_Y;
 			msgSceneSetup.BackgroundLayers[index].ScaledDimensionsX = layer->m_ScaledDimensions.m_X;
 			msgSceneSetup.BackgroundLayers[index].ScaledDimensionsY = layer->m_ScaledDimensions.m_Y;
 
 			msgSceneSetup.BackgroundLayers[index].WrapX = layer->m_WrapX;
 			msgSceneSetup.BackgroundLayers[index].WrapY = layer->m_WrapY;
 
-			msgSceneSetup.BackgroundLayers[index].FillLeftColor = layer->m_FillLeftColor;
-			msgSceneSetup.BackgroundLayers[index].FillRightColor = layer->m_FillRightColor;
-			msgSceneSetup.BackgroundLayers[index].FillUpColor = layer->m_FillUpColor;
-			msgSceneSetup.BackgroundLayers[index].FillDownColor = layer->m_FillDownColor;
+			msgSceneSetup.BackgroundLayers[index].FillLeftColor = layer->m_FillColorLeft;
+			msgSceneSetup.BackgroundLayers[index].FillRightColor = layer->m_FillColorRight;
+			msgSceneSetup.BackgroundLayers[index].FillUpColor = layer->m_FillColorUp;
+			msgSceneSetup.BackgroundLayers[index].FillDownColor = layer->m_FillColorDown;
 
 			index++;
 			// Set everything back to what it was just in case

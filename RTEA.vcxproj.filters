@@ -537,6 +537,12 @@
     <ClInclude Include="Lua\LuaAdapters.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\TerrainFrosting.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\SLBackground.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1034,6 +1040,12 @@
     </ClCompile>
     <ClCompile Include="Lua\LuaBindingsSystem.cpp">
       <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\TerrainFrosting.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\SLBackground.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

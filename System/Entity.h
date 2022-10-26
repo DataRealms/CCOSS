@@ -52,19 +52,13 @@ namespace RTE {
 	/// Whether to draw the colors, or own material property, or to clear the corresponding non-key-color pixels of the Entity being drawn with key-color pixels on the target.
 	/// </summary>
 	enum DrawMode {
-		g_DrawColor = 0,
+		g_DrawColor,
 		g_DrawMaterial,
-		g_DrawAir,
-		g_DrawMask,
 		g_DrawWhite,
 		g_DrawMOID,
 		g_DrawNoMOID,
 		g_DrawDoor,
-		g_DrawDebug,
-		g_DrawLess,
 		g_DrawTrans,
-		g_DrawRedTrans,
-		g_DrawScreen,
 		g_DrawAlpha
 	};
 

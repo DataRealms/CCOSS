@@ -68,6 +68,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether simplified collision detection is enabled or not.</returns>
 		bool SimplifiedCollisionDetection() const { return m_SimplifiedCollisionDetection; }
+
+		/// <summary>
+		/// Gets the Scene background layer auto-scaling mode.
+		/// </summary>
+		/// <returns>The Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</returns>
+		int GetSceneBackgroundAutoScaleMode() const { return m_SceneBackgroundAutoScaleMode; }
+
+		/// <summary>
+		/// Sets the Scene background layer auto-scaling mode.
+		/// </summary>
+		/// <param name="newMode">The new Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</param>
+		void SetSceneBackgroundAutoScaleMode(int newMode) { m_SceneBackgroundAutoScaleMode = std::clamp(newMode, 0, 2); }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -457,6 +469,7 @@ namespace RTE {
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
+		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

@@ -43,6 +43,7 @@ namespace RTE
 struct HitData;
 
 class MOSRotating;
+class SLTerrain;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -1809,6 +1810,13 @@ enum MOType
     /// </summary>
     /// <returns>Whether this MO's RootParent can GetHitByMOs and is currently traveling.</returns>
     bool GetTraveling() const { return GetRootParent()->m_IsTraveling; }
+
+	/// <summary>
+	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
+	/// </summary>
+	/// <param name="terrain">The SLTerrain to draw this MovableObject to. Ownership is NOT transferred!</param>
+	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+	bool DrawToTerrain(SLTerrain *terrain);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

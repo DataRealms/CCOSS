@@ -45,7 +45,7 @@ namespace RTE {
 
 	Vector & Vector::CapMagnitude(const float capMag) {
 		if (capMag == 0.0F) { Reset(); }
-		if (GetSqrMagnitude() > capMag*capMag) { SetMagnitude(capMag); }
+		if (IsMagnitudeGreaterThan(capMag)) { SetMagnitude(capMag); }
 		return *this;
 	}
 

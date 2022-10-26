@@ -308,7 +308,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
         returnVel.CapMagnitude(adjustedTravelSpeed);
         returnVel += m_JointVel;
 
-//        if (distVect.GetSqrMagnitude() < 0.5F*0.5F)
+//        if (distVect.IsMagnitudeLessThan(0.5F))
 //            returnVel *= 0.1;
     }
     else
@@ -376,7 +376,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
     if (IsStaticPoint())
     {
         const float threshold = 1.0F;
-        m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).GetSqrMagnitude() < threshold*threshold;
+        m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).IsMagnitudeLessThan(threshold);
     }
     else
     {

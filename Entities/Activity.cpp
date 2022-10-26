@@ -720,7 +720,7 @@ void Activity::Clear() {
 		actorSwitchSoundToPlay->Play(player);
 
 		const int halfXRes = g_FrameMan.GetResX() / 2;
-		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetSqrMagnitude() > halfXRes*halfXRes) {
+		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).IsMagnitudeGreaterThan(halfXRes)) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}
 

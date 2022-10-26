@@ -267,9 +267,9 @@ void AreaEditorGUI::Update()
     // Analog cursor input
 
     Vector analogInput;
-    if (m_pController->GetAnalogMove().GetSqrMagnitude() > 0.1F*0.1F)
+    if (m_pController->GetAnalogMove().IsMagnitudeGreaterThan(0.1F))
         analogInput = m_pController->GetAnalogMove();
-//    else if (m_pController->GetAnalogAim().GetSqrMagnitude() > 0.1F*0.1F)
+//    else if (m_pController->GetAnalogAim().IsMagnitudeGreaterThan(0.1F))
 //        analogInput = m_pController->GetAnalogAim();
 
     /////////////////////////////////////////////

@@ -417,7 +417,7 @@ void Arm::UpdateCurrentHandOffset() {
             } else {
                 targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
                 m_DidReach = m_WillIdle;
-                if (m_WillIdle && targetOffset.GetSqrMagnitude() > m_MaxLength*m_MaxLength) {
+                if (m_WillIdle && targetOffset.IsMagnitudeGreaterThan(m_MaxLength)) {
                     targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
                     m_DidReach = false;
                 }

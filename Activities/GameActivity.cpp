@@ -1511,7 +1511,7 @@ void GameActivity::Update()
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
                     int quarterFrameBuffer = g_FrameMan.GetPlayerFrameBufferWidth(player) / 4;
-                    if (markedDistance.GetSqrMagnitude() > quarterFrameBuffer*quarterFrameBuffer)
+                    if (markedDistance.IsMagnitudeGreaterThan(quarterFrameBuffer))
                         m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);
@@ -1602,7 +1602,8 @@ void GameActivity::Update()
 			if (g_SceneMan.GetScene()->WrapsX())
             {
                 float halfSceneWidth = sceneWidth * 0.5F;
-				if (relativeToActor.GetSqrMagnitude() > halfSceneWidth*halfSceneWidth && relativeToActor.GetSqrMagnitude() > 350.0F*350.0F)
+                float seamMinimum = 350.0F;
+				if (relativeToActor.IsMagnitudeGreaterThan(std::max(halfSceneWidth, 350.0F)))
                 {
 					if (m_ActorCursor->m_X < halfSceneWidth)
 						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
@@ -2502,8 +2503,9 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 				unwrappedPos = m_ActorCursor[PoS] - m_ControlledActor[PoS]->GetPos();
 				float sceneWidth = g_SceneMan.GetSceneWidth();
                 float halfSceneWidth = sceneWidth * 0.5F;
+                float seamMinimum = 350.0F;
 				
-				if (unwrappedPos.GetSqrMagnitude() > halfSceneWidth*halfSceneWidth && unwrappedPos.GetSqrMagnitude() > 350*350)
+				if (unwrappedPos.IsMagnitudeGreaterThan(std::max(halfSceneWidth, seamMinimum)))
 				{
 					if (m_ActorCursor->m_X < halfSceneWidth)
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);

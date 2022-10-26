@@ -713,7 +713,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
         float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetSqrMagnitude() > m_PinStrength*m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].IsMagnitudeGreaterThan(m_PinStrength))
         {
             // Unpin and set the threshold to 0
             hd.Body[HITEE]->SetPinStrength(0);
@@ -1179,7 +1179,7 @@ void MOSRotating::ApplyImpulses()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (totalImpulse.GetSqrMagnitude() > impulseLimit*impulseLimit) { GibThis(totalImpulse); }
+		if (totalImpulse.IsMagnitudeGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 	}
     MOSprite::ApplyImpulses();
 }
@@ -1457,7 +1457,7 @@ void MOSRotating::PostTravel()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (m_TravelImpulse.GetSqrMagnitude() > impulseLimit*impulseLimit) { GibThis(); }
+		if (m_TravelImpulse.IsMagnitudeGreaterThan(impulseLimit)) { GibThis(); }
 	}
     // Reset
     m_DeepHardness = 0;
@@ -1562,7 +1562,7 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         Vector otherPos = pOverlapMO->GetPos();
 
         // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).GetSqrMagnitude() < combinedRadii*combinedRadii)
+        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).IsMagnitudeLessThan(combinedRadii))
         {
             // They may be overlapping, so draw the MOID rep of this to the MOID layer
             Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);

@@ -384,7 +384,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
 				// Note this doesn't take into account Scene wrapping, which is problematic when the Scene might not be loaded.. it's okay in this case though
 				Vector distance = (*existingItr)->GetPos() - m_Pos;
 				// If the same thing is within the walk radius, then signal that this Deployment location is indeed BLOCKED
-				if (distance.GetSqrMagnitude() < m_WalkRadius*m_WalkRadius)
+				if (distance.IsMagnitudeLessThan(m_WalkRadius))
 				{
 					blocked = true;
 					break;
@@ -470,7 +470,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
                 // Note this doesn't take into account Scene wrapping, which is problematic when the Scene might not be loaded.. it's okay in this case though
                 Vector distance = (*existingItr)->GetPos() - m_Pos;
                 // If the same thing is within the spawn radius, then signal that this Deployment location is indeed BLOCKED
-                if (distance.GetSqrMagnitude() < m_SpawnRadius*m_SpawnRadius)
+                if (distance.IsMagnitudeLessThan(m_SpawnRadius))
                 {
                     blocked = true;
                     break;

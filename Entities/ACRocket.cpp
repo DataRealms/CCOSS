@@ -320,7 +320,7 @@ void ACRocket::UpdateAI()
 
     // Stuck detection
     float moveThreshold = 1.0f;
-    if (m_Vel.GetSqrMagnitude() > moveThreshold*moveThreshold)
+    if (m_Vel.IsMagnitudeGreaterThan(moveThreshold))
         m_StuckTimer.Reset();
 
     /////////////////////////////
@@ -429,7 +429,7 @@ void ACRocket::UpdateAI()
     // STABILIZATION
 
     // Don't mess if we're unloading or automatically stabilizing
-    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && m_Vel.GetSqrMagnitude() < 5.0f*5.0F))
+    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && m_Vel.IsMagnitudeLessThan(5.0F)))
         m_LateralMoveState = LAT_STILL;
     else
     {

@@ -1089,7 +1089,7 @@ bool Actor::CollideAtPoint(HitData &hd)
 {
     return MOSRotating::CollideAtPoint(hd);
 
-//    if (hd.ResImpulse[HITEE].GetSqrMagnitude() > GetMaterial().strength*GetMaterial().strength) {
+//    if (hd.ResImpulse[HITEE].IsMagnitudeGreaterThan(GetMaterial().strength)) {
 //        m_pParent->
 //    }
 /* Obsolete

@@ -1999,7 +1999,7 @@ void ACrab::UpdateAI()
     if (m_ObstacleState == PROCEEDING)
     {
         // Reset stuck timer if we're moving fine, or we're waiting for teammate to move
-        if (m_RecentMovement.GetSqrMagnitude() > 2.5F*2.5F || m_TeamBlockState)
+        if (m_RecentMovement.IsMagnitudeGreaterThan(2.5F) || m_TeamBlockState)
             m_StuckTimer.Reset();
 
         if (m_DeviceState == SCANNING)
@@ -2026,7 +2026,7 @@ void ACrab::UpdateAI()
     if (m_ObstacleState == JUMPING)
     {
         // Reset stuck timer if we're moving fine
-        if (m_RecentMovement.GetSqrMagnitude() > 2.5F*2.5F)
+        if (m_RecentMovement.IsMagnitudeGreaterThan(2.5F))
             m_StuckTimer.Reset();
 
         if (m_StuckTimer.IsPastSimMS(250))
@@ -2054,7 +2054,7 @@ void ACrab::UpdateAI()
     }
     // Reset from backstepping
 // TODO: better movement detection
-    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.GetSqrMagnitude() > 15.0F*15.0F))
+    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.IsMagnitudeGreaterThan(15.0F)))
     {
         m_ObstacleState = PROCEEDING;
         m_StuckTimer.Reset();
@@ -2174,7 +2174,7 @@ void ACrab::Update()
 		// If pie menu is on, keep the angle to what it was before.
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
 			// Direct the jetpack nozzle according to movement stick if analog input is present.
-			if (m_Controller.GetAnalogMove().GetSqrMagnitude() > analogAimDeadzone*analogAimDeadzone) {
+			if (m_Controller.GetAnalogMove().IsMagnitudeGreaterThan(analogAimDeadzone)) {
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
 			// Use the aim angle if we're getting digital input.
@@ -2193,7 +2193,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Movement direction
     const float movementThreshold = 1.0f;
-	bool isStill = (m_Vel + m_PrevVel).GetSqrMagnitude() < movementThreshold*movementThreshold;
+	bool isStill = (m_Vel + m_PrevVel).IsMagnitudeLessThan(movementThreshold);
 
 	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
@@ -2275,7 +2275,7 @@ void ACrab::Update()
 		m_AimState = AIMDOWN;
 		m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 
-	} else if (analogAim.GetSqrMagnitude() > analogAimDeadzone*analogAimDeadzone && m_Status != INACTIVE) {
+	} else if (analogAim.IsMagnitudeGreaterThan(analogAimDeadzone) && m_Status != INACTIVE) {
         // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
         m_AimAngle = analogAim.GetAbsRadAngle();
@@ -2310,7 +2310,7 @@ void ACrab::Update()
     //////////////////////////////
     // Sharp aim calculation
 
-	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetSqrMagnitude() < 5.0F*5.0F) {
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.IsMagnitudeLessThan(5.0F)) {
         float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full magnitude.
@@ -2546,7 +2546,7 @@ void ACrab::Update()
     m_ViewPoint = m_Pos.GetFloored() + aimSight;
 
     // Add velocity also so the viewpoint moves ahead at high speeds
-    if (m_Vel.GetSqrMagnitude() > 10.0F*10.0F)
+    if (m_Vel.IsMagnitudeGreaterThan(10.0F))
         m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F);
 
 /* Done by pie menu now, see HandlePieCommand()

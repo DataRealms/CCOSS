@@ -317,27 +317,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	bool DataModule::GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::variant<const std::string, const std::vector<std::string>> &groups, bool excludeGroups) {
-		std::vector<std::string> groupsList;
-		if (const std::string *group = std::get_if<const std::string>(&groups)) {
-			if (!group->empty()) { groupsList.emplace_back(*group); }
-		} else {
-			groupsList = std::get<const std::vector<std::string>>(groups);
-		}
-		if (groupsList.empty()) {
+	bool DataModule::GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups) {
+		if (groups.empty()) {
 			return false;
 		}
-
 		bool foundAny = false;
 
 		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too).
-		if (std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type); classItr != m_TypeMap.end()) {
+		if (auto classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type); classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
 			for (const auto &[instanceName, entity] : classItr->second) {
 				if (excludeGroups) {
 					bool excludeEntity = false;
-					for (const std::string &group : groupsList) {
+					for (const std::string &group : groups) {
 						if (entity->IsInGroup(group)) {
 							excludeEntity = true;
 							break;
@@ -348,7 +341,7 @@ namespace RTE {
 						foundAny = true;
 					}
 				} else {
-					for (const std::string &group : groupsList) {
+					for (const std::string &group : groups) {
 						if (entity->IsInGroup(group)) {
 							entityList.emplace_back(entity);
 							foundAny = true;

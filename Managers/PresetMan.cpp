@@ -544,41 +544,10 @@ bool PresetMan::GetAllOfTypeInModuleSpace(std::list<Entity *> &entityList, std::
     return foundAny;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAllOfGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list all previously read in (defined) Entitys which are
-//                  associated with a specific group.
-
-bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string type, int whichModule)
-{
-    RTEAssert(!group.empty(), "Looking for empty group!");
-
-    bool foundAny = false;
-
-    // All modules
-    if (whichModule < 0)
-    {
-        // Get from all modules
-        for (int i = 0; i < m_pDataModules.size(); ++i)
-            // Send the list to each module, let them add
-            foundAny = m_pDataModules[i]->GetAllOfGroup(entityList, group, type) || foundAny;
-    }
-    // Specific one
-    else
-    {
-        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-        foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
-    }
-
-    return foundAny;
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
-	RTEAssert(!groups.empty(), "Looking for empty groups!");
+	RTEAssert(!groups.empty(), "Looking for empty groups in PresetMan::GetAllOfGroups!");
 	bool foundAny = false;
 
 	if (whichModule < 0) {
@@ -586,7 +555,7 @@ bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vecto
 			foundAny = dataModule->GetAllOfGroups(entityList, groups, type) || foundAny;
 		}
 	} else {
-		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllOfGroups!");
 		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, groups, type);
 	}
 	return foundAny;
@@ -595,12 +564,10 @@ bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vecto
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
-	RTEAssert(!type.empty(), "Looking presets of type without specifying type in PresetMan::GetAllNotOfGroups");
-
 	if (groups.empty()) {
-		RTEAbort("Looking for empty groups in PresetMan::GetAllNotOfGroups");
+		RTEAbort("Looking for empty groups in PresetMan::GetAllNotOfGroups!");
 	} else if (std::find(groups.begin(), groups.end(), "All") != groups.end()) {
-		RTEAbort("Trying to exclude all groups while looking for presets in PresetMan::GetAllNotOfGroups");
+		RTEAbort("Trying to exclude all groups while looking for presets in PresetMan::GetAllNotOfGroups!");
 	}
 
 	bool foundAny = false;
@@ -610,7 +577,7 @@ bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::ve
 			foundAny = dataModule->GetAllNotOfGroups(entityList, groups, type) || foundAny;
 		}
 	} else {
-		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllNotOfGroups!");
 		foundAny = m_pDataModules[whichModule]->GetAllNotOfGroups(entityList, groups, type);
 	}
 	return foundAny;
@@ -637,13 +604,13 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
         // Get from all modules
         for (int i = 0; i < m_pDataModules.size(); ++i)
             // Send the list to each module, let them add
-            foundAny = m_pDataModules[i]->GetAllOfGroup(entityList, group, type) || foundAny;
+			foundAny = m_pDataModules[i]->GetAllOfGroups(entityList, { group }, type) || foundAny;
     }
     // Specific one
     else
     {
         RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-        foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, { group }, type);
     }
 
     // Didn't find any of that group in those module(s)
@@ -683,11 +650,11 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 	// All modules
 	if (whichModule < 0) {
 		for (DataModule *dataModule : m_pDataModules) {
-			if (dataModule->IsFaction()) { foundAny = dataModule->GetAllOfGroup(tempList, group, type) || foundAny; }
+			if (dataModule->IsFaction()) { foundAny = dataModule->GetAllOfGroups(tempList, { group }, type) || foundAny; }
 		}
 	} else {
 		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-		foundAny = m_pDataModules[whichModule]->GetAllOfGroup(tempList, group, type);
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(tempList, { group }, type);
 	}
 
 	//Filter found entities, we need only buyables

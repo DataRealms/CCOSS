@@ -209,15 +209,6 @@ namespace RTE {
 		bool GetGroupsWithType(std::list<std::string> &groupList, const std::string &withType);
 
 		/// <summary>
-		/// Adds to a list all previously read in (defined) Entities which are associated with a specific group.
-		/// </summary>
-		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
-		/// <param name="group">The group to look for.</param>
-		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
-		/// <returns>Whether any Entities were found and added to the list.</returns>
-		bool GetAllOfGroup(std::list<Entity *> &entityList, const std::string &group, const std::string &type) { return GetAllOfOrNotOfGroups(entityList, type, group, false); }
-
-		/// <summary>
 		/// Adds to a list all previously read in (defined) Entities which are associated with several specific groups.
 		/// </summary>
 		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
@@ -225,15 +216,6 @@ namespace RTE {
 		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
 		/// <returns>Whether any Entities were found and added to the list.</returns>
 		bool GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type) { return GetAllOfOrNotOfGroups(entityList, type, groups, false); }
-
-		/// <summary>
-		/// Adds to a list all previously read in (defined) Entities which are not associated with a specific group.
-		/// </summary>
-		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
-		/// <param name="group">The group to exclude.</param>
-		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
-		/// <returns>Whether any Entities were found and added to the list.</returns>
-		bool GetAllNotOfGroup(std::list<Entity *> &entityList, const std::string &group, const std::string &type) { return GetAllOfOrNotOfGroups(entityList, type, group, true); }
 
 		/// <summary>
 		/// Adds to a list all previously read in (defined) Entities which are not associated with several specific groups.
@@ -365,10 +347,10 @@ namespace RTE {
 		/// </summary>
 		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
 		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
-		/// <param name="groups">The group or groups to look for.</param>
+		/// <param name="groups">The groups to look for.</param>
 		/// <param name="excludeGroups">Whether Entities belonging to the specified group or groups should be excluded.</param>
 		/// <returns>Whether any Entities were found and added to the list.</returns>
-		bool GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::variant<const std::string, const std::vector<std::string>> &groups, bool excludeGroups);
+		bool GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups);
 
 		/// <summary>
 		/// Checks if the type map has an instance added of a specific name and exact type.

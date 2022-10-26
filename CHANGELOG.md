@@ -194,6 +194,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	AngleWithinRange(float angleToCheck, float startAngle, float endAngle) -- Returns whether or not the angleToCheck is between the startAngle and endAngle, in a counter-clockwise direction (e.g. 0.5rad is between 0rad and 1rad, and 0.3rad is between 2.5rad and 1 rad).	 
 	ClampAngle(float angleToClamp, float startAngle, float endAngle) -- Returns the angleToClamp, clamped between the startAngle and endAngle.
 	```
+	
+- Added support for nested block comments in INI. ([Issue #248](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/248))  
+	The reader will track block comment open tags and crash if a file ends while a block is open, reporting the line it was opened on.
+	
 
 </details>
 

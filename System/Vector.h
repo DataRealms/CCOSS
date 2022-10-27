@@ -161,14 +161,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="magnitude">A float value that the vector's magnitude will be compared against.</param>
 		/// <returns>A boolean that's true if the vector's magnitude is less than the argument.</returns>
-		float IsMagnitudeLessThan(float magnitude) const { return GetSqrMagnitude() < magnitude * magnitude; }
+		bool IsMagnitudeLessThan(float magnitude) const { return GetSqrMagnitude() < magnitude * magnitude; }
 
 		/// <summary>
 		/// Returns whether this Vector has greater magnitude than the input.
 		/// </summary>
 		/// <param name="magnitude">A float value that the vector's magnitude will be compared against.</param>
 		/// <returns>A boolean that's true if the vector's magnitude is greater than the argument.</returns>
-		float IsMagnitudeGreaterThan(float magnitude) const { return GetSqrMagnitude() > magnitude * magnitude; }
+		bool IsMagnitudeGreaterThan(float magnitude) const { return GetSqrMagnitude() > magnitude * magnitude; }
 
 		/// <summary>
 		/// Sets the magnitude of this Vector. A negative magnitude will invert the Vector's direction.

@@ -154,7 +154,7 @@ namespace RTE {
 		/// Gets the magnitude of this Vector.
 		/// </summary>
 		/// <returns>A float describing the magnitude.</returns>
-		float GetMagnitude() const { return std::sqrt(m_X*m_X + m_Y*m_Y); }
+		float GetMagnitude() const { return std::sqrt(GetSqrMagnitude()); }
 
 		/// <summary>
 		/// Returns whether this Vector has less magnitude than the input.

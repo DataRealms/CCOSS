@@ -28,7 +28,7 @@ namespace RTE
 
 class SceneObject;
 class ObjectPickerGUI;
-class PieMenuGUI;
+class PieMenu;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +139,12 @@ public:
 
     void SetController(Controller *pController);
 
+	/// <summary>
+	/// Sets the FeatureSet for this SceneEditorGUI, and sets up the PieMenu accordingly.
+	/// </summary>
+	/// <param name="newFeatureSet">The new FeatureSet for this SceneEditorGUI.</param>
+	void SetFeatureSet(SceneEditorGUI::FeatureSets newFeatureSet);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetPosOnScreen
@@ -177,9 +183,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 // Arguments:       None.
-// Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
+// Return value:    The enum'd int of any slice activated. See the PieSlice::SliceType enum.
 
-    PieSlice::PieSliceIndex GetActivatedPieSlice() { return m_ActivatedPieSliceType; }
+	PieSlice::SliceType GetActivatedPieSlice() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -298,16 +304,6 @@ public:
 
 protected:
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdatePieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the PieMenu config based ont eh current editor state.
-// Arguments:       None.
-// Return value:    None.
-
-    void UpdatePieMenu();
-
 	/// <summary>
 	/// Updates the path to the current brain in the cursor or resident in the scene, if any. If there's none, the path is cleared.
 	/// </summary>
@@ -356,9 +352,7 @@ protected:
 	// Whether we need a clear path to orbit to place brain
 	bool m_RequireClearPathToOrbit;
 
-    // The pie menu
-    PieMenuGUI *m_pPieMenu;
-    PieSlice::PieSliceIndex m_ActivatedPieSliceType; //!< The activated PieSliceType, reset every frame.
+	std::unique_ptr<PieMenu> m_PieMenu; //!< The PieMenu for this SceneEditorGUI.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

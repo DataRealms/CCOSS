@@ -92,6 +92,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Sets which DataModule ID should be treated as the native tech of the user of this menu.
+		/// This will also apply the DataModule's faction BuyMenu theme skin and background color for visual consistency, if applicable.
 		/// </summary>
 		/// <param name="whichModule">The module ID to set as the native one. 0 means everything is native.</param>
 		void SetNativeTechModule(int whichModule);

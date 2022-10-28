@@ -90,6 +90,7 @@ EntityAllocation(AHuman);
 AddScriptFunctionNames(Actor, "OnStride");
 SerializableOverrideMethods;
 ClassInfoGetters;
+DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AHuman
@@ -401,27 +402,12 @@ ClassInfoGetters;
 
     bool CollideAtPoint(HitData &hitData) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-   bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-// Arguments:       The pie menu command to handle. See the PieSliceIndex enum.
-// Return value:    Whetehr any slice was handled. False if no matching slice handler was
-//                  found, or there was no slice currently activated by the pie menu.
-
-    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
+    /// <summary>
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its SliceType.
+    /// </summary>
+    /// <param name="pieSliceType">The SliceType of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
+    bool HandlePieCommand(PieSlice::SliceType pieSliceType) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -452,7 +438,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipDeviceInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of the specified group in the inventory. If the held device already 
+//                  of the specified group in the inventory. If the held device already
 //                  is of that group, or no device is in inventory, nothing happens.
 // Arguments:       The group the device must belong to.
 //                  Whether to actually equip any matching item found in the inventory,
@@ -466,7 +452,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipLoadedFirearmInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first loaded HDFirearm
-//                  of the specified group in the inventory. If no such weapon is in the 
+//                  of the specified group in the inventory. If no such weapon is in the
 //                  inventory, nothing happens.
 // Arguments:       The group the HDFirearm must belong to. "Any" for all groups.
 //                  The group the HDFirearm must *not* belong to. "None" for no group.
@@ -481,7 +467,7 @@ ClassInfoGetters;
 // Virtual Method:  EquipNamedDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of with the specified preset name in the inventory. If the held device already 
+//                  of with the specified preset name in the inventory. If the held device already
 //                  is of that preset name, or no device is in inventory, nothing happens.
 // Arguments:       The preset name the device must have.
 //                  Whether to actually equip any matching item found in the inventory,
@@ -815,13 +801,6 @@ ClassInfoGetters;
 
 	void Update() override;
 
-    /// <summary>
-    /// Executes the Lua-defined OnPieMenu event handler for this AHuman.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	int OnPieMenu(Actor *pieMenuActor) override;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -885,7 +864,7 @@ ClassInfoGetters;
 // Method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       None.
 // Return value:    The default set force maximum, in kg * m/s^2.
 
@@ -896,7 +875,7 @@ ClassInfoGetters;
 // Method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 // Arguments:       The default set force maximum, in kg * m/s^2.
 // Return value:    None
 
@@ -907,14 +886,14 @@ ClassInfoGetters;
     /// </summary>
     /// <param name="movementState">The MovementState to get the rot angle target for.</param>
     /// <returns>The target rot angle for the given MovementState.</returns>
-    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets.at(movementState); }
+    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets[movementState]; }
 
     /// <summary>
     /// Sets the target rot angle for the given MovementState.
     /// </summary>
     /// <param name="movementState">The MovementState to get the rot angle target for.</param>
     /// <param name="newRotAngleTarget">The new rot angle target to use.</param>
-    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets.at(movementState) = newRotAngleTarget; }
+    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets[movementState] = newRotAngleTarget; }
 
 	/// <summary>
 	/// Gets the duration it takes this AHuman to fully charge a throw.
@@ -1120,6 +1099,15 @@ protected:
     Timer m_PatrolTimer;
     // Timer for how long to be firing the jetpack in a direction
     Timer m_JumpTimer;
+
+#pragma region Event Handling
+	/// <summary>
+	/// Event listener to be run while this AHuman's PieMenu is opened.
+	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int WhilePieMenuOpenListener(const PieMenu *pieMenu) override;
+#pragma endregion
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

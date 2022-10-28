@@ -19,7 +19,6 @@
 #include "AEmitter.h"
 #include "HDFirearm.h"
 #include "Controller.h"
-#include "PieMenuGUI.h"
 #include "SceneMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"
@@ -535,65 +534,31 @@ void ACraft::SetTeam(int team)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-	PieSlice deliverSlice("Deliver Cargo", PieSlice::PieSliceIndex::PSI_DELIVER, PieSlice::SliceDirection::RIGHT);
-    pPieMenu->AddSlice(deliverSlice);
-    PieSlice returnSlice("Return", PieSlice::PieSliceIndex::PSI_RETURN, PieSlice::SliceDirection::UP);
-	pPieMenu->AddSlice(returnSlice);
-	
-	PieSlice staySlice("Stay", PieSlice::PieSliceIndex::PSI_STAY, PieSlice::SliceDirection::DOWN);
-    pPieMenu->AddSlice(staySlice);
-    PieSlice scuttleSlice("Scuttle!", PieSlice::PieSliceIndex::PSI_SCUTTLE, PieSlice::SliceDirection::LEFT);
-	pPieMenu->AddSlice(scuttleSlice);
-
-    Actor::AddPieMenuSlices(pPieMenu);
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool ACraft::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
-{
-    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
-    {
-        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DELIVER)
-        {
+bool ACraft::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Deliver) {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RETURN)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::Return) {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_STAY)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::Stay) {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SCUTTLE)
+        } else if (pieSliceIndex == PieSlice::SliceType::Scuttle) {
             m_AIMode = AIMODE_SCUTTLE;
-        else
+        } else {
             return Actor::HandlePieCommand(pieSliceIndex);
-
+        }
         m_StuckTimer.Reset();
     }
-
     return false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -767,7 +732,7 @@ void ACraft::DropAllInventory()
                 // Avoid this immediate collisions with it
                 SetWhichMOToNotHit(*exitee, 0.5f);
                 // Add to scene
-                g_MovableMan.AddItem(*exitee);
+                g_MovableMan.AddMO(*exitee);
                 // Remove passenger from inventory
                 m_Inventory.erase(exitee);
                 // Reset timer interval and quit until next one is due
@@ -961,7 +926,7 @@ void ACraft::Update()
 
     if (m_Pos.m_Y < -m_CharHeight)
     {
-        g_ActivityMan.GetActivity()->EnteredOrbit(this);
+        g_ActivityMan.GetActivity()->HandleCraftEnteringOrbit(this);
         // Play fading away thruster sound
 //        if (m_pMThruster && m_pMThruster->IsEmitting())
 //            m_pMThruster->(pTargetBitmap, targetPos, mode, onlyPhysical);
@@ -974,7 +939,7 @@ void ACraft::Update()
 		{
 			if (m_Pos.m_X < -GetSpriteWidth() || m_Pos.m_X > g_SceneMan.GetSceneWidth() + GetSpriteWidth())
 			{
-				g_ActivityMan.GetActivity()->EnteredOrbit(this);
+				g_ActivityMan.GetActivity()->HandleCraftEnteringOrbit(this);
 				m_ToDelete = true;
 			}
 		}

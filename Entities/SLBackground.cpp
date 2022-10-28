@@ -39,7 +39,7 @@ namespace RTE {
 
 		m_Bitmaps.clear();
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
-		m_MainBitmap = m_Bitmaps.at(0);
+		m_MainBitmap = m_Bitmaps[0];
 
 		if (m_FrameCount == 1) {
 			m_SpriteAnimMode = SpriteAnimMode::NOANIM;
@@ -69,7 +69,7 @@ namespace RTE {
 
 		m_Bitmaps.clear();
 		m_Bitmaps = reference.m_Bitmaps;
-		m_MainBitmap = m_Bitmaps.at(0);
+		m_MainBitmap = m_Bitmaps[0];
 
 		m_FillColorLeft = reference.m_FillColorLeft;
 		m_FillColorRight = reference.m_FillColorRight;

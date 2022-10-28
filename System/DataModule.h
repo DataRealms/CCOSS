@@ -22,6 +22,17 @@ namespace RTE {
 		SerializableClassNameGetter;
 		SerializableOverrideMethods;
 
+		/// <summary>
+		/// Struct that holds data about the custom BuyMenu/ObjectPicker theme of this DataModule.
+		/// Themes are used when a DataModule is considered a faction and is selected to be played as in an Activity.
+		/// </summary>
+		struct BuyMenuTheme {
+			std::string SkinFilePath = ""; //!< Path to the custom BuyMenu skin file.
+			std::string BannerImagePath = ""; //!< Path to the custom BuyMenu banner image.
+			std::string LogoImagePath = ""; //< Path to the custom BuyMenu logo.
+			int BackgroundColorIndex = -1; //!< The custom BuyMenu background color.
+		};
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a DataModule object in system memory. Create() should be called before using the object.
@@ -111,6 +122,12 @@ namespace RTE {
 		bool IsFaction() const { return m_IsFaction; }
 
 		/// <summary>
+		/// Gets whether this DataModule is considered a merchant.
+		/// </summary>
+		/// <returns>Whether this DataModule is considered a merchant or not.</returns>
+		bool IsMerchant() const { return m_IsMerchant; }
+
+		/// <summary>
 		/// Gets the version number of this DataModule.
 		/// </summary>
 		/// <returns>An int with the version number, starting at 1.</returns>
@@ -127,6 +144,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Crab-to-human spawn ration value.</returns>
 		float GetCrabToHumanSpawnRatio() const { return m_CrabToHumanSpawnRatio; }
+
+		/// <summary>
+		/// Gets the faction BuyMenu theme data of this DataModule.
+		/// </summary>
+		/// <returns>The faction BuyMenu theme information of this DataModule</returns>
+		const BuyMenuTheme & GetFactionBuyMenuTheme() const { return m_BuyMenuTheme; }
 #pragma endregion
 
 #pragma region Entity Mapping
@@ -186,13 +209,22 @@ namespace RTE {
 		bool GetGroupsWithType(std::list<std::string> &groupList, const std::string &withType);
 
 		/// <summary>
-		/// Adds to a list all previously read in (defined) Entities which are associated with a specific group.
+		/// Adds to a list all previously read in (defined) Entities which are associated with several specific groups.
 		/// </summary>
-		/// <param name="objectList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
-		/// <param name="group">The group to look for.</param>
+		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
+		/// <param name="groups">A list of groups to look for.</param>
 		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
 		/// <returns>Whether any Entities were found and added to the list.</returns>
-		bool GetAllOfGroup(std::list<Entity *> &objectList, const std::string &group, const std::string &type);
+		bool GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type) { return GetAllOfOrNotOfGroups(entityList, type, groups, false); }
+
+		/// <summary>
+		/// Adds to a list all previously read in (defined) Entities which are not associated with several specific groups.
+		/// </summary>
+		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
+		/// <param name="group">A list of groups to exclude.</param>
+		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
+		/// <returns>Whether any Entities were found and added to the list.</returns>
+		bool GetAllNotOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type) { return GetAllOfOrNotOfGroups(entityList, type, groups, true); }
 
 		/// <summary>
 		/// Adds to a list all previously read in (defined) Entities, by inexact type.
@@ -265,12 +297,15 @@ namespace RTE {
 		std::string m_Description; //!< Brief description of what this module is and contains.
 		std::string m_ScriptPath; //!< Path to script to execute when this module is loaded.
 		bool m_IsFaction; //!< Whether this data module is considered a faction.
+		bool m_IsMerchant; //!< Whether this data module is considered a merchant.
 		std::string m_SupportedGameVersion; //!< Game version this DataModule supports. Needs to match exactly for this DataModule to be allowed. Base DataModules don't need this.
 		int m_Version; //!< Version number, starting with 1.
 		int m_ModuleID; //!< ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
 
 		ContentFile m_IconFile; //!< File to the icon/symbol bitmap.
 		BITMAP *m_Icon; //!< Bitmap with the icon loaded from above file.
+
+		BuyMenuTheme m_BuyMenuTheme; //!< Faction BuyMenu theme data.
 
 		float m_CrabToHumanSpawnRatio; //!< Crab-to-human Spawn ratio to replace value from Constants.lua.
 
@@ -291,7 +326,7 @@ namespace RTE {
 		/// There can be multiple entries of the same instance name in any of the type sub-maps, but only ONE whose exact class is that of the type-list!
 		/// The Entity instances are NOT owned by this map.
 		/// </summary>
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>> m_TypeMap;
+		std::unordered_map<std::string, std::list<std::pair<std::string, Entity *>>> m_TypeMap;
 
 	private:
 
@@ -307,6 +342,16 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Entity Mapping
+		/// <summary>
+		/// Shared method for filling a list with all previously read in (defined) Entities which are or are not associated with a specific group or groups.
+		/// </summary>
+		/// <param name="entityList">Reference to a list which will get all matching Entities added to it. Ownership of the list or the Entities placed in it are NOT transferred!</param>
+		/// <param name="type">The name of the least common denominator type of the Entities you want. "All" will look at all types.</param>
+		/// <param name="groups">The groups to look for.</param>
+		/// <param name="excludeGroups">Whether Entities belonging to the specified group or groups should be excluded.</param>
+		/// <returns>Whether any Entities were found and added to the list.</returns>
+		bool GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups);
+
 		/// <summary>
 		/// Checks if the type map has an instance added of a specific name and exact type.
 		/// Does not check if any parent types with that name has been added. If found, that instance is returned, otherwise 0.

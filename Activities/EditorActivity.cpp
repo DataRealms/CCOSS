@@ -61,6 +61,7 @@ void EditorActivity::Clear()
     m_ModuleSpaceID = 0;
     m_NeedSave = false;
     m_HasEverBeenSaved = false;
+    m_PieMenu = nullptr;
     m_pGUIScreen = 0;
     m_pGUIInput = 0;
     m_pGUIController = 0;
@@ -119,6 +120,7 @@ int EditorActivity::Create(const EditorActivity &reference)
     m_EditorMode = reference.m_EditorMode;
     m_ModuleSpaceID = reference.m_ModuleSpaceID;
     m_NeedSave = reference.m_NeedSave;
+	if (reference.m_PieMenu) { m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(reference.m_PieMenu->Clone())); }
 
     return 0;
 }

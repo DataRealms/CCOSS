@@ -10,7 +10,6 @@ sources += files(
 'MetagameGUI.cpp',
 'ModManagerGUI.cpp',
 'ObjectPickerGUI.cpp',
-'PieMenuGUI.cpp',
 'ScenarioActivityConfigGUI.cpp',
 'ScenarioGUI.cpp',
 'SceneEditorGUI.cpp',

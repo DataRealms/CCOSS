@@ -27,20 +27,20 @@ namespace RTE {
 		m_Sample = 0;
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
-			m_PerfData.at(counter).fill(0);
-			m_PerfPercentages.at(counter).fill(0);
+			m_PerfData[counter].fill(0);
+			m_PerfPercentages[counter].fill(0);
 		}
 		m_PerfMeasureStart.fill(0);
 		m_PerfMeasureStop.fill(0);
 
 		// Set up performance counter's names
-		m_PerfCounterNames.at(PerformanceCounters::SimTotal) = "Total";
-		m_PerfCounterNames.at(PerformanceCounters::ActorsTravel) = "Act Travel";
-		m_PerfCounterNames.at(PerformanceCounters::ParticlesTravel) = "Prt Travel";
-		m_PerfCounterNames.at(PerformanceCounters::ActorsUpdate) = "Act Update";
-		m_PerfCounterNames.at(PerformanceCounters::ParticlesUpdate) = "Prt Update";
-		m_PerfCounterNames.at(PerformanceCounters::ActorsAIUpdate) = "Act AI";
-		m_PerfCounterNames.at(PerformanceCounters::ActivityUpdate) = "Activity";
+		m_PerfCounterNames[PerformanceCounters::SimTotal] = "Total";
+		m_PerfCounterNames[PerformanceCounters::ActorsTravel] = "Act Travel";
+		m_PerfCounterNames[PerformanceCounters::ParticlesTravel] = "Prt Travel";
+		m_PerfCounterNames[PerformanceCounters::ActorsUpdate] = "Act Update";
+		m_PerfCounterNames[PerformanceCounters::ParticlesUpdate] = "Prt Update";
+		m_PerfCounterNames[PerformanceCounters::ActorsAIUpdate] = "Act AI";
+		m_PerfCounterNames[PerformanceCounters::ActivityUpdate] = "Activity";
 
 		return 0;
 	}
@@ -71,14 +71,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) {
-		m_PerfMeasureStart.at(counter) = g_TimerMan.GetAbsoluteTime();
+		m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoluteTime();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::StopPerformanceMeasurement(PerformanceCounters counter) {
-		m_PerfMeasureStop.at(counter) = g_TimerMan.GetAbsoluteTime();
-		AddPerformanceSample(counter, m_PerfMeasureStop.at(counter) - m_PerfMeasureStart.at(counter));
+		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoluteTime();
+		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,8 +88,8 @@ namespace RTE {
 		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
-			m_PerfData.at(counter).at(m_Sample) = 0;
-			m_PerfPercentages.at(counter).at(m_Sample) = 0;
+			m_PerfData[counter].at(m_Sample) = 0;
+			m_PerfPercentages[counter].at(m_Sample) = 0;
 		}
 	}
 
@@ -97,8 +97,8 @@ namespace RTE {
 
 	void PerformanceMan::CalculateSamplePercentages() {
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
-			int samplePercentage = static_cast<int>(static_cast<float>(m_PerfData.at(counter).at(m_Sample)) / static_cast<float>(m_PerfData.at(counter).at(PerformanceCounters::SimTotal)) * 100);
-			m_PerfPercentages.at(counter).at(m_Sample) = samplePercentage;
+			int samplePercentage = static_cast<int>(static_cast<float>(m_PerfData[counter].at(m_Sample)) / static_cast<float>(m_PerfData[counter][PerformanceCounters::SimTotal]) * 100);
+			m_PerfPercentages[counter].at(m_Sample) = samplePercentage;
 		}
 	}
 
@@ -108,7 +108,7 @@ namespace RTE {
 		uint64_t totalPerformanceMeasurement = 0;
 		int sample = m_Sample;
 		for (int i = 0; i < c_Average; ++i) {
-			totalPerformanceMeasurement += m_PerfData.at(counter).at(sample);
+			totalPerformanceMeasurement += m_PerfData[counter].at(sample);
 			if (sample == 0) { sample = c_MaxSamples; }
 			sample--;
 		}
@@ -188,7 +188,7 @@ namespace RTE {
 		for (int pc = 0; pc < PerformanceCounters::PerfCounterCount; ++pc) {
 			int blockStart = c_GraphsStartOffsetY + pc * c_GraphBlockHeight;
 
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames.at(pc), GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
 
 			// Print percentage from PerformanceCounters::SimTotal
 			int perc = static_cast<int>((static_cast<float>(GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerformanceCounterAverage(PerformanceCounters::SimTotal)) * 100));
@@ -210,11 +210,11 @@ namespace RTE {
 			int sample = m_Sample;
 			for (int i = 0; i < c_MaxSamples; ++i) {
 				// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
-				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData.at(pc).at(sample)) / (1000000.0F / 30.0F) * 100.0F), 0, 100);
+				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData[pc].at(sample)) / (1000000.0F / 30.0F) * 100.0F), 0, 100);
 				int dotHeight = static_cast<int>(static_cast<float>(c_GraphHeight) / 100.0F * static_cast<float>(value));
 
 				bitmapToDrawTo.SetPixel(c_StatsOffsetX - 1 + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
-				peak = std::clamp(peak, 0, static_cast<int>(m_PerfData.at(pc).at(sample)));
+				peak = std::clamp(peak, 0, static_cast<int>(m_PerfData[pc].at(sample)));
 
 				if (sample == 0) { sample = c_MaxSamples; }
 				sample--;

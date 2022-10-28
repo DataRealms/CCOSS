@@ -33,39 +33,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LinePrimitive::lineWithThickness(BITMAP *drawScreen, const Vector &startPos, const Vector &endPos, unsigned char color, const int thickness) {
-		bool oddThickness = thickness % 2;
-		Vector normal(
-			-(startPos.GetFloorIntY() - endPos.GetFloorIntY())	/*-y_delta*/,
-			startPos.GetFloorIntX() - endPos.GetFloorIntX() 	/*x_delta*/
-		);
-
-		// normalLenFactor	- incrementally relocate normal vector from center line 
-		// normalUnit	 	- scale normal vector to be unit vector relative to increment value
-		if (oddThickness) { line(drawScreen, startPos.GetFloorIntX(), startPos.GetFloorIntY(), endPos.GetFloorIntX(), endPos.GetFloorIntY(), color); }
-		for (int i = oddThickness ? 1 : 0; i < thickness / 2; ++i) {
-			float normalLenFactor = i / normal.GetMagnitude();
-			Vector normalUnit(normal.GetFloorIntX() * normalLenFactor, normal.GetFloorIntY() * normalLenFactor);
-			line(drawScreen, startPos.GetFloorIntX() + normalUnit.GetX(), startPos.GetFloorIntY() + normalUnit.GetY(), endPos.GetFloorIntX() + normalUnit.GetX(), endPos.GetFloorIntY() + normalUnit.GetY(), color);
-		}
-		for (int i = oddThickness ? -1 : 0; i > -(thickness / 2); --i) {
-			float normalLenFactor = abs(i) / normal.GetMagnitude();
-			Vector normalUnit(normal.GetFloorIntX() * normalLenFactor, normal.GetFloorIntY() * normalLenFactor);
-			line(drawScreen, startPos.GetFloorIntX() - normalUnit.GetX(), startPos.GetFloorIntY() - normalUnit.GetY(), endPos.GetFloorIntX() - normalUnit.GetX(), endPos.GetFloorIntY() - normalUnit.GetY(), color);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LinePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
-			if (m_Thickness > 1) {
-				lineWithThickness(drawScreen, drawStart, drawEnd, m_Color, m_Thickness);
-			} else {
-				line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
-			}
+			line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
 		} else {
 			Vector drawStartLeft;
 			Vector drawEndLeft;
@@ -75,13 +47,8 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
 
-			if (m_Thickness > 1) {
-				lineWithThickness(drawScreen, drawStartLeft, drawEndLeft, m_Color, m_Thickness);
-				lineWithThickness(drawScreen, drawStartRight, drawEndRight, m_Color, m_Thickness);
-			} else {
-				line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
-				line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
-			}
+			line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
+			line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
 		}
 	}
 

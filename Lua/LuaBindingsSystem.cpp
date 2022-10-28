@@ -184,6 +184,7 @@ namespace RTE {
 		.property("CeilingedY", &Vector::GetCeilingIntY)
 		.property("Ceilinged", &Vector::GetCeilinged)
 		.property("Magnitude", &Vector::GetMagnitude)
+		.property("SqrMagnitude", &Vector::GetSqrMagnitude)
 		.property("Largest", &Vector::GetLargest)
 		.property("Smallest", &Vector::GetSmallest)
 		.property("Normalized", &Vector::GetNormalized)

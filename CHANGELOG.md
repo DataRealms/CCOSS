@@ -197,8 +197,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added support for nested block comments in INI. ([Issue #248](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/248))  
 	The reader will track block comment open tags and crash if a file ends while a block is open, reporting the line it was opened on.
-	
 
+- New `Vector` Lua (R/O) property `SqrMagnitude` which returns the squared magnitude of the `Vector`.
+	Can be used for more efficient comparison with `vector.SqrMagnitude > (floatValue * floatValue)` over `vector.Magnitude > floatValue`.
+
+- New `Vector` Lua convenience functions for more efficient magnitude comparison.  
+	```lua
+	-- These perform vector.SqrMagnitude > or < (floatValue * floatValue).
+	vector:MagnitudeIsGreaterThan(floatValue) -- or (not vector:MagnitudeIsGreaterThan(floatValue)) for (vector.SqrMagnitude <= (floatValue * floatValue)).
+	vector:MagnitudeIsLessThan(floatValue) -- or (not vector:MagnitudeIsLessThan(floatValue)) for (vector.SqrMagnitude >= (floatValue * floatValue)).
+	```
+	
 </details>
 
 <details><summary><b>Changed</b></summary>

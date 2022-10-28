@@ -194,6 +194,8 @@ namespace RTE {
 		.def_readwrite("X", &Vector::m_X)
 		.def_readwrite("Y", &Vector::m_Y)
 
+		.def("MagnitudeIsGreaterThan", &Vector::MagnitudeIsGreaterThan)
+		.def("MagnitudeIsLessThan", &Vector::MagnitudeIsLessThan)
 		.def("SetMagnitude", &Vector::SetMagnitude)
 		.def("GetXFlipped", &Vector::GetXFlipped)
 		.def("GetYFlipped", &Vector::GetYFlipped)

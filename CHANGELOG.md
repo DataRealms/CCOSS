@@ -198,6 +198,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added support for nested block comments in INI. ([Issue #248](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/248))  
 	The reader will track block comment open tags and crash if a file ends while a block is open, reporting the line it was opened on.
 	
+- Added thickness option to Line primitives. ([Issue #403](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/403))  
+	New bindings with argument for thickness are:  
+	`PrimitiveMan:DrawLinePrimitive(startPos, endPos, color, thickness)`  
+	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
+	Original bindings with no thickness argument are untouched and can be called as they were.
 
 </details>
 

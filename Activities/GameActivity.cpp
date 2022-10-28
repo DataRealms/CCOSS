@@ -1494,7 +1494,8 @@ void GameActivity::Update()
                 m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
             }
             else if (pMarkedActor) {
-				if (markedDistance.MagnitudeIsGreaterThan(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(player) / 4))) {
+                int quarterFrameBuffer = g_FrameMan.GetPlayerFrameBufferWidth(player) / 4;
+				if (markedDistance.MagnitudeIsGreaterThan(static_cast<float>(quarterFrameBuffer))) {
 					pMarkedActor->GetPieMenu()->Wobble();
 				} else {
 					pMarkedActor->GetPieMenu()->FreezeAtRadius(30);

@@ -374,20 +374,23 @@ float LimbPath::GetNextTimeChunk(const Vector &limbPos)
 void LimbPath::ReportProgress(const Vector &limbPos)
 {
 	if (IsStaticPoint()) {
-		m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).MagnitudeIsLessThan(1.0F);
+        const float staticPointEndedThreshold = 1.0F;
+		m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).MagnitudeIsLessThan(staticPointEndedThreshold);
 	} else {
         // Check if we are sufficiently close to the target to start going after the next one.
         Vector distVec = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget());
         float distance = distVec.GetMagnitude();
         float segMag = (*(m_CurrentSegment)).GetMagnitude();
-// TODO: Don't hardcode this!")
-        if (distance < 1.5)
+
+        // TODO: Don't hardcode this!")
+        const float segmentEndedThreshold = 1.5F;
+        if (distance < segmentEndedThreshold)
         {
             if (++(m_CurrentSegment) == m_Segments.end())
             {
                 --(m_CurrentSegment);
                 // Get normalized progress measure toward the target.
-                m_SegProgress = distance > segMag ? 0.0 : (1.0 - (distance / segMag));
+                m_SegProgress = distance > segMag ? 0.0F : (1.0F - (distance / segMag));
                 m_Ended = true;
             }
             // Next segment!
@@ -400,7 +403,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
         }
         else
         {
-            m_SegProgress = distance > segMag ? 0.0 : (1.0 - (distance / segMag));
+            m_SegProgress = distance > segMag ? 0.0F : (1.0F - (distance / segMag));
             m_Ended = false;
         }
 

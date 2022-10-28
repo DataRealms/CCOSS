@@ -175,13 +175,15 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
     // If we're sucking on an MO already
     if (m_pIncomingMO)
     {
+        const float suckageRange = m_Range * 1.5F;
+
         // Check that it's still active and valid (not destroyed)
         if (!(g_MovableMan.IsDevice(m_pIncomingMO) || g_MovableMan.IsActor(m_pIncomingMO)))
         {
             m_pIncomingMO = 0;
         }
         // See if it's now out of range of suckage
-        else if ((exitPos - m_pIncomingMO->GetPos()).MagnitudeIsGreaterThan(m_Range * 1.5F))
+        else if ((exitPos - m_pIncomingMO->GetPos()).MagnitudeIsGreaterThan(suckageRange))
         {
             m_pIncomingMO = 0;
         }
@@ -200,8 +202,11 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
             // Figure the distance left for the object to go to reach the exit
             Vector toGo = exitPos - m_pIncomingMO->GetPos();
             // If the object is still a bit away from the exit goal, override velocity of the object to head straight into the exit
-            if (toGo.MagnitudeIsGreaterThan(1.0F))
+            const float threshold = 1.0F;
+            if (toGo.MagnitudeIsGreaterThan(threshold))
+            {
                 m_pIncomingMO->SetVel(toGo.SetMagnitude(m_Velocity.GetMagnitude()));
+            }
 
             // Turn off collisions between the object and the craft sucking it in
             m_pIncomingMO->SetWhichMOToNotHit(pExitOwner, 3);
@@ -861,14 +866,14 @@ void ACraft::Update()
 
     ///////////////////////////////////////////////////
     // Crash detection and handling
-
-    if (m_DeepHardness > 5 && m_Vel.MagnitudeIsGreaterThan(1.0F))
+    const float crashSpeedThreshold = 1.0F;
+    if (m_DeepHardness > 5 && m_Vel.MagnitudeIsGreaterThan(crashSpeedThreshold))
     {
         m_Health -= m_DeepHardness * 0.03;
 // TODO: HELLA GHETTO, REWORK
         if (m_CrashTimer.GetElapsedSimTimeMS() > 500)
         {
-			if (m_CrashSound) { m_CrashSound->Play(m_Pos); }
+			if (m_CrashSound) { m_CrashSound->Play(m_Pos); } 
             m_CrashTimer.Reset();
         }
     }

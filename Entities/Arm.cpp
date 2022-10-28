@@ -315,11 +315,11 @@ void Arm::Reach(const Vector &scenePoint)
     else
         m_Pos += m_ParentOffset;
 
-    float reachSqrMagnitude = reachVec.GetSqrMagnitude();
+    float sqrReachMagnitude = reachVec.GetSqrMagnitude();
     Vector reachVec(m_TargetPosition - m_Pos);
     const float halfMaxLength = m_MaxLength * 0.5F;
-    return reachSqrMagnitude <= m_MaxLength*m_MaxLength &&
-           reachSqrMagnitude >= halfMaxLength*halfMaxLength;
+    return sqrReachMagnitude <= m_MaxLength*m_MaxLength &&
+           sqrReachMagnitude >= halfMaxLength*halfMaxLength;
 */
 }
 

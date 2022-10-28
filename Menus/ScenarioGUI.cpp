@@ -426,11 +426,11 @@ namespace RTE {
 		bool foundAnyHover = false;
 		if (m_ActivityScenes && !m_DraggedBox && !m_ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;
-			float shortestDistSqr = 10.0F * 10.0F;
+			float sqrShortestDistance = 10.0F * 10.0F;
 			for (Scene *activityScene : *m_ActivityScenes) {
 				float sqrDistance = (m_PlanetCenter + activityScene->GetLocation() + activityScene->GetLocationOffset() - Vector(static_cast<float>(mouseX), static_cast<float>(mouseY))).GetSqrMagnitude();
-				if (sqrDistance < shortestDistSqr) {
-					shortestDistSqr = sqrDistance;
+				if (sqrDistance < sqrShortestDistance) {
+					sqrShortestDistance = sqrDistance;
 					candidateScene = activityScene;
 					foundAnyHover = true;
 				}

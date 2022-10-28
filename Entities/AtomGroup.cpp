@@ -174,7 +174,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::CalculateMaxRadius() const {
-		float sqrMagnitude;
+		float sqrMagnitude = 0.0F;
 		float sqrLongest = 0.0F;
 
 		for (const Atom *atom : m_Atoms) {
@@ -1204,9 +1204,8 @@ namespace RTE {
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
 		// Pull back or reset the limb if it strayed off the path.
-		float sqrLimbDistance = limbDist.GetSqrMagnitude();
-		if (sqrLimbDistance > m_OwnerMOSR->GetRadius()*m_OwnerMOSR->GetRadius()) { 
-			if (sqrLimbDistance > m_OwnerMOSR->GetDiameter()*m_OwnerMOSR->GetDiameter()) {
+		if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetRadius())) {
+			if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetDiameter())) {
 				limbPath.Terminate();
 			} else {
 				m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
@@ -1344,7 +1343,7 @@ namespace RTE {
 		exitDirection.SetMagnitude(m_OwnerMOSR->GetDiameter());
 
 		// See which of the intersecting Atoms has the longest to travel along the exit direction before it clears
-		float longestDistanceSqr = 0.0F;
+		float sqrLongestDistance = 0.0F;
 
 		Vector clearPos = Vector();
 		Vector atomExitVector = Vector();
@@ -1362,10 +1361,10 @@ namespace RTE {
 
 			if (rayHit) {
 				atomExitVector = clearPos - atomPos;
-				float atomExitSqrDist = atomExitVector.GetSqrMagnitude();
-				if (atomExitSqrDist > longestDistanceSqr) {
+				float sqrAtomExitDist = atomExitVector.GetSqrMagnitude();
+				if (sqrAtomExitDist > sqrLongestDistance) {
 					// We found the Atom with the longest to travel along the exit direction to clear, so that's the distance to move the whole object to clear all its Atoms.
-					longestDistanceSqr = atomExitSqrDist;
+					sqrLongestDistance = sqrAtomExitDist;
 					totalExitVector = atomExitVector;
 				}
 			}
@@ -1462,15 +1461,15 @@ namespace RTE {
 		Vector clearPos = Vector();
 
 		// See which of the intersecting Atoms has the longest to travel along the exit direction before it clears
-		float longestDistanceSqr = 0.0F;
+		float sqrLongestDistance = 0.0F;
 		for (const Atom *intersectingAtom : intersectingAtoms) {
 			atomPos = intersectingAtom->GetCurrentPos();
 			if (g_SceneMan.CastFindMORay(atomPos, exitDirection, g_NoMOID, clearPos, 0, true, 0)) {
 				atomExitVector = clearPos - atomPos.GetFloored();
-				float atomExitSqrDist = atomExitVector.GetSqrMagnitude();
-				if (atomExitSqrDist > longestDistanceSqr) {
+				float sqrAtomExitDist = atomExitVector.GetSqrMagnitude();
+				if (sqrAtomExitDist > sqrLongestDistance) {
 					// We found the Atom with the longest to travel along the exit direction to clear, so that's the distance to move the whole object to clear all its Atoms.
-					longestDistanceSqr = atomExitSqrDist;
+					sqrLongestDistance = sqrAtomExitDist;
 					totalExitVector = atomExitVector;
 				}
 			}

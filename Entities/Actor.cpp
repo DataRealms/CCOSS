@@ -1373,11 +1373,11 @@ void Actor::Update()
     m_ViewPoint = m_Pos;
 
     // Update the best progress made, if we're any closer to the currently pursued waypoint
-    float targetProximitySqr = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetSqrMagnitude();
+    float sqrTargetProximity = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetSqrMagnitude();
     // Reset the timer if we've made progress as the crow flies
-    if (targetProximitySqr < m_BestTargetProximitySqr)
+    if (sqrTargetProximity < m_BestTargetProximitySqr)
     {
-        m_BestTargetProximitySqr = targetProximitySqr;
+        m_BestTargetProximitySqr = sqrTargetProximity;
         m_ProgressTimer.Reset();
     }
 

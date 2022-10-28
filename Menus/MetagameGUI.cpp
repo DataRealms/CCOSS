@@ -1814,7 +1814,7 @@ void MetagameGUI::Update()
             vector<Scene *>::iterator sItr;
             vector<Scene *>::iterator newCandidateItr = g_MetaMan.m_Scenes.end();
 
-            float shortestDistSqr = std::numeric_limits<float>::infinity();
+            float sqrShortestDist = std::numeric_limits<float>::infinity();
             for (sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
             {
                 // Only mess with Scenes we can see
@@ -1830,10 +1830,10 @@ void MetagameGUI::Update()
                 float sqrDistance = (screenLocation - mousePos).GetSqrMagnitude();
 
                 // The first new scene the mouse's position is close to when unlocked, make selected
-                if (sqrDistance < (16.0F * 16.0F) && sqrDistance < shortestDistSqr)
+                if (sqrDistance < (16.0F * 16.0F) && sqrDistance < sqrShortestDist)
                 {
                     // This is now the shortest
-                    shortestDistSqr = sqrDistance;
+                    sqrShortestDist = sqrDistance;
                     foundAnyHover = true;
                     // See if the scene hovered is different from the previously hovered one, and if so, set it to the new candidate to switch hovering to
 // Actually, don't because it will cause alternating each frame if two hover zones overlap!

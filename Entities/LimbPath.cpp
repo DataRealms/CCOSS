@@ -308,7 +308,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
         returnVel.CapMagnitude(adjustedTravelSpeed);
         returnVel += m_JointVel;
 
-//        if (distVect.IsMagnitudeLessThan(0.5F))
+//        if (distVect.MagnitudeIsLessThan(0.5F))
 //            returnVel *= 0.1;
     }
     else
@@ -374,7 +374,7 @@ float LimbPath::GetNextTimeChunk(const Vector &limbPos)
 void LimbPath::ReportProgress(const Vector &limbPos)
 {
 	if (IsStaticPoint()) {
-		m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).IsMagnitudeLessThan(1.0F);
+		m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).MagnitudeIsLessThan(1.0F);
 	} else {
         // Check if we are sufficiently close to the target to start going after the next one.
         Vector distVec = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget());

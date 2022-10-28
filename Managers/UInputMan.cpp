@@ -966,7 +966,7 @@ namespace RTE {
 					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i]).GetStick(), inputElements->at(elementsToCheck[i]).GetAxis()); }
 					if (inputElements->at(elementsToCheck[i + 1]).JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, inputElements->at(elementsToCheck[i + 1]).GetStick(), inputElements->at(elementsToCheck[i + 1]).GetAxis()); }
 
-					if (aimValues.IsMagnitudeLessThan(deadZone * 2.0F)) {
+					if (aimValues.MagnitudeIsLessThan(deadZone * 2.0F)) {
 						for (int j = 0; j < 2; j++) {
 							InputElements whichElementDirection = elementsToCheck[i + j];
 							if (inputElements->at(whichElementDirection).JoyDirMapped()) {

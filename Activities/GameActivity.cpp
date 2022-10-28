@@ -1494,7 +1494,7 @@ void GameActivity::Update()
                 m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
             }
             else if (pMarkedActor) {
-				if (markedDistance.IsMagnitudeGreaterThan(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(player) / 4))) {
+				if (markedDistance.MagnitudeIsGreaterThan(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(player) / 4))) {
 					pMarkedActor->GetPieMenu()->Wobble();
 				} else {
 					pMarkedActor->GetPieMenu()->FreezeAtRadius(30);
@@ -1585,7 +1585,7 @@ void GameActivity::Update()
 			//Check if we crossed the seam
 			if (g_SceneMan.GetScene()->WrapsX()) {
 				float halfSceneWidth = sceneWidth * 0.5F;
-				if (relativeToActor.IsMagnitudeGreaterThan(std::max(halfSceneWidth, seamMinimum))) {
+				if (relativeToActor.MagnitudeIsGreaterThan(std::max(halfSceneWidth, seamMinimum))) {
 					if (m_ActorCursor->m_X < halfSceneWidth) {
 						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth, 0) - m_ControlledActor[player]->GetPos();
 					} else {
@@ -2409,7 +2409,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
                 float halfSceneWidth = sceneWidth * 0.5F;
                 float seamMinimum = 350.0F;
 
-				if (unwrappedPos.IsMagnitudeGreaterThan(std::max(halfSceneWidth, seamMinimum)))
+				if (unwrappedPos.MagnitudeIsGreaterThan(std::max(halfSceneWidth, seamMinimum)))
 				{
 					if (m_ActorCursor->m_X < halfSceneWidth)
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);

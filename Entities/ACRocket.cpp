@@ -319,7 +319,7 @@ void ACRocket::UpdateAI()
     float altitude = GetAltitude(g_SceneMan.GetSceneHeight() / 2, 10);
 
     // Stuck detection
-    if (m_Vel.IsMagnitudeGreaterThan(1.0F))
+    if (m_Vel.MagnitudeIsGreaterThan(1.0F))
         m_StuckTimer.Reset();
 
     /////////////////////////////
@@ -428,7 +428,7 @@ void ACRocket::UpdateAI()
     // STABILIZATION
 
     // Don't mess if we're unloading or automatically stabilizing
-    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && m_Vel.IsMagnitudeLessThan(5.0F)))
+    if (AutoStabilizing() || (m_DeliveryState == UNLOAD && m_Vel.MagnitudeIsLessThan(5.0F)))
         m_LateralMoveState = LAT_STILL;
     else
     {

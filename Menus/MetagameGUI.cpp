@@ -687,7 +687,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 					Vector pos1 = (*pItr)->GetLocation() + (*pItr)->GetLocationOffset();
 					Vector pos2 = (*pItr2)->GetLocation() + (*pItr2)->GetLocationOffset();
 
-					if ((pos1 - pos2).IsMagnitudeLessThan(8.0F))
+					if ((pos1 - pos2).MagnitudeIsLessThan(8.0F))
 					{
 						isOverlapped = true;
 						break;
@@ -1806,7 +1806,7 @@ void MetagameGUI::Update()
         }
 
         // Validate mouse position as being over the planet area for hover operations!
-        if (!m_pDraggedBox && (mousePos - m_PlanetCenter).IsMagnitudeLessThan(m_PlanetRadius))
+        if (!m_pDraggedBox && (mousePos - m_PlanetCenter).MagnitudeIsLessThan(m_PlanetRadius))
         {
             // If unlocked, detect any Scene close to the mouse and highlight it
             bool foundAnyHover = false;

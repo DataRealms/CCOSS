@@ -425,7 +425,7 @@ void ACDropShip::UpdateAI()
     /////////////////////////
     // If we are hopelessly stuck, self destruct
 
-    if (m_RecentMovement.IsMagnitudeGreaterThan(10.0F))
+    if (m_RecentMovement.MagnitudeIsGreaterThan(10.0F))
         m_StuckTimer.Reset();
     if (m_StuckTimer.IsPastSimMS(10000))
         GibThis();

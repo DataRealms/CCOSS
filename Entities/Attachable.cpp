@@ -231,11 +231,11 @@ namespace RTE {
 			}
 		}
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.IsMagnitudeGreaterThan(gibImpulseLimitValueToUse)) {
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.IsMagnitudeGreaterThan(jointStrengthValueToUse)) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;

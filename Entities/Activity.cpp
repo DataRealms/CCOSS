@@ -721,7 +721,7 @@ void Activity::Clear() {
 		SoundContainer *actorSwitchSoundToPlay = (m_ControlledActor[player] == m_Brain[player]) ? g_GUISound.BrainSwitchSound() : g_GUISound.ActorSwitchSound();
 		actorSwitchSoundToPlay->Play(player);
 
-		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).IsMagnitudeGreaterThan(static_cast<float>(g_FrameMan.GetResX() / 2))) {
+		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).MagnitudeIsGreaterThan(static_cast<float>(g_FrameMan.GetResX() / 2))) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}
 

@@ -1247,7 +1247,7 @@ namespace RTE {
 
 		Vector limbRange = m_LimbPos - jointPos;
 
-		if (limbRange.IsMagnitudeGreaterThan(limbRadius)) {
+		if (limbRange.MagnitudeIsGreaterThan(limbRadius)) {
 			limbRange.SetMagnitude(limbRadius);
 			m_LimbPos = jointPos + limbRange;
 		}
@@ -1372,7 +1372,7 @@ namespace RTE {
 		}
 
 		// If the exit vector is too large, then avoid the jarring jump and report that we didn't make it out
-		if (totalExitVector.IsMagnitudeGreaterThan(m_OwnerMOSR->GetIndividualRadius())) {
+		if (totalExitVector.MagnitudeIsGreaterThan(m_OwnerMOSR->GetIndividualRadius())) {
 			return false;
 		}
 
@@ -1501,10 +1501,10 @@ namespace RTE {
 		}
 
 		// Now actually apply the exit vectors to both, but only if the jump isn't too jarring
-		if (thisExit.IsMagnitudeLessThan(m_OwnerMOSR->GetIndividualRadius())) { position += thisExit; }
-		if (!intersectedExit.IsZero() && intersectedExit.IsMagnitudeLessThan(intersectedMO->GetRadius())) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
+		if (thisExit.MagnitudeIsLessThan(m_OwnerMOSR->GetIndividualRadius())) { position += thisExit; }
+		if (!intersectedExit.IsZero() && intersectedExit.MagnitudeIsLessThan(intersectedMO->GetRadius())) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
 
-		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.IsMagnitudeGreaterThan(m_OwnerMOSR->GetDiameter())) */ {
+		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.MagnitudeIsGreaterThan(m_OwnerMOSR->GetDiameter())) */ {
 			// Move back before gibbing so gibs don't end up inside terrain
 			position -= thisExit;
 			m_OwnerMOSR->GibThis(-totalExitVector);
@@ -1512,7 +1512,7 @@ namespace RTE {
 
 		MOSRotating *intersectedMOS = dynamic_cast<MOSRotating *>(intersectedMO);
 
-		if (intersectedMOS && intersectedMOS->CanBeSquished() && intersectedMOS->GetAtomGroup()->RatioInTerrain() > 0.75F) /* && totalExitVector.IsMagnitudeGreaterThan(intersectedMO->GetDiameter())) */ {
+		if (intersectedMOS && intersectedMOS->CanBeSquished() && intersectedMOS->GetAtomGroup()->RatioInTerrain() > 0.75F) /* && totalExitVector.MagnitudeIsGreaterThan(intersectedMO->GetDiameter())) */ {
 			// Move back before gibbing so gibs don't end up inside terrain
 			intersectedMO->SetPos(intersectedMO->GetPos() - intersectedExit);
 			intersectedMOS->GibThis(totalExitVector);

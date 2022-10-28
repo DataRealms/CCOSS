@@ -278,7 +278,7 @@ namespace RTE {
 						Vector pos1 = sceneListEntry1->GetLocation() + sceneListEntry1->GetLocationOffset();
 						Vector pos2 = sceneListEntry2->GetLocation() + sceneListEntry2->GetLocationOffset();
 						Vector overlap = pos1 - pos2;
-						if (overlap.IsMagnitudeLessThan(requiredDistance)) {
+						if (overlap.MagnitudeIsLessThan(requiredDistance)) {
 							foundOverlap = true;
 							float overlapX = overlap.GetX();
 							float xDirMult = 0;

@@ -181,7 +181,7 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
             m_pIncomingMO = 0;
         }
         // See if it's now out of range of suckage
-        else if ((exitPos - m_pIncomingMO->GetPos()).IsMagnitudeGreaterThan(m_Range * 1.5F))
+        else if ((exitPos - m_pIncomingMO->GetPos()).MagnitudeIsGreaterThan(m_Range * 1.5F))
         {
             m_pIncomingMO = 0;
         }
@@ -200,7 +200,7 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
             // Figure the distance left for the object to go to reach the exit
             Vector toGo = exitPos - m_pIncomingMO->GetPos();
             // If the object is still a bit away from the exit goal, override velocity of the object to head straight into the exit
-            if (toGo.IsMagnitudeGreaterThan(1.0F))
+            if (toGo.MagnitudeIsGreaterThan(1.0F))
                 m_pIncomingMO->SetVel(toGo.SetMagnitude(m_Velocity.GetMagnitude()));
 
             // Turn off collisions between the object and the craft sucking it in
@@ -857,12 +857,12 @@ void ACraft::Update()
     // Set viewpoint based on how we are aiming etc.
     m_ViewPoint = m_Pos.GetFloored();
 	// Add velocity also so the viewpoint moves ahead at high speeds
-	if (m_Vel.IsMagnitudeGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
+	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
     ///////////////////////////////////////////////////
     // Crash detection and handling
 
-    if (m_DeepHardness > 5 && m_Vel.IsMagnitudeGreaterThan(1.0F))
+    if (m_DeepHardness > 5 && m_Vel.MagnitudeIsGreaterThan(1.0F))
     {
         m_Health -= m_DeepHardness * 0.03;
 // TODO: HELLA GHETTO, REWORK

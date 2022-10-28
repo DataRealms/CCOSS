@@ -8,8 +8,7 @@ namespace RTE {
 
 	void PrimitiveMan::DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness) {
 		if (thickness > 1) {
-			// Cheese thick line drawing with opposing right-angle triangles.
-			Vector dirVector = g_SceneMan.ShortestDistance(startPos, endPos, true).SetMagnitude(static_cast<float>(thickness - 1) / 2.0F).Perpendicularize();
+			Vector dirVector = g_SceneMan.ShortestDistance(startPos, endPos, g_SceneMan.SceneWrapsX()).SetMagnitude(static_cast<float>(thickness - 1) / 2.0F).Perpendicularize();
 			Vector pointA = startPos + dirVector;
 			Vector pointB = startPos - dirVector;
 			Vector pointC = endPos + dirVector;

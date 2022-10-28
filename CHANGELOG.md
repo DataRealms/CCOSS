@@ -200,8 +200,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added thickness option to Line primitives. ([Issue #403](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/403))  
 	New bindings with argument for thickness are:  
-	`PrimitiveMan:DrawLinePrimitive(startPos, endPos, color, intValue thickness)`  
-	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, intValue thickness)`  
+	`PrimitiveMan:DrawLinePrimitive(startPos, endPos, color, thickness)`  
+	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
 	Original bindings with no thickness argument are untouched and can be called as they were.
 
 </details>

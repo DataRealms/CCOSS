@@ -204,8 +204,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `Vector` Lua convenience functions for more efficient magnitude comparison.  
 	```lua
 	-- These perform vector.SqrMagnitude > or < (floatValue * floatValue).
-	vector:MagnitudeIsGreaterThan(floatValue) -- or (not vector:MagnitudeIsGreaterThan(floatValue)) for (vector.SqrMagnitude <= (floatValue * floatValue)).
-	vector:MagnitudeIsLessThan(floatValue) -- or (not vector:MagnitudeIsLessThan(floatValue)) for (vector.SqrMagnitude >= (floatValue * floatValue)).
+	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
+	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
 	
 </details>

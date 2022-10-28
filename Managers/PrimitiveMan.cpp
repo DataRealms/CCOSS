@@ -6,6 +6,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PrimitiveMan::DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness) {
+		if (thickness > 1) {
+			// Cheese thick line drawing with opposing right-angle triangles.
+			Vector dirVector = g_SceneMan.ShortestDistance(startPos, endPos, true).SetMagnitude(static_cast<float>(thickness - 1) / 2.0F).Perpendicularize();
+			Vector pointA = startPos + dirVector;
+			Vector pointB = startPos - dirVector;
+			Vector pointC = endPos + dirVector;
+			Vector pointD = endPos - dirVector;
+
+			DrawTriangleFillPrimitive(player, pointA, pointB, pointC, color);
+			DrawTriangleFillPrimitive(player, pointC, pointD, pointB, color);
+		} else {
+			m_ScheduledPrimitives.emplace_back(std::make_unique<LinePrimitive>(player, startPos, endPos, color));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {

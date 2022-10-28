@@ -319,8 +319,7 @@ void ACRocket::UpdateAI()
     float altitude = GetAltitude(g_SceneMan.GetSceneHeight() / 2, 10);
 
     // Stuck detection
-    float moveThreshold = 1.0f;
-    if (m_Vel.IsMagnitudeGreaterThan(moveThreshold))
+    if (m_Vel.IsMagnitudeGreaterThan(1.0F))
         m_StuckTimer.Reset();
 
     /////////////////////////////

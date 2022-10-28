@@ -383,7 +383,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
 				// Do ghetto distance calc between the thing we want to place and the similar thing we found already placed
 				// Note this doesn't take into account Scene wrapping, which is problematic when the Scene might not be loaded.. it's okay in this case though
 				Vector distance = (*existingItr)->GetPos() - m_Pos;
-				// If the same thing is within the walk radius, then signal that this Deployment location is indeed BLOCKED
+				// If the same thing is within the spawn radius, then signal that this Deployment location is indeed BLOCKED
 				if (distance.IsMagnitudeLessThan(m_WalkRadius))
 				{
 					blocked = true;

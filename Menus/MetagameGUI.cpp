@@ -1830,7 +1830,7 @@ void MetagameGUI::Update()
                 float sqrDistance = (screenLocation - mousePos).GetSqrMagnitude();
 
                 // The first new scene the mouse's position is close to when unlocked, make selected
-                if (sqrDistance < 16.0F*16.0F && sqrDistance < shortestDistSqr)
+                if (sqrDistance < (16.0F * 16.0F) && sqrDistance < shortestDistSqr)
                 {
                     // This is now the shortest
                     shortestDistSqr = sqrDistance;

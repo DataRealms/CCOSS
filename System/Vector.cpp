@@ -53,12 +53,12 @@ namespace RTE {
 
 	Vector & Vector::ClampMagnitude(float lowerMagnitudeLimit, float upperMagnitudeLimit) {
 		if (upperMagnitudeLimit < lowerMagnitudeLimit) { std::swap(upperMagnitudeLimit, lowerMagnitudeLimit); }
-		const float sqrMagnituge = GetSqrMagnitude();
+
 		if (upperMagnitudeLimit == 0.0F && lowerMagnitudeLimit == 0.0F) {
 			Reset();
-		} else if (sqrMagnituge < lowerMagnitudeLimit*lowerMagnitudeLimit) {
+		} else if (IsMagnitudeLessThan(lowerMagnitudeLimit)) {
 			SetMagnitude(lowerMagnitudeLimit);
-		} else if (sqrMagnituge > upperMagnitudeLimit*upperMagnitudeLimit) {
+		} else if (IsMagnitudeGreaterThan(upperMagnitudeLimit)) {
 			SetMagnitude(upperMagnitudeLimit);
 		}
 		return *this;

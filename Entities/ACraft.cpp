@@ -175,15 +175,13 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
     // If we're sucking on an MO already
     if (m_pIncomingMO)
     {
-        const float rangeAndAHalf = m_Range * 1.5F;
-
         // Check that it's still active and valid (not destroyed)
         if (!(g_MovableMan.IsDevice(m_pIncomingMO) || g_MovableMan.IsActor(m_pIncomingMO)))
         {
             m_pIncomingMO = 0;
         }
         // See if it's now out of range of suckage
-        else if ((exitPos - m_pIncomingMO->GetPos()).IsMagnitudeGreaterThan(rangeAndAHalf))
+        else if ((exitPos - m_pIncomingMO->GetPos()).IsMagnitudeGreaterThan(m_Range * 1.5F))
         {
             m_pIncomingMO = 0;
         }
@@ -202,8 +200,7 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
             // Figure the distance left for the object to go to reach the exit
             Vector toGo = exitPos - m_pIncomingMO->GetPos();
             // If the object is still a bit away from the exit goal, override velocity of the object to head straight into the exit
-            const float threshold = 1.0F;
-            if (toGo.IsMagnitudeGreaterThan(threshold))
+            if (toGo.IsMagnitudeGreaterThan(1.0F))
                 m_pIncomingMO->SetVel(toGo.SetMagnitude(m_Velocity.GetMagnitude()));
 
             // Turn off collisions between the object and the craft sucking it in
@@ -864,14 +861,14 @@ void ACraft::Update()
 
     ///////////////////////////////////////////////////
     // Crash detection and handling
-    const float crashSpeedThreshold = 1.0F;
-    if (m_DeepHardness > 5 && m_Vel.IsMagnitudeGreaterThan(crashSpeedThreshold))
+
+    if (m_DeepHardness > 5 && m_Vel.IsMagnitudeGreaterThan(1.0F))
     {
         m_Health -= m_DeepHardness * 0.03;
 // TODO: HELLA GHETTO, REWORK
         if (m_CrashTimer.GetElapsedSimTimeMS() > 500)
         {
-			if (m_CrashSound) { m_CrashSound->Play(m_Pos); } 
+			if (m_CrashSound) { m_CrashSound->Play(m_Pos); }
             m_CrashTimer.Reset();
         }
     }

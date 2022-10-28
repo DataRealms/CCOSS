@@ -148,7 +148,7 @@ namespace RTE {
 		/// Gets the squared magnitude of this Vector.
 		/// </summary>
 		/// <returns>A float describing the squared magnitude.</returns>
-		float GetSqrMagnitude() const { return m_X*m_X + m_Y*m_Y; }
+		float GetSqrMagnitude() const { return m_X * m_X + m_Y * m_Y; }
 
 		/// <summary>
 		/// Gets the magnitude of this Vector.
@@ -157,17 +157,17 @@ namespace RTE {
 		float GetMagnitude() const { return std::sqrt(GetSqrMagnitude()); }
 
 		/// <summary>
-		/// Returns whether this Vector has less magnitude than the input.
+		/// Gets whether this Vector's magnitude is less than the specified value.
 		/// </summary>
-		/// <param name="magnitude">A float value that the vector's magnitude will be compared against.</param>
-		/// <returns>A boolean that's true if the vector's magnitude is less than the argument.</returns>
+		/// <param name="magnitude">A float value that this Vector's magnitude will be compared against.</param>
+		/// <returns>Whether this Vector's magnitude is less than the specified value.</returns>
 		bool IsMagnitudeLessThan(float magnitude) const { return GetSqrMagnitude() < magnitude * magnitude; }
 
 		/// <summary>
-		/// Returns whether this Vector has greater magnitude than the input.
+		/// Gets whether this Vector's magnitude is greater than the specified value.
 		/// </summary>
-		/// <param name="magnitude">A float value that the vector's magnitude will be compared against.</param>
-		/// <returns>A boolean that's true if the vector's magnitude is greater than the argument.</returns>
+		/// <param name="magnitude">A float value that this Vector's magnitude will be compared against.</param>
+		/// <returns>Whether this Vector's magnitude is greater than the specified value.</returns>
 		bool IsMagnitudeGreaterThan(float magnitude) const { return GetSqrMagnitude() > magnitude * magnitude; }
 
 		/// <summary>

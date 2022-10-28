@@ -820,9 +820,10 @@ bool ACrab::IsWithinRange(Vector &point) const
     Vector diff = g_SceneMan.ShortestDistance(m_Pos, point, false);
     float sqrDistance = diff.GetSqrMagnitude();
 
-    // Really close!
-    if (sqrDistance <= m_CharHeight*m_CharHeight)
-        return true;
+	// Really close!
+	if (sqrDistance <= (m_CharHeight * m_CharHeight)) {
+		return true;
+	}
 
     // Start with the default aim distance
     float range = m_AimDistance;
@@ -833,7 +834,7 @@ bool ACrab::IsWithinRange(Vector &point) const
         range += m_pTurret->GetFirstMountedDevice()->GetSharpLength() * m_SharpAimProgress;
     }
 
-    return sqrDistance <= range*range;
+    return sqrDistance <= (range * range);
 }
 
 
@@ -2139,7 +2140,7 @@ void ACrab::Update()
 
     ////////////////////////////////////
     // Movement direction
-    const float movementThreshold = 1.0f;
+    const float movementThreshold = 1.0F;
 	bool isStill = (m_Vel + m_PrevVel).IsMagnitudeLessThan(movementThreshold);
 
 	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {

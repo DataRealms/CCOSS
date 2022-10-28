@@ -355,7 +355,7 @@ namespace RTE {
 		}
 
 		// Translate analog aim input into sharp aim control state
-		if (m_AnalogAim.IsMagnitudeGreaterThan(0.1F) && !m_ControlStates.at(ControlState::PIE_MENU_ACTIVE)) { m_ControlStates.at(ControlState::AIM_SHARP) = true; }
+		if (m_AnalogAim.IsMagnitudeGreaterThan(0.1F) && !m_ControlStates[ControlState::PIE_MENU_ACTIVE]) { m_ControlStates[ControlState::AIM_SHARP] = true; }
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates[ControlState::BODY_JUMP] || (pieMenuActive && !m_ControlStates[ControlState::SECONDARY_ACTION])) {

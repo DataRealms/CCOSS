@@ -1452,12 +1452,12 @@ void Actor::Update()
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
-	const float travelImpulseMagnitudeSqr = m_TravelImpulse.GetSqrMagnitude();
-    float halfTravelImpulseDamage = m_TravelImpulseDamage * 0.5F;
-	if (m_BodyHitSound && travelImpulseMagnitudeSqr > halfTravelImpulseDamage*halfTravelImpulseDamage) { m_BodyHitSound->Play(m_Pos); }
+	float travelImpulseMagnitude = m_TravelImpulse.GetMagnitude();
 
-	if (travelImpulseMagnitudeSqr > m_TravelImpulseDamage*m_TravelImpulseDamage) {
-		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
+	if (m_BodyHitSound && travelImpulseMagnitude > m_TravelImpulseDamage * 0.5F) { m_BodyHitSound->Play(m_Pos); }
+
+	if (travelImpulseMagnitude > m_TravelImpulseDamage) {
+		const float impulse = travelImpulseMagnitude - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
 		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }

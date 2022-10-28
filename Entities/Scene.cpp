@@ -2105,8 +2105,8 @@ const SceneObject * Scene::PickPlacedObject(int whichSet, Vector &scenePoint, in
 const SceneObject * Scene::PickPlacedActorInRange(int whichSet, Vector &scenePoint, int range, int *pListOrderPlace) const
 {
 	SceneObject * pFoundObject = 0;
-	float distanceSqr = range*range;
-	
+	float distanceSqr = static_cast<float>(range * range);
+
 	// REVERSE!
     int i = m_PlacedObjects[whichSet].size() - 1;
     for (list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)

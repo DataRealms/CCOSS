@@ -1563,9 +1563,10 @@ bool AHuman::IsWithinRange(Vector &point) const
     Vector diff = g_SceneMan.ShortestDistance(m_Pos, point, false);
     float sqrDistance = diff.GetSqrMagnitude();
 
-    // Really close!
-    if (sqrDistance <= m_CharHeight*m_CharHeight)
-        return true;
+	// Really close!
+	if (sqrDistance <= (m_CharHeight * m_CharHeight)) {
+		return true;
+	}
 
     float range = 0;
 
@@ -1584,7 +1585,7 @@ bool AHuman::IsWithinRange(Vector &point) const
         range += m_CharHeight * 4;
     }
 
-    return sqrDistance <= range*range;
+    return sqrDistance <= (range * range);
 }
 
 
@@ -3119,7 +3120,8 @@ void AHuman::Update()
 
 	////////////////////////////////////
 	// Movement direction
-    const float movementThreshold = 1.0f;
+
+    const float movementThreshold = 1.0F;
 	bool isStill = (m_Vel + m_PrevVel).IsMagnitudeLessThan(movementThreshold);
 	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
@@ -3501,12 +3503,10 @@ void AHuman::Update()
 		}
 	}
 
-    // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && 
-        (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).IsMagnitudeGreaterThan(reach + m_pItemInReach->GetRadius())) )
-    {
-        m_pItemInReach = nullptr;
-    }
+	// Item currently set to be within reach has expired or is now out of range
+	if (m_pItemInReach && (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).IsMagnitudeGreaterThan(reach + m_pItemInReach->GetRadius()))) {
+		m_pItemInReach = nullptr;
+	}
 
 	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;

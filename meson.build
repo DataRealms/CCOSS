@@ -5,9 +5,7 @@ project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_s
 deps=[]
 if host_machine.system() in ['linux','osx']
   deps = [
-    dependency('allegro', version:'<5.0'),
     dependency('sdl2'),
-    dependency('loadpng'),
     dependency('flac'),
     dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
@@ -17,8 +15,10 @@ if host_machine.system() in ['linux','osx']
     dependency('boost'), #needed for luabind
     dependency(['lua52', 'lua5.2', 'lua-5.2']),
   ]
-  if host_machine.system() == 'linux'
-    deps += dependency('x11')
+  allegro_dep = dependency('allegro', required: false)
+  loadpng_dep = dependency('loadpng', required: false)
+  if (allegro_dep.found() and loadpng_dep.found())
+    deps += [allegro_dep, loadpng_dep]
   endif
 endif
 

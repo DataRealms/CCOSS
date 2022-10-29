@@ -53,9 +53,9 @@ The Linux build uses the meson build system, and builds against system libraries
 ## Dependencies
 
 * `g++>=8.1` (needs to support c++17 filesystem)
-* `allegro4`
+* `allegro4` (optional, if missing will attempt to compile a stripped down version)
+* `loadpng` (optional, same as above)
 * `sdl2`
-* `loadpng`
 * `flac`
 * `luajit`
 * `lua5.2`
@@ -64,7 +64,6 @@ The Linux build uses the meson build system, and builds against system libraries
 * `libpng`
 * [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson` if your distro doesn't include a recent version)
 * `boost>=1.55`
-* (optional) `xmessage`
 
 ## Building
 
@@ -98,12 +97,12 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit lua52 minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
+`sudo pacman -S allegro4 sdl2 boost flac luajit lua52 minizip lz4 libpng meson ninja base-devel`  
 
 **Ubuntu >=20.04:**  
-`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build python-pip`  
+`sudo apt-get install build-essential liballegro4-dev libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev ninja-build python-pip`  
+`sudo python -m pip install meson`
 
-`# python -m pip install meson`
 ## Troubleshooting
 
 * older versions of `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`

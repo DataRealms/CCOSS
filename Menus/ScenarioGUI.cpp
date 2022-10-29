@@ -296,7 +296,7 @@ namespace RTE {
 							}
 							if (yDirMult != 0) {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(-overlapX + (requiredDistance * xDirMult), -overlapY + (requiredDistance * yDirMult)));
-							} else if (overlap.GetSqrMagnitude() == 0.0F) {
+							} else if (overlap.IsZero()) {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector((pos1.GetX() > 0) ? -requiredDistance : requiredDistance, (pos1.GetY() > 0) ? -requiredDistance : requiredDistance));
 							} else {
 								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(overlapX, overlapY));

@@ -791,12 +791,12 @@ namespace RTE {
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
 
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
-		float longestDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
+		float minimumAudibleDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
 		if (shortestDistance >= soundMaxDistance) {
 			attenuatedVolume = 0.0F;
 		} else if (m_SoundChannelMinimumAudibleDistances.empty() || m_SoundChannelMinimumAudibleDistances.find(soundChannelIndex) == m_SoundChannelMinimumAudibleDistances.end()) {
 			g_ConsoleMan.PrintString("ERROR: An error occurred when checking to see if the sound at channel " + std::to_string(soundChannelIndex) + " was less than its minimum audible distance away from the farthest listener.");
-		} else if (sqrLongestDistance < (longestDistance * longestDistance)) {
+		} else if (sqrLongestDistance < (minimumAudibleDistance * minimumAudibleDistance)) {
 			attenuatedVolume = 0.0F;
 		}
 

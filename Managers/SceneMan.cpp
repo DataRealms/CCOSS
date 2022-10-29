@@ -980,7 +980,7 @@ void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
 // Method:          WillPenetrate
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Test whether a pixel of the scene would be knocked loose and
-//                  turned into a MO by a certian impulse force. Scene needs to be locked
+//                  turned into a MO by a certain impulse force. Scene needs to be locked
 //                  to do this!
 
 bool SceneMan::WillPenetrate(const int posX,
@@ -994,7 +994,7 @@ bool SceneMan::WillPenetrate(const int posX,
 
     unsigned char materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
     float integrity = GetMaterialFromID(materialID)->GetIntegrity();
-    return impulse.GetSqrMagnitude() >= (integrity * integrity);
+    return impulse.MagnitudeIsGreaterThan(integrity);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

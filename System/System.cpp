@@ -1,7 +1,7 @@
 ﻿#include "System.h"
 #include "unzip.h"
 
-#ifdef __unix__
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
@@ -92,7 +92,7 @@ namespace RTE {
 		// Just make sure to really overwrite all old output, " - done! ✓" is shorter than "reading line 700"
 		std::string unicodedOutput = reportString + "            ";
 
-#ifdef __unix__
+#if  defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		// Colorize output with ANSI escape code
 		std::string greenTick = "\033[1;32m✓\033[0;0m";
 		std::string yellowDot = "\033[1;33m•\033[0;0m";
@@ -125,7 +125,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::PrintToCLI(const std::string &stringToPrint) {
-#ifdef __unix__
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		std::string outputString = stringToPrint;
 		// Color the words ERROR: and SYSTEM: red
 		std::regex regexError("(ERROR|SYSTEM):");

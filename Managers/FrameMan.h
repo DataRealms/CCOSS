@@ -8,14 +8,6 @@
 
 #define g_FrameMan FrameMan::Instance()
 
-#ifdef __unix__
-	// Define the missing Windows drivers as autodetect drivers so we don't need to add directives in every place they are used.
-	#define GFX_DIRECTX_ACCEL GFX_AUTODETECT_FULLSCREEN
-	#define GFX_DIRECTX_WIN_BORDERLESS GFX_AUTODETECT_WINDOWED
-
-
-#endif
-
 
 extern "C" {
 	struct SDL_Window;

@@ -2,7 +2,7 @@
 
 c = meson.get_compiler('c')
 allegro_defines = []
-if host_machine.system() == 'linux' or host_machine.system() == 'darwin'
+if host_machine.system() in ['linux', 'darwin']
   allegro_defines += 'ALLEGRO_UNIX'
   aluconfig = configuration_data()
   # aluconfig.set10('ALLEGRO_NO_ASM', true)
@@ -41,12 +41,14 @@ if host_machine.system() == 'linux' or host_machine.system() == 'darwin'
     }"
     MAP_FAILED_DEFINED
   '''))
-  aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', c.run('''
-    static int notsupported = 1;
-    void test_ctor (void) __attribute__((constructor));
-    void test_ctor (void) { notsupported = 0; }
-    int main(void) { return (notsupported); }
-  ''').returncode() == 1)
+	if meson.can_run_host_binaries()
+		aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', c.run('''
+			static int notsupported = 1;
+			void test_ctor (void) __attribute__((constructor));
+			void test_ctor (void) { notsupported = 0; }
+			int main(void) { return (notsupported); }
+		''').returncode() == 1)
+	endif
   aluconfig.set('ALLEGRO_HAVE_POSIX_MONOTONIC_CLOCK', c.compiles('''
     #include <time.h>
     int main(void) {
@@ -71,8 +73,10 @@ subdir('addons/loadpng')
 if not allegro_dep.found()
   allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:'-Wno-deprecated-declarations', override_options:['buildtype=release', 'optimization=3'])
   external_libs += allegro
+	external_inc_dirs += allegro_include
 endif
 
 if not loadpng_dep.found()
-  loadpng = static_library('loadpng', sources: loadpng_sources, include_directories: allegro_include, override_options:['buildtype=release', 'optimization=3'])
+  loadpng = static_library('loadpng', sources: loadpng_sources, dependencies:deps, include_directories: allegro_include, override_options:['buildtype=release', 'optimization=3'])
+	external_inc_dirs += include_directories('addons/loadpng')
 endif

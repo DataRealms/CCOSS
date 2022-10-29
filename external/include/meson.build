@@ -1,18 +1,13 @@
-if host_machine.system() == 'linux'
-  external_inc_dirs = include_directories('common',
+external_inc_dirs = [include_directories('common',
                                          'common/RakNet',
                                          'common/boost_1_75',
                                          'common/fmod',
-                                         'common/luabind')
+                                         'common/luabind')]
+if host_machine.system() in ['linux', 'darwin']
 endif
 if host_machine.system() == 'windows'
-  external_inc_dirs = include_directories('common',
+  external_inc_dirs += include_directories(
                                           'win/GL',
                                           'win/LZ4',
-                                          'common/RakNet',
-                                          'win/allegro',
-                                          'win/allegrogl',
-                                          'common/boost_1_75/',
-                                          'common/fmod',
-                                          'common/luabind')
+                                          'win/allegro')
 endif

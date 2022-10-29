@@ -3,7 +3,7 @@ project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_s
 #### Build environment Setup ####
 
 deps=[]
-if host_machine.system() in ['linux','osx']
+if host_machine.system() in ['linux','darwin']
   deps = [
     dependency('sdl2'),
     dependency('flac'),
@@ -12,7 +12,7 @@ if host_machine.system() in ['linux','osx']
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
-    dependency('boost'), #needed for luabind
+    # dependency('boost'), #needed for luabind
     dependency(['lua52', 'lua5.2', 'lua-5.2']),
   ]
   allegro_dep = dependency('allegro', required: false)
@@ -26,7 +26,7 @@ elfname = 'CortexCommand'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
-extra_args=[]
+extra_args=['-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
 preprocessor_flags = []
 suffix=''
 
@@ -36,7 +36,9 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   #suffix = 'x86_64'
+	if host_machine.system()=='linux'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
+	endif
 
   # Set preprocessor flags and cpp arguments according to build options
   buildtype_debug = get_option('debug')

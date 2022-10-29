@@ -436,8 +436,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InputScheme::CaptureKeyMapping(int whichInput) {
-		if (keyboard_needs_poll()) { poll_keyboard(); }
-
 		for (int whichKey = SDL_SCANCODE_A; whichKey < SDL_NUM_SCANCODES; ++whichKey) {
 			// Don't allow mapping special keys used by UInputMan.
 			if (whichKey == SDL_SCANCODE_ESCAPE || whichKey == SDL_SCANCODE_GRAVE || whichKey == SDL_SCANCODE_PRINTSCREEN || whichKey == SDL_SCANCODE_F1 || whichKey == SDL_SCANCODE_F2 || whichKey == SDL_SCANCODE_F3 || whichKey == SDL_SCANCODE_F4 || whichKey == SDL_SCANCODE_F5) {

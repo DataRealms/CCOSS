@@ -680,10 +680,6 @@ namespace RTE {
 	int UInputMan::Update() {
 		m_LastDeviceWhichControlledGUICursor = InputDevice::DEVICE_KEYB_ONLY;
 
-		// if (keyboard_needs_poll()) { poll_keyboard(); }
-		// if (mouse_needs_poll()) { poll_mouse(); }
-		// poll_joystick();
-
 		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
 		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
 		for (Gamepad& pad: s_ChangedJoystickStates) {
@@ -823,7 +819,6 @@ namespace RTE {
 			m_NetworkAccumulatedRawMouseMovement[Players::PlayerOne] += m_RawMouseMovement;
 		}
 		UpdateMouseInput();
-		// if (num_joysticks > 0) { UpdateJoystickInput(); }
 		HandleSpecialInput();
 		StoreInputEventsForNextUpdate();
 

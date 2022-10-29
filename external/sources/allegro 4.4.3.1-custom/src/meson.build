@@ -16,7 +16,7 @@ allegro_sources += files(
 'file.c',
 'fli.c',
 'flood.c',
-# 'font.c',
+'font.c',
 # 'fontbios.c',
 # 'fontbmp.c',
 # 'fontdat.c',
@@ -40,15 +40,15 @@ allegro_sources += files(
 'midi.c',
 'mixer.c',
 'modesel.c',
-# 'mouse.c',
+'mouse.c',
 'pcx.c',
 'poly3d.c',
 'polygon.c',
 'quantize.c',
 'quat.c',
 'readbmp.c',
-'readfont.c',
-'readsmp.c',
+# 'readfont.c',
+# 'readsmp.c',
 'rle.c',
 'rotate.c',
 'rsfb.c',
@@ -69,5 +69,5 @@ allegro_sources += files(
 )
 subdir('c')
 if host_machine.system() == 'linux' or host_machine.system() == 'darwin'
-  allegro_sources += files('unix/usystem.c', 'unix/ugfxdrv.c', 'unix/ufile.c', 'unix/utimer.c')
+  allegro_sources += files('unix/usystem.c', 'unix/ugfxdrv.c', 'unix/umouse.c', 'unix/ukeybd.c', 'unix/ufile.c', 'unix/utimer.c', 'unix/uptimer.c', 'unix/ustimer.c')
 endif

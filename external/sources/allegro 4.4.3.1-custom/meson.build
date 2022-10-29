@@ -41,14 +41,7 @@ if host_machine.system() in ['linux', 'darwin']
     }"
     MAP_FAILED_DEFINED
   '''))
-	if meson.can_run_host_binaries()
-		aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', c.run('''
-			static int notsupported = 1;
-			void test_ctor (void) __attribute__((constructor));
-			void test_ctor (void) { notsupported = 0; }
-			int main(void) { return (notsupported); }
-		''').returncode() == 1)
-	endif
+	aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', true)
   aluconfig.set('ALLEGRO_HAVE_POSIX_MONOTONIC_CLOCK', c.compiles('''
     #include <time.h>
     int main(void) {
@@ -78,5 +71,6 @@ endif
 
 if not loadpng_dep.found()
   loadpng = static_library('loadpng', sources: loadpng_sources, dependencies:deps, include_directories: allegro_include, override_options:['buildtype=release', 'optimization=3'])
+	external_libs += loadpng
 	external_inc_dirs += include_directories('addons/loadpng')
 endif

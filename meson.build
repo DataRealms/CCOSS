@@ -13,7 +13,7 @@ if host_machine.system() in ['linux','darwin']
     dependency('liblz4'),
     dependency('libpng'),
     # dependency('boost'), #needed for luabind
-    dependency(['lua52', 'lua5.2', 'lua-5.2']),
+    dependency(['lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
   ]
   allegro_dep = dependency('allegro', required: false)
   loadpng_dep = dependency('loadpng', required: false)

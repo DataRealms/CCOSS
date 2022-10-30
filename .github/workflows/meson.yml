@@ -97,19 +97,19 @@ jobs:
         with:
           cc: 1
 
-     - name: Build
-       uses: BSFishy/meson-build@v1.0.3
-       env:
-         CC: "clang"
-         CXX: "clang++"
-       with:
-         setup-options: --buildtype=release -Ddebug_type=release
-         meson-version: 0.60.0
-         ninja-version: 1.10.2
-         action: build
+      - name: Build
+        uses: BSFishy/meson-build@v1.0.3
+        env:
+          CC: "clang"
+          CXX: "clang++"
+        with:
+          setup-options: --buildtype=release -Ddebug_type=release
+          meson-version: 0.60.0
+          ninja-version: 1.10.2
+          action: build
 
-     - name: Artifact Deploy
-       uses: actions/upload-artifact@v2
-       with:
-         name: CortexCommand
-         path: build/CortexCommand
+      - name: Artifact Deploy
+        uses: actions/upload-artifact@v2
+        with:
+          name: CortexCommand
+          path: build/CortexCommand

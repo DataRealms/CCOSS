@@ -59,6 +59,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
 
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -66,23 +67,22 @@ jobs:
       - name: Install Dependencies
         run: |
           brew install pkg-config sdl2 minizip lz4 flac luajit lua52 libpng ninja meson
+
       - name: Install Clang
         uses: egor-tensin/setup-clang@v1
         with:
           cc: 1
 
-     - name: Build
-       uses: BSFishy/meson-build@v1.0.3
-       env:
-         CC: "clang"
-         CXX: "clang++"
-       with:
-         setup-options: --buildtype=debug -Ddebug_type=full
-         meson-version: 0.60.0
-         ninja-version: 1.10.2
-         action: build
-
-
+      - name: Build
+        uses: BSFishy/meson-build@v1.0.3
+        env:
+          CC: "clang"
+          CXX: "clang++"
+        with:
+          setup-options: --buildtype=debug -Ddebug_type=full
+          meson-version: 0.60.0
+          ninja-version: 1.10.2
+          action: build
 
   build-windows:
     env:

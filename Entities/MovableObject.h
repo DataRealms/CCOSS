@@ -43,6 +43,7 @@ namespace RTE
 struct HitData;
 
 class MOSRotating;
+class PieMenu;
 class SLTerrain;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +63,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO");
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -227,7 +228,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>()) const;
+    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>()) const;
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
@@ -239,7 +240,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
     /// <summary>
     /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
@@ -671,7 +672,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetScreenEffectHash
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the hash of the path of this object's screen effect file. Used to 
+// Description:     Gets the hash of the path of this object's screen effect file. Used to
 //					transfer glow effects over network. The hash itself is calculated during
 //					load.
 // Arguments:       None.
@@ -1562,12 +1563,12 @@ enum MOType
 
 	int UpdateScripts();
 
-    /// <summary>
-    /// Executes the Lua-defined OnPieMenu event handler for this MO.
-    /// </summary>
-    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int OnPieMenu(Actor *pieMenuActor);
+	/// <summary>
+	/// Event listener to be run while this MovableObject's PieMenu is opened.
+	/// </summary>
+	/// <param name="pieMenu">The PieMenu this event listener needs to listen to. This will always be this' m_PieMenu and only exists for std::bind.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int WhilePieMenuOpenListener(const PieMenu *pieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1651,7 +1652,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnCollision
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applyies specified ammount of damage points to actors on 
+// Description:     If not zero applyies specified ammount of damage points to actors on
 //					collision even without penetration.
 // Arguments:       None
 // Return value:    Amount of damage to apply.
@@ -1662,7 +1663,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDamageOnCollision
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applyies specified ammount of damage points to actors on 
+// Description:     If not zero applyies specified ammount of damage points to actors on
 //					collision even without penetration.
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
@@ -1673,7 +1674,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnPenetration
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applies specified ammount of damage points to actors on 
+// Description:     If not zero applies specified ammount of damage points to actors on
 //					collision if penetration occured.
 // Arguments:       None
 // Return value:    Amount of damage to apply.
@@ -1684,7 +1685,7 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDamageOnPenetration
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If not zero applies specified ammount of damage points to actors on 
+// Description:     If not zero applies specified ammount of damage points to actors on
 //					collision if penetration occured.
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
@@ -1812,10 +1813,6 @@ enum MOType
 // Return value:    None.
 
 	void SetHitWhatTerrMaterial(unsigned char matID);
-
-	bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
-
-	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
 
     /// <summary>
     /// Gets whether this MO's RootParent can GetHitByMOs and is currently traveling.
@@ -1999,7 +1996,7 @@ protected:
 
 	// This object's unique persistent ID
 	long int m_UniqueID;
-	// In which radis should we look to remove orphaned terrain on terrain penetration, 
+	// In which radis should we look to remove orphaned terrain on terrain penetration,
 	// must not be greater than SceneMan::ORPHANSIZE, or will be truncated
 	int m_RemoveOrphanTerrainRadius;
 	// What is the max orphan area to trigger terrain removal
@@ -2024,9 +2021,6 @@ protected:
 	long int m_ParticleUniqueIDHit;
 	// Number of sim update frame when last collision was detcted
 	unsigned int m_LastCollisionSimFrameNumber;
-	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
-	bool m_ProvidesPieMenuContext;
-    // Update every n frames property
     int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
     int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
 

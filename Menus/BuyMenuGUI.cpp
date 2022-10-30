@@ -37,6 +37,7 @@
 #include "SceneObject.h"
 #include "MovableObject.h"
 #include "MOSprite.h"
+#include "MOSRotating.h"
 #include "HeldDevice.h"
 #include "AHuman.h"
 #include "ACraft.h"
@@ -200,6 +201,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
     m_pCategoryTabs[BODIES] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BodiesTab"));
+	m_pCategoryTabs[MECHA] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("MechaTab"));
     m_pCategoryTabs[TOOLS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ToolsTab"));
     m_pCategoryTabs[GUNS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("GunsTab"));
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
@@ -827,14 +829,15 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::RefreshTabDisabledStates() {
-    bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
-    m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
+	m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[MECHA]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1325,7 +1328,20 @@ void BuyMenuGUI::Update()
                 } else {
                     const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                     if (itemAsMO) {
-                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+						const MOSRotating *itemAsMOSRotating = dynamic_cast<const MOSRotating*>(currentItem);
+						float extraMass = 0;
+						if (itemAsMOSRotating) {
+							if (itemAsMOSRotating->NumberValueExists("Grenade Count")) {
+								description += "\nGrenade Count: " + RoundFloatToPrecision(itemAsMOSRotating->GetNumberValue("Grenade Count"), 0, 2);
+							}
+							if (itemAsMOSRotating->NumberValueExists("Replenish Delay") && itemAsMOSRotating->GetNumberValue("Replenish Delay") > 0) {
+								description += "\nReplenish Delay: " + RoundFloatToPrecision(itemAsMOSRotating->GetNumberValue("Replenish Delay") / 1000.0F, 3, 2) + " seconds";
+							}
+							if (itemAsMOSRotating->NumberValueExists("Belt Mass")) {
+								extraMass = itemAsMOSRotating->GetNumberValue("Belt Mass");
+							}
+						}
+                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, 1, 2) + " kg";
                     }
                 }
             }
@@ -1979,34 +1995,27 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
 
     // The vector of lists which will be filled with catalog objects, grouped by which data module they were read from
-    vector<list<Entity *> > catalogList;
+    std::vector<std::list<Entity *>> catalogList;
+	std::vector<std::string> mechaCategoryGroups = { "Actors - Mecha", "Actors - Turrets" };
 
-    if (m_MenuCategory == CRAFT)
-    {
-        AddObjectsToItemList(catalogList, "ACRocket");
-        AddObjectsToItemList(catalogList, "ACDropShip");
-    }
-    else if (m_MenuCategory == BODIES)
-    {
-        AddObjectsToItemList(catalogList, "AHuman");
-        AddObjectsToItemList(catalogList, "ACrab");
-    }
-    else if (m_MenuCategory == TOOLS)
-    {
-		AddObjectsToItemList(catalogList, "HeldDevice", "Tools");
-    }
-    else if (m_MenuCategory == GUNS)
-    {
-        AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
-    }
-    else if (m_MenuCategory == BOMBS)
-    {
-        AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
-    }
-    else if (m_MenuCategory == SHIELDS)
-    {
-        AddObjectsToItemList(catalogList, "HeldDevice", "Shields");
-    }
+	if (m_MenuCategory == CRAFT) {
+		AddObjectsToItemList(catalogList, "ACRocket");
+		AddObjectsToItemList(catalogList, "ACDropShip");
+	} else if (m_MenuCategory == BODIES) {
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, true);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, true);
+	} else if (m_MenuCategory == MECHA) {
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, false);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, false);
+	} else if (m_MenuCategory == TOOLS) {
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Tools" });
+	} else if (m_MenuCategory == GUNS) {
+		AddObjectsToItemList(catalogList, "HDFirearm", { "Weapons" });
+	} else if (m_MenuCategory == BOMBS) {
+		AddObjectsToItemList(catalogList, "ThrownDevice", { "Bombs" });
+	} else if (m_MenuCategory == SHIELDS) {
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Shields" });
+	}
 
     SceneObject *pSObject = 0;
     const DataModule *pModule = 0;
@@ -2213,45 +2222,22 @@ bool BuyMenuGUI::DeployLoadout(int index)
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  AddObjectsToItemList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all objects of a specific type already defined in PresetMan
-//                  to the current shop/item list. They will be grouped into the different
-//                  data modules they were read from.
-
-void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, string type, string group)
-{
-
-	if (g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0)
-	{
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (group.empty() || group == "All")
+void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups) {
+	while (moduleList.size() < g_PresetMan.GetTotalModuleCount()) {
+		moduleList.emplace_back();
+	}
+	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+		if ((g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0) || (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())) {
+			if (groups.empty() || std::find(groups.begin(), groups.end(), "All") != groups.end()) {
 				g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-			else
-				g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
-		}
-	} else {
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())
-			{
-				if (group.empty() || group == "All")
-					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-				else
-					g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
+			} else {
+				if (excludeGroups) {
+					g_PresetMan.GetAllNotOfGroups(moduleList[moduleID], groups, type, moduleID);
+				} else {
+					g_PresetMan.GetAllOfGroups(moduleList[moduleID], groups, type, moduleID);
+				}
 			}
 		}
 	}

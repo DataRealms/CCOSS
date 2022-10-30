@@ -41,6 +41,8 @@ namespace RTE {
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
 
+		m_PieSlices.clear();
+
 		m_PrevParentOffset.Reset();
 		m_PrevJointOffset.Reset();
 		m_PrevRotAngleOffset = 0;
@@ -90,6 +92,10 @@ namespace RTE {
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
+		for (const std::unique_ptr<PieSlice> &pieSlice : reference.m_PieSlices) {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(pieSlice->Clone())));
+		}
+
 		m_PrevRotAngleOffset = reference.m_PrevRotAngleOffset;
 
 		return 0;
@@ -136,6 +142,8 @@ namespace RTE {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
+		} else if (propName == "AddPieSlice") {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
 			return MOSRotating::ReadProperty(propName, reader);
 		}
@@ -165,6 +173,10 @@ namespace RTE {
 		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
 		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
+
+		for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+			writer.NewPropertyWithValue("AddPieSlice", pieSlice.get());
+		}
 
 		return 0;
 	}
@@ -219,12 +231,11 @@ namespace RTE {
 			}
 		}
 
-		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForceMagnitude > jointStrengthValueToUse) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
@@ -455,6 +466,12 @@ namespace RTE {
 			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
+
+			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
+				if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+					AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, true);
+				}
+			}
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
@@ -470,9 +487,16 @@ namespace RTE {
 					m_pMOToNotHit = rootParent;
 					rootParent->SetWhichMOToNotHit(this);
 				}
+
+				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) {
+					if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+						AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, false);
+					}
+				}
 			}
 
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }
+
 			m_Parent = newParent;
 			for (Attachable *attachable : m_Attachables) {
 				if (attachable->m_CollidesWithTerrainWhileAttached) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
@@ -517,6 +541,29 @@ namespace RTE {
 					}
 				}
 			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddOrRemovePieSlicesAndListenersFromPieMenu(PieMenu *pieMenuToModify, bool addToPieMenu) {
+		RTEAssert(pieMenuToModify, "Cannot add or remove Attachable PieSlices and listeners from a non-existant PieMenu.");
+		if (addToPieMenu) {
+			if (m_FunctionsAndScripts.find("WhilePieMenuOpen") != m_FunctionsAndScripts.end() && !m_FunctionsAndScripts.find("WhilePieMenuOpen")->second.empty()) {
+				pieMenuToModify->AddWhilePieMenuOpenListener(this, std::bind(&MovableObject::WhilePieMenuOpenListener, this, pieMenuToModify));
+			}
+			for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+				pieMenuToModify->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
+			}
+		} else {
+			pieMenuToModify->RemoveWhilePieMenuOpenListener(this);
+			pieMenuToModify->RemovePieSlicesByOriginalSource(this);
+		}
+		for (Attachable *attachable : m_Attachables) {
+			attachable->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
+		}
+		for (AEmitter *wound : m_Wounds) {
+			wound->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
 		}
 	}
 }

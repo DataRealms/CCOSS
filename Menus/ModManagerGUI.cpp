@@ -2,6 +2,7 @@
 
 #include "SettingsMan.h"
 #include "PresetMan.h"
+#include "FrameMan.h"
 #include "DataModule.h"
 #include "GlobalScript.h"
 

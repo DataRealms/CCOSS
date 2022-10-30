@@ -18,9 +18,10 @@
 #include "UInputMan.h"
 #include "ConsoleMan.h"
 #include "AudioMan.h"
-#include "SettingsMan.h" 
+#include "SettingsMan.h"
 #include "AHuman.h"
 #include "ACrab.h"
+#include "ACraft.h"
 #include "SLTerrain.h"
 #include "Controller.h"
 #include "Scene.h"
@@ -49,6 +50,7 @@ void GAScripted::Clear()
     m_ScriptPath.clear();
     m_LuaClassName.clear();
     m_RequiredAreas.clear();
+	m_PieSlicesToAdd.clear();
 }
 
 
@@ -88,8 +90,12 @@ int GAScripted::Create(const GAScripted &reference)
 
     m_ScriptPath = reference.m_ScriptPath;
     m_LuaClassName = reference.m_LuaClassName;
-    for (set<string>::const_iterator itr = reference.m_RequiredAreas.begin(); itr != reference.m_RequiredAreas.end(); ++itr)
-        m_RequiredAreas.insert(*itr);
+	for (const std::string &referenceRequiredArea : reference.m_RequiredAreas) {
+		m_RequiredAreas.emplace(referenceRequiredArea);
+	}
+	for (const std::unique_ptr<PieSlice> &referencePieSliceToAdd : reference.m_PieSlicesToAdd) {
+		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(referencePieSliceToAdd->Clone())));
+	}
 
     return 0;
 }
@@ -107,16 +113,13 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "ScriptPath") {
 		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
-	} else if (propName == "LuaClassName")
-        reader >> m_LuaClassName;
-	else if (propName == "AddPieSlice")
-	{
-		PieSlice newSlice;
-		reader >> newSlice;
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
+	} else if (propName == "LuaClassName") {
+		reader >> m_LuaClassName;
+	} else if (propName == "AddPieSlice") {
+		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
+	} else {
+		return GameActivity::ReadProperty(propName, reader);
 	}
-	else
-        return GameActivity::ReadProperty(propName, reader);
 
     return 0;
 }
@@ -133,6 +136,10 @@ int GAScripted::Save(Writer &writer) const {
 
 	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
 	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
+
+	for (const std::unique_ptr<PieSlice> &pieSliceToAdd : m_PieSlicesToAdd) {
+		writer.NewPropertyWithValue("AddPieSlice", pieSliceToAdd.get());
+	}
 
 	return 0;
 }
@@ -242,28 +249,15 @@ bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GAScripted::EnteredOrbit(Actor *orbitedCraft) {
-    GameActivity::EnteredOrbit(orbitedCraft);
+void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
+    GameActivity::HandleCraftEnteringOrbit(orbitedCraft);
 
     if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
         g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
-        for (GlobalScript *globalScript : m_GlobalScriptsList) {
-            if (globalScript->IsActive()) { globalScript->EnteredOrbit(orbitedCraft); }
+        for (const GlobalScript *globalScript : m_GlobalScriptsList) {
+            if (globalScript->IsActive()) { globalScript->HandleCraftEnteringOrbit(orbitedCraft); }
         }
     }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void GAScripted::OnPieMenu(Actor *pieMenuActor) {
-	if (pieMenuActor && g_MovableMan.IsActor(pieMenuActor)) {
-        pieMenuActor->OnPieMenu(pieMenuActor);
-		g_MovableMan.OnPieMenu(pieMenuActor);
-        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".OnPieMenu", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".OnPieMenu"}, {pieMenuActor});
-        for (GlobalScript *globalScript : m_GlobalScriptsList) {
-            if (globalScript->IsActive()) { globalScript->OnPieMenu(pieMenuActor); }
-        }
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,7 +289,7 @@ int GAScripted::Start()
 	// Clear active global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
 		delete (*sItr);
-	
+
 	m_GlobalScriptsList.clear();
 
 	// Get all global scripts and add to execution list
@@ -404,8 +398,9 @@ void GAScripted::Update()
     }
 
     // If the game didn't end, keep updating activity
-    if (m_ActivityState != ActivityState::Over)
-    {   
+    if (m_ActivityState != ActivityState::Over) {
+		AddPieSlicesToActiveActorPieMenus();
+
         // Call the defined function, but only after first checking if it exists
         g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
 
@@ -586,5 +581,29 @@ void GAScripted::InitAIs()
     }
 */
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GAScripted::AddPieSlicesToActiveActorPieMenus() {
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		if (m_IsActive[player] && m_IsHuman[player] && m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle) {
+			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
+			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE) && controlledActorPieMenu->IsEnabling()) {
+				for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlicesToAdd) {
+					controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), this, true);
+				}
+				for (const GlobalScript *globalScript : m_GlobalScriptsList) {
+					if (globalScript->IsActive()) {
+						for (const std::unique_ptr<PieSlice> &pieSlice : globalScript->GetPieSlicesToAdd()) {
+							controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), globalScript, true);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace RTE

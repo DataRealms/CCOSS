@@ -225,6 +225,13 @@ namespace RTE {
 		int GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
 
 		/// <summary>
+		/// Gets a Vector with the absolute position of the middle of the specified player's screen.
+		/// </summary>
+		/// <param name="whichPlayer">Player to get the middle of the screen for. -1 will give the middle of the entire game window.</param>
+		/// <returns>The middle of the screen for the specified player, or the middle of the game window if that player is -1.</returns>
+		Vector GetMiddleOfPlayerScreen(int whichPlayer);
+
+		/// <summary>
 		/// Gets the width of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>

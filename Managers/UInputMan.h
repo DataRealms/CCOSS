@@ -291,6 +291,13 @@ namespace RTE {
 		void SetMouseValueMagnitude(float magCap, int whichPlayer = Players::NoPlayer);
 
 		/// <summary>
+		/// Sets the mouse's analog emulation output to be in a specific direction.
+		/// </summary>
+		/// <param name="angle">The direction, in radians.</param>
+		/// <param name="whichPlayer">Which player to set magnitude for. Only relevant when in online multiplayer mode.</param>
+		void SetMouseValueAngle(float angle, int whichPlayer = Players::NoPlayer);
+
+		/// <summary>
 		/// Sets the absolute screen position of the mouse cursor.
 		/// </summary>
 		/// <param name="newPos">Where to place the mouse.</param>

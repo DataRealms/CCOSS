@@ -538,9 +538,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 
     Activity *pActivity = g_ActivityMan.GetActivity();
 
-    Vector distanceVec;
-    float distance;
-    float shortestDistance = maxRadius;
+    float sqrShortestDistance = static_cast<float>(maxRadius * maxRadius);
     Actor *pClosestActor = 0;
 
     // If we're looking for a noteam actor, then go through the entire actor list instead
@@ -548,16 +546,15 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam)
+            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam) {
                 continue;
-
-            distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
-            distance = distanceVec.GetMagnitude();
+            }
 
             // Check if even within search radius
-            if (distance < shortestDistance)
+            float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+            if (sqrDistance < sqrShortestDistance)
             {
-                shortestDistance = distance;
+                sqrShortestDistance = sqrDistance;
                 pClosestActor = *aIt;
             }
         }
@@ -570,13 +567,14 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 			if ((*aIt) == pExcludeThis || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
 				continue;
 			}
-            distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
-            distance = distanceVec.GetMagnitude();
+
+            Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
 
             // Check if even within search radius
-            if (distance < shortestDistance)
+            float sqrDistance = distanceVec.GetSqrMagnitude();
+            if (sqrDistance < sqrShortestDistance)
             {
-                shortestDistance = distance;
+                sqrShortestDistance = sqrDistance;
                 pClosestActor = *aIt;
 				getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
             }
@@ -600,9 +598,7 @@ Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int
     
     Activity *pActivity = g_ActivityMan.GetActivity();
     
-    Vector distanceVec;
-    float distance;
-    float shortestDistance = maxRadius;
+    float sqrShortestDistance = static_cast<float>(maxRadius * maxRadius);
     Actor *pClosestActor = 0;
     
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
@@ -610,13 +606,13 @@ Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int
         if ((*aIt)->GetTeam() == team)
             continue;
 
-        distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
-        distance = distanceVec.GetMagnitude();
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
         
         // Check if even within search radius
-        if (distance < shortestDistance)
+        float sqrDistance = distanceVec.GetSqrMagnitude();
+        if (sqrDistance < sqrShortestDistance)
         {
-            shortestDistance = distance;
+            sqrShortestDistance = sqrDistance;
             pClosestActor = *aIt;
             getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
         }
@@ -639,9 +635,7 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
 
     Activity *pActivity = g_ActivityMan.GetActivity();
 
-    Vector distanceVec;
-    float distance;
-    float shortestDistance = maxRadius;
+    float sqrShortestDistance = static_cast<float>(maxRadius * maxRadius);
     Actor *pClosestActor = 0;
 
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
@@ -649,13 +643,13 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
         if ((*aIt) == pExcludeThis)
             continue;
 
-        distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
-        distance = distanceVec.GetMagnitude();
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
 
         // Check if even within search radius
-        if (distance < shortestDistance)
+        float sqrDistance = distanceVec.GetSqrMagnitude();
+        if (sqrDistance < sqrShortestDistance)
         {
-            shortestDistance = distance;
+            sqrShortestDistance = sqrDistance;
             pClosestActor = *aIt;
 			getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
         }
@@ -676,9 +670,9 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
     if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 
-    Vector distanceVec;
-    float distance;
-    float shortestDistance = g_SceneMan.GetSceneDim().GetLargest();
+    float sqrShortestDistance = std::numeric_limits<float>::infinity();
+    sqrShortestDistance *= sqrShortestDistance;
+
     Actor *pClosestBrain = 0;
 
     for (list<Actor *>::const_iterator aIt = m_ActorRoster[team].begin(); aIt != m_ActorRoster[team].end(); ++aIt)
@@ -686,13 +680,11 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
         if (!(*aIt)->HasObjectInGroup("Brains"))
             continue;
 
-        distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
-        distance = distanceVec.GetMagnitude();
-
         // Check if closer than best so far
-        if (distance < shortestDistance)
+        float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+        if (sqrDistance < sqrShortestDistance)
         {
-            shortestDistance = distance;
+            sqrShortestDistance = sqrDistance;
             pClosestBrain = *aIt;
         }
     }
@@ -712,8 +704,9 @@ Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scene
     if (notOfTeam < Activity::TeamOne || notOfTeam >= Activity::MaxTeamCount || m_Actors.empty())
         return 0;
 
-    float testDistance = g_SceneMan.GetSceneDim().GetLargest();
-    float shortestDistance = g_SceneMan.GetSceneDim().GetLargest();
+    float sqrShortestDistance = std::numeric_limits<float>::infinity();
+    sqrShortestDistance *= sqrShortestDistance;
+
     Actor *pClosestBrain = 0;
     Actor *pContenderBrain = 0;
 
@@ -722,11 +715,11 @@ Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scene
         if (t != notOfTeam)
         {
             pContenderBrain = GetClosestBrainActor(t, scenePoint);
-            testDistance = (pContenderBrain->GetPos() - scenePoint).GetMagnitude();
-            if (testDistance < shortestDistance)
+            float sqrDistance = (pContenderBrain->GetPos() - scenePoint).GetSqrMagnitude();
+            if (sqrDistance < sqrShortestDistance)
             {
+                sqrShortestDistance = sqrDistance;
                 pClosestBrain = pContenderBrain;
-                shortestDistance = testDistance;
             }
         }
     }
@@ -1480,32 +1473,6 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     {
         (*parIt)->DrawMOIDIfOverlapping(pOverlapsThis);
     }
-}
-
-
-void MovableMan::OnPieMenu(Actor * pActor)
-{
-	deque<Actor *>::iterator aIt;
-	deque<MovableObject *>::iterator iIt;
-	deque<MovableObject *>::iterator parIt;
-
-	for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-	{
-		if ((*aIt)->ProvidesPieMenuContext())
-			(*aIt)->OnPieMenu(pActor);
-	}
-
-	for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
-	{
-		if ((*iIt)->ProvidesPieMenuContext())
-			(*iIt)->OnPieMenu(pActor);
-	}
-
-	for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-	{
-		if ((*parIt)->ProvidesPieMenuContext())
-			(*parIt)->OnPieMenu(pActor);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -718,7 +718,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
         float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetMagnitude() > m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].MagnitudeIsGreaterThan(m_PinStrength))
         {
             // Unpin and set the threshold to 0
             hd.Body[HITEE]->SetPinStrength(0);
@@ -786,7 +786,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
     float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
     float myStrength = myMat->GetIntegrity() / hd.Body[HITOR]->GetSharpness();
-
 
     // See if there is enough energy in the collision for the particle to penetrate
     if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->GetIntegrity())
@@ -1150,7 +1149,7 @@ void MOSRotating::ApplyImpulses() {
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) { impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio; }
-		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
+		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 	}
 
 	MOSprite::ApplyImpulses();
@@ -1427,7 +1426,7 @@ void MOSRotating::PostTravel()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (m_TravelImpulse.GetMagnitude() > impulseLimit) { GibThis(); }
+		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(); }
 	}
     // Reset
     m_DeepHardness = 0;
@@ -1531,12 +1530,8 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
         Vector otherPos = pOverlapMO->GetPos();
 
-        // Quick check
-        if (fabs(otherPos.m_X - m_Pos.m_X) > combinedRadii || fabs(otherPos.m_Y - m_Pos.m_Y) > combinedRadii)
-            return false;
-
         // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).GetMagnitude() < combinedRadii)
+        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
         {
             // They may be overlapping, so draw the MOID rep of this to the MOID layer
             Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
@@ -1995,10 +1990,10 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 
-std::string MOSRotating::GetStringValue(std::string key)
+std::string MOSRotating::GetStringValue(std::string key) const
 {
 	if (StringValueExists(key))
-		return m_StringValueMap[key];
+		return m_StringValueMap.at(key);
 	else
 		return "";
 }
@@ -2010,10 +2005,10 @@ std::string MOSRotating::GetStringValue(std::string key)
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-double MOSRotating::GetNumberValue(std::string key)
+double MOSRotating::GetNumberValue(std::string key) const
 {
 	if (NumberValueExists(key))
-		return m_NumberValueMap[key];
+		return m_NumberValueMap.at(key);
 	else
 		return 0;
 }
@@ -2025,10 +2020,10 @@ double MOSRotating::GetNumberValue(std::string key)
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-Entity * MOSRotating::GetObjectValue(std::string key)
+Entity * MOSRotating::GetObjectValue(std::string key) const
 {
 	if (ObjectValueExists(key))
-		return m_ObjectValueMap[key];
+		return m_ObjectValueMap.at(key);
 	else
 		return 0;
 }
@@ -2098,7 +2093,7 @@ void MOSRotating::RemoveObjectValue(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::StringValueExists(std::string key)
+bool MOSRotating::StringValueExists(std::string key) const
 {
 	if (m_StringValueMap.find(key) != m_StringValueMap.end())
 		return true;
@@ -2110,7 +2105,7 @@ bool MOSRotating::StringValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::NumberValueExists(std::string key)
+bool MOSRotating::NumberValueExists(std::string key) const
 {
 	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
 		return true;
@@ -2122,7 +2117,7 @@ bool MOSRotating::NumberValueExists(std::string key)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether the value associated with the specified key exists.
 
-bool MOSRotating::ObjectValueExists(std::string key)
+bool MOSRotating::ObjectValueExists(std::string key) const
 {
 	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
 		return true;

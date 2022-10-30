@@ -269,7 +269,8 @@ namespace RTE {
 		m_InventoryActor = newInventoryActor;
 		if (m_InventoryActor) {
 			m_InventoryActorIsHuman = dynamic_cast<AHuman *>(m_InventoryActor);
-			m_CenterPos = m_InventoryActor->GetCPUPos();
+
+			if (g_SceneMan.ShortestDistance(m_CenterPos, m_InventoryActor->GetCPUPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > 2.0F) { m_CenterPos = m_InventoryActor->GetCPUPos(); }
 		}
 	}
 
@@ -1265,7 +1266,7 @@ namespace RTE {
 		auto LaunchInventoryItem = [this, &dropDirection](MovableObject *itemToLaunch) {
 			Vector itemPosition = m_InventoryActor->GetPos();
 			Vector throwForce(0.75F + (0.25F * RandomNum()), 0);
-			if (dropDirection && dropDirection->GetMagnitude() > 0.5F) {
+			if (dropDirection && dropDirection->MagnitudeIsGreaterThan(0.5F)) {
 				itemPosition += Vector(m_InventoryActor->GetRadius(), 0).AbsRotateTo(*dropDirection);
 				throwForce.SetX(throwForce.GetX() + 5.0F);
 				throwForce.AbsRotateTo(*dropDirection);

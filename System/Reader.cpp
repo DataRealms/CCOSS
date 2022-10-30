@@ -215,20 +215,38 @@ namespace RTE {
 			// Comment line?
 			} else if (m_Stream->peek() == '/') {
 				char temp = static_cast<char>(m_Stream->get());
-				char temp2;
 
 				// Confirm that it's a comment line, if so discard it and continue
 				if (m_Stream->peek() == '/') {
 					while (m_Stream->peek() != '\n' && m_Stream->peek() != '\r' && !m_Stream->eof()) { m_Stream->ignore(1); }
 				// Block comment
 				} else if (m_Stream->peek() == '*') {
-					// Find the matching "*/"
-					while (!((temp2 = static_cast<char>(m_Stream->get())) == '*' && m_Stream->peek() == '/') && !m_Stream->eof()) {
-						// Count the lines within the comment though
+					int openBlockComments = 1;
+					m_BlockCommentOpenTagLines.emplace(m_CurrentLine);
+
+					char temp2 = 0;
+					while (openBlockComments > 0 && !m_Stream->eof()) {
+						temp2 = static_cast<char>(m_Stream->get());
 						if (temp2 == '\n') { ++m_CurrentLine; }
+
+						// Find the matching close tag.
+						if (!(temp2 == '*' && m_Stream->peek() == '/')) {
+							// Check if a nested block comment open tag.
+							if (temp2 == '/' && m_Stream->peek() == '*') {
+								openBlockComments++;
+								m_BlockCommentOpenTagLines.emplace(m_CurrentLine);
+							}
+						} else {
+							openBlockComments--;
+							m_BlockCommentOpenTagLines.pop();
+						}
 					}
-					// Discard that final '/'
-					if (!m_Stream->eof()) { m_Stream->ignore(1); }
+					// Discard that final '/'.
+					if (!m_Stream->eof()) {
+						m_Stream->ignore(1);
+					} else if (openBlockComments > 0) {
+						ReportError("File stream ended with an open block comment!\nCouldn't find closing tag for block comment opened on line " + std::to_string(m_BlockCommentOpenTagLines.top()) + ".\n");
+					}
 
 				// Not a comment, so it's data, so quit.
 				} else {

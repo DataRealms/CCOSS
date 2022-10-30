@@ -54,7 +54,6 @@ void HeldDevice::Clear()
     m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
 	m_BlinkTimer.SetSimTimeLimitMS(1000);
-    m_PieSlices.clear();
     m_Loudness = -1;
 
     // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
@@ -154,9 +153,6 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_Supported = reference.m_Supported;
     m_Loudness = reference.m_Loudness;
 
-    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
-        m_PieSlices.push_back(*itr);
-
     return 0;
 }
 
@@ -209,13 +205,6 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_MaxSharpLength;
     else if (propName == "Loudness")
         reader >> m_Loudness;
-    else if (propName == "AddPieSlice")
-    {
-        PieSlice newSlice;
-        reader >> newSlice;
-        m_PieSlices.push_back(newSlice);
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
-    }
     else
         return Attachable::ReadProperty(propName, reader);
 
@@ -252,11 +241,6 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
     writer << m_Loudness;
-    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
-    {
-        writer.NewProperty("AddPieSlice");
-        writer << *itr;
-    }
 
     return 0;
 }
@@ -332,21 +316,6 @@ void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-
-bool HeldDevice::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-    // Add the custom scripted options of this specific device
-    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
-        pPieMenu->AddSlice(*itr);
-
-    return false;
-}
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -583,7 +552,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 				}
 				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
 				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
-				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < unheldItemDisplayRange);
+				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
 
 				if (m_SeenByPlayer.at(viewingPlayer)) {
 					char pickupArrowString[64];

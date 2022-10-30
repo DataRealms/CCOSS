@@ -7,7 +7,7 @@
 namespace RTE {
 
 	class Scene;
-	class Actor;
+	class ACraft;
 
 	/// <summary>
 	/// Base class for all Activities, including game modes and editors.
@@ -177,7 +177,7 @@ namespace RTE {
 		/// <summary>
 		/// Tells if a particular Scene supports this specific Activity on it. Usually that means certain Areas need to be defined in the Scene.
 		/// </summary>
-		/// <param name="scene">The Scene to check if it supports this Activity. Ownership IS NOT TRANSFERRED!</param>
+		/// <param name="scene">The Scene to check if it supports this Activity. Ownership is NOT transferred!</param>
 		/// <param name="teams">How many teams we're checking for. Some scenes may support and Activity but only for a limited number of teams. If -1, not applicable.</param>
 		/// <returns>Whether the Scene has the right stuff.</returns>
 		virtual bool SceneIsCompatible(Scene *scene, int teams = -1) { return scene && teams <= m_MinTeamsRequired; }
@@ -205,6 +205,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="sceneName">The new name of the scene to load next game.</param>
 		void SetSceneName(const std::string sceneName) { m_SceneName = sceneName; }
+
+		/// <summary>
+		/// Gets whether craft must be considered orbited if they reach the map border on non-wrapped maps.
+		/// </summary>
+		/// <returns>Whether craft are considered orbited when at the border of a non-wrapping map.</returns>
+		bool GetCraftOrbitAtTheEdge() const { return m_CraftOrbitAtTheEdge; }
+
+		/// <summary>
+		/// Sets whether craft must be considered orbited if they reach the map border on non-wrapped maps.
+		/// </summary>
+		/// <param name="value">Whether to consider orbited or not.</param>
+		void SetCraftOrbitAtTheEdge(bool value) { m_CraftOrbitAtTheEdge = value; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -268,7 +280,7 @@ namespace RTE {
 		/// <param name="isHuman">Whether this player is Human.</param>
 		/// <param name="team">Which Team this player belongs to.</param>
 		/// <param name="funds">How many funds this player contributes to its Team's total funds.</param>
-		/// <param name="teamIcon">The team flag icon of this player - OWNERSHIP IS NOT TRANSFERRED.</param>
+		/// <param name="teamIcon">The team flag icon of this player. Ownership is NOT transferred!</param>
 		/// <returns>The new total number of active players in the current game.</returns>
 		int AddPlayer(int playerToAdd, bool isHuman, int team, float funds, const Icon *teamIcon = 0);
 
@@ -614,7 +626,7 @@ namespace RTE {
 		void ReassignSquadLeader(const int player, const int team);
 
 		/// <summary>
-		/// Forces the ActivityMan to focus player control to a specific Actor for a specific team. OWNERSHIP IS NOT TRANSFERRED!
+		/// Forces the ActivityMan to focus player control to a specific Actor for a specific team. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="actor">Which Actor to switch focus to. The team of this Actor will be set once it is passed in. The actor should have been added to MovableMan already.</param>
 		/// <param name="player">Player to force for.</param>
@@ -639,22 +651,10 @@ namespace RTE {
 		virtual void SwitchToNextActor(int player, int team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
 
 		/// <summary>
-		/// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+		/// Handles when an ACraft has left the game scene and entered orbit, though does not delete it. Ownership is NOT transferred, as the ACraft's inventory is just 'unloaded'.
 		/// </summary>
-		/// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
-		virtual void EnteredOrbit(Actor *orbitedCraft);
-
-		/// <summary>
-		/// Gets whether craft must be considered orbited if they reach the map border on non-wrapped maps.
-		/// </summary>
-		/// <returns>Whether craft are considered orbited when at the border of a non-wrapping map.</returns>
-		bool GetCraftOrbitAtTheEdge() const { return m_CraftOrbitAtTheEdge; }
-
-		/// <summary>
-		/// Sets whether craft must be considered orbited if they reach the map border on non-wrapped maps.
-		/// </summary>
-		/// <param name="value">Whether to consider orbited or not.</param>
-		void SetCraftOrbitAtTheEdge(bool value) { m_CraftOrbitAtTheEdge = value; }
+		/// <param name="orbitedCraft">The ACraft instance that entered orbit. Ownership is NOT transferred!</param>
+		virtual void HandleCraftEnteringOrbit (ACraft *orbitedCraft);
 #pragma endregion
 
 	protected:

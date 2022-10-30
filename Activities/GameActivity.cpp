@@ -1494,7 +1494,8 @@ void GameActivity::Update()
                 m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
             }
             else if (pMarkedActor) {
-				if (markedDistance.GetMagnitude() > static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)) {
+                int quarterFrameBuffer = g_FrameMan.GetPlayerFrameBufferWidth(player) / 4;
+				if (markedDistance.MagnitudeIsGreaterThan(static_cast<float>(quarterFrameBuffer))) {
 					pMarkedActor->GetPieMenu()->Wobble();
 				} else {
 					pMarkedActor->GetPieMenu()->FreezeAtRadius(30);
@@ -1579,18 +1580,23 @@ void GameActivity::Update()
 
 			Vector relativeToActor = m_ActorCursor[player] - m_ControlledActor[player]->GetPos();
 
-			float sceneWidth = g_SceneMan.GetSceneWidth();
+			float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
+			float seamMinimum = 350.0F;
 
 			//Check if we crossed the seam
-			if (g_SceneMan.GetScene()->WrapsX())
-				if (relativeToActor.GetMagnitude() > sceneWidth / 2 && relativeToActor.GetMagnitude() > 350)
-					if (m_ActorCursor->m_X < sceneWidth / 2)
-						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
-					else
-						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
+			if (g_SceneMan.GetScene()->WrapsX()) {
+				float halfSceneWidth = sceneWidth * 0.5F;
+				if (relativeToActor.MagnitudeIsGreaterThan(std::max(halfSceneWidth, seamMinimum))) {
+					if (m_ActorCursor->m_X < halfSceneWidth) {
+						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth, 0) - m_ControlledActor[player]->GetPos();
+					} else {
+						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth, 0) - m_ControlledActor[player]->GetPos();
+					}
+				}
+			}
 
 			// Limit selection range
-			relativeToActor = relativeToActor.CapMagnitude(350);
+			relativeToActor = relativeToActor.CapMagnitude(seamMinimum);
 			m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + relativeToActor;
 
 			bool wrapped;
@@ -1631,7 +1637,7 @@ void GameActivity::Update()
 				m_ControlledActor[player]->SetAIMode(Actor::AIMODE_SENTRY);
 
 				// Detect nearby actors and attach them to commander
-				float radius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_ControlledActor[player]->GetPos(), true).GetMagnitude();
+				float sqrRadius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_ControlledActor[player]->GetPos(), true).GetSqrMagnitude();
 
 				Actor *pActor = 0;
 				Actor *pFirstActor = 0;
@@ -1646,7 +1652,7 @@ void GameActivity::Update()
 					{
 						// If human, set appropriate AI mode
 						if (dynamic_cast<AHuman *>(pActor) || dynamic_cast<ACrab *>(pActor))
-							if (g_SceneMan.ShortestDistance(m_ControlledActor[player]->GetPos(), pActor->GetPos(),true).GetMagnitude() < radius)
+							if (g_SceneMan.ShortestDistance(m_ControlledActor[player]->GetPos(), pActor->GetPos(),true).GetSqrMagnitude() < sqrRadius)
 							{
 								pActor->FlashWhite();
 								pActor->ClearAIWaypoints();
@@ -2186,7 +2192,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     g_SceneMan.WrapBox(screenBox, wrappedBoxes);
     Vector wrappingOffset, objScenePos, onScreenEdgePos;
     float distance, shortestDist;
-    float sceneWidth = g_SceneMan.GetSceneWidth();
+    float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
     float halfScreenWidth = pTargetBitmap->w / 2;
     float halfScreenHeight = pTargetBitmap->h / 2;
     // THis is the max distance that is possible between a point inside the scene, but outside the screen box, and the screen box's outer edge closest to the point (taking wrapping into account)
@@ -2401,11 +2407,12 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 			{
 				//Calculate unwrapped cursor position, or it won't glow
 				unwrappedPos = m_ActorCursor[PoS] - m_ControlledActor[PoS]->GetPos();
-				float sceneWidth = g_SceneMan.GetSceneWidth();
+                float halfSceneWidth = sceneWidth * 0.5F;
+                float seamMinimum = 350.0F;
 
-				if (unwrappedPos.GetMagnitude() > sceneWidth / 2 && unwrappedPos.GetMagnitude() > 350)
+				if (unwrappedPos.MagnitudeIsGreaterThan(std::max(halfSceneWidth, seamMinimum)))
 				{
-					if (m_ActorCursor->m_X < sceneWidth / 2)
+					if (m_ActorCursor->m_X < halfSceneWidth)
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);
 					else
 						unwrappedPos = m_ActorCursor[PoS] - Vector(sceneWidth , 0);

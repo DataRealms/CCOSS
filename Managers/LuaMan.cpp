@@ -260,7 +260,7 @@ namespace RTE {
 		if (!functionLiteralArguments.empty()) {
 			for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
 				if (!isFirstFunctionArgument) { scriptString << ", "; }
-				scriptString << ", " + std::string(functionLiteralArgument);
+				scriptString << std::string(functionLiteralArgument);
 				isFirstFunctionArgument = false;
 			}
 		}

@@ -766,11 +766,11 @@ float SceneMan::TargetDistanceScalar(Vector point)
         return 0;
 
     int screenCount = g_FrameMan.GetScreenCount();
-    int screenRadius = MAX(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / 2;
-    int sceneRadius = MAX(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight()) / 2;
+    float screenRadius = static_cast<float>(std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight())) / 2.0F;
+    float sceneRadius = static_cast<float>(std::max(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight())) / 2.0F;
     // Avoid divide by zero problems if scene and screen radius are the same
-    if (screenRadius == sceneRadius)
-        sceneRadius += 100;
+	if (screenRadius == sceneRadius) { sceneRadius += 100.0F; }
+
     float distance = 0;
     float scalar = 0;
     float closestScalar = 1.0;
@@ -782,12 +782,12 @@ float SceneMan::TargetDistanceScalar(Vector point)
         // Check if we're off the screen and then fall off
         if (distance > screenRadius)
         {
-            // Get ratio of how close to the very opposite of teh scene the point is
-            scalar = 0.5 + 0.5 * (distance - screenRadius) / (sceneRadius - screenRadius);
+            // Get ratio of how close to the very opposite of the scene the point is
+            scalar = 0.5F + 0.5F * (distance - screenRadius) / (sceneRadius - screenRadius);
         }
         // Full audio if within the screen
         else
-            scalar = 0;
+            scalar = 0.0F;
 
         // See if this screen's distance scalar is the closest one yet
         if (scalar < closestScalar)
@@ -980,7 +980,7 @@ void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
 // Method:          WillPenetrate
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Test whether a pixel of the scene would be knocked loose and
-//                  turned into a MO by a certian impulse force. Scene needs to be locked
+//                  turned into a MO by a certain impulse force. Scene needs to be locked
 //                  to do this!
 
 bool SceneMan::WillPenetrate(const int posX,
@@ -992,10 +992,9 @@ bool SceneMan::WillPenetrate(const int posX,
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
 
-    float impMag = impulse.GetMagnitude();
     unsigned char materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
-
-    return impMag >= GetMaterialFromID(materialID)->GetIntegrity();
+    float integrity = GetMaterialFromID(materialID)->GetIntegrity();
+    return impulse.MagnitudeIsGreaterThan(integrity);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1256,10 +1255,10 @@ bool SceneMan::TryPenetrate(int posX,
 
     float sprayScale = 0.1;
 //    float spraySpread = 10.0;
-    float impMag = impulse.GetMagnitude();
+    float sqrImpMag = impulse.GetSqrMagnitude();
 
     // Test if impulse force is enough to penetrate
-    if (impMag >= sceneMat->GetIntegrity())
+    if (sqrImpMag >= (sceneMat->GetIntegrity() * sceneMat->GetIntegrity()))
     {
         if (numPenetrations <= 3)
         {
@@ -1320,7 +1319,7 @@ bool SceneMan::TryPenetrate(int posX,
 
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
-        retardation = -(sceneMat->GetIntegrity() / impMag);
+        retardation = -(sceneMat->GetIntegrity() / std::sqrt(sqrImpMag));
 
         // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
         if (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)

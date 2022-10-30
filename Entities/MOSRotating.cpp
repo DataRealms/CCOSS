@@ -718,7 +718,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
         float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetMagnitude() > m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].MagnitudeIsGreaterThan(m_PinStrength))
         {
             // Unpin and set the threshold to 0
             hd.Body[HITEE]->SetPinStrength(0);
@@ -786,7 +786,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
     float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
     float myStrength = myMat->GetIntegrity() / hd.Body[HITOR]->GetSharpness();
-
 
     // See if there is enough energy in the collision for the particle to penetrate
     if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->GetIntegrity())
@@ -1150,7 +1149,7 @@ void MOSRotating::ApplyImpulses() {
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) { impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio; }
-		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
+		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 	}
 
 	MOSprite::ApplyImpulses();
@@ -1427,7 +1426,7 @@ void MOSRotating::PostTravel()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (m_TravelImpulse.GetMagnitude() > impulseLimit) { GibThis(); }
+		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(); }
 	}
     // Reset
     m_DeepHardness = 0;
@@ -1531,12 +1530,8 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
         Vector otherPos = pOverlapMO->GetPos();
 
-        // Quick check
-        if (fabs(otherPos.m_X - m_Pos.m_X) > combinedRadii || fabs(otherPos.m_Y - m_Pos.m_Y) > combinedRadii)
-            return false;
-
         // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).GetMagnitude() < combinedRadii)
+        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
         {
             // They may be overlapping, so draw the MOID rep of this to the MOID layer
             Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);

@@ -721,10 +721,11 @@ namespace RTE {
 			float channel3dLevel;
 			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
 			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
-				float distanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetMagnitude();
-				if (distanceToPlayer < m_MinimumDistanceForPanning) {
+				float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
+				float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
+				if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
 					soundChannel->set3DLevel(0);
-				} else if (distanceToPlayer < m_MinimumDistanceForPanning * 2) {
+				} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
 					soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
 				} else {
 					soundChannel->set3DLevel(m_SoundPanningEffectStrength);
@@ -765,35 +766,37 @@ namespace RTE {
 				wrappedChannelPositions = {FMOD_VECTOR({channelPosition.x - g_SceneMan.GetSceneWidth(), channelPosition.y}), channelPosition};
 		}
 
-		float shortestDistance = c_SoundMaxAudibleDistance;
-		float longestDistance = 0;
+		float sqrShortestDistance = c_SoundMaxAudibleDistance * c_SoundMaxAudibleDistance;
+		float sqrLongestDistance = 0.0F;
 		for (const std::unique_ptr<const Vector> & humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
 			for (const FMOD_VECTOR &wrappedChannelPosition : wrappedChannelPositions) {
-				float distanceToChannelPosition = (*(humanPlayerPosition.get()) - GetAsVector(wrappedChannelPosition)).GetMagnitude();
-				if (distanceToChannelPosition < shortestDistance) {
-					shortestDistance = distanceToChannelPosition;
+				float sqrDistanceToChannelPosition = (*(humanPlayerPosition.get()) - GetAsVector(wrappedChannelPosition)).GetSqrMagnitude();
+				if (sqrDistanceToChannelPosition < sqrShortestDistance) {
+					sqrShortestDistance = sqrDistanceToChannelPosition;
 					channelPosition = wrappedChannelPosition;
 				}
-				if (distanceToChannelPosition > longestDistance) { longestDistance = distanceToChannelPosition; }
+				if (sqrDistanceToChannelPosition > sqrLongestDistance) { sqrLongestDistance = sqrDistanceToChannelPosition; }
 				if (!sceneWraps) {
 					break;
 				}
 			}
 		}
+		float shortestDistance = std::sqrt(sqrShortestDistance);
 
 		int soundChannelIndex;
 		result = result == FMOD_OK ? soundChannel->getIndex(&soundChannelIndex) : result;
 
 		float attenuationStartDistance = c_DefaultAttenuationStartDistance;
-		float soundMaxDistance;
+		float soundMaxDistance = 0.0F;
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
-		
+
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
+		float minimumAudibleDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
 		if (shortestDistance >= soundMaxDistance) {
 			attenuatedVolume = 0.0F;
 		} else if (m_SoundChannelMinimumAudibleDistances.empty() || m_SoundChannelMinimumAudibleDistances.find(soundChannelIndex) == m_SoundChannelMinimumAudibleDistances.end()) {
 			g_ConsoleMan.PrintString("ERROR: An error occurred when checking to see if the sound at channel " + std::to_string(soundChannelIndex) + " was less than its minimum audible distance away from the farthest listener.");
-		} else if (longestDistance < m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex)) {
+		} else if (sqrLongestDistance < (minimumAudibleDistance * minimumAudibleDistance)) {
 			attenuatedVolume = 0.0F;
 		}
 

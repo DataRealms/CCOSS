@@ -184,6 +184,7 @@ namespace RTE {
 		.property("CeilingedY", &Vector::GetCeilingIntY)
 		.property("Ceilinged", &Vector::GetCeilinged)
 		.property("Magnitude", &Vector::GetMagnitude)
+		.property("SqrMagnitude", &Vector::GetSqrMagnitude)
 		.property("Largest", &Vector::GetLargest)
 		.property("Smallest", &Vector::GetSmallest)
 		.property("Normalized", &Vector::GetNormalized)
@@ -194,6 +195,8 @@ namespace RTE {
 		.def_readwrite("X", &Vector::m_X)
 		.def_readwrite("Y", &Vector::m_Y)
 
+		.def("MagnitudeIsGreaterThan", &Vector::MagnitudeIsGreaterThan)
+		.def("MagnitudeIsLessThan", &Vector::MagnitudeIsLessThan)
 		.def("SetMagnitude", &Vector::SetMagnitude)
 		.def("GetXFlipped", &Vector::GetXFlipped)
 		.def("GetYFlipped", &Vector::GetYFlipped)

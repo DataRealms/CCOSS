@@ -1,4 +1,4 @@
-name: Linux Build
+name: Meson Build (Linux, macOS)
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the development branch
@@ -34,12 +34,6 @@ jobs:
         with:
           # Set up cc/c++ executables
           cc: 1 # optional, default is 1
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: build-release-${{runner.os}}
-          max-size: 5G
 
       - name: Build
         # You may pin to the exact commit or the version.
@@ -79,7 +73,7 @@ jobs:
       - name: Upload Appimage
         uses: actions/upload-artifact@v3
         with:
-          name: CortexCommand.AppImage
+          name: CortexCommand (Linux)
           path: CortexCommand.AppImage
 
   build-release-macos:
@@ -107,5 +101,5 @@ jobs:
       - name: Artifact Deploy
         uses: actions/upload-artifact@v3
         with:
-          name: CortexCommand
+          name: CortexCommand (macOS)
           path: build/CortexCommand

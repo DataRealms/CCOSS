@@ -1029,7 +1029,7 @@ namespace RTE {
 					}
 
 					if (deadZoneType == DeadZoneType::CIRCLE) {
-						if (aimValues.GetMagnitude() < deadZone) {
+						if (aimValues.MagnitudeIsLessThan(deadZone)) {
 							if (axisLeft != SDL_CONTROLLER_AXIS_INVALID) {
 								s_ChangedJoystickStates[joystickIndex].m_Axis[axisLeft] = Sign(axisLeft == axis ? -prevAxisValue : -device->m_Axis[axisLeft]);
 								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisLeft] = Sign(axisLeft == axis ? -prevDigitalValue : -device->m_DigitalAxis[axisLeft]);

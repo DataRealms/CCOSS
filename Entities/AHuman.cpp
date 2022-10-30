@@ -1561,11 +1561,12 @@ bool AHuman::IsWithinRange(Vector &point) const
         return true;
 
     Vector diff = g_SceneMan.ShortestDistance(m_Pos, point, false);
-    float distance = diff.GetMagnitude();
+    float sqrDistance = diff.GetSqrMagnitude();
 
-    // Really close!
-    if (distance <= m_CharHeight)
-        return true;
+	// Really close!
+	if (sqrDistance <= (m_CharHeight * m_CharHeight)) {
+		return true;
+	}
 
     float range = 0;
 
@@ -1584,7 +1585,7 @@ bool AHuman::IsWithinRange(Vector &point) const
         range += m_CharHeight * 4;
     }
 
-    return distance <= range;
+    return sqrDistance <= (range * range);
 }
 
 
@@ -1996,7 +1997,7 @@ void AHuman::UpdateAI()
                 // Only replace the target if the one we found is closer, or the old one isn't gold anymore
                 Vector newGoldDir = newGoldPos - m_Pos;
                 Vector oldGoldDir = m_DigTarget - m_Pos;
-                if (newGoldDir.GetMagnitude() < oldGoldDir.GetMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
+                if (newGoldDir.GetSqrMagnitude() < oldGoldDir.GetSqrMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
                 {
                     m_DigTarget = newGoldPos;
                     m_StuckTimer.Reset();
@@ -2411,9 +2412,9 @@ void AHuman::UpdateAI()
                 {
                     // Get the distance to the target and see if we've aimed well enough
                     Vector targetVec = g_SceneMan.ShortestDistance(m_Pos, m_SeenTargetPos, false);
-                    float distance = targetVec.GetMagnitude();
+                    float threshold = (m_AimDistance * 6.0F) + (m_pFGArm->GetHeldDevice()->GetSharpLength() * m_SharpAimProgress);
                     // Fire if really close, or if we have aimed well enough
-                    if (distance < m_AimDistance * 6 + m_pFGArm->GetHeldDevice()->GetSharpLength() * m_SharpAimProgress)
+                    if (targetVec.MagnitudeIsLessThan(threshold))
                     {
                         // ENEMY AIMED AT well enough - FIRE!
                         m_DeviceState = FIRING;
@@ -2945,7 +2946,7 @@ void AHuman::UpdateAI()
     if (m_ObstacleState == PROCEEDING)
     {
         // Reset stuck timer if we're moving fine, or we're waiting for teammate to move
-        if (m_RecentMovementMag > 2.5 || m_TeamBlockState)
+        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F) || m_TeamBlockState)
             m_StuckTimer.Reset();
 
         if (m_DeviceState == SCANNING)
@@ -2969,7 +2970,7 @@ void AHuman::UpdateAI()
     if (m_ObstacleState == JUMPING)
     {
         // Reset stuck timer if we're moving fine
-        if (m_RecentMovementMag > 2.5)
+        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F))
             m_StuckTimer.Reset();
 
         if (m_StuckTimer.IsPastSimMS(250))
@@ -2998,7 +2999,7 @@ void AHuman::UpdateAI()
     }
     // Reset from backstepping
 // TODO: better movement detection
-    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovementMag > 15.0))
+    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.MagnitudeIsGreaterThan(15.0F)))
     {
         m_ObstacleState = PROCEEDING;
         m_StuckTimer.Reset();
@@ -3064,7 +3065,9 @@ void AHuman::Update()
 {
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
+	
 	Vector analogAim = m_Controller.GetAnalogAim();
+    const float analogDeadzone = 0.1F;
 
 	m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
 	m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
@@ -3100,7 +3103,7 @@ void AHuman::Update()
 		// If pie menu is on, keep the angle to what it was before.
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
 			// Direct the jetpack nozzle according to either analog stick input or aim angle.
-			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+			if (m_Controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
 			} else {
@@ -3118,7 +3121,8 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Movement direction
 
-	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+    const float movementThreshold = 1.0F;
+	bool isStill = (m_Vel + m_PrevVel).MagnitudeIsLessThan(movementThreshold);
 	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
@@ -3150,7 +3154,7 @@ void AHuman::Update()
 			}
 
 			// Walk backwards if the aiming is already focused in the opposite direction of travel.
-			if (analogAim.GetMagnitude() != 0 || isSharpAiming) {
+			if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
 				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
@@ -3248,7 +3252,7 @@ void AHuman::Update()
 		m_AimAngle -= isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
-	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
+	} else if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) && m_Status != INACTIVE) {
 		// Hack to avoid the GetAbsRadAngle from mangling an aim angle straight down.
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
 		m_AimAngle = analogAim.GetAbsRadAngle();
@@ -3280,8 +3284,8 @@ void AHuman::Update()
     // Sharp aim calculation
 
 // TODO: make the delay data driven by both the actor and the device!
-    // 
-	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
+    //
+	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.MagnitudeIsLessThan(5.0F) && GetEquippedItem()) {
         float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full analog aim mag
@@ -3499,10 +3503,10 @@ void AHuman::Update()
 		}
 	}
 
-    // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
-        m_pItemInReach = nullptr;
-    }
+	// Item currently set to be within reach has expired or is now out of range
+	if (m_pItemInReach && (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsGreaterThan(reach + m_pItemInReach->GetRadius()))) {
+		m_pItemInReach = nullptr;
+	}
 
 	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
@@ -3878,7 +3882,7 @@ void AHuman::Update()
     m_ViewPoint = m_Pos.GetFloored() + aimSight;
 
 	// Add velocity also so the viewpoint moves ahead at high speeds
-	if (m_Vel.GetMagnitude() > 10.0F) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
+	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
     /////////////////////////////////////////
     // Gold Chunk inventroy management

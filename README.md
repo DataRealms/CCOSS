@@ -1,7 +1,7 @@
 # Cortex Command Community Project Source
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
-[![Linux Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
+[![Meson Build (Linux, macOS)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
 
 This is a community-driven effort to continue the development of Cortex Command.  
 Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
@@ -47,7 +47,7 @@ If you want to use an IDE other than Visual Studio, you will have to build using
 
 ***
 
-# Linux Build Instructions
+# Linux and macOS Build Instructions
 The Linux build uses the meson build system, and builds against system libraries.
 
 ## Dependencies
@@ -95,6 +95,13 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
 ## Installing Dependencies
+
+**macOS additional dependencies:**  
+- Homebrew  
+- Xcode  or Command Line Tools for Xcode (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
+
+**Homebrew (macOS):**  
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`
 
 **Arch Linux:**  
 `sudo pacman -S allegro4 sdl2 boost flac luajit lua52 minizip lz4 libpng meson ninja base-devel`  

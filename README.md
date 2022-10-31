@@ -52,9 +52,9 @@ The Linux build uses the meson build system, and builds against system libraries
 
 ## Dependencies
 
-* `g++>=8.1` (needs to support c++17 filesystem)
+* `g++>=8.1` or `clang++` (needs to support c++17 filesystem)
 * `allegro4` (optional, if missing will attempt to compile a stripped down version)
-* `loadpng` (optional, same as above)
+* `loadpng` (optional, will be compiled if missing)
 * `sdl2`
 * `flac`
 * `luajit`

@@ -497,7 +497,7 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-	if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+	if (!m_FunctionsAndScripts.at("Create").empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
 		m_ScriptObjectName = "ERROR";
 		return -3;
 	}

@@ -395,7 +395,9 @@ bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
     if (!m_IsHuman[player])
         return false;
 
-	pActor->GetPieMenu()->DoDisableAnimation();
+	if (pActor) {
+		pActor->GetPieMenu()->DoDisableAnimation();
+	}
     m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
@@ -422,7 +424,9 @@ void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 
     Activity::SwitchToNextActor(player, team, pSkip);
 
-	m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+	if (m_ControlledActor[player]) {
+		m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+	}
 }
 
 
@@ -442,7 +446,9 @@ void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
 
     Activity::SwitchToPrevActor(player, team, pSkip);
 
-	m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+	if (m_ControlledActor[player]) {
+		m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+	}
 }
 
 

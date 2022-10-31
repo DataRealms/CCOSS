@@ -97,8 +97,8 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Installing Dependencies
 
 **macOS additional dependencies:**  
-- Homebrew  
-- Xcode  or Command Line Tools for Xcode (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
+- `brew` [brew.sh](https://brew.sh) (or any other package manager)  
+- `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
 
 **Homebrew (macOS):**  
 `brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`

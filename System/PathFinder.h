@@ -50,7 +50,7 @@ namespace RTE {
 			Pos = pos;
 			for (int i = 0; i < 8; i++) {
 				AdjacentNodes[i] = nullptr;
-				AdjacentNodeCosts[i] = FLT_MAX; // Costs are infinite unless recalculated as otherwise
+				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise
 			}
 		}
 	};

@@ -247,7 +247,7 @@ namespace RTE {
 		int count = 1;
 		for (int i = 0; i < 8; i++) {
 			float cost = node->AdjacentNodeCosts[i];
-			if (cost < FLT_MAX) {
+			if (cost < std::numeric_limits<float>::max()) {
 				averageCost += cost;
 				count++;
 			}

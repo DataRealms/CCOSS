@@ -83,7 +83,7 @@ namespace RTE {
 			}
 		}
 		// Create and allocate the pather class which will do the work
-		m_Pather = new MicroPather(this, allocate);
+		m_Pather = new MicroPather(this, allocate, 8U, false);
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
 		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)

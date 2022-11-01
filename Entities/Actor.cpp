@@ -1179,6 +1179,8 @@ bool Actor::UpdateMovePath()
 {
     // TODO: Do throttling of calls for this function over time??
 
+    // Estimate how much material this actor can dig through
+    m_DigStrength = EstimateDigStrength();
 
     // Remove the material representation of all doors of this guy's team so he can navigate through them (they'll open for him)
     g_MovableMan.OverrideMaterialDoors(true, m_Team);
@@ -1251,6 +1253,16 @@ bool Actor::UpdateMovePath()
     m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
 
     return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Actor::EstimateDigStrength() {
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    // In this case, we use a default penetration value that'll allow us to move through corpses and stuff
+    // In future, it would make sense to make this data-driven per actor
+    const float defaultPenetration = 35.0F;
+    return defaultPenetration;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

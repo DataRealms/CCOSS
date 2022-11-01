@@ -240,56 +240,81 @@ namespace RTE {
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
 		const PathNode *node = static_cast<PathNode *>(state);
 		micropather::StateCost adjCost;
-		float strength = 0.0F;
+		
+		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions
+		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck
+		float averageCost = 0.0F;
+		int count = 1;
+		for (int i = 0; i < 8; i++)
+		{
+			float cost = node->AdjacentNodeCosts[i];
+			if (cost < FLT_MAX)
+			{
+				averageCost += cost;
+				count++;
+			}
+		}
+		averageCost /= static_cast<float>(count);
+
+		const float costRadiationMultiplier = 0.2F;
+		float radiatedCost = averageCost * costRadiationMultiplier;
 
 		// Add cost for digging upwards
 		if (node->Up) {
-			strength = node->UpCost;
+			float strength = node->UpCost;
 			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F); // Four times more expensive when digging
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Right) {
-			strength = node->RightCost;
+			float strength = node->RightCost;
 			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Down) {
-			strength = node->DownCost;
+			float strength = node->DownCost;
 			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Left) {
-			strength = node->LeftCost;
+			float strength = node->LeftCost;
 			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
 		// Add cost for digging at 45 degrees and for digging upwards
 		if (node->UpRight) {
-			strength = node->UpRightCost;
+			float strength = node->UpRightCost;
 			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
-			strength = node->RightDownCost;
+			float strength = node->RightDownCost;
 			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
-			strength = node->DownLeftCost;
+			float strength = node->DownLeftCost;
 			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
-			strength = node->LeftUpCost;
+			float strength = node->LeftUpCost;
 			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
+			adjCost.cost += radiatedCost;
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}

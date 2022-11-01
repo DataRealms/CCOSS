@@ -3054,7 +3054,7 @@ void Scene::Update()
 	}
 
     // Do a partial update every 10 seconds
-    if (m_PartialPathUpdateTimer.IsPastRealMS(1000)) 
+    if (m_PartialPathUpdateTimer.IsPastRealMS(10000)) 
     {
         UpdatePathFinding();
     }

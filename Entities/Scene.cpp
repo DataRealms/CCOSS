@@ -916,7 +916,9 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     if (initPathfinding)
     {
         // Create the pathfinding stuff based on the current scene
-        m_pPathFinder = new PathFinder(this, 20, 2000);
+		int sceneArea = GetWidth() * GetHeight();
+		int pathfinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
+        m_pPathFinder = new PathFinder(this, pathfinderGridNodeSize, numberOfBlocksToAllocate);
         // Update all the pathfinding data
         m_pPathFinder->RecalculateAllCosts();
     }

@@ -64,7 +64,7 @@ namespace RTE {
 		/// <param name="pScene">The scene to be pathing within.</param>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
-		PathFinder(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000) { Clear(); Create(scene, nodeDimension, allocate); }
+		PathFinder(Scene *scene, int nodeDimension, unsigned int allocate) { Clear(); Create(scene, nodeDimension, allocate); }
 
 		/// <summary>
 		/// Makes the PathFinder object ready for use.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000);
+		int Create(Scene *scene, int nodeDimension, unsigned int allocate);
 #pragma endregion
 
 #pragma region Destruction

@@ -172,8 +172,8 @@ namespace RTE {
 		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
 			for (PathNode *pathNode : nodeEntry) {
 				UpdateNodeCosts(pathNode);
-				// Should reset the changed flag since we're about to reset the pather
-				pathNode->IsChanged = false;
+				// Should reset the updated flag since we're about to reset the pather
+				pathNode->IsUpdated = false;
 			}
 		}
 		// Reset the pather when costs change, as per the docs
@@ -182,7 +182,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
+	bool PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
+		// If no node costs changed, then we don't need to reset the pather
+		bool anyChange = false;
+		
 		Box box;
 		// Go through all the boxes and see if any of the node centers are inside each
 		for (const Box &boxListEntry : boxList) {
@@ -191,7 +194,8 @@ namespace RTE {
 			box.Unflip();
 
 			// Do the updates
-			UpdateNodeCostsInBox(box);
+			// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here
+			anyChange = UpdateNodeCostsInBox(box) || anyChange;
 
 			// Take care of all wrapping situations of the box
 			if (g_SceneMan.SceneWrapsX()) {
@@ -199,10 +203,10 @@ namespace RTE {
 
 				if (box.m_Corner.m_X < 0) {
 					temp = Box(Vector(box.m_Corner.m_X + g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				} else if (box.m_Corner.m_X + box.m_Width > g_SceneMan.GetSceneWidth()) {
 					temp = Box(Vector(box.m_Corner.m_X - g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
@@ -210,23 +214,28 @@ namespace RTE {
 
 				if (box.m_Corner.m_Y < 0) {
 					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y + g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				} else if (box.m_Corner.m_Y + box.m_Height > g_SceneMan.GetSceneHeight()) {
 					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y - g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				}
 			}
 		}
 
-		// Reset the pather when costs change, as per the docs
-		m_Pather->Reset();
-
-		// Reset the changed flag on all nodes
+		// Reset the updated flag on all nodes
 		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
 			for (PathNode *pathNode : nodeEntry) {
-				pathNode->IsChanged = false;
+				pathNode->IsUpdated = false;
 			}
 		}
+
+		if (anyChange)
+		{
+			// Reset the pather when costs change, as per the docs
+			m_Pather->Reset();
+		}
+
+		return anyChange;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -326,10 +335,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::UpdateNodeCosts(PathNode *node) {
+	bool PathFinder::UpdateNodeCosts(PathNode *node) {
 		if (!node) {
-			return;
+			return false;
 		}
+
+		std::array<float, 8> oldCosts = node->AdjacentNodeCosts;
+
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
 		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
 		if (node->Right) { node->RightCost = CostAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
@@ -342,12 +354,25 @@ namespace RTE {
 		if (node->LeftUp) { node->LeftUpCost = std::max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
 
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
-		node->IsChanged = true;
+		node->IsUpdated = true;
+
+		for (int i = 0; i < 8; ++i) {
+			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
+			if (delta > sc_nodeCostChangeEpsilon) {
+				return true;
+			}
+		}
+
+		// None of the updates was past our epsilon, so ignore it and pretend it never happened
+		node->AdjacentNodeCosts = oldCosts;
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::UpdateNodeCostsInBox(Box &box) {
+	bool PathFinder::UpdateNodeCostsInBox(Box &box) {
+		bool anyChange = false;
+
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
@@ -368,8 +393,13 @@ namespace RTE {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
 				node = m_NodeGrid[nodeX][nodeY];
 				// Update all the costs going out from each node which is found to be affected by the box
-				if (!node->IsChanged) { UpdateNodeCosts(node); }
+				if (!node->IsUpdated) {
+					// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here
+					anyChange = UpdateNodeCosts(node) || anyChange;
+				}
 			}
 		}
+
+		return anyChange;
 	}
 }

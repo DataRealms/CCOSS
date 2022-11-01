@@ -16,12 +16,12 @@ namespace RTE {
 	struct PathNode {
 
 		Vector Pos; //!< Absolute position of the center of this node in the scene.
-		bool IsChanged; //!< Whether this has been updated since last call to Reset the pather.
+		bool IsUpdated; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		PathNode *AdjacentNodes[8];
+		std::array<PathNode*, 8> AdjacentNodes;
 
 		PathNode *&Up = AdjacentNodes[0];
 		PathNode *&UpRight = AdjacentNodes[1];
@@ -35,7 +35,7 @@ namespace RTE {
 		/// <summary>
 		/// Costs to get to each of the adjacent nodes, in clockwise order with top first.
 		/// </summary>
-		float AdjacentNodeCosts[8];
+		std::array<float, 8> AdjacentNodeCosts;
 
 		float &UpCost = AdjacentNodeCosts[0];
 		float &UpRightCost = AdjacentNodeCosts[1];
@@ -116,10 +116,11 @@ namespace RTE {
 		void RecalculateAllCosts();
 
 		/// <summary>
-		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself.
+		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself, if necessary.
 		/// </summary>
 		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
-		void RecalculateAreaCosts(const std::deque<Box> &boxList);
+		/// <returns>Whether any costs were updated.</returns>
+		bool RecalculateAreaCosts(const std::deque<Box> &boxList);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
@@ -177,20 +178,26 @@ namespace RTE {
 		/// This does NOT update the pather, which is required before solving more paths after calling this.
 		/// </summary>
 		/// <param name="node">The node to update all costs of. It's safe to pass 0 here. OWNERSHIP IS NOT TRANSFERRED!</param>
-		void UpdateNodeCosts(PathNode *node);
+		/// <returns>Whether the node costs changed.</returns>
+		bool UpdateNodeCosts(PathNode *node);
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges crossed by a specific box.
 		/// This does NOT update the pather, which is required before solving more paths after calling this. Also it does NOT wrap the box coming in here, only truncates it!
 		/// </summary>
 		/// <param name="box">The Box of which all edges it touches should be recalculated.</param>
-		void UpdateNodeCostsInBox(Box &box);
+		/// <returns>Whether any node costs changed.</returns>
+		bool UpdateNodeCostsInBox(Box &box);
 #pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
+	// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
+	// This is so that minor changes (i.e blood particles) don't force constant pather resets
+	static constexpr float sc_nodeCostChangeEpsilon = 5.0f;
 	};
 }
 #endif

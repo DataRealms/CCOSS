@@ -1052,14 +1052,14 @@ bool AssemblyEditorGUI::UpdateBrainPath()
     // First see if we have a brain in hand
     if (m_pCurrentObject && m_pCurrentObject->IsInGroup("Brains"))
     {
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
+        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath, 1.0F, static_cast<Activity::Teams>(m_pController->GetTeam()));
         return true;
     }
 
     // If not, then do we have a resident?
     SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
     if (pBrain)
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath);
+        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath, 1.0F, static_cast<Activity::Teams>(m_pController->GetTeam()));
     else
     {
         m_BrainSkyPath.clear();

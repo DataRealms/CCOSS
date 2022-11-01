@@ -1182,14 +1182,9 @@ bool Actor::UpdateMovePath()
     // Estimate how much material this actor can dig through
     m_DigStrength = EstimateDigStrength();
 
-    // Remove the material representation of all doors of this guy's team so he can navigate through them (they'll open for him)
-    g_MovableMan.OverrideMaterialDoors(true, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
-
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength);
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1199,7 +1194,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1210,17 +1205,12 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength);
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
     }
-
-    // Place back the material representation of all doors of this guy's team so they are as we found them
-    g_MovableMan.OverrideMaterialDoors(false, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())

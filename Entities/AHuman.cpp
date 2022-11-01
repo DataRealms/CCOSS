@@ -1190,19 +1190,27 @@ bool AHuman::EquipDiggingTool(bool doEquip)
 
 float AHuman::EstimateDigStrenght()
 {
-    float maxPenetration = 1;
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    // In this case, we use a default penetration value that'll allow us to move through corpses and stuff
+    // In future, it would make sense to make this data-driven per actor
+    // TODO: Implement this for ACrab too! Probably just throw it all in Actor
+    const float defaultPenetration = 35.0F;
+
+    float maxPenetration = defaultPenetration;
     
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return maxPenetration;
     
-    HDFirearm *pTool = 0;
+    HDFirearm* pTool = nullptr;
 
     // Check if the currently held device is already the desired type
     if (m_pFGArm->HoldsSomething())
     {
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
+        {
             return pTool->EstimateDigStrenght();
+        }
     }
 
     // Go through the inventory looking for the proper device
@@ -1211,7 +1219,9 @@ float AHuman::EstimateDigStrenght()
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
+        {
             maxPenetration = max(pTool->EstimateDigStrenght(), maxPenetration);
+        }
     }
     
     return maxPenetration;

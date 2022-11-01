@@ -2907,12 +2907,12 @@ void Scene::UpdatePathFinding()
 // Description:     Calculates and returns the least difficult path between two points on
 //                  the current scene. Takes both distance and materials into account.
 
-float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght)
+float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength)
 {
     float totalCostResult = -1;
     if (m_pPathFinder)
     {
-        int result = m_pPathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrenght);
+        int result = m_pPathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
 
         // It's ok if start and end nodes happen to be the same, the exact pixel locations are added at the front and end of the result regardless
         return (result == micropather::MicroPather::SOLVED || result == micropather::MicroPather::START_END_SAME) ? totalCostResult : -1;

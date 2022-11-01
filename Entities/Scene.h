@@ -1196,7 +1196,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght = 1);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -918,6 +918,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
         // Create the pathfinding stuff based on the current scene
 		int sceneArea = GetWidth() * GetHeight();
 		int pathfinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
+		unsigned int numberOfBlocksToAllocate = 4000;//std::min(128000, sceneArea / (pathfinderGridNodeSize * pathfinderGridNodeSize));
         m_pPathFinder = new PathFinder(this, pathfinderGridNodeSize, numberOfBlocksToAllocate);
         // Update all the pathfinding data
         m_pPathFinder->RecalculateAllCosts();

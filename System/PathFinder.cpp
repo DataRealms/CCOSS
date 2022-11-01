@@ -245,11 +245,9 @@ namespace RTE {
 		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck
 		float averageCost = 0.0F;
 		int count = 1;
-		for (int i = 0; i < 8; i++)
-		{
+		for (int i = 0; i < 8; i++) {
 			float cost = node->AdjacentNodeCosts[i];
-			if (cost < FLT_MAX)
-			{
+			if (cost < FLT_MAX) {
 				averageCost += cost;
 				count++;
 			}

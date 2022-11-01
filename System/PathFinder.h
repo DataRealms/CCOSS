@@ -21,35 +21,34 @@ namespace RTE {
 		/// <summary>
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		PathNode* AdjacentNodes[8];
+		PathNode *AdjacentNodes[8];
 
-		PathNode*& Up = AdjacentNodes[0];
-		PathNode*& UpRight = AdjacentNodes[1];
-		PathNode*& Right = AdjacentNodes[2];
-		PathNode*& RightDown = AdjacentNodes[3];
-		PathNode*& Down = AdjacentNodes[4];
-		PathNode*& DownLeft = AdjacentNodes[5];
-		PathNode*& Left = AdjacentNodes[6];
-		PathNode*& LeftUp = AdjacentNodes[7];
+		PathNode *&Up = AdjacentNodes[0];
+		PathNode *&UpRight = AdjacentNodes[1];
+		PathNode *&Right = AdjacentNodes[2];
+		PathNode *&RightDown = AdjacentNodes[3];
+		PathNode *&Down = AdjacentNodes[4];
+		PathNode *&DownLeft = AdjacentNodes[5];
+		PathNode *&Left = AdjacentNodes[6];
+		PathNode *&LeftUp = AdjacentNodes[7];
 
 		/// <summary>
 		/// Costs to get to each of the adjacent nodes, in clockwise order with top first.
 		/// </summary>
 		float AdjacentNodeCosts[8];
 
-		float& UpCost = AdjacentNodeCosts[0];
-		float& UpRightCost = AdjacentNodeCosts[1];
-		float& RightCost = AdjacentNodeCosts[2];
-		float& RightDownCost = AdjacentNodeCosts[3];
-		float& DownCost = AdjacentNodeCosts[4];
-		float& DownLeftCost = AdjacentNodeCosts[5];
-		float& LeftCost = AdjacentNodeCosts[6];
-		float& LeftUpCost = AdjacentNodeCosts[7];
+		float &UpCost = AdjacentNodeCosts[0];
+		float &UpRightCost = AdjacentNodeCosts[1];
+		float &RightCost = AdjacentNodeCosts[2];
+		float &RightDownCost = AdjacentNodeCosts[3];
+		float &DownCost = AdjacentNodeCosts[4];
+		float &DownLeftCost = AdjacentNodeCosts[5];
+		float &LeftCost = AdjacentNodeCosts[6];
+		float &LeftUpCost = AdjacentNodeCosts[7];
 
 		PathNode(Vector pos) {
 			Pos = pos;
-			for (int i = 0; i < 8; i++)
-			{
+			for (int i = 0; i < 8; i++) {
 				AdjacentNodes[i] = nullptr;
 				AdjacentNodeCosts[i] = FLT_MAX; // Costs are infinite unless recalculated as otherwise
 			}

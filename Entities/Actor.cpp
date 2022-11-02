@@ -1248,11 +1248,8 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float Actor::EstimateDigStrength() {
-    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
-    // In this case, we use a default penetration value that'll allow us to move through corpses and stuff
-    // In future, it would make sense to make this data-driven per actor
-    const float defaultPenetration = 35.0F;
-    return defaultPenetration;
+    // In future, it may make sense to make this data-driven per actor, instead of returning a hardcoded value
+    return sc_defaultDigStrength;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

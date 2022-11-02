@@ -1095,6 +1095,10 @@ ClassInfoGetters;
 
     virtual float EstimateDigStrength();
 
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    // In this case, we use a default penetration value that'll allow us to move through corpses and stuff
+    static constexpr float sc_defaultDigStrength = 35.0F;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  UpdateAIScripted

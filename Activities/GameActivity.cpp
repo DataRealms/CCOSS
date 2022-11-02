@@ -1515,7 +1515,7 @@ void GameActivity::Update()
 			if (m_pLastMarkedActor[player]) {
 				if (!g_MovableMan.ValidMO(m_pLastMarkedActor[player])) {
 					m_pLastMarkedActor[player] = nullptr;
-				} else if (m_pLastMarkedActor[player] != pMarkedActor) {
+				} else if (m_pLastMarkedActor[player] != pMarkedActor && m_pLastMarkedActor[player]->GetPieMenu() != nullptr) {
 					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
 				}
 			}

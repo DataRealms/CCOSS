@@ -282,8 +282,6 @@ protected:
 	std::vector<std::unique_ptr<PieSlice>> m_PieSlicesToAdd; //!< A vector of PieSlices that should be added to any PieMenus opened while this GAScripted is running.
     // The list of global scripts allowed to run during this activity
     std::vector<GlobalScript *> m_GlobalScriptsList;
-	// Whether or not the activity is in progress. This is true when loading an activity from a savegame
-	bool m_InProgress;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -50,7 +50,6 @@ void GAScripted::Clear() {
     m_LuaClassName.clear();
     m_RequiredAreas.clear();
 	m_PieSlicesToAdd.clear();
-    m_InProgress = false;
 }
 
 
@@ -86,8 +85,9 @@ int GAScripted::Create() {
 // Description:     Creates a GAScripted to be identical to another, by deep copy.
 
 int GAScripted::Create(const GAScripted &reference) {
-    if (GameActivity::Create(reference) < 0)
+    if (GameActivity::Create(reference) < 0) {
         return -1;
+    }
 
     m_ScriptPath = reference.m_ScriptPath;
     m_LuaClassName = reference.m_LuaClassName;
@@ -97,7 +97,6 @@ int GAScripted::Create(const GAScripted &reference) {
 	for (const std::unique_ptr<PieSlice> &referencePieSliceToAdd : reference.m_PieSlicesToAdd) {
 		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(referencePieSliceToAdd->Clone())));
 	}
-	m_InProgress = reference.m_InProgress;
 
     return 0;
 }
@@ -118,8 +117,6 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_LuaClassName;
 	} else if (propName == "AddPieSlice") {
 		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
-	} else if (propName == "InProgress") {
-        reader >> m_InProgress;
     } else {
 		return GameActivity::ReadProperty(propName, reader);
 	}
@@ -144,8 +141,6 @@ int GAScripted::Save(Writer &writer) const {
 		writer.NewPropertyWithValue("AddPieSlice", pieSliceToAdd.get());
 	}
 
-    writer.NewPropertyWithValue("InProgress", m_InProgress);
-
 	return 0;
 }
 
@@ -168,8 +163,6 @@ void GAScripted::Destroy(bool notInherited) {
     }
 
     Clear();
-
-    m_InProgress = false;
 }
 
 
@@ -282,6 +275,7 @@ int GAScripted::Start() {
     int error = GameActivity::Start();
     if (error < 0) {
         return error;
+    }
 
     // Create the Lua variable which will hold the class representation that we'll add some definitions to
     if ((error = g_LuaMan.RunScriptString(m_LuaClassName + " = ToGameActivity(ActivityMan:GetActivity());")) < 0) {
@@ -309,10 +303,11 @@ int GAScripted::Start() {
 	std::list<Entity *> globalScripts;
 	g_PresetMan.GetAllOfType(globalScripts, "GlobalScript");
 
-	for (std::list<Entity *>::iterator sItr = globalScripts.begin(); sItr != globalScripts.end(); ++sItr)v{
+	for (std::list<Entity *>::iterator sItr = globalScripts.begin(); sItr != globalScripts.end(); ++sItr) {
 		GlobalScript * script = dynamic_cast<GlobalScript *>(*sItr);
-		if (script && g_SettingsMan.IsGlobalScriptEnabled(script->GetModuleAndPresetName()))
-			m_GlobalScriptsList.push_back(dynamic_cast<GlobalScript *>(script->Clone()));
+        if (script && g_SettingsMan.IsGlobalScriptEnabled(script->GetModuleAndPresetName())) {
+            m_GlobalScriptsList.push_back(dynamic_cast<GlobalScript*>(script->Clone()));
+        }
 	}
 
 	// Start all global scripts
@@ -323,8 +318,6 @@ int GAScripted::Start() {
 
 		(*sItr)->Start();
 	}
-
-    m_InProgress = true;
 
     return error;
 }

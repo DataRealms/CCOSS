@@ -135,6 +135,8 @@ void Activity::Clear() {
 			reader >> m_CraftOrbitAtTheEdge;
 		} else if (propName == "InCampaignStage") {
 			reader >> m_InCampaignStage;
+		} else if (propName == "ActivityState") {
+			m_ActivityState = static_cast<ActivityState>(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "TeamOfPlayer1" || propName == "TeamOfPlayer2" || propName == "TeamOfPlayer3" || propName == "TeamOfPlayer4") {
 			for (int playerTeam = Teams::TeamOne; playerTeam < Teams::MaxTeamCount; playerTeam++) {
 				std::string playerTeamNum = std::to_string(playerTeam + 1);
@@ -227,6 +229,8 @@ void Activity::Clear() {
 		writer << m_CraftOrbitAtTheEdge;
 		writer.NewProperty("InCampaignStage");
 		writer << m_InCampaignStage;
+		writer.NewProperty("ActivityState");
+		writer << m_ActivityState;
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			std::string playerNum = std::to_string(player + 1);

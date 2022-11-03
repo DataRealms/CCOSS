@@ -562,15 +562,27 @@ namespace RTE {
 		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
 		sceneAltered->SetScriptSave(true);
 
-		// Save any extra scene data, and activity
-		Writer writer((sc_scriptSavesPath + fileName + ".ini").c_str());
-		writer.NewPropertyWithValue("Scene", sceneAltered);
-		writer.NewPropertyWithValue("Activity", activity);
+		// We don't need to block the main thread for too long, just need to pause update for a little bit, until the writer has all the data
+		g_TimerMan.PauseSim(true);
 
-		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stufff we got from MovableMan
-		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
+		auto saveWriterData = [sceneAltered, activity](const std::string& filename) {
+			Writer writer(filename.c_str());
+			writer.NewPropertyWithValue("Scene", sceneAltered);
+			writer.NewPropertyWithValue("Activity", activity);
 
-		delete sceneAltered;
+			// We have all the data in the writer
+			// Now we can continue and the flushing to disk (upon scope exit) can be done concurrently with the simulation
+			g_TimerMan.PauseSim(false);
+
+			// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan
+			sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
+
+			delete sceneAltered;
+		};
+
+		std::thread saveThread(saveWriterData, sc_scriptSavesPath + fileName + ".ini");
+		saveThread.detach();
+
 		return true;
 	}
 

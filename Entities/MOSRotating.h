@@ -470,11 +470,11 @@ ClassInfoGetters;
 	void RemoveOrDestroyAllAttachables(bool destroy);
 
 	/// <summary>
-	/// Gets the Attachable nearest to the passed in offset, but only if DetachAttachablesBeforeGibbing is set to true.
+	/// Gets the Attachable nearest to the passed in offset.
 	/// </summary>
 	/// <param name="offset">The offset that will be compared to each Attachable's ParentOffset.</param>
 	/// <returns>The nearest damage-transferring Attachable, or nullptr if none was found.</returns>
-	virtual Attachable * GetNearestAttachableToOffset(Vector offset);
+	Attachable * GetNearestAttachableToOffset(const Vector &offset) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

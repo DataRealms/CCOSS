@@ -213,7 +213,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
-	
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

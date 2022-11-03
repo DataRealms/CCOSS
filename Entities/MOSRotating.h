@@ -976,7 +976,7 @@ protected:
 	int m_GibWoundLimit; //!< The number of wounds that will gib this MOSRotating. 0 means that it can't be gibbed via wounds.
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
 	float m_WoundCountAffectsImpulseLimitRatio; //!< The rate at which this MOSRotating's wound count will diminish the impulse limit.
-	bool m_DetachAttachablesBeforeGibbing; //!< Whether to detach any Attachables of this MOSRotating when gibbing conditions are met, instead of gibbing the MOSRotating itself.
+	bool m_DetachAttachablesBeforeGibbingFromWounds; //!< Whether to detach any Attachables of this MOSRotating when it should gib from hitting its wound limit, instead of gibbing the MOSRotating itself.
 	bool m_GibAtEndOfLifetime; //!< Whether or not this MOSRotating should gib when it reaches the end of its lifetime, instead of just deleting.
     // Gib sound effect
     SoundContainer *m_GibSound;

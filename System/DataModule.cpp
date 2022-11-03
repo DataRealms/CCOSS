@@ -51,7 +51,7 @@ namespace RTE {
 		if (reader.Create(indexPath, true, progressCallback) >= 0) {
 			int result = Serializable::Create(reader);
 
-			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && moduleName != "ScriptSaves.rte" && m_SupportedGameVersion != c_GameVersion) {
+			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && moduleName != "Saves.rte" && m_SupportedGameVersion != c_GameVersion) {
 				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 			}

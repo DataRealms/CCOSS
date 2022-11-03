@@ -15,7 +15,7 @@
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	constexpr static char* sc_scriptSavesPath = "ScriptSaves.rte/";
+	constexpr static char* sc_scriptSavesPath = "Saves.rte/";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +75,8 @@ namespace RTE {
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF)
-				.def("SaveScriptedScene", &LuaMan::SaveScriptedScene)
-				.def("LoadScriptedScene", &LuaMan::LoadScriptedScene),
+				.def("SaveScene", &LuaMan::SaveScriptedScene)
+				.def("LoadScene", &LuaMan::LoadScriptedScene),
 
 			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),

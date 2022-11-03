@@ -263,13 +263,11 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  InitAIs
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Goes through all Actor:s currently in the MovableMan and sets each
-//                  one not controlled by a player to be AI controlled and AIMode setting
-//                  based on team and CPU team.
+// Description:     Does nothing - we do this in script! Just overrides the base behaviour.
 // Arguments:       None.
 // Return value:    None.
 
-	void InitAIs() override;
+	void InitAIs() override {};
 
 
     // Member variables
@@ -284,6 +282,8 @@ protected:
 	std::vector<std::unique_ptr<PieSlice>> m_PieSlicesToAdd; //!< A vector of PieSlices that should be added to any PieMenus opened while this GAScripted is running.
     // The list of global scripts allowed to run during this activity
     std::vector<GlobalScript *> m_GlobalScriptsList;
+	// Whether or not the activity is in progress. This is true when loading an activity from a savegame
+	bool m_InProgress;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

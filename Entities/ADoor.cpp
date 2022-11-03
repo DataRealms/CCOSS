@@ -65,8 +65,10 @@ namespace RTE {
 		}
 		m_SensorInterval = reference.m_SensorInterval;
 
-		// Set the initial door state to the opposite of default so it'll move to default when spawned and draw the door material layer.
-		m_DoorState = reference.m_ClosedByDefault ? OPEN : CLOSED;
+		// Set the door redraw timer, to force an immediate redraw
+		m_DoorMaterialRedrawTimer.SetElapsedSimTimeMS(m_DoorMaterialRedrawTimer.GetSimTimeLimitMS() + 1);
+
+		m_DoorState = reference.m_DoorState;
 
 		m_ClosedByDefault = reference.m_ClosedByDefault;
 		m_OpenOffset = reference.m_OpenOffset;

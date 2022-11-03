@@ -467,6 +467,7 @@ void Scene::Clear()
 	m_pPreviewBitmap = 0;
 	m_MetasceneParent.clear();
 	m_IsMetagameInternal = false;
+    m_IsScriptSave = false;
 }
 
 /*
@@ -570,6 +571,7 @@ int Scene::Create(const Scene &reference)
 
 	m_MetasceneParent = reference.m_MetasceneParent;
 	m_IsMetagameInternal = reference.m_IsMetagameInternal;
+    m_IsScriptSave = reference.m_IsScriptSave;
     return 0;
 }
 
@@ -1175,6 +1177,8 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_MetasceneParent;
     else if (propName == "MetagameInternal")
         reader >> m_IsMetagameInternal;
+     else if (propName == "ScriptSave")
+        reader >> m_IsScriptSave;
     else if (propName == "OwnedByTeam")
         reader >> m_OwnedByTeam;
     else if (propName == "RoundIncome")
@@ -1333,6 +1337,8 @@ int Scene::Save(Writer &writer) const
 	}
     writer.NewProperty("MetagameInternal");
     writer << m_IsMetagameInternal;
+    writer.NewProperty("ScriptSave");
+    writer << m_IsScriptSave;
     writer.NewProperty("Revealed");
     writer << m_Revealed;
     writer.NewProperty("OwnedByTeam");
@@ -1985,24 +1991,21 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveActorsAndDevices
+// Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
+// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
-//                  Should be done AFTER RetrieveResidentBrains!
 
-int Scene::RetrieveActorsAndDevices(int onlyTeam, bool noBrains)
+int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBrains)
 {
     int found = 0;
     
-    // Suck out all the Actors from the MovableMan - TAKING OVER ownership
-    found += g_MovableMan.EjectAllActors(m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
-    // Suck out all the Items from the MovableMan - TAKING OVER ownership
-    found += g_MovableMan.EjectAllItems(m_PlacedObjects[PLACEONLOAD]);
+    found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
+    found += g_MovableMan.GetAllItems(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
+    //found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
 
     return found;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddPlacedObject
@@ -2161,13 +2164,15 @@ void Scene::UpdatePlacedObjects(int whichSet)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all entries in a specific set of placed Objects.
 
-int Scene::ClearPlacedObjectSet(int whichSet)
+int Scene::ClearPlacedObjectSet(int whichSet, bool weHaveOwnership)
 {
     int count = 0;
     for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
     {
-        delete *itr;
-        (*itr) = 0;
+        if (weHaveOwnership)
+        {
+            delete *itr;
+        }
         ++count;
     }
     m_PlacedObjects[whichSet].clear();

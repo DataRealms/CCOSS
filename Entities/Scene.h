@@ -771,16 +771,15 @@ EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveActorsAndDevices
+// Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sucks up all the Actors and Devices currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
-//                  Should be done AFTER RetrieveResidentBrains!
 // Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
-    int RetrieveActorsAndDevices(int onlyTeam = -1, bool noBrains = false);
+    int RetrieveSceneObjects(bool transferOwnership = true, int onlyTeam = -1, bool noBrains = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -866,9 +865,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all entries in a specific set of placed Objects.
 // Arguments:       Which set of placed objects to clear. See the PlacedObjectSets enum.
+//                  Whether or not we have ownership of these items, and should delete them.
 // Return value:    How many things were removed in teh process of clearing that set.
 
-    int ClearPlacedObjectSet(int whichSet);
+    int ClearPlacedObjectSet(int whichSet, bool weHaveOwnership = true);
 
 
 
@@ -1294,6 +1294,25 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 	void SetMetagameInternal(bool newValue) { m_IsMetagameInternal = newValue; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          IsScriptSave
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Whether this scene is a script saved scene
+// Arguments:       None.
+// Return value:    Whether scene is a script save or not.
+
+	bool IsScriptSave() const { return m_IsScriptSave; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetScriptSave
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets whether this scene is a script saved scene
+// Arguments:       New value.
+// Return value:    None.
+
+	void SetScriptSave(bool newValue) { m_IsScriptSave = newValue; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetPreviewBitmap
@@ -1380,8 +1399,10 @@ protected:
 	// Scenes with m_MetaSceneParent field set will be invisible for editors and activities unless
 	// ShowMetaScenes flag in settings.ini is set
 	string m_MetasceneParent;
+
 	// Whether this scene must be shown anywhere in UIs
 	bool m_IsMetagameInternal;
+    bool m_IsScriptSave;
 
 	std::list<Deployment *>m_Deployments;
 

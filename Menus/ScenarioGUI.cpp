@@ -221,7 +221,7 @@ namespace RTE {
 		std::vector<Scene *> filteredScenes;
 		for (Entity *presetEntity : presetList) {
 			Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.emplace_back(presetScene); }
+			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && !presetScene->IsScriptSave() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.emplace_back(presetScene); }
 		}
 		AdjustSitePointOffsetsOnPlanet(filteredScenes);
 

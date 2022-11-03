@@ -204,6 +204,22 @@ namespace RTE {
 		bool FileEOF(int fileIndex);
 #pragma endregion
 
+#pragma region Save/Load
+		/// <summary>
+		/// Saves the currently running scripted scene to a file.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether or not the scripted scene was sucessfully saved.</returns>
+		bool SaveScriptedScene(const std::string& fileName);
+
+		/// <summary>
+		/// Loads a previously saved scripted scene, and starts it.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether or not the scripted scene was sucessfully loaded.</returns>
+		bool LoadScriptedScene(const std::string& fileName);
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this LuaMan.

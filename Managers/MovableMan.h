@@ -611,57 +611,66 @@ public:
 
     bool RemoveMO(MovableObject *pMOToRem);
 
-    /// <summary>
-    /// Kills and destroys all Actors of a specific Team.
-    /// </summary>
-    /// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
-    /// <returns>How many Actors were killed.</returns>
+/// <summary>
+/// Kills and destroys all Actors of a specific Team.
+/// </summary>
+/// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
+/// <returns>How many Actors were killed.</returns>
+
     int KillAllTeamActors(int teamToKill) const;
 
-	/// <summary>
-	/// Kills and destroys all enemy Actors of a specific Team.
-	/// </summary>
-	/// <param name="teamNotToKill">The team to NOT annihilate. If NoTeam is passed in, then ALL Actors die.</param>
-	/// <returns>How many Actors were killed.</returns>
+/// <summary>
+/// Kills and destroys all enemy Actors of a specific Team.
+/// </summary>
+/// <param name="teamNotToKill">The team to NOT annihilate. If NoTeam is passed in, then ALL Actors die.</param>
+/// <returns>How many Actors were killed.</returns>
+
 	int KillAllEnemyActors(int teamNotToKill = Activity::NoTeam) const;
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllActors
+// Method:          GetAllActors
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Actors in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-// Arguments:       The list of Actors to put the evacuated Actor instances in.
-//                  The team to only eject Actors of. If NoTeam, then all will be grabbed.
+// Description:     Adds to a list ALL Actors in the world
+// Arguments:       Whether or not ownership of actors should be transferred, and removed from the MovableMan
+//                  The list of Actors to put the evacuated Actor instances in.
+//                  The team to only get Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not grab any brains at all.
-// Return value:    How many Actors was transferred to the list.
+// Return value:    How many Actors were transferred to the list.
 
-    int EjectAllActors(std::list<SceneObject *> &actorList, int onlyTeam = -1, bool noBrains = false);
-
+    int GetAllActors(bool transferOwnership, std::list<SceneObject *> &actorList, int onlyTeam = -1, bool noBrains = false);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllItems
+// Method:          GetAllItems
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Items in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-// Arguments:       The list of MovableObject:s to put the evacuated MovableObject instances
-//                  in.
+// Description:     Adds to a list ALL Items in the world
+// Arguments:       Whether or not ownership of items should be transferred, and removed from the MovableMan
+//                  The list of Items to put the evacuated Item instances in.
 // Return value:    How many Items were transferred to the list.
 
-    int EjectAllItems(std::list<SceneObject *> &itemList);
+    int GetAllItems(bool transferOwnership, std::list<SceneObject *> &itemList);
 
-    /// <summary>
-    /// Opens all doors and keeps them open until this is called again with false.
-    /// </summary>
-    /// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
-    /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetAllParticles
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds to a list ALL Particles in the world
+// Arguments:       Whether or not ownership of items should be transferred, and removed from the MovableMan
+//                  The list of Particles to put the evacuated Particles instances in.
+// Return value:    How many Particles were transferred to the list.
+
+    int GetAllParticles(bool transferOwnership, std::list<SceneObject *> &particleList);
+
+/// <summary>
+/// Opens all doors and keeps them open until this is called again with false.
+/// </summary>
+/// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
+/// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
     void OpenAllDoors(bool open = true, int team = Activity::NoTeam) const;
 
-    /// <summary>
-    /// Temporarily erases or redraws any material door representations of a specific team.
-	/// Used to make pathfinding work better, allowing Actors to navigate through firendly bases despite the door material layer.
-    /// </summary>
-    /// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
+/// <summary>
+/// Temporarily erases or redraws any material door representations of a specific team.
+/// Used to make pathfinding work better, allowing Actors to navigate through firendly bases despite the door material layer.
+/// </summary>
+/// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
     /// <param name="team">Which team to do this for, NoTeam means all teams.</param>
     void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam) const;
 

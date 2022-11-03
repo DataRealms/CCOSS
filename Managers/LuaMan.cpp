@@ -4,9 +4,18 @@
 #include "LuaAdapters.h"
 #include "LuaAdaptersEntities.h"
 
+#include "Reader.h"
+#include "Writer.h"
+
+#include "ActivityMan.h"
+#include "GAScripted.h"
+#include "Scene.h"
+#include "SceneMan.h"
+
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
+	constexpr static char* sc_scriptSavesPath = "ScriptSaves.rte/";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +74,9 @@ namespace RTE {
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
-				.def("FileEOF", &LuaMan::FileEOF),
+				.def("FileEOF", &LuaMan::FileEOF)
+				.def("SaveScriptedScene", &LuaMan::SaveScriptedScene)
+				.def("LoadScriptedScene", &LuaMan::LoadScriptedScene),
 
 			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
@@ -520,6 +531,74 @@ namespace RTE {
 		}
 		g_ConsoleMan.PrintString("ERROR: Tried to check EOF for an invalid or closed file.");
 		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool LuaMan::SaveScriptedScene(const std::string &fileName) {
+		Scene* scene = dynamic_cast<Scene*>(g_SceneMan.GetScene());
+		GAScripted* activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+
+		if (!scene || !activity) {
+			return false;
+		}
+
+		// Save the scene bitmaps
+		if (scene->SaveData(sc_scriptSavesPath + fileName) < 0) {
+			return false;
+		}
+
+		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current g_movableMan state
+		Scene* sceneAltered = dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone());
+
+		// Delete any existing objects from our scene - we don't want replace broken doors or repair any stuff when we load
+		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
+
+		// Pull all stuff from movableMan into the scene for saving, so existing actors/doors are transfered
+		sceneAltered->RetrieveSceneObjects(false); // Don't transfer ownership
+
+		// We also need to stop being a copy of the scene we got cloned from - otherwise we'll still pick up the PlacedObjectSets from our parent when loading
+		// So become our own original preset
+		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
+		sceneAltered->SetScriptSave(true);
+
+		// Save any extra scene data, and activity
+		Writer writer((sc_scriptSavesPath + fileName + ".ini").c_str());
+		writer.NewPropertyWithValue("Scene", sceneAltered);
+		writer.NewPropertyWithValue("Activity", activity);
+
+		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stufff we got from MovableMan
+		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
+
+		delete sceneAltered;
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool LuaMan::LoadScriptedScene(const std::string &fileName) {
+		Scene* scene = new Scene();
+		GAScripted* activity = new GAScripted();
+
+ 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true);
+		while (reader.NextProperty()) {
+			std::string propName = reader.ReadPropName();
+        	if (propName == "Scene") {
+				reader >> scene;
+			} else if (propName == "Activity") {
+				reader >> activity;
+			}
+    	}
+
+		// Copy our scene/activity over, and then free the memory
+		g_SceneMan.SetSceneToLoad(scene, true, true); // SetSceneToLoad() doesn't Clone(), but when the activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally
+		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone())); // But for activity we need to do the Clone() here
+		// Messy, right? :/
+
+		delete scene;
+		delete activity;
+
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

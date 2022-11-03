@@ -1439,6 +1439,13 @@ int Scene::Save(Writer &writer) const
             writer.NewProperty("Position");
             writer << (*oItr)->GetPos();
 
+            MovableObject* mo = dynamic_cast<MovableObject*>(*oItr);
+            if (mo && !mo->GetVel().IsZero())
+            {
+                writer.NewProperty("Velocity");
+                writer << mo->GetVel();
+            }
+
             if ((*oItr)->GetPlacedByPlayer() != Players::NoPlayer)
             {
                 writer.NewProperty("PlacedByPlayer");

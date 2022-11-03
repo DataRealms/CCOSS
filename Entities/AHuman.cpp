@@ -3182,8 +3182,8 @@ void AHuman::Update()
     ////////////////////////////////////
     // Change and reload held MovableObjects
 
-	bool reloadFG = false;
-	bool reloadBG = false;
+	bool fgFirearmIsReloading = false;
+	bool bgFirearmIsReloading = false;
 	if (m_pFGArm && m_Status != INACTIVE) {
 		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
 		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
@@ -3208,15 +3208,15 @@ void AHuman::Update()
 		if (firearm) {
 			if (HDFirearm *bgFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) { 
 				if (bgFirearm->IsEmpty() && firearm->DoneReloading()) {	bgFirearm->Reload(); }
-				reloadBG = bgFirearm->IsReloading();
+				bgFirearmIsReloading = bgFirearm->IsReloading();
 			}
-			if (!firearm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !reloadBG) {
+			if (!firearm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !bgFirearmIsReloading) {
 				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
 				firearm->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 			}
 			if (firearm->IsReloading()) {
-				reloadFG = true;
+				fgFirearmIsReloading = true;
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
@@ -3325,9 +3325,9 @@ void AHuman::Update()
 			device->SetSharpAim(m_SharpAimProgress);
 			if (m_Controller.IsState(WEAPON_FIRE)) {
 				device->Activate();
-				if (device->IsEmpty() && !reloadBG) { 
+				if (device->IsEmpty() && !bgFirearmIsReloading) { 
 					device->Reload();
-					reloadFG = true;
+					fgFirearmIsReloading = true;
 				}
 			} else {
 				m_pFGArm->GetHeldDevice()->Deactivate();
@@ -3402,7 +3402,7 @@ void AHuman::Update()
 			m_SharpAimProgress = 0;
 			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
 		}
-		if (!reloadFG && !device->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
+		if (!fgFirearmIsReloading && !device->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
 			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(device->GetMagazinePos()); }
 			device->Reload();
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
@@ -3412,7 +3412,7 @@ void AHuman::Update()
 		device->SetSharpAim(m_SharpAimProgress);
 		if (m_Controller.IsState(WEAPON_FIRE)) {
 			device->Activate();
-			if (device->IsEmpty() && !reloadFG) { device->Reload(); }
+			if (device->IsEmpty() && !fgFirearmIsReloading) { device->Reload(); }
 		} else {
 			device->Deactivate();
 		}

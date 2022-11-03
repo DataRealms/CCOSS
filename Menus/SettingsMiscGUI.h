@@ -6,6 +6,8 @@ namespace RTE {
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUICheckbox;
+	class GUILabel;
+	class GUISlider;
 	class GUIEvent;
 
 	/// <summary>
@@ -51,6 +53,16 @@ namespace RTE {
 		GUICheckbox *m_ShowAdvancedPerfStatsCheckbox;
 		GUICheckbox *m_MeasureLoadTimeCheckbox;
 		GUICheckbox *m_UseMonospaceConsoleFontCheckbox;
+		GUICheckbox *m_DisableFactionBuyMenuThemesCheckbox;
+		GUILabel *m_SceneBackgroundAutoScaleLabel;
+		GUISlider *m_SceneBackgroundAutoScaleSlider;
+
+#pragma region Misc Settings Handling
+		/// <summary>
+		/// Updates the Scene background auto-scale label according to the setting.
+		/// </summary>
+		void UpdateSceneBackgroundAutoScaleLabel();
+#pragma endregion
 
 		// Disallow the use of some implicit methods.
 		SettingsMiscGUI(const SettingsMiscGUI &reference) = delete;

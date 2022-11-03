@@ -31,7 +31,6 @@
 #include "ACrab.h"
 #include "SLTerrain.h"
 #include "ObjectPickerGUI.h"
-#include "PieMenuGUI.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "Deployment.h"
@@ -66,8 +65,7 @@ void SceneEditorGUI::Clear()
     m_RepeatTimer.Reset();
     m_RevealTimer.Reset();
     m_RevealIndex = 0;
-    m_pPieMenu = 0;
-    m_ActivatedPieSliceType = PieSlice::PieSliceIndex::PSI_NONE;
+	m_PieMenu = nullptr;
     m_pPicker = 0;
     m_NativeTechModule = 0;
     m_ForeignCostMult = 4.0;
@@ -97,17 +95,7 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     RTEAssert(pController, "No controller sent to SceneEditorGUI on creation!");
     m_pController = pController;
 
-    m_FeatureSet = featureSet;
-
-    // Allocate and (re)create the Editor GUIs
-    if (!m_pPieMenu)
-        m_pPieMenu = new PieMenuGUI();
-    else
-        m_pPieMenu->Destroy();
-    m_pPieMenu->Create(pController);
-
-    // Init the pie menu
-    UpdatePieMenu();
+	SetFeatureSet(featureSet);
 
     // Update the brain path
     UpdateBrainPath();
@@ -169,7 +157,6 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
 
 void SceneEditorGUI::Destroy()
 {
-    delete m_pPieMenu;
     delete m_pPicker;
 
     delete m_pCurrentObject;
@@ -187,9 +174,38 @@ void SceneEditorGUI::Destroy()
 void SceneEditorGUI::SetController(Controller *pController)
 {
     m_pController = pController;
-    m_pPieMenu->SetController(pController);
+	m_PieMenu->SetMenuController(pController);
     m_pPicker->SetController(pController);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneEditorGUI::SetFeatureSet(SceneEditorGUI::FeatureSets newFeatureSet) {
+	m_FeatureSet = newFeatureSet;
+	if (m_PieMenu) { m_PieMenu = nullptr; }
+	std::string pieMenuName;
+	switch (m_FeatureSet) {
+		case FeatureSets::ONLOADEDIT:
+			pieMenuName = "Scene Editor Full Pie Menu";
+			break;
+		case FeatureSets::BLUEPRINTEDIT:
+			pieMenuName = "Scene Editor Blueprint Pie Menu";
+			break;
+		case FeatureSets::AIPLANEDIT:
+			pieMenuName = "Scene Editor AI Build Plan Pie Menu";
+			break;
+		case FeatureSets::INGAMEEDIT:
+			pieMenuName = "Scene Editor In-Game Pie Menu";
+			break;
+		default:
+			RTEAbort("Unhandled SceneEditorGUI FeatureSet when setting up PieMenu.");
+	}
+	m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", pieMenuName)->Clone()));
+	//m_PieMenu->Create();
+	m_PieMenu->SetMenuController(m_pController);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -234,9 +250,17 @@ bool SceneEditorGUI::SetCurrentObject(SceneObject *pNewObject)
     }
 
 
-
-
     return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetActivatedPieSlice
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets any Pie menu slice command activated last update.
+
+PieSlice::SliceType SceneEditorGUI::GetActivatedPieSlice() const {
+    return m_PieMenu->GetPieCommand();
 }
 
 
@@ -321,7 +345,6 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
             m_EditorGUIMode = INSTALLINGBRAIN;
             m_ModeChanged = true;
             UpdateBrainPath();
-            UpdatePieMenu();
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
         return false;
@@ -340,7 +363,6 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
         m_EditorGUIMode = INSTALLINGBRAIN;
         m_ModeChanged = true;
         UpdateBrainPath();
-        UpdatePieMenu();
         g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         return false;
     }
@@ -427,62 +449,59 @@ void SceneEditorGUI::Update()
     // Analog cursor input
 
     Vector analogInput;
-    if (m_pController->GetAnalogMove().GetMagnitude() > 0.1)
+    if (m_pController->GetAnalogMove().MagnitudeIsGreaterThan(0.1F))
         analogInput = m_pController->GetAnalogMove();
-//    else if (m_pController->GetAnalogAim().GetMagnitude() > 0.1)
+//    else if (m_pController->GetAnalogAim().MagnitudeIsGreaterThan(0.1F))
 //        analogInput = m_pController->GetAnalogAim();
 
     /////////////////////////////////////////////
     // PIE MENU
 
-    m_pPieMenu->Update();
+	m_PieMenu->Update();
 
     // Show the pie menu only when the secondary button is held down
-    if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT)
-    {
-        m_pPieMenu->SetEnabled(true);
-        m_pPieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
+    if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
+		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
+		m_PieMenu->SetEnabled(true);
+
+		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
+		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
+			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
+		}
     }
 
-    if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGOBJECT)
-        m_pPieMenu->SetEnabled(false);
+	if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGOBJECT) { m_PieMenu->SetEnabled(false); }
 
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    m_ActivatedPieSliceType = m_pPieMenu->GetPieCommand();
-    if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE)
-    {
-        if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK)
-            m_EditorGUIMode = PICKINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE)
-            m_EditorGUIMode = MOVINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE)
-            m_EditorGUIMode = DELETINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
-            m_EditorGUIMode = INSTALLINGBRAIN;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE)
-            m_EditorGUIMode = DONEEDITING;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_INFRONT)
-        {
+    if (m_PieMenu->GetPieCommand() != PieSlice::SliceType::NoType) {
+		if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorPick) {
+			m_EditorGUIMode = PICKINGOBJECT;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorMove) {
+			m_EditorGUIMode = MOVINGOBJECT;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorRemove) {
+			m_EditorGUIMode = DELETINGOBJECT;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::BrainHunt) {
+			m_EditorGUIMode = INSTALLINGBRAIN;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorDone) {
+			m_EditorGUIMode = DONEEDITING;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorInFront) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEINFRONT;
-        }
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_BEHIND)
-        {
+        } else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorBehind) {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEBEHIND;
-        }
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_TEAM1)
-            m_PlaceTeam = Activity::TeamOne;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_TEAM2)
-            m_PlaceTeam = Activity::TeamTwo;
-        // Toggle between normal scene object editing, and AI plan editing
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MINIMAP)
-            m_FeatureSet = m_FeatureSet == ONLOADEDIT ? AIPLANEDIT : ONLOADEDIT;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam1) {
+			m_PlaceTeam = Activity::TeamOne;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam2) {
+			m_PlaceTeam = Activity::TeamTwo;
+			// Toggle between normal scene object editing, and AI plan editing
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::Map) {
+			SetFeatureSet(m_FeatureSet == FeatureSets::ONLOADEDIT ? FeatureSets::AIPLANEDIT : FeatureSets::ONLOADEDIT);
+		}
 
         UpdateBrainPath();
-        UpdatePieMenu();
         m_ModeChanged = true;
     }
 
@@ -509,7 +528,7 @@ void SceneEditorGUI::Update()
             m_pCurrentObject->Update();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
-                
+
             // If done picking, revert to moving object mode
             if (m_pPicker->DonePicking())
             {
@@ -518,9 +537,8 @@ void SceneEditorGUI::Update()
 					m_EditorGUIMode = INSTALLINGBRAIN;
                 else
                     m_EditorGUIMode = ADDINGOBJECT;
-                
+
                 UpdateBrainPath();
-                UpdatePieMenu();
                 m_ModeChanged = true;
             }
         }
@@ -534,7 +552,7 @@ void SceneEditorGUI::Update()
     /////////////////////////////////////
     // ADDING OBJECT MODE
 
-    if (m_EditorGUIMode == ADDINGOBJECT && !m_pPieMenu->IsEnabled())
+    if (m_EditorGUIMode == ADDINGOBJECT && !m_PieMenu->IsEnabled())
     {
         if (m_ModeChanged)
         {
@@ -613,7 +631,6 @@ void SceneEditorGUI::Update()
             m_EditorGUIMode = PLACINGOBJECT;
             m_PreviousMode = ADDINGOBJECT;
             m_ModeChanged = true;
-            UpdatePieMenu();
             g_GUISound.PlacementBlip()->Play(m_pController->GetPlayer());
         }
 
@@ -626,11 +643,11 @@ void SceneEditorGUI::Update()
                 m_pCurrentObject->SetTeam(m_PlaceTeam);
         }
     }
-    
+
     /////////////////////////////////////
     // INSTALLING BRAIN MODE
 
-    if (m_EditorGUIMode == INSTALLINGBRAIN && !m_pPieMenu->IsEnabled())
+    if (m_EditorGUIMode == INSTALLINGBRAIN && !m_PieMenu->IsEnabled())
     {
         if (m_ModeChanged)
         {
@@ -663,7 +680,6 @@ void SceneEditorGUI::Update()
                 m_EditorGUIMode = PICKINGOBJECT;
                 m_ModeChanged = true;
                 UpdateBrainPath();
-                UpdatePieMenu();
             }
 
             m_ModeChanged = false;
@@ -725,7 +741,7 @@ void SceneEditorGUI::Update()
                 nextItr++;
                 smashedPoint = g_SceneMan.MovePointToGround((*lItr), 20, 10);
 			    Vector notUsed;
-    			
+
                 // Only smash if the new location doesn't cause the path to intersect hard terrain ahead or behind of it
                 // Try three times to halve the height to see if that won't intersect
                 for (int i = 0; i < 3; i++)
@@ -751,7 +767,6 @@ void SceneEditorGUI::Update()
             m_EditorGUIMode = PLACINGOBJECT;
             m_PreviousMode = INSTALLINGBRAIN;
             m_ModeChanged = true;
-            UpdatePieMenu();
             g_GUISound.PlacementBlip()->Play(m_pController->GetPlayer());
         }
 
@@ -843,14 +858,12 @@ void SceneEditorGUI::Update()
         {
             m_EditorGUIMode = m_PreviousMode;
             m_ModeChanged = true;
-            UpdatePieMenu();
         }
         // If previous mode was moving, tear the gib loose if the button is released to soo
         else if (m_PreviousMode == MOVINGOBJECT && m_pController->IsState(RELEASE_PRIMARY) && !m_BlinkTimer.IsPastRealMS(150))
         {
             m_EditorGUIMode = ADDINGOBJECT;
             m_ModeChanged = true;
-            UpdatePieMenu();
         }
         // Only place if the picker and pie menus are completely out of view, to avoid immediate placing after picking
         else if (m_pCurrentObject && m_pController->IsState(RELEASE_PRIMARY) && !m_pPicker->IsVisible())
@@ -903,7 +916,6 @@ void SceneEditorGUI::Update()
 						m_CursorPos.m_X += 40;
 						m_CursorPos.m_Y += 10;
 						UpdateBrainPath();
-						UpdatePieMenu();
 						g_GUISound.PlacementThud()->Play(m_pController->GetPlayer());
 					}
                 }
@@ -942,7 +954,7 @@ void SceneEditorGUI::Update()
 							if (pPickedSceneObject)
 							{
 								pAHuman = dynamic_cast<const AHuman *>(pPickedSceneObject);
-								
+
 								if (!pAHuman)
 								{
 									// Maybe we clicked the underlying bunker module, search for actor in range
@@ -978,7 +990,7 @@ void SceneEditorGUI::Update()
 								SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 								if (pBrain)
 								{
-									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).GetMagnitude() < 20)
+									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).MagnitudeIsLessThan(20.0F))
 									{
 										AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 										if (pBrainAHuman)
@@ -1026,9 +1038,12 @@ void SceneEditorGUI::Update()
                             // Deduct the cost from team funds
                             g_ActivityMan.GetActivity()->ChangeTeamFunds(-m_pCurrentObject->GetTotalValue(m_NativeTechModule, m_ForeignCostMult), m_pController->GetTeam());
 
-							g_SceneMan.GetTerrain()->ApplyTerrainObject(pTO);
+							pTO->PlaceOnTerrain(g_SceneMan.GetTerrain());
 							g_SceneMan.GetTerrain()->CleanAir();
-							g_SceneMan.GetTerrain()->RegisterTerrainChange(pTO);
+
+							Vector terrainObjectPos = pTO->GetPos() + pTO->GetBitmapOffset();
+							if (pTO->HasBGColorBitmap()) { g_SceneMan.RegisterTerrainChange(terrainObjectPos.GetFloorIntX(), terrainObjectPos.GetFloorIntY(), pTO->GetBitmapWidth(), pTO->GetBitmapHeight(), ColorKeys::g_MaskColor, true); }
+							if (pTO->HasFGColorBitmap()) { g_SceneMan.RegisterTerrainChange(terrainObjectPos.GetFloorIntX(), terrainObjectPos.GetFloorIntY(), pTO->GetBitmapWidth(), pTO->GetBitmapHeight(), ColorKeys::g_MaskColor, false); }
 
 // TODO: Make IsBrain function to see if one was placed
                             if (pTO->GetPresetName() == "Brain Vault")
@@ -1037,7 +1052,6 @@ void SceneEditorGUI::Update()
     //                            g_ActivityMan.GetActivity()->SetPlayerBrain(pBrain, m_pController->GetPlayer());
                                 m_EditorGUIMode = PICKINGOBJECT;
                                 m_ModeChanged = true;
-                                UpdatePieMenu();
                             }
 
                             delete pPlacedClone;
@@ -1071,7 +1085,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pObject = pDep->CreateDeployedObject(pDep->GetPlacedByPlayer(), cost);
 									MovableObject *pMO = dynamic_cast<MovableObject *>(pObject);
 									if (pMO)
-										g_MovableMan.AddItem(pMO);
+										g_MovableMan.AddMO(pMO);
 									else
 									{
 										delete pObject;
@@ -1110,7 +1124,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 									if (pBrain)
 									{
-										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).GetMagnitude() < 20)
+										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).MagnitudeIsLessThan(20.0F))
 										{
 											AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 											if (pBrainAHuman)
@@ -1165,7 +1179,6 @@ void SceneEditorGUI::Update()
             // Go back to previous mode
             m_EditorGUIMode = m_PreviousMode;
             m_ModeChanged = true;
-            UpdatePieMenu();
         }
 
         // Set the facing of AHumans based on right/left cursor movements
@@ -1182,7 +1195,7 @@ void SceneEditorGUI::Update()
     /////////////////////////////////////////////////////////////
     // POINTING AT MODES
 
-    else if ((m_EditorGUIMode == MOVINGOBJECT || m_EditorGUIMode == DELETINGOBJECT || m_EditorGUIMode == PLACEINFRONT || m_EditorGUIMode == PLACEBEHIND) && !m_pPieMenu->IsEnabled())
+    else if ((m_EditorGUIMode == MOVINGOBJECT || m_EditorGUIMode == DELETINGOBJECT || m_EditorGUIMode == PLACEINFRONT || m_EditorGUIMode == PLACEBEHIND) && !m_PieMenu->IsEnabled())
     {
         m_DrawCurrentObject = false;
 
@@ -1235,7 +1248,6 @@ void SceneEditorGUI::Update()
                     m_EditorGUIMode = PLACINGOBJECT;
                     m_PreviousMode = MOVINGOBJECT;
                     m_ModeChanged = true;
-                    UpdatePieMenu();
                     m_BlinkTimer.Reset();
                     g_GUISound.PlacementBlip()->Play(m_pController->GetPlayer());
                     g_GUISound.PlacementGravel()->Play(m_pController->GetPlayer());
@@ -1307,11 +1319,10 @@ void SceneEditorGUI::Update()
                     // Go back to previous mode
                     m_EditorGUIMode = m_PreviousMode;
                     m_ModeChanged = true;
-                    UpdatePieMenu();
                 }
                 else
                     g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }   
+            }
         }
     }
     else if (m_EditorGUIMode == DONEEDITING)
@@ -1431,7 +1442,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
             // Is the placed object an actor?
             pActor = dynamic_cast<Actor *>(*itr);
-//            pItem = dynamic_cast<MovableObject *>(*itr);            
+//            pItem = dynamic_cast<MovableObject *>(*itr);
 
             // Blink trans if we are supposed to blink this one
             if ((*itr) == m_pObjectToBlink)
@@ -1537,119 +1548,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     m_pPicker->Draw(pTargetBitmap);
 
     // Draw the pie menu
-    m_pPieMenu->Draw(pTargetBitmap, targetPos);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdatePieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the PieMenu config based ont eh current editor state.
-
-void SceneEditorGUI::UpdatePieMenu()
-{
-    m_pPieMenu->ResetSlices();
-
-    // Add pie menu slices and align them
-    if (m_FeatureSet == ONLOADEDIT)
-    {
-		PieSlice newSceneSlice("New Scene", PieSlice::PieSliceIndex::PSI_NEW, PieSlice::SliceDirection::UP);
-        m_pPieMenu->AddSlice(newSceneSlice);
-		PieSlice loadSceneSlice("Load Scene", PieSlice::PieSliceIndex::PSI_LOAD, PieSlice::SliceDirection::UP);
-		m_pPieMenu->AddSlice(loadSceneSlice);
-		
-		PieSlice testSceneSlice("Test Scene", PieSlice::PieSliceIndex::PSI_DONE, PieSlice::SliceDirection::UP);
-        m_pPieMenu->AddSlice(testSceneSlice);
-        PieSlice moveObjectsSlice("Move Objects", PieSlice::PieSliceIndex::PSI_MOVE, PieSlice::SliceDirection::LEFT);
-		m_pPieMenu->AddSlice(moveObjectsSlice);
-		
-		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::LEFT);
-        m_pPieMenu->AddSlice(removeObjectsSlice);
-		PieSlice addNewSlice("Add New Object", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
-		m_pPieMenu->AddSlice(addNewSlice);
-		
-		PieSlice saveSceneSlice("Save Scene", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN);
-        m_pPieMenu->AddSlice(saveSceneSlice);
-		PieSlice setToEditSlice("Edit AI Plan", PieSlice::PieSliceIndex::PSI_MINIMAP, PieSlice::SliceDirection::RIGHT);
-        m_pPieMenu->AddSlice(setToEditSlice);
-        if (m_pCurrentObject)
-        {
-			PieSlice team1Slice("Team 1 Actor", PieSlice::PieSliceIndex::PSI_TEAM1, PieSlice::SliceDirection::DOWN);
-            m_pPieMenu->AddSlice(team1Slice);
-			PieSlice team2Slice("Team 2 Actor", PieSlice::PieSliceIndex::PSI_TEAM2, PieSlice::SliceDirection::DOWN);
-			m_pPieMenu->AddSlice(team2Slice);
-        }
-        if (m_EditorGUIMode == ADDINGOBJECT)
-        {
-			PieSlice inFrontSlice("Put In Front Of", PieSlice::PieSliceIndex::PSI_INFRONT, PieSlice::SliceDirection::LEFT);
-            m_pPieMenu->AddSlice(inFrontSlice);
-            PieSlice behindSlice("Put Behind Of", PieSlice::PieSliceIndex::PSI_BEHIND, PieSlice::SliceDirection::LEFT);
-			m_pPieMenu->AddSlice(behindSlice);
-        }
-    }
-    // When a metaplayer is designing his base blueprints to build in a metagame
-    else if (m_FeatureSet == BLUEPRINTEDIT)
-    {
-		PieSlice doneBaseSlice("DONE Designing Base", PieSlice::PieSliceIndex::PSI_DONE, PieSlice::SliceDirection::UP);
-        m_pPieMenu->AddSlice(doneBaseSlice);
-        PieSlice moveObjectSlice("Move Objects", PieSlice::PieSliceIndex::PSI_MOVE, PieSlice::SliceDirection::LEFT);
-		m_pPieMenu->AddSlice(moveObjectSlice);
-		
-		PieSlice removeObjectSlice("Remove Objects", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::DOWN);
-        m_pPieMenu->AddSlice(removeObjectSlice);
-		PieSlice addNewSlice("Add New Object", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
-		m_pPieMenu->AddSlice(addNewSlice);
-		
-		PieSlice placeBrainSlice("Place Brain", PieSlice::PieSliceIndex::PSI_BRAINHUNT, PieSlice::SliceDirection::RIGHT);
-        m_pPieMenu->AddSlice(placeBrainSlice);
-        if (m_EditorGUIMode == ADDINGOBJECT)
-        {
-			PieSlice inFrontSlice("Place Later Than", PieSlice::PieSliceIndex::PSI_INFRONT, PieSlice::SliceDirection::LEFT);
-            m_pPieMenu->AddSlice(inFrontSlice);
-            PieSlice behindSlice("Insert Prior To", PieSlice::PieSliceIndex::PSI_BEHIND, PieSlice::SliceDirection::LEFT);
-			m_pPieMenu->AddSlice(behindSlice);
-        }
-    }
-    // When the plans for an AI-built base are designed ahead of time
-    else if (m_FeatureSet == AIPLANEDIT)
-    {
-		PieSlice loadSceneSlice("Load Scene", PieSlice::PieSliceIndex::PSI_LOAD, PieSlice::SliceDirection::UP);
-		m_pPieMenu->AddSlice(loadSceneSlice);
-
-        PieSlice moveObjectsSlice("Move Objects", PieSlice::PieSliceIndex::PSI_MOVE, PieSlice::SliceDirection::LEFT);
-		m_pPieMenu->AddSlice(moveObjectsSlice);
-		
-		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::LEFT);
-        m_pPieMenu->AddSlice(removeObjectsSlice);
-		PieSlice addNewSlice("Add New Object", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
-		m_pPieMenu->AddSlice(addNewSlice);
-		
-		PieSlice saveSceneSlice("Save Scene", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN);
-        m_pPieMenu->AddSlice(saveSceneSlice);
-		PieSlice setToEditSlice("Edit Scene Objects", PieSlice::PieSliceIndex::PSI_MINIMAP, PieSlice::SliceDirection::RIGHT);
-        m_pPieMenu->AddSlice(setToEditSlice);
-        if (m_EditorGUIMode == ADDINGOBJECT)
-        {
-			PieSlice inFrontSlice("Place Later Than", PieSlice::PieSliceIndex::PSI_INFRONT, PieSlice::SliceDirection::LEFT);
-            m_pPieMenu->AddSlice(inFrontSlice);
-            PieSlice behindSlice("Insert Prior To", PieSlice::PieSliceIndex::PSI_BEHIND, PieSlice::SliceDirection::LEFT);
-			m_pPieMenu->AddSlice(behindSlice);
-        }
-    }
-    // In-game editing mode
-    else
-    {
-		PieSlice moveObjectSlice("(Re)Move Object", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::UP, false);
-        m_pPieMenu->AddSlice(moveObjectSlice);
-        PieSlice doneSlice("DONE Building!", PieSlice::PieSliceIndex::PSI_DONE, PieSlice::SliceDirection::LEFT);
-		m_pPieMenu->AddSlice(doneSlice);
-		
-		PieSlice pickObjectSlice("Pick Object", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
-        m_pPieMenu->AddSlice(pickObjectSlice);
-        PieSlice saveSceneSlice("Save Scene", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN, false);
-		m_pPieMenu->AddSlice(saveSceneSlice);
-    }
-    m_pPieMenu->RealignSlices();
+	m_PieMenu->Draw(pTargetBitmap, targetPos);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,7 @@ void ACDropShip::Clear()
 	m_LateralControlSpeed = 6.0f;
 	m_AutoStabilize = 1;
 	m_MaxEngineAngle = 20.0f;
+	m_HoverHeightModifier = 0;
 }
 
 
@@ -98,6 +99,8 @@ int ACDropShip::Create(const ACDropShip &reference) {
 
 	m_MaxEngineAngle = reference.m_MaxEngineAngle;
 
+	m_HoverHeightModifier = reference.m_HoverHeightModifier;
+
 	return 0;
 }
 
@@ -129,8 +132,10 @@ int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_AutoStabilize;
     } else if (propName == "MaxEngineAngle") {
         reader >> m_MaxEngineAngle;
-    } else if (propName == "LateralControlSpeed") {
-        reader >> m_LateralControlSpeed;
+	} else if (propName == "LateralControlSpeed") {
+		reader >> m_LateralControlSpeed;
+	} else if (propName == "HoverHeightModifier") {
+		reader >> m_HoverHeightModifier;
     } else {
         return ACraft::ReadProperty(propName, reader);
     }
@@ -169,6 +174,7 @@ int ACDropShip::Save(Writer &writer) const
 	writer << m_MaxEngineAngle;
 	writer.NewProperty("LateralControlSpeed");
 	writer << m_LateralControlSpeed;
+	writer.NewPropertyWithValue("HoverHeightModifier", m_HoverHeightModifier);
 
     return 0;
 }
@@ -313,7 +319,7 @@ void ACDropShip::UpdateAI()
     float angle = m_Rotation.GetRadAngle();
 
     // This is the altitude at which the craft will hover and unload its cargo
-    float hoverAltitude = m_CharHeight * 2;
+    float hoverAltitude = m_CharHeight * 2 + m_HoverHeightModifier;
     // The gutter range threshold for how much above and below the hovering altitude is ok to stay in
     float hoverRange = m_CharHeight / 4;
     // Get the altitude reading, within 25 pixels precision
@@ -419,7 +425,7 @@ void ACDropShip::UpdateAI()
     /////////////////////////
     // If we are hopelessly stuck, self destruct
 
-    if (m_RecentMovementMag > 10)
+    if (m_RecentMovement.MagnitudeIsGreaterThan(10.0F))
         m_StuckTimer.Reset();
     if (m_StuckTimer.IsPastSimMS(10000))
         GibThis();

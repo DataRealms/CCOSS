@@ -8,6 +8,342 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
+- New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
+
+- New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
+
+- New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
+
+- New Lua event functions for `HDFirearm` - `OnFire(self)` that triggers when the gun fires, and `OnReload(self, hadMagazineBeforeReload)` that triggers when the gun is reloaded.
+
+- New `MOSRotating` INI and Lua (R/W) `MOSRotating` property `GibAtEndOfLifetime` that, when set to true, will make the `MOSRotating` gib if its age exceeds its lifetime, rather than deleting as it normally would.
+
+- New `Actor` INI properties `Organic = 0/1` and `Mechanical = 0/1` and supporting Lua functions `Actor:IsOrganic()` and `Actor:IsMechanical()`.  
+	These have no direct gameplay effect (and default to false), but will be very useful for inter-mod compatibility, as they allow scripts to know if an `Actor` is organic or mechanical, and treat them accordingly.
+  
+- New INI and Lua (R/W) `ACDropShip` property `HoverHeightModifier`. This allows for modification of the height at which an `ACDropShip` will hover when unloading cargo, or staying at a location.
+
+- New `Scene` Lua property `BackgroundLayers` (R/O) to access an iterator of the `Scene`'s `SLBackground` layers.
+
+- `SLBackground` layers can now be animated using the same INI and Lua animation controls as everything else (`FrameCount`, `SpriteAnimMode`, etc). ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
+	The collection of the `Scene`'s background layers can be accessed via `scene.BackgroundLayers`.
+
+- Added `SLBackground` auto-scrolling INI and Lua controls. ([Issue #66](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/66))  
+	The INI definition looks like this:  
+	```
+	CanAutoScrollX = 0/1 // Whether this can auto-scroll on the X axis. Scrolling will take effect only when combined with WrapX = 1, otherwise ignored.
+	CanAutoScrollY = 0/1 // Whether this can auto-scroll on the Y axis. Scrolling will take effect only when combined with WrapY = 1, otherwise ignored.
+
+	AutoScrollStepInterval = intValue // The duration between auto-scrolling steps on both axis, in milliseconds.
+
+	AutoScrollStep = Vector
+		X = intValue // The number of pixels to progress the scrolling on the X axis each step. Float values are supported but may end up choppy and inconsistent due to internal rounding and lack of sub-pixel precision.
+		Y = intValue // The number of pixels to progress the scrolling on the Y axis each step. Float values are supported but may end up choppy and inconsistent due to internal rounding and lack of sub-pixel precision.
+	```
+	You can read and write the following Lua properties:  
+	```
+	slBackground.CanAutoScrollX = bool -- this may be true even if X axis scrolling is not in effect due to WrapX = 0.
+	slBackground.CanAutoScrollY = bool -- this may be true even if Y axis scrolling is not in effect due to WrapY = 0.
+	slBackground.AutoScrollInterval = intValue
+	slBackground.AutoScrollStep = vector
+	slBackground.AutoScrollStepX = intValue
+	slBackground.AutoScrollStepY = intValue
+	```
+	`slBackground:IsAutoScrolling()` - (R/O) returns whether auto-scrolling is actually in effect on either axis (meaning either `WrapX` and `CanAutoScrollX` or `WrapY` and `CanAutoScrollY` are true).
+
+	The collection of the `Scene`'s background layers can be accessed via `scene.BackgroundLayers`.
+
+- New `Settings.ini` property `SceneBackgroundAutoScaleMode = 0/1/2`. ([Issue #243](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/243))  
+	Auto-scaling modes are: 0 = Off, 1 = Fit Screen, 2 = Always 2x.  
+	This will auto-scale all `Scene` background layers to cover the whole screen vertically in cases where the layer's sprite is too short and creates a gap at the bottom.  
+	In cases where a layer is short by design, auto-scaling behavior can be disabled on a per-layer basis using the `SLBackground` INI property `IgnoreAutoScaling`, otherwise it may be excessively scaled up to 2x (maximum).  
+	Note that any `ScaleFactor` definitions in layers that aren't set to ignore auto-scaling will be overridden.  
+
+	Only relevant when playing on un-scaled vertical resolutions of 640p and above as most background layer sprites are currently around 580px tall, and comes with a minor performance impact.  
+	Note that in fit screen mode each layer is scaled individually so some layers may be scaled more than others, or not scaled at all.  
+	In always 2x mode all layers will be equally scaled to 2x.
+
+- New `SLBackground` INI property `IgnoreAutoScaling = 0/1` to ignore the global background layer auto-scaling setting and use the `ScaleFactor` defined in the preset, if any.
+
+- New `SLBackground` INI property `OriginPointOffset` to offset the layer from the top left corner of the screen.
+
+- Added new `TerrainDebris` scattering functionality. ([Issue #152](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/152))  
+	New INI properties are:  
+	```
+	MinRotation/MaxRotation = angleDegrees // Rotates each debris piece to a random angle within the specified values. Values in degrees, negative values are counter-clockwise.  
+
+	FlipChance = floatValue // Chance for a debris piece to be flipped when either `CanHFlip` or `CanYFlip` are set true. 0-1, defaults to 0.5.  
+	
+	CanHFlip/CanVFlip = 0/1 // Flips each debris piece on the X, Y or both axis.
+	```
+
+- Added support for `Material` background textures with INI property `BGTextureFile`.
+
+- New `MovableObject` INI and Lua (R/W) property `SimUpdatesBetweenScriptedUpdates`, that lets `MovableObject`s run their Lua update function less frequently, for performance benefits.
+
+- Added faction themes.  
+	Faction themes apply to the `BuyMenu` when the faction is set as the native module (i.e. playing as the faction) in both Conquest and Scenario battle.
+
+	The theme properties are defined in the `DataModule`'s `Index.ini` (before any `IncludeFile` lines) like so:
+	```
+	FactionBuyMenuTheme = BuyMenuTheme
+		SkinFile = pathToSkinFile // GUI element visuals (NOT actual layout).
+		BackgroundColorIndex = paletteIndex // Color of the parent box that holds all the elements. Palette colors only, no support for images.
+		BannerFile = pathToBannerImage
+		LogoFile = pathToLogoImage
+	```
+	All properties are optional, any combination works.  
+	The skin and background color are also applied to the `ObjectPicker` (scene object placer) for visual consistency.
+
+- New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
+
+- New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
+	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
+	Only has a noticeable effect when the "Allow purchases from other factions" (`Settings.ini` `ShowForeignItems`) gameplay setting is disabled.
+
+	Note that this property takes priority over the `IsFaction` property. A module that is set as both `IsFaction = 1` and `IsMerchant = 1` will be treated as `IsFaction = 0`.
+
+- Made `Vector` properties `AbsRadAngle` and `AbsDegAngle` writable, so you can set a `Vector`'s direction directly, instead of rotating it by an angle via `RadRotate` and `DegRotate`.
+
+- New `HDFirearm` Lua function `GetNextMagazineName()`, that gets the name of the next `Magazine` to be loaded into the `HDFirearm`.
+
+- New INI and Lua (R/W) `Actor` property `PieMenu`. This allows you to set an `Actor`'s `PieMenu` via INI and Lua. If no value is set for this, the default `PieMenu` for the type of `Actor` will be used, these can be found in `Base.rte/GUIs/PieMenus/PieMenus.ini`.
+
+- `PieMenu`s have been completely redone, and are now fully defined in INI and customizable in Lua.	Additionally, `PieMenu`s can have sub-`PieMenu`s to allow for better organization and more controls.
+
+	You can define `PieMenu`s in INI using standard INI concepts like `CopyOf` and `PresetName`, and modify their visuals as you please. They have the following INI properties:  
+	```
+	IconSeparatorMode // The visuals style of the PieMenu's separators. The options are "Line", "Circle" and "Square". Defaults to "Line".  
+	FullInnerRadius // The inner radius of the PieMenu when it's fully expanded, in pixels. Defaults to 58.  
+	BackgroundThickness // The thickness of the background ring of the PieMenu. Defaults to 16.  
+	BackgroundSeparatorSize // The size of the background separators (lines, circles, squares). Defaults to 2.  
+	DrawBackgroundTransparent // Whether or not the PieMenu's background should be drawn transparent. Defaults to true.  
+	BackgroundColor // The color used to draw the background ring of the PieMenu. Color values are palette indexes.  
+	BackgroundBorderColor // The color used to draw the border around the background ring of the PieMenu. Color values are palette indexes.  
+	SelectedItemBackgroundColor // The color used to highlight selected PieSlices in the PieMenu. Color values are palette indexes.  
+	AddPieSlice = PieSlice // Add a PieSlice to the PieMenu. Standard INI concepts like CopyOf, etc. apply.
+	```	
+
+	Additionally, `PieMenu`s have the following Lua properties and functions:  
+
+	**`Owner`** (R) - Gets the owning `Actor` for the `PieMenu`, if there is one.  
+	**`Controller`** (R) - Gets the `Controller` controlling the `PieMenu`. If there's an `Actor` owner, it'll be that `Actor`'s `Controller`, otherwise it's probably a general `Controller` used for handling in-game menu inputs.  
+	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
+	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
+	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+
+	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
+	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
+	**`IsDisabling()`** - Gets whether or not the `PieMenu` is currently disabling.  
+	**`IsEnablingOrDisabling()`** - Gets whether or not the `PieMenu` is currently enabling or disabling.  
+	**`IsVisible()`** - Gets whether or not the `PieMenu` is currently visible (i.e. not disabled).  
+	**`HasSubPieMenuOpen()`** - Gets whether the `PieMenu` has a sub-`PieMenu` open, and is thus transferring commands to that sub-`PieMenu`.  
+	**`SetAnimationModeToNormal()`** - Sets the `PieMenu` back to normal animation mode, and disables it so it's ready for use.  
+	**`DoDisableAnimation()`** - Makes the `PieMenu` do its disabling animation.  
+	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
+	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
+	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
+	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
+	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
+	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
+
+	**`AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, optional_onlyCheckPieSlicesWithSameOriginalSource, optional_allowQuadrantOverflow)`** - Adds the given `PieSlice` to the `PieMenu`, returning whether or not the `PieSlice` was added.  
+	The `pieSliceOriginalSource` is the object that added the `PieSlice` to the `PieMenu`, and it's very important you set this properly (much of the time you'll want it to be `self` if, say, you have a gun adding a `PieSlice`), otherwise you can end up with ghost `PieSlice`s.  
+	`allowQuadrantOverflow` is optional and defaults to false, it determines whether the `PieSlice` can only be added in its specified direction (false), or if it can overflow if that direction is full of `PieSlice`s (true).
+
+	**`AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, optionalAllowQuadrantOverflow)`** - Like `AddPieSlice`, this adds the given `PieSlice` to the `PieMenu` and returns whether or not the `PieSlice` was added, but only if the `PieMenu` doesn't contain a `PieSlice` with this `PieSlice`'s preset name, optionally only checking `PieSlice`s with the same original source (by default it checks all `PieSlice`s in the `PieMenu`).  
+	`PieSlice`s with no preset name will always be added by this.
+
+	**`RemovePieSlice(pieSliceToRemove)`** - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.  
+	**`RemovePieSlicesByPresetName()`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByType()`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByOriginalSource()`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
+
+- `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:  
+
+	**`Type`** (INI, Lua R/W) - Gets or sets the `PieSlice`'s type, useful for invoking hardcoded game actions (e.g. pickup).  
+	**`Direction`** (INI, Lua R/W) - Gets or sets the `PieSlice`'s direction, i.e what direction the `PieSlice` should be added in to a `PieMenu`. Defaults to `Any`, which means it will be added to the least populated direction. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.  
+	**`CanBeMiddleSlice`** (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` can be the middle slice (i.e. a cardinal one like reload) in its direction, when added to a `PieMenu`. Defaults to true. Note that if you set this via Lua, you will need to remove and readd the `PieSlice` for it to take effect.  
+	**`Enabled`** (INI, Lua R/W) - Gets or sets whether or not this `PieSlice` is enabled and usable.  
+	**`ScriptPath`** (INI, Lua R/W) - Gets or sets the filepath to the script that should be run when this `PieSlice` is activated. A script function name is also required for this to work.  
+	**`ScriptFunctionName`** (INI Lua R/W) - Gets or sets the name of the function that should be run when this `PieSlice` is activated. A script path is also required for this to work.  
+	**`SubPieMenu`** (INI Lua R/W) - Gets or sets the sub-`PieMenu` that should be opened when this `PieSlice` is activated. Note that `PieSlice`s with sub-`PieMenu`s will not perform any other actions, though they will run scripts.  
+	**`Icon`** (INI) - The icon for this `PieSlice` to show in its `PieMenu`.  
+	**`OriginalSource`** (Lua R) - The object that added this `PieSlice` to its `PieMenu`.
+	
+- Added `Directions` enum with the following values:  
+	```
+	(-1) None
+	(0)  Up
+	(1)  Down
+	(2)  Left
+	(3)  Right
+	(4)  Any
+	```
+
+- Added `GameActivity` INI property `BuyMenuEnabled` to match the Lua property, and made the buy menu `PieSlice` disappear if `BuyMenuEnabled` is false.  
+	Note that, if you toggle this from off to on in Lua for a running `GameActivity`, you'll need to re-add the buy menu `PieSlice` manually.
+	
+- Added `Controller` Lua function `IsGamepadControlled()`, that lets you tell if a `Controller` is being controlled by any of the gamepad inputs, much like the pre-existing `IsMouseControlled()` function.
+
+- Added some useful global angle helper functions:  
+	```lua
+	NormalizeAngleBetween0And2PI(angle) -- Takes an angle in radians, and returns that angle modified so it's not negative or larger than 2PI.	
+	NormalizeAngleBetweenNegativePIAndPI(angle) -- Takes an angle in radians, and returns that angle modified so angles larger than PI are instead represented as negative angles, and no angle is larger than PI or smaller than -PI.
+	AngleWithinRange(float angleToCheck, float startAngle, float endAngle) -- Returns whether or not the angleToCheck is between the startAngle and endAngle, in a counter-clockwise direction (e.g. 0.5rad is between 0rad and 1rad, and 0.3rad is between 2.5rad and 1 rad).	 
+	ClampAngle(float angleToClamp, float startAngle, float endAngle) -- Returns the angleToClamp, clamped between the startAngle and endAngle.
+	```
+	
+- Added support for nested block comments in INI. ([Issue #248](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/248))  
+	The reader will track block comment open tags and crash if a file ends while a block is open, reporting the line it was opened on.
+
+- Added thickness option to Line primitives. ([Issue #403](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/403))  
+	New bindings with argument for thickness are:  
+	`PrimitiveMan:DrawLinePrimitive(startPos, endPos, color, thickness)`  
+	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
+	Original bindings with no thickness argument are untouched and can be called as they were.
+
+- New `Vector` Lua (R/O) property `SqrMagnitude` which returns the squared magnitude of the `Vector`.  
+	Should be used for more efficient comparison with `vector.SqrMagnitude > (floatValue * floatValue)` over `vector.Magnitude > floatValue`.
+
+- New `Vector` Lua convenience functions for more efficient magnitude comparison.  
+	```lua
+	-- These perform vector.SqrMagnitude > or < (floatValue * floatValue).
+	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
+	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
+	```
+	
+</details>
+
+<details><summary><b>Changed</b></summary>
+
+- Completely replaced `ScriptFile` with `ScriptPath`.
+
+- Changed the `Vector` function `ClampMagnitude` so its parameter order makes sense, it's now `Vector:ClampMagnitude(lowerMagnitudeLimit, upperMagnitudeLimit)`.
+
+- Changed the `MovableMan` function `AddItem` so it now only accepts `HeldDevice`s and sub-classes (i.e. `HDFirearm`, `ThrownDevice`, `TDExplosive`), because it always expected that anyway, and it's good to enforce it.
+
+- `Scene` background layer presets in INI are now defined as `SLBackground` rather than `SceneLayer`.
+
+- `TerrainDebris` INI property `OnlyOnSurface = 0/1` replaced with `DebrisPlacementMode = 0-6`.  
+	Placement modes are:  
+	```
+	0 (NoPlacementRestrictions) // Debris will be placed anywhere where there is target material (currently not strictly enforced when being offset by min/max depth, so can end up being placed mid-air/cavity unless set to OnlyBuried = 1).
+
+	1 (OnSurfaceOnly) // Debris will be placed only on the surface (scanning from top to bottom) where no background cavity material (material index 1) was encountered before the target material.
+
+	2 (OnCavitySurfaceOnly) // Debris will be placed only on the surface (scanning from top to bottom) where background cavity material (material index 1) was encountered before the target material.
+
+	3 (OnSurfaceAndCavitySurface) // Debris will be placed only on the surface (scanning from top to bottom) regardless whether background cavity material (material index 1) was encountered before the target material.
+
+	4 (OnOverhangOnly) // Debris will be placed only on overhangs (scanning from bottom to top) where no background cavity material (material index 1) was encountered before the target material.
+
+	5 (OnCavityOverhangOnly) // Debris will be placed only on overhangs (scanning from bottom to top) where background cavity material (material index 1) was encountered before the target material.
+
+	6 (OnOverhangAndCavityOverhang) // Debris will be placed only on overhangs (scanning from bottom to top) regardless whether background cavity material (material index 1) was encountered before the target material.
+	```
+
+- `Material` INI property `TextureFile` renamed to `FGTextureFile` to accommodate new background texture property.
+
+- `TerrainObject`s no longer have a hard requirement for `FG` and `Mat` layer sprites. Any layer may be omitted as long as at least one is defined.
+
+- `Scene` layer data will now be saved as compressed PNG to reduce file sizes of MetaGame saves and is threaded to prevent the game from freezing when layer data is being saved. 
+
+- Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
+
+- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:  
+	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.  
+	`pieSlice` - The `PieSlice` that has been activated to call this function.  
+	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
+
+- `OnPieMenu(self)` event function has been changed to `WhilePieMenuOpen(self, openedPieMenu)` and will run as long as the `PieMenu` is open.
+
+- Any `Attachable` on an `Actor` (not just `HeldDevice`s) can now have a `WhilePieMenuOpen(self, openedPieMenu)` function, and can add `PieSlice`s and run functions when they're pressed.
+
+- `PieSliceIndex` enum has been renamed to `SliceType` to better match the source. More relevantly for modders, its values have also been renamed, they are as follows:	 
+	```
+	(0)  NoType
+
+	// The following are used for inventory management:
+	(1)  Pickup
+	(2)  Drop
+	(3)  NextItem
+	(4)  PreviousItem
+	(5)  Reload
+
+	// The following are used for menu and GUI activation:
+	(6)  BuyMenu
+	(7)  FullInventory
+	(8)  Stats
+	(9)  Map
+	(10) Ceasefire
+
+	// The following is used for squad management:
+	(11) FormSquad
+
+	// The following are used for AI mode management:
+	(12) AIModes
+	(13) Sentry
+	(14) Patrol
+	(15) BrainHunt
+	(16) GoldDig
+	(17) GoTo
+	(18) Return
+	(19) Stay
+	(20) Deliver
+	(21) Scuttle
+
+	// The following are used for game editors:
+	(22) EditorDone
+	(23) EditorLoad
+	(24) EditorSave
+	(25) EditorNew
+	(26) EditorPick
+	(27) EditorMove
+	(28) EditorRemove
+	(29) EditorInFront
+	(30) EditorBehind
+	(31) EditorZoomIn
+	(32) EditorZoomOut
+	(33) EditorTeam1
+	(34) EditorTeam2
+	(35) EditorTeam3
+	(36) EditorTeam4
+	```
+
+</details>
+
+<details><summary><b>Fixed</b></summary>
+
+- Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
+
+- Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
+</details>
+
+<details><summary><b>Removed</b></summary>
+
+- Removed `SLTerrain` and `SLBackground` INI property `Offset`. Internal and shouldn't have been exposed.
+
+- Removed `SLTerrain` INI alt property `AddTerrainObject`. Use `PlaceTerrainObject` for consistency with similar properties.
+
+- Removed `TerrainObject` INI property `DisplayAsTerrain`. Wasn't implemented and did nothing.
+
+- Removed `SceneMan` Lua function `AddTerrainObject`. `SceneMan:AddSceneObject` should be used instead.
+
+- Removed `Activity` Lua function `EnteredOrbit`. This tells the `Activity` to consider an `ACraft` as having entered orbit, and should never actually have been accessible to Lua.
+
+- Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
+
+</details>
+
+***
+
+## [0.1.0 pre-release 4.0][0.1.0-pre4.0] - 2022/02/28
+
+<details><summary><b>Added</b></summary>
+
 - Executable can be compiled as 64bit.
 
 - New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purposes.
@@ -260,7 +596,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Attachable` Lua (R) property `JointPos`, which gets the position of the object's joint in scene coordinates.
 
-- New `AHuman` Lua (R) Property `IsClimbing`, which indicates whether the actor is currently climbing using either of the arms.
+- New `AHuman` Lua (R) property `IsClimbing`, which indicates whether the actor is currently climbing using either of the arms.
 
 - New `AHuman` Lua functions `UnequipFGArm()` and `UnequipArms()` which unequip the currently held item(s) and put them into the actor's inventory.
 
@@ -272,6 +608,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `MOSprite` Lua functions `GetIconWidth()` and `GetIconHeight()` which return the dimensions of its GUI representation.
 
 - New `PrimitiveMan` Lua functions `DrawIconPrimitive(player, pos, entity)` and `DrawIconPrimitive(pos, entity)` which can be used to draw the GUI representation of the passed in entity.
+
+- New `AEmitter` and `PEmitter` Lua (R) property `ThrottleFactor`, which gets the throttle strength as a multiplier value that factors in either the positive or negative throttle multiplier according to throttle.
+
+- New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
+
+- New Settings.ini flag `UseExperimentalMultiplayerSpeedBoosts = 1/0`. When turned on, it will use some code that **may** speed up multiplayer.
 
 </details>
 
@@ -1191,3 +1533,4 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
+[0.1.0-pre4.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre4.0

@@ -29,9 +29,9 @@ namespace RTE {
 		m_LastInputMapScrollingBoxScrollbarValue = m_InputMapScrollingBoxScrollbar->GetValue();
 
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
-			m_InputMapLabel.at(i) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelInputName" + std::to_string(i + 1)));
-			m_InputMapLabel.at(i)->SetText(c_InputElementNames.at(i));
-			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputKey" + std::to_string(i + 1)));
+			m_InputMapLabel[i] = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelInputName" + std::to_string(i + 1)));
+			m_InputMapLabel[i]->SetText(c_InputElementNames[i]);
+			m_InputMapButton[i] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputKey" + std::to_string(i + 1)));
 		}
 		m_InputMappingCaptureBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputCapture"));
 		m_InputMappingCaptureBox->SetVisible(false);
@@ -111,7 +111,7 @@ namespace RTE {
 		m_InputMappingCaptureBox->SetVisible(true);
 		m_InputMappingCaptureBox->SetEnabled(true);
 		m_InputElementCapturingInput = inputElement;
-		m_InputElementCapturingInputNameLabel->SetText(m_InputMapLabel.at(inputElement)->GetText());
+		m_InputElementCapturingInputNameLabel->SetText(m_InputMapLabel[inputElement]->GetText());
 		m_ConfiguringManually = true;
 
 		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(m_GUIControlManager->GetManager()->GetInputController());
@@ -135,7 +135,7 @@ namespace RTE {
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
 			std::string inputDescription = inputMappings->at(i).GetPresetDescription();
 			if (inputDescription.empty()) { inputDescription = m_ConfiguringPlayerInputScheme->GetMappingName(i); }
-			m_InputMapButton.at(i)->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
+			m_InputMapButton[i]->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
 		}
 		// Adjust the scrolling box scroll range to hide mappings that are only relevant to gamepads.
 		m_InputMapScrollingBoxScrollbar->SetMaximum(m_InputMapScrollingBox->GetHeight() - ((m_ConfiguringPlayerInputScheme->GetDevice() < InputDevice::DEVICE_GAMEPAD_1) ? 141 : -8));
@@ -166,7 +166,7 @@ namespace RTE {
 				m_InputConfigWizardMenu->SetEnabled(true, m_ConfiguringPlayer, m_ConfiguringPlayerInputScheme);
 			} else if (guiEvent.GetMsg() == GUIButton::Pushed) {
 				for (int mapButton = 0; mapButton < InputElements::INPUT_COUNT; ++mapButton) {
-					if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {
+					if (guiEvent.GetControl() == m_InputMapButton[mapButton]) {
 						// Don't want to deal with special handling for mouse so don't allow remapping any mouse controls when using mouse+keyboard.
 						// TODO: Add handling for input mapping with mouse directions and buttons (extra buttons too if applicable).
 						if (m_ConfiguringPlayerInputScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB && std::find(m_InputElementsUsedByMouse.begin(), m_InputElementsUsedByMouse.end(), mapButton) != m_InputElementsUsedByMouse.end()) {

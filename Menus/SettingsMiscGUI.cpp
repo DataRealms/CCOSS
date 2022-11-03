@@ -6,6 +6,8 @@
 #include "GUI.h"
 #include "GUICollectionBox.h"
 #include "GUICheckbox.h"
+#include "GUILabel.h"
+#include "GUISlider.h"
 
 namespace RTE {
 
@@ -31,6 +33,15 @@ namespace RTE {
 
 		m_UseMonospaceConsoleFontCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxUseMonospaceConsoleFont"));
 		m_UseMonospaceConsoleFontCheckbox->SetCheck(g_ConsoleMan.GetConsoleUseMonospaceFont());
+
+		m_DisableFactionBuyMenuThemesCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDisableFactionBuyMenuThemes"));
+		m_DisableFactionBuyMenuThemesCheckbox->SetCheck(g_SettingsMan.FactionBuyMenuThemesDisabled());
+
+		m_SceneBackgroundAutoScaleLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSceneBackgroundAutoScaleSetting"));
+		UpdateSceneBackgroundAutoScaleLabel();
+
+		m_SceneBackgroundAutoScaleSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderSceneBackgroundAutoScale"));
+		m_SceneBackgroundAutoScaleSlider->SetValue(g_SettingsMan.GetSceneBackgroundAutoScaleMode());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,6 +49,22 @@ namespace RTE {
 	void SettingsMiscGUI::SetEnabled(bool enable) const {
 		m_MiscSettingsBox->SetVisible(enable);
 		m_MiscSettingsBox->SetEnabled(enable);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsMiscGUI::UpdateSceneBackgroundAutoScaleLabel() {
+		switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
+			case 1:
+				m_SceneBackgroundAutoScaleLabel->SetText("Stretch to fit screen");
+				break;
+			case 2:
+				m_SceneBackgroundAutoScaleLabel->SetText("Always upscaled");
+				break;
+			default:
+				m_SceneBackgroundAutoScaleLabel->SetText("Disabled");
+				break;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +83,11 @@ namespace RTE {
 				g_SettingsMan.MeasureModuleLoadTime(m_MeasureLoadTimeCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_UseMonospaceConsoleFontCheckbox) {
 				g_ConsoleMan.SetConsoleUseMonospaceFont(m_UseMonospaceConsoleFontCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_DisableFactionBuyMenuThemesCheckbox) {
+				g_SettingsMan.SetFactionBuyMenuThemesDisabled(m_DisableFactionBuyMenuThemesCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_SceneBackgroundAutoScaleSlider) {
+				g_SettingsMan.SetSceneBackgroundAutoScaleMode(m_SceneBackgroundAutoScaleSlider->GetValue());
+				UpdateSceneBackgroundAutoScaleLabel();
 			}
 		}
 	}

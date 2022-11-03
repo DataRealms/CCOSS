@@ -22,7 +22,6 @@
 #include "HDFirearm.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"
-#include "PieMenuGUI.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 
@@ -745,105 +744,41 @@ bool AHuman::OnSink(const Vector &pos)
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-	if (m_pItemInReach) {
-		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_Status != INACTIVE);
-		pPieMenu->AddSlice(pickUpSlice);
-	} else {
-		PieSlice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
-		pPieMenu->AddSlice(reloadSlice);
-	}
-	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
-	pPieMenu->AddSlice(dropSlice);
-
-	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_NEXTITEM, PieSlice::SliceDirection::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
-	pPieMenu->AddSlice(nextItemSlice);
-	PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_PREVITEM, PieSlice::SliceDirection::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
-	pPieMenu->AddSlice(prevItemSlice);
-
-	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
-    pPieMenu->AddSlice(sentryAISlice);
-    PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
-	pPieMenu->AddSlice(patrolAISlice);
-	PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
-    pPieMenu->AddSlice(formSquadSlice);
-	
-	PieSlice goToSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
-    pPieMenu->AddSlice(goToSlice);
-    PieSlice goldAISlice("Gold Dig AI Mode", PieSlice::PieSliceIndex::PSI_GOLDDIG, PieSlice::SliceDirection::DOWN);
-	pPieMenu->AddSlice(goldAISlice);
-
-    PieSlice huntAISlice("Brain Hunt AI Mode", PieSlice::PieSliceIndex::PSI_BRAINHUNT, PieSlice::SliceDirection::RIGHT);
-	pPieMenu->AddSlice(huntAISlice);
-
-    PieSlice fullInventorySlice("Show Full Inventory", PieSlice::PieSliceIndex::PSI_FULLINVENTORY, PieSlice::SliceDirection::RIGHT, GetEquippedItem() || GetEquippedBGItem() || !m_Inventory.empty());
-    pPieMenu->AddSlice(fullInventorySlice);
-
-    // Add any custom slices from a currently held device
-	if (m_Status != INACTIVE) {
-		// Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
-		Actor::AddPieMenuSlices(pPieMenu);
-
-		// Add any custom slices from a currently held device
-		if (m_pFGArm && m_pFGArm->HoldsDevice()) { m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu); }
-	} else {
-		m_PieNeedsUpdate = false;
-	}
-    return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool AHuman::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
-{
-    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
-    {
-        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PICKUP)
+bool AHuman::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::SliceType::NoType) {
+        if (pieSliceIndex == PieSlice::SliceType::Pickup) {
             m_Controller.SetState(WEAPON_PICKUP);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DROP)
+        } else if (pieSliceIndex == PieSlice::SliceType::Drop) {
             m_Controller.SetState(WEAPON_DROP);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
+        } else if (pieSliceIndex == PieSlice::SliceType::Reload) {
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_NEXTITEM)
+        } else if (pieSliceIndex == PieSlice::SliceType::NextItem) {
             m_Controller.SetState(WEAPON_CHANGE_NEXT, true);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PREVITEM)
+        } else if (pieSliceIndex == PieSlice::SliceType::PreviousItem) {
             m_Controller.SetState(WEAPON_CHANGE_PREV, true);
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
+        } else if (pieSliceIndex == PieSlice::SliceType::Sentry) {
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
+        } else if (pieSliceIndex == PieSlice::SliceType::Patrol) {
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::BrainHunt) {
             m_AIMode = AIMODE_BRAINHUNT;
-            // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
-        {
+        } else if (pieSliceIndex == PieSlice::SliceType::GoTo) {
             m_AIMode = AIMODE_GOTO;
-            // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
             m_UpdateMovePath = true;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOLDDIG)
+        } else if (pieSliceIndex == PieSlice::SliceType::GoldDig) {
             m_AIMode = AIMODE_GOLDDIG;
-        else
+        } else {
             return Actor::HandlePieCommand(pieSliceIndex);
+        }
     }
-
     return false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1465,6 +1400,19 @@ MovableObject * AHuman::GetEquippedBGItem() const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+
+float AHuman::GetEquippedMass() const {
+	float equippedMass = 0;
+	if (MovableObject *fgDevice = GetEquippedItem()) {
+		equippedMass += fgDevice->GetMass();
+	}
+	if (MovableObject *bgDevice = GetEquippedBGItem()) {
+		equippedMass += bgDevice->GetMass();
+	}
+	return equippedMass;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  FirearmIsReady
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held device's current mag is empty on
@@ -1608,11 +1556,12 @@ bool AHuman::IsWithinRange(Vector &point) const
         return true;
 
     Vector diff = g_SceneMan.ShortestDistance(m_Pos, point, false);
-    float distance = diff.GetMagnitude();
+    float sqrDistance = diff.GetSqrMagnitude();
 
-    // Really close!
-    if (distance <= m_CharHeight)
-        return true;
+	// Really close!
+	if (sqrDistance <= (m_CharHeight * m_CharHeight)) {
+		return true;
+	}
 
     float range = 0;
 
@@ -1631,7 +1580,7 @@ bool AHuman::IsWithinRange(Vector &point) const
         range += m_CharHeight * 4;
     }
 
-    return distance <= range;
+    return sqrDistance <= (range * range);
 }
 
 
@@ -2043,7 +1992,7 @@ void AHuman::UpdateAI()
                 // Only replace the target if the one we found is closer, or the old one isn't gold anymore
                 Vector newGoldDir = newGoldPos - m_Pos;
                 Vector oldGoldDir = m_DigTarget - m_Pos;
-                if (newGoldDir.GetMagnitude() < oldGoldDir.GetMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
+                if (newGoldDir.GetSqrMagnitude() < oldGoldDir.GetSqrMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
                 {
                     m_DigTarget = newGoldPos;
                     m_StuckTimer.Reset();
@@ -2458,9 +2407,9 @@ void AHuman::UpdateAI()
                 {
                     // Get the distance to the target and see if we've aimed well enough
                     Vector targetVec = g_SceneMan.ShortestDistance(m_Pos, m_SeenTargetPos, false);
-                    float distance = targetVec.GetMagnitude();
+                    float threshold = (m_AimDistance * 6.0F) + (m_pFGArm->GetHeldDevice()->GetSharpLength() * m_SharpAimProgress);
                     // Fire if really close, or if we have aimed well enough
-                    if (distance < m_AimDistance * 6 + m_pFGArm->GetHeldDevice()->GetSharpLength() * m_SharpAimProgress)
+                    if (targetVec.MagnitudeIsLessThan(threshold))
                     {
                         // ENEMY AIMED AT well enough - FIRE!
                         m_DeviceState = FIRING;
@@ -2992,7 +2941,7 @@ void AHuman::UpdateAI()
     if (m_ObstacleState == PROCEEDING)
     {
         // Reset stuck timer if we're moving fine, or we're waiting for teammate to move
-        if (m_RecentMovementMag > 2.5 || m_TeamBlockState)
+        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F) || m_TeamBlockState)
             m_StuckTimer.Reset();
 
         if (m_DeviceState == SCANNING)
@@ -3016,7 +2965,7 @@ void AHuman::UpdateAI()
     if (m_ObstacleState == JUMPING)
     {
         // Reset stuck timer if we're moving fine
-        if (m_RecentMovementMag > 2.5)
+        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F))
             m_StuckTimer.Reset();
 
         if (m_StuckTimer.IsPastSimMS(250))
@@ -3045,7 +2994,7 @@ void AHuman::UpdateAI()
     }
     // Reset from backstepping
 // TODO: better movement detection
-    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovementMag > 15.0))
+    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.MagnitudeIsGreaterThan(15.0F)))
     {
         m_ObstacleState = PROCEEDING;
         m_StuckTimer.Reset();
@@ -3102,24 +3051,6 @@ void AHuman::UpdateAI()
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int AHuman::OnPieMenu(Actor *pieMenuActor) {
-	int status = Actor::OnPieMenu(pieMenuActor);
-
-    // Note: This is a bit ugly, but it should make this function output different error statuses based on whether the AHuman's OnPieMenuFunction fails, or its weapons' do, though the specifics can't be sussed out by the error alone.
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
-        status += m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
-    }
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsDevice()) {
-        status += m_pBGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
-    }
-
-	return status;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -3129,7 +3060,9 @@ void AHuman::Update()
 {
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
+	
 	Vector analogAim = m_Controller.GetAnalogAim();
+    const float analogDeadzone = 0.1F;
 
 	m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
 	m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
@@ -3165,7 +3098,7 @@ void AHuman::Update()
 		// If pie menu is on, keep the angle to what it was before.
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
 			// Direct the jetpack nozzle according to either analog stick input or aim angle.
-			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+			if (m_Controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
 			} else {
@@ -3183,7 +3116,8 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Movement direction
 
-	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+    const float movementThreshold = 1.0F;
+	bool isStill = (m_Vel + m_PrevVel).MagnitudeIsLessThan(movementThreshold);
 	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
@@ -3215,7 +3149,7 @@ void AHuman::Update()
 			}
 
 			// Walk backwards if the aiming is already focused in the opposite direction of travel.
-			if (analogAim.GetMagnitude() != 0 || isSharpAiming) {
+			if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
 				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
@@ -3270,7 +3204,6 @@ void AHuman::Update()
 				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 			m_EquipHUDTimer.Reset();
-			m_PieNeedsUpdate = true;
 			m_SharpAimProgress = 0;
 		}
 
@@ -3311,7 +3244,7 @@ void AHuman::Update()
 		m_AimAngle -= isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
-	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
+	} else if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) && m_Status != INACTIVE) {
 		// Hack to avoid the GetAbsRadAngle from mangling an aim angle straight down.
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
 		m_AimAngle = analogAim.GetAbsRadAngle();
@@ -3343,8 +3276,8 @@ void AHuman::Update()
     // Sharp aim calculation
 
 // TODO: make the delay data driven by both the actor and the device!
-    // 
-	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
+    //
+	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.MagnitudeIsLessThan(5.0F) && GetEquippedItem()) {
         float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full analog aim mag
@@ -3420,24 +3353,21 @@ void AHuman::Update()
 					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
 					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
+					float maxThrowVel = pThrown->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
 						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
-						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
-						if (maxThrowVel == 0) {
-							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
-							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
-							minThrowVel = maxThrowVel * 0.2F;
-						}
+						if (minThrowVel == 0) { minThrowVel = maxThrowVel * 0.2F; }
+
 						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
 						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
 						pMO->SetRotAngle(adjustedAimAngle);
 
-						if (pMO->IsHeldDevice()) {
-							pMO->SetTeam(m_Team);
-							pMO->SetIgnoresTeamHits(true);
-							g_MovableMan.AddItem(pMO);
+						if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
+							moAsHeldDevice->SetTeam(m_Team);
+							moAsHeldDevice->SetIgnoresTeamHits(true);
+							g_MovableMan.AddItem(moAsHeldDevice);
 						} else {
 							if (pMO->IsGold()) {
 								m_GoldInInventoryChunk = 0;
@@ -3512,8 +3442,8 @@ void AHuman::Update()
 				Vector tossVec(1.0F + std::sqrt(std::abs(m_pFGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
 				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (heldMO->IsDevice()) {
-					g_MovableMan.AddItem(heldMO);
+				if (HeldDevice *heldMOAsHeldDevice = dynamic_cast<HeldDevice *>(heldMO)) {
+					g_MovableMan.AddItem(heldMOAsHeldDevice);
 				} else {
 					if (heldMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
@@ -3533,8 +3463,8 @@ void AHuman::Update()
 				Vector tossVec(1.0F + std::sqrt(std::abs(m_pBGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
 				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (heldMO->IsDevice()) {
-					g_MovableMan.AddItem(heldMO);
+				if (HeldDevice *heldMOAsHeldDevice = dynamic_cast<HeldDevice *>(heldMO)) {
+					g_MovableMan.AddItem(heldMOAsHeldDevice);
 				} else {
 					if (heldMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
@@ -3549,7 +3479,6 @@ void AHuman::Update()
 		}
 		EquipShieldInBGArm();
 		m_SharpAimProgress = 0;
-		m_PieNeedsUpdate = true;
 		m_EquipHUDTimer.Reset();
 	}
 
@@ -3560,36 +3489,36 @@ void AHuman::Update()
 	Vector reachPoint = m_Pos;
 
 	// Try to detect a new item
-	if (m_pFGArm && m_Status == STABLE) {
-		reach += m_pFGArm->GetMaxLength();
-		reachPoint = m_pFGArm->GetJointPos();
+	if ((m_pFGArm || m_pBGArm) && m_Status == STABLE) {
+		reach += m_pFGArm ? m_pFGArm->GetMaxLength() : m_pBGArm->GetMaxLength();
+		reachPoint = m_pFGArm ? m_pFGArm->GetJointPos() : m_pBGArm->GetJointPos();
 
 		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
 		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
-			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent()); foundDevice && (m_pFGArm || foundDevice->IsOneHanded())) {
 				m_pItemInReach = foundDevice;
-				m_PieNeedsUpdate = true;
 			}
 		}
 	}
 
-    // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!m_pFGArm || m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
-        m_pItemInReach = nullptr;
-        m_PieNeedsUpdate = true;
-    }
+	// Item currently set to be within reach has expired or is now out of range
+	if (m_pItemInReach && (!m_pItemInReach->IsPickupableBy(this) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsGreaterThan(reach + m_pItemInReach->GetRadius()))) {
+		m_pItemInReach = nullptr;
+	}
 
-	if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
-        MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
+		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
+        MovableObject *pMO = armToUse->ReleaseHeldMO();
 		if (pMO) { m_Inventory.push_back(pMO); }
-        m_pFGArm->SetHeldMO(m_pItemInReach);
-		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		armToUse->SetHeldMO(m_pItemInReach);
+		armToUse->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 		m_pItemInReach = nullptr;
 
-		EquipShieldInBGArm();
+		if (armToUse != m_pBGArm) {
+			EquipShieldInBGArm();
+		}
 		m_SharpAimProgress = 0;
-        m_PieNeedsUpdate = true;
 		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
 		m_EquipHUDTimer.Reset();
@@ -3952,36 +3881,8 @@ void AHuman::Update()
     m_ViewPoint = m_Pos.GetFloored() + aimSight;
 
 	// Add velocity also so the viewpoint moves ahead at high speeds
-	if (m_Vel.GetMagnitude() > 10.0F) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
+	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
-
-/* Done by pie menu now, see HandlePieCommand()
-    ////////////////////////////////////////
-    // AI mode setting
-    
-    if (m_Controller.IsState(AI_MODE_SET))
-    {
-        if (m_Controller.IsState(PRESS_RIGHT))
-        {
-            m_AIMode = AIMODE_BRAINHUNT;
-            m_UpdateMovePath = true;
-        }
-        else if (m_Controller.IsState(PRESS_LEFT))
-        {
-            m_AIMode = AIMODE_PATROL;
-        }
-        else if (m_Controller.IsState(PRESS_UP))
-        {
-            m_AIMode = AIMODE_SENTRY;
-        }
-        else if (m_Controller.IsState(PRESS_DOWN))
-        {
-            m_AIMode = AIMODE_GOLDDIG;
-        }
-
-        m_DeviceState = SCANNING;
-    }
-*/
     /////////////////////////////////////////
     // Gold Chunk inventroy management
 
@@ -4531,6 +4432,76 @@ void AHuman::SetLimbPathPushForce(float force)
 {
 	m_Paths[FGROUND][WALK].OverridePushForce(force);
 	m_Paths[BGROUND][WALK].OverridePushForce(force);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
+	int result = Actor::WhilePieMenuOpenListener(pieMenu);
+
+	for (PieSlice *pieSlice : GetPieMenu()->GetPieSlices()) {
+		switch (pieSlice->GetType()) {
+			case PieSlice::SliceType::Pickup:
+			case PieSlice::SliceType::Reload:
+				pieSlice->SetType(m_pItemInReach ? PieSlice::SliceType::Pickup : PieSlice::SliceType::Reload);
+				pieSlice->SetIcon(dynamic_cast<Icon *>(g_PresetMan.GetEntityPreset("Icon", m_pItemInReach ? "Pick Up" : "Refresh")->Clone()));
+				
+				if (pieSlice->GetType() == PieSlice::SliceType::Pickup) {
+					if (m_pFGArm || (m_pBGArm && m_pItemInReach->IsOneHanded())) {
+						pieSlice->SetEnabled(true);
+						pieSlice->SetDescription("Pick Up " + m_pItemInReach->GetPresetName());
+					} else {
+						pieSlice->SetEnabled(false);
+						pieSlice->SetDescription("No Arm");
+					}
+				} else {
+					const HeldDevice *fgHeldDevice = dynamic_cast<const HeldDevice *>(GetEquippedItem());
+					const HeldDevice *bgHeldDevice = dynamic_cast<const HeldDevice *>(GetEquippedBGItem());
+					if (fgHeldDevice || bgHeldDevice) {
+						pieSlice->SetEnabled((fgHeldDevice && !fgHeldDevice->IsFull()) || (bgHeldDevice && !bgHeldDevice->IsFull()));
+						pieSlice->SetDescription("Reload");
+					} else {
+						pieSlice->SetEnabled(false);
+						pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
+					}
+				}
+				break;
+			case PieSlice::SliceType::NextItem:
+				if (!IsInventoryEmpty() && m_pFGArm) {
+					pieSlice->SetEnabled(true);
+					pieSlice->SetDescription("Next Item");
+				} else {
+					pieSlice->SetEnabled(false);
+					pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
+				}
+				break;
+			case PieSlice::SliceType::PreviousItem:
+				if (!IsInventoryEmpty() && m_pFGArm) {
+					pieSlice->SetEnabled(true);
+					pieSlice->SetDescription("Prev Item");
+				} else {
+					pieSlice->SetEnabled(false);
+					pieSlice->SetDescription(m_pFGArm ? "Not Holding Anything" : "No Arm");
+				}
+				break;
+			case PieSlice::SliceType::Drop:
+				if (const MovableObject *equippedFGItem = GetEquippedItem()) {
+					pieSlice->SetEnabled(true);
+					pieSlice->SetDescription("Drop " + equippedFGItem->GetPresetName());
+				} else if (const MovableObject *equippedBGItem = GetEquippedBGItem()) {
+					pieSlice->SetDescription("Drop " + equippedBGItem->GetPresetName());
+					pieSlice->SetEnabled(true);
+				} else if (!IsInventoryEmpty()) {
+					pieSlice->SetEnabled(true);
+					pieSlice->SetDescription("Drop Inventory");
+				} else {
+					pieSlice->SetEnabled(false);
+					pieSlice->SetDescription((m_pFGArm || m_pBGArm) ? "Not Holding Anything" : "No Arm");
+				}
+				break;
+		}
+	}
+	return result;
 }
 
 

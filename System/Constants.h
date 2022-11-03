@@ -10,7 +10,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr const char *c_GameVersion = "Pre-Release 3.0";
+	static constexpr const char *c_GameVersion = "Pre-Release 4.0";
 #pragma endregion
 
 #pragma region Physics Constants
@@ -46,8 +46,31 @@ namespace RTE {
 		g_NoMOID = 255
 	};
 
-	enum DotGlowColor { NoDot = 0, YellowDot, RedDot, BlueDot };
-	enum TransparencyPreset { LessTrans = 0, HalfTrans, MoreTrans };
+	enum MaterialColorKeys {
+		g_MaterialAir = 0,
+		g_MaterialOutOfBounds = 1,
+		g_MaterialCavity = 1,
+		g_MaterialGold = 2,
+		g_MaterialSand = 8,
+		g_MaterialGrass = 128,
+		g_MaterialDoor = 181
+	};
+
+	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
+	enum TransparencyPreset { LessTrans, HalfTrans, MoreTrans };
+
+	enum SpriteAnimMode {
+		NOANIM,
+		ALWAYSLOOP,
+		ALWAYSRANDOM,
+		ALWAYSPINGPONG,
+		LOOPWHENACTIVE,
+		LOOPWHENOPENCLOSE,
+		PINGPONGOPENCLOSE,
+		OVERLIFETIME,
+		ONCOLLIDE,
+		SpriteAnimModeCount
+	};
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)
@@ -67,6 +90,7 @@ namespace RTE {
 
 #pragma region Math Constants
 	static constexpr float c_TwoPI = 6.28318531F;
+	static constexpr float c_OneAndAHalfPI = 4.71238898F;
 	static constexpr float c_PI = 3.14159265F;
 	static constexpr float c_HalfPI = 1.57079633F;
 	static constexpr float c_QuarterPI = 0.78539816F;
@@ -229,9 +253,25 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Enumeration for cardinal directions, as well as None and Any.
+	/// Enumeration and supporting maps for cardinal directions, as well as None and Any.
 	/// </summary>
 	enum Directions { None = -1, Up, Down, Left, Right, Any };
+
+	static const std::unordered_map<std::string_view, Directions> c_DirectionNameToDirectionsMap = {
+		{"None", Directions::None},
+		{"Up", Directions::Up},
+		{"Down", Directions::Down},
+		{"Left", Directions::Left},
+		{"Right", Directions::Right},
+		{"Any", Directions::Any}
+	};
+
+	static const std::unordered_map<Directions, const float> c_DirectionsToRadiansMap = {
+		{Directions::Up, c_HalfPI},
+		{Directions::Down, c_OneAndAHalfPI},
+		{Directions::Left, c_PI},
+		{Directions::Right, 0.0F}
+	};
 #pragma endregion
 
 #pragma region Un-Definitions

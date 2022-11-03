@@ -8,6 +8,7 @@
 #include "UInputMan.h"
 
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "Scene.h"
 
 #include "GUI.h"
@@ -22,10 +23,16 @@
 
 namespace RTE {
 
+	bool FrameMan::m_DisableFrameBufferFlip = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::DisplaySwitchOut() {
 		g_UInputMan.DisableMouseMoving(true);
+
+#ifdef _WIN32
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = true; }
+#endif
 
 #ifdef __unix__
 		// In fullscreen regrab focus because the window is lost otherwise. Only applies to X11 since XWayland handles this differently.
@@ -37,6 +44,10 @@ namespace RTE {
 
 	void FrameMan::DisplaySwitchIn() {
 		g_UInputMan.DisableMouseMoving(false);
+
+#ifdef _WIN32
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = false; }
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +153,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetDisplaySwitchMode() const {
+#ifdef _WIN32
+		set_display_switch_mode((m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL) ? SWITCH_BACKAMNESIA : SWITCH_BACKGROUND);
+#else
 		set_display_switch_mode(SWITCH_BACKGROUND);
+#endif
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
@@ -561,6 +576,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Vector FrameMan::GetMiddleOfPlayerScreen(int whichPlayer) {
+		Vector middleOfPlayerScreen;
+
+		if (whichPlayer == -1 || IsInMultiplayerMode()) {
+			middleOfPlayerScreen.SetXY(static_cast<float>(m_ResX / 2), static_cast<float>(m_ResY / 2));
+		} else {
+			int playerScreen = g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer);
+
+			middleOfPlayerScreen.SetXY(static_cast<float>(m_PlayerScreenWidth / 2), static_cast<float>(m_PlayerScreenHeight / 2));
+			if ((playerScreen == 1 && g_FrameMan.GetVSplit()) || playerScreen == 3) {
+				middleOfPlayerScreen.SetX(middleOfPlayerScreen.GetX() + static_cast<float>(m_PlayerScreenWidth));
+			}
+			if ((playerScreen == 1 && g_FrameMan.GetHSplit()) || playerScreen >= 2) {
+				middleOfPlayerScreen.SetY(middleOfPlayerScreen.GetY() + static_cast<float>(m_PlayerScreenHeight));
+			}
+		}
+		return middleOfPlayerScreen;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
@@ -640,6 +676,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() const {
+		if (m_DisableFrameBufferFlip) {
+			return;
+		}
+
 		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
@@ -985,6 +1025,10 @@ namespace RTE {
 				drawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][playerScreen];
 				drawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][playerScreen];
 			}
+			// Need to clear the backbuffers because Scene background layers can be too small to fill the whole backbuffer or drawn masked resulting in artifacts from the previous frame.
+			clear_to_color(drawScreenGUI, ColorKeys::g_MaskColor);
+			clear_to_color(drawScreen, m_BlackColor);
+
 			AllegroBitmap playerGUIBitmap(drawScreenGUI);
 
 			// Update the scene view to line up with a specific screen and then draw it onto the intermediate screen
@@ -1017,8 +1061,6 @@ namespace RTE {
 			if (!IsInMultiplayerMode()) {
 				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos);
 			} else {
-				clear_to_color(drawScreen, g_MaskColor);
-				clear_to_color(drawScreenGUI, g_MaskColor);
 				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos, true, true);
 			}
 

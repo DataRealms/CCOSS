@@ -340,9 +340,9 @@ int GATutorial::Start()
 
     // COMMON SCREENS
     std::vector<BITMAP *> apScreens = ContentFile("Missions.rte/Objects/Tutorial/ScreenStatic.png").GetAsAnimation(3);
-    m_apCommonScreens[SCREENOFF] = apScreens.at(0);
-    m_apCommonScreens[STATICLITTLE] = apScreens.at(1);
-    m_apCommonScreens[STATICLARGE] = apScreens.at(2);
+    m_apCommonScreens[SCREENOFF] = apScreens[0];
+    m_apCommonScreens[STATICLITTLE] = apScreens[1];
+    m_apCommonScreens[STATICLARGE] = apScreens[2];
 
     // ROOM SIGNS
     ContentFile signFile;
@@ -357,8 +357,8 @@ int GATutorial::Start()
         else if (room == ROOM3)
             signFile.SetDataPath("Missions.rte/Objects/Tutorial/TutEntryD.png");
 		std::vector<BITMAP *> apSigns = signFile.GetAsAnimation(2);
-        m_aapRoomSigns[room][UNLIT] = apSigns.at(0);
-        m_aapRoomSigns[room][LIT] = apSigns.at(1);
+        m_aapRoomSigns[room][UNLIT] = apSigns[0];
+        m_aapRoomSigns[room][LIT] = apSigns[1];
     }
 
     m_RoomSignPositions[ROOM0].SetXY(744, 695);

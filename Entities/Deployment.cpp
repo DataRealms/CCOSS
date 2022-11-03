@@ -384,7 +384,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
 				// Note this doesn't take into account Scene wrapping, which is problematic when the Scene might not be loaded.. it's okay in this case though
 				Vector distance = (*existingItr)->GetPos() - m_Pos;
 				// If the same thing is within the spawn radius, then signal that this Deployment location is indeed BLOCKED
-				if (distance.GetMagnitude() < m_WalkRadius)
+				if (distance.MagnitudeIsLessThan(m_WalkRadius))
 				{
 					blocked = true;
 					break;
@@ -470,7 +470,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
                 // Note this doesn't take into account Scene wrapping, which is problematic when the Scene might not be loaded.. it's okay in this case though
                 Vector distance = (*existingItr)->GetPos() - m_Pos;
                 // If the same thing is within the spawn radius, then signal that this Deployment location is indeed BLOCKED
-                if (distance.GetMagnitude() < m_SpawnRadius)
+                if (distance.MagnitudeIsLessThan(m_SpawnRadius))
                 {
                     blocked = true;
                     break;
@@ -731,10 +731,6 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 				// Draw the spawn radius circle too
 				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, c_GUIColorGray);
 			}
-			else if (mode == g_DrawLess)
-			{
-				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
-			}
 			else if (mode == g_DrawTrans)
 			{
 				draw_trans_sprite(pTargetBitmap, pBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
@@ -804,10 +800,6 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 		for (int i = 0; i < passes; ++i)
 		{
 			if (mode == g_DrawColor)
-			{
-				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
-			}
-			else if (mode == g_DrawLess)
 			{
 				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
 			}

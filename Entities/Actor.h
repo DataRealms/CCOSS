@@ -15,14 +15,19 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
-#include "PieMenuGUI.h"
+#include "PieMenu.h"
 
 namespace RTE
 {
 
+
+#pragma region Global Macro Definitions
+	#define DefaultPieMenuNameGetter(DEFAULTPIEMENUNAME) \
+		std::string GetDefaultPieMenuName() const override { return DEFAULTPIEMENUNAME; }
+#pragma endregion
+
 class AtomGroup;
 class HeldDevice;
-class PieMenuGUI;
 
 #define AILINEDOTSPACING 16
 
@@ -391,7 +396,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSharpAimProgress
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the normalized amount of sharp aim that has been achieved by this. 
+// Description:     Gets the normalized amount of sharp aim that has been achieved by this.
 // Arguments:       None.
 // Return value:    Sharp aim progress between 0 - 1.0. 1.0 is fully aimed.
 
@@ -593,33 +598,12 @@ ClassInfoGetters;
 
     bool IsDead() const { return m_Status == DEAD; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PieNeedsUpdate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates that the pie menu associated with this Actor needs updating.
-// Arguments:       None.
-// Return value:    Whether the pie menu needs updating.
-
-    bool PieNeedsUpdate() { return m_PieNeedsUpdate; };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-	virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
-
-
     /// <summary>
-    /// Handles and does whatever a specific activated Pie Menu slice does to this.
+    /// Tries to handle the activated PieSlice in this object's PieMenu, if there is one, based on its SliceType.
     /// </summary>
-    /// <param name="pieSliceIndex">The pie menu command to handle. See the enum in PieSlice.</param>
-    /// <returns>Whether any slice was handled. False if no matching slice handler was found, or there was no slice currently activated by the pie menu.</returns>
-    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) { return false; }
+    /// <param name="pieSliceType">The SliceType of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
+    virtual bool HandlePieCommand(PieSlice::SliceType pieSliceType) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1323,6 +1307,36 @@ ClassInfoGetters;
 	/// <param name="newRecoverDelay">The recovery delay, in MS.</param>
 	void SetStableRecoverDelay(int newRecoverDelay) { m_StableRecoverDelay = newRecoverDelay; }
 
+	/// <summary>
+	/// Gets whether or not this Actor has the organic flag set and should be considered as organic.
+	/// </summary>
+	/// <returns>Whether or not this Actor has the organic flag set and should be considered as organic.</returns>
+	bool IsOrganic() const { return m_Organic; }
+
+	/// <summary>
+	/// Gets whether or not this Actor has the mechanical flag set and should be considered as mechanical.
+	/// </summary>
+	/// <returns>Whether or not this Actor has the mechanical flag set and should be considered as mechanical.</returns>
+	bool IsMechanical() const { return m_Mechanical; }
+
+	/// <summary>
+	/// Gets the default PieMenu name for this type.
+	/// </summary>
+	/// <returns>The default PieMenu name for this type.</returns>
+	virtual std::string GetDefaultPieMenuName() const { return "Default Actor Pie Menu"; }
+
+    /// <summary>
+    /// Gets a pointer to the PieMenu for this Actor. Ownership is NOT transferred.
+    /// </summary>
+    /// <returns>The PieMenu for this Actor.</returns>
+    PieMenu * GetPieMenu() const { return m_PieMenu.get(); }
+
+	/// <summary>
+	/// Sets the PieMenu for this Actor. Ownership IS transferred.
+	/// </summary>
+	/// <param name="newPieMenu">The new PieMenu for this Actor.</param>
+	void SetPieMenu(PieMenu *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenu>(newPieMenu); m_PieMenu->Create(this); m_PieMenu->AddWhilePieMenuOpenListener(this, std::bind(&Actor::WhilePieMenuOpenListener, this, m_PieMenu.get())); }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1373,7 +1387,6 @@ protected:
     Vector m_LastSecondPos;
     // Movement since last whole second
     Vector m_RecentMovement;
-    float m_RecentMovementMag;
     // Threshold for taking damage from travel impulses, in kg * m/s
     float m_TravelImpulseDamage;
     // Timer for timing the delay before regaining stability after losing it
@@ -1440,16 +1453,12 @@ protected:
     float m_MaxInventoryMass; //!< The mass limit for this Actor's inventory. -1 means there's no limit.
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
-    // Whether the pie menu associated with this needs updating
-    bool m_PieNeedsUpdate;
     // HUD positioning aid
     int m_HUDStack;
     // For how much longer to draw this as white. 0 means don't draw as white
     int m_FlashWhiteMS;
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
-    // Extra pie menu options that this should add to any Pie Menu that focuses on this
-    std::list<PieSlice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
     float m_DigStrength;
 	// ID of deployment which spawned this actor
@@ -1527,9 +1536,9 @@ protected:
     TeamBlockState m_TeamBlockState;
     // Times how long after an obstruction is cleared to start proceeding again
     Timer m_BlockTimer;
-    // The closest the actor has ever come to the current waypoint it's going for. Used to checking if we shuold re-update the movepath
+    // The closest the actor has ever come to the current waypoint it's going for, squared. Used to checking if we shuold re-update the movepath
     // It's useful for when the path seems to be broken or unreachable
-    float m_BestTargetProximity;
+    float m_BestTargetProximitySqr;
     // Timer used to check on larger movement progress toward the goal
     Timer m_ProgressTimer;
     // Timer used to time how long we've been stuck in the same spot.
@@ -1537,10 +1546,15 @@ protected:
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
 
+	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
+	bool m_Mechanical; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
 private:
+
+    std::unique_ptr<PieMenu> m_PieMenu;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

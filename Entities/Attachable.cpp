@@ -41,6 +41,8 @@ namespace RTE {
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
 
+		m_PieSlices.clear();
+
 		m_PrevParentOffset.Reset();
 		m_PrevJointOffset.Reset();
 		m_PrevRotAngleOffset = 0;
@@ -90,6 +92,10 @@ namespace RTE {
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
+		for (const std::unique_ptr<PieSlice> &pieSlice : reference.m_PieSlices) {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(pieSlice->Clone())));
+		}
+
 		m_PrevRotAngleOffset = reference.m_PrevRotAngleOffset;
 
 		return 0;
@@ -113,7 +119,9 @@ namespace RTE {
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {
-			reader >> m_JointStiffness;
+			float jointStiffness = 0;
+			reader >> jointStiffness;
+			SetJointStiffness(jointStiffness);
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {
@@ -134,6 +142,8 @@ namespace RTE {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
+		} else if (propName == "AddPieSlice") {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
 			return MOSRotating::ReadProperty(propName, reader);
 		}
@@ -163,6 +173,10 @@ namespace RTE {
 		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
 		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
+
+		for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+			writer.NewPropertyWithValue("AddPieSlice", pieSlice.get());
+		}
 
 		return 0;
 	}
@@ -199,6 +213,7 @@ namespace RTE {
 		jointStiffnessValueToUse = jointStiffnessValueToUse > 0 ? jointStiffnessValueToUse : m_JointStiffness;
 		jointStrengthValueToUse = jointStrengthValueToUse > 0 ? jointStrengthValueToUse : m_JointStrength;
 		gibImpulseLimitValueToUse = gibImpulseLimitValueToUse > 0 ? gibImpulseLimitValueToUse : m_GibImpulseLimit;
+		if (jointStrengthValueToUse == 0) { gibImpulseLimitValueToUse = 0; }
 		if (gibImpulseLimitValueToUse > 0) { gibImpulseLimitValueToUse = std::max(gibImpulseLimitValueToUse, jointStrengthValueToUse); }
 
 		Vector totalImpulseForce;
@@ -207,28 +222,25 @@ namespace RTE {
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
 
-		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
+		// Rough explanation of what this is doing:
+		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
+		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents (leaving none to affect the Attachable) and min stiffness transfer none.
+		if (!m_InheritsRotAngle) {
+			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+				if (!impulseForceOffset.IsZero()) { m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - std::clamp(jointStiffnessValueToUse, 0.0F, 1.0F)); }
+			}
+		}
+
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForceMagnitude > jointStrengthValueToUse) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
 		} else {
 			jointImpulses += totalImpulseForce;
-		}
-
-		// Rough explanation of what this is doing:
-		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
-		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
-		if (!m_InheritsRotAngle) {
-			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
-				if (!impulseForceOffset.IsZero()) {
-					m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
-				}
-			}
 		}
 
 		m_ImpulseForces.clear();
@@ -454,6 +466,12 @@ namespace RTE {
 			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
+
+			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
+				if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+					AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, true);
+				}
+			}
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
@@ -469,9 +487,16 @@ namespace RTE {
 					m_pMOToNotHit = rootParent;
 					rootParent->SetWhichMOToNotHit(this);
 				}
+
+				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) {
+					if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
+						AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, false);
+					}
+				}
 			}
 
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }
+
 			m_Parent = newParent;
 			for (Attachable *attachable : m_Attachables) {
 				if (attachable->m_CollidesWithTerrainWhileAttached) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
@@ -516,6 +541,29 @@ namespace RTE {
 					}
 				}
 			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddOrRemovePieSlicesAndListenersFromPieMenu(PieMenu *pieMenuToModify, bool addToPieMenu) {
+		RTEAssert(pieMenuToModify, "Cannot add or remove Attachable PieSlices and listeners from a non-existant PieMenu.");
+		if (addToPieMenu) {
+			if (m_FunctionsAndScripts.find("WhilePieMenuOpen") != m_FunctionsAndScripts.end() && !m_FunctionsAndScripts.find("WhilePieMenuOpen")->second.empty()) {
+				pieMenuToModify->AddWhilePieMenuOpenListener(this, std::bind(&MovableObject::WhilePieMenuOpenListener, this, pieMenuToModify));
+			}
+			for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+				pieMenuToModify->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
+			}
+		} else {
+			pieMenuToModify->RemoveWhilePieMenuOpenListener(this);
+			pieMenuToModify->RemovePieSlicesByOriginalSource(this);
+		}
+		for (Attachable *attachable : m_Attachables) {
+			attachable->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
+		}
+		for (AEmitter *wound : m_Wounds) {
+			wound->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
 		}
 	}
 }

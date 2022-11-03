@@ -16,7 +16,6 @@
 
 #include "Attachable.h"
 #include "Actor.h"
-#include "PieMenuGUI.h"
 
 namespace RTE
 {
@@ -419,17 +418,6 @@ ClassInfoGetters;
 // Return value:    None.
 
     void SetOneHanded(bool newValue) { m_OneHanded = newValue; }
-	
-	
-	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-   bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -645,8 +633,6 @@ protected:
     float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;
-    // Extra pie menu options that this should add to any actor who holds this device
-    std::list<PieSlice> m_PieSlices;
     // How loud this device is when activated. 0 means perfectly quiet 0.5 means half of normal (normal equals audiable from ~half a screen)
     float m_Loudness;
     // If this weapon belongs to the "Explosive Weapons" group or not

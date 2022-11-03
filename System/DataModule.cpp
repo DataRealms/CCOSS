@@ -14,6 +14,7 @@ namespace RTE {
 		m_FriendlyName.clear();
 		m_Author.clear();
 		m_Description.clear();
+		m_SupportedGameVersion.clear();
 		m_Version = 1;
 		m_ModuleID = -1;
 		m_IconFile.Reset();
@@ -27,6 +28,7 @@ namespace RTE {
 		m_CrabToHumanSpawnRatio = 0;
 		m_ScriptPath.clear();
 		m_IsFaction = false;
+		m_IsMerchant = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +50,11 @@ namespace RTE {
 
 		if (reader.Create(indexPath, true, progressCallback) >= 0) {
 			int result = Serializable::Create(reader);
+
+			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && m_SupportedGameVersion != c_GameVersion) {
+				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.
 			if (progressCallback) { progressCallback(" ", true); }
@@ -110,6 +117,12 @@ namespace RTE {
 			}
 		} else if (propName == "IsFaction") {
 			reader >> m_IsFaction;
+			if (m_IsMerchant) { m_IsFaction = false; }
+		} else if (propName == "IsMerchant") {
+			reader >> m_IsMerchant;
+			if (m_IsMerchant) { m_IsFaction = false; }
+		} else if (propName == "SupportedGameVersion") {
+			reader >> m_SupportedGameVersion;
 		} else if (propName == "Version") {
 			reader >> m_Version;
 		} else if (propName == "ScanFolderContents") {
@@ -131,6 +144,23 @@ namespace RTE {
 		} else if (propName == "IconFile") {
 			reader >> m_IconFile;
 			m_Icon = m_IconFile.GetAsBitmap();
+		} else if (propName == "FactionBuyMenuTheme") {
+			if (reader.ReadPropValue() == "BuyMenuTheme") {
+				while (reader.NextProperty()) {
+					std::string themePropName = reader.ReadPropName();
+					if (themePropName == "SkinFile") {
+						m_BuyMenuTheme.SkinFilePath = reader.ReadPropValue();
+					} else if (themePropName == "BannerFile") {
+						m_BuyMenuTheme.BannerImagePath = reader.ReadPropValue();
+					} else if (themePropName == "LogoFile") {
+						m_BuyMenuTheme.LogoImagePath = reader.ReadPropValue();
+					} else if (themePropName == "BackgroundColorIndex") {
+						m_BuyMenuTheme.BackgroundColorIndex = std::clamp(std::stoi(reader.ReadPropValue()), 0, 255);
+					} else {
+						break;
+					}
+				}
+			}
 		} else if (propName == "AddMaterial") {
 			return g_SceneMan.ReadProperty(propName, reader);
 		} else {
@@ -149,6 +179,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("Author", m_Author);
 		writer.NewPropertyWithValue("Description", m_Description);
 		writer.NewPropertyWithValue("IsFaction", m_IsFaction);
+		writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion);
 		writer.NewPropertyWithValue("Version", m_Version);
 		writer.NewPropertyWithValue("IconFile", m_IconFile);
 
@@ -184,13 +215,11 @@ namespace RTE {
 		if (exactType.empty() || instance == "None" || instance.empty()) {
 			return nullptr;
 		}
-
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
-		if (classItr != m_TypeMap.end()) {
+		if (auto classItr = m_TypeMap.find(exactType); classItr != m_TypeMap.end()) {
 			// Find an instance of that EXACT type and name; derived types are not matched
-			for (const std::pair<std::string, Entity *> &classItrEntry : classItr->second) {
-				if (classItrEntry.first == instance && classItrEntry.second->GetClassName() == exactType) {
-					return classItrEntry.second;
+			for (const auto &[instanceName, entity] : classItr->second) {
+				if (instanceName == instance && entity->GetClassName() == exactType) {
+					return entity;
 				}
 			}
 		}
@@ -206,9 +235,8 @@ namespace RTE {
 			return false;
 		}
 		bool entityAdded = false;
-		Entity *existingEntity = GetEntityIfExactType(entityToAdd->GetClassName(), entityToAdd->GetPresetName());
 
-		if (existingEntity) {
+		if (Entity *existingEntity = GetEntityIfExactType(entityToAdd->GetClassName(), entityToAdd->GetPresetName())) {
 			// If we're commanded to overwrite any collisions, then do so by cloning over the existing instance in the list
 			// This way we're not invalidating any instance references that would have been taken out and held by clients
 			if (overwriteSame) {
@@ -262,12 +290,11 @@ namespace RTE {
 				// But I suppose no actual finding is done. Investigate this and see where it's called, maybe this should be changed
 			}
 		} else {
-			std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(withType);
-			if (classItr != m_TypeMap.end()) {
+			if (auto classItr = m_TypeMap.find(withType); classItr != m_TypeMap.end()) {
 				const std::list<std::string> *groupListPtr = nullptr;
 				// Go through all the entities of that type, adding the groups they belong to
-				for (const std::pair<std::string, Entity *> &instance : classItr->second) {
-					groupListPtr = instance.second->GetGroupList();
+				for (const auto &[instanceName, entity] : classItr->second) {
+					groupListPtr = entity->GetGroupList();
 
 					for (const std::string &groupListEntry : *groupListPtr) {
 						groupList.push_back(groupListEntry); // Get the grouped entities, without transferring ownership
@@ -285,23 +312,38 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool DataModule::GetAllOfGroup(std::list<Entity *> &entityList, const std::string &group, const std::string &type) {
-		if (group.empty()) {
+
+	bool DataModule::GetAllOfOrNotOfGroups(std::list<Entity *> &entityList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups) {
+		if (groups.empty()) {
 			return false;
 		}
-
 		bool foundAny = false;
 
-		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too)
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
-
-		if (classItr != m_TypeMap.end()) {
+		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too).
+		if (auto classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type); classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
-			for (const std::pair<std::string, Entity *> &instance : classItr->second) {
-				if (instance.second->IsInGroup(group)) {
-					entityList.push_back(instance.second); // Get the grouped entities, without transferring ownership
-					foundAny = true;
+			for (const auto &[instanceName, entity] : classItr->second) {
+				if (excludeGroups) {
+					bool excludeEntity = false;
+					for (const std::string &group : groups) {
+						if (entity->IsInGroup(group)) {
+							excludeEntity = true;
+							break;
+						}
+					}
+					if (!excludeEntity) {
+						entityList.emplace_back(entity);
+						foundAny = true;
+					}
+				} else {
+					for (const std::string &group : groups) {
+						if (entity->IsInGroup(group)) {
+							entityList.emplace_back(entity);
+							foundAny = true;
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -315,12 +357,11 @@ namespace RTE {
 			return false;
 		}
 
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(type);
-		if (classItr != m_TypeMap.end()) {
+		if (auto classItr = m_TypeMap.find(type);  classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
-			for (const std::pair<std::string, Entity *> &instance : classItr->second) {
-				entityList.push_back(instance.second); // Get the entities, without transferring ownership
+			for (const auto &[instanceName, entity] : classItr->second) {
+				entityList.push_back(entity); // Get the entities, without transferring ownership
 			}
 			return true;
 		}
@@ -360,7 +401,7 @@ namespace RTE {
 		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + m_FileName)) {
 			if (directoryEntry.path().extension() == ".ini" && directoryEntry.path().filename() != "Index.ini") {
 				Reader iniReader;
-				if (iniReader.Create(directoryEntry.path().generic_string(), false, progressCallback) >= 0) {
+				if (iniReader.Create(m_FileName + "/" + directoryEntry.path().filename().generic_string(), false, progressCallback) >= 0) {
 					result = Serializable::Create(iniReader, false, true);
 					if (progressCallback) { progressCallback(" ", true); }
 				}
@@ -378,13 +419,11 @@ namespace RTE {
 		if (exactType.empty() || presetName == "None" || presetName.empty()) {
 			return nullptr;
 		}
-
-		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
-		if (classItr != m_TypeMap.end()) {
+		if (auto classItr = m_TypeMap.find(exactType); classItr != m_TypeMap.end()) {
 			// Find an instance of that EXACT type and name; derived types are not matched
-			for (const std::pair<std::string, Entity *> &instance : classItr->second) {
-				if (instance.first == presetName && instance.second->GetClassName() == exactType) {
-					return instance.second;
+			for (const auto &[instanceName, entity] : classItr->second) {
+				if (instanceName == presetName && entity->GetClassName() == exactType) {
+					return entity;
 				}
 			}
 		}
@@ -400,7 +439,7 @@ namespace RTE {
 
 		// Walk up the class hierarchy till we reach the top, adding an entry of the passed in entity into each typelist as we go along
 		for (const Entity::ClassInfo *pClass = &(entityToAdd->GetClass()); pClass != nullptr; pClass = pClass->GetParent()) {
-			std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(pClass->GetName());
+			auto classItr = m_TypeMap.find(pClass->GetName());
 
 			// No instances of this entity have been added yet so add a class category for it
 			if (classItr == m_TypeMap.end()) {

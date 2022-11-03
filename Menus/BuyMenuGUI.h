@@ -203,14 +203,12 @@ public:
 
 	int GetMetaPlayer() const { return m_MetaPlayer; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetNativeTechModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets which DataModule ID should be treated as the native tech of the
-//                  user of this menu.
-// Arguments:       The module ID to set as the native one. 0 means everything is native.
-// Return value:    None.
 
+    /// <summary>
+    /// Sets which DataModule ID should be treated as the native tech of the user of this menu.
+	/// This will also apply the DataModule's faction BuyMenu theme, if applicable.
+    /// </summary>
+	/// <param name="whichModule">The module ID to set as the native one. 0 means everything is native.</param>
     void SetNativeTechModule(int whichModule);
 
 
@@ -403,7 +401,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			AddAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an item to the list of allowed items. 
+// Description:     Adds an item to the list of allowed items.
 //					If the list is not empty then everything not in the list is removed from the buy menu
 //					Items will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
 // Arguments:       Full preset name to add.
@@ -414,7 +412,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes an item from the list of allowed items. 
+// Description:     Removes an item from the list of allowed items.
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
@@ -450,7 +448,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAlwaysAllowedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes an item from the list of always allowed items. 
+// Description:     Removes an item from the list of always allowed items.
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
@@ -479,7 +477,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			AddProhibitedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an item prohibited to buy from the buy menu. 
+// Description:     Adds an item prohibited to buy from the buy menu.
 //					The item will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
 // Arguments:       Full preset name to add.
 // Return value:    None.
@@ -529,7 +527,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-	void ClearCartList(); 
+	void ClearCartList();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			LoadDefaultLoadoutToCart
@@ -572,7 +570,7 @@ public:
 // Method:			GetOwnedItemsAmount
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the amount of specified items owned in this buy menu
-// Arguments:       Full preset name of item. 
+// Arguments:       Full preset name of item.
 // Return value:    Amount of owned items.
 
 	int GetOwnedItemsAmount(std::string presetName) { if (m_OwnedItems.find(presetName) != m_OwnedItems.end()) return m_OwnedItems[presetName]; else return 0; };
@@ -581,28 +579,24 @@ public:
 // Method:			CommitPurchase
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Deducts 1 piece of owned item and return true if purchase can be made or false if the item is out of stock.
-// Arguments:       Full preset name of item. 
+// Arguments:       Full preset name of item.
 // Return value:    Whether the purchase can be conducted or the item is out of stock.
 
 	bool CommitPurchase(string presetName);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetHeaderImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the header image to the one specified in path
-// Arguments:       Path to image to set as header.
-// Return value:    None.
+#pragma region Faction Theme Handling
+	/// <summary>
+	/// Changes the banner image to the one specified. If none is specified, resets it to the default banner image.
+	/// </summary>
+	/// <param name="imagePath">Path to image to set as banner.</param>
+	void SetBannerImage(const std::string &imagePath);
 
-	void SetHeaderImage(string path);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetLogoImage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Changes the logo image to the one specified in path
-// Arguments:       Path to image to set as logo.
-// Return value:    None.
-
-	void SetLogoImage(string path);
+	/// <summary>
+	/// Changes the logo image to the one specified. If none is specified, resets it to the default logo image.
+	/// </summary>
+	/// <param name="imagePath">Path to image to set as logo.</param>
+	void SetLogoImage(const std::string &imagePath);
+#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -630,18 +624,14 @@ protected:
     bool DeployLoadout(int index);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddObjectsToItemList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all objects of a specific type already defined in PresetMan
-//                  to the current shop/item list. They will be grouped into the different
-//                  data modules they were read from.
-// Arguments:       Reference to the data module vector of entity lists to add the items to.
-//                  The name of the class to add all objects of. "" or "All" looks for all.
-//                  The name of the group to add all objects of. "" or "All" looks for all.
-// Return value:    None.
-
-    void AddObjectsToItemList(std::vector<std::list<Entity *> > &moduleList, std::string type = "", std::string group = "");
+	/// <summary>
+	/// Adds all objects of a specific type already defined in PresetMan to the current shop/item list. They will be grouped into the different data modules they were read from.
+	/// </summary>
+	/// <param name="moduleList">Reference to the data module vector of entity lists to add the items to.</param>
+	/// <param name="type">The name of the class to add all objects of. "" or "All" looks for all.</param>
+	/// <param name="groups">The name of the groups to add all objects of. An empty vector or "All" looks for all.</param>
+	/// <param name="excludeGroups">Whether the specified groups should be excluded, meaning all objects NOT associated with the groups will be added.</param>
+	void AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleList, const std::string &type = "", const std::vector<std::string> &groups = {}, bool excludeGroups = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -719,6 +709,7 @@ protected:
     {
         CRAFT = 0,
         BODIES,
+		MECHA,
         TOOLS,
         GUNS,
         BOMBS,
@@ -796,8 +787,10 @@ protected:
     GUICollectionBox *m_pPopupBox;
     // Label displaying the item popup description
     GUILabel *m_pPopupText;
+    // Top banner
+    GUICollectionBox *m_Banner;
     // Logo label that disappears when the sets category is selected
-    GUICollectionBox *m_pLogo;
+    GUICollectionBox *m_Logo;
     // All the radio buttons for the different shop categories
     GUITab *m_pCategoryTabs[CATEGORYCOUNT];
     // The Listbox which lists all the shop's items in the currently selected category
@@ -866,6 +859,9 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_DefaultBannerImagePath; //!< Path to the default banner image.
+	static const std::string c_DefaultLogoImagePath; //!< Path to the default logo image.
 
     /// <summary>
     /// Refresh tab disabled states, so tabs get properly enabled/disabled based on whether or not equipment selection mode is enabled.

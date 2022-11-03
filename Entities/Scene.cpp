@@ -2002,7 +2002,7 @@ int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBra
     
     found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
     found += g_MovableMan.GetAllItems(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
-    //found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
+    found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
 
     return found;
 }

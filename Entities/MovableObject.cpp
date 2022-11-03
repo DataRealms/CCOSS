@@ -287,7 +287,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	{
 		reader >> m_AirResistance;
 		// Backwards compatibility after we made this value scaled over time
-		m_AirResistance /= 0.01666;
+		m_AirResistance /= 0.01666F;
 	}
 	else if (propName == "AirThreshold")
 		reader >> m_AirThreshold;
@@ -331,7 +331,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_HUDVisible;
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
-        switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
+        switch (LoadScript(scriptPath)) {
             case 0:
                 break;
             case -1:
@@ -415,7 +415,9 @@ int MovableObject::Save(Writer &writer) const
 {
     SceneObject::Save(writer);
 // TODO: Make proper save system that knows not to save redundant data!
-/*
+// Note - this function isn't even called when saving a scene. Turns out that scene special-cases this stuff, see Scene::Save()
+// In future, perhaps we ought to not do that. Who knows?
+
     writer.NewProperty("Mass");
     writer << m_Mass;
     writer.NewProperty("Velocity");
@@ -425,7 +427,7 @@ int MovableObject::Save(Writer &writer) const
     writer.NewProperty("GlobalAccScalar");
     writer << m_GlobalAccScalar;
     writer.NewProperty("AirResistance");
-    writer << m_AirResistance;
+    writer << (m_AirResistance * 0.01666F); // Backwards compatibility after we made this value scaled over time
     writer.NewProperty("AirThreshold");
     writer << m_AirThreshold;
     writer.NewProperty("PinStrength");
@@ -452,10 +454,14 @@ int MovableObject::Save(Writer &writer) const
     writer << m_CanBeSquished;
     writer.NewProperty("HUDVisible");
     writer << m_HUDVisible;
-    if (!m_ScriptPath.empty())
+    for (const auto &pair : m_AllLoadedScripts)
     {
-        writer.NewProperty("ScriptPath");
-        writer << m_ScriptPath;
+        const std::string &scriptPath = pair.first;
+        if (!scriptPath.empty())
+        {
+            writer.NewProperty("ScriptPath");
+            writer << scriptPath;
+        }
     }
     writer.NewProperty("ScreenEffect");
     writer << m_ScreenEffectFile;
@@ -469,7 +475,21 @@ int MovableObject::Save(Writer &writer) const
     writer << (float)m_EffectStopStrength / 255.0f;
     writer.NewProperty("EffectAlwaysShows");
     writer << m_EffectAlwaysShows;
-*/
+    writer.NewProperty("DamageOnCollision");
+    writer << m_DamageOnCollision;
+    writer.NewProperty("DamageOnPenetration");
+    writer << m_DamageOnPenetration;
+    writer.NewProperty("WoundDamageMultiplier");
+    writer << m_WoundDamageMultiplier;
+    writer.NewProperty("ApplyWoundDamageOnCollision");
+    writer << m_ApplyWoundDamageOnCollision;
+    writer.NewProperty("ApplyWoundBurstDamageOnCollision");
+    writer << m_ApplyWoundBurstDamageOnCollision;
+    writer.NewProperty("IgnoreTerrain");
+    writer << m_IgnoreTerrain;
+    writer.NewProperty("SimUpdatesBetweenScriptedUpdates");
+    writer << m_SimUpdatesBetweenScriptedUpdates;
+    
     return 0;
 }
 

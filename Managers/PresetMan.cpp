@@ -881,7 +881,7 @@ void PresetMan::ReloadAllScripts()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &moduleName) {
+bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &moduleName, bool storeReloadedPresetDataForQuickReloading) {
 	if (className.empty() || presetName.empty() || moduleName.empty()) {
 		g_ConsoleMan.PrintString("ERROR: Trying to reload Entity preset without specifying preset name, type or data module!");
 		return false;
@@ -913,10 +913,12 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 	}
 	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + actualDataModuleOfPreset + "\" was successfully reloaded");
 
-	m_LastReloadedEntityPresetInfo[0] = presetName;
-	m_LastReloadedEntityPresetInfo[1] = className;
-	m_LastReloadedEntityPresetInfo[2] = moduleName; // Store the module name as is so in case of a data location warning it persists on every quick reload.
-	
+	if (storeReloadedPresetDataForQuickReloading) {
+		m_LastReloadedEntityPresetInfo[0] = presetName;
+		m_LastReloadedEntityPresetInfo[1] = className;
+		m_LastReloadedEntityPresetInfo[2] = moduleName; // Store the module name as is so in case of a data location warning it persists on every quick reload.
+	}
+
 	m_ReloadEntityPresetCalledThisUpdate = true;
 	return true;
 }

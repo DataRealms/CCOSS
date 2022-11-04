@@ -430,8 +430,9 @@ public:
 	/// <param name="presetName">The name of the preset to reload.</param>
 	/// <param name="className">The type of the preset to reload, to avoid any ambiguity.</param>
 	/// <param name="dataModule">The DataModule the preset to reload is defined in.</param>
+	/// <param name="storeReloadedPresetDataForQuickReloading">Whether or not to store the reloaded entity preset data for quick reloading.</param>
 	/// <returns>Whether reloading the preset was successful.</returns>
-	bool ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &dataModule);
+	bool ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &dataModule, bool storeReloadedPresetDataForQuickReloading = true);
 
 	/// <summary>
 	/// Reloads the previously reloaded Entity preset and all related presets with the latest version of their respective files.

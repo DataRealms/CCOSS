@@ -64,7 +64,7 @@ allegro_include = include_directories('include')
 loadpng_sources = []
 subdir('addons/loadpng')
 if not allegro_dep.found()
-  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:['-DALLEGRO_NO_COMPATIBILITY','-Wno-deprecated-declarations'], override_options:['buildtype=release', 'optimization=3'])
+  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:['-Wno-deprecated-declarations'], override_options:['buildtype=release', 'optimization=3'])
   external_libs += allegro
 	external_inc_dirs += allegro_include
   extra_args += ['-DALLEGRO_NO_COMPATIBILITY', '-Wno-deprecated-declarations']

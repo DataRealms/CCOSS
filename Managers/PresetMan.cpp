@@ -878,7 +878,39 @@ void PresetMan::ReloadAllScripts()
         m_pDataModules[i]->ReloadAllScripts();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &moduleName) {
+	if (className.empty() || presetName.empty() || moduleName.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Trying to reload Entity preset without specifying preset name, type or data module!");
+		return false;
+	}
+
+	int moduleId = GetModuleID(moduleName);
+	if (moduleId < 0) {
+		g_ConsoleMan.PrintString("ERROR: Failed to find data module with name \"" + moduleName + "\" while attempting to reload an Entity preset with name \"" + presetName + "\" of type \"" + className + "\"!");
+		return false;
+	}
+
+	std::string entityDataLocation = GetEntityDataLocation(className, presetName, moduleId);
+	if (entityDataLocation.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\"! The preset might not exist!");
+		return false;
+	}
+
+	if (Reader reader; reader.Create(entityDataLocation.c_str(), true, nullptr, true) >= 0) {
+		while (reader.NextProperty()) {
+			reader.ReadPropName();
+			g_PresetMan.GetEntityPreset(reader);
+		}
+	} else {
+		g_ConsoleMan.PrintString("ERROR: Failed to read data for Entity preset located at \"" + entityDataLocation + "\"!");
+		return false;
+	}
+	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + moduleName + "\" was successfully reloaded");
+
+	return true;
+}
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialMapping
 //////////////////////////////////////////////////////////////////////////////////////////

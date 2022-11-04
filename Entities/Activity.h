@@ -261,6 +261,11 @@ namespace RTE {
 		virtual int Start();
 
 		/// <summary>
+		/// Sets this activity to running state, after everything has been initialized in the Create()
+		/// </summary>
+		virtual void PostStart() { m_ActivityState = (m_ActivityState == ActivityState::NotStarted ? ActivityState::Running : m_ActivityState); };
+
+		/// <summary>
 		/// Forces this Activity to end.
 		/// </summary>
 		virtual void End();

@@ -132,7 +132,10 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 //                  later recreation with Create(Reader &reader);
 
 int GAScripted::Save(Writer &writer) const {
-	GameActivity::Save(writer);
+    // Call the script OnSave() function, if it exists
+    g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
+    
+    GameActivity::Save(writer);
 
 	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
 	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);

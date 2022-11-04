@@ -193,6 +193,8 @@ namespace RTE {
 		m_LastMusicPos = 0;
 		g_AudioMan.PauseAllMobileSounds(false);
 
+		m_Activity->PostStart();
+
 		return error;
 	}
 

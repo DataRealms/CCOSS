@@ -274,7 +274,6 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
-		m_ActivityState = ActivityState::Running;
 		m_Paused = false;
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)

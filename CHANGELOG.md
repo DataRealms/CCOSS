@@ -213,6 +213,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
+
+- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, definedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
+	Once an entity preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
+	Note that any changes made to the entity preset will not be reflected in existing copies of the entity, only in new ones created after the reload.  
+	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is however possible to reload with a different set of loaded or entirely new sprites.
+
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
 </details>

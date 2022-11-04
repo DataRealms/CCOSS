@@ -396,7 +396,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
     if (!m_IsHuman[player])
         return false;
 
-	if (pActor) {
+	if (pActor && pActor->GetPieMenu()) {
 		pActor->GetPieMenu()->DoDisableAnimation();
 	}
     m_InventoryMenuGUI[player]->SetEnabled(false);
@@ -425,7 +425,7 @@ void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 
     Activity::SwitchToNextActor(player, team, pSkip);
 
-	if (m_ControlledActor[player]) {
+	if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
 		m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
 	}
 }
@@ -447,7 +447,7 @@ void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
 
     Activity::SwitchToPrevActor(player, team, pSkip);
 
-	if (m_ControlledActor[player]) {
+	if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
 		m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
 	}
 }
@@ -1407,7 +1407,9 @@ void GameActivity::Update()
         // Switch to next actor if the player wants to. Don't do it while the buy menu is open
         else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
-			if (m_ControlledActor[player]) { m_ControlledActor[player]->GetPieMenu()->SetEnabled(false); }
+			if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+				m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
+			}
             SwitchToNextActor(player, team);
             m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
@@ -1415,7 +1417,9 @@ void GameActivity::Update()
         // Switch to prev actor if the player wants to. Don't do it while the buy menu is open
         else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
-			if (m_ControlledActor[player]) { m_ControlledActor[player]->GetPieMenu()->SetEnabled(false); }
+			if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+				m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
+			}
             SwitchToPrevActor(player, team);
             m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
@@ -1478,9 +1482,11 @@ void GameActivity::Update()
 
 				m_ViewState[player] = ViewState::Normal;
                 g_GUISound.UserErrorSound()->Play(player);
-				m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				}
 				m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
-				if (pMarkedActor) {
+				if (pMarkedActor && pMarkedActor->GetPieMenu()) {
 					pMarkedActor->GetPieMenu()->DoDisableAnimation();
 				}
             }
@@ -1498,9 +1504,11 @@ void GameActivity::Update()
                 m_ViewState[player] = ViewState::Normal;
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				}
             }
-            else if (pMarkedActor) {
+            else if (pMarkedActor && pMarkedActor->GetPieMenu()) {
                 int quarterFrameBuffer = g_FrameMan.GetPlayerFrameBufferWidth(player) / 4;
 				if (markedDistance.MagnitudeIsGreaterThan(static_cast<float>(quarterFrameBuffer))) {
 					pMarkedActor->GetPieMenu()->Wobble();
@@ -1516,7 +1524,7 @@ void GameActivity::Update()
 			if (m_pLastMarkedActor[player]) {
 				if (!g_MovableMan.ValidMO(m_pLastMarkedActor[player])) {
 					m_pLastMarkedActor[player] = nullptr;
-				} else if (m_pLastMarkedActor[player] != pMarkedActor && m_pLastMarkedActor[player]->GetPieMenu() != nullptr) {
+				} else if (m_pLastMarkedActor[player] != pMarkedActor && m_pLastMarkedActor[player]->GetPieMenu()) {
 					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
 				}
 			}
@@ -1536,7 +1544,7 @@ void GameActivity::Update()
             // If we are pointing to an actor to follow, then snap cursor to that actor's position
             Actor *pTargetActor = 0;
 			Vector distance;
-			if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player])) {
+			if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]); pTargetActor && pTargetActor->GetPieMenu()) {
 				pTargetActor->GetPieMenu()->FreezeAtRadius(15);
 				m_pLastMarkedActor[player] = pTargetActor;
 			}
@@ -1746,7 +1754,9 @@ void GameActivity::Update()
                 m_MessageTimer[player].Reset();
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-               m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				}
 			} else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY)) {
 				m_LandingZone[player].m_Y = 0;
 				float lzOffsetY = 0;
@@ -1760,7 +1770,9 @@ void GameActivity::Update()
 						m_ViewState[player] = ViewState::Normal;
 					}
 					g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+					if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
+						m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+					}
 
 					CreateDelivery(player);
 				} else {
@@ -1880,7 +1892,9 @@ void GameActivity::Update()
 						m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + Vector(50, -50);
 						// Disable Actor's controller while we set the waypoints
 						m_ControlledActor[player]->GetController()->SetDisabled(true);
-						m_ControlledActor[player]->GetPieMenu()->SetEnabled(false);
+						if (controlledActorPieMenu) {
+							controlledActorPieMenu->SetEnabled(false);
+						}
 					}
 				} else if (command == PieSlice::SliceType::BuyMenu) {
 					m_pBuyGUI[player]->SetEnabled(true);

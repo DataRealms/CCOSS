@@ -159,7 +159,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
-		g_FrameMan.ClearFrame();
+			g_FrameMan.ClearFrame();
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -291,13 +291,13 @@ namespace RTE {
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
 	// allegro_init();
-    install_allegro(SYSTEM_NONE, &errno, atexit);
+	install_allegro(SYSTEM_NONE, &errno, atexit);
 	loadpng_init();
 
-	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_GAMECONTROLLER|SDL_INIT_TIMER);
-	#if SDL_MINOR_VERSION > 22
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER);
+#if SDL_MINOR_VERSION > 22
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
-	#endif
+#endif
 	SDL_ShowCursor(SDL_DISABLE);
 
 	System::Initialize();

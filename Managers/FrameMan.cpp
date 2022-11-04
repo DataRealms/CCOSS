@@ -47,9 +47,9 @@ namespace RTE {
 
 	void FrameMan::DisplaySwitchIn() {
 		g_UInputMan.DisableMouseMoving(false);
-		if (m_MultiWindows.size()>0) {
+		if (m_MultiWindows.size() > 0) {
 			SDL_RaiseWindow(m_Window.get());
-			for(auto& window: m_MultiWindows) {
+			for (auto &window: m_MultiWindows) {
 				SDL_RaiseWindow(window.get());
 			}
 		}
@@ -57,11 +57,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FrameMan::FrameMan() {Clear();}
+	FrameMan::FrameMan() { Clear(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FrameMan::~FrameMan() {Destroy();}
+	FrameMan::~FrameMan() { Destroy(); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void FrameMan::Clear() {
 		m_ScreenVertices = {
 			1.0f, 1.0f, 1.0f, 0.0f,
@@ -69,6 +72,7 @@ namespace RTE {
 			-1.0f, 1.0f, 0.0f, 0.0f,
 			-1.0f, -1.0f, 0.0f, 1.0f,};
 		m_Window.reset();
+		m_MultiWindows.clear();
 		m_GLContext.reset();
 		m_ScreenShader.reset();
 		m_WindowView.resize(1);
@@ -76,6 +80,9 @@ namespace RTE {
 		m_WindowTransforms.resize(1);
 		m_WindowTransforms[0] = glm::mat4(1);
 		m_ScreenTexture = 0;
+		m_ScreenVBO = 0;
+		m_ScreenVAO = 0;
+
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
 		m_ForceVirtualFullScreenGfxDriver = false;
@@ -208,7 +215,9 @@ namespace RTE {
 				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
 			}
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
-			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { settingsNeedOverwrite = ValidateMultiScreenResolution(resX, resY, resMultiplier); }
+			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) {
+				settingsNeedOverwrite = ValidateMultiScreenResolution(resX, resY, resMultiplier);
+			}
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
 			settingsNeedOverwrite = true;
 			resX = c_DefaultResX;
@@ -296,36 +305,35 @@ namespace RTE {
 			if (res.y + res.h > m_MaxResY) {
 				m_MaxResY = res.y + res.h;
 			}
-
 		}
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 		SetInitialGraphicsDriver();
 
-		int windowFlags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
+		int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
 		m_Window = std::unique_ptr<SDL_Window, SdlWindowDeleter>(
-			SDL_CreateWindow("Cortex Command Community Project",
-				SDL_WINDOWPOS_CENTERED,
-				SDL_WINDOWPOS_CENTERED,
-				m_ResX * m_ResMultiplier,
-				m_ResY * m_ResMultiplier,
-				windowFlags));
+		    SDL_CreateWindow("Cortex Command Community Project",
+		        SDL_WINDOWPOS_CENTERED,
+		        SDL_WINDOWPOS_CENTERED,
+		        m_ResX * m_ResMultiplier,
+		        m_ResY * m_ResMultiplier,
+		        windowFlags));
 
 		if (!m_Window) {
 			ShowMessageBox("Unable to create window because: " + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults");
 			m_Window = std::unique_ptr<SDL_Window, SdlWindowDeleter>(SDL_CreateWindow(
-				"Cortex Command Community Project",
-				SDL_WINDOWPOS_CENTERED,
-				SDL_WINDOWPOS_CENTERED,
-				c_DefaultResX,
-				c_DefaultResY,
-				SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN));
+			    "Cortex Command Community Project",
+			    SDL_WINDOWPOS_CENTERED,
+			    SDL_WINDOWPOS_CENTERED,
+			    c_DefaultResX,
+			    c_DefaultResY,
+			    SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN));
 
-			if (!m_Window){
+			if (!m_Window) {
 				RTEAbort("Failed to create a window because: " + std::string(SDL_GetError()));
 			}
 			m_Fullscreen = false;
@@ -336,7 +344,7 @@ namespace RTE {
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		m_GLContext = std::unique_ptr<void, SdlContextDeleter>(static_cast<void*>(SDL_GL_CreateContext(m_Window.get())));
+		m_GLContext = std::unique_ptr<void, SdlContextDeleter>(static_cast<void *>(SDL_GL_CreateContext(m_Window.get())));
 		int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
 		if (version == 0 || (GLAD_VERSION_MAJOR(version) < 3 && GLAD_VERSION_MINOR(version) < 3)) {
@@ -359,8 +367,8 @@ namespace RTE {
 		glBindVertexArray(m_ScreenVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_ScreenVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ScreenVertices.size(), m_ScreenVertices.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 4*sizeof(float), 0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 4*sizeof(float), (void*)(2*sizeof(float)));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 4 * sizeof(float), 0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
@@ -479,16 +487,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier) {
-		std::vector<std::pair<int,SDL_Rect>> displayBounds(m_NumScreens);
-		for (int i = 0; i < m_NumScreens; ++i){
+		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumScreens);
+		for (int i = 0; i < m_NumScreens; ++i) {
 			displayBounds[i].first = i;
 			SDL_GetDisplayBounds(i, &displayBounds[i].second);
 		}
-		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right){return left.second.x < right.second.x;});
-		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right){return left.second.y < right.second.y;});
+		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.x < right.second.x; });
+		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.y < right.second.y; });
 		// Move main window to primary display (at 0,0).
 		SDL_SetWindowFullscreen(m_Window.get(), 0);
-		SDL_SetWindowPosition(m_Window.get(), 0,0);
+		SDL_SetWindowPosition(m_Window.get(), 0, 0);
 		SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 		int mainWindowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
 		int actualResX = 0;
@@ -514,17 +522,17 @@ namespace RTE {
 			height = std::clamp<float>(height, 0.0f, displayBounds[index].second.h);
 
 			glm::mat4 uvTransform(1.0f);
-			uvTransform = glm::translate<float>(uvTransform , {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
+			uvTransform = glm::translate<float>(uvTransform, {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
 			uvTransform = glm::scale(uvTransform, {width / static_cast<float>(resX * resMultiplier), height / static_cast<float>(resY * resMultiplier), 1.0f});
 
 			if (displayBounds[index].first != mainWindowDisplay) {
 				m_MultiWindows.emplace_back(SDL_CreateWindow("",
-										displayBounds[index].second.x,
-										displayBounds[index].second.y,
-										displayBounds[index].second.w,
-										displayBounds[index].second.h,
-										SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
-				if(m_MultiWindows.back() == nullptr) {
+				    displayBounds[index].second.x,
+				    displayBounds[index].second.y,
+				    displayBounds[index].second.w,
+				    displayBounds[index].second.h,
+				    SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
+				if (m_MultiWindows.back() == nullptr) {
 					actualResX = -1;
 					actualResY = -1;
 					break;
@@ -544,7 +552,7 @@ namespace RTE {
 		m_MultiWindows.clear();
 		m_WindowView.resize(1);
 		m_WindowTransforms.resize(1);
-		m_WindowView[0] = glm::ortho<float>(0.0f,displayBounds[0].second.w,0.0f,displayBounds[0].second.h,-1.0f,1.0f);
+		m_WindowView[0] = glm::ortho<float>(0.0f, displayBounds[0].second.w, 0.0f, displayBounds[0].second.h, -1.0f, 1.0f);
 		m_WindowTransforms[0] = glm::mat4(1);
 		return false;
 	}
@@ -637,7 +645,7 @@ namespace RTE {
 
 		if (m_Fullscreen) {
 			if (m_NumScreens > 1) {
-				if(!CreateFullscreenMultiWindows(m_ResX, m_ResY, newMultiplier)) {
+				if (!CreateFullscreenMultiWindows(m_ResX, m_ResY, newMultiplier)) {
 					m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY);
 					SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 					if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -672,7 +680,7 @@ namespace RTE {
 		int windowH;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
-		if(!m_Fullscreen || m_MultiWindows.empty()) {
+		if (!m_Fullscreen || m_MultiWindows.empty()) {
 			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
@@ -697,16 +705,16 @@ namespace RTE {
 		}
 		m_MultiWindows.clear();
 		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
-		//m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
-		if(!newFullscreen) {
+		// m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
+		if (!newFullscreen) {
 			SDL_RestoreWindow(m_Window.get());
 		}
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
 		if (newFullscreen &&
-			((m_NumScreens > 1 && !CreateFullscreenMultiWindows(newResX, newResY, newResMultiplier)) ||
-				SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+		    ((m_NumScreens > 1 && !CreateFullscreenMultiWindows(newResX, newResY, newResMultiplier)) ||
+		        SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 
 			SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 			if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -911,7 +919,7 @@ namespace RTE {
 	void FrameMan::ClearFrame() const {
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		for (auto& window: m_MultiWindows) {
+		for (auto &window: m_MultiWindows) {
 			SDL_GL_MakeCurrent(window.get(), m_GLContext.get());
 			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -944,8 +952,8 @@ namespace RTE {
 				SDL_GL_GetDrawableSize(m_MultiWindows[i].get(), &windowW, &windowH);
 				glViewport(0, 0, windowW, windowH);
 
-				preScaleProjection = glm::translate(m_WindowView[i+1], {windowW/2, windowH/2, 0.0f});
-				preScaleProjection = glm::scale<float>(preScaleProjection, {windowW/2, windowH/2, 1.0f});
+				preScaleProjection = glm::translate(m_WindowView[i + 1], {windowW / 2, windowH / 2, 0.0f});
+				preScaleProjection = glm::scale<float>(preScaleProjection, {windowW / 2, windowH / 2, 1.0f});
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
@@ -967,8 +975,8 @@ namespace RTE {
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
 		preScaleProjection = m_WindowView[0];
-		preScaleProjection = glm::translate<float>(preScaleProjection, {windowW/2, windowH/2, 0.0f});
-		preScaleProjection = glm::scale<float>(preScaleProjection, {windowW/2, windowH/2, 1.0f});
+		preScaleProjection = glm::translate<float>(preScaleProjection, {windowW / 2, windowH / 2, 0.0f});
+		preScaleProjection = glm::scale<float>(preScaleProjection, {windowW / 2, windowH / 2, 1.0f});
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);

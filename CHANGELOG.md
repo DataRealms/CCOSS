@@ -214,10 +214,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
 
-- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, definedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
-	Once an entity preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
-	Note that any changes made to the entity preset will not be reflected in existing copies of the entity, only in new ones created after the reload.  
-	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is however possible to reload with a different set of loaded or entirely new sprites.
+- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
+	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
+	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
+	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
+	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
 	
 </details>
 

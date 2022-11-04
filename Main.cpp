@@ -300,6 +300,10 @@ int main(int argc, char **argv) {
 #endif
 	SDL_ShowCursor(SDL_DISABLE);
 
+	if (std::filesystem::exists("Base.rte/gamecontrollerdb.txt")) {
+		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
+	}
+
 	System::Initialize();
 	SeedRNG();
 

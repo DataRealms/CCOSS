@@ -10,6 +10,7 @@ namespace RTE {
 			return -1;
 		}
 
+		reader.StartObject();
 		while (reader.NextProperty()) {
 			m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 			std::string propName = reader.ReadPropName();
@@ -28,7 +29,7 @@ namespace RTE {
 
 	int Serializable::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader.ReadPropValue();
-		reader.ReportError("Could not match property");
+		reader.ReportError("Could not match property '" + std::string(propName) + "'!");
 		return -1;
 	}
 

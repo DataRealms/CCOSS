@@ -128,6 +128,11 @@ namespace RTE {
 		bool NextProperty();
 
 		/// <summary>
+		/// Notifies the reader that we're starting reading a new object.
+		/// </summary>
+		void StartObject();
+
+		/// <summary>
 		/// Takes out whitespace from the beginning and the end of a string.
 		/// </summary>
 		/// <param name="stringToTrim">String to remove whitespace from.</param>

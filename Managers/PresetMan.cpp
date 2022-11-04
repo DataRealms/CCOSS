@@ -916,6 +916,8 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 	m_LastReloadedEntityPresetInfo[0] = presetName;
 	m_LastReloadedEntityPresetInfo[1] = className;
 	m_LastReloadedEntityPresetInfo[2] = moduleName; // Store the module name as is so in case of a data location warning it persists on every quick reload.
+	
+	m_ReloadEntityPresetCalledThisUpdate = true;
 	return true;
 }
 

@@ -439,6 +439,17 @@ public:
 	/// <returns>Whether reloading the preset was successful.</returns>
 	bool QuickReloadEntityPreset();
 
+	/// <summary>
+	/// Gets whether or not ReloadEntityPreset was called this update.
+	/// </summary>
+	/// <returns>Whether or not ReloadEntityPreset was called this update.</returns>
+	bool GetReloadEntityPresetCalledThisUpdate() const { return m_ReloadEntityPresetCalledThisUpdate; }
+
+	/// <summary>
+	/// Resets whether or not ReloadEntityPreset was called this update.
+	/// </summary>
+	void ClearReloadEntityPresetCalledThisUpdate() { m_ReloadEntityPresetCalledThisUpdate = false; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialMapping
@@ -549,6 +560,7 @@ protected:
 private:
 
 	std::array<std::string, 3> m_LastReloadedEntityPresetInfo; //!< Array storing the last reloaded Entity preset info (ClassName, PresetName and DataModule). Used for quick reloading via key combination.
+	bool m_ReloadEntityPresetCalledThisUpdate; //!< A flag for whether or not ReloadEntityPreset was called this update.
 
 	/// <summary>
 	/// Iterates through the working directory to find any files matching the zipped module package extension (.rte.zip) and proceeds to extract them.

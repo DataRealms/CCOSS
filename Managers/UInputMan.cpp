@@ -867,7 +867,7 @@ namespace RTE {
 			// Ctrl+O to toggle one sim update per frame
 			} else if (KeyPressed(SDLK_o)) {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
-			} else if (KeyPressed(KEY_F2)) {
+			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
 			}
 		} else if (!FlagCtrlState() && FlagAltState()) {

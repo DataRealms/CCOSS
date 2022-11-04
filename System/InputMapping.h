@@ -94,7 +94,6 @@ namespace RTE {
 		/// <summary>
 		/// Sets the joystick direction mapping.
 		/// </summary>
-		/// <param name="newStick">The number of the stick this should be mapped to.</param>
 		/// <param name="newAxis">The number of the axis this should be mapped to.</param>
 		/// <param name="newDirection">The number of the direction this should be mapped to.</param>
 		void SetDirection(int newAxis, int newDirection) { m_DirectionMapped = true; m_AxisMap = newAxis; m_DirectionMap = newDirection; }

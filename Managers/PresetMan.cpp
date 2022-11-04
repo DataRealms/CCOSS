@@ -895,18 +895,14 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 
 	std::string entityDataLocation = GetEntityDataLocation(className, presetName, moduleId);
 	if (entityDataLocation.empty()) {
-		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\"! The preset might not exist!");
+		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\"! The preset might not exist!");
 		return false;
 	}
 
-	if (Reader reader; reader.Create(entityDataLocation.c_str(), true, nullptr, true) >= 0) {
-		while (reader.NextProperty()) {
-			reader.ReadPropName();
-			g_PresetMan.GetEntityPreset(reader);
-		}
-	} else {
-		g_ConsoleMan.PrintString("ERROR: Failed to read data for Entity preset located at \"" + entityDataLocation + "\"!");
-		return false;
+	Reader reader(entityDataLocation.c_str(), true);
+	while (reader.NextProperty()) {
+		reader.ReadPropName();
+		g_PresetMan.GetEntityPreset(reader);
 	}
 	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + moduleName + "\" was successfully reloaded");
 

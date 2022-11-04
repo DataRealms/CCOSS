@@ -26,7 +26,7 @@ elfname = 'CortexCommand'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
-extra_args=['-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
+extra_args=[]
 preprocessor_flags = []
 suffix=''
 
@@ -48,7 +48,10 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
 
     if get_option('sane_warnings')
-      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-inconsistent-missing-override']
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual']
+      if compiler.get_id() == 'clang'
+        extra_args += ['-Wno-inconsistent-missing-override', '-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
+      endif
     endif
 
     debug_type = get_option('debug_type')

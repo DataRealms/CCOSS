@@ -41,7 +41,7 @@ if host_machine.system() in ['linux', 'darwin']
     }"
     MAP_FAILED_DEFINED
   '''))
-	aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', true)
+	aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', true) # TODO: dont understand if constructors work or not, or if that even makes any difference
   aluconfig.set('ALLEGRO_HAVE_POSIX_MONOTONIC_CLOCK', c.compiles('''
     #include <time.h>
     int main(void) {
@@ -64,9 +64,10 @@ allegro_include = include_directories('include')
 loadpng_sources = []
 subdir('addons/loadpng')
 if not allegro_dep.found()
-  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:'-Wno-deprecated-declarations', override_options:['buildtype=release', 'optimization=3'])
+  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:['-DALLEGRO_NO_COMPATIBILITY','-Wno-deprecated-declarations'], override_options:['buildtype=release', 'optimization=3'])
   external_libs += allegro
 	external_inc_dirs += allegro_include
+  extra_args += ['-DALLEGRO_NO_COMPATIBILITY', '-Wno-deprecated-declarations']
 endif
 
 if not loadpng_dep.found()

@@ -43,6 +43,7 @@ void PresetMan::Clear()
     m_DataModuleIDs.clear();
     m_OfficialModuleCount = 0;
     m_TotalGroupRegister.clear();
+	m_LastReloadedEntityPresetInfo.fill("");
 }
 
 /*
@@ -909,8 +910,25 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 	}
 	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + moduleName + "\" was successfully reloaded");
 
+	m_LastReloadedEntityPresetInfo[0] = presetName;
+	m_LastReloadedEntityPresetInfo[1] = className;
+	m_LastReloadedEntityPresetInfo[2] = moduleName;
 	return true;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::QuickReloadEntityPreset() {
+	for (const std::string &entityPresetInfoEntry : m_LastReloadedEntityPresetInfo) {
+		if (entityPresetInfoEntry.empty()) {
+			g_ConsoleMan.PrintString("ERROR: Trying to quick reload Entity preset when there is nothing set to reload!");
+			return false;
+		}
+	}
+	return ReloadEntityPreset(m_LastReloadedEntityPresetInfo[0], m_LastReloadedEntityPresetInfo[1], m_LastReloadedEntityPresetInfo[2]);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialMapping
 //////////////////////////////////////////////////////////////////////////////////////////

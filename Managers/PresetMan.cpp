@@ -892,23 +892,30 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 		g_ConsoleMan.PrintString("ERROR: Failed to find data module with name \"" + moduleName + "\" while attempting to reload an Entity preset with name \"" + presetName + "\" of type \"" + className + "\"!");
 		return false;
 	}
+	std::string actualDataModuleOfPreset = moduleName;
 
-	std::string entityDataLocation = GetEntityDataLocation(className, presetName, moduleId);
-	if (entityDataLocation.empty()) {
-		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\"! The preset might not exist!");
+	std::string presetDataLocation = GetEntityDataLocation(className, presetName, moduleId);
+	if (presetDataLocation.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\" or any official module! The preset might not exist!");
 		return false;
 	}
 
-	Reader reader(entityDataLocation.c_str(), true);
+	// GetEntityDataLocation will attempt to locate the preset in the official modules if it fails to locate it in the specified module. Warn and correct the result string.
+	if (std::string presetDataLocationModuleName = presetDataLocation.substr(0, presetDataLocation.find_first_of("/\\")); presetDataLocationModuleName != actualDataModuleOfPreset) {
+		actualDataModuleOfPreset = presetDataLocationModuleName;
+		g_ConsoleMan.PrintString("WARNING: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\"! Entity preset data matching the name and type was found in \"" + actualDataModuleOfPreset + "\"!");
+	}
+
+	Reader reader(presetDataLocation.c_str(), true);
 	while (reader.NextProperty()) {
 		reader.ReadPropName();
 		g_PresetMan.GetEntityPreset(reader);
 	}
-	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + moduleName + "\" was successfully reloaded");
+	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + actualDataModuleOfPreset + "\" was successfully reloaded");
 
 	m_LastReloadedEntityPresetInfo[0] = presetName;
 	m_LastReloadedEntityPresetInfo[1] = className;
-	m_LastReloadedEntityPresetInfo[2] = moduleName;
+	m_LastReloadedEntityPresetInfo[2] = moduleName; // Store the module name as is so in case of a data location warning it persists on every quick reload.
 	return true;
 }
 

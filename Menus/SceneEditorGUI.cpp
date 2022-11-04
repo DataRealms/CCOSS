@@ -410,6 +410,11 @@ void SceneEditorGUI::Update()
         m_BlinkMode = NOBLINK;
     }
 */
+
+	if (m_pCurrentObject && m_EditorGUIMode != PICKINGOBJECT && g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+		m_pCurrentObject = dynamic_cast<SceneObject *>(g_PresetMan.GetEntityPreset(m_pCurrentObject->GetClassName(), m_pCurrentObject->GetPresetName(), m_pCurrentObject->GetModuleName())->Clone());
+	}
+
     /////////////////////////////////////////////
     // Repeating input logic
 

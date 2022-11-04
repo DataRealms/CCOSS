@@ -436,7 +436,7 @@ public:
 	/// <summary>
 	/// Reloads the previously reloaded Entity preset and all related presets with the latest version of their respective files.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>Whether reloading the preset was successful.</returns>
 	bool QuickReloadEntityPreset();
 
 

@@ -19,7 +19,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
+		m_NewFullscreen = g_FrameMan.GetGraphicsDriver();
 		m_NewResX = g_FrameMan.GetResX();
 		m_NewResY = g_FrameMan.GetResY();
 		m_NewResUpscaled = g_FrameMan.GetResMultiplier() > 1;
@@ -216,7 +216,7 @@ namespace RTE {
 		} else {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
-			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
+			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewFullscreen);
 		}
 	}
 
@@ -225,21 +225,21 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
-				m_NewGraphicsDriver = false;
+				m_NewFullscreen = false;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
 				break;
 			case ResolutionQuickChangeType::Borderless:
 			case ResolutionQuickChangeType::Dedicated:
-				m_NewGraphicsDriver = true;
+				m_NewFullscreen = true;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX();
 				m_NewResY = g_FrameMan.GetMaxResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledBorderless:
 			case ResolutionQuickChangeType::UpscaledDedicated:
-				m_NewGraphicsDriver = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				m_NewFullscreen = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = true;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
@@ -262,7 +262,7 @@ namespace RTE {
 			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
-			m_NewGraphicsDriver = false;
+			m_NewFullscreen = false;
 
 			g_GUISound.ButtonPressSound()->Play();
 			ApplyNewResolution();
@@ -278,7 +278,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewGraphicsDriver = m_CustomResolutionDedicatedRadioButton->GetCheck();
+		m_NewFullscreen = m_CustomResolutionDedicatedRadioButton->GetCheck();
 
 		bool invalidResolution = false;
 

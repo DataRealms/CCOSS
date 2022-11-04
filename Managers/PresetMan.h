@@ -423,6 +423,35 @@ public:
     void ReloadAllScripts();
 
 
+	/// <summary>
+	/// Reloads an Entity preset and all related presets with the latest version of their respective files.
+	/// Stores the passed in Entity preset info for later re-use in PresetMan::QuickReloadEntityPreset.
+	/// </summary>
+	/// <param name="presetName">The name of the preset to reload.</param>
+	/// <param name="className">The type of the preset to reload, to avoid any ambiguity.</param>
+	/// <param name="dataModule">The DataModule the preset to reload is defined in.</param>
+	/// <param name="storeReloadedPresetDataForQuickReloading">Whether or not to store the reloaded entity preset data for quick reloading.</param>
+	/// <returns>Whether reloading the preset was successful.</returns>
+	bool ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &dataModule, bool storeReloadedPresetDataForQuickReloading = true);
+
+	/// <summary>
+	/// Reloads the previously reloaded Entity preset and all related presets with the latest version of their respective files.
+	/// </summary>
+	/// <returns>Whether reloading the preset was successful.</returns>
+	bool QuickReloadEntityPreset();
+
+	/// <summary>
+	/// Gets whether or not ReloadEntityPreset was called this update.
+	/// </summary>
+	/// <returns>Whether or not ReloadEntityPreset was called this update.</returns>
+	bool GetReloadEntityPresetCalledThisUpdate() const { return m_ReloadEntityPresetCalledThisUpdate; }
+
+	/// <summary>
+	/// Resets whether or not ReloadEntityPreset was called this update.
+	/// </summary>
+	void ClearReloadEntityPresetCalledThisUpdate() { m_ReloadEntityPresetCalledThisUpdate = false; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialMapping
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -530,6 +559,9 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	std::array<std::string, 3> m_LastReloadedEntityPresetInfo; //!< Array storing the last reloaded Entity preset info (ClassName, PresetName and DataModule). Used for quick reloading via key combination.
+	bool m_ReloadEntityPresetCalledThisUpdate; //!< A flag for whether or not ReloadEntityPreset was called this update.
 
 	/// <summary>
 	/// Iterates through the working directory to find any files matching the zipped module package extension (.rte.zip) and proceeds to extract them.

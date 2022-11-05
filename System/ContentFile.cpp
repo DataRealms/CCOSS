@@ -5,6 +5,7 @@
 
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
+#include "boost/functional/hash/hash.hpp"
 
 namespace RTE {
 
@@ -100,6 +101,8 @@ namespace RTE {
 		m_DataPathAndReaderPosition = m_DataPath + "\n" + newPosition;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	size_t ContentFile::GetHash() const { return boost::hash<std::string>()(m_DataPath); }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {

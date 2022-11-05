@@ -3087,7 +3087,7 @@ void AHuman::Update()
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
+		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
 			m_pJetpack->EnableEmission(true);
 			m_pJetpack->AlarmOnEmit(m_Team);
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
@@ -3126,66 +3126,70 @@ void AHuman::Update()
 	bool isStill = (m_Vel + m_PrevVel).MagnitudeIsLessThan(movementThreshold);
 	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
-	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
-	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
-		bool crouching = m_Controller.IsState(BODY_CROUCH);
-		if ((m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP) && m_Status != INACTIVE) {
-			for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
-				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
-				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
-			}
-			// Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs.
-			if (m_MoveState != JUMP || isStill) {
-				// Restart the stride if we're just starting to walk or crawl.
-				if ((m_MoveState != WALK && !crouching) || (m_MoveState != CRAWL && crouching)) {
-					m_StrideStart = true;
-					MoveOutOfTerrain(g_MaterialGrass);
-				}
+    // If the pie menu is on, try to preserve whatever move state we had before it going into effect.
+    // This is only done for digital input, where the user needs to use the keyboard to choose pie slices
+    // For analog input, this doesn't matter - the mouse or aiming analog stick controls the pie menu
+    bool keepOldState = !m_Controller.IsMouseControlled() && !m_Controller.IsGamepadControlled() && m_Controller.IsState(PIE_MENU_ACTIVE);
 
-				m_MoveState = crouching ? CRAWL : WALK;
+	if (!keepOldState) {
+        bool crouching = m_Controller.IsState(BODY_CROUCH);
+        if ((m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP) && m_Status != INACTIVE) {
+            for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
+                m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+                m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+            }
+            // Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs.
+            if (m_MoveState != JUMP || isStill) {
+                // Restart the stride if we're just starting to walk or crawl.
+                if ((m_MoveState != WALK && !crouching) || (m_MoveState != CRAWL && crouching)) {
+                    m_StrideStart = true;
+                    MoveOutOfTerrain(g_MaterialGrass);
+                }
 
-				// Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright.
-				if (m_MoveState == CRAWL && m_ProneState == NOTPRONE) {
-					m_ProneState = GOPRONE;
-					m_ProneTimer.Reset();
-				}
+                m_MoveState = crouching ? CRAWL : WALK;
 
-				m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-				m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-			}
+                // Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright.
+                if (m_MoveState == CRAWL && m_ProneState == NOTPRONE) {
+                    m_ProneState = GOPRONE;
+                    m_ProneTimer.Reset();
+                }
 
-			// Walk backwards if the aiming is already focused in the opposite direction of travel.
-			if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
-				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
-				m_HFlipped = !m_HFlipped;
-				m_CheckTerrIntersection = true;
-				if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+                m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+                m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+            }
 
-				for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
-					m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
-					m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
-					m_Paths[FGROUND][i].Terminate();
-					m_Paths[BGROUND][i].Terminate();
-				}
-				m_StrideStart = true;
-				// Stop the going prone spring.
-				if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
-			}
-		} else {
-			m_ArmClimbing[FGROUND] = false;
-			m_ArmClimbing[BGROUND] = false;
-			if (crouching) {
-				// Don't go back to crouching if we're already prone, the player has to let go of the crouch button first. If already laying down, just stay put.
-				m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
-			} else {
-				m_MoveState = STAND;
-			}
-		}
-		// Disengage the prone state as soon as crouch is released.
-		if (!crouching) { m_ProneState = NOTPRONE; }
-	}
+            // Walk backwards if the aiming is already focused in the opposite direction of travel.
+            if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
+                m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+                m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+            } else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
+                m_HFlipped = !m_HFlipped;
+                m_CheckTerrIntersection = true;
+                if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+
+                for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
+                    m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+                    m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+                    m_Paths[FGROUND][i].Terminate();
+                    m_Paths[BGROUND][i].Terminate();
+                }
+                m_StrideStart = true;
+                // Stop the going prone spring.
+                if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
+            }
+        } else {
+            m_ArmClimbing[FGROUND] = false;
+            m_ArmClimbing[BGROUND] = false;
+            if (crouching) {
+                // Don't go back to crouching if we're already prone, the player has to let go of the crouch button first. If already laying down, just stay put.
+                m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
+            } else {
+                m_MoveState = STAND;
+            }
+        }
+        // Disengage the prone state as soon as crouch is released.
+        if (!crouching) { m_ProneState = NOTPRONE; }
+    }
 
     ////////////////////////////////////
     // Change and reload held MovableObjects

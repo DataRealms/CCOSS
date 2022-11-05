@@ -434,16 +434,16 @@ namespace RTE {
 		void UpdateEnablingAndDisablingProgress();
 
 		/// <summary>
-		/// Handles the mouse input when updating.
+		/// Handles the analog input when updating.
 		/// </summary>
 		/// <returns>Whether or not enough input was received to do something.</returns>
-		bool HandleMouseInput();
+		bool HandleAnalogInput();
 
 		/// <summary>
-		/// Handles the keyboard or controller input when updating.
+		/// Handles the digital input when updating.
 		/// </summary>
 		/// <returns>Whether or not enough input was received to do something.</returns>
-		bool HandleNonMouseInput();
+		bool HandleDigitalInput();
 
 		/// <summary>
 		/// Handles the slice activation part of Update.

@@ -592,7 +592,11 @@ namespace RTE {
 		Scene* scene = new Scene();
 		GAScripted* activity = new GAScripted();
 
- 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true);
+ 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true, nullptr, true);
+		if (!reader.ReaderOK()) {
+			return false;
+		}
+
 		while (reader.NextProperty()) {
 			std::string propName = reader.ReadPropName();
         	if (propName == "Scene") {

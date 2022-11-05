@@ -5,7 +5,7 @@
 
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#include "boost/functional/hash/hash.hpp"
+#include "boost/functional/hash.hpp"
 
 namespace RTE {
 

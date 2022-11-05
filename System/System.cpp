@@ -1,6 +1,6 @@
 ﻿#include "System.h"
 #include "unzip.h"
-#include "boost/functional/hash/hash.hpp"
+#include "boost/functional/hash.hpp"
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>

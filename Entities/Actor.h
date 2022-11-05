@@ -1086,6 +1086,18 @@ ClassInfoGetters;
 
     virtual bool UpdateMovePath();
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          EstimateDigStrength
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Estimates what material strength this actor can penetrate.
+// Arguments:       None.
+// Return value:    A default dig strength (what the actor can be expected to just walk through without tools)
+
+    virtual float EstimateDigStrength();
+
+    // A default penetration value that'll allow us to move through corpses and stuff
+    static constexpr float c_DefaultDigStrength = 35.0F;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  UpdateAIScripted
@@ -1459,13 +1471,12 @@ protected:
     int m_FlashWhiteMS;
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
-    // What material strength this actor is capable of digging trough.
-    float m_DigStrength;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
     // How many passenger slots this actor will take in a craft
     int m_PassengerSlots;
-
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    float m_BaseDigStrength;
 
     ////////////////////
     // AI States

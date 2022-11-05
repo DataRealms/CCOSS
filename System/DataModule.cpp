@@ -195,7 +195,7 @@ namespace RTE {
 	std::string DataModule::GetEntityDataLocation(const std::string &exactType, const std::string &instance) {
 		const Entity *foundEntity = GetEntityPreset(exactType, instance);
 		if (foundEntity == nullptr) {
-			return nullptr;
+			return "";
 		}
 
 		// Search for entity in instanceList
@@ -206,7 +206,7 @@ namespace RTE {
 		}
 
 		RTEAbort("Tried to find allegedly existing Entity Preset Entry: " + foundEntity->GetPresetName() + ", but couldn't!");
-		return nullptr;
+		return "";
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

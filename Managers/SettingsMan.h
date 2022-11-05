@@ -92,6 +92,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="disable">Whether faction BuyMenu theme support is disabled or not.</param>
 		void SetFactionBuyMenuThemesDisabled(bool disable) { m_DisableFactionBuyMenuThemes = disable; }
+
+		/// <summary>
+		/// Gets the PathFinder grid node size.
+		/// </summary>
+		/// <returns>The PathFinder grid node size.</returns>
+		int GetPathFinderGridNodeSize() const { return m_PathFinderGridNodeSize; }
+
+		/// <summary>
+		/// Sets the PathFinder grid node size
+		/// </summary>
+		/// <param name="newGridSize">The new PathFinder grid node size.</param>
+		void SetPathFinderGridNodeSize(int newGridSize) { m_PathFinderGridNodeSize = newGridSize; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -483,6 +495,7 @@ namespace RTE {
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
 		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 		bool m_DisableFactionBuyMenuThemes; //!< Whether faction BuyMenu theme support is disabled.
+		int m_PathFinderGridNodeSize; //!< The grid size used by the PathFinder, in pixels.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

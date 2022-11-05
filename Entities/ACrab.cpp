@@ -957,7 +957,6 @@ bool ACrab::UpdateMovePath()
             for (int i = 0; i < 3; i++)
             {
 				Vector notUsed;
-				
                 if (!g_SceneMan.CastStrengthRay(previousPoint, smashedPoint - previousPoint, 5, notUsed, 3, g_MaterialDoor) &&
                     nextItr != m_MovePath.end() && !g_SceneMan.CastStrengthRay(smashedPoint, (*nextItr) - smashedPoint, 5, notUsed, 3, g_MaterialDoor))
                 {

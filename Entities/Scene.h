@@ -1193,10 +1193,12 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  the current scene. Takes both distance and materials into account.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  A list which will be filled out with waypoints between the start and end.
+//                  The maximum material strength any actor traveling along the path can dig through.
+//                  The team we're pathing for (doors for this team will be considered passable)
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght = 1);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1.0F, Activity::Teams team = Activity::Teams::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1208,11 +1210,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  For exposing CalculatePath to Lua.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  If the path should be moved to the ground or not.
-//                  The maximum material strength any actor traveling along the paht can
-//                  dig through.
+//                  The maximum material strength any actor traveling along the path can dig through.
 // Return value:    The number of waypoints from start to goal, or -1 if no path.
 
-    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1);
+    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1.0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1331,6 +1332,16 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 protected:
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetPathfinder
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the pathfinder for a given team.
+// Arguments:       The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.
+// Return value:    Pointer to the pathfinder for the given team.
+
+    PathFinder* GetPathfinder(Activity::Teams team);
+
+
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1359,13 +1370,16 @@ protected:
     float m_TotalInvestment;
     // Terrain definition
     SLTerrain *m_pTerrain;
+
     // Pathfinding graph and logic. Owned by this
-    PathFinder *m_pPathFinder;
+    // We store a pathfinder per team, but also a shared pathfinder, therefore team count + 1
+    static constexpr int sc_pathfinderCount = Activity::Teams::MaxTeamCount + 1;
+    std::array<PathFinder*, sc_pathfinderCount> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
-    // Timers for when to do an update of all or only part of the pathfinding data
-    Timer m_FullPathUpdateTimer;
+    // Timers for when to do an update of the pathfinding data
     Timer m_PartialPathUpdateTimer;
+
     // SceneObject:s to be placed in the scene, divided up by different sets - OWNED HERE
     std::list<SceneObject *> m_PlacedObjects[PLACEDSETSCOUNT];
     // List of background layers, first is the closest to the terrain, last is closest to the back
@@ -1420,7 +1434,6 @@ private:
 // Return value:    None.
 
     void Clear();
-
 
     // Disallow the use of some implicit methods.
     Scene(const Scene &reference) = delete;

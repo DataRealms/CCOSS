@@ -843,6 +843,7 @@ namespace RTE {
 
 		.def_readonly("Attachables", &MOSRotating::m_Attachables, luabind::return_stl_iterator)
 		.def_readonly("Wounds", &MOSRotating::m_Wounds, luabind::return_stl_iterator)
+		.def_readonly("Gibs", &MOSRotating::m_Gibs, luabind::return_stl_iterator)
 
 		.def("AddRecoil", &MOSRotating::AddRecoil)
 		.def("SetRecoil", &MOSRotating::SetRecoil)

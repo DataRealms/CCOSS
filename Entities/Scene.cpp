@@ -1423,6 +1423,15 @@ int Scene::Save(Writer &writer) const
     {
         for (list<SceneObject *>::const_iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
         {
+            std::string presetName = (*oItr)->GetModuleAndPresetName();
+            if (presetName.empty() || presetName == "None")
+            {
+                // We have no info about what we're placing. This is probably because it's some particle that was kicked off the terrain
+                // In future, we'll save all the data (uncomment out //writer << (*oItr);), and will be able to save/load that stuff
+                // But for now, until we have a more effective writer that can remove redundant properties, we just skip this
+                continue;
+            }
+
             if (set == PLACEONLOAD)
                 writer.NewProperty("PlaceSceneObject");
             else if (set == BLUEPRINT)
@@ -1433,19 +1442,8 @@ int Scene::Save(Writer &writer) const
     //        writer << (*oItr);
             writer.ObjectStart((*oItr)->GetClassName());
 
-            std::string presetName = (*oItr)->GetModuleAndPresetName();
-            if (!presetName.empty() && presetName != "None")
-            {
-                writer.NewProperty("CopyOf");
-                writer << (*oItr)->GetModuleAndPresetName();
-            }
-            else
-            {
-                // We have no info about what we're placing. This is probably because it's some particle that was kicked off the terrain
-                // In future, we'll save all the data (uncomment out //writer << (*oItr);), and will be able to save/load that stuff
-                // But for now, until we have a more effective writer that can remove redundant properties, we just skip this
-                continue;
-            }
+            writer.NewProperty("CopyOf");
+            writer << (*oItr)->GetModuleAndPresetName();
 
             writer.NewProperty("Position");
             writer << (*oItr)->GetPos();

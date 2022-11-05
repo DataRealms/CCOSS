@@ -51,9 +51,9 @@ namespace RTE {
 		} else if (propName == "Spread") {
 			reader >> m_Spread;
 		} else if (propName == "MinVelocity") {
-			reader >> m_MinVelocity;
+			SetMinVelocity(std::stof(reader.ReadPropValue()));
 		} else if (propName == "MaxVelocity") {
-			reader >> m_MaxVelocity;
+			SetMaxVelocity(std::stof(reader.ReadPropValue()));
 		} else if (propName == "LifeVariation") {
 			reader >> m_LifeVariation;
 		} else if (propName == "InheritsVel") {

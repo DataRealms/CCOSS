@@ -79,13 +79,25 @@ namespace RTE {
 		/// Gets the specified minimum velocity a GibParticle object can have when spawned.
 		/// </summary>
 		/// <returns>The minimum velocity a GibParticle can have when spawned in m/s.</returns>
-		float GetMinVelocity() const { return std::min(m_MinVelocity, m_MaxVelocity); }
+		float GetMinVelocity() const { return m_MinVelocity; }
+
+		/// <summary>
+		/// Sets the specified minimum velocity a GibParticle object can have when spawned.
+		/// </summary>
+		/// <param name="newMinVelocity">The new minimum velocity in m/s.</param>
+		void SetMinVelocity(float newMinVelocity) { m_MinVelocity = newMinVelocity; if (m_MinVelocity > m_MaxVelocity) { std::swap(m_MinVelocity, m_MaxVelocity); } }
 
 		/// <summary>
 		/// Gets the specified maximum velocity a GibParticle object can have when spawned.
 		/// </summary>
 		/// <returns>The maximum velocity a GibParticle can have when spawned in m/s.</returns>
-		float GetMaxVelocity() const { return std::max(m_MinVelocity, m_MaxVelocity); }
+		float GetMaxVelocity() const { return m_MaxVelocity; }
+
+		/// <summary>
+		/// Sets the specified maximum velocity a GibParticle object can have when spawned.
+		/// </summary>
+		/// <param name="newMaxVelocity"></param>
+		void SetMaxVelocity(float newMaxVelocity) { m_MaxVelocity = newMaxVelocity; if (m_MinVelocity > m_MaxVelocity) { std::swap(m_MinVelocity, m_MaxVelocity); } }
 
 		/// <summary>
 		/// Gets the specified variation in Lifetime of the GibParticle objects.
@@ -106,10 +118,16 @@ namespace RTE {
 		bool IgnoresTeamHits() const { return m_IgnoresTeamHits; }
 
 		/// <summary>
-		/// Gets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles. 
+		/// Gets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles.
 		/// </summary>
 		/// <returns>The spread mode of this Gib.</returns>
 		SpreadMode GetSpreadMode() const { return m_SpreadMode; }
+
+		/// <summary>
+		/// Sets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles.
+		/// </summary>
+		/// <param name="newSpreadMode">The new spread mode of this Gib. See the SpreadMode enumeration.</param>
+		void SetSpreadMode(SpreadMode newSpreadMode) { m_SpreadMode = (newSpreadMode < SpreadMode::SpreadRandom || newSpreadMode > SpreadMode::SpreadSpiral) ? SpreadMode::SpreadRandom : newSpreadMode; }
 #pragma endregion
 
 	protected:

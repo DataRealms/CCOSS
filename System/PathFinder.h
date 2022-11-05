@@ -195,9 +195,9 @@ namespace RTE {
 		/// </summary>
 		void Clear();
 
-	// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
-	// This is so that minor changes (i.e blood particles) don't force constant pather resets
-	static constexpr float sc_nodeCostChangeEpsilon = 5.0f;
+		// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
+		// This is so that minor changes (i.e blood particles) don't force constant pather resets
+		static constexpr float c_NodeCostChangeEpsilon = 5.0f;
 	};
 }
 #endif

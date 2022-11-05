@@ -2890,9 +2890,8 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 
 void Scene::ResetPathFinding()
 {
-    for (int i = 0; i < sc_pathfinderCount; ++i) {
-        // Update all the pathfinding data
-        m_pPathFinders[i]->RecalculateAllCosts();
+    for (PathFinder* pf : m_pPathFinders) {
+        pf->RecalculateAllCosts();
     }
 }
 
@@ -2940,10 +2939,10 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
 {
     float totalCostResult = -1;
 
-    PathFinder* pathfinder = GetPathfinder(team);
-    if (pathfinder)
+    PathFinder *pathFinder = GetPathfinder(team);
+    if (pathFinder)
     {
-        int result = pathfinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
+        int result = pathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
 
         // It's ok if start and end nodes happen to be the same, the exact pixel locations are added at the front and end of the result regardless
         return (result == micropather::MicroPather::SOLVED || result == micropather::MicroPather::START_END_SAME) ? totalCostResult : -1;
@@ -3053,7 +3052,7 @@ void Scene::Update()
 		}
 	}
 
-    // Do a partial update every 10 seconds
+    // Only update the pathfinding on occasion, as it's a costly operation
     if (m_PartialPathUpdateTimer.IsPastRealMS(10000)) 
     {
         UpdatePathFinding();
@@ -3062,8 +3061,8 @@ void Scene::Update()
 
 PathFinder* Scene::GetPathfinder(Activity::Teams team) 
 {
-    int i = static_cast<int>(team) + 1; // + 1 because of our shared NoTeam pathfinder (index -1 becomes 0)
-    return m_pPathFinders[i];
+    // + 1 because of our shared NoTeam pathfinder (index -1 becomes 0)
+    return m_pPathFinders[static_cast<int>(team) + 1];
 }
 
 } // namespace RTE

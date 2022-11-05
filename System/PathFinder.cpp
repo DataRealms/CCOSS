@@ -229,8 +229,7 @@ namespace RTE {
 			}
 		}
 
-		if (anyChange)
-		{
+		if (anyChange) {
 			// Reset the pather when costs change, as per the docs
 			m_Pather->Reset();
 		}
@@ -358,7 +357,7 @@ namespace RTE {
 
 		for (int i = 0; i < 8; ++i) {
 			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
-			if (delta > sc_nodeCostChangeEpsilon) {
+			if (delta > c_NodeCostChangeEpsilon) {
 				return true;
 			}
 		}

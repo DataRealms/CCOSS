@@ -1190,7 +1190,6 @@ bool AHuman::EquipDiggingTool(bool doEquip)
 
 float AHuman::EstimateDigStrength()
 {
-
     float maxPenetration = Actor::EstimateDigStrength();
     
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
@@ -1204,7 +1203,7 @@ float AHuman::EstimateDigStrength()
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
-            return pTool->EstimateDigStrength();
+            maxPenetration = max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
 

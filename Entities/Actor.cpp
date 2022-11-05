@@ -131,7 +131,7 @@ void Actor::Clear() {
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrength = 1.0F;
+    m_BaseDigStrength = c_DefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
 
@@ -384,16 +384,19 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         int mode;
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
-	} else if (propName == "Organic") {
-		reader >> m_Organic;
-	} else if (propName == "Mechanical") {
-		reader >> m_Mechanical;
 	} else if (propName == "PieMenu") {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
 		m_PieMenu->Create(this);
-	} else
+    } else if (propName == "Organic") {
+        reader >> m_Organic;
+    } else if (propName == "Mechanical") {
+        reader >> m_Mechanical;
+    } else if (propName == "BaseDigStrength") {
+        reader >> m_BaseDigStrength;
+    } else {
         return MOSRotating::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -467,7 +470,8 @@ int Actor::Save(Writer &writer) const
     writer << m_PieMenu.get();
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
-	writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("BaseDigStrength", m_BaseDigStrength);
 
     return 0;
 }
@@ -1180,11 +1184,11 @@ bool Actor::UpdateMovePath()
     // TODO: Do throttling of calls for this function over time??
 
     // Estimate how much material this actor can dig through
-    m_DigStrength = EstimateDigStrength();
+    float digStrength = EstimateDigStrength();
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1194,7 +1198,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1205,11 +1209,11 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength, static_cast<Activity::Teams>(m_Team));
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     }
 
     // Process the new path we now have, if any
@@ -1249,7 +1253,7 @@ bool Actor::UpdateMovePath()
 
 float Actor::EstimateDigStrength() {
     // In future, it may make sense to make this data-driven per actor, instead of returning a hardcoded value
-    return sc_defaultDigStrength;
+    return m_BaseDigStrength;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

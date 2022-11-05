@@ -1575,7 +1575,7 @@ void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
 	}
 
 	Activity::Teams team = static_cast<Activity::Teams>(g_ActivityMan.GetActivity()->GetTeamOfPlayer(m_pController->GetPlayer()));
-	m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(brainPos, Vector(orbitPosX, 0), m_BrainSkyPath, Actor::sc_defaultDigStrength, team);
+	m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(brainPos, Vector(orbitPosX, 0), m_BrainSkyPath, Actor::c_DefaultDigStrength, team);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -124,4 +124,29 @@ namespace RTE {
 			luabind::value("Any", Directions::Any)
 		];
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(MiscLuaBindings, Gib) {
+		return luabind::class_<Gib>("Gib")
+
+		.property("MinVelocity", &Gib::GetMinVelocity, &Gib::SetMinVelocity)
+		.property("MaxVelocity", &Gib::GetMaxVelocity, &Gib::SetMaxVelocity)
+		.property("SpreadMode", &Gib::GetSpreadMode, &Gib::SetSpreadMode)
+
+		.def_readwrite("Offset", &Gib::m_Offset)
+		.def_readwrite("Count", &Gib::m_Count)
+		.def_readwrite("Spread", &Gib::m_Spread)
+		.def_readwrite("LifeVariation", &Gib::m_LifeVariation)
+		.def_readwrite("InheritsVel", &Gib::m_InheritsVel)
+		.def_readwrite("IgnoresTeamHits", &Gib::m_IgnoresTeamHits)
+
+		.def("GetParticlePreset", &Gib::GetParticlePreset)
+
+		.enum_("SpreadMode")[
+			luabind::value("SpreadRandom", Gib::SpreadMode::SpreadRandom),
+			luabind::value("SpreadEven", Gib::SpreadMode::SpreadEven),
+			luabind::value("SpreadSpiral", Gib::SpreadMode::SpreadSpiral)
+		];
+	}
 }

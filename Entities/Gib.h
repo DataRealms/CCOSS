@@ -12,6 +12,7 @@ namespace RTE {
 	/// </summary>
 	class Gib : public Serializable {
 		friend class GibEditor;
+		friend struct MiscLuaBindings;
 
 	public:
 
@@ -21,7 +22,7 @@ namespace RTE {
 		/// <summary>
 		/// Different types of logic for the Gib to use when applying velocity to its GibParticles.
 		/// </summary>
-		enum class SpreadMode { SpreadRandom, SpreadEven, SpreadSpiral };
+		enum SpreadMode { SpreadRandom, SpreadEven, SpreadSpiral };
 
 #pragma region Creation
 		/// <summary>

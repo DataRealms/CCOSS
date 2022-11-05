@@ -487,7 +487,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
     if (woundToAdd && !ToDelete()) {
 		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
 			// Find and detach an attachable near the new wound before gibbing the object itself.
-			if (m_DetachAttachablesBeforeGibbingFromWounds) {
+			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
 				if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
 					RemoveAttachable(attachableToDetach, true, true);
 				}

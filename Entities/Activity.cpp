@@ -307,6 +307,13 @@ void Activity::Clear() {
 			m_PlayerController[player].SetTeam(m_Team[player]);
 
 			m_MessageTimer[player].Reset();
+
+			// Set our brains if they already exist
+			// For now, this does so in an arbritrary manner - TODO, we should save information on which brain is for which player in the scene!
+			Actor* brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player));
+			if (brain) {
+				SetPlayerBrain(brain, player);
+			}
 		}
 
 		return 0;

@@ -891,6 +891,10 @@ void Activity::Clear() {
 		Entity::Save(writer);
 
 		for (const auto& pair : m_Data) {
+			if (pair.second.empty()) {
+				continue;
+			}
+
 			writer.NewProperty(pair.first);
 			writer << pair.second;
 		}

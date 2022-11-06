@@ -249,12 +249,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Controller::UpdatePlayerPieMenuInput() {
-		// PIE MENU ACTIVE
-		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
-			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
-		} 
-		
+	void Controller::UpdatePlayerPieMenuInput() {		
 		// Holding of the switch buttons disables aiming later
 		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_NEXT)) {
 			m_ControlStates[ControlState::ACTOR_NEXT_PREP] = true;
@@ -323,6 +318,12 @@ namespace RTE {
 				m_WeaponReloadIgnore = true;
 			}
 		}
+
+		// PIE MENU ACTIVE
+		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
+			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
+			m_ControlStates[ControlState::WEAPON_FIRE] = false; // Pie menu steals clicks, so we don't shoot our gun when we select a pie option
+		} 
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

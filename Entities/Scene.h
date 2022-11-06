@@ -17,6 +17,7 @@
 #include "Entity.h"
 #include "Box.h"
 #include "Activity.h"
+#include "PathFinder.h"
 
 namespace RTE
 {
@@ -1191,6 +1192,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Calculates and returns the least difficult path between two points on
 //                  the current scene. Takes both distance and materials into account.
+//                  When pathing using the NoTeam pathFinder, no doors are considered passable.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  A list which will be filled out with waypoints between the start and end.
 //                  The maximum material strength any actor traveling along the path can dig through.
@@ -1333,13 +1335,13 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 protected:
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPathfinder
+// Method:          GetPathFinder
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the pathfinder for a given team.
 // Arguments:       The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.
 // Return value:    Pointer to the pathfinder for the given team.
 
-    PathFinder* GetPathfinder(Activity::Teams team);
+    std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
 
     // Member variables
@@ -1372,12 +1374,11 @@ protected:
     SLTerrain *m_pTerrain;
 
     // Pathfinding graph and logic. Owned by this
-    // We store a pathfinder per team, but also a shared pathfinder, therefore team count + 1
-    static constexpr int sc_pathfinderCount = Activity::Teams::MaxTeamCount + 1;
-    std::array<PathFinder*, sc_pathfinderCount> m_pPathFinders;
+    // The array of PathFinders for each team. Because we also have a shared pathfinder, we need to use MaxTeamCount + 1.
+    std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
-    // Timers for when to do an update of the pathfinding data
+    // Timer for when to do an update of the pathfinding data
     Timer m_PartialPathUpdateTimer;
 
     // SceneObject:s to be placed in the scene, divided up by different sets - OWNED HERE

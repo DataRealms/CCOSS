@@ -442,9 +442,8 @@ void Scene::Clear()
     m_AutoDesigned = true;
     m_TotalInvestment = 0;
     m_pTerrain = 0;
-   
-    for (int i = 0; i < sc_pathfinderCount; ++i) {
-        m_pPathFinders[i] = nullptr;
+    for (auto& pathFinder : m_pPathFinders) {
+        pathFinder.reset();
     }
     m_PathfindingUpdated = false;
     m_PartialPathUpdateTimer.Reset();
@@ -922,11 +921,14 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     {
         // Create the pathfinding stuff based on the current scene
 		int sceneArea = GetWidth() * GetHeight();
-		int pathfinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
-		unsigned int numberOfBlocksToAllocate = 4000;//std::min(128000, sceneArea / (pathfinderGridNodeSize * pathfinderGridNodeSize));
-        
-        for (int i = 0; i < sc_pathfinderCount; ++i) {
-            m_pPathFinders[i] = new PathFinder(this, pathfinderGridNodeSize, numberOfBlocksToAllocate);
+		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
+
+        // TODO: test dynamically setting this 
+        //std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+		unsigned int numberOfBlocksToAllocate = 4000;
+
+        for (int i = 0; i < m_pPathFinders.size(); ++i) {
+            m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
         }
         ResetPathFinding();
     }
@@ -1646,10 +1648,6 @@ int Scene::Save(Writer &writer) const
 void Scene::Destroy(bool notInherited)
 {
     delete m_pTerrain;
-    
-    for (int i = 0; i < sc_pathfinderCount; ++i) {
-        delete m_pPathFinders[i];
-    }
 
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
         delete m_ResidentBrains[player];
@@ -2911,8 +2909,8 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 
 void Scene::ResetPathFinding()
 {
-    for (PathFinder* pf : m_pPathFinders) {
-        pf->RecalculateAllCosts();
+    for (const auto &pathFinder : m_pPathFinders) {
+        pathFinder->RecalculateAllCosts();
     }
 }
 
@@ -2925,10 +2923,10 @@ void Scene::ResetPathFinding()
 
 void Scene::UpdatePathFinding()
 {
-    // Update our shared pathfinder
-    bool updated = GetPathfinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
+    // Update our shared pathFinder
+    bool updated = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
     if (updated) {
-        // Update each team's pathfinder
+        // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
             if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) { 
                 continue; 
@@ -2937,7 +2935,7 @@ void Scene::UpdatePathFinding()
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us)
             g_MovableMan.OverrideMaterialDoors(true, team);
 
-            GetPathfinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
+            GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
 
             // Place back the material representation of all doors of this team so they are as we found them
             g_MovableMan.OverrideMaterialDoors(false, team);
@@ -2960,7 +2958,7 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
 {
     float totalCostResult = -1;
 
-    PathFinder *pathFinder = GetPathfinder(team);
+    auto& pathFinder = GetPathFinder(team);
     if (pathFinder)
     {
         int result = pathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
@@ -2985,11 +2983,11 @@ int Scene::CalculateScenePath(const Vector start, const Vector end, bool movePat
 {
     int pathSize = -1;
 
-    PathFinder* pathfinder = GetPathfinder(Activity::Teams::NoTeam);
-    if (pathfinder)
+    auto& pathFinder = GetPathFinder(Activity::Teams::NoTeam);
+    if (pathFinder)
     {
         float notUsed;
-        pathfinder->CalculatePath(start, end, m_ScenePath, notUsed, digStrength);
+        pathFinder->CalculatePath(start, end, m_ScenePath, notUsed, digStrength);
 
         // Process the new path we now have, if any
         if (!m_ScenePath.empty())
@@ -3080,7 +3078,7 @@ void Scene::Update()
     }
 }
 
-PathFinder* Scene::GetPathfinder(Activity::Teams team) 
+std::unique_ptr<PathFinder> & Scene::GetPathFinder(Activity::Teams team) 
 {
     // + 1 because of our shared NoTeam pathfinder (index -1 becomes 0)
     return m_pPathFinders[static_cast<int>(team) + 1];

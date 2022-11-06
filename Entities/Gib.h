@@ -12,7 +12,7 @@ namespace RTE {
 	/// </summary>
 	class Gib : public Serializable {
 		friend class GibEditor;
-		friend struct MiscLuaBindings;
+		friend struct EntityLuaBindings;
 
 	public:
 
@@ -56,6 +56,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the particle to be used as a Gib.</returns>
 		const MovableObject * GetParticlePreset() const { return m_GibParticle; }
+
+		/// <summary>
+		/// Sets the reference particle to be used as a Gib. Ownership is NOT transferred!
+		/// </summary>
+		/// <param name="newParticlePreset">A pointer to the new particle to be used as a Gib.</param>
+		void SetParticlePreset(const MovableObject *newParticlePreset) { m_GibParticle = newParticlePreset; }
 
 		/// <summary>
 		/// Gets the spawn offset of this Gib from the parent's position.

@@ -123,6 +123,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
@@ -157,8 +158,7 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Gib)
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
 		];
 
 		// Assign the manager instances to globals in the lua master state

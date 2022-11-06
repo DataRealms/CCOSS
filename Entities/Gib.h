@@ -42,7 +42,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a Gib object before deletion from system memory.
 		/// </summary>
-		~Gib() { Destroy(); }
+		~Gib() override { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Gib object.

@@ -443,7 +443,7 @@ void Scene::Clear()
     m_TotalInvestment = 0;
     m_pTerrain = 0;
     for (auto& pathFinder : m_pPathFinders) {
-        pathFinder->Reset();
+        pathFinder.reset();
     }
     m_PathfindingUpdated = false;
     m_PartialPathUpdateTimer.Reset();

@@ -1095,9 +1095,6 @@ ClassInfoGetters;
 
     virtual float EstimateDigStrength();
 
-    // A default penetration value that'll allow us to move through corpses and stuff
-    static constexpr float c_DefaultDigStrength = 35.0F;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  UpdateAIScripted

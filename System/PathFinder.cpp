@@ -251,19 +251,8 @@ namespace RTE {
 		
 		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions
 		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck
-		float averageCost = 0.0F;
-		int count = 1;
-		for (int i = 0; i < 8; i++) {
-			float cost = node->AdjacentNodeCosts[i];
-			if (cost < std::numeric_limits<float>::max()) {
-				averageCost += cost;
-				count++;
-			}
-		}
-		averageCost /= static_cast<float>(count);
-
 		const float costRadiationMultiplier = 0.2F;
-		float radiatedCost = averageCost * costRadiationMultiplier;
+		float radiatedCost = GetNodeAverageTransitionCost(*node) * costRadiationMultiplier;
 
 		// Add cost for digging upwards
 		if (node->Up) {
@@ -400,5 +389,20 @@ namespace RTE {
 		}
 
 		return anyChange;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) {
+		float averageCost = 0.0F;
+		int count = 1;
+		for (int i = 0; i < 8; i++) {
+			float cost = node.AdjacentNodeCosts[i];
+			if (cost < std::numeric_limits<float>::max()) {
+				averageCost += cost;
+				count++;
+			}
+		}
+		return averageCost / static_cast<float>(count);
 	}
 }

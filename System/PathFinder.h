@@ -188,16 +188,23 @@ namespace RTE {
 		/// <param name="box">The Box of which all edges it touches should be recalculated.</param>
 		/// <returns>Whether any node costs changed.</returns>
 		bool UpdateNodeCostsInBox(Box &box);
+
+		/// <summary>
+		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions
+		/// </summary>
+		/// <param name="node">The node to get the average transition cost for.</param>
+		/// <returns>The average transition cost.</returns>
+		float GetNodeAverageTransitionCost(const PathNode &node);
+
+		// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
+		// This is so that minor changes (i.e blood particles) don't force constant pather resets
+		static constexpr float c_NodeCostChangeEpsilon = 5.0f;
 #pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
-
-		// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
-		// This is so that minor changes (i.e blood particles) don't force constant pather resets
-		static constexpr float c_NodeCostChangeEpsilon = 5.0f;
 	};
 }
 #endif

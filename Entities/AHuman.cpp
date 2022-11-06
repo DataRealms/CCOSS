@@ -1195,7 +1195,7 @@ float AHuman::EstimateDigStrength()
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return maxPenetration;
     
-    HDFirearm* pTool = nullptr;
+    HDFirearm *pTool = nullptr;
 
     // Check if the currently held device is already the desired type
     if (m_pFGArm->HoldsSomething())

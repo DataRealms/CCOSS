@@ -131,7 +131,7 @@ void Actor::Clear() {
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_BaseDigStrength = c_DefaultDigStrength;
+    m_BaseDigStrength = c_PathFindingDefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
 
@@ -1252,7 +1252,6 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float Actor::EstimateDigStrength() {
-    // In future, it may make sense to make this data-driven per actor, instead of returning a hardcoded value
     return m_BaseDigStrength;
 }
 

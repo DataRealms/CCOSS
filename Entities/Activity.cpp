@@ -310,9 +310,11 @@ void Activity::Clear() {
 
 			// Set our brains if they already exist
 			// For now, this does so in an arbritrary manner - TODO, we should save information on which brain is for which player in the scene!
-			Actor* brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player));
-			if (brain) {
-				SetPlayerBrain(brain, player);
+			if (m_IsActive[player]) {
+				Actor* brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player));
+				if (brain) {
+					SetPlayerBrain(brain, player);
+				}
 			}
 		}
 

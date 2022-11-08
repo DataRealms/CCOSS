@@ -46,6 +46,7 @@ namespace RTE {
 		Vector m_EndPos = Vector(); //!< End position of the primitive.
 		unsigned char m_Color = 0; //!< Color to draw this primitive with.
 		int m_Player = -1; //!< Player screen to draw this primitive on.
+		int m_Transparency = 0; //!< The transparency to draw this primitive at. From 0 (opaque) to 100 (transparent).
 
 		/// <summary>
 		/// Destructor method used to clean up a GraphicalPrimitive object before deletion from system memory.

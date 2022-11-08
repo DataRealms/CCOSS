@@ -158,7 +158,23 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
-			RegisterLuaBindingsOfType(MiscLuaBindings, TransparencyPreset)
+			RegisterLuaBindingsOfType(MiscLuaBindings, TransparencyPreset),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, ArcPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, SplinePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BoxPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BoxFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, RoundedBoxPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, RoundedBoxFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, CirclePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, CircleFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipsePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipseFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TrianglePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive)
+			//RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
+			//RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive)
 		];
 
 		// Assign the manager instances to globals in the lua master state

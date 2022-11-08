@@ -1053,6 +1053,9 @@
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

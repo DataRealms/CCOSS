@@ -7,6 +7,7 @@
 #include "MetaPlayer.h"
 #include "SLTerrain.h"
 #include "TerrainObject.h"
+#include "PieMenu.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -29,7 +30,7 @@
 #include "Box.h"
 #include "Controller.h"
 #include "DataModule.h"
-#include "PieMenu.h"
+#include "GraphicalPrimitive.h"
 
 namespace RTE {
 
@@ -196,6 +197,28 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
 		LuaBindingRegisterFunctionDeclarationForType(Directions);
 		LuaBindingRegisterFunctionDeclarationForType(TransparencyPreset);
+	};
+
+	/// <summary>
+	/// Struct that contains Lua binding registration functions for GraphicalPrimitive classes.
+	/// </summary>
+	struct PrimitiveLuaBindings {
+		LuaBindingRegisterFunctionDeclarationForType(GraphicalPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(LinePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(ArcPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(SplinePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BoxPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BoxFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(RoundedBoxPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(RoundedBoxFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(CirclePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(CircleFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(EllipsePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(EllipseFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TrianglePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TriangleFillPrimitive);
+		//LuaBindingRegisterFunctionDeclarationForType(TextPrimitive);
+		//LuaBindingRegisterFunctionDeclarationForType(BitmapPrimitive);
 	};
 }
 #endif

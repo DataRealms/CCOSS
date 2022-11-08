@@ -512,6 +512,7 @@ namespace RTE {
 			if (IsEnabled()) {
 				for (const auto &[listenerObject, listenerFunction] : m_WhilePieMenuOpenListeners) { listenerFunction(); }
 
+				bool anyInput = false;
 				if (m_ActiveSubPieMenu) {
 					m_CursorAngle = m_HoveredPieSlice->GetMidAngle() + GetRotAngle();
 					m_CursorInVisiblePosition = false;
@@ -530,7 +531,13 @@ namespace RTE {
 							SetHoveredPieSlice(nullptr);
 						}
 					}
-				} else if (HandleMouseInput() || HandleNonMouseInput()) {
+				} else if (GetController()->IsMouseControlled() || GetController()->IsGamepadControlled()) {
+					anyInput = HandleAnalogInput();
+				} else {
+					anyInput = HandleDigitalInput();
+				}
+
+				if (anyInput) {
 					m_HoverTimer.Reset();
 				}
 
@@ -611,11 +618,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenu::HandleMouseInput() {
+	bool PieMenu::HandleAnalogInput() {
 		const Controller *controller = GetController();
 		const PieSlice *pieSliceToSelect = nullptr;
 
-		if (controller->GetAnalogCursor().GetMagnitude() > 0.5F) {
+		if (controller->GetAnalogCursor().MagnitudeIsGreaterThan(0.5F)) {
 			m_CursorInVisiblePosition = true;
 			float normalizedCursorAngle = NormalizeAngleBetween0And2PI(controller->GetAnalogCursor().GetAbsRadAngle());
 			m_CursorAngle = normalizedCursorAngle;
@@ -639,7 +646,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenu::HandleNonMouseInput() {
+	bool PieMenu::HandleDigitalInput() {
 		const Controller *controller = GetController();
 		if (!controller) {
 			return false;

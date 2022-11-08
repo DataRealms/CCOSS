@@ -42,6 +42,13 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Primitive Draw Scheduling
+		/// <summary>
+		/// Schedule to draw multiple primitives of varying type with transparency enabled.
+		/// If the transparency is set to maximum, scheduling will be skipped because drawing fully transparent primitives is the same as not drawing them at all.
+		/// </summary>
+		/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
+		/// <param name="primitives">A vector of primitives to schedule drawing for.</param>
+		void SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives);
 
 		/// <summary>
 		/// Schedule to draw a line primitive.

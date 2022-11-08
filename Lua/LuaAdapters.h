@@ -94,6 +94,16 @@ namespace RTE {
 	/// <param name="whichButton">Which button to check for.</param>
 	/// <returns>Whether the mouse button is released or not.</returns>
 	static bool MouseButtonReleased(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonReleased(Players::PlayerOne, whichButton); }
+
+	/// <summary>
+	/// Schedules to draw multiple primitives of varying type with transparency enabled.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
+	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for. This table will be converted to a </param>
+	static void DrawPrimitives(const PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
+		g_PrimitiveMan.SchedulePrimitivesForTransparentDrawing(transValue, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
 #pragma endregion
 
 #pragma region Misc Lua Adapters

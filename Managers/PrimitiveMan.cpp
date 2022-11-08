@@ -42,6 +42,18 @@ namespace RTE {
 				return nullptr;
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PrimitiveMan::SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives) {
+		if (transValue < TransparencyPreset::Trans100) {
+			for (GraphicalPrimitive *primitive : primitives) {
+				primitive->m_Transparency = std::clamp(transValue, 0, static_cast<int>(TransparencyPreset::Trans100));
+				m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
+			}
+		}
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {

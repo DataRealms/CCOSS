@@ -501,6 +501,10 @@ void SceneEditorGUI::Update()
 			m_PlaceTeam = Activity::TeamOne;
 		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam2) {
 			m_PlaceTeam = Activity::TeamTwo;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam3) {
+			m_PlaceTeam = Activity::TeamThree;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam4) {
+			m_PlaceTeam = Activity::TeamFour;
 			// Toggle between normal scene object editing, and AI plan editing
 		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::Map) {
 			SetFeatureSet(m_FeatureSet == FeatureSets::ONLOADEDIT ? FeatureSets::AIPLANEDIT : FeatureSets::ONLOADEDIT);

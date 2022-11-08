@@ -318,6 +318,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(36) EditorTeam4
 	```
 
+- Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

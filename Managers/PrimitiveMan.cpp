@@ -10,14 +10,14 @@ namespace RTE {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
 			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
-			if (bitmap) { m_ScheduledPrimitives.push_back(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
+			if (bitmap) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawIconPrimitive(int player, const Vector &centerPos, Entity *entity) {
-		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity)) { m_ScheduledPrimitives.push_back(std::make_unique<BitmapPrimitive>(player, centerPos, moSprite->GetGraphicalIcon(), 0, false, false)); }
+		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity)) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, moSprite->GetGraphicalIcon(), 0, false, false)); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

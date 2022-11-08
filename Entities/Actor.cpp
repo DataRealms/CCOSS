@@ -1845,7 +1845,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)
         return;
 
-	if (m_PieMenu->IsVisible()) { m_PieMenu->Draw(pTargetBitmap, targetPos); }
+	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen))) {
+		m_PieMenu->Draw(pTargetBitmap, targetPos);
+	}
 
     // AI waypoints or points of interest
     if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))

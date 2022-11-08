@@ -192,6 +192,12 @@ namespace RTE {
 		bool IsVisible() const { return m_EnabledState != EnabledState::Disabled || m_MenuMode == MenuMode::Freeze || m_MenuMode == MenuMode::Wobble; }
 
 		/// <summary>
+		/// Gets whether or not the PieMenu is in the normal animation mode.
+		/// </summary>
+		/// <returns>Whether or not the PieMenu is in the normal animation mode.</returns>
+		bool IsInNormalAnimationMode() const { return m_MenuMode == MenuMode::Normal; }
+
+		/// <summary>
 		/// Enables or disables the PieMenu and animates it in and out of view.
 		/// </summary>
 		/// <param name="enable">Whether to enable or disable the PieMenu.</param>

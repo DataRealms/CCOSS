@@ -390,6 +390,14 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// Constructs a unique_ptr of the appropriate derived type from the passed in GraphicalPrimitive raw pointer.
+		/// This is used for preparing primitives constructed in Lua for scheduling.
+		/// </summary>
+		/// <param name="primitive">Raw pointer to the GraphicalPrimitive object to make unique.</param>
+		/// <returns>A unique_ptr of the appropriate derived GraphicalPrimitive type. Ownership is transferred!</returns>
+		std::unique_ptr<GraphicalPrimitive> MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(GraphicalPrimitive *primitive);
+
 		// Disallow the use of some implicit methods.
 		PrimitiveMan(const PrimitiveMan &reference) = delete;
 		PrimitiveMan & operator=(const PrimitiveMan &rhs) = delete;

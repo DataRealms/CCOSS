@@ -442,7 +442,7 @@ void Scene::Clear()
     m_AutoDesigned = true;
     m_TotalInvestment = 0;
     m_pTerrain = 0;
-    for (auto& pathFinder : m_pPathFinders) {
+    for (std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
         pathFinder.reset();
     }
     m_PathfindingUpdated = false;
@@ -2909,7 +2909,7 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 
 void Scene::ResetPathFinding()
 {
-    for (const auto &pathFinder : m_pPathFinders) {
+    for (const std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
         pathFinder->RecalculateAllCosts();
     }
 }

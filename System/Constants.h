@@ -23,7 +23,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region AI Constants
-    static constexpr float c_PathFindingDefaultDigStrength = 35.0F; // A default penetration value that'll allow us to move through corpses and stuff
+    static constexpr float c_PathFindingDefaultDigStrength = 35.0F; //!< A default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
 #pragma endregion
 
 #pragma region Graphics Constants

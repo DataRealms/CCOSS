@@ -337,6 +337,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
 
+- Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
 </details>
 
 <details><summary><b>Removed</b></summary>

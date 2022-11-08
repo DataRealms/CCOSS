@@ -213,6 +213,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
+
+- New functionality to support save games.
+	```lua
+	LuaMan:SaveScene(fileName) -- Saves the currently playing scene and activity to Saves.rte.
+	LuaMan:LoadScene(fileName) -- Loads and resumes a previously saved scene and activity.
+	```
+	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.
+	
+	To determine if we're resuming a previously saved game, we can check against ActivityState in Start() as follows:
+	```lua
+	if self.ActivityState == Activity.NOTSTARTED then
+		-- Starting a new game.
+	else
+		-- Loading a previously saved game.
+	end
+	```
+	Activity now has several Lua convenience functions to support extra saved generic values, that will be saved along with the scene:
+	```lua
+	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey
+	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey
+
+	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
+	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
+	```
+	The Wave Defense activity has been updated to support this functionality, and will auto-save at the end of each round. These autosaves can be loaded later by opening the console and typing `LuaMan:LoadScene("Wave Defense - Autosave")`.
 	
 </details>
 

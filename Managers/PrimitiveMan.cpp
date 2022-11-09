@@ -74,7 +74,16 @@ namespace RTE {
 
 	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
 		for (const std::unique_ptr<GraphicalPrimitive> &primitive : m_ScheduledPrimitives) {
-			if (primitive->m_Player == player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
+			if (int playerToDrawFor = primitive->m_Player; playerToDrawFor == player || playerToDrawFor == -1) {
+				if (int transparencySetting = primitive->m_Transparency; transparencySetting > TransparencyPreset::Trans0) {
+					g_FrameMan.SetTransTable(transparencySetting);
+					drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
+				} else {
+					drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
+				}
+				primitive->Draw(targetBitmap, targetPos);
+			}
 		}
+		drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
 	}
 }

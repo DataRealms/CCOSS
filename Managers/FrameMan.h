@@ -318,9 +318,9 @@ namespace RTE {
 
 		/// <summary>
 		/// Sets a transparency table which is used for any subsequent transparency drawing.
-		/// Will first attempt to use a pre-calculated table preset and if none match will generate a new temporary table.
+		/// Will first attempt to use a pre-calculated table preset and if none match will generate a new table.
 		/// </summary>
-		/// <param name="transValue">The transparency value to set. 0-100.</param>
+		/// <param name="transValue">The transparency value to set. From 0 (opaque) to 100 (transparent).</param>
 		void SetTransTable(int transValue);
 
 		/// <summary>

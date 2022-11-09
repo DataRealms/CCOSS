@@ -448,7 +448,11 @@ namespace RTE {
 
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			if (m_Transparency > TransparencyPreset::Trans0) {
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			} else {
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			}
 		} else {
 			Vector drawStartLeft;
 			Vector drawStartRight;
@@ -456,10 +460,14 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
 			// Take into account the h-flipped pivot point
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			if (m_Transparency > TransparencyPreset::Trans0) {
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			} else {
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			}
 		}
-
 		destroy_bitmap(bitmapToDraw);
 	}
 }

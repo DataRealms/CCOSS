@@ -44,10 +44,10 @@ namespace RTE {
 #pragma region Primitive Draw Scheduling
 		/// <summary>
 		/// Schedule to draw multiple primitives of varying type with transparency enabled.
-		/// If the transparency is set to maximum, scheduling will be skipped because drawing fully transparent primitives is the same as not drawing them at all.
 		/// </summary>
 		/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
 		/// <param name="primitives">A vector of primitives to schedule drawing for.</param>
+		/// <remarks>If the transparency is set to maximum, scheduling will be skipped because drawing fully transparent primitives is the same as not drawing them at all.</remarks>
 		void SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives);
 
 		/// <summary>
@@ -337,43 +337,43 @@ namespace RTE {
 		/// Schedule to draw a bitmap primitive.
 		/// </summary>
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
-		/// <param name="entity">An entity to draw sprite from.</param>
+		/// <param name="moSprite">A MOSprite to draw BITMAP from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
-		void DrawBitmapPrimitive(const Vector &centerPos, const Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, false, false); }
+		void DrawBitmapPrimitive(const Vector &centerPos, const MOSprite *moSprite, float rotAngle, int frame) { DrawBitmapPrimitive(-1, centerPos, moSprite, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive with the option to flip the primitive horizontally and vertically.
 		/// </summary>
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
-		/// <param name="entity">An entity to draw sprite from.</param>
+		/// <param name="moSprite">A MOSprite to draw BITMAP from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, hFlipped, vFlipped); }
+		void DrawBitmapPrimitive(const Vector &centerPos, const MOSprite *moSprite, float rotAngle, int frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, moSprite, rotAngle, frame, hFlipped, vFlipped); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
-		/// <param name="entity">An entity to draw sprite from.</param>
+		/// <param name="moSprite">A MOSprite to draw BITMAP from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
-		void DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(player, centerPos, entity, rotAngle, frame, false, false); }
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const MOSprite *moSprite, float rotAngle, int frame) { DrawBitmapPrimitive(player, centerPos, moSprite, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player with the option to flip the primitive horizontally or vertically.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
-		/// <param name="entity">An entity to draw sprite from.</param>
+		/// <param name="moSprite">A MOSprite to draw BITMAP from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const MOSprite *moSprite, float rotAngle, int frame, bool hFlipped, bool vFlipped) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, moSprite, rotAngle, frame, hFlipped, vFlipped)); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive.

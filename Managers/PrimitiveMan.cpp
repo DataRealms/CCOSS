@@ -1,5 +1,4 @@
 #include "PrimitiveMan.h"
-#include "Entity.h"
 #include "MOSprite.h"
 
 namespace RTE {
@@ -48,20 +47,10 @@ namespace RTE {
 	void PrimitiveMan::SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives) {
 		if (transValue < TransparencyPreset::Trans100) {
 			for (GraphicalPrimitive *primitive : primitives) {
-				if (primitive->GetPrimtiveType() == GraphicalPrimitive::PrimitiveType::Bitmap && static_cast<BitmapPrimitive *>(primitive)->m_Bitmap == nullptr) {
-					continue;
-				}
 				primitive->m_Transparency = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
 				m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
-		BitmapPrimitive primitive(player, centerPos, entity, rotAngle, frame, hFlipped, vFlipped);
-		if (primitive.m_Bitmap) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(primitive)); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

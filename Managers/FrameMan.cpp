@@ -93,6 +93,7 @@ namespace RTE {
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_TransparencyTablePresets.clear();
+		m_CustomTransparencyTables.clear();
 		m_GUIScreen = nullptr;
 		m_LargeFont = nullptr;
 		m_SmallFont = nullptr;
@@ -704,6 +705,23 @@ namespace RTE {
 			return true;
 		}
 		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::SetTransTable(int transValue) {
+		transValue = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
+
+		if (!SetTransTableFromPreset(static_cast<TransparencyPreset>(transValue))) {
+			if (m_CustomTransparencyTables.find(transValue) == m_CustomTransparencyTables.end()) {
+				PALETTE ccPalette;
+				get_palette(ccPalette);
+				m_CustomTransparencyTables.try_emplace(transValue);
+				int blendAmount = 255 - (static_cast<int>(255.0F * 0.01F * static_cast<float>(transValue)));
+				create_trans_table(&m_CustomTransparencyTables.at(transValue), ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
+			}
+			color_map = &m_CustomTransparencyTables.at(transValue);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -48,7 +48,7 @@ namespace RTE {
 	void PrimitiveMan::SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives) {
 		if (transValue < TransparencyPreset::Trans100) {
 			for (GraphicalPrimitive *primitive : primitives) {
-				primitive->m_Transparency = std::clamp(transValue, 0, static_cast<int>(TransparencyPreset::Trans100));
+				primitive->m_Transparency = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
 				m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
 			}
 		}

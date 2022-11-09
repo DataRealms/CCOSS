@@ -317,6 +317,13 @@ namespace RTE {
 		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
+		/// Sets a transparency table which is used for any subsequent transparency drawing.
+		/// Will first attempt to use a pre-calculated table preset and if none match will generate a new temporary table.
+		/// </summary>
+		/// <param name="transValue">The transparency value to set. 0-100.</param>
+		void SetTransTable(int transValue);
+
+		/// <summary>
 		/// Sets a specific pre-calculated transparency table which is used for any subsequent transparency drawing.
 		/// </summary>
 		/// <param name="transValue">The transparency preset value. See the TransparencyPreset enumeration for values.</param>
@@ -560,6 +567,7 @@ namespace RTE {
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
 		std::unordered_map<int, COLOR_MAP> m_TransparencyTablePresets; //!< Pre-calculated color tables for transparent drawing in indexed color mode.
+		std::unordered_map<int, COLOR_MAP> m_CustomTransparencyTables; //!< Color tables for transparent drawing in indexed color mode that do not match any of the existing presets.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.

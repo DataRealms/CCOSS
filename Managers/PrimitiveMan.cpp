@@ -48,6 +48,9 @@ namespace RTE {
 	void PrimitiveMan::SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives) {
 		if (transValue < TransparencyPreset::Trans100) {
 			for (GraphicalPrimitive *primitive : primitives) {
+				if (primitive->GetPrimtiveType() == GraphicalPrimitive::PrimitiveType::Bitmap && static_cast<BitmapPrimitive *>(primitive)->m_Bitmap == nullptr) {
+					continue;
+				}
 				primitive->m_Transparency = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
 				m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
 			}
@@ -56,12 +59,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
-		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
-		if (moSprite) {
-			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
-			if (bitmap) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
-		}
+	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
+		BitmapPrimitive primitive(player, centerPos, entity, rotAngle, frame, hFlipped, vFlipped);
+		if (primitive.m_Bitmap) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(primitive)); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

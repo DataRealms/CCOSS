@@ -340,7 +340,7 @@ namespace RTE {
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
-		void DrawBitmapPrimitive(const Vector &centerPos, Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, false, false); }
+		void DrawBitmapPrimitive(const Vector &centerPos, const Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive with the option to flip the primitive horizontally and vertically.
@@ -351,7 +351,7 @@ namespace RTE {
 		/// <param name="frame">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, hFlipped, vFlipped); }
+		void DrawBitmapPrimitive(const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, hFlipped, vFlipped); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player.
@@ -360,8 +360,8 @@ namespace RTE {
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
-		/// <param name="">Frame to draw.</param>
-		void DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(player, centerPos, entity, rotAngle, frame, false, false); }
+		/// <param name="frame">Frame to draw.</param>
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame) { DrawBitmapPrimitive(player, centerPos, entity, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player with the option to flip the primitive horizontally or vertically.
@@ -370,10 +370,10 @@ namespace RTE {
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
-		/// <param name="">Frame to draw.</param>
+		/// <param name="frame">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
 
 		/// <summary>
 		/// Schedule to draw the GUI icon of an object.

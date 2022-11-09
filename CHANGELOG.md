@@ -219,7 +219,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
 	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
-	
+
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -328,6 +330,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 	MicroPather's cache now isn't cleared unless the terrain has changed significantly enough to make an impact.
 
+
+- Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
 
 </details>
 
@@ -637,6 +641,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- The landing zone cursor will now show the width of the selected delivery craft.
 
 - `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
 	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.

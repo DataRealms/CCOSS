@@ -228,14 +228,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenu::SetOwner(Actor *newOwner) {
-		RTEAssert((newOwner == nullptr) ? true : newOwner->GetPieMenu() == this, "Tried to set Pie Menu owning Actor to Actor with different Pie Menu.");
+		RTEAssert((newOwner == nullptr) ? true : (newOwner->GetPieMenu() == this || IsSubPieMenu()), "Tried to set Pie Menu owning Actor to Actor with different Pie Menu.");
 		if (m_Owner) {
 			for (PieSlice *pieSlice : m_CurrentPieSlices) {
 				if (pieSlice->GetOriginalSource() == m_Owner) { pieSlice->SetOriginalSource(newOwner); }
 			}
-			RemoveWhilePieMenuOpenListener(m_Owner);
+			if (!IsSubPieMenu()) {
+				RemoveWhilePieMenuOpenListener(m_Owner);
+			}
 		}
-		if (newOwner) { AddWhilePieMenuOpenListener(newOwner, std::bind(&MovableObject::WhilePieMenuOpenListener, newOwner, this)); }
+		if (newOwner && !IsSubPieMenu()) {
+			AddWhilePieMenuOpenListener(newOwner, std::bind(&MovableObject::WhilePieMenuOpenListener, newOwner, this));
+		}
 		m_Owner = newOwner;
 	}
 
@@ -749,7 +753,12 @@ namespace RTE {
 			if ((m_ActivatedPieSlice && m_ActivatedPieSlice->GetSubPieMenu() != nullptr) || (m_HoveredPieSlice->GetSubPieMenu() && m_SubPieMenuHoverOpenTimer.IsPastRealMS(c_PieSliceWithSubPieMenuHoverOpenInterval))) {
 				PreparePieSliceSubPieMenuForUse(m_ActivatedPieSlice ? m_ActivatedPieSlice : m_HoveredPieSlice);
 				m_ActiveSubPieMenu = m_ActivatedPieSlice ? m_ActivatedPieSlice->GetSubPieMenu() : m_HoveredPieSlice->GetSubPieMenu();
-				m_ActiveSubPieMenu->m_Owner = m_Owner;
+				if (m_Owner) {
+					m_ActiveSubPieMenu->SetOwner(m_Owner);
+				} else if (m_MenuController) {
+					m_ActiveSubPieMenu->SetMenuController(m_MenuController);
+					m_ActiveSubPieMenu->SetPos(m_CenterPos);
+				}
 				m_ActiveSubPieMenu->SetEnabled(true);
 				m_ActiveSubPieMenu->SetHoveredPieSlice(m_ActiveSubPieMenu->m_PieQuadrants.at(m_ActiveSubPieMenu->m_DirectionIfSubPieMenu).m_MiddlePieSlice.get(), true);
 				m_ActiveSubPieMenu->m_HoverTimer.SetRealTimeLimitMS(2000);

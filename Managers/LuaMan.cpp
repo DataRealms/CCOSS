@@ -172,9 +172,9 @@ namespace RTE {
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipsePrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipseFillPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TrianglePrimitive),
-			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive)
-			//RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
-			//RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive)
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive)
 		];
 
 		// Assign the manager instances to globals in the lua master state

@@ -217,8 +217,8 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(EllipseFillPrimitive);
 		LuaBindingRegisterFunctionDeclarationForType(TrianglePrimitive);
 		LuaBindingRegisterFunctionDeclarationForType(TriangleFillPrimitive);
-		//LuaBindingRegisterFunctionDeclarationForType(TextPrimitive);
-		//LuaBindingRegisterFunctionDeclarationForType(BitmapPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TextPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BitmapPrimitive);
 	};
 }
 #endif

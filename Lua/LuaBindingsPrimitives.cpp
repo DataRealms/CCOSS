@@ -115,19 +115,18 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
+
 	LuaBindingRegisterFunctionDefinitionForType(PrimitiveLuaBindings, TextPrimitive) {
 		return luabind::class_<TextPrimitive, GraphicalPrimitive>("TextPrimitive")
 
 		.def(luabind::constructor<int, const Vector &, const std::string &, bool, int>());
 	}
-*/
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
+
 	LuaBindingRegisterFunctionDefinitionForType(PrimitiveLuaBindings, BitmapPrimitive) {
 		return luabind::class_<BitmapPrimitive, GraphicalPrimitive>("BitmapPrimitive")
 
-		.def(luabind::constructor<int, const Vector &, BITMAP *, float, bool, bool>());
+		.def(luabind::constructor<int, const Vector &, const Entity *, float, int, bool, bool>())
 	}
-*/
 }

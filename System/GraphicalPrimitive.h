@@ -682,7 +682,7 @@ namespace RTE {
 		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive's center.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="bitmap">BITMAP to draw.</param>
 		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
 		/// <param name="hFlipped">Whether the BITMAP to draw should be horizontally flipped.</param>
@@ -698,7 +698,7 @@ namespace RTE {
 		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive's center.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="entity">The Entity to get the BITMAP to draw from.</param>
 		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
 		/// <param name="frame">Frame number of the Entity's MOSprite that will be drawn.</param>
@@ -711,6 +711,22 @@ namespace RTE {
 			m_Player = player;
 
 			if (const MOSprite *moSprite = dynamic_cast<const MOSprite *>(entity)) { m_Bitmap = moSprite->GetSpriteFrame(frame); }
+		}
+
+		/// <summary>
+		/// Constructor method for BitmapPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="filePath">The path to get the BITMAP to draw from.</param>
+		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
+		/// <param name="hFlipped">Whether the BITMAP to draw should be horizontally flipped.</param>
+		/// <param name="vFlipped">Whether the BITMAP to draw should be vertically flipped.</param>
+		BitmapPrimitive(int player, const Vector &centerPos, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped) :
+			m_Bitmap(ContentFile(filePath.c_str()).GetAsBitmap()), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
+
+			m_StartPos = centerPos;
+			m_Player = player;
 		}
 
 		/// <summary>

@@ -376,6 +376,44 @@ namespace RTE {
 		void DrawBitmapPrimitive(int player, const Vector &centerPos, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
 
 		/// <summary>
+		/// Schedule to draw a bitmap primitive.
+		/// </summary>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="filePath">Path to the bitmap to draw.</param>
+		/// <param name="rotAngle">Rotation angle in radians.</param>
+		void DrawBitmapPrimitive(const Vector &centerPos, const std::string &filePath, float rotAngle) { DrawBitmapPrimitive(-1, centerPos, filePath, rotAngle, false, false); }
+
+		/// <summary>
+		/// Schedule to draw a bitmap primitive with the option to flip the primitive horizontally and vertically.
+		/// </summary>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="filePath">An entity to draw sprite from.</param>
+		/// <param name="rotAngle">Rotation angle in radians.</param>
+		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
+		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
+		void DrawBitmapPrimitive(const Vector &centerPos, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, filePath, rotAngle, hFlipped, vFlipped); }
+
+		/// <summary>
+		/// Schedule to draw a bitmap primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="filePath">Path to the bitmap to draw.</param>
+		/// <param name="rotAngle">Rotation angle in radians.</param>
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const std::string &filePath, float rotAngle) { DrawBitmapPrimitive(player, centerPos, filePath, rotAngle, false, false); }
+
+		/// <summary>
+		/// Schedule to draw a bitmap primitive visible only to a specified player with the option to flip the primitive horizontally or vertically.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="filePath">Path to the bitmap to draw.</param>
+		/// <param name="rotAngle">Rotation angle in radians.</param>
+		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
+		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
+		void DrawBitmapPrimitive(int player, const Vector &centerPos, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, filePath, rotAngle, hFlipped, vFlipped)); }
+
+		/// <summary>
 		/// Schedule to draw the GUI icon of an object.
 		/// </summary>
 		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>

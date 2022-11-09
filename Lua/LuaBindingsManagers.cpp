@@ -232,6 +232,10 @@ namespace RTE {
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &filePath, float rotAngle))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &filePath, float rotAngle))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
 		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
 

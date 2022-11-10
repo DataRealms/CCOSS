@@ -237,7 +237,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	The Wave Defense activity has been updated to support this functionality, and will auto-save at the end of each round. These autosaves can be loaded later by opening the console and typing `LuaMan:LoadScene("Wave Defense - Autosave")`.
+	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadScene("Autosave")`.
 	
 </details>
 

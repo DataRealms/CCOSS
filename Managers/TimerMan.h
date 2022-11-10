@@ -221,7 +221,6 @@ namespace RTE {
 		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
-		long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 
 		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.	
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
@@ -233,7 +232,10 @@ namespace RTE {
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
-		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
+		// Atomic to allow other threads to pause the simulation.
+		std::atomic<bool> m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
+		std::atomic<long long> m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
+
 		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
 		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
 

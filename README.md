@@ -107,7 +107,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 **Fedora:**
 `$dnf install allegro-loadpng allegro-devel lua-devel boost-devel meson flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel libX11-devel xmessage lua-devel`
-`the version of lua in meson.build needs to be unversioned as well`
+the version of lua in meson.build needs to be unversioned as well
 ## Troubleshooting
 
 * On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)

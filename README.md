@@ -103,7 +103,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `# pacman -S allegro4 boost flac luajit lua minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 
 **Fedora:**  
 `# dnf install allegro-loadpng-devel allegro-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel libX11-devel xmessage lua-devel libX11-devel gcc gcc-c++`  

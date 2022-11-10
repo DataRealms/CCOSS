@@ -222,6 +222,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- New functionality to support save games.
+	```lua
+	LuaMan:SaveScene(fileName) -- Saves the currently playing scene and activity to Saves.rte.
+	LuaMan:LoadScene(fileName) -- Loads and resumes a previously saved scene and activity.
+	```
+	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.
+	
+	To determine if we're resuming a previously saved game, we can check against ActivityState in Start() as follows:
+	```lua
+	if self.ActivityState == Activity.NOTSTARTED then
+		-- Starting a new game.
+	else
+		-- Loading a previously saved game.
+	end
+	```
+	Activity now has several Lua convenience functions to support extra saved generic values, that will be saved along with the scene:
+	```lua
+	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey
+	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey
+
+	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
+	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
+	```
+	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadScene("Autosave")`.
+	
 </details>
 
 <details><summary><b>Changed</b></summary>

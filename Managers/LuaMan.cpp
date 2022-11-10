@@ -549,7 +549,7 @@ namespace RTE {
 		}
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current g_movableMan state
-		Scene* sceneAltered = dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone());
+		std::unique_ptr<Scene> sceneAltered(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
 
 		// Delete any existing objects from our scene - we don't want replace broken doors or repair any stuff when we load
 		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
@@ -562,26 +562,24 @@ namespace RTE {
 		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
 		sceneAltered->SetScriptSave(true);
 
-		// We don't need to block the main thread for too long, just need to pause update for a little bit, until the writer has all the data
-		g_TimerMan.PauseSim(true);
+		// We don't need to block the main thread for too long, just need to let writer access the relevant data
+		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + fileName + ".ini"));
+		writer->NewPropertyWithValue("Scene", sceneAltered.get());
+		writer->NewPropertyWithValue("Activity", activity);
 
-		auto saveWriterData = [sceneAltered, activity](const std::string& filename) {
-			Writer writer(filename.c_str());
-			writer.NewPropertyWithValue("Scene", sceneAltered);
-			writer.NewPropertyWithValue("Activity", activity);
-
-			// We have all the data in the writer
-			// Now we can continue and the flushing to disk (upon scope exit) can be done concurrently with the simulation
-			g_TimerMan.PauseSim(false);
-
-			// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan
-			sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
-
-			delete sceneAltered;
+		auto saveWriterData = [](std::unique_ptr<Writer> writer) {
+			// Explicitly flush to disk...
+			// This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
+			writer->EndWrite();
 		};
 
-		std::thread saveThread(saveWriterData, sc_scriptSavesPath + fileName + ".ini");
+		std::thread saveThread(saveWriterData, std::move(writer));
+
+		// Now we can continue and the flushing to disk can be done concurrently with the simulation
 		saveThread.detach();
+
+		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan
+		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
 
 		return true;
 	}
@@ -589,8 +587,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaMan::LoadScriptedScene(const std::string &fileName) {
-		Scene* scene = new Scene();
-		GAScripted* activity = new GAScripted();
+		std::unique_ptr<Scene> scene(new Scene());
+		std::unique_ptr<GAScripted> activity(new GAScripted());
 
  		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true, nullptr, true);
 		if (!reader.ReaderOK()) {
@@ -600,19 +598,15 @@ namespace RTE {
 		while (reader.NextProperty()) {
 			std::string propName = reader.ReadPropName();
         	if (propName == "Scene") {
-				reader >> scene;
+				reader >> scene.get();
 			} else if (propName == "Activity") {
-				reader >> activity;
+				reader >> activity.get();
 			}
     	}
 
-		// Copy our scene/activity over, and then free the memory
-		g_SceneMan.SetSceneToLoad(scene, true, true); // SetSceneToLoad() doesn't Clone(), but when the activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally
+		g_SceneMan.SetSceneToLoad(scene.get(), true, true); // SetSceneToLoad() doesn't Clone(), but when the activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone())); // But for activity we need to do the Clone() here
 		// Messy, right? :/
-
-		delete scene;
-		delete activity;
 
 		return true;
 	}

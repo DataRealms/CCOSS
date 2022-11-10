@@ -57,7 +57,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `loadpng`
 * `flac`
 * `luajit`
-* `lua5.2`
+* `lua`
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
@@ -100,14 +100,14 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit lua52 minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
+`# pacman -S allegro4 boost flac luajit lua minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 
-**Fedora:**
-`$dnf install allegro-loadpng allegro-devel lua-devel boost-devel meson flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel libX11-devel xmessage lua-devel`
-the version of lua in meson.build needs to be unversioned as well
+**Fedora:**  
+`# dnf install allegro-loadpng-devel allegro-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel libX11-devel xmessage lua-devel libX11-devel gcc gcc-c++`  
+
 ## Troubleshooting
 
 * On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)

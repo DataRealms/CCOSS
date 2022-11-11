@@ -58,6 +58,24 @@ namespace RTE {
 
 	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
 
+	enum DrawBlendMode {
+		NoBlend,
+		BlendBurn,
+		BlendColor,
+		BlendDifference,
+		BlendDissolve,
+		BlendDodge,
+		BlendInvert,
+		BlendLuminance,
+		BlendMultiply,
+		BlendSaturation,
+		BlendScreen,
+		BlendTransparency,
+		BlendModeCount
+	};
+
+	enum BlendAmountLimits { MinBlend = 0, MaxBlend = 100 };
+
 	enum TransparencyPreset {
 		Trans0 = 0,
 		Trans5 = 5,

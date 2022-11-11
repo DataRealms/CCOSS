@@ -1176,8 +1176,8 @@ public:
 //                  all Air, then 0 is returned (Air's strength value is 0).
 
     // We use two accessors instead of default parameters, for lua compat
-    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial) const;
-    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) const { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

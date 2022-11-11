@@ -129,6 +129,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(MiscLuaBindings, DrawBlendMode) {
+		return luabind::class_<blend_modes>("DrawBlendMode")
+
+		.enum_("DrawBlendMode")[
+			luabind::value("NoBlend", DrawBlendMode::NoBlend),
+			luabind::value("Burn", DrawBlendMode::BlendBurn),
+			luabind::value("Color", DrawBlendMode::BlendColor),
+			luabind::value("Difference", DrawBlendMode::BlendDifference),
+			luabind::value("Dissolve", DrawBlendMode::BlendDissolve),
+			luabind::value("Dodge", DrawBlendMode::BlendDodge),
+			luabind::value("Invert", DrawBlendMode::BlendInvert),
+			luabind::value("Luminance", DrawBlendMode::BlendLuminance),
+			luabind::value("Multiply", DrawBlendMode::BlendMultiply),
+			luabind::value("Saturation", DrawBlendMode::BlendSaturation),
+			luabind::value("Screen", DrawBlendMode::BlendScreen),
+			luabind::value("Transparency", DrawBlendMode::BlendTransparency),
+			luabind::value("BlendModeCount", DrawBlendMode::BlendModeCount)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(MiscLuaBindings, TransparencyPreset) {
 		return luabind::class_<trans_presets>("TransparencyPreset")
 

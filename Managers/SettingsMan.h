@@ -110,7 +110,7 @@ namespace RTE {
 		int GetAIUpdateInterval() const { return m_AIUpdateInterval; }
 
 		/// <summary>Sets the AI update interval.</summary>
-		/// <param name="newAIUpdateInterval">How often actor's AI will now be updated, in frames.</param>
+		/// <param name="newAIUpdateInterval">How often actor's AI will now be updated, in simulation updates.</param>
 		void SetAIUpdateInterval(int newAIUpdateInterval) { m_AIUpdateInterval = newAIUpdateInterval; }
 #pragma endregion
 

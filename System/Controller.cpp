@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
+#include "SettingsMan.h"
 #include "Actor.h"
 
 namespace RTE {
@@ -151,37 +152,69 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Update() {
+		// Disabled won't get updates, or when the activity isn't going
+		if (IsDisabled() || !g_ActivityMan.ActivityRunning()) {
+			return;
+		}
+
+		// Update team indicator
+		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+
+		switch (m_InputMode) {
+			case InputMode::CIM_PLAYER:
+				GetInputFromPlayer();
+				break;
+			case InputMode::CIM_AI:
+				GetInputFromAI();
+				break;
+			default:
+				ResetCommandState();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Controller::ResetCommandState() {
 		// Reset all command states.
 		m_ControlStates.fill(false);
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
 		m_MouseMovement.Reset();
+	}
 
-		// Update team indicator
-		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Player Input Mode
-		if (m_InputMode == InputMode::CIM_PLAYER) {
-			// Disable player input if the console is open but isn't in read-only mode, or the controller is disabled or has no player
-			if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Disabled || m_Player < 0) {
-				return;
-			}
-			// Update all the player input
-			UpdatePlayerInput();
+	void Controller::GetInputFromPlayer() {
+		ResetCommandState();
 
-		// AI Input Mode
-		} else if (m_InputMode == InputMode::CIM_AI) {
-			// Disabled won't get updates, or when the activity isn't going
-			if (m_Disabled || !g_ActivityMan.ActivityRunning()) {
-				return;
-			}
+		// Disable player input if the console is open but isn't in read-only mode, or we have no player.
+		if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Player < 0) {
+			return;
+		}
 
-			// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
-			if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
-				// If we can't, fall back on the legacy C++ implementation
-				m_ControlledActor->UpdateAI();
-			}
+		// Update all the player input
+		UpdatePlayerInput();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Controller::GetInputFromAI() {
+		// Throttle the AI to only update every X frames.
+		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check an ID against the frame number.
+		// As an ID, we just use the MOID. This isn't perfectly consistent, as it's reassigned per frame, but it's mostly okay as actors are assigned MOIDs first.
+		const int framesPerUpdate = g_SettingsMan.GetAIUpdateInterval();
+		if (m_ControlledActor && m_ControlledActor->GetID() % framesPerUpdate != g_TimerMan.GetSimUpdateCount() % framesPerUpdate) {
+			// Don't reset our command state, so we give the same input as last frame.
+			return;
+		}
+
+		ResetCommandState();
+
+		// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
+		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
+			// If we can't, fall back on the legacy C++ implementation
+			m_ControlledActor->UpdateAI();
 		}
 	}
 

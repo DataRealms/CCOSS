@@ -100,10 +100,18 @@ namespace RTE {
 		int GetPathFinderGridNodeSize() const { return m_PathFinderGridNodeSize; }
 
 		/// <summary>
-		/// Sets the PathFinder grid node size
+		/// Sets the PathFinder grid node size.
 		/// </summary>
 		/// <param name="newGridSize">The new PathFinder grid node size.</param>
 		void SetPathFinderGridNodeSize(int newGridSize) { m_PathFinderGridNodeSize = newGridSize; }
+
+		/// <summary>Gets the AI update interval.</summary>
+		/// <returns>How often actor's AI is updated, in frames.</returns>
+		int GetAIUpdateInterval() const { return m_AIUpdateInterval; }
+
+		/// <summary>Sets the AI update interval.</summary>
+		/// <param name="newAIUpdateInterval">How often actor's AI will now be updated, in frames.</param>
+		void SetAIUpdateInterval(int newAIUpdateInterval) { m_AIUpdateInterval = newAIUpdateInterval; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -496,6 +504,7 @@ namespace RTE {
 		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 		bool m_DisableFactionBuyMenuThemes; //!< Whether faction BuyMenu theme support is disabled.
 		int m_PathFinderGridNodeSize; //!< The grid size used by the PathFinder, in pixels.
+		int m_AIUpdateInterval; //!< How often actor's AI should be updated, in frames.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

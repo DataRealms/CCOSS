@@ -222,6 +222,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New INI and Lua (R/W) `Actor` property `BaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
+-- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

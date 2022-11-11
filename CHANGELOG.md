@@ -220,6 +220,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
 	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
 	
+- New INI and Lua (R/W) `Actor` property `BaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -318,16 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(36) EditorTeam4
 	```
 
-- Pathfinding changes to improve performance and AI decision making.
-
-	Actors now have a default diggability amount, `BaseDigStrength`, which represents the strength of terrain that the actor will attempt to move through even without digging tools. This means they will attempt to move through light obstacles like corpses, instead of trying to find another path. This can be set in the Actor .ini, and defaults at a value of 35.
-
-	Brain pathing from orbit now can dig through light debris like corpses, and pass through their own team's doors.
-
-	Each team now stores it's own pathfinder. This dramatically reduces the rate at which the terrain node graph needs to be rebuilt.
-
-	MicroPather's cache now isn't cleared unless the terrain has changed significantly enough to make an impact.
-
+- Major improvements to pathfinding performance and AI decision making.
 
 </details>
 
@@ -338,6 +331,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
 
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
+- Fixed issue where AI actors didn't try to path around and avoid enemy doors.
 
 </details>
 

@@ -1175,7 +1175,9 @@ public:
 // Return value:    The max of all encountered pixels' material strength vales. So if it was
 //                  all Air, then 0 is returned (Air's strength value is 0).
 
-    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial = g_MaterialDoor);
+    // We use two accessors instead of default parameters, for lua compat
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1744,7 +1746,6 @@ private:
 // Return value:    None.
 
     void Clear();
-
     
     // Disallow the use of some implicit methods.
 	SceneMan(const SceneMan &reference) = delete;

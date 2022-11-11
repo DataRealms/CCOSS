@@ -333,6 +333,8 @@ namespace RTE {
 		.property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 		.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 		.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
+		.property("AIDeltaTimeSecs", &TimerMan::GetAIDeltaTimeSecs)
+		.property("AIDeltaTimeMS", &TimerMan::GetAIDeltaTimeMS)
 		.property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
 
 		.property("TicksPerSecond", &GetTicksPerSecond)

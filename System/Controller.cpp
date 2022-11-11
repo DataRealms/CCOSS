@@ -200,11 +200,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::GetInputFromAI() {
-		// Throttle the AI to only update every X frames.
+		// Throttle the AI to only update every X sim updates.
 		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check an ID against the frame number.
 		// As an ID, we just use the MOID. This isn't perfectly consistent, as it's reassigned per frame, but it's mostly okay as actors are assigned MOIDs first.
-		const int framesPerUpdate = g_SettingsMan.GetAIUpdateInterval();
-		if (m_ControlledActor && m_ControlledActor->GetID() % framesPerUpdate != g_TimerMan.GetSimUpdateCount() % framesPerUpdate) {
+		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();
+		if (m_ControlledActor && m_ControlledActor->GetID() % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
 			// Don't reset our command state, so we give the same input as last frame.
 			return;
 		}

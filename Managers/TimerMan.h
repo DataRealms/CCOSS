@@ -188,6 +188,18 @@ namespace RTE {
 		float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
 
 		/// <summary>
+		/// Gets the current fixed delta time of the AI updates, in seconds.
+		/// </summary>
+		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
+		float GetAIDeltaTimeSecs() const;
+
+		/// <summary>
+		/// Gets the current fixed delta time of the AI updates, in seconds.
+		/// </summary>
+		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
+		float GetAIDeltaTimeMS() const { return GetAIDeltaTimeSecs() * 1000; };
+
+		/// <summary>
 		/// Sets the number of seconds that a simulation update delta time should take.
 		/// </summary>
 		/// <param name="newDelta">The new delta time in seconds.</param>

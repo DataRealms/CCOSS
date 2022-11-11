@@ -1,6 +1,7 @@
 #include "TimerMan.h"
 #include "PerformanceMan.h"
 #include "AudioMan.h"
+#include "SettingsMan.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -173,5 +174,11 @@ namespace RTE {
 		}
 		// TODO: Handle this from AudioMan::Update
 		g_AudioMan.SetGlobalPitch(globalPitch);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float TimerMan::GetAIDeltaTimeSecs() const { 
+		return m_DeltaTimeS * g_SettingsMan.GetAIUpdateInterval(); 
 	}
 }

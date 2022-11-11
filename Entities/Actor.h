@@ -1097,7 +1097,7 @@ ClassInfoGetters;
 
     /// <summary>Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.</summary>
 	/// <returns>The actors base dig strength.</returns>
-    float GetBaseDigStrength() { return m_BaseDigStrength; }
+    float GetBaseDigStrength() const { return m_BaseDigStrength; }
 
     /// <summary>Sets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.</summary>
 	/// <param name="newBaseDigStrength">The new base dig strength for this Actor.</param>

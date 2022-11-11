@@ -46,6 +46,7 @@ struct MOXPosComparison {
 void MovableMan::Clear()
 {
     m_Actors.clear();
+    m_ActorIDs.clear();
     m_Items.clear();
     m_Particles.clear();
     m_AddedActors.clear();
@@ -1238,6 +1239,16 @@ bool MovableMan::IsOfActor(MOID checkMOID)
     return found;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableMan::GetActorID(const Actor *actor) const {
+    auto itr = m_ActorIDs.find(actor);
+    if (itr == m_ActorIDs.end()) {
+        return -1;
+    }
+
+    return itr->second;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRootMOID
@@ -1966,52 +1977,46 @@ void MovableMan::VerifyMOIDIndex()
 
 void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 {
-    int aCount = m_Actors.size();
-    int iCount = m_Items.size();
-    int parCount = m_Particles.size();
-
-    // Clear the index each frame and do it over because MO's get added and
-    // deleted between each frame.
+    // Clear the index each frame and do it over because MO's get added and deleted between each frame.
     m_MOIDIndex.clear();
+    m_ActorIDs.clear();
+
     // Add a null and start counter at 1 because MOID == 0 means no MO.
     // - Update: This isnt' true anymore, but still keep 0 free just to be safe
     m_MOIDIndex.push_back(0);
 
     MOID currentMOID = 1;
-    int i = 0;
 
-    for (i = 0; i < aCount; ++i) {
-		if (m_Actors[i]->GetsHitByMOs() && !m_Actors[i]->IsSetToDelete())
-        {
-			Vector notUsed;
-            m_Actors[i]->UpdateMOID(m_MOIDIndex);
-            m_Actors[i]->Draw(pTargetBitmap, notUsed, g_DrawMOID, true);
+    int actorID = 0;
+    for (Actor *actor : m_Actors) {
+        m_ActorIDs[actor] = actorID++;
+		if (actor->GetsHitByMOs() && !actor->IsSetToDelete()) {
+            actor->UpdateMOID(m_MOIDIndex);
+            actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
+        } else {
+            actor->SetAsNoID();
         }
-        else
-            m_Actors[i]->SetAsNoID();
     }
-    for (i = 0; i < iCount; ++i)
-    {
-        if (m_Items[i]->GetsHitByMOs() && !m_Items[i]->IsSetToDelete())
-        {
-            m_Items[i]->UpdateMOID(m_MOIDIndex);
-            m_Items[i]->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
+
+    for (MovableObject *item : m_Items) {
+        if (item->GetsHitByMOs() && !item->IsSetToDelete()) {
+            item->UpdateMOID(m_MOIDIndex);
+            item->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
+        } else {
+            item->SetAsNoID();
         }
-        else
-            m_Items[i]->SetAsNoID();
     }
-    for (i = 0; i < parCount; ++i)
-    {
-        if (m_Particles[i]->GetsHitByMOs() && !m_Particles[i]->IsSetToDelete())
-        {
-            m_Particles[i]->UpdateMOID(m_MOIDIndex);
-            m_Particles[i]->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
+
+    for (MovableObject *particle : m_Particles) {
+        if (particle->GetsHitByMOs() && !particle->IsSetToDelete()) {
+            particle->UpdateMOID(m_MOIDIndex);
+            particle->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
+        } else {
+            particle->SetAsNoID();
         }
-        else
-            m_Particles[i]->SetAsNoID();
     }
 }
 

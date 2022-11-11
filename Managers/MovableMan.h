@@ -586,6 +586,12 @@ public:
 
     bool IsOfActor(MOID checkMOID);
 
+    // <summary>
+    // Gives a unique, contiguous id per-actor. This is regenerated every frame. Returns -1 if the actor doesn't exist in our state.
+    // </summary>
+    // <returns> An id for the actor. </returns>
+    int GetActorID(const Actor *actor) const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRootMOID
@@ -889,6 +895,8 @@ protected:
 
     // All actors in the scene
     std::deque<Actor *> m_Actors;
+    // A map to give a unique contiguous index per-actor. This is re-created per frame.
+    std::unordered_map<const Actor *, int> m_ActorIDs;
     // List of items that are pickup-able by actors
     std::deque<MovableObject *> m_Items;
     // List of free, dead particles flying around
@@ -920,6 +928,7 @@ protected:
 
     // The list created each frame to register all the current MO's
     std::vector<MovableObject *> m_MOIDIndex;
+
     // The ration of terrain pixels to be converted into MOPixel:s upon
     // deep impact of MO.
     float m_SplashRatio;

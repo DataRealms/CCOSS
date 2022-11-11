@@ -375,13 +375,19 @@ namespace RTE {
 		void UpdatePlayerAnalogInput();
 #pragma endregion
 
-		/// <summary>Clears the command state, meaning no input is given and our actor will be idle.</summary>
+		/// <summary>
+		/// Clears the command state, meaning no input is given and our actor will be idle.
+		/// </summary>
 		void ResetCommandState();
 
-		/// <summary>Requests and applies input from the player.</summary>
+		/// <summary>
+		/// Requests and applies input from the player.
+		/// </summary>
 		void GetInputFromPlayer();
 
-		/// <summary>Requests and applies input from the AI.</summary>
+		/// <summary> 
+		/// Requests and applies input from the AI.
+		/// </summary>
 		void GetInputFromAI();
 
 		/// <summary>

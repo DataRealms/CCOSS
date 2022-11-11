@@ -152,6 +152,12 @@ namespace RTE {
 		long long GetSimTickCount() const { return m_SimTimeTicks; }
 
 		/// <summary>
+		/// Gets a current global simulation time measured in update from the start of the simulation up to the last Update of this TimerMan.
+		/// </summary>
+		/// <returns>The number of simulation updates that have occurred since the simulation started.</returns>
+		long long GetSimUpdateCount() const { return m_SimUpdateCount; }
+
+		/// <summary>
 		/// Gets a current global simulation time measured in ms ticks from the start of the simulation up to the last UpdateSim of this TimerMan.
 		/// </summary>
 		/// <returns>The number of ms passed since the simulation started.</returns>

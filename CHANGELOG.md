@@ -251,6 +251,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 -- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
 
+- New `Settings.ini` property `PathFinderGridNodeSize` to define the size of the pathfinder's graph nodes, in pixels. 
+
+- New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation frames. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

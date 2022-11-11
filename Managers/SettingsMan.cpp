@@ -45,6 +45,7 @@ namespace RTE {
 		m_SceneBackgroundAutoScaleMode = 1;
 		m_DisableFactionBuyMenuThemes = false;
 		m_PathFinderGridNodeSize = 20;
+		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
@@ -180,6 +181,8 @@ namespace RTE {
 			reader >> m_DisableFactionBuyMenuThemes;
 		} else if (propName == "PathFinderGridNodeSize") {
 			reader >> m_PathFinderGridNodeSize;
+		} else if (propName == "AIUpdateInterval") {
+			reader >> m_AIUpdateInterval;
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -357,6 +360,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
 		writer.NewPropertyWithValue("DisableFactionBuyMenuThemes", m_DisableFactionBuyMenuThemes);
 		writer.NewPropertyWithValue("PathFinderGridNodeSize", m_PathFinderGridNodeSize);
+		writer.NewPropertyWithValue("AIUpdateInterval", m_AIUpdateInterval);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());

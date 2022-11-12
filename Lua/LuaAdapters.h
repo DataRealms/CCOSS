@@ -100,9 +100,34 @@ namespace RTE {
 	/// </summary>
 	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
 	/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
-	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for. This table will be converted to a </param>
-	static void DrawPrimitives(const PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
-		g_PrimitiveMan.SchedulePrimitivesForTransparentDrawing(transValue, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+	static void DrawPrimitivesWithTransparency(const PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
+		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(DrawBlendMode::BlendTransparency, transValue, transValue, transValue, BlendAmountLimits::MinBlend, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+	/// <summary>
+	/// Schedule to draw multiple primitives of varying type with blending enabled.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+	/// <param name="blendAmount">The blending amount for all the channels. 0-100.</param>
+	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+	static void DrawPrimitivesWithBlending(const PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable) {
+		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmount, blendAmount, blendAmount, blendAmount, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+	/// <summary>
+	/// Schedule to draw multiple primitives of varying type with blending enabled.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+	/// <param name="blendAmountR">The blending amount for the Red channel. 0-100.</param>
+	/// <param name="blendAmountG">The blending amount for the Green channel. 0-100.</param>
+	/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
+	/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
+	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+	static void DrawPrimitivesWithBlendingPerChannel(const PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable) {
+		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmountR, blendAmountG, blendAmountB, blendAmountA, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
 	}
 #pragma endregion
 

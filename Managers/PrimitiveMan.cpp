@@ -1,4 +1,5 @@
 #include "PrimitiveMan.h"
+#include "ConsoleMan.h"
 #include "MOSprite.h"
 
 namespace RTE {
@@ -44,12 +45,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives) {
-		if (transValue < TransparencyPreset::Trans100) {
-			for (GraphicalPrimitive *primitive : primitives) {
-				primitive->m_Transparency = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
-				m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
+	void PrimitiveMan::SchedulePrimitivesForBlendedDrawing(DrawBlendMode blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const std::vector<GraphicalPrimitive *> &primitives) {
+		if (blendMode < DrawBlendMode::NoBlend || blendMode >= DrawBlendMode::BlendModeCount) {
+			g_ConsoleMan.PrintString("ERROR: Encountered invalid blending mode when attempting to draw primitives! Drawing will be skipped! See the DrawBlendMode enumeration for valid modes.");
+			return;
+		}
+		blendAmountR = std::clamp(blendAmountR, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+		blendAmountG = std::clamp(blendAmountG, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+		blendAmountB = std::clamp(blendAmountB, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+		blendAmountA = std::clamp(blendAmountB, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+
+		for (GraphicalPrimitive *primitive : primitives) {
+			primitive->m_BlendMode = blendMode;
+
+			if (blendAmountR == BlendAmountLimits::MaxBlend && blendAmountG == BlendAmountLimits::MaxBlend && blendAmountB == BlendAmountLimits::MaxBlend) {
+				continue;
+			} else if (primitive->m_BlendMode == DrawBlendMode::BlendInvert && blendAmountB == BlendAmountLimits::MaxBlend) {
+				// Invert does nothing with the RGA channel values, it will always be fully inverted on all channels. The B channel controls transparency, so don't schedule if it's set to max.
+				continue;
 			}
+			primitive->m_ColorChannelBlendAmounts = { blendAmountR, blendAmountG, blendAmountB, blendAmountA };
+			m_ScheduledPrimitives.emplace_back(MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(primitive));
 		}
 	}
 
@@ -62,13 +78,31 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
+		if (m_ScheduledPrimitives.empty()) {
+			return;
+		}
+		int lastDrawMode = NULL;
+		DrawBlendMode lastBlendMode = DrawBlendMode::NoBlend;
+		std::array<int, 4> lastBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend };
+
 		for (const std::unique_ptr<GraphicalPrimitive> &primitive : m_ScheduledPrimitives) {
 			if (int playerToDrawFor = primitive->m_Player; playerToDrawFor == player || playerToDrawFor == -1) {
-				if (int transparencySetting = primitive->m_Transparency; transparencySetting > TransparencyPreset::Trans0) {
-					g_FrameMan.SetTransTable(transparencySetting);
-					drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
+				if (DrawBlendMode blendMode = primitive->m_BlendMode; blendMode > DrawBlendMode::NoBlend) {
+					if (const std::array<int, 4> &blendAmounts = primitive->m_ColorChannelBlendAmounts; blendMode != lastBlendMode || blendAmounts != lastBlendAmounts) {
+						g_FrameMan.SetColorTable(blendMode, blendAmounts);
+						lastBlendMode = blendMode;
+						lastBlendAmounts = blendAmounts;
+					}
+					if (lastDrawMode != DRAW_MODE_TRANS) {
+						drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
+						lastDrawMode = DRAW_MODE_TRANS;
+					}
 				} else {
-					drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
+					if (lastDrawMode != DRAW_MODE_SOLID) {
+						drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
+						lastDrawMode = DRAW_MODE_SOLID;
+					}
+					lastBlendMode = DrawBlendMode::NoBlend;
 				}
 				primitive->Draw(targetBitmap, targetPos);
 			}

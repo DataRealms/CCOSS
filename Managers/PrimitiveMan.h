@@ -43,12 +43,16 @@ namespace RTE {
 
 #pragma region Primitive Draw Scheduling
 		/// <summary>
-		/// Schedule to draw multiple primitives of varying type with transparency enabled.
+		/// Schedule to draw multiple primitives of varying type with blending enabled.
 		/// </summary>
-		/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
+		/// <param name="blendMode">The blending mode to use when drawing each primitive.</param>
+		/// <param name="blendAmountR">The blending amount for the Red channel. 0-100.</param>
+		/// <param name="blendAmountG">The blending amount for the Green channel. 0-100.</param>
+		/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
+		/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
 		/// <param name="primitives">A vector of primitives to schedule drawing for.</param>
-		/// <remarks>If the transparency is set to maximum, scheduling will be skipped because drawing fully transparent primitives is the same as not drawing them at all.</remarks>
-		void SchedulePrimitivesForTransparentDrawing(int transValue, const std::vector<GraphicalPrimitive *> &primitives);
+		/// <remarks>If all the blend amounts are set to maximum, scheduling will be skipped because full blend results in full transparency and drawing fully transparent is the same as not drawing at all.</remarks>
+		void SchedulePrimitivesForBlendedDrawing(DrawBlendMode blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const std::vector<GraphicalPrimitive *> &primitives);
 
 		/// <summary>
 		/// Schedule to draw a line primitive.

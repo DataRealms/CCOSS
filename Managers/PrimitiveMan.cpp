@@ -53,15 +53,15 @@ namespace RTE {
 		blendAmountR = std::clamp(blendAmountR, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
 		blendAmountG = std::clamp(blendAmountG, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
 		blendAmountB = std::clamp(blendAmountB, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
-		blendAmountA = std::clamp(blendAmountB, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+		blendAmountA = std::clamp(blendAmountA, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
 
 		for (GraphicalPrimitive *primitive : primitives) {
 			primitive->m_BlendMode = blendMode;
 
 			if (blendAmountR == BlendAmountLimits::MaxBlend && blendAmountG == BlendAmountLimits::MaxBlend && blendAmountB == BlendAmountLimits::MaxBlend) {
 				continue;
-			} else if (primitive->m_BlendMode == DrawBlendMode::BlendInvert && blendAmountB == BlendAmountLimits::MaxBlend) {
-				// Invert does nothing with the RGA channel values, it will always be fully inverted on all channels. The B channel controls transparency, so don't schedule if it's set to max.
+			} else if (primitive->m_BlendMode == DrawBlendMode::BlendInvert && blendAmountA == BlendAmountLimits::MaxBlend) {
+				// Invert does nothing with the RGB channel values, it will always be fully inverted on all channels. The Alpha channel controls transparency, so don't schedule if it's set to max.
 				continue;
 			}
 			primitive->m_ColorChannelBlendAmounts = { blendAmountR, blendAmountG, blendAmountB, blendAmountA };

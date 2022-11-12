@@ -730,8 +730,8 @@ namespace RTE {
 				RTEAbort("Somehow ended up attempting to set a color table for DrawBlendMode::NoBlend in FrameMan::SetColorTable! This should never happen!");
 				return;
 			case DrawBlendMode::BlendInvert:
-				// Invert does nothing with the RGA channel values, it will always be fully inverted on all channels. The B channel controls transparency, so set all channels to B channel value to avoid creating pointless variants.
-				colorChannelBlendAmounts.fill(colorChannelBlendAmounts[2]);
+				// Invert does nothing with the RGB channel values, it will always be fully inverted on all channels, so set all channels to Alpha channel value to avoid creating pointless variants.
+				colorChannelBlendAmounts.fill(colorChannelBlendAmounts[3]);
 				break;
 			case DrawBlendMode::BlendTransparency:
 				// Indexed transparency has dedicated maps that don't use alpha, so min it to attempt to load one of the presets, and in case there isn't one avoid creating a variant for each alpha value.

@@ -5,4 +5,5 @@ sources += files(
 'LuaBindingsManagers.cpp',
 'LuaBindingsMisc.cpp',
 'LuaBindingsSystem.cpp',
+'LuaBindingsPrimitives.cpp'
 )

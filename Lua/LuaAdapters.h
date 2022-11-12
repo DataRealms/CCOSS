@@ -95,6 +95,7 @@ namespace RTE {
 	/// <returns>Whether the mouse button is released or not.</returns>
 	static bool MouseButtonReleased(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonReleased(Players::PlayerOne, whichButton); }
 
+	/// <summary>
 	/// Reloads the specified Entity preset in PresetMan.
 	/// </summary>
 	/// <param name="presetName">The preset name of the Entity to reload.</param>

@@ -284,6 +284,10 @@ namespace RTE {
 		}
 		return outputVector;
 	}
+#pragma endregion
+}
+
+namespace std {
 
 	/// <summary>
 	/// Custom std::hash specialization to allow using std::array as key in hash table based containers.
@@ -298,6 +302,5 @@ namespace RTE {
 			return outHash;
 		}
 	};
-#pragma endregion
 }
 #endif

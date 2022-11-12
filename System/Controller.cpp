@@ -204,7 +204,7 @@ namespace RTE {
 		// Throttle the AI to only update every X sim updates.
 		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check an ID against the frame number.
 		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();
-		if (m_ControlledActor && g_MovableMan.GetActorID(m_ControlledActor) % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
+		if (m_ControlledActor && g_MovableMan.GetContiguousActorID(m_ControlledActor) % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
 			// Don't reset our command state, so we give the same input as last frame.
 			return;
 		}

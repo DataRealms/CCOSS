@@ -253,7 +253,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `PathFinderGridNodeSize` to define the size of the pathfinder's graph nodes, in pixels. 
 
-- New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness.
+- New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness. This can be accessed (read-only) from Lua, through `SettingsMan.AIUpdateInterval`.
 
 </details>
 

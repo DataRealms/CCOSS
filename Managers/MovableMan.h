@@ -586,11 +586,12 @@ public:
 
     bool IsOfActor(MOID checkMOID);
 
-    // <summary>
-    // Gives a unique, contiguous id per-actor. This is regenerated every frame. Returns -1 if the actor doesn't exist in our state.
-    // </summary>
-    // <returns> An id for the actor. </returns>
-    int GetActorID(const Actor *actor) const;
+    /// <summary>
+    /// Gives a unique, contiguous id per-actor. This is regenerated every frame. Returns -1 if the actor doesn't exist in our state.
+    /// </summary>
+    /// <param name="actor">The actor to get an id for.</param>
+    /// <returns>An id for the actor.</returns>
+    int GetContiguousActorID(const Actor *actor) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -896,7 +897,7 @@ protected:
     // All actors in the scene
     std::deque<Actor *> m_Actors;
     // A map to give a unique contiguous index per-actor. This is re-created per frame.
-    std::unordered_map<const Actor *, int> m_ActorIDs;
+    std::unordered_map<const Actor *, int> m_ContiguousActorIDs;
     // List of items that are pickup-able by actors
     std::deque<MovableObject *> m_Items;
     // List of free, dead particles flying around

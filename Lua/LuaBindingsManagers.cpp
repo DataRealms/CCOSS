@@ -320,6 +320,7 @@ namespace RTE {
 
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
+		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval)
 		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
 	}
 

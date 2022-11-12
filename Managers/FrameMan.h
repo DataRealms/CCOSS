@@ -625,7 +625,7 @@ namespace RTE {
 		/// This flag does the job. While true blitting the backbuffer to the screen will be skipped during FlipFrameBuffers().
 		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
 		/// </summary>
-		static bool m_DisableFrameBufferFlip;
+		static bool s_DisableFrameBufferFlip;
 
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
@@ -642,7 +642,7 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
-#pragma region Display Switch Callbacks
+#pragma region Display Switch Handling
 		/// <summary>
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
 		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
@@ -653,21 +653,21 @@ namespace RTE {
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
 		/// </summary>
 		static void DisplaySwitchIn();
-#pragma endregion
-
-#pragma region Create Breakdown
-		/// <summary>
-		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
-		/// </summary>
-		void SetInitialGraphicsDriver();
 
 		/// <summary>
 		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
 		/// </summary>
 		void SetDisplaySwitchMode() const;
+#pragma endregion
+
+#pragma region Initialize Breakdown
+		/// <summary>
+		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Initialize().
+		/// </summary>
+		void SetInitialGraphicsDriver();
 
 		/// <summary>
-		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
+		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Initialize().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
@@ -684,7 +684,7 @@ namespace RTE {
 		bool ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
 
 		/// <summary>
-		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
+		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Initialize().
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();

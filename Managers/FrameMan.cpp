@@ -23,7 +23,7 @@
 
 namespace RTE {
 
-	bool FrameMan::m_DisableFrameBufferFlip = false;
+	bool FrameMan::s_DisableFrameBufferFlip = false;
 
 	const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> FrameMan::c_BlenderSetterFunctions = {
 		nullptr, // NoBlend obviously has no blender, but we want to keep the indexes matching with the enum.
@@ -46,7 +46,7 @@ namespace RTE {
 		g_UInputMan.DisableMouseMoving(true);
 
 #ifdef _WIN32
-		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = true; }
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { s_DisableFrameBufferFlip = true; }
 #endif
 
 #ifdef __unix__
@@ -61,7 +61,7 @@ namespace RTE {
 		g_UInputMan.DisableMouseMoving(false);
 
 #ifdef _WIN32
-		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = false; }
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { s_DisableFrameBufferFlip = false; }
 #endif
 	}
 
@@ -705,7 +705,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() const {
-		if (m_DisableFrameBufferFlip) {
+		if (s_DisableFrameBufferFlip) {
 			return;
 		}
 

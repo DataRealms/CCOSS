@@ -317,18 +317,18 @@ namespace RTE {
 		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
-		/// Sets a transparency table which is used for any subsequent transparency drawing.
-		/// Will first attempt to use a pre-calculated table preset and if none match will generate a new table.
+		/// Sets a specific color table which is used for any subsequent blended drawing in indexed color modes.
 		/// </summary>
-		/// <param name="transValue">The transparency value to set. From 0 (opaque) to 100 (transparent).</param>
-		void SetTransTable(int transValue);
+		/// <param name="blendMode">The blending mode that will be used in drawing.</param>
+		/// <param name="colorChannelBlendAmounts">The color channel blend amounts that will be used to select or create the correct table in the specified blending mode.</param>
+		/// <remarks>New color tables will be created using the default palette loaded at initialization because handling per-palette per-mode color tables is too much headache, even if it may possibly produce better blending results.</remarks>
+		void SetColorTable(DrawBlendMode blendMode, std::array<int, 4> colorChannelBlendAmounts);
 
 		/// <summary>
-		/// Sets a specific pre-calculated transparency table which is used for any subsequent transparency drawing.
+		/// Sets a specific pre-calculated transparency table which is used for any subsequent transparency drawing in indexed color modes.
 		/// </summary>
 		/// <param name="transValue">The transparency preset value. See the TransparencyPreset enumeration for values.</param>
-		/// <returns>Whether a preset transparency table was found and applied.</returns>
-		bool SetTransTableFromPreset(TransparencyPreset transValue);
+		void SetTransTableFromPreset(TransparencyPreset transValue);
 
 		/// <summary>
 		/// Flashes any of the players' screen with the specified color for this frame.
@@ -560,14 +560,14 @@ namespace RTE {
 		bool m_TwoPlayerVSplit; //!< Whether the screen is set to be split vertically when in two player splitscreen, or is default split horizontally.
 
 		ContentFile m_PaletteFile; //!< File of the screen palette.
-		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
+		PALETTE m_Palette; //!< The current array of RGB entries read from the palette file.
+		PALETTE m_DefaultPalette; //!< The default array of RGB entries read from the palette file at initialization.
 		RGB_MAP m_RGBTable; //!< RGB mapping table to speed up calculation of Allegro color maps.
 
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
-		std::unordered_map<int, COLOR_MAP> m_TransparencyTablePresets; //!< Pre-calculated color tables for transparent drawing in indexed color mode.
-		std::unordered_map<int, COLOR_MAP> m_CustomTransparencyTables; //!< Color tables for transparent drawing in indexed color mode that do not match any of the existing presets.
+		std::array<std::unordered_map<std::array<int, 4>, COLOR_MAP>, DrawBlendMode::BlendModeCount> m_ColorTables; //!< Color tables for blended drawing in indexed color mode.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
@@ -626,6 +626,8 @@ namespace RTE {
 		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
 		/// </summary>
 		static bool m_DisableFrameBufferFlip;
+
+		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
@@ -686,6 +688,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();
+
+		/// <summary>
+		/// Creates the RGB lookup table and color table presets for drawing with transparency in indexed color mode. This is called during Initialize().
+		/// </summary>
+		void CreatePresetColorTables();
 #pragma endregion
 
 #pragma region Resolution Handling

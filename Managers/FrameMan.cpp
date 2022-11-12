@@ -25,6 +25,21 @@ namespace RTE {
 
 	bool FrameMan::m_DisableFrameBufferFlip = false;
 
+	const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> FrameMan::c_BlenderSetterFunctions = {
+		nullptr, // NoBlend obviously has no blender, but we want to keep the indexes matching with the enum.
+		&set_burn_blender,
+		&set_color_blender,
+		&set_difference_blender,
+		&set_dissolve_blender,
+		&set_dodge_blender,
+		&set_invert_blender,
+		&set_luminance_blender,
+		&set_multiply_blender,
+		&set_saturation_blender,
+		&set_screen_blender,
+		nullptr // Transparency does not rely on the blender setting, it creates a map with the dedicated function instead of with the generic one.
+	};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::DisplaySwitchOut() {
@@ -92,8 +107,6 @@ namespace RTE {
 		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
-		m_TransparencyTablePresets.clear();
-		m_CustomTransparencyTables.clear();
 		m_GUIScreen = nullptr;
 		m_LargeFont = nullptr;
 		m_SmallFont = nullptr;
@@ -306,22 +319,11 @@ namespace RTE {
 
 		LoadPalette(m_PaletteFile.GetDataPath());
 
-		PALETTE ccPalette;
-		get_palette(ccPalette);
+		// Store the default palette for re-use when creating new color tables for different blend modes because the palette can be changed via scripts, and handling per-palette per-mode color tables is too much headache.
+		get_palette(m_DefaultPalette);
 
-		// Create RGB lookup table that supposedly speeds up calculation of other color tables.
-		create_rgb_table(&m_RGBTable, ccPalette, nullptr);
-		rgb_map = &m_RGBTable;
-
-		// Create transparency color tables.
-		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
-			int presetTransValue = index * 5;
-			m_TransparencyTablePresets.try_emplace(presetTransValue);
-			int blendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
-			create_trans_table(&m_TransparencyTablePresets.at(presetTransValue), ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
-		}
+		CreatePresetColorTables();
 		SetTransTableFromPreset(TransparencyPreset::Trans50);
-
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
@@ -378,6 +380,24 @@ namespace RTE {
 		m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h);
 
 		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::CreatePresetColorTables() {
+		// Create RGB lookup table that supposedly speeds up calculation of other color tables.
+		create_rgb_table(&m_RGBTable, m_DefaultPalette, nullptr);
+		rgb_map = &m_RGBTable;
+
+		// Create transparency color tables. Tables for other blend modes will be created on demand.
+		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
+			int presetBlendAmount = index * 5;
+			std::array<int, 4> colorChannelBlendAmounts = { presetBlendAmount, presetBlendAmount, presetBlendAmount, BlendAmountLimits::MinBlend };
+			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
+
+			m_ColorTables.at(DrawBlendMode::BlendTransparency).try_emplace(colorChannelBlendAmounts);
+			create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts), m_DefaultPalette, adjustedBlendAmount, adjustedBlendAmount, adjustedBlendAmount, nullptr);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -698,29 +718,42 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::SetTransTableFromPreset(TransparencyPreset transValue) {
-		RTEAssert(transValue >= TransparencyPreset::Trans0 || transValue < TransparencyPreset::TransPresetCount, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
-		if (m_TransparencyTablePresets.find(transValue) != m_TransparencyTablePresets.end()) {
-			color_map = &m_TransparencyTablePresets.at(transValue);
-			return true;
+	void FrameMan::SetColorTable(DrawBlendMode blendMode, std::array<int, 4> colorChannelBlendAmounts) {
+		RTEAssert(blendMode > DrawBlendMode::NoBlend && blendMode < DrawBlendMode::BlendModeCount, "Invalid DrawBlendMode or DrawBlendMode::NoBlend passed into FrameMan::SetColorTable. See DrawBlendMode enumeration for defined values.");
+
+		for (int &colorChannelBlendAmount : colorChannelBlendAmounts) {
+			colorChannelBlendAmount = std::clamp(colorChannelBlendAmount, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
 		}
-		return false;
+
+
+		if (m_ColorTables[blendMode].find(colorChannelBlendAmounts) == m_ColorTables[blendMode].end()) {
+			m_ColorTables[blendMode].try_emplace(colorChannelBlendAmounts);
+
+			std::array<int, 4> adjustedColorChannelBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend };
+			for (int index = 0; index < adjustedColorChannelBlendAmounts.size(); ++index) {
+				adjustedColorChannelBlendAmounts[index] = 255 - (static_cast<int>(255.0F * 0.01F * static_cast<float>(colorChannelBlendAmounts[index])));
+			}
+
+			if (blendMode == DrawBlendMode::BlendTransparency) {
+				// Paletted transparency has dedicated tables so better create one instead of generic for best result. Alpha is ignored here.
+				create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts), m_DefaultPalette, adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], nullptr);
+			} else {
+				c_BlenderSetterFunctions[blendMode](adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], adjustedColorChannelBlendAmounts[3]);
+				create_blender_table(&m_ColorTables[blendMode].at(colorChannelBlendAmounts), m_DefaultPalette, nullptr);
+				// Reset the blender to avoid potentially screwing some true-color draw operation. Hopefully.
+				c_BlenderSetterFunctions[blendMode](255, 255, 255, 255);
+			}
+		}
+		color_map = &m_ColorTables[blendMode].at(colorChannelBlendAmounts);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetTransTable(int transValue) {
-		transValue = std::clamp(transValue, static_cast<int>(TransparencyPreset::Trans0), static_cast<int>(TransparencyPreset::Trans100));
-
-		if (!SetTransTableFromPreset(static_cast<TransparencyPreset>(transValue))) {
-			if (m_CustomTransparencyTables.find(transValue) == m_CustomTransparencyTables.end()) {
-				PALETTE ccPalette;
-				get_palette(ccPalette);
-				m_CustomTransparencyTables.try_emplace(transValue);
-				int blendAmount = 255 - (static_cast<int>(255.0F * 0.01F * static_cast<float>(transValue)));
-				create_trans_table(&m_CustomTransparencyTables.at(transValue), ccPalette, blendAmount, blendAmount, blendAmount, nullptr);
-			}
-			color_map = &m_CustomTransparencyTables.at(transValue);
+	void FrameMan::SetTransTableFromPreset(TransparencyPreset transValue) {
+		RTEAssert(transValue >= TransparencyPreset::Trans0 && transValue <= TransparencyPreset::Trans100, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+		std::array<int, 4> colorChannelBlendAmounts = { transValue, transValue, transValue, BlendAmountLimits::MinBlend };
+		if (m_ColorTables[DrawBlendMode::BlendTransparency].find(colorChannelBlendAmounts) != m_ColorTables[DrawBlendMode::BlendTransparency].end()) {
+			color_map = &m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts);
 		}
 	}
 

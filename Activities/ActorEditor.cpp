@@ -57,7 +57,6 @@ ConcreteClassInfo(ActorEditor, EditorActivity, 0);
 void ActorEditor::Clear()
 {
     m_pEditedActor = 0;
-    m_ActorDataFilePath.clear();
     m_pPicker = 0;
 }
 
@@ -351,8 +350,6 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
 			m_pEditedActor->GetPieMenu()->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice->Clone()), this);
 		}
 
-        // Get the actor's data path so we can reload that file quickly
-        m_ActorDataFilePath = g_PresetMan.GetEntityDataLocation(m_pEditedActor->GetClassName(), m_pEditedActor->GetPresetName(), m_pEditedActor->GetModuleID());
         m_EditorMode = EditorActivity::EDITINGOBJECT;
         m_ModeChange = true;
     }
@@ -366,31 +363,18 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReloadActorData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the ini with the currently edited Actor's definitions.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ActorEditor::ReloadActorData()
-{
-    if (!m_pEditedActor || m_ActorDataFilePath.empty())
-        return false;
-
-    // Set up the reader to overwrite old definitions
-    Reader reader(m_ActorDataFilePath.c_str(), true);
-
-    // Read in all the objects defined in the ini, overwriting any previous definitions
-    while (reader.NextProperty())
-    {
-        reader.ReadPropName();
-        g_PresetMan.GetEntityPreset(reader);
-    }
-
-    // Now reload the actor from the new definition
-    const Entity *pEntity = g_PresetMan.GetEntityPreset(m_pEditedActor->GetClassName(), m_pEditedActor->GetPresetName(), m_pEditedActor->GetModuleID());
-    LoadActor(pEntity);
-
-    return m_pEditedActor != 0;
+bool ActorEditor::ReloadActorData() {
+	if (m_pEditedActor) {
+		std::string presetName = m_pEditedActor->GetPresetName();
+		std::string className = m_pEditedActor->GetClassName();
+		std::string moduleName = g_PresetMan.GetDataModuleName(m_pEditedActor->GetModuleID());
+		g_PresetMan.ReloadEntityPreset(presetName, className, moduleName, false);
+		LoadActor(g_PresetMan.GetEntityPreset(className, presetName, moduleName));
+		return m_pEditedActor != nullptr;
+	}
+	return false;
 }
 
 

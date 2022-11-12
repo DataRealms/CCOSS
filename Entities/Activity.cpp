@@ -707,8 +707,8 @@ void Activity::Clear() {
 			return false;
 		}
 
-		Actor *preSwitchActor = (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) ? m_ControlledActor[player] : 0;
-		if (preSwitchActor) {
+		Actor *preSwitchActor = (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) ? m_ControlledActor[player] : nullptr;
+		if (preSwitchActor && preSwitchActor->GetController()->GetPlayer() == player) {
 			preSwitchActor->SetControllerMode(Controller::CIM_AI);
 			preSwitchActor->GetController()->SetDisabled(false);
 		}
@@ -721,7 +721,9 @@ void Activity::Clear() {
 		SoundContainer *actorSwitchSoundToPlay = (m_ControlledActor[player] == m_Brain[player]) ? g_GUISound.BrainSwitchSound() : g_GUISound.ActorSwitchSound();
 		actorSwitchSoundToPlay->Play(player);
 
-		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetMagnitude() > g_FrameMan.GetResX() / 2) {
+		// If out of frame from the POV of the preswitch actor, play the camera travel noise
+		const int switchSoundThreshold = g_FrameMan.GetResX() / 2;
+		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).MagnitudeIsGreaterThan(static_cast<float>(switchSoundThreshold))) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}
 

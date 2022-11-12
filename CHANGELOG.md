@@ -197,7 +197,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added support for nested block comments in INI. ([Issue #248](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/248))  
 	The reader will track block comment open tags and crash if a file ends while a block is open, reporting the line it was opened on.
-	
+
+- Added thickness option to Line primitives. ([Issue #403](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/403))  
+	New bindings with argument for thickness are:  
+	`PrimitiveMan:DrawLinePrimitive(startPos, endPos, color, thickness)`  
+	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
+	Original bindings with no thickness argument are untouched and can be called as they were.
+
+- New `Vector` Lua (R/O) property `SqrMagnitude` which returns the squared magnitude of the `Vector`.  
+	Should be used for more efficient comparison with `vector.SqrMagnitude > (floatValue * floatValue)` over `vector.Magnitude > floatValue`.
+
+- New `Vector` Lua convenience functions for more efficient magnitude comparison.  
+	```lua
+	-- These perform vector.SqrMagnitude > or < (floatValue * floatValue).
+	vector:MagnitudeIsGreaterThan(floatValue) -- Note that you can use (not vector:MagnitudeIsGreaterThan(floatValue)) in place of (vector.SqrMagnitude <= (floatValue * floatValue)).
+	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
+	```
+
+- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
+	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
+	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
+	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
+	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
 </details>
 
@@ -296,6 +319,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(35) EditorTeam3
 	(36) EditorTeam4
 	```
+
+- Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
 
 </details>
 
@@ -603,6 +628,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- The landing zone cursor will now show the width of the selected delivery craft.
 
 - `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
 	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.

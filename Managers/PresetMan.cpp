@@ -43,6 +43,7 @@ void PresetMan::Clear()
     m_DataModuleIDs.clear();
     m_OfficialModuleCount = 0;
     m_TotalGroupRegister.clear();
+	m_LastReloadedEntityPresetInfo.fill("");
 }
 
 /*
@@ -501,7 +502,7 @@ bool PresetMan::GetAllOfType(list<Entity *> &entityList, string type, int whichM
     {
         // Send the list to each module
         for (int i = 0; i < m_pDataModules.size(); ++i)
-            foundAny = m_pDataModules[i]->GetAllOfType(entityList, type) || foundAny; 
+            foundAny = m_pDataModules[i]->GetAllOfType(entityList, type) || foundAny;
     }
     // Specific module
     else
@@ -544,35 +545,43 @@ bool PresetMan::GetAllOfTypeInModuleSpace(std::list<Entity *> &entityList, std::
     return foundAny;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAllOfGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list all previously read in (defined) Entitys which are
-//                  associated with a specific group.
+bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
+	RTEAssert(!groups.empty(), "Looking for empty groups in PresetMan::GetAllOfGroups!");
+	bool foundAny = false;
 
-bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string type, int whichModule)
-{
-    RTEAssert(!group.empty(), "Looking for empty group!");
+	if (whichModule < 0) {
+		for (DataModule *dataModule : m_pDataModules) {
+			foundAny = dataModule->GetAllOfGroups(entityList, groups, type) || foundAny;
+		}
+	} else {
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllOfGroups!");
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, groups, type);
+	}
+	return foundAny;
+}
 
-    bool foundAny = false;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // All modules
-    if (whichModule < 0)
-    {
-        // Get from all modules
-        for (int i = 0; i < m_pDataModules.size(); ++i)
-            // Send the list to each module, let them add
-            foundAny = m_pDataModules[i]->GetAllOfGroup(entityList, group, type) || foundAny;
-    }
-    // Specific one
-    else
-    {
-        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-        foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
-    }
+bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::vector<std::string> &groups, const std::string &type, int whichModule) {
+	if (groups.empty()) {
+		RTEAbort("Looking for empty groups in PresetMan::GetAllNotOfGroups!");
+	} else if (std::find(groups.begin(), groups.end(), "All") != groups.end()) {
+		RTEAbort("Trying to exclude all groups while looking for presets in PresetMan::GetAllNotOfGroups!");
+	}
 
-    return foundAny;
+	bool foundAny = false;
+
+	if (whichModule < 0) {
+		for (DataModule *dataModule : m_pDataModules) {
+			foundAny = dataModule->GetAllNotOfGroups(entityList, groups, type) || foundAny;
+		}
+	} else {
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllNotOfGroups!");
+		foundAny = m_pDataModules[whichModule]->GetAllNotOfGroups(entityList, groups, type);
+	}
+	return foundAny;
 }
 
 
@@ -596,13 +605,13 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
         // Get from all modules
         for (int i = 0; i < m_pDataModules.size(); ++i)
             // Send the list to each module, let them add
-            foundAny = m_pDataModules[i]->GetAllOfGroup(entityList, group, type) || foundAny;
+			foundAny = m_pDataModules[i]->GetAllOfGroups(entityList, { group }, type) || foundAny;
     }
     // Specific one
     else
     {
         RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-        foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, { group }, type);
     }
 
     // Didn't find any of that group in those module(s)
@@ -642,11 +651,11 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 	// All modules
 	if (whichModule < 0) {
 		for (DataModule *dataModule : m_pDataModules) {
-			if (dataModule->IsFaction()) { foundAny = dataModule->GetAllOfGroup(tempList, group, type) || foundAny; }
+			if (dataModule->IsFaction()) { foundAny = dataModule->GetAllOfGroups(tempList, { group }, type) || foundAny; }
 		}
 	} else {
 		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-		foundAny = m_pDataModules[whichModule]->GetAllOfGroup(tempList, group, type);
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(tempList, { group }, type);
 	}
 
 	//Filter found entities, we need only buyables
@@ -722,7 +731,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 				return (*itr);
 		}
 	}
-	else 
+	else
 	{
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
@@ -870,6 +879,67 @@ void PresetMan::ReloadAllScripts()
         m_pDataModules[i]->ReloadAllScripts();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &moduleName, bool storeReloadedPresetDataForQuickReloading) {
+	if (className.empty() || presetName.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Trying to reload Entity preset without specifying preset name or type!");
+		return false;
+	}
+
+	int moduleId = -1;
+	if (moduleName != "") {
+		moduleId = GetModuleID(moduleName);
+		if (moduleId < 0) {
+			g_ConsoleMan.PrintString("ERROR: Failed to find data module with name \"" + moduleName + "\" while attempting to reload an Entity preset with name \"" + presetName + "\" of type \"" + className + "\"!");
+			return false;
+		}
+	}
+	std::string actualDataModuleOfPreset = moduleName;
+
+	std::string presetDataLocation = GetEntityDataLocation(className, presetName, moduleId);
+	if (presetDataLocation.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\" or any official module! The preset might not exist!");
+		return false;
+	}
+
+	// GetEntityDataLocation will attempt to locate the preset in the official modules if it fails to locate it in the specified module. Warn and correct the result string.
+	if (std::string presetDataLocationModuleName = presetDataLocation.substr(0, presetDataLocation.find_first_of("/\\")); presetDataLocationModuleName != actualDataModuleOfPreset) {
+		actualDataModuleOfPreset = presetDataLocationModuleName;
+		if (moduleName != "") {
+			g_ConsoleMan.PrintString("WARNING: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\"! Entity preset data matching the name and type was found in \"" + actualDataModuleOfPreset + "\"!");
+		}
+	}
+
+	Reader reader(presetDataLocation.c_str(), true);
+	while (reader.NextProperty()) {
+		reader.ReadPropName();
+		g_PresetMan.GetEntityPreset(reader);
+	}
+	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + actualDataModuleOfPreset + "\" was successfully reloaded");
+
+	if (storeReloadedPresetDataForQuickReloading) {
+		m_LastReloadedEntityPresetInfo[0] = presetName;
+		m_LastReloadedEntityPresetInfo[1] = className;
+		m_LastReloadedEntityPresetInfo[2] = moduleName == "" ? actualDataModuleOfPreset : moduleName; // If there was a module name, store it as-is so that if there's a data location warning, it persists on every quick reload.
+	}
+
+	m_ReloadEntityPresetCalledThisUpdate = true;
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::QuickReloadEntityPreset() {
+	for (const std::string &entityPresetInfoEntry : m_LastReloadedEntityPresetInfo) {
+		if (entityPresetInfoEntry.empty()) {
+			g_ConsoleMan.PrintString("ERROR: Trying to quick reload Entity preset when there is nothing set to reload!");
+			return false;
+		}
+	}
+	return ReloadEntityPreset(m_LastReloadedEntityPresetInfo[0], m_LastReloadedEntityPresetInfo[1], m_LastReloadedEntityPresetInfo[2]);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialMapping
@@ -947,7 +1017,7 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
 
             foundAny = !pGroupList->empty();
         }
-        // Get only modules that contain an entity of valid type 
+        // Get only modules that contain an entity of valid type
         else
             foundAny = m_pDataModules[whichModule]->GetGroupsWithType(groupList, withType) || foundAny;
     }
@@ -983,7 +1053,7 @@ bool PresetMan::GetModuleSpaceGroups(list<string> &groupList, int whichModule, s
         else
         {
             for (int module = 0; module < (int)m_pDataModules.size(); ++module)
-                foundAny = GetGroups(groupList, module, withType) || foundAny;            
+                foundAny = GetGroups(groupList, module, withType) || foundAny;
         }
     }
     // Getting modulespace of specific module

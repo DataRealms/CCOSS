@@ -308,7 +308,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
         returnVel.CapMagnitude(adjustedTravelSpeed);
         returnVel += m_JointVel;
 
-//        if (distVect.GetMagnitude() < 0.5)
+//        if (distVect.MagnitudeIsLessThan(0.5F))
 //            returnVel *= 0.1;
     }
     else
@@ -373,24 +373,24 @@ float LimbPath::GetNextTimeChunk(const Vector &limbPos)
 
 void LimbPath::ReportProgress(const Vector &limbPos)
 {
-    if (IsStaticPoint())
-    {
-        m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).GetMagnitude() < 1.0;
-    }
-    else
-    {
+	if (IsStaticPoint()) {
+        const float staticPointEndedThreshold = 1.0F;
+		m_Ended = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()).MagnitudeIsLessThan(staticPointEndedThreshold);
+	} else {
         // Check if we are sufficiently close to the target to start going after the next one.
         Vector distVec = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget());
         float distance = distVec.GetMagnitude();
         float segMag = (*(m_CurrentSegment)).GetMagnitude();
-// TODO: Don't hardcode this!")
-        if (distance < 1.5)
+
+        // TODO: Don't hardcode this!")
+        const float segmentEndedThreshold = 1.5F;
+        if (distance < segmentEndedThreshold)
         {
             if (++(m_CurrentSegment) == m_Segments.end())
             {
                 --(m_CurrentSegment);
                 // Get normalized progress measure toward the target.
-                m_SegProgress = distance > segMag ? 0.0 : (1.0 - (distance / segMag));
+                m_SegProgress = distance > segMag ? 0.0F : (1.0F - (distance / segMag));
                 m_Ended = true;
             }
             // Next segment!
@@ -403,7 +403,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
         }
         else
         {
-            m_SegProgress = distance > segMag ? 0.0 : (1.0 - (distance / segMag));
+            m_SegProgress = distance > segMag ? 0.0F : (1.0F - (distance / segMag));
             m_Ended = false;
         }
 
@@ -441,7 +441,7 @@ float LimbPath::GetTotalProgress() const
 // Method:          GetRegularProgress
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a value representing the progress that has been made on the
-//                  regular part of this path, ie averythign except the starting segments.
+//                  regular part of this path, ie everything except the starting segments.
 //                  If progress has not been made past the starting segments, < 0 will
 //                  be returned. If the path has ended, 0.0 is returned.
 

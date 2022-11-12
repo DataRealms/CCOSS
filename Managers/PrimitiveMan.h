@@ -60,7 +60,16 @@ namespace RTE {
 		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
 		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawLinePrimitive(const Vector &startPos, const Vector &endPos, unsigned char color) { m_ScheduledPrimitives.emplace_back(std::make_unique<LinePrimitive>(-1, startPos, endPos, color)); }
+		void DrawLinePrimitive(const Vector &startPos, const Vector &endPos, unsigned char color) { DrawLinePrimitive(-1, startPos, endPos, color, 1); }
+
+		/// <summary>
+		/// Schedule to draw a line primitive with the option to change thickness.
+		/// </summary>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the line in pixels.</param>
+		void DrawLinePrimitive(const Vector &startPos, const Vector &endPos, unsigned char color, int thickness) { DrawLinePrimitive(-1, startPos, endPos, color, thickness); }
 
 		/// <summary>
 		/// Schedule to draw a line primitive visible only to a specified player.
@@ -69,7 +78,17 @@ namespace RTE {
 		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
 		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color) { m_ScheduledPrimitives.emplace_back(std::make_unique<LinePrimitive>(player, startPos, endPos, color)); }
+		void DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color) { DrawLinePrimitive(player, startPos, endPos, color, 1); }
+
+		/// <summary>
+		/// Schedule to draw a line primitive visible only to a specified player with the option to change thickness.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the line in pixels.</param>
+		void DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness);
 
 		/// <summary>
 		/// Schedule to draw an arc primitive.

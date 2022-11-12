@@ -583,6 +583,14 @@ namespace RTE {
 		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms, bool propagateToChildAttachables);
 
 		/// <summary>
+		/// Add or removes this Attachable's PieSlices and PieMenu listeners, as well as those of any of its child Attachables, from the given PieMenu (should be the root parent's PieMenu).
+		/// Note that listeners are only added for Attachables that have at least one script file with the appropriate Lua function.
+		/// </summary>
+		/// <param name="pieMenuToModify">The PieMenu to modify, passed in to keep the recursion simple and clean.</param>
+		/// <param name="addToPieMenu">Whether to add this Attachable's PieSlices and listeners to, or remove them from, the root parent's PieMenu.</param>
+		void AddOrRemovePieSlicesAndListenersFromPieMenu(PieMenu *pieMenuToModify, bool addToPieMenu);
+
+		/// <summary>
 		/// Clears all the member variables of this Attachable, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();

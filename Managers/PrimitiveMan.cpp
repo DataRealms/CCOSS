@@ -71,6 +71,23 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PrimitiveMan::DrawLinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness) {
+		if (thickness > 1) {
+			Vector dirVector = g_SceneMan.ShortestDistance(startPos, endPos, g_SceneMan.SceneWrapsX()).SetMagnitude(static_cast<float>(thickness - 1) / 2.0F).Perpendicularize();
+			Vector pointA = startPos + dirVector;
+			Vector pointB = startPos - dirVector;
+			Vector pointC = endPos + dirVector;
+			Vector pointD = endPos - dirVector;
+
+			DrawTriangleFillPrimitive(player, pointA, pointB, pointC, color);
+			DrawTriangleFillPrimitive(player, pointC, pointD, pointB, color);
+		} else {
+			m_ScheduledPrimitives.emplace_back(std::make_unique<LinePrimitive>(player, startPos, endPos, color));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PrimitiveMan::DrawIconPrimitive(int player, const Vector &centerPos, Entity *entity) {
 		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity)) { m_ScheduledPrimitives.emplace_back(std::make_unique<BitmapPrimitive>(player, centerPos, moSprite->GetGraphicalIcon(), 0, false, false)); }
 	}

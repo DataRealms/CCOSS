@@ -95,6 +95,26 @@ namespace RTE {
 	/// <returns>Whether the mouse button is released or not.</returns>
 	static bool MouseButtonReleased(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonReleased(Players::PlayerOne, whichButton); }
 
+	/// Reloads the specified Entity preset in PresetMan.
+	/// </summary>
+	/// <param name="presetName">The preset name of the Entity to reload.</param>
+	/// <param name="className">The class name of the Entity to reload.</param>
+	/// <param name="moduleName">The module name of the Entity to reload.</param>
+	/// <returns>Whether or not the Entity was reloaded.</returns>
+	static bool ReloadEntityPreset1(PresetMan &presetMan, const std::string &presetName, const std::string &className, const std::string &moduleName) {
+		return presetMan.ReloadEntityPreset(presetName, className, moduleName);
+	}
+
+	/// <summary>
+	/// Reloads the specified Entity preset in PresetMan.
+	/// </summary>
+	/// <param name="presetName">The preset name of the Entity to reload.</param>
+	/// <param name="className">The class name of the Entity to reload.</param>
+	/// <returns>Whether or not the Entity was reloaded.</returns>
+	static bool ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className) {
+		return ReloadEntityPreset1(presetMan, presetName, className, "");
+	}
+
 	/// <summary>
 	/// Schedules to draw multiple primitives of varying type with transparency enabled.
 	/// </summary>

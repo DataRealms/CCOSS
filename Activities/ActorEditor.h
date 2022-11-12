@@ -236,8 +236,6 @@ protected:
 
     // The loaded MOSR of which we are editing. Owned by this.
     Actor *m_pEditedActor;
-    // The file to reload to get any alterations to the current actor.
-    std::string m_ActorDataFilePath;
     // The picker for selecting which object to load
     ObjectPickerGUI *m_pPicker;
 

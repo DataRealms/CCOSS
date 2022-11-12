@@ -103,6 +103,7 @@ void BuyMenuGUI::Clear()
 	m_pCraftMassLabel = 0;
 
     m_pSelectedCraft = 0;
+	m_DeliveryWidth = 0;
     m_pCostLabel = 0;
     m_pBuyButton = 0;
     m_pSaveButton = 0;
@@ -201,6 +202,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
     m_pCategoryTabs[BODIES] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BodiesTab"));
+	m_pCategoryTabs[MECHA] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("MechaTab"));
     m_pCategoryTabs[TOOLS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ToolsTab"));
     m_pCategoryTabs[GUNS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("GunsTab"));
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
@@ -828,14 +830,15 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::RefreshTabDisabledStates() {
-    bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
-    m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
-    m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
-    m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
+	m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[MECHA]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+	m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+	m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1993,34 +1996,27 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
 
     // The vector of lists which will be filled with catalog objects, grouped by which data module they were read from
-    vector<list<Entity *> > catalogList;
+    std::vector<std::list<Entity *>> catalogList;
+	std::vector<std::string> mechaCategoryGroups = { "Actors - Mecha", "Actors - Turrets" };
 
-    if (m_MenuCategory == CRAFT)
-    {
-        AddObjectsToItemList(catalogList, "ACRocket");
-        AddObjectsToItemList(catalogList, "ACDropShip");
-    }
-    else if (m_MenuCategory == BODIES)
-    {
-        AddObjectsToItemList(catalogList, "AHuman");
-        AddObjectsToItemList(catalogList, "ACrab");
-    }
-    else if (m_MenuCategory == TOOLS)
-    {
-		AddObjectsToItemList(catalogList, "HeldDevice", "Tools");
-    }
-    else if (m_MenuCategory == GUNS)
-    {
-        AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
-    }
-    else if (m_MenuCategory == BOMBS)
-    {
-        AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
-    }
-    else if (m_MenuCategory == SHIELDS)
-    {
-        AddObjectsToItemList(catalogList, "HeldDevice", "Shields");
-    }
+	if (m_MenuCategory == CRAFT) {
+		AddObjectsToItemList(catalogList, "ACRocket");
+		AddObjectsToItemList(catalogList, "ACDropShip");
+	} else if (m_MenuCategory == BODIES) {
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, true);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, true);
+	} else if (m_MenuCategory == MECHA) {
+		AddObjectsToItemList(catalogList, "AHuman", mechaCategoryGroups, false);
+		AddObjectsToItemList(catalogList, "ACrab", mechaCategoryGroups, false);
+	} else if (m_MenuCategory == TOOLS) {
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Tools" });
+	} else if (m_MenuCategory == GUNS) {
+		AddObjectsToItemList(catalogList, "HDFirearm", { "Weapons" });
+	} else if (m_MenuCategory == BOMBS) {
+		AddObjectsToItemList(catalogList, "ThrownDevice", { "Bombs" });
+	} else if (m_MenuCategory == SHIELDS) {
+		AddObjectsToItemList(catalogList, "HeldDevice", { "Shields" });
+	}
 
     SceneObject *pSObject = 0;
     const DataModule *pModule = 0;
@@ -2227,45 +2223,22 @@ bool BuyMenuGUI::DeployLoadout(int index)
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  AddObjectsToItemList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all objects of a specific type already defined in PresetMan
-//                  to the current shop/item list. They will be grouped into the different
-//                  data modules they were read from.
-
-void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, string type, string group)
-{
-
-	if (g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0)
-	{
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (group.empty() || group == "All")
+void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleList, const std::string &type, const std::vector<std::string> &groups, bool excludeGroups) {
+	while (moduleList.size() < g_PresetMan.GetTotalModuleCount()) {
+		moduleList.emplace_back();
+	}
+	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+		if ((g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0) || (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())) {
+			if (groups.empty() || std::find(groups.begin(), groups.end(), "All") != groups.end()) {
 				g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-			else
-				g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
-		}
-	} else {
-		// Make as many datamodule entries as necessary in the vector
-		while (moduleList.size() < g_PresetMan.GetTotalModuleCount())
-			moduleList.push_back(list<Entity *>());
-
-		// Go through all the data modules, gathering the objects that match the criteria in each one
-		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID)
-		{
-			if (moduleID == 0 || moduleID == m_NativeTechModule || g_PresetMan.GetDataModule(moduleID)->IsMerchant())
-			{
-				if (group.empty() || group == "All")
-					g_PresetMan.GetAllOfType(moduleList[moduleID], type, moduleID);
-				else
-					g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
+			} else {
+				if (excludeGroups) {
+					g_PresetMan.GetAllNotOfGroups(moduleList[moduleID], groups, type, moduleID);
+				} else {
+					g_PresetMan.GetAllOfGroups(moduleList[moduleID], groups, type, moduleID);
+				}
 			}
 		}
 	}
@@ -2466,8 +2439,8 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLab
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::TryPurchase()
-{
+void BuyMenuGUI::TryPurchase() {
+	int player = m_pController->GetPlayer();
     // Switch to the Craft category to give the user a hint
     if (!m_pSelectedCraft)
     {
@@ -2475,7 +2448,7 @@ void BuyMenuGUI::TryPurchase()
         CategoryChange();
         m_FocusChange = -2;
         m_MenuFocus = ITEMS;
-        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(player);
         // Set the notification blinker
         m_BlinkMode = NOCRAFT;
         m_BlinkTimer.Reset();
@@ -2484,7 +2457,7 @@ void BuyMenuGUI::TryPurchase()
     // Can't afford it :(
     else if (GetTotalOrderCost() > g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))
     {
-        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(player);
         // Set the notification blinker
         m_BlinkMode = NOFUNDS;
         m_BlinkTimer.Reset();
@@ -2495,7 +2468,7 @@ void BuyMenuGUI::TryPurchase()
 		if (pCraft) {
 			// Enforce max mass
 			if (m_EnforceMaxMassConstraint && pCraft->GetMaxInventoryMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxInventoryMass()) {
-				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(player);
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
 				m_BlinkTimer.Reset();
@@ -2505,7 +2478,7 @@ void BuyMenuGUI::TryPurchase()
 			// Enforce max passengers
 			if (pCraft->GetMaxPassengers() >= 0 && GetTotalOrderPassengers() > pCraft->GetMaxPassengers() && m_EnforceMaxPassengersConstraint)
 			{
-				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(player);
 				// Set the notification blinker
 				m_BlinkMode = MAXPASSENGERS;
 				m_BlinkTimer.Reset();
@@ -2517,7 +2490,9 @@ void BuyMenuGUI::TryPurchase()
 	// Only allow purchase if there is a delivery craft and enough funds
 	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))) {
 		m_PurchaseMade = true;
-		g_GUISound.PurchaseMadeSound()->Play(m_pController->GetPlayer());
+		m_DeliveryWidth = static_cast<const MOSprite *>(m_pSelectedCraft)->GetSpriteWidth();
+		
+		g_GUISound.PurchaseMadeSound()->Play(player);
 	}
 }
 

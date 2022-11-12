@@ -231,12 +231,11 @@ namespace RTE {
 			}
 		}
 
-		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForceMagnitude > jointStrengthValueToUse) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
@@ -470,10 +469,7 @@ namespace RTE {
 
 			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
 				if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
-					rootParentAsActorPieMenu->AddWhilePieMenuOpenListener(this, std::bind(&MovableObject::WhilePieMenuOpenListener, this, rootParentAsActorPieMenu));
-					for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
-						rootParentAsActorPieMenu->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
-					}
+					AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, true);
 				}
 			}
 		} else {
@@ -494,8 +490,7 @@ namespace RTE {
 
 				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) {
 					if (PieMenu *rootParentAsActorPieMenu = rootParentAsActor->GetPieMenu()) {
-						rootParentAsActorPieMenu->RemoveWhilePieMenuOpenListener(this);
-						rootParentAsActorPieMenu->RemovePieSlicesByOriginalSource(this);
+						AddOrRemovePieSlicesAndListenersFromPieMenu(rootParentAsActorPieMenu, false);
 					}
 				}
 			}
@@ -546,6 +541,29 @@ namespace RTE {
 					}
 				}
 			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddOrRemovePieSlicesAndListenersFromPieMenu(PieMenu *pieMenuToModify, bool addToPieMenu) {
+		RTEAssert(pieMenuToModify, "Cannot add or remove Attachable PieSlices and listeners from a non-existant PieMenu.");
+		if (addToPieMenu) {
+			if (m_FunctionsAndScripts.find("WhilePieMenuOpen") != m_FunctionsAndScripts.end() && !m_FunctionsAndScripts.find("WhilePieMenuOpen")->second.empty()) {
+				pieMenuToModify->AddWhilePieMenuOpenListener(this, std::bind(&MovableObject::WhilePieMenuOpenListener, this, pieMenuToModify));
+			}
+			for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+				pieMenuToModify->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true);
+			}
+		} else {
+			pieMenuToModify->RemoveWhilePieMenuOpenListener(this);
+			pieMenuToModify->RemovePieSlicesByOriginalSource(this);
+		}
+		for (Attachable *attachable : m_Attachables) {
+			attachable->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
+		}
+		for (AEmitter *wound : m_Wounds) {
+			wound->AddOrRemovePieSlicesAndListenersFromPieMenu(pieMenuToModify, addToPieMenu);
 		}
 	}
 }

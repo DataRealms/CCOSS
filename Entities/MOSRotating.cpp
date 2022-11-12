@@ -74,6 +74,7 @@ void MOSRotating::Clear()
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
 	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
+	m_DetachAttachablesBeforeGibbingFromWounds = true;
 	m_GibAtEndOfLifetime = false;
     m_GibSound = nullptr;
     m_EffectOnGib = true;
@@ -257,6 +258,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
 	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
+	m_DetachAttachablesBeforeGibbingFromWounds = reference.m_DetachAttachablesBeforeGibbingFromWounds;
 	m_GibAtEndOfLifetime = reference.m_GibAtEndOfLifetime;
 	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
 	m_EffectOnGib = reference.m_EffectOnGib;
@@ -331,7 +333,9 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "GibBlastStrength") {
 		reader >> m_GibBlastStrength;
 	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
-		reader >> m_WoundCountAffectsImpulseLimitRatio;
+        reader >> m_WoundCountAffectsImpulseLimitRatio;
+	} else if (propName == "DetachAttachablesBeforeGibbingFromWounds") {
+		reader >> m_DetachAttachablesBeforeGibbingFromWounds;
 	} else if (propName == "GibAtEndOfLifetime") {
 		reader >> m_GibAtEndOfLifetime;
 	} else if (propName == "GibSound") {
@@ -462,26 +466,46 @@ int MOSRotating::GetWoundCount(bool includePositiveDamageAttachables, bool inclu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) const {
+	Attachable *nearestAttachable = nullptr;
+	float closestRadius = -1.0F;
+	for (Attachable *attachable : m_Attachables) {
+		if (attachable->GetsHitByMOs() && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0) {
+			float radius = (offset - attachable->GetParentOffset()).GetMagnitude();
+			if (closestRadius < 0 || radius < closestRadius) {
+				closestRadius = radius;
+				nearestAttachable = attachable;
+			}
+		}
+	}
+	return nearestAttachable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
-    if (woundToAdd) {
-        if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
-            // Indicate blast in opposite direction of emission
-            // TODO: don't hardcode here, get some data from the emitter
-            Vector blast(-5, 0);
-            blast.RadRotate(woundToAdd->GetEmitAngle());
-            GibThis(blast);
-            delete woundToAdd;
-            return;
-        } else {
-            woundToAdd->SetCollidesWithTerrainWhileAttached(false);
-            woundToAdd->SetParentOffset(parentOffsetToSet);
-            woundToAdd->SetInheritsHFlipped(false);
-            woundToAdd->SetParent(this);
-            woundToAdd->SetIsWound(true);
-            if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
-            m_AttachableAndWoundMass += woundToAdd->GetMass();
-            m_Wounds.push_back(woundToAdd);
-        }
+    if (woundToAdd && !ToDelete()) {
+		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
+			// Find and detach an attachable near the new wound before gibbing the object itself.
+			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
+				if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
+					RemoveAttachable(attachableToDetach, true, true);
+				}
+			} else {
+				// TODO: Don't hardcode the blast strength!
+				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
+				delete woundToAdd;
+				return;
+			}
+		}
+        woundToAdd->SetCollidesWithTerrainWhileAttached(false);
+        woundToAdd->SetParentOffset(parentOffsetToSet);
+        woundToAdd->SetInheritsHFlipped(false);
+        woundToAdd->SetParent(this);
+        woundToAdd->SetIsWound(true);
+        if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
+        m_AttachableAndWoundMass += woundToAdd->GetMass();
+        m_Wounds.push_back(woundToAdd);
     }
 }
 
@@ -718,7 +742,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
         float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetMagnitude() > m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].MagnitudeIsGreaterThan(m_PinStrength))
         {
             // Unpin and set the threshold to 0
             hd.Body[HITEE]->SetPinStrength(0);
@@ -786,7 +810,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
     float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
     float myStrength = myMat->GetIntegrity() / hd.Body[HITOR]->GetSharpness();
-
 
     // See if there is enough energy in the collision for the particle to penetrate
     if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->GetIntegrity())
@@ -1143,14 +1166,29 @@ void MOSRotating::ApplyImpulses() {
 	}
 
 	Vector totalImpulse;
+	Vector averagedImpulseForceOffset;
 	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
 		totalImpulse += impulseForceVector;
+		averagedImpulseForceOffset += impulseForceOffset;
 	}
+	averagedImpulseForceOffset /= static_cast<float>(m_ImpulseForces.size());
 
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
-		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) { impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio; }
-		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
+		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
+			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
+		}
+		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
+			for (Attachable *attachable : m_Attachables) {
+				if (attachable->GetGibWithParentChance() == 0 && totalImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
+					attachable->SetGibWithParentChance(0.33F);
+				}
+			}
+			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(averagedImpulseForceOffset.SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && totalImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
+				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
+			}
+			GibThis(totalImpulse);
+		}
 	}
 
 	MOSprite::ApplyImpulses();
@@ -1427,7 +1465,17 @@ void MOSRotating::PostTravel()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (m_TravelImpulse.GetMagnitude() > impulseLimit) { GibThis(); }
+		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
+			for (Attachable *attachable : m_Attachables) {
+				if (attachable->GetGibWithParentChance() == 0 && m_TravelImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
+					attachable->SetGibWithParentChance(0.33F);
+				}
+			}
+			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && m_TravelImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
+				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
+			}
+			GibThis();
+		}
 	}
     // Reset
     m_DeepHardness = 0;
@@ -1531,12 +1579,8 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
         Vector otherPos = pOverlapMO->GetPos();
 
-        // Quick check
-        if (fabs(otherPos.m_X - m_Pos.m_X) > combinedRadii || fabs(otherPos.m_Y - m_Pos.m_Y) > combinedRadii)
-            return false;
-
         // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).GetMagnitude() < combinedRadii)
+        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
         {
             // They may be overlapping, so draw the MOID rep of this to the MOID layer
             Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);

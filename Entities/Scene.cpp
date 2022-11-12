@@ -1085,14 +1085,14 @@ int Scene::SavePreview(const std::string &bitmapPath) {
 
 			// Wrapped drawing
 			if (pos.GetFloorIntX() < 0) {
-				masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
-				masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
+				if (terrainObject->HasBGColorBitmap()) { masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h); }
+				if (terrainObject->HasFGColorBitmap()) { masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h); }
 			} else if (pos.GetFloorIntX() + terrainObject->GetBitmapWidth() >= sceneWidth) {
-				masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
-				masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
+				if (terrainObject->HasBGColorBitmap()) { masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h); }
+				if (terrainObject->HasFGColorBitmap()) { masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h); }
 			}
-			masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
-			masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
+			if (terrainObject->HasBGColorBitmap()) { masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h); }
+			if (terrainObject->HasFGColorBitmap()) { masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h); }
 		}
 
 		// TODO: Figure out how to draw the actual modules that compose an assembly that is part of the scheme. For now just disable.
@@ -2105,20 +2105,20 @@ const SceneObject * Scene::PickPlacedObject(int whichSet, Vector &scenePoint, in
 const SceneObject * Scene::PickPlacedActorInRange(int whichSet, Vector &scenePoint, int range, int *pListOrderPlace) const
 {
 	SceneObject * pFoundObject = 0;
-	float distance = range;
-	
+	float sqrDistance = static_cast<float>(range * range);
+
 	// REVERSE!
     int i = m_PlacedObjects[whichSet].size() - 1;
     for (list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)
     {
 		if (dynamic_cast<const Actor *>(*itr))
 		{
-			float d = g_SceneMan.ShortestDistance((*itr)->GetPos(), scenePoint, true).GetMagnitude();
-			if (d < distance)
+			float sqrCheckDistance = g_SceneMan.ShortestDistance((*itr)->GetPos(), scenePoint, true).GetSqrMagnitude();
+			if (sqrCheckDistance < sqrDistance)
 			{
 				if (pListOrderPlace)
 					*pListOrderPlace = i;
-				distance = d;
+				sqrDistance = sqrCheckDistance;
 				pFoundObject = *itr;
 			}
 		}

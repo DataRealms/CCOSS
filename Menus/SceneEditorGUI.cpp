@@ -410,6 +410,11 @@ void SceneEditorGUI::Update()
         m_BlinkMode = NOBLINK;
     }
 */
+
+	if (m_pCurrentObject && m_EditorGUIMode != PICKINGOBJECT && g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+		m_pCurrentObject = dynamic_cast<SceneObject *>(g_PresetMan.GetEntityPreset(m_pCurrentObject->GetClassName(), m_pCurrentObject->GetPresetName(), m_pCurrentObject->GetModuleName())->Clone());
+	}
+
     /////////////////////////////////////////////
     // Repeating input logic
 
@@ -449,9 +454,9 @@ void SceneEditorGUI::Update()
     // Analog cursor input
 
     Vector analogInput;
-    if (m_pController->GetAnalogMove().GetMagnitude() > 0.1)
+    if (m_pController->GetAnalogMove().MagnitudeIsGreaterThan(0.1F))
         analogInput = m_pController->GetAnalogMove();
-//    else if (m_pController->GetAnalogAim().GetMagnitude() > 0.1)
+//    else if (m_pController->GetAnalogAim().MagnitudeIsGreaterThan(0.1F))
 //        analogInput = m_pController->GetAnalogAim();
 
     /////////////////////////////////////////////
@@ -496,6 +501,10 @@ void SceneEditorGUI::Update()
 			m_PlaceTeam = Activity::TeamOne;
 		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam2) {
 			m_PlaceTeam = Activity::TeamTwo;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam3) {
+			m_PlaceTeam = Activity::TeamThree;
+		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::EditorTeam4) {
+			m_PlaceTeam = Activity::TeamFour;
 			// Toggle between normal scene object editing, and AI plan editing
 		} else if (m_PieMenu->GetPieCommand() == PieSlice::SliceType::Map) {
 			SetFeatureSet(m_FeatureSet == FeatureSets::ONLOADEDIT ? FeatureSets::AIPLANEDIT : FeatureSets::ONLOADEDIT);
@@ -990,7 +999,7 @@ void SceneEditorGUI::Update()
 								SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 								if (pBrain)
 								{
-									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).GetMagnitude() < 20)
+									if (g_SceneMan.ShortestDistance(pBrain->GetPos(), m_CursorPos,true).MagnitudeIsLessThan(20.0F))
 									{
 										AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 										if (pBrainAHuman)
@@ -1124,7 +1133,7 @@ void SceneEditorGUI::Update()
 									SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 									if (pBrain)
 									{
-										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).GetMagnitude() < 20)
+										if (g_SceneMan.ShortestDistance(pBrain->GetPos(), pPlacedClone->GetPos(),true).MagnitudeIsLessThan(20.0F))
 										{
 											AHuman * pBrainAHuman = dynamic_cast<AHuman *>(pBrain);
 											if (pBrainAHuman)

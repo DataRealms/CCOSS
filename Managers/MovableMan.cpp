@@ -46,7 +46,7 @@ struct MOXPosComparison {
 void MovableMan::Clear()
 {
     m_Actors.clear();
-    m_ActorIDs.clear();
+    m_ContiguousActorIDs.clear();
     m_Items.clear();
     m_Particles.clear();
     m_AddedActors.clear();
@@ -1241,9 +1241,9 @@ bool MovableMan::IsOfActor(MOID checkMOID)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableMan::GetActorID(const Actor *actor) const {
-    auto itr = m_ActorIDs.find(actor);
-    if (itr == m_ActorIDs.end()) {
+int MovableMan::GetContiguousActorID(const Actor *actor) const {
+    auto itr = m_ContiguousActorIDs.find(actor);
+    if (itr == m_ContiguousActorIDs.end()) {
         return -1;
     }
 
@@ -1949,7 +1949,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 {
     // Clear the index each frame and do it over because MO's get added and deleted between each frame.
     m_MOIDIndex.clear();
-    m_ActorIDs.clear();
+    m_ContiguousActorIDs.clear();
 
     // Add a null and start counter at 1 because MOID == 0 means no MO.
     // - Update: This isnt' true anymore, but still keep 0 free just to be safe
@@ -1959,7 +1959,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 
     int actorID = 0;
     for (Actor *actor : m_Actors) {
-        m_ActorIDs[actor] = actorID++;
+        m_ContiguousActorIDs[actor] = actorID++;
 		if (actor->GetsHitByMOs() && !actor->IsSetToDelete()) {
             actor->UpdateMOID(m_MOIDIndex);
             actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);

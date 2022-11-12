@@ -284,6 +284,20 @@ namespace RTE {
 		}
 		return outputVector;
 	}
+
+	/// <summary>
+	/// Custom std::hash specialization to allow using std::array as key in hash table based containers.
+	/// </summary>
+	template <typename Type, size_t Size> struct std::hash<std::array<Type, Size>> {
+		size_t operator()(const std::array<Type, Size> &arr) const {
+			std::hash<Type> hasher;
+			size_t outHash = 0;
+			for (size_t i = 0; i < Size; ++i) {
+				outHash = outHash * 31 + hasher(arr[i]);
+			}
+			return outHash;
+		}
+	};
 #pragma endregion
 }
 #endif

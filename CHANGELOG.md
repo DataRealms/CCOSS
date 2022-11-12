@@ -338,8 +338,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
 
-- Fixed issue where AI actors didn't try to path around and avoid enemy doors.
-
 </details>
 
 <details><summary><b>Removed</b></summary>

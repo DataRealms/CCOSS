@@ -46,7 +46,8 @@ namespace RTE {
 		Vector m_EndPos = Vector(); //!< End position of the primitive.
 		unsigned char m_Color = 0; //!< Color to draw this primitive with.
 		int m_Player = -1; //!< Player screen to draw this primitive on.
-		int m_Transparency = 0; //!< The transparency to draw this primitive at. From 0 (opaque) to 100 (transparent).
+		DrawBlendMode m_BlendMode = DrawBlendMode::NoBlend; //!< The blending mode that will be used when drawing this primitive.
+		std::array<int, 4> m_ColorChannelBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend }; //!< The blending amount for each color channel when drawing in blended mode.
 
 		/// <summary>
 		/// Destructor method used to clean up a GraphicalPrimitive object before deletion from system memory.

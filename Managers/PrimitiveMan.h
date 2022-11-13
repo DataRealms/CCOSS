@@ -51,7 +51,6 @@ namespace RTE {
 		/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
 		/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
 		/// <param name="primitives">A vector of primitives to schedule drawing for.</param>
-		/// <remarks>If all the blend amounts are set to maximum, scheduling will be skipped because full blend results in full transparency and drawing fully transparent is the same as not drawing at all.</remarks>
 		void SchedulePrimitivesForBlendedDrawing(DrawBlendMode blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const std::vector<GraphicalPrimitive *> &primitives);
 
 		/// <summary>

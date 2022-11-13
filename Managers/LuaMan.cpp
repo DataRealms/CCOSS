@@ -159,7 +159,6 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
 			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode),
-			RegisterLuaBindingsOfType(MiscLuaBindings, TransparencyPreset),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, ArcPrimitive),

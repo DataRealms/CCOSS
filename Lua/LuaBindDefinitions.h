@@ -40,7 +40,6 @@ namespace RTE {
 	struct joy_buttons : public luabind::enum_wrapper {};
 	struct joy_directions : public luabind::enum_wrapper {};
 	struct directions : public luabind::enum_wrapper {};
-	struct trans_presets : public luabind::enum_wrapper {};
 	struct blend_modes : public luabind::enum_wrapper {};
 
 	/// <summary>

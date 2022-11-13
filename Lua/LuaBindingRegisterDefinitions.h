@@ -197,7 +197,6 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
 		LuaBindingRegisterFunctionDeclarationForType(Directions);
 		LuaBindingRegisterFunctionDeclarationForType(DrawBlendMode);
-		LuaBindingRegisterFunctionDeclarationForType(TransparencyPreset);
 	};
 
 	/// <summary>

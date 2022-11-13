@@ -148,35 +148,4 @@ namespace RTE {
 			luabind::value("BlendModeCount", DrawBlendMode::BlendModeCount)
 		];
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	LuaBindingRegisterFunctionDefinitionForType(MiscLuaBindings, TransparencyPreset) {
-		return luabind::class_<trans_presets>("TransparencyPreset")
-
-		.enum_("TransparencyPreset")[
-			luabind::value("Trans0", TransparencyPreset::Trans0),
-			luabind::value("Trans5", TransparencyPreset::Trans5),
-			luabind::value("Trans10", TransparencyPreset::Trans10),
-			luabind::value("Trans15", TransparencyPreset::Trans15),
-			luabind::value("Trans20", TransparencyPreset::Trans20),
-			luabind::value("Trans25", TransparencyPreset::Trans25),
-			luabind::value("Trans30", TransparencyPreset::Trans30),
-			luabind::value("Trans35", TransparencyPreset::Trans35),
-			luabind::value("Trans40", TransparencyPreset::Trans40),
-			luabind::value("Trans45", TransparencyPreset::Trans45),
-			luabind::value("Trans50", TransparencyPreset::Trans50),
-			luabind::value("Trans55", TransparencyPreset::Trans55),
-			luabind::value("Trans60", TransparencyPreset::Trans60),
-			luabind::value("Trans65", TransparencyPreset::Trans65),
-			luabind::value("Trans70", TransparencyPreset::Trans70),
-			luabind::value("Trans75", TransparencyPreset::Trans75),
-			luabind::value("Trans80", TransparencyPreset::Trans80),
-			luabind::value("Trans85", TransparencyPreset::Trans85),
-			luabind::value("Trans90", TransparencyPreset::Trans90),
-			luabind::value("Trans95", TransparencyPreset::Trans95),
-			luabind::value("Trans100", TransparencyPreset::Trans100),
-			luabind::value("TransPresetCount", TransparencyPreset::TransPresetCount)
-		];
-	}
 }

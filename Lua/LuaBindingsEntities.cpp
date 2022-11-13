@@ -11,7 +11,7 @@ namespace RTE {
 		.def(luabind::tostring(luabind::const_self))
 
 		.property("ClassName", &Entity::GetClassName)
-		.property("PresetName", &Entity::GetPresetName, &SetPresetName)
+		.property("PresetName", &Entity::GetPresetName, &EntitySetPresetName)
 		.property("Description", &Entity::GetDescription, &Entity::SetDescription)
 		.property("IsOriginalPreset", &Entity::IsOriginalPreset)
 		.property("ModuleID", &Entity::GetModuleID)
@@ -563,8 +563,8 @@ namespace RTE {
 		.def("IsAttached", &Attachable::IsAttached)
 		.def("IsAttachedTo", &Attachable::IsAttachedTo)
 
-		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1, luabind::adopt(luabind::return_value))
-		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2, luabind::adopt(luabind::return_value));
+		.def("RemoveFromParent", &AttachableRemoveFromParent1, luabind::adopt(luabind::return_value))
+		.def("RemoveFromParent", &AttachableRemoveFromParent2, luabind::adopt(luabind::return_value));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -603,7 +603,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, GlobalScript) {
 		return AbstractTypeLuaClassDefinition(GlobalScript, Entity)
 
-		.def("Deactivate", &DeactivateGlobalScript);
+		.def("Deactivate", &GlobalScriptDeactivate);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -885,7 +885,7 @@ namespace RTE {
 		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
 		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
 
-		.def("GibThis", &GibThis); // Free function bound as member function to emulate default variables
+		.def("GibThis", &MOSRotatingGibThis); // Free function bound as member function to emulate default variables
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -942,10 +942,10 @@ namespace RTE {
 		.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 		.def("ReloadScripts", &MovableObject::ReloadScripts)
 		.def("HasScript", &MovableObject::HasScript)
-		.def("AddScript", &MovableObject::AddScript)
+		.def("AddScript", &MovableObjectAddScript)
 		.def("ScriptEnabled", &MovableObject::ScriptEnabled)
-		.def("EnableScript", &MovableObject::EnableScript)
-		.def("DisableScript", &MovableObject::DisableScript)
+		.def("EnableScript", &MovableObjectEnableScript)
+		.def("DisableScript", &MovableObjectDisableScript)
 		.def("EnableOrDisableAllScripts", &MovableObject::EnableOrDisableAllScripts)
 		.def("GetAltitude", &MovableObject::GetAltitude)
 		.def("GetWhichMOToNotHit", &MovableObject::GetWhichMOToNotHit)
@@ -1224,8 +1224,7 @@ namespace RTE {
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
-
-		.def("GetTotalValue", &GetTotalValue);
+		.def("GetTotalValue", &SceneObjectGetTotalValue);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

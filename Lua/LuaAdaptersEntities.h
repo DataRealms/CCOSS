@@ -135,19 +135,26 @@ namespace RTE {
 
 #pragma region Entity Lua Adapters
 	// TODO this is a temporary fix for lua PresetName setting causing scripts to have to rerun. It should be replaced with a DisplayName property someday.
-	static void SetPresetName(Entity *selfObject, const std::string &presetName) {
-		selfObject->SetPresetName(presetName, true);
+	static void EntitySetPresetName(Entity *luaSelfObject, const std::string &presetName) {
+		luaSelfObject->SetPresetName(presetName, true);
 	}
 
-	// These methods are needed to specially handle removing attachables with Lua in order to avoid memory leaks. They have silly names cause LuaBind otherwise makes it difficult to pass values to them properly.
-	// Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
-	static Attachable * RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+	static float SceneObjectGetTotalValue(const SceneObject *luaSelfObject, int nativeModule, float foreignMult) {
+		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
+	}
+
+	static void MOSRotatingGibThis(MOSRotating *luaSelfObject) {
+		luaSelfObject->GibThis();
+	}
+
+	static Attachable * AttachableRemoveFromParent1(Attachable *luaSelfObject) {
 		if (luaSelfObject->IsAttached()) {
 			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);
 		}
 		return luaSelfObject;
 	}
-	static Attachable * RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+
+	static Attachable * AttachableRemoveFromParent2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
 		if (luaSelfObject->IsAttached()) {
 			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject, addToMovableMan, addBreakWounds);
 		}
@@ -158,15 +165,7 @@ namespace RTE {
 		luaSelfObject->AddMountedDevice(newMountedDevice);
 	}
 
-	static void GibThis(MOSRotating *luaSelfObject) {
-		luaSelfObject->GibThis();
-	}
-
-	static float GetTotalValue(const SceneObject *luaSelfObject, int nativeModule, float foreignMult) {
-		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
-	}
-
-	static void DeactivateGlobalScript(GlobalScript *luaSelfObject) {
+	static void GlobalScriptDeactivate(GlobalScript *luaSelfObject) {
 		luaSelfObject->SetActive(false);
 	}
 

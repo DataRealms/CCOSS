@@ -111,6 +111,7 @@ namespace RTE {
 						lastBlendAmounts = blendAmounts;
 					}
 					if (lastDrawMode != DRAW_MODE_TRANS) {
+						// Drawing mode is set so blending effects apply to true primitives. For bitmap based primitives it has no effect.
 						drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
 						lastDrawMode = DRAW_MODE_TRANS;
 					}

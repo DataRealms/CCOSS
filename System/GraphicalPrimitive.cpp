@@ -391,14 +391,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TextPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		AllegroBitmap playerGUIBitmap(drawScreen);
+		GUIFont *font = m_IsSmall ? g_FrameMan.GetSmallFont() : g_FrameMan.GetLargeFont();
+
+		BITMAP *blendBitmap = nullptr;
+		if (m_BlendMode > DrawBlendMode::NoBlend) {
+			blendBitmap = create_bitmap_ex(8, font->CalculateWidth(m_Text), font->CalculateHeight(m_Text));
+			clear_to_color(blendBitmap, ColorKeys::g_MaskColor);
+			AllegroBitmap blendAllegroBitmap(blendBitmap);
+			font->DrawAligned(&blendAllegroBitmap, 0, 0, m_Text, m_Alignment);
+		}
+
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			AllegroBitmap playerGUIBitmap(drawScreen);
 
-			if (m_IsSmall) {
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				// Have to perform a more expensive draw operation here because draw_trans_sprite fails to mask for reasons unknown to man, so the magenta background remains visible and gets blended with the rest of it.
+				rotate_sprite_trans(drawScreen, blendBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(0));
 			} else {
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
 			}
 		} else {
 			Vector drawStartLeft;
@@ -406,15 +417,16 @@ namespace RTE {
 
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
-			AllegroBitmap playerGUIBitmap(drawScreen);
-			if (m_IsSmall) {
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				// Have to perform a more expensive draw operation here because draw_trans_sprite fails to mask for reasons unknown to man, so the magenta background remains visible and gets blended with the rest of it.
+				rotate_sprite_trans(drawScreen, blendBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(0));
+				rotate_sprite_trans(drawScreen, blendBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(0));
 			} else {
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
 			}
 		}
+		if (blendBitmap) { destroy_bitmap(blendBitmap); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,12 +437,12 @@ namespace RTE {
 		}
 
 		BITMAP *bitmapToDraw = create_bitmap_ex(8, m_Bitmap->w, m_Bitmap->h);
-		clear_to_color(bitmapToDraw, 0);
+		clear_to_color(bitmapToDraw, ColorKeys::g_MaskColor);
 		draw_sprite(bitmapToDraw, m_Bitmap, 0, 0);
 
 		if (m_HFlipped || m_VFlipped) {
 			BITMAP *flipBitmap = create_bitmap_ex(8, bitmapToDraw->w, bitmapToDraw->h);
-			clear_to_color(flipBitmap, 0);
+			clear_to_color(flipBitmap, ColorKeys::g_MaskColor);
 
 			if (m_HFlipped && !m_VFlipped) {
 				draw_sprite_h_flip(flipBitmap, bitmapToDraw, 0, 0);

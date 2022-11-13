@@ -344,7 +344,17 @@ namespace RTE {
 		/// <param name="text">Text string to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		void DrawTextPrimitive(const Vector &start, const std::string &text, bool isSmall, int alignment) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(-1, start, text, isSmall, alignment)); }
+		void DrawTextPrimitive(const Vector &start, const std::string &text, bool isSmall, int alignment) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(-1, start, text, isSmall, alignment, 0)); }
+
+		/// <summary>
+		/// Schedule to draw a text primitive.
+		/// </summary>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="text">Text string to draw.</param>
+		/// <param name="isSmall">Use small or large font. True for small font.</param>
+		/// <param name="alignment">Alignment of text.</param>
+		/// <param name="rotAngle">Angle to rotate text in radians.</param>
+		void DrawTextPrimitive(const Vector &start, const std::string &text, bool isSmall, int alignment, float rotAngle) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(-1, start, text, isSmall, alignment, rotAngle)); }
 
 		/// <summary>
 		/// Schedule to draw a text primitive visible only to a specified player.
@@ -354,7 +364,18 @@ namespace RTE {
 		/// <param name="text">Text string to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		void DrawTextPrimitive(int player, const Vector &start, const std::string &text, bool isSmall, int alignment) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(player, start, text, isSmall, alignment)); }
+		void DrawTextPrimitive(int player, const Vector &start, const std::string &text, bool isSmall, int alignment) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(player, start, text, isSmall, alignment, 0)); }
+
+		/// <summary>
+		/// Schedule to draw a text primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="text">Text string to draw.</param>
+		/// <param name="isSmall">Use small or large font. True for small font.</param>
+		/// <param name="alignment">Alignment of text.</param>
+		/// <param name="rotAngle">Angle to rotate text in radians.</param>
+		void DrawTextPrimitive(int player, const Vector &start, const std::string &text, bool isSmall, int alignment, float rotAngle) { m_ScheduledPrimitives.emplace_back(std::make_unique<TextPrimitive>(player, start, text, isSmall, alignment, rotAngle)); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive.

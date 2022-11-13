@@ -634,6 +634,7 @@ namespace RTE {
 		std::string m_Text = ""; //!< String containing text to draw.
 		bool m_IsSmall = false; //!< Use small or large font. True for small font.
 		int m_Alignment = 0; //!< Alignment of text.
+		float m_RotAngle = 0; //!< Angle to rotate text in radians.
 
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
@@ -643,8 +644,9 @@ namespace RTE {
 		/// <param name="text">String containing text to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		TextPrimitive(int player, const Vector &pos, const std::string &text, bool isSmall, int alignment) :
-			m_Text(text), m_IsSmall(isSmall), m_Alignment(alignment) {
+		/// <param name="rotAngle">Angle to rotate text in radians.</param>
+		TextPrimitive(int player, const Vector &pos, const std::string &text, bool isSmall, int alignment, float rotAngle) :
+			m_Text(text), m_IsSmall(isSmall), m_Alignment(alignment), m_RotAngle(rotAngle) {
 
 			m_StartPos = pos;
 			m_Player = player;

@@ -119,7 +119,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(PrimitiveLuaBindings, TextPrimitive) {
 		return luabind::class_<TextPrimitive, GraphicalPrimitive>("TextPrimitive")
 
-		.def(luabind::constructor<int, const Vector &, const std::string &, bool, int>());
+		.def(luabind::constructor<int, const Vector &, const std::string &, bool, int, float>());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -322,6 +322,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
 
+- `MOSRotating` based presets without an `AtomGroup` definition will now crash with error message during loading.
+
+- Over-indentation in INI will crash with error message if detected during loading instead of skipping entire blocks or in some cases the rest of the file.  
+	There is never a case where there should be a positive difference of more than one tab between lines, but this means that lines like `IncludeFile` which would previously load fine even if over-indented will also crash, but you should never have those indented to begin with.  
+
+	Examples of structure that will cause a crash:  
+	```ini
+	AddSomething = Something
+			PresetName = Thing // Over-indented. Will crash.
+		SomeProperty = Whatever
+
+	AddSomething = Something
+		PresetName = Thing
+		SomeObjectProperty = Something
+				CopyOf = Thing // Over-indented. Will crash.
+	```
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

@@ -14,8 +14,6 @@ namespace RTE {
 		m_MasterState = nullptr;
 		m_DisableLuaJIT = false;
 		m_LastError.clear();
-		m_NextPresetID = 0;
-		m_NextObjectID = 0;
 		m_TempEntity = nullptr;
 		m_TempEntityVector.clear();
 
@@ -181,6 +179,7 @@ namespace RTE {
 			"print = function(toPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(toPrint)); end;\n"
 			// Add cls() as a shortcut to ConsoleMan:Clear().
 			"cls = function() ConsoleMan:Clear(); end;"
+
 			// Add package path to the defaults.
 			"package.path = package.path .. \";Base.rte/?.lua\";\n"
 		);
@@ -205,26 +204,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string LuaMan::GetNewPresetID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
-
-		m_NextPresetID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::string LuaMan::GetNewObjectID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
-
-		m_NextObjectID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
 		m_TempEntityVector.reserve(entityVector.size());
 		for (const Entity *entity : entityVector) {
@@ -234,7 +213,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+	int LuaMan::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
@@ -301,6 +280,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int LuaMan::RunScriptFunctionObject(const luabind::object &functionObject, const std::string &selfObjectName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+		int status = 0;
+
+		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
+		functionObject.push(m_MasterState);
+		
+		//TODO with lua pcall you have to push the args onto the stack first. See https://www.lua.org/pil/25.2.html
+		//luabind::call_function<void>(L, "keyPress") should be an alternative
+		if (lua_pcall(m_MasterState, 0, LUA_MULTRET, -2) > 0) {
+			m_LastError = lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+			status = -1;
+		}
+		lua_pop(m_MasterState, 2);
+
+		return status;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
 		if (filePath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
@@ -319,6 +320,43 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
+		
+		/*
+		int errCode = luaL_loadfile(m_MasterState, filePath.c_str());
+		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
+
+		//Check for errors.
+
+		//Get the function from the top of the stack as a Luabind object.
+		luabind::object compiledScript(luabind::from_stack(m_MasterState, -1));
+		luabind::object script2 = luabind::globals(m_MasterState)["gaogogo"]; <----
+
+		auto tes = luabind::type(script2);
+		bool isfunction3 = luabind::type(script2) == LUA_TFUNCTION;
+
+		luabind::call_function<void>(script2);
+		bool isfunction = luabind::type(compiledScript) == LUA_TFUNCTION;
+		bool isfunction2 = luabind::type(script2) == LUA_TFUNCTION;
+		compiledScript.push(m_MasterState);
+		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
+
+		script2.push(m_MasterState);
+		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
+
+		//Call the function through Luabind, passing the manager as the parameter.
+		luabind::call_function<void>(compiledScript, this);
+		luabind::call_function<void>(script2);
+
+		//The function is still on the stack from the load call. Pop it.
+		lua_pop(m_MasterState, 1);
+		if (luaL_dofile(m_MasterState, filePath.c_str()) == 0) {
+			int value = luabind::call_function<int>(m_MasterState, "testadd", 2, 3);
+			luabind::object compiledScript(luabind::from_stack(m_MasterState, -1));
+			auto bb = luabind::call_function<void>(compiledScript);
+			bool b = true;
+			lua_pop(m_MasterState, 1);
+		}*/
+
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_MasterState, -1);
@@ -333,6 +371,23 @@ namespace RTE {
 		lua_pop(m_MasterState, 1);
 
 		return error;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaMan::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, luabind::object> &outFunctionNamesAndObjects) {
+		if (int error = RunScriptFile(filePath); error < 0) {
+			return error;
+		}
+
+		for (const std::string &functionName : functionNamesToLookFor) {
+			luabind::object functionObject = luabind::globals(m_MasterState)[functionName];
+			if (luabind::type(functionObject) == LUA_TFUNCTION) {
+				outFunctionNamesAndObjects.try_emplace(functionName, functionObject);
+			}
+		}
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

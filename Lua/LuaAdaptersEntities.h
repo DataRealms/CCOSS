@@ -143,6 +143,43 @@ namespace RTE {
 		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
 	}
 
+	static bool MovableObjectAddScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
+		switch (luaSelfObject->LoadScript(luaSelfObject->CorrectBackslashesInPath(scriptPath))) {
+			case 0:
+				if (luaSelfObject->ObjectScriptsInitialized()) {
+					luaSelfObject->RunFunctionOfScript(scriptPath, "Create");
+				}
+				return true;
+			case -1:
+				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " was empty.");
+				break;
+			case -2:
+				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + "  did not point to a valid file.");
+				break;
+			case -3:
+				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
+				break;
+			case -4:
+				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+				break;
+			case -5:
+				g_ConsoleMan.PrintString("ERROR: The file with script path " + scriptPath + " could not be run. Please check that this is a valid Lua file.");
+				break;
+			default:
+				RTEAbort("Reached default case while adding script. This should never happen!");
+				break;
+		}
+		return false;
+	}
+
+	static bool MovableObjectEnableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
+		return luaSelfObject->EnableOrDisableScript(scriptPath, true);
+	}
+
+	static bool MovableObjectDisableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
+		return luaSelfObject->EnableOrDisableScript(scriptPath, false);
+	}
+
 	static void MOSRotatingGibThis(MOSRotating *luaSelfObject) {
 		luaSelfObject->GibThis();
 	}

@@ -1256,15 +1256,19 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Actor::UpdateAIScripted() {
-    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty()) {
         return false;
     }
 
-    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
-    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	int status = 0;
+	if (!ObjectScriptsInitialized()) {
+		status = InitializeObjectScripts();
+	}
+	if (status >= 0) {
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+		status = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	}
 
     return status >= 0;
 }

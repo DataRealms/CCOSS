@@ -24,9 +24,11 @@
 
 struct BITMAP;
 
-namespace RTE
-{
+namespace luabind {
+	class object;
+}
 
+namespace RTE {
 
 #pragma region Global Macro Definitions
     #define ScriptFunctionNames(...) \
@@ -45,6 +47,7 @@ struct HitData;
 class MOSRotating;
 class PieMenu;
 class SLTerrain;
+using luabind::object;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -158,6 +161,7 @@ enum MOType
 
     void Destroy(bool notInherited = false) override;
 
+#pragma region Script Handling
     /// <summary>
     /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
     /// </summary>
@@ -170,7 +174,13 @@ enum MOType
     /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int ReloadScripts();
+	int ReloadScripts() final;
+
+	/// <summary>
+	/// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
+	/// </summary>
+	/// <returns>Whether or not the object's scripts have been successfully initialized.</returns>
+	bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
 
     /// <summary>
     /// Checks if this MO has any scripts on it.
@@ -186,49 +196,25 @@ enum MOType
 	bool HasScript(const std::string &scriptPath) const { return m_AllLoadedScripts.find(scriptPath) != m_AllLoadedScripts.end(); }
 
     /// <summary>
-    /// Adds the script at the given path as one of the scripts on this MO.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to add.</param>
-    /// <returns>Whether or not the script was successfully added.</returns>
-	bool AddScript(const std::string &scriptPath);
-
-    /// <summary>
     /// Checks if the script at the given path is one of the enabled scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-    bool ScriptEnabled(const std::string &scriptPath) const { std::map<std::string, bool>::const_iterator scriptPathIterator = m_AllLoadedScripts.find(scriptPath); return scriptPathIterator != m_AllLoadedScripts.end() && scriptPathIterator->second == true; }
+    bool ScriptEnabled(const std::string &scriptPath) const { auto scriptPathIterator = m_AllLoadedScripts.find(scriptPath); return scriptPathIterator != m_AllLoadedScripts.end() && scriptPathIterator->second == true; }
 
-    /// <summary>
-    /// Enable the script at the given path on this MO.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to enable.</param>
-    /// <returns>Whether or not the script was successfully enabled.</returns>
-	bool EnableScript(const std::string &scriptPath);
-
-    /// <summary>
-    /// Disables the script at the given path for this MO.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to disable.</param>
-    /// <returns>Whether or not the script was successfully disabled..</returns>
-	bool DisableScript(const std::string &scriptPath);
+	/// <summary>
+	/// Enables or dsiableds the script at the given path on this MO.
+	/// </summary>
+	/// <param name="scriptPath">The path to the script to enable or disable</param>
+	/// <param name="enableScript">Whether to enable the script, or disable it.</param>
+	/// <returns>Whether or not the script was successfully eanbled/disabled.</returns>
+	bool EnableOrDisableScript(const std::string &scriptPath, bool enableScript);
 
     /// <summary>
     /// Enables or disables all scripts on this MovableObject.
     /// </summary>
     /// <param name="enableScripts">Whether to enable (true) or disable (false) all scripts on this MovableObject.</param>
     void EnableOrDisableAllScripts(bool enableScripts);
-
-    /// <summary>
-    /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
-    /// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to run.</param>
-    /// <param name="functionName">The name of the function to run.</param>
-    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
-    /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>()) const;
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
@@ -241,19 +227,7 @@ enum MOType
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
-
-    /// <summary>
-    /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
-    /// </summary>
-    /// <returns>Whether or not the object's scripts have been successfully initialized.</returns>
-    bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
-
-    /// <summary>
-    /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
-    /// </summary>
-    /// <param name="newName">A string reference with the instance name of this Entity.</param>
-    /// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
-    void SetPresetName(const std::string &newName, bool calledFromLua = false) override { Entity::SetPresetName(newName); if (!calledFromLua) { m_ScriptPresetName.clear(); ReloadScripts(); } }
+#pragma endregion
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1837,6 +1811,17 @@ protected:
     /// <returns>0 on success, -2 if it fails to setup the script object in Lua, and -3 if it fails to run any Create function.</returns>
     int InitializeObjectScripts();
 
+	/// <summary>
+	/// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
+	/// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
+	/// </summary>
+	/// <param name="scriptPath">The path to the script to run.</param>
+	/// <param name="functionName">The name of the function to run.</param>
+	/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+	/// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>()) const;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1960,13 +1945,9 @@ protected:
 
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling when simplified collision detection is used.
 
-    std::map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
-    std::unordered_map<std::string, std::vector<std::string>> m_FunctionsAndScripts; //!< A map of function names to vectors of scripts paths. Used to maintain script execution order and avoid extraneous Lua calls.
-
-    // The ID name unique to this' preset and its defined scripted functions in the lua state.
-    std::string m_ScriptPresetName;
-    // The ID name unique to this' object instance representation in the Lua state.
-    std::string m_ScriptObjectName;
+    std::string m_ScriptObjectName; //!< The name of this object for script usage.
+    std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
+    std::unordered_map<std::string, std::vector<std::pair<const std::string &, luabind::object>>> m_FunctionsAndScripts; //!< A map of function names to vectors of luabind function objects. Used to maintain script execution order and avoid extraneous Lua calls.
 
     // Special post processing flash effect file and Bitmap. Shuold be loaded from a 32bpp bitmap
     ContentFile m_ScreenEffectFile;

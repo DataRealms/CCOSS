@@ -391,7 +391,7 @@ namespace RTE {
 
 		// Create transparency color tables. Tables for other blend modes will be created on demand.
 		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
-			int presetBlendAmount = index * 5;
+			int presetBlendAmount = index * c_BlendAmountStep;
 			std::array<int, 4> colorChannelBlendAmounts = { presetBlendAmount, presetBlendAmount, presetBlendAmount, BlendAmountLimits::MinBlend };
 			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
 
@@ -722,7 +722,7 @@ namespace RTE {
 		RTEAssert(blendMode > DrawBlendMode::NoBlend && blendMode < DrawBlendMode::BlendModeCount, "Invalid DrawBlendMode or DrawBlendMode::NoBlend passed into FrameMan::SetColorTable. See DrawBlendMode enumeration for defined values.");
 
 		for (int &colorChannelBlendAmount : colorChannelBlendAmounts) {
-			colorChannelBlendAmount = std::clamp(colorChannelBlendAmount, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend));
+			colorChannelBlendAmount = RoundToNearestMultiple(std::clamp(colorChannelBlendAmount, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend)), c_BlendAmountStep);
 		}
 
 		switch (blendMode) {

@@ -34,6 +34,8 @@ namespace RTE {
 	static constexpr unsigned short c_MOIDLayerBitDepth = 16; //!< Bit depth of MOID layer bitmap.
 	static constexpr unsigned short c_GoldMaterialID = 2; //!< Index of gold material in the material palette.
 
+	static constexpr int c_BlendAmountStep = 5; //!< The multiple to round blend amounts to when creating new color maps. This is to reduce the ridiculous amount of color map variants that can be created.
+
 	enum ColorKeys {
 		g_MaskColor = 0, //!< Mask color for all 8bpp bitmaps (palette index 0 (255,0,255)). This color is fully transparent.
 		//g_MOIDMaskColor = 0, //!< Mask color for 8bpp MOID layer bitmaps (palette index 0 (255,0,255)). This color is fully transparent.

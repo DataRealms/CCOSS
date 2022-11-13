@@ -172,6 +172,24 @@ namespace RTE {
 	float Limit(float value, float upperLimit, float lowerLimit);
 #pragma endregion
 
+#pragma region Rounding
+	/// <summary>
+	/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
+	/// </summary>
+	/// <param name="inputFloat">The input float to round.</param>
+	/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
+	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
+
+	/// <summary>
+	/// Rounds an integer to the specified nearest multiple.
+	/// </summary>
+	/// <param name="num">The number to round to the nearest multiple.</param>
+	/// <param name="multiple">The multiple to round to.</param>
+	/// <returns>An integer rounded to the specified nearest multiple.</returns>
+	inline int RoundToNearestMultiple(int num, int multiple) { return static_cast<int>(std::round(static_cast<float>(num) / static_cast<float>(multiple)) * static_cast<float>(multiple)); }
+#pragma endregion
+
 #pragma region Angle Helpers
 	/// <summary>
 	/// Returns a copy of the angle normalized so it's between 0 and 2PI.
@@ -250,14 +268,6 @@ namespace RTE {
 	/// <param name="angleRadians">The angle in radians to be converted.</param>
 	/// <returns>The converted angle in degrees.</returns>
 	inline float RadiansToDegrees(float angleRadians) { return angleRadians / c_PI * 180.0F; }
-
-	/// <summary>
-	/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
-	/// </summary>
-	/// <param name="inputFloat">The input float to round.</param>
-	/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
-	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
-	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
 
 #pragma region Comparison

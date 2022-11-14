@@ -1479,6 +1479,9 @@ void MovableMan::OpenAllDoors(bool open, int team) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: Completely tear out and delete this.
+// It shouldn't belong to MovableMan, instead it probably ought to be on the pathfinder. On that note, pathfinders shouldn't be part of the scene!
+// AIMan? PathingMan? Something like that. Ideally, we completely tear out this hack, and allow for doors in a completely different way.
 void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) const {
 	for (std::deque<Actor *> actorDeque : { m_Actors, m_AddedActors }) {
 		for (Actor *actor : actorDeque) {

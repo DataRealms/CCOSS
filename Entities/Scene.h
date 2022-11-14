@@ -779,7 +779,7 @@ EntityAllocation(Scene)
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
-    int RetrieveSceneObjects(bool transferOwnership = true, int onlyTeam = -1, bool noBrains = false);
+    int RetrieveSceneObjects(bool transferOwnership, int onlyTeam = -1, bool noBrains = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -2182,17 +2182,16 @@ void Scene::UpdatePlacedObjects(int whichSet)
 
 int Scene::ClearPlacedObjectSet(int whichSet, bool weHaveOwnership)
 {
-    int count = 0;
-    for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
+    if (weHaveOwnership) 
     {
-        if (weHaveOwnership)
+        for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
         {
             delete *itr;
         }
-        ++count;
     }
-    m_PlacedObjects[whichSet].clear();
 
+    int count = m_PlacedObjects[whichSet].size();
+    m_PlacedObjects[whichSet].clear();
     return count;
 }
 

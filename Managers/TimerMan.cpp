@@ -45,7 +45,7 @@ namespace RTE {
 		timespec my_TimeSpec;
 		clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
 
-		m_TicksPerSecond= ((1e9 / my_TimeSpec.tv_nsec) / 1000);
+		m_TicksPerSecond = ((1e9 / my_TimeSpec.tv_nsec) / 1000);
 #endif
 
 		// Reset the real time setting so that we can measure how much real time has passed till the next Update.
@@ -55,7 +55,7 @@ namespace RTE {
 		SetDeltaTimeSecs(m_DeltaTimeS);
 
 		// Set up a default cap if one hasn't been set yet
-		if (m_RealToSimCap <= 0) { m_RealToSimCap = 0.0333333F * m_TicksPerSecond; }
+		if (m_RealToSimCap <= 0) { m_RealToSimCap = static_cast<long long>(0.0333333F * static_cast<float>(m_TicksPerSecond)); }
 
 		return 0;
 	}
@@ -74,7 +74,7 @@ namespace RTE {
 		// honestly need anything more than that.
 		long long ticks = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 #endif
-	  return (ticks * 1000000) / m_TicksPerSecond;
+		return (ticks * 1000000) / m_TicksPerSecond;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ namespace RTE {
 		std::uint64_t curTime;
 		timespec my_TimeSpec;
 		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-		curTime= static_cast<long long>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
+		curTime = static_cast<long long>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 		m_RealTimeTicks = curTime - m_StartTime;
 #endif
 		// Figure the increase in real time
@@ -145,7 +145,7 @@ namespace RTE {
 		RTEAssert(timeIncrease > 0, "It seems your CPU is giving bad timing data to the game, this is known to happen on some multi-core processors. This may be fixed by downloading the latest CPU drivers from AMD or Intel.");
 
 		// If not paused, add the new time difference to the sim accumulator, scaling by the TimeScale
-		if (!m_SimPaused) { m_SimAccumulator += timeIncrease * m_TimeScale; }
+		if (!m_SimPaused) { m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale); }
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 

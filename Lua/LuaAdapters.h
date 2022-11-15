@@ -67,6 +67,14 @@ namespace RTE {
 	}
 
 	/// <summary>
+	/// Gets the current number of ticks that the simulation should be updating with. Lua can't handle int64 (or long long apparently) so we'll expose this specialized function.
+	/// </summary>
+	/// <returns>The current fixed delta time that the simulation should be updating with, in ticks.</returns>
+	static double GetDeltaTimeTicks(const TimerMan &timerMan) {
+		return static_cast<double>(timerMan.GetDeltaTimeTicks());
+	}
+
+	/// <summary>
 	/// Gets the number of ticks per second. Lua can't handle int64 (or long long apparently) so we'll expose this specialized function.
 	/// </summary>
 	/// <returns>The number of ticks per second.</returns>

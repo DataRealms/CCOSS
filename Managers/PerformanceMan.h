@@ -2,13 +2,13 @@
 #define _RTEPERFORMANCEMAN_
 
 #include "Singleton.h"
+#include "Timer.h"
 
 #define g_PerformanceMan PerformanceMan::Instance()
 
 namespace RTE {
 
 	class AllegroBitmap;
-	class Timer;
 
 	/// <summary>
 	/// Singleton manager responsible for all performance stats counting and drawing.

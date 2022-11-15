@@ -35,7 +35,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TimerMan::Initialize() {
+	TimerMan::TimerMan() {
+		Clear();
+
 		// Get the frequency of ticks/s for this machine
 #ifdef _WIN32
 		LARGE_INTEGER tempLInt;
@@ -47,7 +49,11 @@ namespace RTE {
 
 		m_TicksPerSecond = ((1e9 / my_TimeSpec.tv_nsec) / 1000);
 #endif
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TimerMan::Initialize() {
 		// Reset the real time setting so that we can measure how much real time has passed till the next Update.
 		ResetTime();
 

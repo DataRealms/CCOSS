@@ -16,12 +16,12 @@ namespace RTE {
 		m_StartTime = 0;
 		m_TicksPerSecond = 1;
 		m_RealTimeTicks = 0;
-		m_RealToSimCap = 0;
+		m_RealToSimCap = 0.0F;
 		m_SimTimeTicks = 0;
 		m_SimUpdateCount = 0;
 		m_SimAccumulator = 0;
 		m_DeltaTime = 0;
-		m_DeltaTimeS = 0.016666666F;
+		m_DeltaTimeS = 0.0F;
 		m_DeltaBuffer.clear();
 		m_SimUpdatesSinceDrawn = -1;
 		m_DrawnSimUpdate = false;
@@ -58,10 +58,10 @@ namespace RTE {
 		ResetTime();
 
 		// Calculate a reasonable delta time in ticks, based on the now known frequency
-		SetDeltaTimeSecs(m_DeltaTimeS);
+		if (m_DeltaTimeS <= 0) { SetDeltaTimeSecs(c_DefaultDeltaTimeS); }
 
 		// Set up a default cap if one hasn't been set yet
-		if (m_RealToSimCap <= 0) { m_RealToSimCap = static_cast<long long>(0.0333333F * static_cast<float>(m_TicksPerSecond)); }
+		if (m_RealToSimCap <= 0) { SetRealToSimCap(c_DefaultRealToSimCap); }
 
 		return 0;
 	}

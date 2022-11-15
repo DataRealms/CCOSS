@@ -22,6 +22,11 @@ namespace RTE {
 	static constexpr int c_DefaultAtomGroupResolution = 5; //!< The global default AtomGroup resolution setting.
 #pragma endregion
 
+#pragma region Time Constants
+	static constexpr float c_DefaultDeltaTimeS = 0.016666666F; //!< The default simulation update step size, in seconds.
+	static constexpr float c_DefaultRealToSimCap = 0.0333333F; //!< The default cap of number of ticks that the real time can add to the tick accumulator each update.
+#pragma endregion
+
 #pragma region Graphics Constants
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.

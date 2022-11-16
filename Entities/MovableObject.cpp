@@ -17,7 +17,6 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "LuaMan.h"
-#include "luabind/object.hpp"
 #include "Atom.h"
 #include "Actor.h"
 #include "SLTerrain.h"
@@ -494,7 +493,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	} else if (HasScript(scriptPath)) {
 		return -3;
 	}
-	m_AllLoadedScripts.insert({scriptPath, loadAsEnabledScript});
 
 	std::string luaClearSupportedFunctionsString;
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
@@ -506,19 +504,21 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
 		if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
-			m_FunctionsAndScripts.insert({ functionName, std::vector<std::pair<const std::string &, luabind::object>>() });
+			m_FunctionsAndScripts.try_emplace(functionName);
 		}
 	}
 
-	std::unordered_map<std::string, luabind::object> scriptFileFunctions;
+	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 	if (g_LuaMan.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
 		return -5;
 	}
-	for (auto &[functionName, functionObject] : scriptFileFunctions) {
-		m_FunctionsAndScripts.at(functionName).push_back({ scriptPath, functionObject });
+	for (const auto &[functionName, functionObject] : scriptFileFunctions) {
+		m_FunctionsAndScripts.at(functionName).emplace_back(std::unique_ptr<LuabindObjectWrapper>(functionObject));
 	}
 
 	g_LuaMan.RunScriptString(luaClearSupportedFunctionsString);
+
+	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
 	return 0;
 }
@@ -532,6 +532,7 @@ int MovableObject::ReloadScripts() {
 
 	int status = 0;
 	std::unordered_map<std::string, bool> loadedScriptsCopy = m_AllLoadedScripts;
+	m_AllLoadedScripts.clear();
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
 		if (status < 0) {
@@ -540,6 +541,24 @@ int MovableObject::ReloadScripts() {
 	}
 
     return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::InitializeObjectScripts() {
+	g_LuaMan.SetTempEntity(this);
+
+	m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
+	if (g_LuaMan.RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
+		RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
+	}
+
+	if (!m_FunctionsAndScripts.at("Create").empty() && RunScriptedFunctionInAppropriateScripts("Create", false, true) < 0) {
+		m_ScriptObjectName = "ERROR";
+		return -1;
+	}
+
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -580,9 +599,9 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     }
 
     if (status >= 0) {
-        for (const auto &[scriptPath, functionObject] : m_FunctionsAndScripts.at(functionName)) {
-            if (runOnDisabledScripts || m_AllLoadedScripts.at(scriptPath) == true) {
-				status = g_LuaMan.RunScriptFunctionObject(functionObject, m_ScriptObjectName, functionEntityArguments, functionLiteralArguments);
+        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
+            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
+				status = g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
                 if (status < 0 && stopOnError) {
                     return status;
                 }
@@ -599,8 +618,8 @@ int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std:
 		return -1;
 	}
 
-	for (auto &[luaFunctionScriptPath, functionObject] : m_FunctionsAndScripts.at(functionName)) {
-		if (scriptPath == luaFunctionScriptPath && g_LuaMan.RunScriptFunctionObject(functionObject, m_ScriptObjectName, functionEntityArguments, functionLiteralArguments) < 0) {
+	for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
+		if (scriptPath == functionObjectWrapper->GetFilePath() && g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
 			if (m_AllLoadedScripts.size() > 1) {
 				g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
 			}
@@ -609,22 +628,6 @@ int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std:
 	}
 
 	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int MovableObject::InitializeObjectScripts() {
-	g_LuaMan.SetTempEntity(this);
-
-	m_ScriptObjectName = "_ScriptedObjects[" + std::to_string(m_UniqueID) + "]";
-	if (g_LuaMan.RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
-		RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-	}
-
-	if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
-		m_ScriptObjectName = "ERROR";
-		return -1;
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

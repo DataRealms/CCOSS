@@ -18,15 +18,13 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Timer.h"
+#include "LuabindObjectWrapper.h"
 #include "Material.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
 
 struct BITMAP;
 
-namespace luabind {
-	class object;
-}
 
 namespace RTE {
 
@@ -47,7 +45,6 @@ struct HitData;
 class MOSRotating;
 class PieMenu;
 class SLTerrain;
-using luabind::object;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -164,6 +161,7 @@ enum MOType
 #pragma region Script Handling
     /// <summary>
     /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
+	/// If the script contains a Create function and this MO's scripts are running, the Create function will be run immediately.
     /// </summary>
     /// <param name="scriptPath">The path to the script to load.</param>
     /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
@@ -1947,7 +1945,7 @@ protected:
 
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
-    std::unordered_map<std::string, std::vector<std::pair<const std::string &, luabind::object>>> m_FunctionsAndScripts; //!< A map of function names to vectors of luabind function objects. Used to maintain script execution order and avoid extraneous Lua calls.
+    std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
 
     // Special post processing flash effect file and Bitmap. Shuold be loaded from a 32bpp bitmap
     ContentFile m_ScreenEffectFile;

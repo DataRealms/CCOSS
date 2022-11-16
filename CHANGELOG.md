@@ -132,6 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
 	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
 	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+	**`PieSlices`** - Gets all of the `PieSlice`s in the `PieMenu` for iterating over in a for loop.  
 
 	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
 	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
@@ -144,7 +145,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
 	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
 	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
-	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
 	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
 	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
 

@@ -1079,6 +1079,8 @@ namespace RTE {
 		.property("Pos", &PieMenu::GetPos)
 		.property("RotAngle", &PieMenu::GetRotAngle, &PieMenu::SetRotAngle)
 		.property("FullInnerRadius", &PieMenu::GetFullInnerRadius, &PieMenu::SetFullInnerRadius)
+		
+		.property("PieSlices", &PieMenu::GetPieSlices, luabind::return_stl_iterator)
 
 		.def("IsSubPieMenu", &PieMenu::IsSubPieMenu)
 
@@ -1095,7 +1097,6 @@ namespace RTE {
 		.def("FreezeAtRadius", &PieMenu::FreezeAtRadius)
 
 		.def("GetPieCommand", &PieMenu::GetPieCommand)
-		.def("GetPieSlices", &PieMenu::GetPieSlices, luabind::return_stl_iterator)
 		.def("GetFirstPieSliceByPresetName", &PieMenu::GetFirstPieSliceByPresetName)
 		.def("GetFirstPieSliceByType", &PieMenu::GetFirstPieSliceByType)
 		.def("AddPieSlice", &PieMenu::AddPieSlice, luabind::adopt(_2))

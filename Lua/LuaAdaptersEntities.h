@@ -146,9 +146,6 @@ namespace RTE {
 	static bool MovableObjectAddScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
 		switch (luaSelfObject->LoadScript(luaSelfObject->CorrectBackslashesInPath(scriptPath))) {
 			case 0:
-				if (luaSelfObject->ObjectScriptsInitialized()) {
-					luaSelfObject->RunFunctionOfScript(scriptPath, "Create");
-				}
 				return true;
 			case -1:
 				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " was empty.");

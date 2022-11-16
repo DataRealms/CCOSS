@@ -520,6 +520,10 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
+	if (ObjectScriptsInitialized()) {
+		RunFunctionOfScript(scriptPath, "Create");
+	}
+
 	return 0;
 }
 

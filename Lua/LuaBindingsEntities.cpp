@@ -1027,6 +1027,8 @@ namespace RTE {
 
 		.property("DrawFlippedToMatchAbsoluteAngle", &PieSlice::GetDrawFlippedToMatchAbsoluteAngle, &PieSlice::SetDrawFlippedToMatchAbsoluteAngle)
 
+		.def("ReloadScripts", &PieSlice::ReloadScripts)
+
 		.enum_("SliceType")[
 			luabind::value("NoType", PieSlice::SliceType::NoType),
 			luabind::value("Pickup", PieSlice::SliceType::Pickup),

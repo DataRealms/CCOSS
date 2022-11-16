@@ -222,6 +222,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -338,6 +340,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 		SomeObjectProperty = Something
 				CopyOf = Thing // Over-indented. Will crash.
 	```
+
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game. `PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s
 
 </details>
 

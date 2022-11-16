@@ -280,22 +280,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptFunctionObject(const luabind::object &functionObject, const std::string &selfObjectName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+	int LuaMan::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		int status = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		functionObject.push(m_MasterState);
-		
-		//TODO with lua pcall you have to push the args onto the stack first. See https://www.lua.org/pil/25.2.html
-		//luabind::call_function<void>(L, "keyPress") should be an alternative
-		if (lua_pcall(m_MasterState, 0, LUA_MULTRET, -2) > 0) {
+		functionObject->GetLuabindObject()->push(m_MasterState);
+
+		int argumentCount = functionEntityArguments.size() + functionLiteralArguments.size();
+		if (!selfGlobalTableName.empty() && TableEntryIsDefined(selfGlobalTableName, selfGlobalTableKey)) {
+			lua_getglobal(m_MasterState, selfGlobalTableName.c_str());
+			lua_getfield(m_MasterState, -1, selfGlobalTableKey.c_str());
+			lua_remove(m_MasterState, -2);
+			argumentCount++;
+		}
+
+		for (const Entity *functionEntityArgument : functionEntityArguments) {
+			luabind::adl::object(m_MasterState, functionEntityArgument).push(m_MasterState);
+		}
+
+		for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+			lua_pushlstring(m_MasterState, functionLiteralArgument.data(), functionLiteralArgument.size());
+		}
+
+		if (lua_pcall(m_MasterState, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
 			m_LastError = lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);
 			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
 			ClearErrors();
 			status = -1;
 		}
-		lua_pop(m_MasterState, 2);
+		lua_pop(m_MasterState, 1);
 
 		return status;
 	}
@@ -320,43 +334,6 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		
-		/*
-		int errCode = luaL_loadfile(m_MasterState, filePath.c_str());
-		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
-
-		//Check for errors.
-
-		//Get the function from the top of the stack as a Luabind object.
-		luabind::object compiledScript(luabind::from_stack(m_MasterState, -1));
-		luabind::object script2 = luabind::globals(m_MasterState)["gaogogo"]; <----
-
-		auto tes = luabind::type(script2);
-		bool isfunction3 = luabind::type(script2) == LUA_TFUNCTION;
-
-		luabind::call_function<void>(script2);
-		bool isfunction = luabind::type(compiledScript) == LUA_TFUNCTION;
-		bool isfunction2 = luabind::type(script2) == LUA_TFUNCTION;
-		compiledScript.push(m_MasterState);
-		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
-
-		script2.push(m_MasterState);
-		lua_pcall(m_MasterState, 0, LUA_MULTRET, -2);
-
-		//Call the function through Luabind, passing the manager as the parameter.
-		luabind::call_function<void>(compiledScript, this);
-		luabind::call_function<void>(script2);
-
-		//The function is still on the stack from the load call. Pop it.
-		lua_pop(m_MasterState, 1);
-		if (luaL_dofile(m_MasterState, filePath.c_str()) == 0) {
-			int value = luabind::call_function<int>(m_MasterState, "testadd", 2, 3);
-			luabind::object compiledScript(luabind::from_stack(m_MasterState, -1));
-			auto bb = luabind::call_function<void>(compiledScript);
-			bool b = true;
-			lua_pop(m_MasterState, 1);
-		}*/
-
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_MasterState, -1);
@@ -375,7 +352,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, luabind::object> &outFunctionNamesAndObjects) {
+	int LuaMan::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
 		if (int error = RunScriptFile(filePath); error < 0) {
 			return error;
 		}
@@ -383,7 +360,8 @@ namespace RTE {
 		for (const std::string &functionName : functionNamesToLookFor) {
 			luabind::object functionObject = luabind::globals(m_MasterState)[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
-				outFunctionNamesAndObjects.try_emplace(functionName, functionObject);
+				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
+				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 			}
 		}
 

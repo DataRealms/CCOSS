@@ -4,18 +4,13 @@
 #include "Singleton.h"
 #include "Serializable.h"
 #include "Entity.h"
+#include "LuabindObjectWrapper.h"
 
 #define g_LuaMan LuaMan::Instance()
 
 struct lua_State;
 
-namespace luabind {
-	class object;
-}
-
 namespace RTE {
-
-	using luabind::object;
 
 	/// <summary>
 	/// The singleton manager of the master Lua script state.
@@ -99,12 +94,13 @@ namespace RTE {
 		/// Runs the given Lua function object. The first argument to the function will always be the self object.
 		/// If either argument list has entries, they will be passed into the function in order, with entity arguments first.
 		/// </summary>
-		/// <param name="functionObject">The Lua function object to be run.</param>
-		/// <param name="selfObjectName">The name that gives access to the self object in the global Lua namespace.</param>
+		/// <param name="functionObjectWrapper">The LuabindObjectWrapper containing the Lua function to be run.</param>
+		/// <param name="selfGlobalTableName">The name of the global Lua table that gives access to the self object.</param>
+		/// <param name="selfGlobalTableKey">The key for this object in the resepective global Lua table.</param>
 		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int RunScriptFunctionObject(const luabind::object &functionObject, const std::string &selfObjectName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+		int RunScriptFunctionObject(const LuabindObjectWrapper *functionObjectWrapper, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 		/// <summary>
 		/// Opens and loads a file containing a script and runs it on the master state.
@@ -119,9 +115,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="filePath">The path to the file to load and run.</param>
 		/// <param name="functionNamesToLookFor">The vector of strings defining the function names to be retrieved.</param>
-		/// <param name="outFunctionNamesAndObjects">The map of function names to objects to be retrieved from the script that's run.</param>
+		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
-		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, luabind::object> &outFunctionNamesAndObjects);
+		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
 #pragma endregion
 
 #pragma region

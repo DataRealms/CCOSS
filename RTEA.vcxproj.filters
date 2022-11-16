@@ -534,6 +534,9 @@
     <ClInclude Include="Lua\LuaAdaptersEntities.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="Lua\LuabindObjectWrapper.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
     <ClInclude Include="Lua\LuaAdapters.h">
       <Filter>Lua</Filter>
     </ClInclude>
@@ -1025,6 +1028,9 @@
     </ClCompile>
     <ClCompile Include="GUI\GUIWriter.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuabindObjectWrapper.cpp">
+      <Filter>Lua</Filter>
     </ClCompile>
     <ClCompile Include="Lua\LuaBindingsMisc.cpp">
       <Filter>Lua</Filter>

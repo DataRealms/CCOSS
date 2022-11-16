@@ -548,6 +548,7 @@
     <ClInclude Include="GUI\GUIInterface.h" />
     <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="Lua\LuabindObjectWrapper.h" />
     <ClInclude Include="Lua\LuaAdapters.h" />
     <ClInclude Include="Lua\LuaBindDefinitions.h" />
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h" />
@@ -722,6 +723,10 @@
     <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="GUI\GUIWriter.cpp" />
+    <ClCompile Include="Lua\LuabindObjectWrapper.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Lua\LuaBindingsActivities.cpp">
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>

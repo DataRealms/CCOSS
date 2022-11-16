@@ -242,6 +242,12 @@ namespace RTE {
 		/// </summary>
 		void Clear();
 
+		/// <summary>
+		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
+		/// </summary>
+		/// <returns>A string that describes the current state of the Lua stack.</returns>
+		std::string DescribeLuaStack();
+
 		// Disallow the use of some implicit methods.
 		LuaMan(const LuaMan &reference) = delete;
 		LuaMan & operator=(const LuaMan &rhs) = delete;

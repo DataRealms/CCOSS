@@ -560,4 +560,33 @@ namespace RTE {
 	void LuaMan::Update() const {
 		lua_gc(m_MasterState, LUA_GCSTEP, 1);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::DescribeLuaStack() {
+		int indexOfTopOfStack = lua_gettop(m_MasterState);
+		if (indexOfTopOfStack == 0) {
+			return "The Lua stack is empty.";
+		}
+
+		std::string stackDescription = "The Lua stack contains " + std::to_string(indexOfTopOfStack ) + " elements. From top to bottom, they are:\n";
+		for (int i = indexOfTopOfStack; i > 0; i--) {
+			int type = lua_type(m_MasterState, i);
+			switch (type) {
+				case LUA_TBOOLEAN:
+					stackDescription = stackDescription + (lua_toboolean(m_MasterState, i) ? "true" : "false") + "\n";
+					break;
+				case LUA_TNUMBER:
+					stackDescription = stackDescription + std::to_string(lua_tonumber(m_MasterState, i)) + "\n";
+					break;
+				case LUA_TSTRING:
+					stackDescription = stackDescription + lua_tostring(m_MasterState, i) + "\n";
+					break;
+				default:
+					stackDescription = stackDescription + lua_typename(m_MasterState, type) + "\n";
+					break;
+			}
+		}
+		return stackDescription;
+	}
 }

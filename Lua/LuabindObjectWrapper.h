@@ -51,6 +51,10 @@ namespace RTE {
 
 		luabind::adl::object *m_LuabindObject; //!< The luabind object this is wrapping.
 		std::string m_FilePath; //!< The filepath the wrapped luabind object represents, if it's a function.
+
+		// Disallow the use of some implicit methods.
+		LuabindObjectWrapper(const LuabindObjectWrapper &reference) = delete;
+		LuabindObjectWrapper &operator=(const LuabindObjectWrapper &rhs) = delete;
 	};
 }
 #endif

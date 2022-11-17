@@ -15,10 +15,11 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Convenience macro to cut down on duplicate GetPrimtiveType methods in classes that extend GraphicalPrimitive.
+		/// Convenience macro to cut down on duplicate methods in classes that extend GraphicalPrimitive.
 		/// </summary>
-		#define GraphicalPrimitiveTypeGetter \
-			const PrimitiveType GetPrimtiveType() const override { return c_PrimitiveType; }
+		#define GraphicalPrimitiveOverrideMethods \
+			const PrimitiveType GetPrimtiveType() const override { return c_PrimitiveType; } \
+			void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 
 		/// <summary>
 		///
@@ -98,7 +99,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
@@ -114,13 +115,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -135,7 +129,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		float m_StartAngle = 0; //!< The angle from which the arc begins.
 		float m_EndAngle = 0; //!< The angle at which the arc ends.
@@ -159,13 +153,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -180,7 +167,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_GuidePointAPos = Vector(); //!< A guide point that controls the curve of the spline.
 		Vector m_GuidePointBPos = Vector(); //!< A guide point that controls the curve of the spline.
@@ -203,13 +190,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -224,7 +204,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for BoxPrimitive object.
@@ -240,13 +220,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -261,7 +234,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for BoxFillPrimitive object.
@@ -277,13 +250,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -298,7 +264,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
@@ -319,13 +285,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -340,7 +299,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
@@ -361,13 +320,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -382,7 +334,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_Radius = 0; //!< Radius of the circle primitive.
 
@@ -401,13 +353,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -422,7 +367,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_Radius = 0; //!< Radius of the circle primitive.
 
@@ -441,13 +386,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -462,7 +400,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
 		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
@@ -483,13 +421,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -504,7 +435,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
 		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
@@ -524,13 +455,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -545,7 +469,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_PointAPos = Vector(); //!< First point of the triangle.
 		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
@@ -566,13 +490,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -587,7 +504,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_PointAPos = Vector(); //!< First point of the triangle.
 		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
@@ -608,13 +525,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -629,7 +539,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		std::string m_Text = ""; //!< String containing text to draw.
 		bool m_IsSmall = false; //!< Use small or large font. True for small font.
@@ -652,13 +562,6 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
-
 	private:
 
 		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
@@ -673,7 +576,7 @@ namespace RTE {
 
 	public:
 
-		GraphicalPrimitiveTypeGetter;
+		GraphicalPrimitiveOverrideMethods;
 
 		BITMAP *m_Bitmap = nullptr; //!< Bitmap to draw.
 		float m_RotAngle = 0; //!< Angle to rotate bitmap in radians.
@@ -728,13 +631,6 @@ namespace RTE {
 			m_StartPos = centerPos;
 			m_Player = player;
 		}
-
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 
 	private:
 

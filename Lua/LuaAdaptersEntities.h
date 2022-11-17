@@ -3,6 +3,7 @@
 
 #include "ConsoleMan.h"
 #include "PresetMan.h"
+#include "LuabindObjectWrapper.h"
 
 #include "ACDropShip.h"
 #include "ACrab.h"
@@ -121,7 +122,10 @@ namespace RTE {
 		} \
 		static bool Is##TYPE(Entity *entity) { \
 			return dynamic_cast<TYPE *>(entity) ? true : false; \
-		}
+		} \
+		static LuabindObjectWrapper * ToLuabindObject##TYPE (const Entity *entity, lua_State *luaState) { \
+			return new LuabindObjectWrapper(new luabind::adl::object(luaState, dynamic_cast<const TYPE *>(entity)), ""); \
+		} \
 
 	/// <summary>
 	/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
@@ -275,6 +279,7 @@ namespace RTE {
 	LuaEntityClone(PieSlice);
 	LuaEntityClone(PieMenu);
 
+	// NOTE - I'm sorry for this, but whenever you add a new LuaEntityCast entry, make sure to include it in LuaMan::InitializeCastingHelperMap.
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
 	LuaEntityCast(SceneObject);
@@ -311,6 +316,7 @@ namespace RTE {
 	LuaEntityCast(PEmitter);
 	LuaEntityCast(PieSlice);
 	LuaEntityCast(PieMenu);
+	// DON'T FORGET TO UPDATE LuaMan::InitializeCastingHelperMap!!!
 
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetBreakWound);

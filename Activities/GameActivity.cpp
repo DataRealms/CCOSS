@@ -1545,8 +1545,13 @@ void GameActivity::Update()
             Actor *pTargetActor = 0;
 			Vector distance;
 			if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]); pTargetActor && pTargetActor->GetPieMenu()) {
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
 				pTargetActor->GetPieMenu()->FreezeAtRadius(15);
 				m_pLastMarkedActor[player] = pTargetActor;
+			} else if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+				m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
 			}
 
             // Set the view to the cursor pos
@@ -1571,6 +1576,9 @@ void GameActivity::Update()
                 m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
             }
             // Player set a new waypoint
             else if (m_ControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1584,6 +1592,9 @@ void GameActivity::Update()
                     m_ControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
                 // Update the player's move path now to the first waypoint set
                 m_ControlledActor[player]->UpdateMovePath();
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
             }
         }
         else if (m_ViewState[player] == ViewState::UnitSelectCircle)

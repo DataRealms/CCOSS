@@ -14,7 +14,7 @@ if host_machine.system() in ['linux','osx']
     dependency('liblz4'),
     dependency('libpng'),
     dependency('boost'), #needed for luabind
-    dependency(['lua52', 'lua5.2', 'lua-5.2']),
+    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2']),
   ]
   if host_machine.system() == 'linux'
     deps += dependency('x11')

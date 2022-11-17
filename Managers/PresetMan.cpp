@@ -45,6 +45,7 @@ void PresetMan::Clear()
     m_DataModuleIDs.clear();
     m_OfficialModuleCount = 0;
     m_TotalGroupRegister.clear();
+	m_LastReloadedEntityPresetInfo.fill("");
 }
 
 /*
@@ -931,6 +932,67 @@ void PresetMan::ReloadAllScripts()
     // Go through all modules and reset all scripts in all their Presets
     for (int i = 0; i < m_pDataModules.size(); ++i)
         m_pDataModules[i]->ReloadAllScripts();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::string &className, const std::string &moduleName, bool storeReloadedPresetDataForQuickReloading) {
+	if (className.empty() || presetName.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Trying to reload Entity preset without specifying preset name or type!");
+		return false;
+	}
+
+	int moduleId = -1;
+	if (moduleName != "") {
+		moduleId = GetModuleID(moduleName);
+		if (moduleId < 0) {
+			g_ConsoleMan.PrintString("ERROR: Failed to find data module with name \"" + moduleName + "\" while attempting to reload an Entity preset with name \"" + presetName + "\" of type \"" + className + "\"!");
+			return false;
+		}
+	}
+	std::string actualDataModuleOfPreset = moduleName;
+
+	std::string presetDataLocation = GetEntityDataLocation(className, presetName, moduleId);
+	if (presetDataLocation.empty()) {
+		g_ConsoleMan.PrintString("ERROR: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\" or any official module! The preset might not exist!");
+		return false;
+	}
+
+	// GetEntityDataLocation will attempt to locate the preset in the official modules if it fails to locate it in the specified module. Warn and correct the result string.
+	if (std::string presetDataLocationModuleName = presetDataLocation.substr(0, presetDataLocation.find_first_of("/\\")); presetDataLocationModuleName != actualDataModuleOfPreset) {
+		actualDataModuleOfPreset = presetDataLocationModuleName;
+		if (moduleName != "") {
+			g_ConsoleMan.PrintString("WARNING: Failed to locate data of Entity preset with name \"" + presetName + "\" of type \"" + className + "\" in \"" + moduleName + "\"! Entity preset data matching the name and type was found in \"" + actualDataModuleOfPreset + "\"!");
+		}
+	}
+
+	Reader reader(presetDataLocation.c_str(), true);
+	while (reader.NextProperty()) {
+		reader.ReadPropName();
+		g_PresetMan.GetEntityPreset(reader);
+	}
+	g_ConsoleMan.PrintString("SYSTEM: Entity preset with name \"" + presetName + "\" of type \"" + className + "\" defined in \"" + actualDataModuleOfPreset + "\" was successfully reloaded");
+
+	if (storeReloadedPresetDataForQuickReloading) {
+		m_LastReloadedEntityPresetInfo[0] = presetName;
+		m_LastReloadedEntityPresetInfo[1] = className;
+		m_LastReloadedEntityPresetInfo[2] = moduleName == "" ? actualDataModuleOfPreset : moduleName; // If there was a module name, store it as-is so that if there's a data location warning, it persists on every quick reload.
+	}
+
+	m_ReloadEntityPresetCalledThisUpdate = true;
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::QuickReloadEntityPreset() {
+	for (const std::string &entityPresetInfoEntry : m_LastReloadedEntityPresetInfo) {
+		if (entityPresetInfoEntry.empty()) {
+			g_ConsoleMan.PrintString("ERROR: Trying to quick reload Entity preset when there is nothing set to reload!");
+			return false;
+		}
+	}
+	return ReloadEntityPreset(m_LastReloadedEntityPresetInfo[0], m_LastReloadedEntityPresetInfo[1], m_LastReloadedEntityPresetInfo[2]);
 }
 
 

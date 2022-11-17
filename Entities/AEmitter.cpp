@@ -513,7 +513,11 @@ void AEmitter::Update()
 					pParticle->SetRotAngle(emitVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
 
-					if (pParticle->GetLifetime() != 0) { pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * RandomNormalNum()))), 1)); }
+					//Scale the particle's lifetime based on life variation and throttle, as long as it's not 0
+					if (pParticle->GetLifetime() != 0) {
+						pParticle->SetLifetime(std::max(static_cast<int>(static_cast<float>(pParticle->GetLifetime()) * (1.0F + ((*eItr)->GetLifeVariation() * RandomNormalNum()))), 1));
+						pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * throttleFactor), 1));
+					}
                     pParticle->SetTeam(m_Team);
                     pParticle->SetIgnoresTeamHits(true);
 
@@ -524,10 +528,6 @@ void AEmitter::Update()
                     // Set the emitted particle to not hit this emitter's parent, if applicable
                     if (m_EmissionsIgnoreThis)
                         pParticle->SetWhichMOToNotHit(pRootParent);
-
-                    // Scale the particle's lifetime based on the throttle
-                    if (throttleFactor != 0)
-                        pParticle->SetLifetime(pParticle->GetLifetime() * throttleFactor);
 
                     // Let particle loose into the world!
                     g_MovableMan.AddMO(pParticle);

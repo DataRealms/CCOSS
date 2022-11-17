@@ -39,6 +39,7 @@ namespace RTE {
 			EllipseFill,
 			Triangle,
 			TriangleFill,
+			Polygon,
 			PolygonFill,
 			Text,
 			Bitmap
@@ -532,6 +533,39 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Polygon Primitive
+	/// <summary>
+	/// Class used to schedule drawing of polygon primitives created from Lua.
+	/// </summary>
+	class PolygonPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		GraphicalPrimitiveOverrideMethods;
+
+		std::vector<Vector *> m_Vertices = {}; //!< Positions of the vertices of the polygon, relative to the center position.
+
+		/// <summary>
+		/// Constructor method for PolygonPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		PolygonPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices) :
+			m_Vertices(vertices) {
+
+			m_StartPos = centerPos;
+			m_Color = color;
+			m_Player = player;
+		}
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
+	};
+#pragma endregion
+
 #pragma region Filled Polygon Primitive
 	/// <summary>
 	/// Class used to schedule drawing of filled polygon primitives created from Lua.
@@ -545,7 +579,7 @@ namespace RTE {
 		std::vector<Vector *> m_Vertices = {}; //!< Positions of the vertices of the polygon, relative to the center position.
 
 		/// <summary>
-		/// Constructor method for PolygonPrimitive object.
+		/// Constructor method for PolygonFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="centerPos">Position of this primitive's center.</param>

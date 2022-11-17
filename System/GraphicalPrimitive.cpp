@@ -22,6 +22,7 @@ namespace RTE {
 	const GraphicalPrimitive::PrimitiveType EllipseFillPrimitive::c_PrimitiveType = PrimitiveType::EllipseFill;
 	const GraphicalPrimitive::PrimitiveType TrianglePrimitive::c_PrimitiveType = PrimitiveType::Triangle;
 	const GraphicalPrimitive::PrimitiveType TriangleFillPrimitive::c_PrimitiveType = PrimitiveType::TriangleFill;
+	const GraphicalPrimitive::PrimitiveType PolygonPrimitive::c_PrimitiveType = PrimitiveType::Polygon;
 	const GraphicalPrimitive::PrimitiveType PolygonFillPrimitive::c_PrimitiveType = PrimitiveType::PolygonFill;
 	const GraphicalPrimitive::PrimitiveType TextPrimitive::c_PrimitiveType = PrimitiveType::Text;
 	const GraphicalPrimitive::PrimitiveType BitmapPrimitive::c_PrimitiveType = PrimitiveType::Bitmap;
@@ -386,6 +387,32 @@ namespace RTE {
 
 			triangle(drawScreen, drawPointALeft.GetFloorIntX(), drawPointALeft.GetFloorIntY(), drawPointBLeft.GetFloorIntX(), drawPointBLeft.GetFloorIntY(), drawPointCLeft.GetFloorIntX(), drawPointCLeft.GetFloorIntY(), m_Color);
 			triangle(drawScreen, drawPointARight.GetFloorIntX(), drawPointARight.GetFloorIntY(), drawPointBRight.GetFloorIntX(), drawPointBRight.GetFloorIntY(), drawPointCRight.GetFloorIntX(), drawPointCRight.GetFloorIntY(), m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PolygonPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart;
+			Vector drawEnd;
+			for (int i = 0; i < m_Vertices.size(); ++i) {
+				drawStart = m_StartPos - targetPos + (*m_Vertices[i]);
+				drawEnd = m_StartPos - targetPos + ((i + 1 < m_Vertices.size()) ? *m_Vertices[i + 1] : *m_Vertices[0]);
+				line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
+			}
+		} else {
+			Vector drawStartLeft;
+			Vector drawStartRight;
+			Vector drawEndLeft;
+			Vector drawEndRight;
+			for (int i = 0; i < m_Vertices.size(); ++i) {
+				TranslateCoordinates(targetPos, m_StartPos + (*m_Vertices[i]), drawStartLeft, drawStartRight);
+				TranslateCoordinates(targetPos, m_StartPos + ((i + 1 < m_Vertices.size()) ? *m_Vertices[i + 1] : *m_Vertices[0]), drawEndLeft, drawEndRight);
+
+				line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
+				line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
+			}
 		}
 	}
 

@@ -115,6 +115,31 @@ namespace RTE {
 	static bool ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className) {
 		return ReloadEntityPreset1(presetMan, presetName, className, "");
 	}
+#pragma endregion
+
+#pragma region PrimitiveMan Lua Adapters
+	/// <summary>
+	/// Schedule to draw a polygon primitive.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="color">Color to draw primitive with.</param>
+	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
+	static void DrawPolygonPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonPrimitive(-1, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable));
+	}
+
+	/// <summary>
+	/// Schedule to draw a polygon primitive visible only to a specified player.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="player">Player screen to draw primitive on.</param>
+	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="color">Color to draw primitive with.</param>
+	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
+	static void DrawPolygonPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonPrimitive(player, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable));
+	}
 
 	/// <summary>
 	/// Schedule to draw a filled polygon primitive.

@@ -22,6 +22,7 @@ namespace RTE {
 	const GraphicalPrimitive::PrimitiveType EllipseFillPrimitive::c_PrimitiveType = PrimitiveType::EllipseFill;
 	const GraphicalPrimitive::PrimitiveType TrianglePrimitive::c_PrimitiveType = PrimitiveType::Triangle;
 	const GraphicalPrimitive::PrimitiveType TriangleFillPrimitive::c_PrimitiveType = PrimitiveType::TriangleFill;
+	const GraphicalPrimitive::PrimitiveType PolygonFillPrimitive::c_PrimitiveType = PrimitiveType::PolygonFill;
 	const GraphicalPrimitive::PrimitiveType TextPrimitive::c_PrimitiveType = PrimitiveType::Text;
 	const GraphicalPrimitive::PrimitiveType BitmapPrimitive::c_PrimitiveType = PrimitiveType::Bitmap;
 
@@ -385,6 +386,41 @@ namespace RTE {
 
 			triangle(drawScreen, drawPointALeft.GetFloorIntX(), drawPointALeft.GetFloorIntY(), drawPointBLeft.GetFloorIntX(), drawPointBLeft.GetFloorIntY(), drawPointCLeft.GetFloorIntX(), drawPointCLeft.GetFloorIntY(), m_Color);
 			triangle(drawScreen, drawPointARight.GetFloorIntX(), drawPointARight.GetFloorIntY(), drawPointBRight.GetFloorIntX(), drawPointBRight.GetFloorIntY(), drawPointCRight.GetFloorIntX(), drawPointCRight.GetFloorIntY(), m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PolygonFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		size_t drawPointsSize = m_Vertices.size() * 2;
+
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+
+			std::vector<int> drawPoints = {};
+			drawPoints.reserve(drawPointsSize);
+
+			for (const Vector *vertice : m_Vertices) {
+				drawPoints.insert(drawPoints.end(), { drawStart.GetFloorIntX() + vertice->GetFloorIntX(), drawStart.GetFloorIntY() + vertice->GetFloorIntY() });
+			}
+			polygon(drawScreen, m_Vertices.size(), drawPoints.data(), m_Color);
+		} else {
+			std::vector<int> drawPointsLeft = {};
+			drawPointsLeft.reserve(drawPointsSize);
+
+			std::vector<int> drawPointsRight = {};
+			drawPointsRight.reserve(drawPointsSize);
+
+			Vector drawPointLeft;
+			Vector drawPointRight;
+			for (const Vector *vertice : m_Vertices) {
+				TranslateCoordinates(targetPos, m_StartPos + (*vertice), drawPointLeft, drawPointRight);
+
+				drawPointsLeft.insert(drawPointsLeft.end(), { drawPointLeft.GetFloorIntX(), drawPointLeft.GetFloorIntY() });
+				drawPointsRight.insert(drawPointsRight.end(), { drawPointRight.GetFloorIntX(), drawPointRight.GetFloorIntY() });
+			}
+			polygon(drawScreen, m_Vertices.size(), drawPointsLeft.data(), m_Color);
+			polygon(drawScreen, m_Vertices.size(), drawPointsRight.data(), m_Color);
 		}
 	}
 

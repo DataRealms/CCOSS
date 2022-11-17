@@ -337,6 +337,15 @@ namespace RTE {
 		void DrawTriangleFillPrimitive(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color) { m_ScheduledPrimitives.emplace_back(std::make_unique<TriangleFillPrimitive>(player, pointA, pointB, pointC, color)); }
 
 		/// <summary>
+		/// Schedule to draw a filled polygon primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on, or -1 for all players.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
+		void DrawPolygonFillPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices);
+
+		/// <summary>
 		/// Schedule to draw a text primitive.
 		/// </summary>
 		/// <param name="start">Start position of primitive in scene coordinates.</param>

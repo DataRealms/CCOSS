@@ -117,13 +117,36 @@ namespace RTE {
 	}
 
 	/// <summary>
+	/// Schedule to draw a filled polygon primitive.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="color">Color to draw primitive with.</param>
+	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
+	static void DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonFillPrimitive(-1, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable));
+	}
+
+	/// <summary>
+	/// Schedule to draw a filled polygon primitive visible only to a specified player.
+	/// </summary>
+	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+	/// <param name="player">Player screen to draw primitive on.</param>
+	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="color">Color to draw primitive with.</param>
+	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
+	static void DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonFillPrimitive(player, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable));
+	}
+
+	/// <summary>
 	/// Schedules to draw multiple primitives of varying type with transparency enabled.
 	/// </summary>
 	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
 	/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
 	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
-	static void DrawPrimitivesWithTransparency(const PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
-		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(DrawBlendMode::BlendTransparency, transValue, transValue, transValue, BlendAmountLimits::MinBlend, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	static void DrawPrimitivesWithTransparency(PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(DrawBlendMode::BlendTransparency, transValue, transValue, transValue, BlendAmountLimits::MinBlend, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
 	}
 
 	/// <summary>
@@ -133,8 +156,8 @@ namespace RTE {
 	/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
 	/// <param name="blendAmount">The blending amount for all the channels. 0-100.</param>
 	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
-	static void DrawPrimitivesWithBlending(const PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable) {
-		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmount, blendAmount, blendAmount, blendAmount, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	static void DrawPrimitivesWithBlending(PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmount, blendAmount, blendAmount, blendAmount, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
 	}
 
 	/// <summary>
@@ -147,8 +170,8 @@ namespace RTE {
 	/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
 	/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
 	/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
-	static void DrawPrimitivesWithBlendingPerChannel(const PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable) {
-		g_PrimitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmountR, blendAmountG, blendAmountB, blendAmountA, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	static void DrawPrimitivesWithBlendingPerChannel(PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmountR, blendAmountG, blendAmountB, blendAmountA, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
 	}
 #pragma endregion
 

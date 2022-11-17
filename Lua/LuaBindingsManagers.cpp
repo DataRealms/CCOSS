@@ -245,6 +245,9 @@ namespace RTE {
 		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
 		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
 
+		.def("DrawPolygonFillPrimitive", &DrawPolygonFillPrimitive)
+		.def("DrawPolygonFillPrimitive", &DrawPolygonFillPrimitiveForPlayer)
+
 		.def("DrawPrimitives", &DrawPrimitivesWithTransparency)
 		.def("DrawPrimitives", &DrawPrimitivesWithBlending)
 		.def("DrawPrimitives", &DrawPrimitivesWithBlendingPerChannel);

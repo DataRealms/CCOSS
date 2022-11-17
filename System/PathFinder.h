@@ -50,7 +50,7 @@ namespace RTE {
 			Pos = pos;
 			for (int i = 0; i < 8; i++) {
 				AdjacentNodes[i] = nullptr;
-				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise
+				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise.
 			}
 		}
 	};
@@ -196,9 +196,7 @@ namespace RTE {
 		/// <returns>The average transition cost.</returns>
 		float GetNodeAverageTransitionCost(const PathNode &node);
 
-		// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
-		// This is so that minor changes (i.e blood particles) don't force constant pather resets
-		static constexpr float c_NodeCostChangeEpsilon = 5.0f;
+		static constexpr float c_NodeCostChangeEpsilon = 5.0f; //!< The minimum change in a node's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 #pragma endregion
 
 		/// <summary>

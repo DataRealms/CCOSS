@@ -124,7 +124,7 @@ namespace RTE {
 			return dynamic_cast<TYPE *>(entity) ? true : false; \
 		} \
 		static LuabindObjectWrapper * ToLuabindObject##TYPE (const Entity *entity, lua_State *luaState) { \
-			return new LuabindObjectWrapper(new luabind::adl::object(luaState, dynamic_cast<const TYPE *>(entity)), ""); \
+			return new LuabindObjectWrapper(new luabind::object(luaState, dynamic_cast<const TYPE *>(entity)), ""); \
 		} \
 
 	/// <summary>

@@ -67,6 +67,7 @@ void GameActivity::Clear()
         m_LandingZone[player].Reset();
         m_AIReturnCraft[player] = true;
 		m_StrategicModePieMenu.at(player) = nullptr;
+		m_LZCursorWidth[player] = 0;
         m_InventoryMenuGUI[player] = nullptr;
         m_pBuyGUI[player] = 0;
         m_pEditorGUI[player] = 0;
@@ -1927,6 +1928,7 @@ void GameActivity::Update()
         // Start LZ picking mode if a purchase was made
         if (m_pBuyGUI[player]->PurchaseMade())
         {
+			m_LZCursorWidth[player] = std::min(m_pBuyGUI[player]->GetDeliveryWidth(), g_FrameMan.GetPlayerScreenWidth() - 24);
             m_pBuyGUI[player]->SetEnabled(false);
 //            SwitchToPrevActor(player, team, m_Brain[player]);
             // Start selecting the landing zone
@@ -1956,7 +1958,7 @@ void GameActivity::Update()
         ///////////////////////////////////
         // Enable/disable controlled actors' AI as appropriate when in menus
 
-        if (m_ControlledActor[player])
+        if (m_ControlledActor[player] && m_ControlledActor[player]->GetController()->GetPlayerRaw() == player)
         {
             // Don't disable when pie menu is active; it is done inside the Controller Update
             if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe) {
@@ -2125,7 +2127,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
         if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            int halfWidth = 36;
+			int halfWidth = std::max(m_LZCursorWidth[player]/2, 36);
             team = m_Team[player];
             if (team == Teams::NoTeam)
                 continue;
@@ -2525,7 +2527,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
         if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            int halfWidth = 36;
+			int halfWidth = std::max(m_LZCursorWidth[player] / 2, 36);
             int team = m_Team[player];
             if (team == Teams::NoTeam)
                 continue;

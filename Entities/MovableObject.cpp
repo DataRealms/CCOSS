@@ -535,8 +535,16 @@ int MovableObject::ReloadScripts() {
     }
 
 	int status = 0;
+
+	//TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
+	MovableObject *movableObjectPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
+	if (this != movableObjectPreset) {
+		movableObjectPreset->ReloadScripts();
+	}
+
 	std::unordered_map<std::string, bool> loadedScriptsCopy = m_AllLoadedScripts;
 	m_AllLoadedScripts.clear();
+	m_FunctionsAndScripts.clear();
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
 		if (status < 0) {

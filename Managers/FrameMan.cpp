@@ -323,7 +323,7 @@ namespace RTE {
 		get_palette(m_DefaultPalette);
 
 		CreatePresetColorTables();
-		SetTransTableFromPreset(TransparencyPreset::Trans50);
+		SetTransTableFromPreset(TransparencyPreset::HalfTrans);
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
@@ -390,10 +390,11 @@ namespace RTE {
 		rgb_map = &m_RGBTable;
 
 		// Create transparency color tables. Tables for other blend modes will be created on demand.
-		for (int index = 0; index < TransparencyPreset::TransPresetCount; ++index) {
+		int transparencyPresetCount = BlendAmountLimits::MaxBlend / c_BlendAmountStep;
+		for (int index = 0; index <= transparencyPresetCount; ++index) {
 			int presetBlendAmount = index * c_BlendAmountStep;
 			std::array<int, 4> colorChannelBlendAmounts = { presetBlendAmount, presetBlendAmount, presetBlendAmount, BlendAmountLimits::MinBlend };
-			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(TransparencyPreset::TransPresetCount - 1) * static_cast<float>(index))));
+			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(transparencyPresetCount) * static_cast<float>(index))));
 
 			m_ColorTables.at(DrawBlendMode::BlendTransparency).try_emplace(colorChannelBlendAmounts);
 			create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts), m_DefaultPalette, adjustedBlendAmount, adjustedBlendAmount, adjustedBlendAmount, nullptr);
@@ -764,9 +765,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetTransTableFromPreset(TransparencyPreset transValue) {
-		RTEAssert(transValue >= TransparencyPreset::Trans0 && transValue <= TransparencyPreset::Trans100, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
-		std::array<int, 4> colorChannelBlendAmounts = { transValue, transValue, transValue, BlendAmountLimits::MinBlend };
+	void FrameMan::SetTransTableFromPreset(TransparencyPreset transPreset) {
+		RTEAssert(transPreset == TransparencyPreset::LessTrans || transPreset == TransparencyPreset::HalfTrans || transPreset == TransparencyPreset::MoreTrans, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+		std::array<int, 4> colorChannelBlendAmounts = { transPreset, transPreset, transPreset, BlendAmountLimits::MinBlend };
 		if (m_ColorTables[DrawBlendMode::BlendTransparency].find(colorChannelBlendAmounts) != m_ColorTables[DrawBlendMode::BlendTransparency].end()) {
 			color_map = &m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts);
 		}

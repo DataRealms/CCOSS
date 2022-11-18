@@ -86,6 +86,7 @@ namespace RTE {
 			luabind::def("GetPPL", &GetPPL),
 			luabind::def("GetLPP", &GetLPP),
 			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
+			luabind::def("RoundToNearestMultiple", &RoundToNearestMultiple),
 
 			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Box),

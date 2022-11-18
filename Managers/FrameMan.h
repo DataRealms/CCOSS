@@ -567,7 +567,8 @@ namespace RTE {
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
-		std::array<std::unordered_map<std::array<int, 4>, COLOR_MAP>, DrawBlendMode::BlendModeCount> m_ColorTables; //!< Color tables for blended drawing in indexed color mode.
+		std::array<std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>>, DrawBlendMode::BlendModeCount> m_ColorTables; //!< Color tables for blended drawing in indexed color mode.
+		Timer m_ColorTablePruneTimer; //!< Timer for pruning unused color tables to prevent ridiculous memory usage.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.

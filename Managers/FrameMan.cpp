@@ -107,6 +107,7 @@ namespace RTE {
 		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
+		m_ColorTablePruneTimer.Reset();
 		m_GUIScreen = nullptr;
 		m_LargeFont = nullptr;
 		m_SmallFont = nullptr;
@@ -397,7 +398,8 @@ namespace RTE {
 			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(transparencyPresetCount) * static_cast<float>(index))));
 
 			m_ColorTables.at(DrawBlendMode::BlendTransparency).try_emplace(colorChannelBlendAmounts);
-			create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts), m_DefaultPalette, adjustedBlendAmount, adjustedBlendAmount, adjustedBlendAmount, nullptr);
+			create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first, m_DefaultPalette, adjustedBlendAmount, adjustedBlendAmount, adjustedBlendAmount, nullptr);
+			m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).second = -1;
 		}
 	}
 
@@ -476,6 +478,26 @@ namespace RTE {
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
+
+		// Prune unused color tables every 5 real minutes to prevent ridiculous memory usage over time.
+		if (m_ColorTablePruneTimer.IsPastRealMS(300000)) {
+			long long currentTime = g_TimerMan.GetAbsoluteTime() / 10000;
+			for (std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>> &colorTableMap : m_ColorTables) {
+				if (colorTableMap.size() >= 100) {
+					std::vector<std::array<int, 4>> markedForDelete = {};
+					markedForDelete.reserve(colorTableMap.size());
+					for (const auto &[tableKey, tableData] : colorTableMap) {
+						long long lastAccessTime = tableData.second;
+						// Mark tables that haven't been accessed in the last minute for deletion. Avoid marking the transparency table presets, those will have lastAccessTime set to -1.
+						if (lastAccessTime != -1 && (currentTime - lastAccessTime > 60)) { markedForDelete.emplace_back(tableKey); }
+					}
+					for (const std::array<int, 4> &keyToDelete : markedForDelete) {
+						colorTableMap.erase(keyToDelete);
+					}
+				}
+			}
+			m_ColorTablePruneTimer.Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -726,6 +748,8 @@ namespace RTE {
 			colorChannelBlendAmount = RoundToNearestMultiple(std::clamp(colorChannelBlendAmount, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend)), c_BlendAmountStep);
 		}
 
+		bool usedPresetTransparencyTable = false;
+
 		switch (blendMode) {
 			case DrawBlendMode::NoBlend:
 				RTEAbort("Somehow ended up attempting to set a color table for DrawBlendMode::NoBlend in FrameMan::SetColorTable! This should never happen!");
@@ -737,6 +761,7 @@ namespace RTE {
 			case DrawBlendMode::BlendTransparency:
 				// Indexed transparency has dedicated maps that don't use alpha, so min it to attempt to load one of the presets, and in case there isn't one avoid creating a variant for each alpha value.
 				colorChannelBlendAmounts[3] = BlendAmountLimits::MinBlend;
+				usedPresetTransparencyTable = (colorChannelBlendAmounts[0] == colorChannelBlendAmounts[1]) && (colorChannelBlendAmounts[0] == colorChannelBlendAmounts[2]);
 				break;
 			default:
 				break;
@@ -752,15 +777,16 @@ namespace RTE {
 
 			if (blendMode == DrawBlendMode::BlendTransparency) {
 				// Paletted transparency has dedicated tables so better create one instead of generic for best result. Alpha is ignored here.
-				create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts), m_DefaultPalette, adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], nullptr);
+				create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first, m_DefaultPalette, adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], nullptr);
 			} else {
 				c_BlenderSetterFunctions[blendMode](adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], adjustedColorChannelBlendAmounts[3]);
-				create_blender_table(&m_ColorTables[blendMode].at(colorChannelBlendAmounts), m_DefaultPalette, nullptr);
+				create_blender_table(&m_ColorTables[blendMode].at(colorChannelBlendAmounts).first, m_DefaultPalette, nullptr);
 				// Reset the blender to avoid potentially screwing some true-color draw operation. Hopefully.
 				c_BlenderSetterFunctions[blendMode](255, 255, 255, 255);
 			}
 		}
-		color_map = &m_ColorTables[blendMode].at(colorChannelBlendAmounts);
+		color_map = &m_ColorTables[blendMode].at(colorChannelBlendAmounts).first;
+		m_ColorTables[blendMode].at(colorChannelBlendAmounts).second = usedPresetTransparencyTable ? -1 : (g_TimerMan.GetAbsoluteTime() / 10000);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -769,7 +795,8 @@ namespace RTE {
 		RTEAssert(transPreset == TransparencyPreset::LessTrans || transPreset == TransparencyPreset::HalfTrans || transPreset == TransparencyPreset::MoreTrans, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
 		std::array<int, 4> colorChannelBlendAmounts = { transPreset, transPreset, transPreset, BlendAmountLimits::MinBlend };
 		if (m_ColorTables[DrawBlendMode::BlendTransparency].find(colorChannelBlendAmounts) != m_ColorTables[DrawBlendMode::BlendTransparency].end()) {
-			color_map = &m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts);
+			color_map = &m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first;
+			m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).second = -1;
 		}
 	}
 

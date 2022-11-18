@@ -224,8 +224,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
 
-- Because of changes in how Lua is handled under the hood, you can now access all `MovableObjects`' self objects via the `_ScriptedObjects` global table. The key for each `MovableObject` is their `UniqueID` as a string, i.e. `_ScriptedObjects["12345"]`. This removes the need for things like `SetNumberValue`, but can also be dangerous, so use it with caution.
-
 </details>
 
 <details><summary><b>Changed</b></summary>

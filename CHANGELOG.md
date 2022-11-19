@@ -228,6 +228,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness. This can be accessed (read-only) from Lua, through `SettingsMan.AIUpdateInterval`.
 
+- New Lua (read-only) `TimerMan` properties `AIDeltaTimeMS` / `AIDeltaTimeSecs` to give the time that has passed since the last AI update.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

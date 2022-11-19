@@ -755,7 +755,8 @@ namespace RTE {
 				RTEAbort("Somehow ended up attempting to set a color table for DrawBlendMode::NoBlend in FrameMan::SetColorTable! This should never happen!");
 				return;
 			case DrawBlendMode::BlendInvert:
-				// Invert does nothing with the RGB channel values, it will always be fully inverted on all channels, so set all channels to Alpha channel value to avoid creating pointless variants.
+			case DrawBlendMode::BlendDissolve:
+				// Invert and Dissolve do nothing with the RGB channels values, so set all channels to Alpha channel value to avoid creating pointless variants.
 				colorChannelBlendAmounts.fill(colorChannelBlendAmounts[3]);
 				break;
 			case DrawBlendMode::BlendTransparency:

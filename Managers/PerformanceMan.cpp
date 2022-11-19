@@ -15,6 +15,9 @@ namespace RTE {
 		m_ShowPerfStats = false;
 		m_AdvancedPerfStats = true;
 		m_CurrentPing = 0;
+		m_SimUpdateTimer = nullptr;
+		m_MSPSUs.clear();
+		m_MSPSUAverage = 0;
 		m_MSPFs.clear();
 		m_MSPFAverage = 0;
 		m_MSPUs.clear();
@@ -26,6 +29,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PerformanceMan::Initialize() {
+		m_SimUpdateTimer = std::make_unique<Timer>();
 		m_Sample = 0;
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
@@ -123,8 +127,9 @@ namespace RTE {
 			char str[128];
 
 			// Calculate the fps from the average
-			std::snprintf(str, sizeof(str), "FPS: %.0f", fps);
 			float fps = 1.0F / (m_MSPFAverage / 1000.0F);
+			float ups = 1.0F / (m_MSPSUAverage / 1000.0F);
+			std::snprintf(str, sizeof(str), "FPS: %.0f | UPS: %.0f", fps, ups);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
 			// Display the average

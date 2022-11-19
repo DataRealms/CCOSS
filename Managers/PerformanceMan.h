@@ -61,6 +61,11 @@ namespace RTE {
 		void UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime);
 
 		/// <summary>
+		/// Updates the individual sim update time measurements and recalculates the average. Supposed to be done every sim update.
+		/// </summary>
+		void UpdateMSPSU() { CalculateTimeAverage(m_MSPSUs, m_MSPSUAverage, static_cast<float>(m_SimUpdateTimer->GetElapsedRealTimeMS())); m_SimUpdateTimer->Reset(); }
+
+		/// <summary>
 		/// Draws the performance stats to the screen.
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to draw on.</param>
@@ -147,6 +152,8 @@ namespace RTE {
 		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
 		int m_Sample; //!< Sample counter.
+
+		std::unique_ptr<Timer> m_SimUpdateTimer; //!< Timer for measuring milliseconds per sim update for performance stats readings.
 
 		std::deque<float> m_MSPSUs; //!< History log of single update time measurements in milliseconds, for averaging the results. In milliseconds.
 		std::deque<float> m_MSPFs; //!< History log total frame time measurements in milliseconds, for averaging the results.

@@ -209,6 +209,7 @@ namespace RTE {
 				serverUpdated = false;
 
 				g_PerformanceMan.NewPerformanceSample();
+				g_PerformanceMan.UpdateMSPSU();
 				g_TimerMan.UpdateSim();
 
 				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);

@@ -151,7 +151,7 @@ namespace RTE {
 		long long GetSimTickCount() const { return m_SimTimeTicks; }
 
 		/// <summary>
-		/// Gets a current global simulation time measured in update from the start of the simulation up to the last Update of this TimerMan.
+		/// Gets a current global simulation time, measured in sim updates, from the start of the simulation up to the last Update of this TimerMan.
 		/// </summary>
 		/// <returns>The number of simulation updates that have occurred since the simulation started.</returns>
 		long long GetSimUpdateCount() const { return m_SimUpdateCount; }
@@ -187,15 +187,15 @@ namespace RTE {
 		float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
 
 		/// <summary>
-		/// Gets the current fixed delta time of the AI updates, in seconds.
+		/// Gets the current fixed delta time of AI updates, in seconds.
 		/// </summary>
-		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
+		/// <returns>The current fixed delta time of AI updates, in seconds.</returns>
 		float GetAIDeltaTimeSecs() const;
 
 		/// <summary>
-		/// Gets the current fixed delta time of the AI updates, in seconds.
+		/// Gets the current fixed delta time of AI updates, in seconds.
 		/// </summary>
-		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
+		/// <returns>The current fixed delta time of AI updates, in ms.</returns>
 		float GetAIDeltaTimeMS() const { return GetAIDeltaTimeSecs() * 1000; };
 
 		/// <summary>

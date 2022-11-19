@@ -222,13 +222,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New INI and Lua (R/W) `Actor` property `BaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
--- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
+- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
 
 - New `Settings.ini` property `PathFinderGridNodeSize` to define the size of the pathfinder's graph nodes, in pixels. 
 
 - New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness. This can be accessed (read-only) from Lua, through `SettingsMan.AIUpdateInterval`.
 
-- New Lua (read-only) `TimerMan` properties `AIDeltaTimeMS` / `AIDeltaTimeSecs` to give the time that has passed since the last AI update.
+- New Lua (read-only) `TimerMan` properties `AIDeltaTimeMS` / `AIDeltaTimeSecs` to give the time that has passed since the 
+
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
 </details>
 
@@ -329,6 +331,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 
 - Major improvements to pathfinding performance and AI decision making.
+
+- Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
+
+- `MOSRotating` based presets without an `AtomGroup` definition will now crash with error message during loading.
+
+- Over-indentation in INI will crash with error message if detected during loading instead of skipping entire blocks or in some cases the rest of the file.  
+	There is never a case where there should be a positive difference of more than one tab between lines, but this means that lines like `IncludeFile` which would previously load fine even if over-indented will also crash, but you should never have those indented to begin with.  
+
+	Examples of structure that will cause a crash:  
+	```ini
+	AddSomething = Something
+			PresetName = Thing // Over-indented. Will crash.
+		SomeProperty = Whatever
+
+	AddSomething = Something
+		PresetName = Thing
+		SomeObjectProperty = Something
+				CopyOf = Thing // Over-indented. Will crash.
+	```
 
 </details>
 
@@ -638,6 +659,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- The landing zone cursor will now show the width of the selected delivery craft.
 
 - `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
 	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.

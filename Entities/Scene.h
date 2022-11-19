@@ -1215,7 +1215,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  The maximum material strength any actor traveling along the path can dig through.
 // Return value:    The number of waypoints from start to goal, or -1 if no path.
 
-    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1.0);
+    int CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength = 1.0F);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

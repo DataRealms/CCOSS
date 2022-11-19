@@ -918,11 +918,11 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     if (initPathfinding)
     {
         // Create the pathfinding stuff based on the current scene
-		int sceneArea = GetWidth() * GetHeight();
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-        // TODO: test dynamically setting this 
-        //std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+        // TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+		//int sceneArea = GetWidth() * GetHeight();
+        //unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
         for (int i = 0; i < m_pPathFinders.size(); ++i) {
@@ -2911,12 +2911,12 @@ void Scene::UpdatePathFinding()
                 continue; 
             }
 
-            // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us)
+            // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
             g_MovableMan.OverrideMaterialDoors(true, team);
 
             GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
 
-            // Place back the material representation of all doors of this team so they are as we found them
+            // Place back the material representation of all doors of this team so they are as we found them.
             g_MovableMan.OverrideMaterialDoors(false, team);
         }
     }
@@ -2933,13 +2933,10 @@ void Scene::UpdatePathFinding()
 // Description:     Calculates and returns the least difficult path between two points on
 //                  the current scene. Takes both distance and materials into account.
 
-float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength, Activity::Teams team)
-{
+float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength, Activity::Teams team) {
     float totalCostResult = -1;
 
-    auto& pathFinder = GetPathFinder(team);
-    if (pathFinder)
-    {
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
         int result = pathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
 
         // It's ok if start and end nodes happen to be the same, the exact pixel locations are added at the front and end of the result regardless
@@ -2958,26 +2955,22 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
 //                  A list of waypoints can be retrived from m_ScenePath;
 //                  For exposing CalculatePath to Lua.
 
-int Scene::CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength)
-{
+int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength) {
     int pathSize = -1;
 
-    auto& pathFinder = GetPathFinder(Activity::Teams::NoTeam);
-    if (pathFinder)
-    {
+	if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(Activity::Teams::NoTeam)) {
         float notUsed;
         pathFinder->CalculatePath(start, end, m_ScenePath, notUsed, digStrength);
 
         // Process the new path we now have, if any
-        if (!m_ScenePath.empty())
-        {
+        if (!m_ScenePath.empty()) {
             pathSize = m_ScenePath.size();
-            if (movePathToGround)
-            {
+            if (movePathToGround) {
                 // Smash all airborne waypoints down to just above the ground
                 list<Vector>::iterator finalItr = m_ScenePath.end();
-                for (list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr)
-                    (*lItr) = g_SceneMan.MovePointToGround((*lItr), 20, 15);
+				for (list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr) {
+					(*lItr) = g_SceneMan.MovePointToGround((*lItr), 20, 15);
+				}
             }
         }
     }
@@ -3057,8 +3050,7 @@ void Scene::Update()
     }
 }
 
-std::unique_ptr<PathFinder> & Scene::GetPathFinder(Activity::Teams team) 
-{
+std::unique_ptr<PathFinder> & Scene::GetPathFinder(Activity::Teams team) {
     // + 1 because of our shared NoTeam pathfinder (index -1 becomes 0)
     return m_pPathFinders[static_cast<int>(team) + 1];
 }

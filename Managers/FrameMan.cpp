@@ -441,8 +441,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Update() {
-		g_PerformanceMan.Update();
-
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
@@ -1132,9 +1130,6 @@ namespace RTE {
 		// Draw scene seam
 		vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
-
-		// Reset the frame timer so we can measure how much it takes until next frame being drawn
-		g_PerformanceMan.ResetFrameTimer();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

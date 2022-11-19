@@ -15,15 +15,17 @@ namespace RTE {
 		m_ShowPerfStats = false;
 		m_AdvancedPerfStats = true;
 		m_CurrentPing = 0;
-		m_FrameTimer = nullptr;
 		m_MSPFs.clear();
 		m_MSPFAverage = 0;
+		m_MSPUs.clear();
+		m_MSPUAverage = 0;
+		m_MSPDs.clear();
+		m_MSPDAverage = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PerformanceMan::Initialize() {
-		m_FrameTimer = std::make_unique<Timer>();
 		m_Sample = 0;
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
@@ -47,25 +49,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Update() {
-		// Time and store the milliseconds per frame reading of the sim update to the buffer, and trim the buffer as needed
-		m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
-		while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
-			m_MSPFs.pop_front();
-		}
-
-		// Calculate the average milliseconds per frame over the last sampleSize frames
-		m_MSPFAverage = 0;
-		for (const int &mspf : m_MSPFs) {
-			m_MSPFAverage += mspf;
-		}
-		m_MSPFAverage /= m_MSPFs.size();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::ResetFrameTimer() const {
-		m_FrameTimer->Reset();
+	void PerformanceMan::UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime) {
+		CalculateTimeAverage(m_MSPUs, m_MSPUAverage, static_cast<float>(measuredUpdateTime / 1000));
+		CalculateTimeAverage(m_MSPDs, m_MSPDAverage, static_cast<float>(measuredDrawTime / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>((measuredUpdateTime + measuredDrawTime) / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,29 +104,31 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PerformanceMan::CalculateTimeAverage(std::deque<float> &timeMeasurements, float &avgResult, float newTimeMeasurement) const {
+		timeMeasurements.emplace_back(newTimeMeasurement);
+		while (timeMeasurements.size() > c_MSPAverageSampleSize) {
+			timeMeasurements.pop_front();
+		}
+		avgResult = 0;
+		for (const float &timeMeasurement : timeMeasurements) {
+			avgResult += timeMeasurement;
+		}
+		avgResult /= static_cast<float>(timeMeasurements.size());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PerformanceMan::Draw(AllegroBitmap &bitmapToDrawTo) {
 		if (m_ShowPerfStats) {
-			// Time and store the milliseconds per frame reading of the drawing frame to the buffer, and trim the buffer as needed
-			m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
-			m_FrameTimer->Reset();
-			while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
-				m_MSPFs.pop_front();
-			}
-			// Calculate the average milliseconds per frame over the last sampleSize frames
-			for(const int &mspf : m_MSPFs){
-				m_MSPFAverage += mspf;
-			}
-			m_MSPFAverage /= m_MSPFs.size();
-
 			char str[128];
 
 			// Calculate the fps from the average
-			float fps = 1.0F / (static_cast<float>(m_MSPFAverage) / 1000.0F);
 			std::snprintf(str, sizeof(str), "FPS: %.0f", fps);
+			float fps = 1.0F / (m_MSPFAverage / 1000.0F);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
 			// Display the average
-			std::snprintf(str, sizeof(str), "MSPF: %zi", m_MSPFAverage);
+			std::snprintf(str, sizeof(str), "Frame: %.1fms | Update: %.1fms | Draw: %.1fms", m_MSPFAverage, m_MSPUAverage, m_MSPDAverage);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Reset)", g_TimerMan.IsOneSimUpdatePerFrame() ? g_TimerMan.GetSimSpeed() : g_TimerMan.GetTimeScale());

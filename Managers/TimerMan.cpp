@@ -153,7 +153,7 @@ namespace RTE {
 			// Reset the counter of sim updates since the last drawn. it will always be 0 since every update results in a drawn frame.
 			m_SimUpdatesSinceDrawn = -1;
 
-			m_SimSpeed = GetDeltaTimeMS() / static_cast<float>(g_PerformanceMan.GetMSPFAverage());
+			m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPFAverage();
 			if (IsSimSpeedLimited() && m_SimSpeed > 1.0F) { m_SimSpeed = 1.0F; }
 		} else {
 			m_SimSpeed = 1.0F;

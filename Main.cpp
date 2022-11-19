@@ -189,21 +189,26 @@ namespace RTE {
 		if (System::IsSetToQuit()) {
 			return;
 		}
-		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
-		while (!System::IsSetToQuit()) {
-			g_TimerMan.Update();
+		long long updateStartTime = 0;
+		long long updateTotalTime = 0;
+		long long drawStartTime = 0;
+		long long drawTotalTime = 0;
 
+		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
+
+			updateStartTime = g_TimerMan.GetAbsoluteTime();
+			g_TimerMan.Update();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
-				g_PerformanceMan.NewPerformanceSample();
 
+				g_PerformanceMan.NewPerformanceSample();
 				g_TimerMan.UpdateSim();
 
 				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
@@ -228,7 +233,7 @@ namespace RTE {
 				// This is to support hot reloading entities in SceneEditorGUI. It's a bit hacky to put it in Main like this, but PresetMan has no update in which to clear the value, and I didn't want to set up a listener for the job.
 				// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
 				g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
-				
+
 				g_ConsoleMan.Update();
 				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
@@ -252,7 +257,7 @@ namespace RTE {
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {
 					g_ActivityMan.ResumeActivity();
-					g_PerformanceMan.ResetFrameTimer();
+					updateStartTime = g_TimerMan.GetAbsoluteTime();
 				}
 			}
 
@@ -271,8 +276,14 @@ namespace RTE {
 					}
 				}
 			}
+			updateTotalTime = g_TimerMan.GetAbsoluteTime() - updateStartTime;
+			drawStartTime = g_TimerMan.GetAbsoluteTime();
+
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();
+
+			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
+			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);
 		}
 	}
 }

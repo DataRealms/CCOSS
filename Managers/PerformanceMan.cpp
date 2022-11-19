@@ -208,7 +208,8 @@ namespace RTE {
 				int dotHeight = static_cast<int>(static_cast<float>(c_GraphHeight) / 100.0F * static_cast<float>(value));
 
 				bitmapToDrawTo.SetPixel(c_StatsOffsetX - 1 + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
-				peak = std::clamp(peak, 0, static_cast<int>(m_PerfData[pc].at(sample)));
+
+				if (peak < m_PerfData[pc][sample]) { peak = static_cast<int>(m_PerfData[pc][sample]); }
 
 				if (sample == 0) { sample = c_MaxSamples; }
 				sample--;

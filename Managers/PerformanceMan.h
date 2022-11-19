@@ -54,6 +54,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Resets the sim update timer.
+		/// </summary>
+		void ResetSimUpdateTimer() const { m_SimUpdateTimer->Reset(); }
+
+		/// <summary>
 		/// Updates the frame time measurements and recalculates the averages. Supposed to be done every game loop iteration.
 		/// </summary>
 		/// <param name="measuredUpdateTime">The total sim update time measured in the game loop iteration.</param>

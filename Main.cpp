@@ -258,6 +258,7 @@ namespace RTE {
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {
 					g_ActivityMan.ResumeActivity();
+					g_PerformanceMan.ResetSimUpdateTimer();
 					updateStartTime = g_TimerMan.GetAbsoluteTime();
 				}
 			}

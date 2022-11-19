@@ -145,11 +145,11 @@ namespace RTE {
 	/// Schedule to draw a filled polygon primitive.
 	/// </summary>
 	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
-	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="startPos">Start position of the primitive in scene coordinates.</param>
 	/// <param name="color">Color to draw primitive with.</param>
 	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
-	static void DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable) {
-		primitiveMan.DrawPolygonOrPolygonFillPrimitive(-1, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
+	static void DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &startPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(-1, startPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
 	}
 
 	/// <summary>
@@ -157,11 +157,11 @@ namespace RTE {
 	/// </summary>
 	/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
 	/// <param name="player">Player screen to draw primitive on.</param>
-	/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+	/// <param name="startPos">Start position of the primitive in scene coordinates.</param>
 	/// <param name="color">Color to draw primitive with.</param>
 	/// <param name="vertices">A vector that contains the positions of the primitive's vertices, relative to the center position.</param>
-	static void DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable) {
-		primitiveMan.DrawPolygonOrPolygonFillPrimitive(player, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
+	static void DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &startPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(player, startPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
 	}
 
 	/// <summary>

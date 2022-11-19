@@ -340,11 +340,11 @@ namespace RTE {
 		/// Schedule to draw a polygon primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on, or -1 for all players.</param>
-		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="startPos">Start position of the primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
 		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
 		/// <param name="filled">Whether a PolygonFillPrimitive should be scheduled instead of PolygonPrimitive.</param>
-		void DrawPolygonOrPolygonFillPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices, bool filled);
+		void DrawPolygonOrPolygonFillPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices, bool filled);
 
 		/// <summary>
 		/// Schedule to draw a text primitive.

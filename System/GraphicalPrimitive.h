@@ -549,13 +549,13 @@ namespace RTE {
 		/// Constructor method for PolygonPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		PolygonPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices) :
+		PolygonPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices) :
 			m_Vertices(vertices) {
 
-			m_StartPos = centerPos;
+			m_StartPos = startPos;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -582,13 +582,13 @@ namespace RTE {
 		/// Constructor method for PolygonFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		PolygonFillPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices) :
+		PolygonFillPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices) :
 			m_Vertices(vertices) {
 
-			m_StartPos = centerPos;
+			m_StartPos = startPos;
 			m_Color = color;
 			m_Player = player;
 		}

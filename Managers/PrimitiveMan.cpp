@@ -81,15 +81,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawPolygonOrPolygonFillPrimitive(int player, const Vector &centerPos, unsigned char color, const std::vector<Vector *> &vertices, bool filled) {
+	void PrimitiveMan::DrawPolygonOrPolygonFillPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices, bool filled) {
 		if (vertices.size() < 2) {
 			g_ConsoleMan.PrintString("ERROR: Polygon primitive should have at least 2 vertices! Drawing will be skipped!");
 			return;
 		}
 		if (filled) {
-			m_ScheduledPrimitives.emplace_back(std::make_unique<PolygonFillPrimitive>(player, centerPos, color, vertices));
+			m_ScheduledPrimitives.emplace_back(std::make_unique<PolygonFillPrimitive>(player, startPos, color, vertices));
 		} else {
-			m_ScheduledPrimitives.emplace_back(std::make_unique<PolygonPrimitive>(player, centerPos, color, vertices));
+			m_ScheduledPrimitives.emplace_back(std::make_unique<PolygonPrimitive>(player, startPos, color, vertices));
 		}
 	}
 

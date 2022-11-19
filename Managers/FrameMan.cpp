@@ -1123,7 +1123,8 @@ namespace RTE {
 
 		if (g_ActivityMan.IsInActivity()) { g_PostProcessMan.PostProcess(); }
 
-		// Draw the console on top of everything
+		// Draw the performance stats and console on top of everything.
+		g_PerformanceMan.Draw(m_BackBuffer32);
 		g_ConsoleMan.Draw(m_BackBuffer32);
 
 #ifdef DEBUG_BUILD
@@ -1170,8 +1171,6 @@ namespace RTE {
 				default:
 					break;
 			}
-			g_PerformanceMan.Draw(playerGUIBitmap);
-
 		} else {
 			// If superfluous screen (as in a three-player match), make the fourth the Observer one
 			GetLargeFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, textPosY, "- Observer View -", GUIFont::Centre);

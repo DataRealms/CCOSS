@@ -84,6 +84,7 @@ namespace RTE {
 		g_NetworkClient.Destroy();
 		g_NetworkServer.Destroy();
 		g_MetaMan.Destroy();
+		g_PerformanceMan.Destroy();
 		g_MovableMan.Destroy();
 		g_SceneMan.Destroy();
 		g_ActivityMan.Destroy();

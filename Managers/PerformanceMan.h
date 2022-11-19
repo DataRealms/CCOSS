@@ -41,8 +41,7 @@ namespace RTE {
 		/// <summary>
 		/// Makes the PerformanceMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize();
+		void Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -50,37 +49,6 @@ namespace RTE {
 		/// Resets the entire PerformanceMan to the default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region Concrete Methods
-		/// <summary>
-		/// Resets the sim update timer.
-		/// </summary>
-		void ResetSimUpdateTimer() const { m_SimUpdateTimer->Reset(); }
-
-		/// <summary>
-		/// Updates the frame time measurements and recalculates the averages. Supposed to be done every game loop iteration.
-		/// </summary>
-		/// <param name="measuredUpdateTime">The total sim update time measured in the game loop iteration.</param>
-		/// <param name="measuredDrawTime">The total draw time measured in the game loop iteration.</param>
-		void UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime);
-
-		/// <summary>
-		/// Updates the individual sim update time measurements and recalculates the average. Supposed to be done every sim update.
-		/// </summary>
-		void UpdateMSPSU() { CalculateTimeAverage(m_MSPSUs, m_MSPSUAverage, static_cast<float>(m_SimUpdateTimer->GetElapsedRealTimeMS())); m_SimUpdateTimer->Reset(); }
-
-		/// <summary>
-		/// Draws the performance stats to the screen.
-		/// </summary>
-		/// <param name="whichScreen">Which player screen to draw on.</param>
-		/// <param name="whichScreenGUIBitmap">The GUI bitmap to draw to.</param>
-		void Draw(AllegroBitmap &bitmapToDrawTo);
-
-		/// <summary>
-		/// Draws the current ping value to the screen.
-		/// </summary>
-		void DrawCurrentPing() const;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -140,11 +108,43 @@ namespace RTE {
 		void SetCurrentPing(int ping) { m_CurrentPing = ping; }
 #pragma endregion
 
+#pragma region Concrete Methods
+		/// <summary>
+		/// Resets the sim update timer.
+		/// </summary>
+		void ResetSimUpdateTimer() const { m_SimUpdateTimer->Reset(); }
+
+		/// <summary>
+		/// Updates the frame time measurements and recalculates the averages. Supposed to be done every game loop iteration.
+		/// </summary>
+		/// <param name="measuredUpdateTime">The total sim update time measured in the game loop iteration.</param>
+		/// <param name="measuredDrawTime">The total draw time measured in the game loop iteration.</param>
+		void UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime);
+
+		/// <summary>
+		/// Updates the individual sim update time measurements and recalculates the average. Supposed to be done every sim update.
+		/// </summary>
+		void UpdateMSPSU() { CalculateTimeAverage(m_MSPSUs, m_MSPSUAverage, static_cast<float>(m_SimUpdateTimer->GetElapsedRealTimeMS())); m_SimUpdateTimer->Reset(); }
+
+		/// <summary>
+		/// Draws the performance stats to the screen.
+		/// </summary>
+		/// <param name="whichScreen">Which player screen to draw on.</param>
+		/// <param name="whichScreenGUIBitmap">The GUI bitmap to draw to.</param>
+		void Draw(AllegroBitmap &bitmapToDrawTo);
+
+		/// <summary>
+		/// Draws the current ping value to the screen.
+		/// </summary>
+		void DrawCurrentPing() const;
+#pragma endregion
+
 	protected:
 
 		static constexpr int c_MSPAverageSampleSize = 20; //!< How many samples to use to calculate average milliseconds-per-something value.
 		static constexpr int c_MaxSamples = 120; //!< How many performance samples to store, directly affects graph size.
 		static constexpr int c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.
+		static const std::array<std::string, PerformanceCounters::PerfCounterCount> m_PerfCounterNames; //!< Performance counter names displayed on screen.
 
 		const int c_StatsOffsetX = 17; //!< Offset of the stat text from the left edge of the screen.
 		const int c_StatsHeight = 14; //!< Height of each stat text line.
@@ -172,11 +172,10 @@ namespace RTE {
 
 		int m_CurrentPing; //!< Current ping value to display on screen.
 
-		std::array<std::array<int, c_MaxSamples>, PerformanceCounters::PerfCounterCount>  m_PerfPercentages; //!< Array to store percentages from SimTotal.
+		std::array<std::array<int, c_MaxSamples>, PerformanceCounters::PerfCounterCount> m_PerfPercentages; //!< Array to store percentages from SimTotal.
 		std::array<std::array<uint64_t, c_MaxSamples>, PerformanceCounters::PerfCounterCount> m_PerfData; //!< Array to store performance measurements in microseconds.
 		std::array<uint64_t, PerformanceCounters::PerfCounterCount> m_PerfMeasureStart; //!< Current measurement start time in microseconds.
 		std::array<uint64_t, PerformanceCounters::PerfCounterCount> m_PerfMeasureStop; //!< Current measurement stop time in microseconds.
-		std::array<std::string, PerformanceCounters::PerfCounterCount> m_PerfCounterNames; //!< Performance counter names displayed on screen.
 
 	private:
 

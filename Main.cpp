@@ -195,6 +195,7 @@ namespace RTE {
 
 		long long updateStartTime = 0;
 		long long updateTotalTime = 0;
+		long long updateEndAndDrawStartTime = 0;
 		long long drawStartTime = 0;
 		long long drawTotalTime = 0;
 
@@ -278,8 +279,9 @@ namespace RTE {
 					}
 				}
 			}
-			updateTotalTime = g_TimerMan.GetAbsoluteTime() - updateStartTime;
-			drawStartTime = g_TimerMan.GetAbsoluteTime();
+			updateEndAndDrawStartTime = g_TimerMan.GetAbsoluteTime();
+			updateTotalTime = updateEndAndDrawStartTime - updateStartTime;
+			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();

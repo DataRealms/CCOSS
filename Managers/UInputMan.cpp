@@ -829,6 +829,10 @@ namespace RTE {
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
+			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
+				if (KeyPressed(KEY_P)) {
+					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
+				}
 			}
 		} else {
 			// PrntScren to save a single ScreenDump

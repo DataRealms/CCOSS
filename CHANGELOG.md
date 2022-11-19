@@ -227,8 +227,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`Ctrl + 3` to reset the `RealToSimCap`.  
 	`Ctrl + 5` to reset the `DeltaTime`.
 
-- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.  
-	The visibility change is not persistent and will reset to the `Settings.ini` setting on every activity reload.
+- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.
 
 - Added new `UPS` (Updates per second) measurement to the performance stats which is probably the most reliable performance indicator.  
 	The sim update target is ~60 UPS (defined by `DeltaTime`).  

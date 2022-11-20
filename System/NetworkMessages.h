@@ -1,7 +1,7 @@
 #ifndef _RTENETWORKMSG_
 #define _RTENETWORKMSG_
 
-#include "MessageIdentifiers.h"
+#include "RakNet/MessageIdentifiers.h"
 
 namespace RTE {
 
@@ -20,7 +20,10 @@ namespace RTE {
 		ID_SRV_ACCEPTED,
 		ID_SRV_FRAME_SETUP,
 		ID_SRV_FRAME_LINE,
-		ID_SRV_FRAME_BOX,
+		ID_SRV_FRAME_BOX_MO,
+		ID_SRV_FRAME_BOX_UI,
+		ID_SRV_FRAME_BOX_MO_DELTA,
+		ID_SRV_FRAME_BOX_UI_DELTA,
 		ID_SRV_SCENE_SETUP,
 		ID_CLT_SCENE_SETUP_ACCEPTED,
 		ID_SRV_SCENE,
@@ -101,6 +104,12 @@ namespace RTE {
 		unsigned char Id;
 		unsigned char FrameNumber;
 
+		bool Interlaced;
+		bool DeltaCompressed;
+
+		unsigned short int BoxWidth;
+		unsigned short int BoxHeight;
+
 		short int TargetPosX;
 		short int TargetPosY;
 
@@ -126,15 +135,11 @@ namespace RTE {
 	/// </summary>
 	struct MsgFrameBox {
 		unsigned char Id;
-		unsigned char FrameNumber;
 
-		unsigned char Layer;
-		unsigned short int BoxX;
-		unsigned short int BoxY;
-		unsigned char BoxWidth;
-		unsigned char BoxHeight;
+		unsigned char BoxX;
+		unsigned char BoxY;
+
 		unsigned short int DataSize;
-		unsigned short int UncompressedSize;
 	};
 
 	/// <summary>

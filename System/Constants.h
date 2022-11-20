@@ -42,6 +42,7 @@ namespace RTE {
 		g_BlackColor = 245,
 		g_WhiteColor = 254,
 		g_RedColor = 13,
+		g_GreenColor = 147,
 		g_YellowGlowColor = 117,
 		g_NoMOID = 255
 	};
@@ -114,9 +115,15 @@ namespace RTE {
 
 #pragma region Network Constants
 	static constexpr unsigned short c_MaxClients = 4;
-	static constexpr unsigned short c_FramesToRemember = 3;
-	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;
+	static constexpr unsigned short c_FramesToRemember = 2;
+	static constexpr unsigned short c_MaxLayersStoredForNetwork = 5;
 	static constexpr unsigned short c_MaxPixelLineBufferSize = 8192;
+
+	// Defaults are picked so that if the box can't be compressed it should somewhat fit into one UDP packet.
+	// Reducing box area introduces slight overhead due to more messages and hence more headers being sent.
+	// Box area must be divisible by 8 bytes for copying reasons.
+	static constexpr int c_ServerDefaultBoxWidth = 32;
+	static constexpr int c_ServerDefaultBoxHeight = 44;
 #pragma endregion
 
 #pragma region Input Constants

@@ -26,7 +26,12 @@ namespace RTE {
 		m_SceneForegroundBitmap = 0;
 		m_CurrentSceneLayerReceived = -1;
 		m_CurrentFrame = 0;
+		m_CurrentBoxWidth = 0;
+		m_CurrentBoxHeight = 0;
+		m_CurrentFrameDeltaCompressed = false;
+		m_ShowFillRate = false;
 		m_UseNATPunchThroughService = false;
+		m_UseInterlacing = false;
 		m_ServerGUID = RakNet::UNASSIGNED_RAKNET_GUID;
 		m_NATServiceServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_ServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -273,10 +278,15 @@ namespace RTE {
 			return;
 		}
 
-		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(frameData->FrameNumber, frameData->Interlaced, !frameData->DeltaCompressed); }
 
 		m_PostEffects[m_CurrentFrame].clear();
 		m_CurrentFrame = frameData->FrameNumber;
+		m_UseInterlacing = frameData->Interlaced;
+		m_CurrentFrameDeltaCompressed = frameData->DeltaCompressed;
+
+		m_CurrentBoxWidth = frameData->BoxWidth;
+		m_CurrentBoxHeight = frameData->BoxHeight;
 
 		m_TargetPos[m_CurrentFrame].m_X = frameData->TargetPosX;
 		m_TargetPos[m_CurrentFrame].m_Y = frameData->TargetPosY;
@@ -333,59 +343,95 @@ namespace RTE {
 
 	void NetworkClient::ReceiveFrameBoxMsg(RakNet::Packet *packet) {
 		const MsgFrameBox *frameData = (MsgFrameBox *)packet->data;
-		int bpx = frameData->BoxX;
-		int bpy = frameData->BoxY;
+
+		if (m_CurrentBoxWidth == 0 || m_CurrentBoxHeight == 0) {
+			return;
+		}
+
+		int bpx = frameData->BoxX * m_CurrentBoxWidth;
+		int bpy = frameData->BoxY * m_CurrentBoxHeight;
 		m_CurrentSceneLayerReceived = -1;
 
 		BITMAP *bmp = 0;
+		bool isDelta = frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA || frameData->Id == ID_SRV_FRAME_BOX_UI_DELTA;
 
-		if (frameData->Layer == 0) {
+		if (frameData->Id == ID_SRV_FRAME_BOX_MO || frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
-		} else if (frameData->Layer == 1) {
+		} else if (frameData->Id == ID_SRV_FRAME_BOX_UI || frameData->Id == ID_SRV_FRAME_BOX_UI_DELTA) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0);
 		}
 
 		acquire_bitmap(bmp);
 
-		int maxWidth = frameData->BoxWidth;
-		int maxHeight = frameData->BoxHeight;
+		int maxWidth = m_CurrentBoxWidth;
+		int maxHeight = m_CurrentBoxHeight;
+
+		// If box with default size is out of bounds, then it was truncated by the screen edge
+		if (bpx + maxWidth >= bmp->w) { maxWidth = bmp->w - bpx; }
+		if (bpy + maxHeight >= bmp->h) { maxHeight = bmp->h - bpy; }
+
 		int size = frameData->DataSize;
+		int uncompressedSize = maxWidth * maxHeight;
+
+		if (m_UseInterlacing) { uncompressedSize = maxWidth * (maxHeight / 2); }
+
+		float compressionRatio = (float)size / (float)uncompressedSize;
 
 		m_ReceivedData += frameData->DataSize;
-		m_CompressedData += frameData->UncompressedSize;
+		m_CompressedData += uncompressedSize;
 
 		if (bpx + maxWidth - 1 < bmp->w && bpy + maxHeight - 1 < bmp->h && bpx >= 0 && bpy >= 0) {
 			// Unpack box
 			if (frameData->DataSize == 0) {
-				//memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			} else {
-				if (frameData->DataSize == frameData->UncompressedSize) {
+				if (frameData->DataSize == uncompressedSize) {
 #ifdef _WIN32
 					memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgFrameBox), size);
 #else
 					// Fallback to unsafe memcpy
 					memcpy(m_PixelLineBuffer, packet->data + sizeof(MsgFrameBox), size);
 #endif
-
 				} else {
-					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameBox)), (char *)(m_PixelLineBuffer), size, frameData->UncompressedSize);
-				}
-				// Copy box to bitmap line by line
-				const unsigned char *lineAddr = m_PixelLineBuffer;
-				for (int y = 0; y < maxHeight; y++) {
-#ifdef _WIN32
-					memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
-#else
-					memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
-#endif
-
-					lineAddr += maxWidth;
+					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameBox)), (char *)(m_PixelLineBuffer), size, uncompressedSize);
 				}
 
-#ifndef RELEASE_BUILD
-				if (g_UInputMan.KeyHeld(KEY_0)) { rect(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_BlackColor); }
-#endif
+
+				int lineStart = 0;
+				int lineStep = 1;
+
+				if (m_UseInterlacing) {
+					lineStep = 2;
+					if (m_CurrentFrame % 2 != 0) { lineStart = 1; }
+				}
+
+				if (isDelta) {
+					unsigned char *lineAddr = m_PixelLineBuffer;
+					for (int y = lineStart; y < maxHeight; y += lineStep) {
+						for (int x = 0; x < maxWidth; x++) {
+							*(bmp->line[bpy + y] + bpx + x) += lineAddr[x];
+						}
+						lineAddr += maxWidth;
+					}
+				} else {
+					// Copy box to bitmap line by line
+					unsigned char *lineAddr = m_PixelLineBuffer;
+					for (int y = lineStart; y < maxHeight; y += lineStep) {
+						memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
+						lineAddr += maxWidth;
+					}
+				}
+
+				if (m_ShowFillRate && frameData->DataSize > 0) {
+					rect(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_WhiteColor);
+
+					int color = isDelta ? ColorKeys::g_GreenColor : ColorKeys::g_RedColor;
+					if (maxHeight == m_CurrentBoxHeight) {
+						line(bmp, bpx, bpy, bpx + maxWidth - 1, bpy, color);
+						line(bmp, bpx, bpy, bpx, bpy + compressionRatio * maxHeight, color);
+						line(bmp, bpx + maxWidth - 1, bpy, bpx + maxWidth - 1, bpy + compressionRatio * maxHeight, color);
+					}
+				}
 			}
 		}
 		release_bitmap(bmp);
@@ -508,6 +554,13 @@ namespace RTE {
 				m_BackgroundLayers[f][i].FillDownColor = frameData->BackgroundLayers[i].FillDownColor;
 			}
 		}
+		// Reset network framebuffers
+		BITMAP *net_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
+		BITMAP *net_gui_bmp = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0);
+
+		clear_to_color(net_bmp, ColorKeys::g_MaskColor);
+		clear_to_color(net_gui_bmp, ColorKeys::g_MaskColor);
+
 		SendSceneSetupAcceptedMsg();
 		g_ConsoleMan.PrintString("CLIENT: Scene setup accepted");
 	}
@@ -870,7 +923,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::DrawFrame() {
+	void NetworkClient::DrawFrame(int frameNumber, bool useInterlacing, bool clearFramebuffer) {
 		BITMAP *src_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
 		BITMAP *dst_bmp = g_FrameMan.GetNetworkBackBuffer8Ready(0);
 
@@ -903,7 +956,7 @@ namespace RTE {
 			masked_blit(m_SceneBackgroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
 
-		//draw_sprite(src_bmp, dst_bmp, 0, 0);
+		//Draw received bitmap
 		masked_blit(src_bmp, dst_bmp, 0, 0, 0, 0, src_bmp->w, src_bmp->h);
 		masked_blit(src_gui_bmp, dst_gui_bmp, 0, 0, 0, 0, src_bmp->w, src_bmp->h);
 		masked_blit(m_SceneForegroundBitmap, dst_bmp, sourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
@@ -924,6 +977,51 @@ namespace RTE {
 		DrawPostEffects(m_CurrentFrame);
 
 		g_PerformanceMan.SetCurrentPing(GetPing());
+
+		if (clearFramebuffer) {
+			if (useInterlacing) {
+				if (m_CurrentBoxWidth == 0 || m_CurrentBoxHeight == 0) {
+					return;
+				}
+				bool clearEven = !(frameNumber % 2 == 0);
+				int boxedWidth = src_bmp->w / m_CurrentBoxWidth;
+				int boxedHeight = src_bmp->h / m_CurrentBoxHeight;
+
+				if (src_bmp->w % m_CurrentBoxWidth != 0) { boxedWidth = boxedWidth + 1; }
+
+				int lineStep = 2;
+				int lineStart = 0;
+
+				if (clearEven) { lineStart = 1; }
+
+				for (int by = 0; by <= boxedHeight; by++) {
+					for (int bx = 0; bx <= boxedWidth; bx++) {
+						int bpx = bx * m_CurrentBoxWidth;
+						int bpy = by * m_CurrentBoxHeight;
+
+						if (bpx >= src_bmp->w || bpy >= src_bmp->h) {
+							break;
+						}
+
+						int maxWidth = m_CurrentBoxWidth;
+						if (bpx + m_CurrentBoxWidth >= src_bmp->w) { maxWidth = src_bmp->w - bpx; }
+
+						int maxHeight = m_CurrentBoxHeight;
+						if (bpy + m_CurrentBoxHeight >= src_bmp->h) { maxHeight = src_bmp->h - bpy; }
+
+						/*
+						for (int y = bpy + lineStart; y < bpy + maxHeight - 1; y += lineStep) {
+							//line(src_bmp, bpx, y, bpx + maxWidth - 1, y, ColorKeys::g_MaskColor);
+							//line(src_gui_bmp, bpx, y, bpx + maxWidth - 1, y, ColorKeys::g_MaskColor);
+						}
+						*/
+					}
+				}
+			} else {
+				clear_to_color(src_bmp, ColorKeys::g_MaskColor);
+				clear_to_color(src_gui_bmp, ColorKeys::g_MaskColor);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -999,10 +1097,14 @@ namespace RTE {
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
 			if (IsConnectedAndRegistered()) {
-				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(m_CurrentFrame, m_UseInterlacing, !m_CurrentFrameDeltaCompressed); }
 				SendInputMsg();
 			}
 		}
+
+#ifndef RELEASE_BUILD
+		m_ShowFillRate = g_UInputMan.KeyHeld(KEY_0);
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1098,7 +1200,10 @@ namespace RTE {
 				case ID_SRV_FRAME_LINE:
 					ReceiveFrameLineMsg(packet);
 					break;
-				case ID_SRV_FRAME_BOX:
+				case ID_SRV_FRAME_BOX_MO:
+				case ID_SRV_FRAME_BOX_UI:
+				case ID_SRV_FRAME_BOX_MO_DELTA:
+				case ID_SRV_FRAME_BOX_UI_DELTA:
 					ReceiveFrameBoxMsg(packet);
 					break;
 				case ID_SRV_SCENE_SETUP:

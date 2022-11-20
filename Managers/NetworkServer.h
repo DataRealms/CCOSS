@@ -207,10 +207,8 @@ namespace RTE {
 		RakNet::SystemAddress m_NATServiceServerID; //!<
 		bool m_NatServerConnected; //!<
 
-		unsigned char m_PixelLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!<
-
-		BITMAP *m_BackBuffer8[c_MaxClients]; //!<
-		BITMAP *m_BackBufferGUI8[c_MaxClients]; //!<
+		BITMAP *m_BackBuffer8[c_MaxClients]; //!< Buffers to store client screens before compression.
+		BITMAP *m_BackBufferGUI8[c_MaxClients]; //!< Buffers to store client GUI screens before compression.
 
 		void *m_LZ4CompressionState[c_MaxClients]; //!<
 		void *m_LZ4FastCompressionState[c_MaxClients]; //!<
@@ -225,6 +223,7 @@ namespace RTE {
 
 		bool m_UseHighCompression; //!< Whether to use higher compression methods (default).
 		bool m_UseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
+		bool m_UseDeltaCompression; //!<
 		int m_HighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
 
 		/// <summary>
@@ -239,22 +238,26 @@ namespace RTE {
 
 		bool m_SendEven[c_MaxClients]; //!<
 
-		bool m_ShowStats; //!<
-		bool m_ShowInput; //!<
-
 		bool m_SendSceneSetupData[c_MaxClients]; //!<
 		bool m_SendSceneData[c_MaxClients]; //!<
 		bool m_SceneAvailable[c_MaxClients]; //!<
 		bool m_SendFrameData[c_MaxClients]; //!<
+
 		std::mutex m_SceneLock[c_MaxClients]; //!<
 
-		unsigned char m_TerrainChangeBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!<
+		unsigned char m_PixelLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
+		unsigned char m_PixelLineBufferDelta[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
+
+		unsigned char m_CompressedLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store compressed pixel data line
+
+		unsigned char *m_PixelLineBuffersPrev[c_MaxClients];
+		unsigned char *m_PixelLineBuffersGUIPrev[c_MaxClients];
+
 		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
 		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<
 
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
-		//std::mutex m_InputQueueMutex[c_MaxClients];
 		std::queue<MsgInput> m_InputMessages[c_MaxClients]; //!<
 
 		unsigned char m_SceneID; //!<
@@ -295,6 +298,12 @@ namespace RTE {
 
 		unsigned long m_DataSentCurrent[MAX_STAT_RECORDS][2]; //!<
 		unsigned long m_DataSentTotal[MAX_STAT_RECORDS]; //!<
+
+		unsigned long m_FullBlocksSentCurrent[MAX_STAT_RECORDS][2];
+		unsigned long m_EmptyBlocksSentCurrent[MAX_STAT_RECORDS][2];
+
+		unsigned long m_FullBlocksDataSentCurrent[MAX_STAT_RECORDS][2];
+		unsigned long m_EmptyBlocksDataSentCurrent[MAX_STAT_RECORDS][2];
 
 		unsigned long m_DataUncompressedTotal[MAX_STAT_RECORDS]; //!<
 		unsigned long m_DataUncompressedCurrent[MAX_STAT_RECORDS][2]; //!<
@@ -489,6 +498,14 @@ namespace RTE {
 		/// <param name="w"></param>
 		/// <param name="h"></param>
 		void CreateBackBuffer(short player, int w, int h);
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="player"></param>
+		/// <param name="w"></param>
+		/// <param name="h"></param>
+		void ClearBackBuffer(int player, int w, int h);
 
 		/// <summary>
 		///

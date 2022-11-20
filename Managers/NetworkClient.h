@@ -140,6 +140,8 @@ namespace RTE {
 	protected:
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
+		static constexpr int c_MaxPossibleBoxes = 256; //!<
+
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
 		RakNet::RakPeerInterface *m_Client; //!< The client RakPeerInterface.
@@ -152,6 +154,7 @@ namespace RTE {
 		RakNet::SystemAddress m_NATServiceServerID; //!< The NAT server's identifier.
 
 		bool m_UseNATPunchThroughService; //!< Whether to use NAT service for connecting to server.
+		bool m_UseInterlacing;
 
 		bool m_IsConnected; //!< Is client connected to server.
 		bool m_IsRegistered; //!< Is client registered at server.
@@ -166,6 +169,11 @@ namespace RTE {
 		long long m_LastInputSentTime; //!< The last time input was sent in real time ticks.
 
 		int m_CurrentFrame; //!<
+		int m_CurrentBoxWidth; //!<
+		int m_CurrentBoxHeight; //!<
+		bool m_CurrentFrameDeltaCompressed; //!<
+
+		bool m_ShowFillRate; //!<
 
 		Vector m_TargetPos[c_FramesToRemember]; //!<
 		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!< List of post-effects received from server.
@@ -326,7 +334,10 @@ namespace RTE {
 		/// <summary>
 		///
 		/// </summary>
-		void DrawFrame();
+		/// <param name="frameNumber"></param>
+		/// <param name="useInterlacing"></param>
+		/// <param name="clearFramebuffer"></param>
+		void DrawFrame(int frameNumber, bool useInterlacing, bool clearFramebuffer);
 #pragma endregion
 
 		/// <summary>

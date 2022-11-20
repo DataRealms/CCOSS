@@ -62,7 +62,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
 		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
-		
+
 		/// <summary>
 		/// Gets scene width for network client.
 		/// </summary>
@@ -74,7 +74,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Current scene height.</returns>
 		int GetSceneHeight() const { return m_SceneHeight; }
-		
+
 		/// <summary>
 		/// Indicates whether the scene wraps its scrolling around the X axis for network client.
 		/// </summary>
@@ -128,7 +128,7 @@ namespace RTE {
 
 		// TODO: Figure out
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="rakPeer"></param>
 		/// <param name="address"></param>
@@ -172,7 +172,7 @@ namespace RTE {
 
 		std::unordered_map<int, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
-		unsigned char m_SceneID; //!< 
+		unsigned char m_SceneID; //!<
 		int m_CurrentSceneLayerReceived; //!<
 
 		BITMAP *m_SceneBackgroundBitmap; //!<
@@ -193,36 +193,36 @@ namespace RTE {
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void HandleNetworkPackets();
 #pragma endregion
 
 #pragma region Network Event Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
 		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendRegisterMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ReceiveAcceptedMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendDisconnectMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="address"></param>
 		/// <param name="serverName"></param>
@@ -230,58 +230,58 @@ namespace RTE {
 		void SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveServerGUIDAnswer(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendInputMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameSetupMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameLineMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameBoxMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendSceneAcceptedMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ReceiveSceneEndMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneSetupMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendSceneSetupAcceptedMsg();
 
@@ -292,7 +292,7 @@ namespace RTE {
 		void ReceiveTerrainChangeMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// Receive and handle a packet of post-effect data. 
+		/// Receive and handle a packet of post-effect data.
 		/// </summary>
 		/// <param name="packet">The packet to handle.</param>
 		void ReceivePostEffectsMsg(RakNet::Packet *packet);
@@ -312,19 +312,19 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="targetBitmap"></param>
 		void DrawBackgrounds(BITMAP *targetBitmap);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="frame"></param>
 		void DrawPostEffects(int frame);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void DrawFrame();
 #pragma endregion

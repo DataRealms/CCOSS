@@ -174,10 +174,10 @@ namespace RTE {
 		for (short i = 0; i < c_MaxClients; i++) {
 			DestroyBackBuffer(i);
 
-			if (m_LZ4CompressionState[i]) { free(m_LZ4CompressionState[i]); }		
+			if (m_LZ4CompressionState[i]) { free(m_LZ4CompressionState[i]); }
 			m_LZ4CompressionState[i] = 0;
 
-			if (m_LZ4FastCompressionState[i]) { free(m_LZ4FastCompressionState[i]); }		
+			if (m_LZ4FastCompressionState[i]) { free(m_LZ4FastCompressionState[i]); }
 			m_LZ4FastCompressionState[i] = 0;
 		}
 		Clear();

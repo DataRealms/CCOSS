@@ -23,7 +23,7 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		enum NetworkServerStats {
 			STAT_CURRENT = 0,
@@ -32,7 +32,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		enum ThreadExitReasons {
 			NORMAL = 0,
@@ -81,7 +81,7 @@ namespace RTE {
 		void EnableServerMode() { m_IsInServerMode = true; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <returns></returns>
 		bool ReadyForSimulation();
@@ -154,18 +154,18 @@ namespace RTE {
 
 #pragma region Network Scene Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="isLocked"></param>
 		void LockScene(bool isLocked);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ResetScene();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="terrainChange"></param>
 		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
@@ -174,7 +174,7 @@ namespace RTE {
 	protected:
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		struct ClientConnection {
 			bool IsActive; //!<
@@ -229,7 +229,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Acceleration factor, higher values consume more bandwidth but less CPU.
-		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
+		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed.
 		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
 		/// </summary>
 		int m_FastAccelerationFactor;
@@ -266,7 +266,7 @@ namespace RTE {
 
 		int m_FrameNumbers[c_MaxClients]; //!<
 
-		unsigned short m_Ping[c_MaxClients]; //!< 
+		unsigned short m_Ping[c_MaxClients]; //!<
 		Timer m_PingTimer[c_MaxClients]; //!<
 
 		Timer m_LastPackedReceived; //!<
@@ -318,14 +318,14 @@ namespace RTE {
 
 #pragma region Thread Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="server"></param>
 		/// <param name="player"></param>
 		static void BackgroundSendThreadFunction(NetworkServer *server, short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="reason"></param>
@@ -334,69 +334,69 @@ namespace RTE {
 
 #pragma region Network Event Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
 		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveNewIncomingConnection(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendAcceptedMsg(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveDisconnection(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveRegisterMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="addr"></param>
 		void SendNATServerRegistrationMsg(RakNet::SystemAddress address);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveInputMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="msg"></param>
 		void ProcessInputMsg(short player, MsgInput msg);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ClearInputMessages(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSoundData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendMusicData(short player);
@@ -404,78 +404,78 @@ namespace RTE {
 
 #pragma region Network Scene Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool IsSceneAvailable(short player) const { return m_SceneAvailable[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToSendSceneSetupData(short player) const { return m_SendSceneSetupData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneSetupData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneSetupDataAccepted(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToSendSceneData(short player) const { return m_SendSceneData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ClearTerrainChangeQueue(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToProcessTerrainChanges(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ProcessTerrainChanges(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="terrainChange"></param>
 		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneAcceptedMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneEndMsg(short player);
@@ -483,7 +483,7 @@ namespace RTE {
 
 #pragma region Network Frame Handling and Drawing
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="w"></param>
@@ -491,32 +491,32 @@ namespace RTE {
 		void CreateBackBuffer(short player, int w, int h);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void DestroyBackBuffer(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendFrameSetupMsg(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool SendFrameData(short player) const { return m_SendFrameData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendPostEffectData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
@@ -525,20 +525,20 @@ namespace RTE {
 
 #pragma region Network Stats Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void UpdateStats(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void DrawStatisticsData();
 #pragma endregion
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void HandleNetworkPackets();
 #pragma endregion
@@ -550,7 +550,7 @@ namespace RTE {
 		RakNet::RakNetGUID GetServerGUID() const { return m_Server->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS); }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="rakPeer"></param>
 		/// <param name="address"></param>

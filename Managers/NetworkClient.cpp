@@ -127,7 +127,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	RakNet::SystemAddress NetworkClient::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port) {
 		if (rakPeer->Connect(address, port, 0, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
 			return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -723,7 +723,7 @@ namespace RTE {
 					// Regular scroll
 					offsetX = std::floor(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
 					offsetY = std::floor(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
-			
+
 					// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 					// ForceBounds(offsetX, offsetY);
 					// WrapPosition(offsetX, offsetY);
@@ -889,7 +889,7 @@ namespace RTE {
 
 		DrawBackgrounds(dst_bmp);
 		masked_blit(m_SceneBackgroundBitmap, dst_bmp, sourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
-		
+
 		if (sourceX < 0) {
 			// Draw if the out of seam portion is to the left
 			int newSourceX = m_SceneBackgroundBitmap->w + sourceX;
@@ -954,7 +954,7 @@ namespace RTE {
 			int x = 0;
 			int y = g_FrameMan.GetResY() / 2 - h / 2;
 			if (h >= g_FrameMan.GetResY()) { y = 0; }
-				
+
 			// Recalculate everything for tall maps
 			if (static_cast<float>(bmp->h) / static_cast<float>(bmp->w) > 1) {
 				scale = static_cast<float>(dst_bmp->h) / static_cast<float>(bmp->h);
@@ -963,7 +963,7 @@ namespace RTE {
 
 				x = g_FrameMan.GetResX() / 2 - w / 2;
 				y = 0;
-				if (w >= g_FrameMan.GetResX()) { x = 0; }					
+				if (w >= g_FrameMan.GetResX()) { x = 0; }
 			}
 
 			// Draw previous layer

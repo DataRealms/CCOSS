@@ -222,9 +222,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Greatly reduce online multiplayer bandwidth usage.
 
 - Completely replaced `ScriptFile` with `ScriptPath`.
 
@@ -346,6 +350,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
+- Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
 
 </details>
 

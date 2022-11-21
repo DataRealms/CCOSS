@@ -1299,7 +1299,7 @@ namespace RTE {
 		for (int i = 0; i < 4; i++)
 		{
 			if (i < c_MaxClients)
-				finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediate8Current(i);
+				finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Current(i);
 			else
 				finalDestBitmap = pTargetBitmap;
 

@@ -262,6 +262,12 @@ namespace RTE {
 		float GetDigitalAimSpeed() const;
 
 		/// <summary>
+		/// Gets the player this is listening. Unlike GetPlayer, this ignores the input mode.
+		/// </summary>
+		/// <returns>The player this is listening to, regardless of input mode.</returns>
+		int GetPlayerRaw() const { return m_Player; }
+
+		/// <summary>
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>

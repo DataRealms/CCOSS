@@ -417,7 +417,11 @@ namespace RTE {
 					// Copy box to bitmap line by line
 					unsigned char *lineAddr = m_PixelLineBuffer;
 					for (int y = lineStart; y < maxHeight; y += lineStep) {
+#ifdef _WIN32
 						memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
+#else
+						memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
+#endif
 						lineAddr += maxWidth;
 					}
 				}

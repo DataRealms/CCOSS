@@ -222,6 +222,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
+
+- Expose `Gib` to Lua.  
+	You can read and write the following properties:  
+	```
+	gib.ParticlePreset = movableObject;
+	gib.Offset = vector;
+	gib.Count = intValue;
+	gib.Spread = angleInRadians;
+	gib.MinVelocity = floatValue;
+	gib.MaxVelocity = floatValue;
+	gib.LifeVariation = floatValue;
+	gib.InheritsVel = bool;
+	gib.IgnoresTeamHits = bool;
+	gib.SpreadMode = SpreadMode;
+	```
+
+	The `SpreadMode` property accepts values from the `SpreadMode` enum:  
+	```
+	(0) Gib.SpreadRandom
+	(1) Gib.SpreadEven
+	(2) Gib.SpreadSpiral
+	```
+
+	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -239,9 +239,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadScene("Autosave")`.
 	
+- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
+	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
+	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
+	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
+	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- The landing zone cursor will now show the width of the selected delivery craft.
 
 - Completely replaced `ScriptFile` with `ScriptPath`.
 
@@ -335,6 +345,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(34) EditorTeam2
 	(35) EditorTeam3
 	(36) EditorTeam4
+	```
+
+- Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
+
+- `MOSRotating` based presets without an `AtomGroup` definition will now crash with error message during loading.
+
+- Over-indentation in INI will crash with error message if detected during loading instead of skipping entire blocks or in some cases the rest of the file.  
+	There is never a case where there should be a positive difference of more than one tab between lines, but this means that lines like `IncludeFile` which would previously load fine even if over-indented will also crash, but you should never have those indented to begin with.  
+
+	Examples of structure that will cause a crash:  
+	```ini
+	AddSomething = Something
+			PresetName = Thing // Over-indented. Will crash.
+		SomeProperty = Whatever
+
+	AddSomething = Something
+		PresetName = Thing
+		SomeObjectProperty = Something
+				CopyOf = Thing // Over-indented. Will crash.
 	```
 
 </details>

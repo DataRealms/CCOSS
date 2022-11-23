@@ -103,6 +103,7 @@ void BuyMenuGUI::Clear()
 	m_pCraftMassLabel = 0;
 
     m_pSelectedCraft = 0;
+	m_DeliveryWidth = 0;
     m_pCostLabel = 0;
     m_pBuyButton = 0;
     m_pSaveButton = 0;
@@ -2438,8 +2439,8 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLab
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::TryPurchase()
-{
+void BuyMenuGUI::TryPurchase() {
+	int player = m_pController->GetPlayer();
     // Switch to the Craft category to give the user a hint
     if (!m_pSelectedCraft)
     {
@@ -2447,7 +2448,7 @@ void BuyMenuGUI::TryPurchase()
         CategoryChange();
         m_FocusChange = -2;
         m_MenuFocus = ITEMS;
-        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(player);
         // Set the notification blinker
         m_BlinkMode = NOCRAFT;
         m_BlinkTimer.Reset();
@@ -2456,7 +2457,7 @@ void BuyMenuGUI::TryPurchase()
     // Can't afford it :(
     else if (GetTotalOrderCost() > g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))
     {
-        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(player);
         // Set the notification blinker
         m_BlinkMode = NOFUNDS;
         m_BlinkTimer.Reset();
@@ -2467,7 +2468,7 @@ void BuyMenuGUI::TryPurchase()
 		if (pCraft) {
 			// Enforce max mass
 			if (m_EnforceMaxMassConstraint && pCraft->GetMaxInventoryMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxInventoryMass()) {
-				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(player);
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
 				m_BlinkTimer.Reset();
@@ -2477,7 +2478,7 @@ void BuyMenuGUI::TryPurchase()
 			// Enforce max passengers
 			if (pCraft->GetMaxPassengers() >= 0 && GetTotalOrderPassengers() > pCraft->GetMaxPassengers() && m_EnforceMaxPassengersConstraint)
 			{
-				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(player);
 				// Set the notification blinker
 				m_BlinkMode = MAXPASSENGERS;
 				m_BlinkTimer.Reset();
@@ -2489,7 +2490,9 @@ void BuyMenuGUI::TryPurchase()
 	// Only allow purchase if there is a delivery craft and enough funds
 	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))) {
 		m_PurchaseMade = true;
-		g_GUISound.PurchaseMadeSound()->Play(m_pController->GetPlayer());
+		m_DeliveryWidth = static_cast<const MOSprite *>(m_pSelectedCraft)->GetSpriteWidth();
+		
+		g_GUISound.PurchaseMadeSound()->Play(player);
 	}
 }
 

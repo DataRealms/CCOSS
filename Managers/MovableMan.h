@@ -587,10 +587,11 @@ public:
     bool IsOfActor(MOID checkMOID);
 
     /// <summary>
-    /// Gives a unique, contiguous id per-actor. This is regenerated every frame. Returns -1 if the actor doesn't exist in our state.
+    /// Gives a unique, contiguous id per-actor. This is regenerated every frame.
     /// </summary>
     /// <param name="actor">The actor to get a contiguous id for.</param>
-    /// <returns>A contiguous id for the actor.</returns>
+    /// <returns>A contiguous id for the actor. Returns -1 if the actor doesn't exist in MovableMan.</returns>
+    /// <remarks>This function is used for AI throttling.</remarks>
     int GetContiguousActorID(const Actor *actor) const;
 
 

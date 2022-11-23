@@ -131,7 +131,7 @@ void Actor::Clear() {
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_BaseDigStrength = c_PathFindingDefaultDigStrength;
+    m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
 
@@ -392,8 +392,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_Organic;
     } else if (propName == "Mechanical") {
         reader >> m_Mechanical;
-    } else if (propName == "BaseDigStrength") {
-        reader >> m_BaseDigStrength;
+    } else if (propName == "AIBaseDigStrength") {
+        reader >> m_AIBaseDigStrength;
     } else {
         return MOSRotating::ReadProperty(propName, reader);
     }
@@ -471,7 +471,7 @@ int Actor::Save(Writer &writer) const
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
     writer.NewPropertyWithValue("Mechanical", m_Mechanical);
-    writer.NewPropertyWithValue("BaseDigStrength", m_BaseDigStrength);
+    writer.NewPropertyWithValue("AIBaseDigStrength", m_AIBaseDigStrength);
 
     return 0;
 }
@@ -1252,7 +1252,7 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float Actor::EstimateDigStrength() {
-    return m_BaseDigStrength;
+    return m_AIBaseDigStrength;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

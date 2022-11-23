@@ -381,18 +381,17 @@ namespace RTE {
 		return anyChange;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) {
 		float totalCostOfAdjacentNodes = 0.0F;
-		int count = 1;
-		for (int i = 0; i < 8; i++) {
-			float cost = node.AdjacentNodeCosts[i];
+		int count = 0;
+		for (float cost : node.AdjacentNodeCosts) {
 			if (cost < std::numeric_limits<float>::max()) {
-				totalCostOfAdjacentNodes += cost;
-				count++;
+					totalCostOfAdjacentNodes += cost;
+					count++;
 			}
 		}
-		return totalCostOfAdjacentNodes / static_cast<float>(count);
+		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0f);
 	}
 }

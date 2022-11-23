@@ -220,7 +220,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
 	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
 	
-- New INI and Lua (R/W) `Actor` property `BaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
+- New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
 - New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
 

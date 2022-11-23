@@ -1315,13 +1315,11 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPathFinder
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the pathfinder for a given team.
-// Arguments:       The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.
-// Return value:    Pointer to the pathfinder for the given team.
-
+    /// <summary>
+    /// Gets the pathfinder for a given team.
+    /// </summary>
+    /// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+    /// <returns>A pointer to the pathfinder for the given team.</returns>
     std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
 

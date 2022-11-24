@@ -1086,6 +1086,24 @@ ClassInfoGetters;
 
     virtual bool UpdateMovePath();
 
+    /// <summary>
+    /// Estimates what material strength this actor can penetrate.
+    /// </summary>
+	/// <returns>The actor's dig strength.</returns>
+    virtual float EstimateDigStrength();
+
+    /// <summary>
+    /// Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
+	/// <returns>The actors base dig strength.</returns>
+    float GetAIBaseDigStrength() const { return m_AIBaseDigStrength; }
+
+    /// <summary>
+    /// Sets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
+	/// <param name="newAIBaseDigStrength">The new base dig strength for this Actor.</param>
+    void SetAIBaseDigStrength(float newAIBaseDigStrength) { m_AIBaseDigStrength = newAIBaseDigStrength; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  UpdateAIScripted
@@ -1459,13 +1477,12 @@ protected:
     int m_FlashWhiteMS;
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
-    // What material strength this actor is capable of digging trough.
-    float m_DigStrength;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
     // How many passenger slots this actor will take in a craft
     int m_PassengerSlots;
-
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    float m_AIBaseDigStrength;
 
     ////////////////////
     // AI States

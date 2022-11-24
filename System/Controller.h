@@ -153,7 +153,7 @@ namespace RTE {
 		/// Sets whether this is a disabled controller that doesn't give any new output.
 		/// </summary>
 		/// <param name="disabled">Disabled or not.</param>
-		void SetDisabled(bool disabled = true) { if (m_Disabled != disabled) { m_ReleaseTimer.Reset(); } m_Disabled = disabled; }
+		void SetDisabled(bool disabled = true) { if (m_Disabled != disabled) { m_ReleaseTimer.Reset(); ResetCommandState(); } m_Disabled = disabled; }
 
 		/// <summary>
 		/// Shows whether the current controller is in a specific state.
@@ -379,6 +379,21 @@ namespace RTE {
 		/// Updates the player's analog inputs portion of this Controller. For breaking down Update into more comprehensible chunks.
 		/// </summary>
 		void UpdatePlayerAnalogInput();
+
+		/// <summary>
+		/// Clears the command state, meaning no input is given and our actor will be idle.
+		/// </summary>
+		void ResetCommandState();
+
+		/// <summary>
+		/// Requests and applies input from the player.
+		/// </summary>
+		void GetInputFromPlayer();
+
+		/// <summary>
+		/// Requests and applies input from the AI.
+		/// </summary>
+		void GetInputFromAI();
 #pragma endregion
 
 		/// <summary>

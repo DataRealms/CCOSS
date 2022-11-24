@@ -3050,4 +3050,11 @@ void Scene::Update()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::unique_ptr<PathFinder>& Scene::GetPathFinder(Activity::Teams team) {
+	// Note - we use + 1 when getting pathfinders by index, because our shared NoTeam pathfinder occupies index 0, and the rest come after that.
+	return m_pPathFinders[static_cast<int>(team) + 1];
+}
+
 } // namespace RTE

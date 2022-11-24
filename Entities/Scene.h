@@ -1345,7 +1345,7 @@ protected:
     SLTerrain *m_pTerrain;
 
     // Pathfinding graph and logic. Owned by this
-    // The array of PathFinders for each team. Because we also have a shared pathfinder, we need to use MaxTeamCount + 1.
+    // The array of PathFinders for each team. Because we also have a shared pathfinder using index 0, we need to use MaxTeamCount + 1 to handle all the Teams' PathFinders.
     std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
@@ -1400,8 +1400,7 @@ private:
 	/// </summary>
 	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
 	/// <returns>A pointer to the pathfinder for the given team.</returns>
-	/// <remarks>Note that the NoTeam shared pathfinder is the first entry in the PathFinder array.</remarks>
-	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team) { return m_pPathFinders[static_cast<int>(team) + 1]; }
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

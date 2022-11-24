@@ -3050,9 +3050,4 @@ void Scene::Update()
     }
 }
 
-std::unique_ptr<PathFinder> & Scene::GetPathFinder(Activity::Teams team) {
-    // + 1 because of our shared NoTeam pathfinder (index -1 becomes 0)
-    return m_pPathFinders[static_cast<int>(team) + 1];
-}
-
 } // namespace RTE

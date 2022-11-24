@@ -100,12 +100,6 @@ namespace RTE {
 		int GetPathFinderGridNodeSize() const { return m_PathFinderGridNodeSize; }
 
 		/// <summary>
-		/// Sets the PathFinder grid node size.
-		/// </summary>
-		/// <param name="newGridSize">The new PathFinder grid node size.</param>
-		void SetPathFinderGridNodeSize(int newGridSize) { m_PathFinderGridNodeSize = newGridSize; }
-
-		/// <summary>
 		/// Gets the AI update interval.
 		/// </summary>
 		/// <returns>How often actor's AI is updated, in frames.</returns>

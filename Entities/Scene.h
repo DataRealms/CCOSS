@@ -1315,14 +1315,6 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 protected:
 
-    /// <summary>
-    /// Gets the pathfinder for a given team.
-    /// </summary>
-    /// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
-    /// <returns>A pointer to the pathfinder for the given team.</returns>
-    std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
-
-
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1402,6 +1394,14 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	/// <summary>
+	/// Gets the pathfinder for a given team.
+	/// </summary>
+	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+	/// <returns>A pointer to the pathfinder for the given team.</returns>
+	/// <remarks>Note that the NoTeam shared pathfinder is the first entry in the PathFinder array.</remarks>
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team) { return m_pPathFinders[static_cast<int>(team) + 1]; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

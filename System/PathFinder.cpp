@@ -83,7 +83,7 @@ namespace RTE {
 			}
 		}
 		// Create and allocate the pather class which will do the work
-		m_Pather = new MicroPather(this, allocate, 8U, true);
+		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, true);
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
 		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
@@ -318,7 +318,7 @@ namespace RTE {
 			return false;
 		}
 
-		std::array<float, 8> oldCosts = node->AdjacentNodeCosts;
+		std::array<float, PathNode::c_MaxAdjacentNodeCount> oldCosts = node->AdjacentNodeCosts;
 
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
 		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
@@ -334,7 +334,7 @@ namespace RTE {
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
 		node->IsUpdated = true;
 
-		for (int i = 0; i < 8; ++i) {
+		for (int i = 0; i < PathNode::c_MaxAdjacentNodeCount; ++i) {
 			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
 			if (delta > c_NodeCostChangeEpsilon) {
 				return true;

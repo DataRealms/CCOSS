@@ -44,7 +44,7 @@ namespace RTE {
 		m_SimplifiedCollisionDetection = false;
 		m_SceneBackgroundAutoScaleMode = 1;
 		m_DisableFactionBuyMenuThemes = false;
-		m_PathFinderGridNodeSize = 20;
+		m_PathFinderGridNodeSize = c_PPM;
 		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;

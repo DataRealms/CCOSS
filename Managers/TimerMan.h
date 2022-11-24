@@ -193,7 +193,7 @@ namespace RTE {
 		float GetAIDeltaTimeSecs() const;
 
 		/// <summary>
-		/// Gets the current fixed delta time of AI updates, in seconds.
+		/// Gets the current fixed delta time of AI updates, in MS.
 		/// </summary>
 		/// <returns>The current fixed delta time of AI updates, in ms.</returns>
 		float GetAIDeltaTimeMS() const { return GetAIDeltaTimeSecs() * 1000; };

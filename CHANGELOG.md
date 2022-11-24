@@ -237,6 +237,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 <details><summary><b>Changed</b></summary>
 
+- The landing zone cursor will now show the width of the selected delivery craft.
+
 - Completely replaced `ScriptFile` with `ScriptPath`.
 
 - Changed the `Vector` function `ClampMagnitude` so its parameter order makes sense, it's now `Vector:ClampMagnitude(lowerMagnitudeLimit, upperMagnitudeLimit)`.
@@ -660,8 +662,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 </details>
 
 <details><summary><b>Changed</b></summary>
-
-- The landing zone cursor will now show the width of the selected delivery craft.
 
 - `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
 	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.

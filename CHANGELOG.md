@@ -229,7 +229,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness.  
 This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInterval`.
 
-- New Lua (R) `TimerMan` properties `AIDeltaTimeMS` / `AIDeltaTimeSecs` to give the time that has passed since the last AI update.
+- New Lua (R) `TimerMan` properties `AIDeltaTimeMS` and `AIDeltaTimeSecs` to get the time that has passed since the last AI update.
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 

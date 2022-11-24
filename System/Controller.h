@@ -390,7 +390,7 @@ namespace RTE {
 		/// </summary>
 		void GetInputFromPlayer();
 
-		/// <summary> 
+		/// <summary>
 		/// Requests and applies input from the AI.
 		/// </summary>
 		void GetInputFromAI();

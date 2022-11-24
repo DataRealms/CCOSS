@@ -23,7 +23,7 @@ namespace RTE {
 		/// <summary>
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		std::array<PathNode*, c_MaxAdjacentNodeCount> AdjacentNodes;
+		std::array<PathNode *, c_MaxAdjacentNodeCount> AdjacentNodes;
 
 		PathNode *&Up = AdjacentNodes[0];
 		PathNode *&UpRight = AdjacentNodes[1];
@@ -49,7 +49,7 @@ namespace RTE {
 		float &LeftUpCost = AdjacentNodeCosts[7];
 
 		explicit PathNode(const Vector &pos) : Pos(pos) {
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
 				AdjacentNodes[i] = nullptr;
 				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise.
 			}
@@ -137,10 +137,7 @@ namespace RTE {
 		/// Gets the cost to go to any adjacent node of the one passed in.
 		/// </summary>
 		/// <param name="state">Pointer to node to get to cost of all adjacents for. OWNERSHIP IS NOT TRANSFERRED!</param>
-		/// <param name="adjacentList">
-		/// An empty vector which will be filled out with all the valid nodes adjacent to the one passed in.
-		/// If at non-wrapping edge of seam, those non existent nodes won't be added.
-		/// </param>
+		/// <param name="adjacentList">An empty vector which will be filled out with all the valid nodes adjacent to the one passed in. If at non-wrapping edge of seam, those non existent nodes won't be added.</param>
 		void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) override;
 #pragma endregion
 
@@ -195,7 +192,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="node">The node to get the average transition cost for.</param>
 		/// <returns>The average transition cost.</returns>
-		float GetNodeAverageTransitionCost(const PathNode &node);
+		float GetNodeAverageTransitionCost(const PathNode &node) const;
 #pragma endregion
 
 		/// <summary>

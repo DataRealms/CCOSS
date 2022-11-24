@@ -193,7 +193,7 @@ namespace RTE {
 		float GetAIDeltaTimeSecs() const;
 
 		/// <summary>
-		/// Gets the current fixed delta time of AI updates, in MS.
+		/// Gets the current fixed delta time of AI updates, in ms.
 		/// </summary>
 		/// <returns>The current fixed delta time of AI updates, in ms.</returns>
 		float GetAIDeltaTimeMS() const { return GetAIDeltaTimeSecs() * 1000; };
@@ -233,14 +233,14 @@ namespace RTE {
 	protected:
 
 		long long m_StartTime; //!< The point in real time when the simulation (re)started.
-		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.	
+		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.
 		long long m_RealTimeTicks; //!< The number of actual time ticks counted so far.
 		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
 		long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 
-		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.	
+		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 

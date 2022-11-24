@@ -185,7 +185,7 @@ namespace RTE {
 	bool PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
 		// If no node costs changed, then we don't need to reset the pather
 		bool anyChange = false;
-		
+
 		Box box;
 		// Go through all the boxes and see if any of the node centers are inside each
 		for (const Box &boxListEntry : boxList) {
@@ -246,7 +246,7 @@ namespace RTE {
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
 		const PathNode *node = static_cast<PathNode *>(state);
 		micropather::StateCost adjCost;
-		
+
 		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions.
 		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck.
 		const float costRadiationMultiplier = 0.2F;
@@ -383,15 +383,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) {
+	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) const {
 		float totalCostOfAdjacentNodes = 0.0F;
 		int count = 0;
-		for (float cost : node.AdjacentNodeCosts) {
+		for (const float &cost : node.AdjacentNodeCosts) {
 			if (cost < std::numeric_limits<float>::max()) {
-					totalCostOfAdjacentNodes += cost;
-					count++;
+				totalCostOfAdjacentNodes += cost;
+				count++;
 			}
 		}
-		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0f);
+		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0F);
 	}
 }

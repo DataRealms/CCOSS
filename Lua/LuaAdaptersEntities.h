@@ -50,6 +50,8 @@
 
 namespace RTE {
 
+	static std::unordered_map<std::string, std::function<LuabindObjectWrapper * (const Entity *, lua_State *)>> s_LuaAdaptersEntityToLuabindObjectCastFunctions = {}; //!< Map of preset names to casting methods for ensuring objects are downcast properly when passed into Lua.
+
 #pragma region Entity Lua Adapter Macros
 	/// <summary>
 	/// Convenience macro to generate preset clone-create adapter functions that will return the exact pre-cast types, so we don't have to do: myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
@@ -126,6 +128,11 @@ namespace RTE {
 		static LuabindObjectWrapper * ToLuabindObject##TYPE (const Entity *entity, lua_State *luaState) { \
 			return new LuabindObjectWrapper(new luabind::object(luaState, dynamic_cast<const TYPE *>(entity)), ""); \
 		} \
+		/* Bullshit semi-hack to automatically populate the Luabind Object cast function map that is used in LuaMan::RunScriptFunctionObject */ \
+		static const auto EntityToLuabindObjectCastMapAutoInserterForType##TYPE = []() -> int { \
+			s_LuaAdaptersEntityToLuabindObjectCastFunctions.try_emplace(std::string(#TYPE), &ToLuabindObject##TYPE); \
+			return 0; \
+		}();
 
 	/// <summary>
 	/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
@@ -279,7 +286,6 @@ namespace RTE {
 	LuaEntityClone(PieSlice);
 	LuaEntityClone(PieMenu);
 
-	// NOTE - I'm sorry for this, but whenever you add a new LuaEntityCast entry, make sure to include it in LuaMan::InitializeCastingHelperMap.
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
 	LuaEntityCast(SceneObject);
@@ -316,7 +322,6 @@ namespace RTE {
 	LuaEntityCast(PEmitter);
 	LuaEntityCast(PieSlice);
 	LuaEntityCast(PieMenu);
-	// DON'T FORGET TO UPDATE LuaMan::InitializeCastingHelperMap!!!
 
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetBreakWound);

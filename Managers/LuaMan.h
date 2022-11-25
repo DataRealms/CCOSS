@@ -235,19 +235,12 @@ namespace RTE {
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
-		std::unordered_map<std::string, std::function<LuabindObjectWrapper * (const Entity *, lua_State *)>> m_CastingHelperMap; //!< Map of preset names to casting methods for ensuring objects are downcast properly when passed into Lua.
-
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
-
-		/// <summary>
-		/// Sets up the casting helper map. Called once during initialization.
-		/// </summary>
-		void InitializeCastingHelperMap();
 
 		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.

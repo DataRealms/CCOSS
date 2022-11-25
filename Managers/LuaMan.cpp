@@ -8,45 +8,6 @@ namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
 
-	const std::unordered_map<std::string, std::function<LuabindObjectWrapper * (const Entity *, lua_State *)>> c_CastingHelperMap = {
-		{"Entity", ToLuabindObjectEntity},
-		{"SoundContainer", ToLuabindObjectSoundContainer},
-		{"SceneObject", ToLuabindObjectSceneObject},
-		{"MovableObject", ToLuabindObjectMovableObject},
-		{"Attachable", ToLuabindObjectAttachable},
-		{"Arm", ToLuabindObjectArm},
-		{"Leg", ToLuabindObjectLeg},
-		{"Emission", ToLuabindObjectEmission},
-		{"AEmitter", ToLuabindObjectAEmitter},
-		{"Turret", ToLuabindObjectTurret},
-		{"Actor", ToLuabindObjectActor},
-		{"ADoor", ToLuabindObjectADoor},
-		{"AHuman", ToLuabindObjectAHuman},
-		{"ACrab", ToLuabindObjectACrab},
-		{"ACraft", ToLuabindObjectACraft},
-		{"ACDropShip", ToLuabindObjectACDropShip},
-		{"ACRocket", ToLuabindObjectACRocket},
-		{"MOSParticle", ToLuabindObjectMOSParticle},
-		{"MOSRotating", ToLuabindObjectMOSRotating},
-		{"MOPixel", ToLuabindObjectMOPixel},
-		{"MOSprite", ToLuabindObjectMOSprite},
-		{"Scene", ToLuabindObjectScene},
-		{"Deployment", ToLuabindObjectDeployment},
-		{"GameActivity", ToLuabindObjectGameActivity},
-		{"GlobalScript", ToLuabindObjectGlobalScript},
-		{"GAScripted", ToLuabindObjectGAScripted},
-		{"HeldDevice", ToLuabindObjectHeldDevice},
-		{"Round", ToLuabindObjectRound},
-		{"Magazine", ToLuabindObjectMagazine},
-		{"HDFirearm", ToLuabindObjectHDFirearm},
-		{"ThrownDevice", ToLuabindObjectThrownDevice},
-		{"TDExplosive", ToLuabindObjectTDExplosive},
-		{"TerrainObject", ToLuabindObjectTerrainObject},
-		{"PEmitter", ToLuabindObjectPEmitter},
-		{"PieSlice", ToLuabindObjectPieSlice},
-		{"PieMenu", ToLuabindObjectPieMenu}
-	};
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Clear() {

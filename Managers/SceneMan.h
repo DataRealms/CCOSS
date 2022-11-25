@@ -1165,16 +1165,19 @@ public:
 // Method:          CastMaxStrengthRay
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Traces along a vector and returns the strongest of all encountered pixels'
-//                  material strength values exept doors.
+//                  material strength values.
 //                  This will take wrapping into account.
 // Arguments:       The starting position.
 //                  The ending position.
 //                  For every pixel checked along the line, how many to skip between them
 //                  for optimization reasons. 0 = every pixel is checked.
+//                  A material ID to ignore, IN ADDITION to Air. This defaults to doors, for legacy script purposes
 // Return value:    The max of all encountered pixels' material strength vales. So if it was
 //                  all Air, then 0 is returned (Air's strength value is 0).
 
-    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip);
+    // We use two accessors instead of default parameters, for lua compat
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
+    float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1743,7 +1746,6 @@ private:
 // Return value:    None.
 
     void Clear();
-
     
     // Disallow the use of some implicit methods.
 	SceneMan(const SceneMan &reference) = delete;

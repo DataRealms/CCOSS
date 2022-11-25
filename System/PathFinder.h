@@ -15,38 +15,44 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
+		static constexpr int c_MaxAdjacentNodeCount = 8; //!< The maximum number of adjacent nodes to any given node. Thusly, also the number of directions for nodes to be in.
+
 		Vector Pos; //!< Absolute position of the center of this node in the scene.
-		bool IsChanged; //!< Whether this has been updated since last call to Reset the pather.
+		bool IsUpdated = false; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
-		/// Pointers to all adjacent nodes. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
+		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		PathNode *Up;
-		PathNode *Right;
-		PathNode *Down;
-		PathNode *Left;
-		PathNode *UpRight;
-		PathNode *RightDown;
-		PathNode *DownLeft;
-		PathNode *LeftUp;
+		std::array<PathNode *, c_MaxAdjacentNodeCount> AdjacentNodes;
+
+		PathNode *&Up = AdjacentNodes[0];
+		PathNode *&UpRight = AdjacentNodes[1];
+		PathNode *&Right = AdjacentNodes[2];
+		PathNode *&RightDown = AdjacentNodes[3];
+		PathNode *&Down = AdjacentNodes[4];
+		PathNode *&DownLeft = AdjacentNodes[5];
+		PathNode *&Left = AdjacentNodes[6];
+		PathNode *&LeftUp = AdjacentNodes[7];
 
 		/// <summary>
-		/// Costs to get to each of the adjacent nodes.
+		/// Costs to get to each of the adjacent nodes, in clockwise order with top first.
 		/// </summary>
-		float UpCost;
-		float RightCost;
-		float DownCost;
-		float LeftCost;
-		float UpRightCost;
-		float RightDownCost;
-		float DownLeftCost;
-		float LeftUpCost;
+		std::array<float, c_MaxAdjacentNodeCount> AdjacentNodeCosts;
 
-		PathNode(Vector pos) {
-			Pos = pos;
-			Up = Right = Down = Left = UpRight = RightDown = DownLeft = LeftUp = 0;
-			// Costs are infinite unless recalculated as otherwise
-			UpCost = RightCost = DownCost = LeftCost = UpRightCost = RightDownCost = DownLeftCost = LeftUpCost = FLT_MAX;
+		float &UpCost = AdjacentNodeCosts[0];
+		float &UpRightCost = AdjacentNodeCosts[1];
+		float &RightCost = AdjacentNodeCosts[2];
+		float &RightDownCost = AdjacentNodeCosts[3];
+		float &DownCost = AdjacentNodeCosts[4];
+		float &DownLeftCost = AdjacentNodeCosts[5];
+		float &LeftCost = AdjacentNodeCosts[6];
+		float &LeftUpCost = AdjacentNodeCosts[7];
+
+		explicit PathNode(const Vector &pos) : Pos(pos) {
+			for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
+				AdjacentNodes[i] = nullptr;
+				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise.
+			}
 		}
 	};
 
@@ -64,7 +70,7 @@ namespace RTE {
 		/// <param name="pScene">The scene to be pathing within.</param>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
-		PathFinder(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000) { Clear(); Create(scene, nodeDimension, allocate); }
+		PathFinder(Scene *scene, int nodeDimension, unsigned int allocate) { Clear(); Create(scene, nodeDimension, allocate); }
 
 		/// <summary>
 		/// Makes the PathFinder object ready for use.
@@ -73,7 +79,7 @@ namespace RTE {
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000);
+		int Create(Scene *scene, int nodeDimension, unsigned int allocate);
 #pragma endregion
 
 #pragma region Destruction
@@ -111,10 +117,11 @@ namespace RTE {
 		void RecalculateAllCosts();
 
 		/// <summary>
-		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself.
+		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself, if necessary.
 		/// </summary>
 		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
-		void RecalculateAreaCosts(const std::deque<Box> &boxList);
+		/// <returns>Whether any costs were updated.</returns>
+		bool RecalculateAreaCosts(const std::deque<Box> &boxList);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
@@ -130,10 +137,7 @@ namespace RTE {
 		/// Gets the cost to go to any adjacent node of the one passed in.
 		/// </summary>
 		/// <param name="state">Pointer to node to get to cost of all adjacents for. OWNERSHIP IS NOT TRANSFERRED!</param>
-		/// <param name="adjacentList">
-		/// An empty vector which will be filled out with all the valid nodes adjacent to the one passed in.
-		/// If at non-wrapping edge of seam, those non existent nodes won't be added.
-		/// </param>
+		/// <param name="adjacentList">An empty vector which will be filled out with all the valid nodes adjacent to the one passed in. If at non-wrapping edge of seam, those non existent nodes won't be added.</param>
 		void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) override;
 #pragma endregion
 
@@ -146,15 +150,15 @@ namespace RTE {
 		void PrintStateInfo(void *state) override {}
 #pragma endregion
 
-	protected:
+	private:
+
+		static constexpr float c_NodeCostChangeEpsilon = 5.0F; //!< The minimum change in a node's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 
 		MicroPather *m_Pather; //!< The actual pathing object that does the pathfinding work. Owned.
 		std::vector<std::vector<PathNode *>> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
 		unsigned int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
 
 		float m_DigStrength; //!< What material strength the search is capable of digging through.
-
-	private:
 
 #pragma region Path Cost Updates
 		/// <summary>
@@ -172,14 +176,23 @@ namespace RTE {
 		/// This does NOT update the pather, which is required before solving more paths after calling this.
 		/// </summary>
 		/// <param name="node">The node to update all costs of. It's safe to pass 0 here. OWNERSHIP IS NOT TRANSFERRED!</param>
-		void UpdateNodeCosts(PathNode *node);
+		/// <returns>Whether the node costs changed.</returns>
+		bool UpdateNodeCosts(PathNode *node);
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges crossed by a specific box.
 		/// This does NOT update the pather, which is required before solving more paths after calling this. Also it does NOT wrap the box coming in here, only truncates it!
 		/// </summary>
 		/// <param name="box">The Box of which all edges it touches should be recalculated.</param>
-		void UpdateNodeCostsInBox(Box &box);
+		/// <returns>Whether any node costs changed.</returns>
+		bool UpdateNodeCostsInBox(Box &box);
+
+		/// <summary>
+		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions
+		/// </summary>
+		/// <param name="node">The node to get the average transition cost for.</param>
+		/// <returns>The average transition cost.</returns>
+		float GetNodeAverageTransitionCost(const PathNode &node) const;
 #pragma endregion
 
 		/// <summary>

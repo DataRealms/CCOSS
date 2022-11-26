@@ -3488,10 +3488,10 @@ void AHuman::Update()
 
 	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
-        MovableObject *pMO = armToUse->ReleaseHeldMO();
+        Attachable *pMO = armToUse->RemoveAttachable(armToUse->GetHeldDevice());
 		if (pMO) { m_Inventory.push_back(pMO); }
-		armToUse->SetHeldMO(m_pItemInReach);
-		armToUse->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		armToUse->SetHeldDevice(m_pItemInReach);
+		armToUse->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 		m_pItemInReach = nullptr;
 
 		if (armToUse != m_pBGArm) {

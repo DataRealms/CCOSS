@@ -162,20 +162,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetDisplaySwitchMode() const {
-#if 0
-#ifdef _WIN32
-		set_display_switch_mode((m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL) ? SWITCH_BACKAMNESIA : SWITCH_BACKGROUND);
-#else
-		set_display_switch_mode(SWITCH_BACKGROUND);
-#endif
-		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
-		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
-#endif
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
 		bool settingsNeedOverwrite = false;
 
@@ -653,7 +639,6 @@ namespace RTE {
 					}
 					g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
 					set_palette(m_Palette);
-					SetDisplaySwitchMode();
 					return;
 				}
 			} else if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -664,7 +649,6 @@ namespace RTE {
 				}
 				g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
 				set_palette(m_Palette);
-				SetDisplaySwitchMode();
 				return;
 			}
 		} else {
@@ -686,7 +670,6 @@ namespace RTE {
 		}
 		set_palette(m_Palette);
 		RecreateBackBuffers();
-		SetDisplaySwitchMode();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
@@ -723,7 +706,6 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
 			m_ForceDedicatedFullScreenGfxDriver = prevForceDedicatedDriver;
 			set_palette(m_Palette);
-			SetDisplaySwitchMode();
 			return;
 		} else if (!newFullscreen) {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
@@ -748,7 +730,6 @@ namespace RTE {
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();
-		SetDisplaySwitchMode();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
 		g_SettingsMan.UpdateSettingsFile();
@@ -776,7 +757,6 @@ namespace RTE {
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();
-		SetDisplaySwitchMode();
 
 		m_ResChanged = true;
 

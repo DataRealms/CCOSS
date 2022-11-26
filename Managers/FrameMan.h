@@ -712,11 +712,6 @@ namespace RTE {
 		void SetInitialGraphicsDriver();
 
 		/// <summary>
-		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
-		/// </summary>
-		void SetDisplaySwitchMode() const;
-
-		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>

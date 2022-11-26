@@ -446,6 +446,7 @@ namespace RTE {
 		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
 		.def("UnequipArms", &AHuman::UnequipArms)
+		.def("ReloadFirearms", &AHumanReloadFirearms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)

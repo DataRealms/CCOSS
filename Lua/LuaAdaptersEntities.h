@@ -182,6 +182,10 @@ namespace RTE {
 		return luaSelfObject->AddPieSliceIfPresetNameIsUnique(pieSliceToAdd, pieSliceOriginalSource, onlyCheckPieSlicesWithSameOriginalSource, false);
 	}
 
+	static void AHumanReloadFirearms(AHuman *luaSelfObject) {
+		luaSelfObject->ReloadFirearms(false);
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);

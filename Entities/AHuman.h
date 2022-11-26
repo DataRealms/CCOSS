@@ -687,10 +687,10 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 // Method:  ReloadFirearm
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reloads the currently held firearm, if any. Will only reload the BG Firearm if the FG one is full already, to support reloading guns one at a time.
-// Arguments:       None.
+// Arguments:       Whether or not to only reload empty fireams.
 // Return value:    None.
 
-	void ReloadFirearms() const;
+	void ReloadFirearms(bool onlyReloadEmptyFirearms = false) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

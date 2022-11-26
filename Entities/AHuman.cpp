@@ -3309,118 +3309,111 @@ void AHuman::Update()
 	}
 
     ////////////////////////////////////
-    // Fire/Activate held devices
+    // Handle firing/activating/throwing HeldDevices and ThrownDevices.
+	// Also deal with certain reload cases and setting sharp aim progress for HeldDevices.
 
 	ThrownDevice *pThrown = nullptr;
 	if (m_pFGArm && m_Status != INACTIVE) {
-		if (m_pBGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
-			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
-		} else if (m_pFGLeg && m_ArmSwingRate > 0) {
-			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
-		} else {
-			// Force arm to idle by reaching toward a virtually inaccessible point.
-			m_pFGArm->ReachToward(Vector());
-		}
+		if (HeldDevice *device = m_pFGArm->GetHeldDevice(); device && !dynamic_cast<ThrownDevice *>(device)) {
+			// If reloading 2 guns one-at-a-time, the automatic reload when firing empty won't trigger, so this makes sure it happens automatically.
+			if (device->IsEmpty()) {
+				ReloadFirearms(true);
+			}
 
-		// Activate held device, if it's not a thrown device.
-		if (m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice()) {
-			//TODO: This entire section is in need of some cleanup!
-			HeldDevice *device = m_pFGArm->GetHeldDevice();
-			
 			device->SetSharpAim(m_SharpAimProgress);
 			if (m_Controller.IsState(WEAPON_FIRE)) {
 				device->Activate();
-				if (device->IsEmpty() && !bgFirearmIsReloading) { 
-					device->Reload();
-					fgFirearmIsReloading = true;
+				if (device->IsEmpty()) {
+					ReloadFirearms(true);
 				}
 			} else {
-				m_pFGArm->GetHeldDevice()->Deactivate();
+				device->Deactivate();
 			}
-		}
-		// Throw whatever is held if it's a thrown device
-		else if (m_pFGArm->GetHeldMO()) {
-			pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
-			if (pThrown) {
-				pThrown->SetSharpAim(isSharpAiming ? 1.0F : 0);
-				if (m_Controller.IsState(WEAPON_FIRE)) {
-					if (m_ArmsState != THROWING_PREP) {
-						m_ThrowTmr.Reset();
-						if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
-					}
-					float throwProgress = GetThrowProgress();
-					m_ArmsState = THROWING_PREP;
-					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + (pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + pThrown->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
-				} else if (m_ArmsState == THROWING_PREP) {
-					m_ArmsState = THROWING_RELEASE;
-					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
-					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
-					float maxThrowVel = pThrown->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
-					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
-						float minThrowVel = pThrown->GetMinThrowVel();
-						if (minThrowVel == 0) { minThrowVel = maxThrowVel * 0.2F; }
-
-						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
-						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
-						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
-						pMO->SetRotAngle(adjustedAimAngle);
-
-						if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
-							moAsHeldDevice->SetTeam(m_Team);
-							moAsHeldDevice->SetIgnoresTeamHits(true);
-							g_MovableMan.AddItem(moAsHeldDevice);
-						} else {
-							if (pMO->IsGold()) {
-								m_GoldInInventoryChunk = 0;
-								ChunkGold();
-							}
-							g_MovableMan.AddParticle(pMO);
-						}
-						pMO = 0;
-					}
-					if (pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
+			if (device->IsReloading()) {
+				m_SharpAimTimer.Reset();
+				m_SharpAimProgress = 0;
+				device->SetSharpAim(m_SharpAimProgress);
+			}
+		} else if (pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldDevice())) {
+			pThrown->SetSharpAim(isSharpAiming ? 1.0F : 0);
+			if (m_Controller.IsState(WEAPON_FIRE)) {
+				if (m_ArmsState != THROWING_PREP) {
 					m_ThrowTmr.Reset();
-				} else {
-					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + pThrown->GetStanceOffset().RadRotate(adjustedAimAngle));
+					if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 				}
+				float throwProgress = GetThrowProgress();
+				m_ArmsState = THROWING_PREP;
+				m_pFGArm->AddHandTarget("Start Throw Offset", m_pFGArm->GetJointPos() + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+			} else if (m_ArmsState == THROWING_PREP) {
+				m_ArmsState = THROWING_RELEASE;
+				m_pFGArm->AddHandTarget("End Throw Offset", m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+
+				float maxThrowVel = pThrown->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
+				if (MovableObject *pMO = m_pFGArm->RemoveAttachable(pThrown)) {
+					pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
+					float minThrowVel = pThrown->GetMinThrowVel();
+					if (minThrowVel == 0) { minThrowVel = maxThrowVel * 0.2F; }
+
+					Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
+					pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+					pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
+					pMO->SetRotAngle(adjustedAimAngle);
+
+					if (HeldDevice *moAsHeldDevice = dynamic_cast<HeldDevice *>(pMO)) {
+						moAsHeldDevice->SetTeam(m_Team);
+						moAsHeldDevice->SetIgnoresTeamHits(true);
+						g_MovableMan.AddItem(moAsHeldDevice);
+					} else {
+						if (pMO->IsGold()) {
+							m_GoldInInventoryChunk = 0;
+							ChunkGold();
+						}
+						g_MovableMan.AddParticle(pMO);
+					}
+					pMO = 0;
+				}
+				if (pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
+				m_ThrowTmr.Reset();
+			} else {
+				//m_pFGArm->SetHandIdleRotation(adjustedAimAngle);
+				//m_pFGArm->AddHandTarget("Stance Offset", m_pFGArm->GetJointPos() + pThrown->GetStanceOffset().RadRotate(adjustedAimAngle)); //TODO this can probably be replaced non-targeted handling, especially if I let you rotate idle offsets. Make sure to fix arm so TDs aren't excluded, to make this happen
 			}
 		} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
-			m_pFGArm->SetHeldMO(SwapNextInventory());
-			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+			m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
+			m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 			EquipShieldInBGArm();
 			m_ArmsState = WEAPON_READY;
 		} else if (m_ArmsState == THROWING_RELEASE) {
-			m_pFGArm->SetHandPos(m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
+			m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
+		}
+	}
+
+	if (HeldDevice *device = GetEquippedBGItem(); device && m_Status != INACTIVE) {
+		// If reloading 2 guns one-at-a-time, the automatic reload when firing empty won't trigger, so this makes sure it happens automatically.
+		if (device->IsEmpty()) {
+			ReloadFirearms(true);
+		}
+
+		device->SetSharpAim(m_SharpAimProgress);
+		if (m_Controller.IsState(WEAPON_FIRE)) {
+			device->Activate();
+			if (device->IsEmpty()) {
+				ReloadFirearms(true);
+			}
+		} else {
+			device->Deactivate();
+		}
+
+		if (device->IsReloading()) {
+			m_SharpAimTimer.Reset();
+			m_SharpAimProgress = 0;
+			device->SetSharpAim(m_SharpAimProgress);
 		}
 	}
 
 	if (m_ArmsState == THROWING_PREP && !pThrown) {
 		m_ArmsState = WEAPON_READY;
-	}
-
-	if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
-		HeldDevice *device = m_pBGArm->GetHeldDevice();
-		if (device->IsReloading()) {
-			m_SharpAimTimer.Reset();
-			m_SharpAimProgress = 0;
-			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
-		}
-		if (!fgFirearmIsReloading && !device->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
-			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(device->GetMagazinePos()); }
-			device->Reload();
-			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-		}
-		if (device->DoneReloading() && m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(device->GetMagazinePos()); }
-
-		device->SetSharpAim(m_SharpAimProgress);
-		if (m_Controller.IsState(WEAPON_FIRE)) {
-			device->Activate();
-			if (device->IsEmpty() && !fgFirearmIsReloading) { device->Reload(); }
-		} else {
-			device->Deactivate();
-		}
 	}
 
     // Controller disabled

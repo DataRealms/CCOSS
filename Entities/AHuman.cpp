@@ -1405,36 +1405,6 @@ bool AHuman::UnequipBGArm() {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-
-MovableObject * AHuman::GetEquippedItem() const
-{
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
-    {
-        return m_pFGArm->GetHeldMO();
-    }
-    return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedBGItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-
-MovableObject * AHuman::GetEquippedBGItem() const
-{
-	// Check if the currently held device is already the desired type
-	if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsSomething())
-	{
-		return m_pBGArm->GetHeldMO();
-	}
-	return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
 
 float AHuman::GetEquippedMass() const {
 	float equippedMass = 0;

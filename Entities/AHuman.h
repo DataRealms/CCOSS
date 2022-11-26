@@ -601,25 +601,17 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// </summary>
 	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
 
+	/// <summary>
+	/// Gets the FG Arm's HeldDevice. Ownership is NOT transferred.
+	/// </summary>
+	/// <returns>The FG Arm's HeldDevice.</returns>
+	HeldDevice * GetEquippedItem() const { return m_pFGArm ? m_pFGArm->GetHeldDevice() : nullptr; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetEquippedItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-// Arguments:       None.
-// Return value:    The currently equipped item, if any.
-
-	MovableObject * GetEquippedItem() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetEquippedBGItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the BG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-// Arguments:       None.
-// Return value:    The currently equipped item, if any.
-
-	MovableObject * GetEquippedBGItem() const;
+	/// <summary>
+	/// Gets the BG Arm's HeldDevice. Ownership is NOT transferred.
+	/// </summary>
+	/// <returns>The BG Arm's HeldDevice.</returns>
+	HeldDevice * GetEquippedBGItem() const { return m_pBGArm ? m_pBGArm->GetHeldDevice() : nullptr; }
 
 
 	/// <summary>

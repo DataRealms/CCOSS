@@ -807,6 +807,32 @@ void AHuman::AddInventoryItem(MovableObject *pItemToAdd)
     EquipShieldInBGArm();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * AHuman::SwapNextInventory(MovableObject *inventoryItemToSwapIn, bool muteSound) {
+	MovableObject *swappedInventoryItem = Actor::SwapNextInventory(inventoryItemToSwapIn, muteSound);
+	while (!dynamic_cast<HeldDevice *>(swappedInventoryItem) && ! m_Inventory.empty()) {
+		g_MovableMan.AddMO(swappedInventoryItem);
+		swappedInventoryItem = Actor::SwapNextInventory(nullptr, muteSound);
+	}
+
+	return swappedInventoryItem;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * AHuman::SwapPrevInventory(MovableObject *inventoryItemToSwapIn) {
+	MovableObject *swappedInventoryItem = Actor::SwapPrevInventory(inventoryItemToSwapIn);
+	while (!dynamic_cast<HeldDevice *>(swappedInventoryItem) && !m_Inventory.empty()) {
+		g_MovableMan.AddMO(swappedInventoryItem);
+		swappedInventoryItem = Actor::SwapNextInventory(nullptr);
+	}
+
+	return swappedInventoryItem;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  EquipFirearm

@@ -432,6 +432,23 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	void AddInventoryItem(MovableObject *pItemToAdd) override;
 
+	/// <summary>
+	/// Swaps the next MovableObject carried by this AHuman and puts one not currently carried into the back of the inventory of this.
+	/// For safety reasons, this will dump any non-HeldDevice inventory items it finds into MovableMan, ensuring the returned item is a HeldDevice (but not casted to one, for overload purposes).
+	/// </summary>
+	/// <param name="inventoryItemToSwapIn">A pointer to the external MovableObject to swap in. Ownership IS transferred.</param>
+	/// <param name="muteSound">Whether or not to mute the sound on this event.</param>
+	/// <returns>The next HeldDevice in this AHuman's inventory, if there are any.</returns>
+	MovableObject * SwapNextInventory(MovableObject *inventoryItemToSwapIn = nullptr, bool muteSound = false) override;
+
+	/// <summary>
+	/// Swaps the previous MovableObject carried by this AHuman and puts one not currently carried into the back of the inventory of this.
+	/// For safety reasons, this will dump any non-HeldDevice inventory items it finds into MovableMan, ensuring the returned item is a HeldDevice (but not casted to one, for overload purposes).
+	/// </summary>
+	/// <param name="inventoryItemToSwapIn">A pointer to the external MovableObject to swap in. Ownership IS transferred.</param>
+	/// <returns>The previous HeldDevice in this AHuman's inventory, if there are any.</returns>
+	MovableObject * SwapPrevInventory(MovableObject *inventoryItemToSwapIn = nullptr) override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  EquipFirearm

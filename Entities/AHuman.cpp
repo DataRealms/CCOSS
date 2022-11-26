@@ -1203,7 +1203,7 @@ float AHuman::EstimateDigStrength()
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
-            maxPenetration = max(pTool->EstimateDigStrength(), maxPenetration);
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
 
@@ -1214,7 +1214,7 @@ float AHuman::EstimateDigStrength()
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
-            maxPenetration = max(pTool->EstimateDigStrength(), maxPenetration);
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
     

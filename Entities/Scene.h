@@ -1215,7 +1215,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  The maximum material strength any actor traveling along the path can dig through.
 // Return value:    The number of waypoints from start to goal, or -1 if no path.
 
-    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1.0);
+    int CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength = 1.0F);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1334,16 +1334,6 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPathFinder
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the pathfinder for a given team.
-// Arguments:       The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.
-// Return value:    Pointer to the pathfinder for the given team.
-
-    std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
-
-
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1374,7 +1364,7 @@ protected:
     SLTerrain *m_pTerrain;
 
     // Pathfinding graph and logic. Owned by this
-    // The array of PathFinders for each team. Because we also have a shared pathfinder, we need to use MaxTeamCount + 1.
+    // The array of PathFinders for each team. Because we also have a shared pathfinder using index 0, we need to use MaxTeamCount + 1 to handle all the Teams' PathFinders.
     std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
@@ -1425,6 +1415,13 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	/// <summary>
+	/// Gets the pathfinder for a given team.
+	/// </summary>
+	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+	/// <returns>A pointer to the pathfinder for the given team.</returns>
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

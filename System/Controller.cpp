@@ -153,12 +153,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Update() {
-		// Disabled won't get updates, or when the activity isn't going
 		if (IsDisabled() || !g_ActivityMan.ActivityRunning()) {
 			return;
 		}
 
-		// Update team indicator
 		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
 
 		switch (m_InputMode) {
@@ -189,12 +187,10 @@ namespace RTE {
 	void Controller::GetInputFromPlayer() {
 		ResetCommandState();
 
-		// Disable player input if the console is open but isn't in read-only mode, or we have no player.
 		if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Player < 0) {
 			return;
 		}
 
-		// Update all the player input
 		UpdatePlayerInput();
 	}
 
@@ -202,7 +198,7 @@ namespace RTE {
 
 	void Controller::GetInputFromAI() {
 		// Throttle the AI to only update every X sim updates.
-		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check an ID against the frame number.
+		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check their contiguous ID against the frame number.
 		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();
 		if (m_ControlledActor && g_MovableMan.GetContiguousActorID(m_ControlledActor) % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
 			// Don't reset our command state, so we give the same input as last frame.
@@ -211,9 +207,8 @@ namespace RTE {
 
 		ResetCommandState();
 
-		// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
+		// Try to run the scripted AI for the controlled Actor. If it doesn't work, fall back on the legacy C++ implementation.
 		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
-			// If we can't, fall back on the legacy C++ implementation
 			m_ControlledActor->UpdateAI();
 		}
 	}

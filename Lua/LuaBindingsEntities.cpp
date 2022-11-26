@@ -237,7 +237,7 @@ namespace RTE {
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 		.property("PieMenu", &Actor::GetPieMenu, &ActorSetPieMenu)
-		.property("BaseDigStrength", &Actor::GetBaseDigStrength, &Actor::SetBaseDigStrength)
+		.property("AIBaseDigStrength", &Actor::GetAIBaseDigStrength, &Actor::SetAIBaseDigStrength)
 
 		.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
 		.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)

@@ -83,7 +83,7 @@ namespace RTE {
 			}
 		}
 		// Create and allocate the pather class which will do the work
-		m_Pather = new MicroPather(this, allocate, 8U, true);
+		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, true);
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
 		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
@@ -185,7 +185,7 @@ namespace RTE {
 	bool PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
 		// If no node costs changed, then we don't need to reset the pather
 		bool anyChange = false;
-		
+
 		Box box;
 		// Go through all the boxes and see if any of the node centers are inside each
 		for (const Box &boxListEntry : boxList) {
@@ -193,8 +193,7 @@ namespace RTE {
 			box = boxListEntry;
 			box.Unflip();
 
-			// Do the updates
-			// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here
+			// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
 			anyChange = UpdateNodeCostsInBox(box) || anyChange;
 
 			// Take care of all wrapping situations of the box
@@ -222,7 +221,6 @@ namespace RTE {
 			}
 		}
 
-		// Reset the updated flag on all nodes
 		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
 			for (PathNode *pathNode : nodeEntry) {
 				pathNode->IsUpdated = false;
@@ -230,7 +228,7 @@ namespace RTE {
 		}
 
 		if (anyChange) {
-			// Reset the pather when costs change, as per the docs
+			// Reset the pather when costs change, as per the micropather docs.
 			m_Pather->Reset();
 		}
 
@@ -248,38 +246,34 @@ namespace RTE {
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
 		const PathNode *node = static_cast<PathNode *>(state);
 		micropather::StateCost adjCost;
-		
-		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions
-		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck
+
+		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions.
+		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck.
 		const float costRadiationMultiplier = 0.2F;
 		float radiatedCost = GetNodeAverageTransitionCost(*node) * costRadiationMultiplier;
 
 		// Add cost for digging upwards
 		if (node->Up) {
 			float strength = node->UpCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F); // Four times more expensive when digging
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F) + radiatedCost; // Four times more expensive when digging
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Right) {
 			float strength = node->RightCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Down) {
 			float strength = node->DownCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Left) {
 			float strength = node->LeftCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
@@ -287,29 +281,25 @@ namespace RTE {
 		// Add cost for digging at 45 degrees and for digging upwards
 		if (node->UpRight) {
 			float strength = node->UpRightCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
 			float strength = node->RightDownCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
 			float strength = node->DownLeftCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
 			float strength = node->LeftUpCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
-			adjCost.cost += radiatedCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
@@ -328,7 +318,7 @@ namespace RTE {
 			return false;
 		}
 
-		std::array<float, 8> oldCosts = node->AdjacentNodeCosts;
+		std::array<float, PathNode::c_MaxAdjacentNodeCount> oldCosts = node->AdjacentNodeCosts;
 
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
 		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
@@ -344,7 +334,7 @@ namespace RTE {
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
 		node->IsUpdated = true;
 
-		for (int i = 0; i < 8; ++i) {
+		for (int i = 0; i < PathNode::c_MaxAdjacentNodeCount; ++i) {
 			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
 			if (delta > c_NodeCostChangeEpsilon) {
 				return true;
@@ -382,7 +372,7 @@ namespace RTE {
 				node = m_NodeGrid[nodeX][nodeY];
 				// Update all the costs going out from each node which is found to be affected by the box
 				if (!node->IsUpdated) {
-					// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here
+					// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
 					anyChange = UpdateNodeCosts(node) || anyChange;
 				}
 			}
@@ -391,18 +381,17 @@ namespace RTE {
 		return anyChange;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) {
-		float averageCost = 0.0F;
-		int count = 1;
-		for (int i = 0; i < 8; i++) {
-			float cost = node.AdjacentNodeCosts[i];
+	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) const {
+		float totalCostOfAdjacentNodes = 0.0F;
+		int count = 0;
+		for (const float &cost : node.AdjacentNodeCosts) {
 			if (cost < std::numeric_limits<float>::max()) {
-				averageCost += cost;
+				totalCostOfAdjacentNodes += cost;
 				count++;
 			}
 		}
-		return averageCost / static_cast<float>(count);
+		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0F);
 	}
 }

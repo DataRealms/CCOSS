@@ -1086,22 +1086,23 @@ ClassInfoGetters;
 
     virtual bool UpdateMovePath();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Estimates what material strength this actor can penetrate.
-// Arguments:       None.
-// Return value:    A default dig strength (what the actor can be expected to just walk through without tools)
-
+    /// <summary>
+    /// Estimates what material strength this actor can penetrate.
+    /// </summary>
+	/// <returns>The actor's dig strength.</returns>
     virtual float EstimateDigStrength();
 
-    /// <summary>Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.</summary>
+    /// <summary>
+    /// Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
 	/// <returns>The actors base dig strength.</returns>
-    float GetBaseDigStrength() const { return m_BaseDigStrength; }
+    float GetAIBaseDigStrength() const { return m_AIBaseDigStrength; }
 
-    /// <summary>Sets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.</summary>
-	/// <param name="newBaseDigStrength">The new base dig strength for this Actor.</param>
-    void SetBaseDigStrength(float newBaseDigStrength) { m_BaseDigStrength = newBaseDigStrength; }
+    /// <summary>
+    /// Sets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
+	/// <param name="newAIBaseDigStrength">The new base dig strength for this Actor.</param>
+    void SetAIBaseDigStrength(float newAIBaseDigStrength) { m_AIBaseDigStrength = newAIBaseDigStrength; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1481,7 +1482,7 @@ protected:
     // How many passenger slots this actor will take in a craft
     int m_PassengerSlots;
     // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
-    float m_BaseDigStrength;
+    float m_AIBaseDigStrength;
 
     ////////////////////
     // AI States

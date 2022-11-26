@@ -379,7 +379,6 @@ namespace RTE {
 		/// Updates the player's analog inputs portion of this Controller. For breaking down Update into more comprehensible chunks.
 		/// </summary>
 		void UpdatePlayerAnalogInput();
-#pragma endregion
 
 		/// <summary>
 		/// Clears the command state, meaning no input is given and our actor will be idle.
@@ -391,10 +390,11 @@ namespace RTE {
 		/// </summary>
 		void GetInputFromPlayer();
 
-		/// <summary> 
+		/// <summary>
 		/// Requests and applies input from the AI.
 		/// </summary>
 		void GetInputFromAI();
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this Controller, effectively resetting the members of this abstraction level only.

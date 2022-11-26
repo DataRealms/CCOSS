@@ -587,10 +587,11 @@ public:
     bool IsOfActor(MOID checkMOID);
 
     /// <summary>
-    /// Gives a unique, contiguous id per-actor. This is regenerated every frame. Returns -1 if the actor doesn't exist in our state.
+    /// Gives a unique, contiguous id per-actor. This is regenerated every frame.
     /// </summary>
-    /// <param name="actor">The actor to get an id for.</param>
-    /// <returns>An id for the actor.</returns>
+    /// <param name="actor">The actor to get a contiguous id for.</param>
+    /// <returns>A contiguous id for the actor. Returns -1 if the actor doesn't exist in MovableMan.</returns>
+    /// <remarks>This function is used for AI throttling.</remarks>
     int GetContiguousActorID(const Actor *actor) const;
 
 
@@ -896,7 +897,7 @@ protected:
 
     // All actors in the scene
     std::deque<Actor *> m_Actors;
-    // A map to give a unique contiguous index per-actor. This is re-created per frame.
+    // A map to give a unique contiguous identifier per-actor. This is re-created per frame.
     std::unordered_map<const Actor *, int> m_ContiguousActorIDs;
     // List of items that are pickup-able by actors
     std::deque<MovableObject *> m_Items;

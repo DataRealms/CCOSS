@@ -15,13 +15,15 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
+		static constexpr int c_MaxAdjacentNodeCount = 8; //!< The maximum number of adjacent nodes to any given node. Thusly, also the number of directions for nodes to be in.
+
 		Vector Pos; //!< Absolute position of the center of this node in the scene.
-		bool IsUpdated; //!< Whether this has been updated since last call to Reset the pather.
+		bool IsUpdated = false; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		std::array<PathNode*, 8> AdjacentNodes;
+		std::array<PathNode *, c_MaxAdjacentNodeCount> AdjacentNodes;
 
 		PathNode *&Up = AdjacentNodes[0];
 		PathNode *&UpRight = AdjacentNodes[1];
@@ -35,7 +37,7 @@ namespace RTE {
 		/// <summary>
 		/// Costs to get to each of the adjacent nodes, in clockwise order with top first.
 		/// </summary>
-		std::array<float, 8> AdjacentNodeCosts;
+		std::array<float, c_MaxAdjacentNodeCount> AdjacentNodeCosts;
 
 		float &UpCost = AdjacentNodeCosts[0];
 		float &UpRightCost = AdjacentNodeCosts[1];
@@ -46,11 +48,10 @@ namespace RTE {
 		float &LeftCost = AdjacentNodeCosts[6];
 		float &LeftUpCost = AdjacentNodeCosts[7];
 
-		PathNode(Vector pos) {
-			Pos = pos;
-			for (int i = 0; i < 8; i++) {
+		explicit PathNode(const Vector &pos) : Pos(pos) {
+			for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
 				AdjacentNodes[i] = nullptr;
-				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise
+				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise.
 			}
 		}
 	};
@@ -136,10 +137,7 @@ namespace RTE {
 		/// Gets the cost to go to any adjacent node of the one passed in.
 		/// </summary>
 		/// <param name="state">Pointer to node to get to cost of all adjacents for. OWNERSHIP IS NOT TRANSFERRED!</param>
-		/// <param name="adjacentList">
-		/// An empty vector which will be filled out with all the valid nodes adjacent to the one passed in.
-		/// If at non-wrapping edge of seam, those non existent nodes won't be added.
-		/// </param>
+		/// <param name="adjacentList">An empty vector which will be filled out with all the valid nodes adjacent to the one passed in. If at non-wrapping edge of seam, those non existent nodes won't be added.</param>
 		void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) override;
 #pragma endregion
 
@@ -152,15 +150,15 @@ namespace RTE {
 		void PrintStateInfo(void *state) override {}
 #pragma endregion
 
-	protected:
+	private:
+
+		static constexpr float c_NodeCostChangeEpsilon = 5.0F; //!< The minimum change in a node's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 
 		MicroPather *m_Pather; //!< The actual pathing object that does the pathfinding work. Owned.
 		std::vector<std::vector<PathNode *>> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
 		unsigned int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
 
 		float m_DigStrength; //!< What material strength the search is capable of digging through.
-
-	private:
 
 #pragma region Path Cost Updates
 		/// <summary>
@@ -194,11 +192,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="node">The node to get the average transition cost for.</param>
 		/// <returns>The average transition cost.</returns>
-		float GetNodeAverageTransitionCost(const PathNode &node);
-
-		// Any cost changes below this amount are ignored, meaning that a change to this node will not reset the pather
-		// This is so that minor changes (i.e blood particles) don't force constant pather resets
-		static constexpr float c_NodeCostChangeEpsilon = 5.0f;
+		float GetNodeAverageTransitionCost(const PathNode &node) const;
 #pragma endregion
 
 		/// <summary>

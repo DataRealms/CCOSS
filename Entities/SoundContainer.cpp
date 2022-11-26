@@ -61,7 +61,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "AddSound") {
+		if (propName == "TopLevelSoundSet") {
+			reader >> m_TopLevelSoundSet;
+		} else if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
 			SoundSet soundSetToAdd;
@@ -111,6 +113,7 @@ namespace RTE {
 	int SoundContainer::Save(Writer &writer) const {
 		Entity::Save(writer);
 
+		writer.NewProperty("TopLevelSoundSet");
 		writer << m_TopLevelSoundSet;
 
 		writer.NewProperty("SoundSelectionCycleMode");
@@ -136,7 +139,7 @@ namespace RTE {
 		writer.NewProperty("AffectedByGlobalPitch");
 		writer << m_AffectedByGlobalPitch;
 
-		writer.NewProperty("Pos");
+		writer.NewProperty("Position");
 		writer << m_Pos;
 		writer.NewProperty("Volume");
 		writer << m_Volume;

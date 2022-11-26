@@ -1,6 +1,8 @@
 #ifndef _RTETIMERMAN_
 #define _RTETIMERMAN_
 
+#include <atomic>
+
 #include "Singleton.h"
 
 #define g_TimerMan TimerMan::Instance()

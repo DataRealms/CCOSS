@@ -101,10 +101,15 @@ int MOSRotating::Create()
     if (MOSprite::Create() < 0)
         return -1;
 
-    if (m_pAtomGroup && m_pAtomGroup->AutoGenerate()/* && m_pAtomGroup->GetAtomCount() == 0*/)
-        m_pAtomGroup->Create(this);
-    else if (m_pAtomGroup)
-        m_pAtomGroup->SetOwner(this);
+	if (!m_pAtomGroup) {
+		RTEAbort("Encountered empty AtomGroup while trying to create preset \"" + this->GetPresetName() + "\"!\nAtomGroups must be defined for MOSRotating based presets!\n\nError happened " + this->GetFormattedReaderPosition() + "!");
+	} else {
+		if (m_pAtomGroup->AutoGenerate() /* && m_pAtomGroup->GetAtomCount() == 0*/) {
+			m_pAtomGroup->Create(this);
+		} else {
+			m_pAtomGroup->SetOwner(this);
+		}
+	}
 
     if (m_pDeepGroup && m_pDeepGroup->AutoGenerate()/* && m_pDeepGroup->GetAtomCount() == 0*/)
         m_pDeepGroup->Create(this);
@@ -1754,7 +1759,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 {
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
-    
+
     // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
     if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
         return;

@@ -3499,8 +3499,8 @@ void AHuman::Update()
 		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
 		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
-			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent()); foundDevice && (m_pFGArm || foundDevice->IsOneHanded())) {
-				m_pItemInReach = foundDevice;
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+				m_pItemInReach = (m_pFGArm || foundDevice->IsOneHanded()) ? foundDevice : nullptr;
 			}
 		}
 	}

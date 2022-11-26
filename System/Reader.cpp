@@ -269,6 +269,7 @@ namespace RTE {
 		if (discardedLine) {
 			// Get indentation difference from the last line of the last call to DiscardEmptySpace(), and the last line of this call to DiscardEmptySpace().
 			m_IndentDifference = indent - m_PreviousIndent;
+			if (m_IndentDifference >= 2) { ReportError("Over indentation detected!\nPlease make sure the preset definition structure is correct.\n"); }
 			// Save the last tab count
 			m_PreviousIndent = indent;
 		}

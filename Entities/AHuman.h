@@ -388,6 +388,18 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
+	/// <summary>
+	/// Gets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// </summary>
+	/// <returns>The angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</returns>
+	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
+
+	/// <summary>
+	/// Sets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// </summary>
+	/// <param name="newValue">The new angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</param>
+	void SetOneHandedReloadAngle(float newValue) { m_OneHandedReloadAngle = newValue; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint

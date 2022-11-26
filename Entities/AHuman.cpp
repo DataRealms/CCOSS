@@ -4045,10 +4045,11 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
     if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
     if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
 
-    //TODO simplify this complex if check when arm is cleaned up like turret so all it can hold are HeldDevices and children
     // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
-    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
-        m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
+    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->GetHandHasReachedCurrentTarget()) {
+		if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && !dynamic_cast<ThrownDevice *>(heldDevice) && !heldDevice->IsReloading() && !heldDevice->IsShield()) {
+			m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
+		}
     }
 
     if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {

@@ -3886,6 +3886,18 @@ void AHuman::Update()
 	// Add velocity also so the viewpoint moves ahead at high speeds
 	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
+	// Point HeldDevices that are trying to to a one-handed reload towards the one handed reload angle.
+	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
+		if (arm && arm->HasAnyHandTargets()) {
+			if (HeldDevice *heldDevice = arm->GetHeldDevice(); heldDevice && heldDevice->IsReloading()) {
+				float currentForearmAngle = GetFlipFactor() * (NormalizeAngleBetween0And2PI(arm->GetHandCurrentOffset().GetAbsRadAngle()) + m_OneHandedReloadAngle) + GetRotAngle();
+				heldDevice->SetRotAngle(currentForearmAngle);
+			} else if (heldDevice && !heldDevice->IsReloading() && arm->GetNextHandTargetDescription() == "Reload Offset") {
+				arm->RemoveNextHandTarget();
+			}
+		}
+	}
+
     /////////////////////////////////////////
     // Gold Chunk inventroy management
 

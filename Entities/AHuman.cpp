@@ -132,10 +132,9 @@ int AHuman::Create()
     }
 
     // If empty-handed, equip first thing in inventory
-    if (m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldMO())
-    {
-        m_pFGArm->SetHeldMO(SwapNextInventory(0, true));
-        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+    if (m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldDevice()) {
+        m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory(nullptr, true)));
+        m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
     }
 
     // Initalize the jump time left
@@ -431,8 +430,8 @@ float AHuman::GetTotalValue(int nativeModule, float foreignMult, float nativeMul
     float totalValue = Actor::GetTotalValue(nativeModule, foreignMult, nativeMult);
 
     // If holding something, then add its value, too
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
-        totalValue += m_pFGArm->GetHeldMO()->GetTotalValue(nativeModule, foreignMult, nativeMult);
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
+        totalValue += m_pFGArm->GetHeldDevice()->GetTotalValue(nativeModule, foreignMult, nativeMult);
 
     return totalValue;
 }
@@ -449,10 +448,10 @@ bool AHuman::HasObject(string objectName) const
     bool found = Actor::HasObject(objectName);
 
     // If holding something, then check that too
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
-        found = found || m_pFGArm->GetHeldMO()->HasObject(objectName);
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldMO())
-        found = found || m_pBGArm->GetHeldMO()->HasObject(objectName);
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
+        found = found || m_pFGArm->GetHeldDevice()->HasObject(objectName);
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice())
+        found = found || m_pBGArm->GetHeldDevice()->HasObject(objectName);
 
     return found;
 }
@@ -470,10 +469,10 @@ bool AHuman::HasObjectInGroup(std::string groupName) const
     bool found = Actor::HasObjectInGroup(groupName);
 
     // If holding something, then check that too
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
-        found = found || m_pFGArm->GetHeldMO()->HasObjectInGroup(groupName);
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldMO())
-        found = found || m_pBGArm->GetHeldMO()->HasObjectInGroup(groupName);
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
+        found = found || m_pFGArm->GetHeldDevice()->HasObjectInGroup(groupName);
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice())
+        found = found || m_pBGArm->GetHeldDevice()->HasObjectInGroup(groupName);
 
     return found;
 }
@@ -792,18 +791,15 @@ bool AHuman::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
 // Description:     Adds an inventory item to this AHuman. This also puts that item
 //                  directly in the hands of this if they are empty.
 
-void AHuman::AddInventoryItem(MovableObject *pItemToAdd)
-{
-    // If we have nothing in inventory, and nothing in our hands, just grab this first things added to us
-    if (pItemToAdd && m_Inventory.empty() && m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldMO())
-    {
-        m_pFGArm->SetHeldMO(pItemToAdd);
-        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-    }
-    else
-        Actor::AddInventoryItem(pItemToAdd);
+void AHuman::AddInventoryItem(MovableObject *pItemToAdd) {
+    // If we have nothing in inventory, and nothing in our hands, just grab this first thing added to us.
+    if (HeldDevice *itemToAddAsHeldDevice = dynamic_cast<HeldDevice *>(pItemToAdd); itemToAddAsHeldDevice && m_Inventory.empty() && m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldDevice()) {
+        m_pFGArm->SetHeldDevice(itemToAddAsHeldDevice);
+        m_pFGArm->SetHandCurrentPos(m_HolsterOffset.GetXFlipped(m_HFlipped));
+	} else {
+		Actor::AddInventoryItem(pItemToAdd);
+	}
 
-    // Equip shield in BG arm is applicable
     EquipShieldInBGArm();
 }
 
@@ -843,17 +839,12 @@ MovableObject * AHuman::SwapPrevInventory(MovableObject *inventoryItemToSwapIn) 
 
 bool AHuman::EquipFirearm(bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    HDFirearm *pWeapon = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pWeapon && pWeapon->IsWeapon())
-            return true;
+    if (HDFirearm *heldDeviceAsFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsFirearm && heldDeviceAsFirearm->IsWeapon()) {
+        return true;
 	} else {
 		UnequipBGArm();
 	}
@@ -861,7 +852,7 @@ bool AHuman::EquipFirearm(bool doEquip)
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pWeapon = dynamic_cast<HDFirearm *>(*itr);
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pWeapon && pWeapon->IsWeapon())
         {
@@ -872,16 +863,15 @@ bool AHuman::EquipFirearm(bool doEquip)
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
-                {
-                    m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice()) {
+                    heldDevice->Deactivate();
+                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pWeapon);
+                m_pFGArm->SetHeldDevice(pWeapon);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -907,23 +897,18 @@ bool AHuman::EquipFirearm(bool doEquip)
 
 bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    HeldDevice *pDevice = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pDevice = dynamic_cast<HeldDevice *>(m_pFGArm->GetHeldMO());
-        if (pDevice && pDevice->IsInGroup(group))
-            return true;
+	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && heldDevice->IsInGroup(group)) {
+        return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pDevice = dynamic_cast<HeldDevice *>(*itr);
+        HeldDevice *pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pDevice && pDevice->IsInGroup(group))
         {
@@ -934,10 +919,10 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
-                    m_pFGArm->GetHeldDevice()->Deactivate();
-                    MovableObject *previouslyHeldItem = m_pFGArm->ReleaseHeldMO();
+                    heldDevice->Deactivate();
+                    MovableObject *previouslyHeldItem = m_pFGArm->RemoveAttachable(heldDevice);
                     // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
                     // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
                     if (previouslyHeldItem->GetsHitByMOs()) { previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
@@ -945,9 +930,9 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pDevice);
+                m_pFGArm->SetHeldDevice(pDevice);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -973,23 +958,18 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
 
 bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
+    if (!(m_pFGArm && m_pFGArm->IsAttached())) {
         return false;
+	}
 
-    HDFirearm *pFirearm = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pFirearm && !pFirearm->NeedsReloading() && pFirearm->IsInGroup(group) && !pFirearm->IsInGroup(excludeGroup))
-            return true;
+    if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && !heldDevice->NeedsReloading() && heldDevice->IsInGroup(group) && !heldDevice->IsInGroup(excludeGroup)) {
+        return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pFirearm = dynamic_cast<HDFirearm *>(*itr);
+        HDFirearm *pFirearm = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pFirearm && !pFirearm->NeedsReloading() && pFirearm->IsInGroup(group) && !pFirearm->IsInGroup(excludeGroup))
         {
@@ -1000,16 +980,16 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
                     m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pFirearm);
+                m_pFGArm->SetHeldDevice(pFirearm);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -1035,23 +1015,18 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
 
 bool AHuman::EquipNamedDevice(const string name, bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    HeldDevice *pDevice = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pDevice = dynamic_cast<HeldDevice *>(m_pFGArm->GetHeldMO());
-        if (pDevice && pDevice->GetPresetName() == name)
-            return true;
+	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && heldDevice->GetPresetName() == name) {
+        return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pDevice = dynamic_cast<HeldDevice *>(*itr);
+        HeldDevice *pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pDevice && pDevice->GetPresetName() == name)
         {
@@ -1062,16 +1037,16 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
-                    m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    heldDevice->Deactivate();
+                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pDevice);
+                m_pFGArm->SetHeldDevice(pDevice);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -1097,24 +1072,18 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
 
 bool AHuman::EquipThrowable(bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    ThrownDevice *pThrown = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
-// TODO: see if thrown is weapon or not, don't want to throw key items etc
-        if (pThrown)// && pThrown->IsWeapon())
-            return true;
+    if (dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldDevice())) {
+		return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pThrown = dynamic_cast<ThrownDevice *>(*itr);
+        ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(*itr);
         // Found proper device to equip, so make the switch!
 // TODO: see if thrown is weapon or not, don't want to throw key items etc
         if (pThrown)// && pThrown->IsWeapon())
@@ -1126,16 +1095,16 @@ bool AHuman::EquipThrowable(bool doEquip)
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
-                    m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    heldDevice->Deactivate();
+                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pThrown);
+                m_pFGArm->SetHeldDevice(pThrown);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm as applicable
                 EquipShieldInBGArm();
@@ -1161,23 +1130,18 @@ bool AHuman::EquipThrowable(bool doEquip)
 
 bool AHuman::EquipDiggingTool(bool doEquip)
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    HDFirearm *pTool = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pTool && pTool->IsInGroup("Tools - Diggers"))
-            return true;
+	if (HDFirearm *heldDeviceAsFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsFirearm && heldDeviceAsFirearm->IsInGroup("Tools - Diggers")) {
+		return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pTool = dynamic_cast<HDFirearm *>(*itr);
+        HDFirearm *pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
@@ -1188,16 +1152,16 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 m_Inventory.erase(itr);
 
                 // Put back into the inventory what we had in our hands, if anything
-                if (m_pFGArm->HoldsSomething())
+                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
-                    m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    heldDevice->Deactivate();
+                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldMO(pTool);
+                m_pFGArm->SetHeldDevice(pTool);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm is applicable
                 EquipShieldInBGArm();
@@ -1222,26 +1186,19 @@ bool AHuman::EquipDiggingTool(bool doEquip)
 float AHuman::EstimateDigStrength()
 {
     float maxPenetration = Actor::EstimateDigStrength();
-    
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return maxPenetration;
-    
-    HDFirearm *pTool = nullptr;
 
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pTool && pTool->IsInGroup("Tools - Diggers"))
-        {
-            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
-        }
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return maxPenetration;
+	}
+
+    if (HDFirearm *heldDeviceAsHDFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsHDFirearm && heldDeviceAsHDFirearm->IsInGroup("Tools - Diggers")) {
+		maxPenetration = std::max(heldDeviceAsHDFirearm->EstimateDigStrength(), maxPenetration);
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pTool = dynamic_cast<HDFirearm *>(*itr);
+        HDFirearm *pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
@@ -1262,23 +1219,18 @@ float AHuman::EstimateDigStrength()
 
 bool AHuman::EquipShield()
 {
-    if (!(m_pFGArm && m_pFGArm->IsAttached()))
-        return false;
+	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
+		return false;
+	}
 
-    HeldDevice *pShield = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pFGArm->HoldsSomething())
-    {
-        pShield = dynamic_cast<HeldDevice *>(m_pFGArm->GetHeldMO());
-        if (pShield && pShield->IsShield())
-            return true;
+    if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && heldDevice->IsShield()) {
+        return true;
     }
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pShield = dynamic_cast<HeldDevice *>(*itr);
+        HeldDevice *pShield = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pShield && pShield->IsShield())
         {
@@ -1287,16 +1239,16 @@ bool AHuman::EquipShield()
             m_Inventory.erase(itr);
 
             // Put back into the inventory what we had in our hands, if anything
-            if (m_pFGArm->HoldsSomething())
+            if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
             {
-                m_pFGArm->GetHeldDevice()->Deactivate();
-                m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                heldDevice->Deactivate();
+                m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
             }
 
             // Now put the device we were looking for and found into the hand
-            m_pFGArm->SetHeldMO(pShield);
+            m_pFGArm->SetHeldDevice(pShield);
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+            m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
             // Equip shield in BG arm is applicable
             EquipShieldInBGArm();
@@ -1321,37 +1273,29 @@ bool AHuman::EquipShield()
 
 bool AHuman::EquipShieldInBGArm()
 {
-    if (!(m_pBGArm && m_pBGArm->IsAttached()))
-        return false;
+	if (!(m_pBGArm && m_pBGArm->IsAttached())) {
+		return false;
+	}
 
-    HeldDevice *pShield = 0;
-
-    // Check if the currently held device is already the desired type
-    if (m_pBGArm->HoldsSomething())
-    {
-        pShield = dynamic_cast<HeldDevice *>(m_pBGArm->GetHeldMO());
-		if (pShield && (pShield->IsShield() || pShield->IsDualWieldable()))
-        {
-            // If we're holding a shield, but aren't supposed to, because we need to support the FG hand's two-handed device,
-            // then let go of the shield and put it back in inventory
-            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
-            {
-                m_pBGArm->GetHeldDevice()->Deactivate();
-                m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
-                return false;
-            }
-            return true;
-        }
-    }
+	if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice(); heldDevice && (heldDevice->IsShield() || heldDevice->IsDualWieldable())) {
+		// If we're holding a shield, but aren't supposed to, because we need to support the FG hand's two-handed device, then let go of the shield and put it back in inventory.
+		if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded()) {
+			m_pBGArm->GetHeldDevice()->Deactivate();
+			m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
+			return false;
+		}
+		return true;
+	}
 
     // Only equip if the BG hand isn't occupied with supporting a two handed device
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded()) {
         return false;
+	}
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
-        pShield = dynamic_cast<HeldDevice *>(*itr);
+        HeldDevice *pShield = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pShield && (pShield->IsShield() || pShield->IsDualWieldable()))
         {
@@ -1360,16 +1304,16 @@ bool AHuman::EquipShieldInBGArm()
             m_Inventory.erase(itr);
 
             // Put back into the inventory what we had in our hands, if anything
-            if (m_pBGArm->HoldsSomething())
+            if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice())
             {
-                m_pBGArm->GetHeldDevice()->Deactivate();
-                m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
+                heldDevice->Deactivate();
+                m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
             }
 
             // Now put the device we were looking for and found into the hand
-            m_pBGArm->SetHeldMO(pShield);
+            m_pBGArm->SetHeldDevice(pShield);
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
-            m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+            m_pBGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
@@ -1383,11 +1327,13 @@ bool AHuman::EquipShieldInBGArm()
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool AHuman::UnequipFGArm() {
-	if (m_pFGArm && m_pFGArm->HoldsSomething()) {
-		m_pFGArm->GetHeldDevice()->Deactivate();
-		m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
-		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
-		return true;
+	if (m_pFGArm) {
+		if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice()) {
+			heldDevice->Deactivate();
+			m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+			m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+			return true;
+		}
 	}
 	return false;
 }
@@ -1395,11 +1341,13 @@ bool AHuman::UnequipFGArm() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool AHuman::UnequipBGArm() {
-	if (m_pBGArm && m_pBGArm->HoldsSomething()) {
-		m_pBGArm->GetHeldDevice()->Deactivate();
-		m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
-		m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
-		return true;
+	if (m_pBGArm) {
+		if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice()) {
+			heldDevice->Deactivate();
+			m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
+			m_pBGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+			return true;
+		}
 	}
 	return false;
 }
@@ -1426,9 +1374,9 @@ float AHuman::GetEquippedMass() const {
 bool AHuman::FirearmIsReady() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
             return true;
     }
@@ -1445,9 +1393,9 @@ bool AHuman::FirearmIsReady() const
 bool AHuman::ThrowableIsReady() const
 {
     // Check if the currently held thrown device is already the desired type
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        const ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
+        const ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldDevice());
         if (pThrown)// && pThrown->blah() > 0)
             return true;
     }
@@ -1463,9 +1411,9 @@ bool AHuman::ThrowableIsReady() const
 
 bool AHuman::FirearmIsEmpty() const
 {
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
             return true;
     }
@@ -1524,9 +1472,9 @@ bool AHuman::FirearmsAreReloading(bool onlyIfAllFirearmsAreReloading) const {
 
 bool AHuman::FirearmIsSemiAuto() const
 {
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
         return pWeapon && !pWeapon->IsFullAuto();
     }
     return false;
@@ -1563,9 +1511,9 @@ void AHuman::ReloadFirearms() const {
 int AHuman::FirearmActivationDelay() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
         if (pWeapon)
             return pWeapon->GetActivationDelay();
     }
@@ -1601,7 +1549,7 @@ bool AHuman::IsWithinRange(Vector &point) const
         range = m_AimDistance;
 
         // Add the sharp range of the equipped weapon
-        if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+        if (m_pFGArm && m_pFGArm->IsAttached())
             range += m_pFGArm->GetHeldDevice()->GetSharpLength() + 150;
     }
     else if (ThrowableIsReady())
@@ -1631,7 +1579,7 @@ bool AHuman::Look(float FOVSpread, float range)
     Vector aimPos = m_Pos;
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached())
     {
         aimPos = m_pFGArm->GetHeldDevice()->GetPos();
         aimDistance += m_pFGArm->GetHeldDevice()->GetSharpLength();
@@ -1687,7 +1635,7 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
     float aimDistance = m_AimDistance + g_FrameMan.GetPlayerScreenWidth() * 0.51;   // Set the length of the look vector
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
     {
         aimPos = m_pFGArm->GetHeldDevice()->GetPos();
         aimDistance += m_pFGArm->GetHeldDevice()->GetSharpLength();
@@ -2427,7 +2375,7 @@ void AHuman::UpdateAI()
             m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
 
             // If we have something to fire with
-            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
             {
                 // Don't press the trigger too fast in succession
                 if (m_FireTimer.IsPastSimMS(250))

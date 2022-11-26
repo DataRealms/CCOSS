@@ -774,6 +774,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
     if (pSwapIn)
     {
+		pSwapIn->SetAsNoID();
         m_Inventory.push_back(pSwapIn);
         playSound = true;
     }
@@ -839,6 +840,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
     if (pSwapIn)
     {
+		pSwapIn->SetAsNoID();
         m_Inventory.push_front(pSwapIn);
         playSound = true;
     }
@@ -866,6 +868,7 @@ MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, 
     if (!newInventoryItem) {
         return RemoveInventoryItemAtIndex(inventoryIndex);
     }
+	newInventoryItem->SetAsNoID();
 
     if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
         m_Inventory.emplace_back(newInventoryItem);

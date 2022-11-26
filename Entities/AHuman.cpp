@@ -3195,49 +3195,38 @@ void AHuman::Update()
         if (!crouching) { m_ProneState = NOTPRONE; }
     }
 
-    ////////////////////////////////////
-    // Change and reload held MovableObjects
+	////////////////////////////////////
+	// Standard Reloading
+	
+	if (m_Controller.IsState(ControlState::WEAPON_RELOAD)) {
+		ReloadFirearms();
+	}
 
-	bool fgFirearmIsReloading = false;
-	bool bgFirearmIsReloading = false;
+    ////////////////////////////////////
+    // Change held MovableObjects
+
 	if (m_pFGArm && m_Status != INACTIVE) {
 		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
 		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
-		HDFirearm *firearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
 		if (changeNext || changePrev) {
 			if (changeNext && changePrev) {
 				UnequipArms();
 			} else if (!m_Inventory.empty() || UnequipBGArm()) {
-				if (firearm) { firearm->StopActivationSound(); }
+				if (HDFirearm *firearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice())) {
+					firearm->StopActivationSound();
+				}
 				if (changeNext) {
-					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+					m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory(m_pFGArm->RemoveAttachable(m_pFGArm->GetHeldDevice()))));
 				} else {
-					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+					m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapPrevInventory(m_pFGArm->RemoveAttachable(m_pFGArm->GetHeldDevice()))));
 				}
 				EquipShieldInBGArm();
-				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+				m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 			m_EquipHUDTimer.Reset();
 			m_SharpAimProgress = 0;
-		}
-
-		if (firearm) {
-			if (HDFirearm *bgFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) { 
-				if (bgFirearm->IsEmpty() && firearm->DoneReloading()) {	bgFirearm->Reload(); }
-				bgFirearmIsReloading = bgFirearm->IsReloading();
-			}
-			if (!firearm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !bgFirearmIsReloading) {
-				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
-				firearm->Reload();
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-			}
-			if (firearm->IsReloading()) {
-				fgFirearmIsReloading = true;
-				m_SharpAimTimer.Reset();
-				m_SharpAimProgress = 0;
-				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
-			}
-			if (firearm->DoneReloading() && m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
+			// Reload empty firearms when we swap to them, for convenience.
+			ReloadFirearms(true);
 		}
 	}
 

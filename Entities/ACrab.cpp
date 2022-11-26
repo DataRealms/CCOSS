@@ -780,7 +780,7 @@ void ACrab::ReloadFirearms() {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
         for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
             if (HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice)) {
-                mountedFirearm->Reload();
+                mountedFirearm->Reload(false);
             }
         }
     }

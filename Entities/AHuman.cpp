@@ -1488,16 +1488,51 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearms() const {
-	HDFirearm *fgWeapon = dynamic_cast<HDFirearm *>(GetEquippedItem());
-	if (fgWeapon && fgWeapon->IsReloading()) {
-		return;
-	}
+void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) const {
+	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
+		if (arm) {
+			HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(arm->GetHeldDevice());
+			if (!heldFirearm) {
+				continue;
+			}
+			bool heldFirearmCanReload = heldFirearm->IsReloadable() && !heldFirearm->IsFull() && !heldFirearm->IsReloading() && (!onlyReloadEmptyFirearms || heldFirearm->IsEmpty());
+			if (!heldFirearmCanReload) {
+				continue;
+			}
 
-	if (fgWeapon && !fgWeapon->IsFull()) {
-		fgWeapon->Reload();
-	} else if (HDFirearm *bgWeapon = dynamic_cast<HDFirearm *>(GetEquippedBGItem()); bgWeapon && !bgWeapon->IsFull()) {
-		bgWeapon->Reload();
+			Arm *otherArm = arm == m_pFGArm ? m_pBGArm : m_pFGArm;
+			HDFirearm *otherHeldFirearm = otherArm ? dynamic_cast<HDFirearm *>(otherArm->GetHeldDevice()) : nullptr;
+
+			bool reloadHeldFirearm = false;
+			if (otherHeldFirearm && otherHeldFirearm->IsReloadable()) {
+				if (heldFirearm->IsDualReloadable() && otherHeldFirearm->IsDualReloadable()) {
+					reloadHeldFirearm = true;
+				} else if (!otherHeldFirearm->IsReloading()) {
+					reloadHeldFirearm = true;
+				}
+			} else {
+				reloadHeldFirearm = true;
+			}
+
+			if (reloadHeldFirearm) {
+				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+
+				heldFirearm->Reload(!otherArmIsAvailable);
+				if (otherArmIsAvailable) {
+					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
+					if (!m_ReloadOffset.IsZero()) {
+						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * 0.8F);
+					} else {
+						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), heldFirearm->GetReloadTime() * 0.8F);
+					}
+					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
+					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				} else if (!m_ReloadOffset.IsZero()) {
+					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * 0.8F);
+					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				}
+			}
+		}
 	}
 }
 

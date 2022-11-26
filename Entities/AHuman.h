@@ -661,6 +661,12 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	bool FirearmNeedsReload() const;
 
+	/// <summary>
+	/// Indicates whether currently held HDFirearms are reloading. If the parameter is true, it will only return true if all firearms are reloading, otherwise it will return whether any firearm is reloading.
+	/// </summary>
+	/// <returns>Whether or not currently held HDFirearms are reloading.</returns>
+	bool FirearmsAreReloading(bool onlyIfAllFirearmsAreReloading) const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  FirearmIsSemiAuto

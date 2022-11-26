@@ -1489,6 +1489,33 @@ bool AHuman::FirearmNeedsReload() const {
 	return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool AHuman::FirearmsAreReloading(bool onlyIfAllFirearmsAreReloading) const {
+	int reloadingFirearmCount = 0;
+	int totalFirearmCount = 0;
+
+	if (const HDFirearm *fgWeapon = dynamic_cast<HDFirearm *>(GetEquippedItem())) {
+		totalFirearmCount++;
+		if (fgWeapon->IsReloading()) {
+			reloadingFirearmCount++;
+		}
+	}
+	if (reloadingFirearmCount > 0 && !onlyIfAllFirearmsAreReloading) {
+		return true;
+	}
+
+	if (const HDFirearm *bgWeapon = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) {
+		totalFirearmCount++;
+		if (bgWeapon->IsReloading()) {
+			reloadingFirearmCount++;
+		}
+	}
+	
+	return onlyIfAllFirearmsAreReloading ? reloadingFirearmCount == totalFirearmCount : reloadingFirearmCount > 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  FirearmIsSemiAuto

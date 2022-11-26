@@ -295,7 +295,7 @@ int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
 // Description:     Saves the complete state of this SceneObject to an output stream for
 //                  later recreation with Create(istream &stream);
 
-int SceneObject::Save(Writer &writer) const
+int SceneObject::Save(Writer& writer) const
 {
     Entity::Save(writer);
 // TODO: Make proper save system that knows not to save redundant data!
@@ -306,8 +306,8 @@ int SceneObject::Save(Writer &writer) const
     writer << m_OzValue;
     writer.NewProperty("Buyable");
     writer << m_Buyable;
-	writer.NewProperty("BuyableMode");
-	writer << m_BuyableMode;
+    writer.NewProperty("BuyableMode");
+    writer << static_cast<int>(m_BuyableMode);
     writer.NewProperty("Team");
     writer << m_Team;
     writer.NewProperty("PlacedByPlayer");

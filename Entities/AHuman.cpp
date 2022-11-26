@@ -84,6 +84,7 @@ void AHuman::Clear()
 	m_EquipHUDTimer.Reset();
 	m_WalkAngle.fill(Matrix());
 	m_ArmSwingRate = 1.0F;
+	m_DeviceArmSwayRate = m_ArmSwingRate * 0.75F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -181,6 +182,7 @@ int AHuman::Create(const AHuman &reference) {
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
 	m_ArmSwingRate = reference.m_ArmSwingRate;
+	m_DeviceArmSwayRate = reference.m_DeviceArmSwayRate;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -259,6 +261,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_BGArmFlailScalar;
 	} else if (propName == "ArmSwingRate") {
 		reader >> m_ArmSwingRate;
+	} else if (propName == "DeviceArmSwayRate") {
+		reader >> m_DeviceArmSwayRate;
     } else if (propName == "FGArm") {
         SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGArm") {
@@ -361,6 +365,7 @@ int AHuman::Save(Writer &writer) const
 	writer << m_BGArmFlailScalar;
 	writer.NewProperty("ArmSwingRate");
 	writer << m_ArmSwingRate;
+	writer.NewPropertyWithValue("DeviceArmSwayRate", m_DeviceArmSwayRate);
     writer.NewProperty("FGArm");
     writer << m_pFGArm;
     writer.NewProperty("BGArm");

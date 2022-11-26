@@ -2323,6 +2323,7 @@ void ACrab::Update()
             mountedDevice->SetSharpAim(m_SharpAimProgress);
             if (m_Controller.IsState(WEAPON_FIRE)) {
                 mountedDevice->Activate();
+				if (mountedDevice->IsEmpty()) { mountedDevice->Reload(); }
             } else {
                 mountedDevice->Deactivate();
             }

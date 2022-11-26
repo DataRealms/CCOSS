@@ -634,7 +634,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  FirearmNeedsReload
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
+// Description:     Indicates whether any currently held HDFirearms are almost out of ammo.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) has less than half of ammo left.
 
@@ -665,7 +665,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  ReloadFirearm
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the currently held firearm, if any.
+// Description:     Reloads the currently held firearm, if any. Will only reload the BG Firearm if the FG one is full already, to support reloading guns one at a time.
 // Arguments:       None.
 // Return value:    None.
 

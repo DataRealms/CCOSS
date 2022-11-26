@@ -726,8 +726,8 @@ void Activity::Clear() {
 			return false;
 		}
 
-		Actor *preSwitchActor = (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) ? m_ControlledActor[player] : 0;
-		if (preSwitchActor) {
+		Actor *preSwitchActor = (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) ? m_ControlledActor[player] : nullptr;
+		if (preSwitchActor && preSwitchActor->GetController()->GetPlayer() == player) {
 			preSwitchActor->SetControllerMode(Controller::CIM_AI);
 			preSwitchActor->GetController()->SetDisabled(false);
 		}

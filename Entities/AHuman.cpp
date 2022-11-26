@@ -3633,7 +3633,7 @@ void AHuman::Update()
 				if (m_pBGArm) {
 					m_ArmClimbing[BGROUND] = true;
 					m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
-				} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+				} else if (m_pFGArm && !m_pFGArm->GetHeldDevice()) {
 					m_ArmClimbing[FGROUND] = true;
 					m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
 				}
@@ -3704,7 +3704,8 @@ void AHuman::Update()
 	}
 
     /////////////////////////////////
-    // Manage Attachable:s
+    // Manage Attachables
+
     if (m_pHead) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
@@ -3836,8 +3837,7 @@ void AHuman::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
-		HeldDevice *heldDevice = m_pFGArm->GetHeldDevice();
+	if (HeldDevice *heldDevice = GetEquippedItem()) {
 		float maxLength = heldDevice->GetSharpLength();
 		if (maxLength == 0) {
 			m_SharpAimProgress = 0;
@@ -3850,7 +3850,7 @@ void AHuman::Update()
 			// TODO: make an uniform function to get the total GripStrength of an AHuman?
 			float totalGripStrength = m_pFGArm->GetGripStrength();
 			if (m_pBGArm) {
-				if (m_pBGArm->HoldsHeldDevice()) {
+				if (m_pBGArm->GetHeldDevice()) {
 					HeldDevice *heldBGDevice = m_pBGArm->GetHeldDevice();
 					if (heldBGDevice->IsRecoiled()) {
 						m_SharpAimProgress *= 1.0F - std::min(heldBGDevice->GetRecoilForce().GetMagnitude() / std::max(m_pBGArm->GetGripStrength() * heldBGDevice->GetGripStrengthMultiplier(), 1.0F), 1.0F);
@@ -3993,8 +3993,8 @@ void AHuman::Update()
 	}
 
     if (m_Status == DYING) {
-		if (m_pFGArm) { m_pFGArm->DropEverything(); }
-		if (m_pBGArm) { m_pBGArm->DropEverything(); }
+		if (m_pFGArm) { m_pFGArm->RemoveAttachable(m_pFGArm->GetHeldDevice(), true, false); }
+		if (m_pBGArm) { m_pBGArm->RemoveAttachable(m_pBGArm->GetHeldDevice(), true, false); }
     }
 
     /////////////////////////////////////////
@@ -4127,7 +4127,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Player AI drawing
 
-	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+	if (m_pFGArm && m_pFGArm->GetHeldDevice()) {
 		// Draw the aiming dots for the currently held device.
 		if (m_ArmsState == THROWING_PREP) {
 			DrawThrowingReticle(pTargetBitmap, targetPos, GetThrowProgress());
@@ -4207,7 +4207,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
 			m_HUDStack -= 10;
 			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				std::string equippedItemsString = (m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}
@@ -4264,7 +4264,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                     m_HUDStack -= 11;
                 }
 */
-				std::string equippedItemsString = (m_pFGArm && m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				std::string equippedItemsString = (m_pFGArm && m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 /*

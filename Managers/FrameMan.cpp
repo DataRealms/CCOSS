@@ -621,6 +621,18 @@ namespace RTE {
 		}
 #endif
 
+		// TEMP
+		SDL_DisplayMode desktop;
+		SDL_DisplayMode current;
+		SDL_GetDesktopDisplayMode(0, &desktop);
+		SDL_GetCurrentDisplayMode(0, &current);
+		if (memcmp(&desktop, &current, sizeof(desktop)) == 0) {
+			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
+			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
+			RTEAbort("Current and Desktop display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
+		}
+		// TEMP end
+
 		if (m_ResX > m_MaxResX / newMultiplier || m_ResY > m_MaxResY / newMultiplier) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
@@ -683,6 +695,19 @@ namespace RTE {
 	void FrameMan::ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen) {
 		int newResMultiplier = upscaled ? 2 : 1;
 
+		// TEMP
+		SDL_DisplayMode desktop;
+		SDL_DisplayMode current;
+		SDL_GetDesktopDisplayMode(0, &desktop);
+		SDL_GetCurrentDisplayMode(0, &current);
+		if (memcmp(&desktop, &current, sizeof(desktop)) == 0) {
+			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
+			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
+			RTEAbort("Current and Desktop display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
+		}
+		// TEMP end
+
+
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_Fullscreen == newFullscreen) {
 			return;
 		}
@@ -718,6 +743,16 @@ namespace RTE {
 		m_ResX = newResX;
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
+
+		// TEMP
+		SDL_GetDesktopDisplayMode(0, &desktop);
+		SDL_GetCurrentDisplayMode(0, &current);
+		if (memcmp(&desktop, &current, sizeof(desktop)) == 0) {
+			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
+			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
+			RTEAbort("Fullscreen display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
+		}
+		// TEMP end
 
 		int windowW = m_ResX * m_ResMultiplier;
 		int windowH = m_ResY * m_ResMultiplier;

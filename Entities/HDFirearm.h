@@ -246,8 +246,30 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 // Description:     Sets the reload time in ms.
 // Arguments:       An int in ms.
 // Return value:    None.
+	/// <summary>
+	/// Gets whether or not this HDFirearm allows dual-reload, i.e. if it's one-handed and dual-wieldable, it can reload at the same time as another weapon that also allows dual-reload.
+	/// </summary>
+	/// <returns>Whether or not this HDFirearm allows dual-reload.</returns>
+	bool IsDualReloadable() const { return m_DualReloadable; }
+
+	/// <summary>
+	/// Sets whether or not this HDFirearm allows dual-reloading.
+	/// </summary>
+	/// <param name="newDualReloadable">The new value for whether or not this HDFirearm should allow dual-reloading.</param>
+	void SetDualReloadable(bool newDualReloadable) { m_DualReloadable = newDualReloadable; }
+
+	/// <summary>
+	/// Gets the multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.
+	/// </summary>
+	/// <returns>The multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</returns>
+	float GetOneHandedReloadTimeMultiplier() const { return m_OneHandedReloadTimeMultiplier; }
 
     void SetReloadTime(int delay) { m_ReloadTime = delay; };
+	/// <summary>
+	/// Sets the multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.
+	/// </summary>
+	/// <param name="newDualReloadTimeMultiplier">The new multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</param>
+	void SetOneHandedReloadTimeMultiplier(float newOneHandedReloadTimeMultiplier) { m_OneHandedReloadTimeMultiplier = newOneHandedReloadTimeMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -852,6 +874,8 @@ protected:
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
 	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
+	float m_OneHandedReloadTimeMultiplier; //!< The multiplier for how long this weapon takes to reload when being used one-handed. Only relevant for one-handed weapons.
+	bool m_DualReloadable; //!< Whether or not this weapon can be dual-reloaded, i.e. both guns can reload at once instead of having to wait til the other dual-wielded gun isn't being reloaded. Only relevant for one-handed weapons.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

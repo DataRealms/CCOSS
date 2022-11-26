@@ -3728,6 +3728,7 @@ void AHuman::Update()
         m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
     }
 
+	// FG Arm rotating and climbing
 	if (m_pFGArm) {
 		float affectingBodyAngle = 0.0F;
 		if (m_FGArmFlailScalar != 0 && m_SharpAimDelay != 0) {
@@ -3741,37 +3742,36 @@ void AHuman::Update()
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
-                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-            } else if (!m_pFGArm->IsReaching()) {
-				// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
-				m_pFGArm->Reach(Vector());
-            }
+                m_pFGArm->AddHandTarget("Hand AtomGroup Limb Pos", m_pFGHandGroup->GetLimbPos(m_HFlipped));
+			}
         } else {
-            // Unstable, so just drop the arm limply
-            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+			m_pFGArm->ClearHandTargets();
         }
     }
 
+	// BG Arm rotating, climbing, throw animations, supporting fg weapon
     if (m_pBGArm) {
 		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (adjustedAimAngle));
+
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield
-				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) { UnequipBGArm(); }
-				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-
+				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) {
+					UnequipBGArm();
+				}
+				m_pBGArm->AddHandTarget("Hand AtomGroup Limb Pos", m_pBGHandGroup->GetLimbPos(m_HFlipped));
 			} else {
-				HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem());
+				HeldDevice *heldDevice = GetEquippedItem();
 				ThrownDevice *thrownDevice = dynamic_cast<ThrownDevice *>(heldDevice);
 				if (thrownDevice && (m_ArmsState == THROWING_PREP || isSharpAiming)) {
-					float throwProgress = isSharpAiming ? 1.0F : GetThrowProgress();
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + (thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + (thrownDevice->GetStanceOffset() + thrownDevice->GetSupportOffset().GetXFlipped(m_HFlipped)) * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
+					m_pBGArm->AddHandTarget("End Throw Offset", m_pBGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
 				} else if (heldDevice) {
-					if (GetEquippedBGItem() && !heldDevice->IsOneHanded()) {
+					if (HeldDevice *bgDevice = GetEquippedBGItem(); bgDevice && !heldDevice->IsOneHanded()) {
 						UnequipBGArm();
-					} else {
-						m_pBGArm->Reach(heldDevice->GetSupportPos());
-						if (m_pBGArm->DidReach()) {
+					} else if (!bgDevice && !heldDevice->IsReloading()) {
+						m_pBGArm->SetHeldDeviceThisArmIsTryingToSupport(heldDevice);
+
+						if (m_pBGArm->GetHandHasReachedCurrentTarget()) {
 							heldDevice->SetSupported(true);
 							m_pBGArm->SetRecoil(heldDevice->GetRecoilForce(), heldDevice->GetRecoilOffset(), heldDevice->IsRecoiled());
 						} else {
@@ -3780,22 +3780,18 @@ void AHuman::Update()
 							m_pBGArm->SetRecoil(Vector(), Vector(), false);
 						}
 					}
-				} else if (m_pFGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
-				} else if (m_pBGLeg && m_ArmSwingRate > 0) {
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
-				} else {
-					// Force arm to idle by reaching toward a virtually inaccessible point.
-					m_pBGArm->ReachToward(Vector());
 				}
 			}
         } else {
-            // Unstable, so just drop the arm limply
-            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+			m_pBGArm->ClearHandTargets();
         }
-	} else if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
-		m_pFGArm->GetHeldDevice()->SetSupported(false);
+	} else if (HeldDevice *heldDevice = GetEquippedItem()) {
+		heldDevice->SetSupported(false);
     }
+	// Make sure the bg arm doesn't think it's supporting something when it isn't. 
+	if (m_pBGArm && (!m_pFGArm || !m_pFGArm->GetHeldDevice() || m_pBGArm->GetHeldDevice())) {
+		m_pBGArm->SetHeldDeviceThisArmIsTryingToSupport(nullptr);
+	}
 
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc

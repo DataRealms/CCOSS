@@ -654,22 +654,20 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
             if (pMO)
             {
                 // PASSING OWNERSHIP INTO the Add* ones - we are clearing out this list!
-                if (pMO->IsActor())
-				{
+                if (pMO->IsActor()) {
 					// Skip playable actors if we're told to not place actors
-					if (!placeUnits)
-					{
-						if (dynamic_cast<ADoor *>(pMO))
-							g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
-						else
-						{
-							//Just delete the object
-							delete pMO;
-							pMO = 0;
-						}
+                    bool shouldPlace = placeUnits || dynamic_cast<ADoor*>(pMO);
+
+                    // Because we don't save/load all data yet and do a bit of a hack with scene loading,
+                    // We can potentially save a dead actor that still technically exists
+                    // If we find one of these, just skip them!
+                    shouldPlace = shouldPlace && dynamic_cast<Actor*>(pMO)->GetHealth() > 0.0F;
+
+					if (shouldPlace) {
+                        g_MovableMan.AddActor(dynamic_cast<Actor*>(pMO));
 					} else {
-						// Place units as usual if we're told to place units
-						g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
+                        delete pMO;
+                        pMO = nullptr;
 					}
 				} else {
 					g_MovableMan.AddMO(pMO);

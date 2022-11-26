@@ -420,6 +420,7 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
+		.property("OneHandedReloadAngle", &AHuman::GetOneHandedReloadAngle, &AHuman::SetOneHandedReloadAngle)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
@@ -448,6 +449,7 @@ namespace RTE {
 		.def("UnequipArms", &AHuman::UnequipArms)
 		.def("ReloadFirearms", &AHumanReloadFirearms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
+		.def("FirearmsAreReloading", &AHuman::FirearmsAreReloading)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)
 		.def("LookForGold", &AHuman::LookForGold)
@@ -532,12 +534,23 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Arm) {
 		return ConcreteTypeLuaClassDefinition(Arm, Attachable)
 
-		.property("HeldDevice", &Arm::GetHeldMO)
-		.property("MaxLength", &Arm::GetMaxLength)
-		.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
-		.property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
-		.property("ThrowStrength", &Arm::GetThrowStrength, &Arm::SetThrowStrength)
-		.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos);
+			.property("MaxLength", &Arm::GetMaxLength)
+			.property("MoveSpeed", &Arm::GetMoveSpeed, &Arm::SetMoveSpeed)
+
+			.property("IdleOffset", &Arm::GetHandDefaultIdleOffset, &Arm::SetHandDefaultIdleOffset)
+			.property("HandPos", &Arm::GetHandCurrentPos, &Arm::SetHandCurrentPos)
+			.property("HasAnyHandTargets", &Arm::HasAnyHandTargets)
+			.property("NextHandTargetPosition", &Arm::GetNextHandTargetPosition)
+			.property("HandHasReachedCurrentTarget", &Arm::GetHandHasReachedCurrentTarget)
+
+			.property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
+			.property("ThrowStrength", &Arm::GetThrowStrength, &Arm::SetThrowStrength)
+
+			.property("HeldDevice", &Arm::GetHeldDevice, &ArmSetHeldDevice)
+
+			.def("AddHandTarget", (void (Arm::*)(const std::string &name, const Vector & handTargetPositionToAdd))&Arm::AddHandTarget)
+			.def("AddHandTarget", (void (Arm::*)(const std::string &name, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
+			.def("ClearHandTargets", &Arm::ClearHandTargets);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,6 +629,8 @@ namespace RTE {
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
 		.property("Reloadable", &HDFirearm::IsReloadable, &HDFirearm::SetReloadable)
+		.property("DualReloadable", &HDFirearm::IsDualReloadable, &HDFirearm::SetDualReloadable)
+		.property("OneHandedReloadTimeMultiplier", &HDFirearm::GetOneHandedReloadTimeMultiplier, &HDFirearm::SetOneHandedReloadTimeMultiplier)
 		.property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
 		.property("RoundInMagCapacity", &HDFirearm::GetRoundInMagCapacity)
 		.property("Magazine", &HDFirearm::GetMagazine, &HDFirearmSetMagazine)

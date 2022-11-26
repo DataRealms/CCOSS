@@ -291,6 +291,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetBurstSound);
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetEndSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, Attachable, SetDoor);
+	LuaPropertyOwnershipSafetyFaker(Arm, HeldDevice, SetHeldDevice);
 	LuaPropertyOwnershipSafetyFaker(Leg, Attachable, SetFoot);
 	LuaPropertyOwnershipSafetyFaker(Actor, PieMenu, SetPieMenu);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetBodyHitSound);

@@ -74,6 +74,7 @@ void AHuman::Clear()
     m_JetTimeLeft = 0.0;
 	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
+	m_OneHandedReloadAngle = 0.75F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
@@ -177,6 +178,7 @@ int AHuman::Create(const AHuman &reference) {
     m_JetTimeLeft = reference.m_JetTimeLeft;
     m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
+	m_OneHandedReloadAngle = reference.m_OneHandedReloadAngle;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
 	m_ArmSwingRate = reference.m_ArmSwingRate;
@@ -250,6 +252,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_JetReplenishRate;
 	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
 		reader >> m_JetAngleRange;
+	} else if (propName == "OneHandedReloadAngle") {
+		reader >> m_OneHandedReloadAngle;
 	} else if (propName == "FGArmFlailScalar") {
 		reader >> m_FGArmFlailScalar;
 	} else if (propName == "BGArmFlailScalar") {
@@ -351,6 +355,7 @@ int AHuman::Save(Writer &writer) const
 	writer << m_JetReplenishRate;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
+	writer.NewPropertyWithValue("OneHandedReloadAngle", m_OneHandedReloadAngle);
 	writer.NewProperty("FGArmFlailScalar");
 	writer << m_FGArmFlailScalar;
 	writer.NewProperty("BGArmFlailScalar");

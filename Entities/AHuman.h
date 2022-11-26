@@ -1001,6 +1001,7 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
+	float m_OneHandedReloadAngle; //!< The angle to which HDFirearms should point when they're being reloaded one-handed.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.

@@ -1,491 +1,354 @@
 #ifndef _RTEARM_
 #define _RTEARM_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            Arm.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the Arm class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
 
 #include "Attachable.h"
 
-namespace RTE
-{
+namespace RTE {
 
-class HeldDevice;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           Arm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A detatchable arm that can hold HeldDevices (weapons, tools)
-// Parent(s):       Attachable.
-// Class history:   05/30/2002 Arm created.
-
-class Arm : public Attachable {
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(Arm);
-SerializableOverrideMethods;
-ClassInfoGetters;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     Arm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a Arm object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    Arm() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~Arm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a Arm object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-	~Arm() override { Destroy(true); }
-
-
-    /// <summary>
-    /// Makes the Arm object ready for use.
-    /// </summary>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    int Create() override;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a Arm to be identical to another, by deep copy.
-// Arguments:       A reference to the Arm to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(const Arm &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire Arm, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    void Reset() override { Clear(); Attachable::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the SceneLayer object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    void Destroy(bool notInherited = false) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHandPos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the position of the hand of this Arm as an absolute scene coord.
-// Arguments:       None.
-// Return value:    Vector with the current absolute scene hand position.
-
-    Vector GetHandPos() const { return m_JointPos + m_HandOffset; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeldDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the HeldDevice currently held by this Arm, IF the thing held is
-//                  a HeldDevice, that is. Ownership is NOT transferred.
-// Arguments:       None.
-// Return value:    A pointer to the currently held HeldDevice. 0 is returned if no
-//                  HeldDevice is currently held (even though an MO may be held).
-
-    HeldDevice * GetHeldDevice() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HoldsDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a device is being held or not. Faster than using
-//                  GetHeldDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether any device is held by this Arm.
-
-    bool HoldsDevice() const { return m_pHeldMO && m_pHeldMO->IsDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HoldsHeldDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a HeldDevice is held or not. Faster than using
-//                  GetHeldDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether a HeldDevice is held by this Arm.
-
-    bool HoldsHeldDevice() const { return m_pHeldMO && m_pHeldMO->IsHeldDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HoldsThrownDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a ThrownDevice is held or not. Faster than using
-//                  GetHeldDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether a ThrownDevice is held by this Arm.
-
-    bool HoldsThrownDevice() const { return m_pHeldMO && m_pHeldMO->IsThrownDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeldMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MovableObject currently held by this Arm. Ownership is NOT
-//                  transferred.
-// Arguments:       None.
-// Return value:    A pointer to the currently held MovableObject. 0 is returned if no
-//                  MovableObject is currently held.
-
-    MovableObject * GetHeldMO() const { return m_pHeldMO; }
-
-    /// <summary>
-    /// Gets the the strength with which this Arm will grip its HeldDevice.
-    /// </summary>
-    /// <returns>The grip strength of this Arm.</returns>
-    float GetGripStrength() const { return m_GripStrength; }
-
-    /// <summary>
-    /// Sets the strength with which this Arm will grip its HeldDevice.
-    /// </summary>
-    /// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
-    void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
-
-    /// <summary>
-    /// Gets the the strength with which this Arm will throw a ThrownDevice.
-    /// </summary>
-    /// <returns>The throw strength of this Arm.</returns>
-    float GetThrowStrength() const { return m_ThrowStrength; }
-
-    /// <summary>
-    /// Sets the strength with which this Arm will throw a ThrownDevice.
-    /// </summary>
-    /// <param name="newThrowStrength">The new throw strength for this Arm to use.</param>
-    void SetThrowStrength(float newThrowStrength) { m_ThrowStrength = newThrowStrength; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaxLength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the max length this arm can reach from its socket to the hand.
-// Arguments:       None.
-// Return value:    The max length of reach, in pixels, of this arm.
-
-    float GetMaxLength() const { return m_MaxLength; }
-
-    /// <summary>
-    /// Replaces the MovableObject currently held by this arm with a new one. Ownership IS transferred.
-    /// The currently held MovableObject (if there is one) will be dropped and become a detached MovableObject.
-    /// This is primarily used to support clone Create. At some point this should be refactored so Arm can only hold HeldDevices or Attachables anyway.
-    /// </summary>
-    /// <param name="newHeldMO">A pointer to the new MovableObject to hold. Ownership IS transferred.</param>
-    void SetHeldMO(Attachable *newHeldMO) { SetHeldMO(dynamic_cast<MovableObject *>(newHeldMO)); }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetHeldMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the MovableObject currently held by this Arm with a new
-//                  one. Ownership IS transferred. The currently held MovableObject
-//                  (if there is one) will be deleted.
-// Arguments:       A pointer to the new MovableObject to hold. Ownership IS transferred.
-// Return value:    None.
-
-    void SetHeldMO(MovableObject *newHeldMO);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetHandPos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the position of the hand of this Arm to an absolute scene coord.
-//                  This position will be capped to the reach of the Arm before drawing.
-// Arguments:       Vector with the new absolute scene hand position.
-// Return value:    None.
-
-    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_JointPos; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetIdleOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset from the joint position of this Arm to which its hand will
-//                  go when not holding a device and not able to reach a certain target.
-// Arguments:       None.
-// Return value:    Vector with the new idle offset relative to the joint position of this Arm.
-
-	Vector GetIdleOffset() const { return m_IdleOffset; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetIdleOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset from the joint position of this Arm to which its hand will
-//                  go when not holding a device and not able to reach a certain target.
-// Arguments:       Vector with the new idle offset relative to the joint position of this Arm.
-// Return value:    None.
-
-    void SetIdleOffset(const Vector &newIdleOffset) { m_IdleOffset = newIdleOffset; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReleaseHeldMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this arm let go of the MovableObject currently held. Ownership
-//                  IS transferred!
-// Arguments:       None.
-// Return value:    A pointer to the up to this point held MovableObject. 0 is returned
-//                  if no MovableObject is currently held. Ownership IS transferred!
-
-    MovableObject * ReleaseHeldMO();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DropEverything
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this arm let go of anyhthing it holds and give it to the
-//                  MovableMan. Ownership is transferred to MovableMan.
-// Arguments:       None.
-// Return value:    A pointer to the up to this point held anything. 0 is returned if
-//                  nothing is currently held. Ownership is NOT transferred, but given
-//                  to MovableMan.
-
-    MovableObject * DropEverything();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SwapHeldMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the MovableObject currently held by this Arm with a new
-//                  one, and returns the replaced one. Ownership IS transferred both ways.
-// Arguments:       A pointer to the new MovableObject to hold. Ownership IS transferred.
-// Return value:    A pointer to the previously held MO. Ownership IS transferred.
-
-    MovableObject * SwapHeldMO(MovableObject *newMO);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Reach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Rotates the arm so that it reaches after a point in scene coordinates.
-//                  Must be called AFTER SetPos for this frame if the return value is to
-//                  be accurate. If the target is not reached, the idle position of the
-//                  Arm will be assumed.
-// Arguments:       The point to reach after. If (0, 0), reaching is deactivated.
-// Return value:    None.
-
-    void Reach(const Vector &scenePoint);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReachToward
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Rotates the arm so that it reaches after a point in scene coordinates.
-//                  Must be called AFTER SetPos for this frame if the return value is to
-//                  be accurate. Arm will reach towards target regardless of wheter it
-//                  is within this Arm's length or not.
-// Arguments:       The point to reach after. If (0, 0), reaching is deactivated.
-// Return value:    None.
-
-    void ReachToward(const Vector &scenePoint);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsReaching
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Arm is reaching toward somehting this frame
-// Arguments:       None.
-// Return value:    Whether this Arm is holding anyhting.
-
-    bool IsReaching() { return !m_TargetPosition.IsZero(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DidReach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Arm actually reached the reach target last
-//                  Update().
-// Arguments:       None.
-// Return value:    Whether.the Arm was able to actually reach the point or not.
-
-    bool DidReach() { return m_DidReach; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WillIdle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Arm will go to the idle position if it can't
-//                  reach something.
-// Arguments:       None.
-// Return value:    Whether the Arm will idle upon failing to reach somehting.
-
-    bool WillIdle() { return m_WillIdle; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HoldsDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Arm is holding a HeldDevice or not.
-// Arguments:       None.
-// Return value:    Whether this Arm is holding a HeldDevice or not.
-
-    bool HoldsDevice() { return m_pHeldMO && m_pHeldMO->IsDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HoldsSomething
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Arm is holding an MO or not.
-// Arguments:       None.
-// Return value:    Whether this Arm is holding anyhting.
-
-    bool HoldsSomething() { return m_pHeldMO != 0; }
+	class HeldDevice;
 
 	/// <summary>
-	/// Does stuff that needs to be done after Update().
+	/// A detachable arm that can hold HeldDevices.
 	/// </summary>
-	void PostTravel() override { if (IsAttached()) { m_AngularVel = 0; } MOSRotating::PostTravel(); }
+	class Arm : public Attachable {
 
-    /// <summary>
-    /// Updates this Arm. Supposed to be done every frame.
-    /// </summary>
-	void Update() override;
+	public:
 
+		EntityAllocation(Arm);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Arm's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate an Arm object in system memory. Create() should be called before using the object.
+		/// </summary>
+		Arm() { Clear(); }
 
-    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+		/// <summary>
+		/// Makes the Arm object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
 
-    /// <summary>
-    /// Draws this Arm's hand's graphical representation to a BITMAP of choice.
-    /// </summary>
-    /// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-    /// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-    /// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
-	void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ConstrainHand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure the hand distance is constrained between the max length of
-//                  this Arm and half the max length.
-// Arguments:       None.
-// Return value:    Whether.the Arm already was within the reach range of this Arm or not.
-
-    bool ConstrainHand();
-
-
-    // Member variables
-    static Entity::ClassInfo m_sClass;
-//    // The location of the 'hand' in relation to the MovableObject::m_Pos
-//    Vector m_HandPos;
-    // The MovableObject held, updated and held by this Arm, if any.
-    MovableObject *m_pHeldMO;
-    // Whether or not this arm is currently supporting something held in another hand
-    bool m_Supporting;
-    float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
-    float m_ThrowStrength; //!< The strength with which this Arm will throw a ThrownDevice. Effectively supercedes the ThrownDevice's ThrowVelocity values.
-    // The file containing the hand bitmap.
-    ContentFile m_HandFile;
-    // The small bitmap holding the hand bitmap.
-    BITMAP *m_pHand;
-	// The maximum reaching length of this Arm. Max distance between the joint position and the hand offset. Length of a straight arm sprite in pixels.
-    float m_MaxLength;
-    // Current offset position of the hand relative to m_JointPos.
-    Vector m_HandOffset;
-    // The target position that this Arm's hand is reaching after.
-    // If (0, 0), the Arm is currently not reaching after anything.
-    Vector m_TargetPosition;
-    // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
-    Vector m_IdleOffset;
-    // How fast the arm moves to a reach target,
-    // on a scale from 0.0 (frozen) to 1.0 (instantly there).
-    float m_MoveSpeed;
-    // Wether this Arm will go to idle position if it didn't reach or not.
-    bool m_WillIdle;
-    // Whether this Arm reached the reach target last Update.
-    bool m_DidReach;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-
-#pragma region Update Breakdown
-    /// <summary>
-    /// Updates the current hand offset for this Arm. Should only be called from Update.
-    /// If the Arm is attached, the current hand offset is based on the target offset and move speed, and whether the Arm should idle or not, otherwise it puts it in a reasonable position.
-    /// </summary>
-    void UpdateCurrentHandOffset();
-
-    /// <summary>
-    /// Updates the frame for this Arm. Should only be called from Update.
-    /// </summary>
-    void UpdateArmFrame();
+		/// <summary>
+		/// Creates an Arm to be identical to another, by deep copy.
+		/// </summary>
+		/// <param name="reference">A reference to the Arm to deep copy.</param>
+		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const Arm &reference);
 #pragma endregion
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this Arm, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up an Arm object before deletion from system memory.
+		/// </summary>
+		~Arm() override { Destroy(true); }
 
-    void Clear();
+		/// <summary>
+		/// Destroys and resets (through Clear()) the Arm object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Attachable::Destroy(); } Clear(); }
 
+		/// <summary>
+		/// Resets the entire Arm, including its inherited members, to their default settings or values.
+		/// </summary>
+		void Reset() override { Clear(); Attachable::Reset(); }
+#pragma endregion
 
-    // Disallow the use of some implicit methods.
-	Arm(const Arm &reference) = delete;
-	Arm & operator=(const Arm &rhs) = delete;
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the max length of this Arm when fully extended, i.e. the farthest possible length from its joint position to the hand.
+		/// </summary>
+		/// <returns>The max length of this Arm.</returns>
+		float GetMaxLength() const { return m_MaxLength; }
 
-};
+		/// <summary>
+		/// Gets the move speed of this Arm, where 1.0 is instant and 0.0 is none.
+		/// </summary>
+		/// <returns>The move speed of this Arm.</returns>
+		float GetMoveSpeed() const { return m_MoveSpeed; }
 
-} // namespace RTE
+		/// <summary>
+		/// Sets the move speed of this Arm, where 1.0 is instant and 0.0 is none.
+		/// </summary>
+		/// <returns>The new move speed of this Arm.</returns>
+		void SetMoveSpeed(float newMoveSpeed) { m_MoveSpeed = newMoveSpeed; }
 
-#endif // File
+		/// <summary>
+		/// Gets the default idle offset of this Arm's hand, i.e. the default offset from the joint position that this Arm will try to move to when not moving towards a position.
+		/// </summary>
+		/// <returns>The idle offset of this Arm's hand.</returns>
+		Vector GetHandDefaultIdleOffset() const { return m_HandDefaultIdleOffset; }
+
+		/// <summary>
+		/// Sets the default idle offset of this Arm's hand, i.e. the default offset from the joint position that this Arm will try to move to when not moving towards a position.
+		/// </summary>
+		/// <param name="newDefaultIdleOffset">The new idle offset of this Arm's hand.</param>
+		void SetHandDefaultIdleOffset(const Vector &newDefaultIdleOffset) { m_HandDefaultIdleOffset = newDefaultIdleOffset; }
+
+		/// <summary>
+		/// Gets the rotation that is being applied to this Arm's hand, if it's using an idle offset.
+		/// </summary>
+		/// <returns>The idle rotation of this Arm's hand.</returns>
+		float GetHandIdleRotation() const { return m_HandIdleRotation; }
+
+		/// <summary>
+		/// Sets the rotation that is being applied to this Arm's hand, if it's using an idle offset. Note that this value is reset to 0 every update.
+		/// </summary>
+		/// <param name="newHandIdleRotation">The new idle rotation of this Arm's hand.</param>
+		void SetHandIdleRotation(float newHandIdleRotation) { m_HandIdleRotation = newHandIdleRotation; }
+
+		/// <summary>
+		/// Gets the current offset of this Arm's hand, i.e. its distance from the joint position.
+		/// </summary>
+		/// <returns>This current offset of this Arm's hand.</returns>
+		Vector GetHandCurrentOffset() const { return m_HandCurrentOffset; }
+
+		/// <summary>
+		/// Sets the current offset of this Arm's hand, i.e. its distance from the joint position. The value is capped to the max length of the Arm.
+		/// </summary>
+		/// <param name="newHandOffset">The new current offset of this Arm's hand.</param>
+		void SetHandCurrentOffset(const Vector &newHandOffset) { m_HandCurrentOffset = newHandOffset; m_HandCurrentOffset.CapMagnitude(m_MaxLength); } //TODO maybe dont' want this in favour of SetHandPos?
+
+		/// <summary>
+		/// Gets the current position of this Arm's hand in absolute Scene coordinates.
+		/// </summary>
+		/// <returns>The current position of this Arm's hand in absolute Scene coordinates.</returns>
+		Vector GetHandCurrentPos() const { return m_JointPos + m_HandCurrentOffset; }
+
+		/// <summary>
+		/// Sets the current position of this Arm's hand to an absolute scene coordinate. If needed, the set position is modified so its distance from the joint position of the Arm is capped to the max length of the Arm.
+		/// </summary>
+		/// <param name="newHandPos">The new current position of this Arm's hand as absolute scene coordinate.</param>
+		void SetHandCurrentPos(const Vector &newHandPos);
+
+		/// <summary>
+		/// Adds a HandTarget position, in absolute scene coordinates, to the queue for the Arm to move its hand towards. Target positions are removed from the queue when they're reached (or as close to reached as is possible).
+		/// </summary>
+		/// <param name="description">The description of this HandTarget, for easy identification.</param>
+		/// <param name="handTargetPositionToAdd">The position, in absolute scene coordinates, to add the queue of hand targets.</param>
+		void AddHandTarget(const std::string &description, const Vector &handTargetPositionToAdd) { AddHandTarget(description, handTargetPositionToAdd, 0); }
+
+		/// <summary>
+		/// Adds a HandTarget position, in absolute scene coordinates, to the queue for the Arm to move its hand towards. Target positions are removed from the queue when they're reached (or as close to reached as is possible).
+		/// If the target position is very close to the last element in the queue, or has the same name as it, the last element in the queue is updated to avoid filling the queue with similar values.
+		/// </summary>
+		/// <param name="description">The description of this HandTarget, for easy identification.</param>
+		/// <param name="handTargetPositionToAdd">The position, in absolute scene coordinates, to add the queue of hand targets.</param>
+		/// <param name="delayAtTarget">The amount of time, in MS, that the hand should wait when it reaches the newly added HandTarget.</param>
+		void AddHandTarget(const std::string &description, const Vector &handTargetPositionToAdd, float delayAtTarget);
+
+		/// <summary>
+		/// Removes this Arm's next HandTarget, if there is one.
+		/// </summary>
+		void RemoveNextHandTarget() { if (!m_HandTargets.empty()) { m_HandTargets.pop(); m_HandHasReachedCurrentTarget = false; } }
+
+		/// <summary>
+		/// Gets whether or not this Arm has any HandTargets.
+		/// </summary>
+		/// <returns>Whether or not this Arm has any HandTargets.</returns>
+		bool HasAnyHandTargets() const { return !m_HandTargets.empty(); }
+
+		/// <summary>
+		/// Gets the name of this Arm's next HandTarget.
+		/// </summary>
+		/// <returns>The name of this Arm's next HandTarget.</returns>
+		std::string GetNextHandTargetDescription() const { return m_HandTargets.empty() ? "" : m_HandTargets.front().Description; }
+
+		/// <summary>
+		/// Gets the position, in absolute scene coordinates, of this Arm's next HandTarget.
+		/// </summary>
+		/// <returns>The position of this Arm's next HandTarget.</returns>
+		Vector GetNextHandTargetPosition() const { return m_HandTargets.empty() ? Vector() : m_HandTargets.front().TargetOffset + m_JointPos; }
+
+		/// <summary>
+		/// Gets whether or not the hand has reached its current target. This is either the front of the HandTarget queue, or the offset it's currently trying to move to to when it has no HandTargets specified.
+		/// </summary>
+		/// <returns>Whether or not the hand has reached its current target.</returns>
+		bool GetHandHasReachedCurrentTarget() const { return m_HandHasReachedCurrentTarget; }
+
+		/// <summary>
+		/// Empties the queue of HandTargets. With the queue empty, the hand will move to its appropriate idle offset.
+		/// </summary>
+		void ClearHandTargets() { m_HandTargets = {}; }
+
+		/// <summary>
+		/// Gets the the strength with which this Arm will grip its HeldDevice.
+		/// </summary>
+		/// <returns>The grip strength of this Arm.</returns>
+		float GetGripStrength() const { return m_GripStrength; }
+
+		/// <summary>
+		/// Sets the strength with which this Arm will grip its HeldDevice.
+		/// </summary>
+		/// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
+		void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
+
+		/// <summary>
+		/// Gets the the strength with which this Arm will throw a ThrownDevice.
+		/// </summary>
+		/// <returns>The throw strength of this Arm.</returns>
+		float GetThrowStrength() const { return m_ThrowStrength; }
+
+		/// <summary>
+		/// Sets the strength with which this Arm will throw a ThrownDevice.
+		/// </summary>
+		/// <param name="newThrowStrength">The new throw strength for this Arm to use.</param>
+		void SetThrowStrength(float newThrowStrength) { m_ThrowStrength = newThrowStrength; }
+#pragma endregion
+
+#pragma region HeldDevice Management
+		/// <summary>
+		/// Gets the HeldDevice currently held by this Arm.
+		/// </summary>
+		/// <returns>The HeldDevice currently held by this Arm. Ownership is NOT transferred.</returns>
+		HeldDevice * GetHeldDevice() const { return m_HeldDevice; }
+
+		/// <summary>
+		/// Sets the HeldDevice held by this Arm.
+		/// </summary>
+		/// <param name="newHeldDevice">The new HeldDevice to be held by this Arm. Ownership IS transferred.</param>
+		void SetHeldDevice(HeldDevice *newHeldDevice);
+
+		/// <summary>
+		/// Gets the HeldDevice this Arm is trying to support.
+		/// </summary>
+		/// <returns>The HeldDevice this Arm is trying to support. Ownership is NOT transferred.</returns>
+		HeldDevice * GetHeldDeviceThisArmIsTryingToSupport() const { return m_HeldDeviceThisArmIsTryingToSupport; }
+
+		/// <summary>
+		/// Sets the HeldDevice being this Arm is trying to support.
+		/// </summary>
+		/// <param name="newHeldDeviceForThisArmToTryToSupport">The new HeldDevice this Arm should try to support. Ownership is NOT transferred.</param>
+		void SetHeldDeviceThisArmIsTryingToSupport(HeldDevice *newHeldDeviceThisArmShouldTryToSupport) { m_HeldDeviceThisArmIsTryingToSupport = newHeldDeviceThisArmShouldTryToSupport; }
+
+		/// <summary>
+		/// Releases the HeldDevice held by this Arm.
+		/// </summary>
+		/// <returns>The HeldDevice that was held by this Arm. Ownership IS transferred.</returns>
+		//HeldDevice * ReleaseHeldDevice();
+
+		/// <summary>
+		/// Replaces the HeldDevice currently held by this Arm with a new one, and returns the old one. Ownership IS transferred both ways.
+		/// </summary>
+		/// <param name="newHeldDevice">The new HeldDevice to be held by this Arm. Ownership IS transferred.</param>
+		/// <returns>The HeldDevice that was held by this Arm. Ownership IS transferred.</returns>
+		HeldDevice * SwapHeldDevice(HeldDevice *newHeldDevice);
+		//TODO, ReleaseHeldMO used to call m_pHeldMO->ClearForces(); and m_pHeldMO->ClearImpulseForces();. Make sure no weird force stuff is happening here. I don't think it would, since forces now transfer up the chain all the time.
+		//TODOTODOTODO - No weird force stuff is happening, but the ID not being set to zero can cause problems. Test swapping items a few times and see if it erro5rs consisntently, if so, make swap next and previous in ahuman set moid to 0. Need to worry about inventory gui methods too! THIS SHOULD BE FIXED NOW!!
+
+#pragma endregion
+
+#pragma region Override Methods
+		/// <summary>
+		/// Does stuff that needs to be done after Update().
+		/// </summary>
+		void PostTravel() override { if (IsAttached()) { m_AngularVel = 0; } MOSRotating::PostTravel(); }
+
+		/// <summary>
+		/// Updates this Arm. Supposed to be done every frame.
+		/// </summary>
+		void Update() override;
+
+		/// <summary>
+		/// Draws this Arm's current graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this Arm. In this case, that means the hand sprite.</param>
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+#pragma endregion
+
+		/// <summary>
+		/// Draws this Arm's hand's graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
+		void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
+
+	private:
+		
+		/// <summary>
+		/// Struct for storing data about each target in the Arm's queue of HandTargets.
+		/// </summary>
+		struct HandTarget {
+			HandTarget(const std::string_view &description, const Vector &targetOffset, float delayAtTarget) { Description = description, TargetOffset = targetOffset, DelayAtTarget = delayAtTarget; }
+			std::string Description;
+			Vector TargetOffset = Vector();
+			float DelayAtTarget = 0;
+		};
+	
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		float m_MaxLength; //!< The maximum length of this Arm when fully extended, i.e. the length of the straight Arm sprite.
+		float m_MoveSpeed; //!< How quickly this Arm moves between targets. 0.0 means it doesn't move at all, 1.0 means it moves instantly.
+
+		Vector m_HandDefaultIdleOffset; //!< The default offset that this Arm's hand should move to when not moving towards anything else, relative to its joint position. Other offsets are used under certain circumstances.
+		float m_HandIdleRotation; //!< The rotation to be applied to the idle offset, when it's being used. Resets every update to avoid locking it.
+
+		Vector m_HandCurrentOffset; //!< The current offset of this Arm's hand, relative to its joint position.
+
+		std::queue<HandTarget> m_HandTargets; // A queue of target positions this Arm's hand is reaching towards. If it's empty, the Arm isn't reaching towards anything.
+		Timer m_HandMovementDelayTimer; //!< A Timer for making the hand wait at its current HandTarget.
+		bool m_HandHasReachedCurrentTarget; //!< A flag for whether or not the hand has reached its current target. The target is either the front of the HandTarget queue, or the appropriate target to move to if the queue is empty.
+		
+		ContentFile m_HandSpriteFile; //!< The ContentFile containing this Arm's hand bitmap.
+		BITMAP *m_HandSpriteBitmap; //!< An unowned pointer to the Bitmap held by the hand sprite ContentFile.
+
+		float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
+		float m_ThrowStrength; //!< The strength with which this Arm will throw a ThrownDevice. Effectively supercedes the ThrownDevice's ThrowVelocity values.
+
+		HeldDevice *m_HeldDevice; //!< A pointer to the HeldDevice this Arm is currently holding. Owned in the MOSRotating Attachables list, kept here for convenience.
+		HeldDevice *m_HeldDeviceThisArmIsTryingToSupport; //!< A pointer to the HeldDevice being supported by this Arm (i.e. this is the background Arm for another HeldDevice).
+		
+		/// <summary>
+		/// Gets whether or not the hand is close to the given offset.
+		/// </summary>
+		/// <param name="targetOffset">The offset to check for closeness to the hand.</param>
+		/// <returns>Whether or not the hand is close to the given offset.</returns>
+		bool HandIsCloseToTargetOffset(const Vector &targetOffset) const;
+
+#pragma region Update Breakdown
+		/// <summary>
+		/// Updates the current hand offset for this Arm. Should only be called from Update.
+		/// If the Arm is attached, the current hand offset is based on the target offset and move speed, and whether the Arm should idle or not, otherwise it puts it in a reasonable position.
+		/// </summary>
+		/// <param name="hasParent">Whether or not this Arm has a parent. Passed in for convenient reuse.</param>
+		/// <param name="heldDeviceIsAThrownDevice">Whether or not this Arm's HeldDevice is a ThrownDevice. Passed in for convenient reuse.</param>
+		void UpdateHandCurrentOffset(bool armHasParent, bool heldDeviceIsAThrownDevice);
+
+		/// <summary>
+		/// To be used in UpdateHandCurrentOffset. Applies any recoil accumulated on the HeldDevice to the passed in target offset, so it can be used to affect the hand's target position.
+		/// </summary>
+		/// <param name="heldDevice">The held MO as a HeldDevice, for convenience.</param>
+		/// <param name="targetOffset">The target offset to have recoil applied to it.</param>
+		void AccountForHeldDeviceRecoil(const HeldDevice *heldDevice, Vector &targetOffset);
+
+		/// <summary>
+		/// To be used in UpdateHandCurrentOffset. Ensures the HeldDevice won't clip through terrain by modifying the passed in target offset.
+		/// </summary>
+		/// <param name="heldDevice">The held MO as a HeldDevice, for convenience.</param>
+		/// <param name="targetOffset">The target offset to be modified to avoid any terrain clipping.</param>
+		void AccountForHeldDeviceTerrainClipping(const HeldDevice *heldDevice, Vector &targetOffset) const;
+
+		/// <summary>
+		/// Updates the frame for this Arm. Should only be called from Update.
+		/// </summary>
+		void UpdateArmFrame();
+#pragma endregion
+
+		/// <summary>
+		/// Clears all the member variables of this Arm, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		Arm(const Arm &reference) = delete;
+		Arm & operator=(const Arm &rhs) = delete;
+	};
+}
+#endif

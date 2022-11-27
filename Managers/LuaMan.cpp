@@ -61,6 +61,8 @@ namespace RTE {
 			luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
 				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
+				.def("DirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
+				.def("FileList", &LuaMan::FileList, luabind::return_stl_iterator)
 				.def("FileOpen", &LuaMan::FileOpen)
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
@@ -401,6 +403,38 @@ namespace RTE {
 		lua_pop(m_MasterState, 2);
 
 		return isDefined;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
+		std::string fullPath = System::GetWorkingDirectory() + filePath;
+
+		m_Paths.clear();
+
+		for (const auto& entry : std::filesystem::directory_iterator{fullPath}) {
+			if (entry.is_directory()) {
+				m_Paths.push_back(entry.path().filename().string());
+			}
+		}
+
+		return m_Paths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::FileList(const std::string &filePath) {
+		std::string fullPath = System::GetWorkingDirectory() + filePath;
+
+		m_Paths.clear();
+
+		for (const auto& entry : std::filesystem::directory_iterator{fullPath}) {
+			if (entry.is_regular_file()) {
+				m_Paths.push_back(entry.path().filename().string());
+			}
+		}
+
+		return m_Paths;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

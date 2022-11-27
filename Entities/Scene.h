@@ -686,33 +686,25 @@ EntityAllocation(Scene)
     bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDimensions
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-// Arguments:       None.
-// Return value:    A Vector describing the scene dimensions.
-
+    /// <summary>
+    /// Gets the total dimensions (width and height) of the scene, in pixels.
+    /// </summary>
+    /// <returns>A Vector describing the scene dimensions.</returns>
+	/// <remarks>This will attempt to get the dimensions from the bitmap if it is loaded into memory. If not, will fall back to the info that was read directly from the file on disk at creation.</remarks>
     Vector GetDimensions() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
+    /// <summary>
+    /// Gets the total width of the scene, in pixels.
+    /// </summary>
+    /// <returns>An int describing the scene width.</returns>
+	/// <remarks>This will attempt to get the width from the bitmap if it is loaded into memory. If not, will fall back to the info that was read directly from the file on disk at creation.</remarks>
     int GetWidth() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
+    /// <summary>
+    /// Gets the total height of the scene, in pixels.
+    /// </summary>
+    /// <returns>An int describing the scene height.</returns>
+	/// <remarks>This will attempt to get the width from the bitmap if it is loaded into memory. If not, will fall back to the info that was read directly from the file on disk at creation.</remarks>
     int GetHeight() const;
 
 

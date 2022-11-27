@@ -89,6 +89,12 @@ namespace RTE {
 		float GetIntegrity() const { return m_Integrity; }
 
 		/// <summary>
+		/// Overrides the integrity of this material to be unbreakable
+		/// This is dangerous! This is just used for special-case materials (i.e out-of-bounds), but should be used psaringly
+		/// </summary>
+		void SetAsForceUnbreakable() { m_Integrity = std::numeric_limits<float>::max(); }
+
+		/// <summary>
 		/// Gets the scalar value that defines the restitution of this Material. 1.0 = no kinetic energy is lost in a collision, 0.0 = all energy is lost (plastic).
 		/// </summary>
 		/// <returns>A float scalar value that defines the restitution of this Material.</returns>

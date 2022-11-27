@@ -1,8 +1,19 @@
 #include "PathFinder.h"
+#include "Material.h"
 #include "Scene.h"
 #include "SceneMan.h"
 
 namespace RTE {
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	PathNode::PathNode(const Vector& pos) : Pos(pos) {
+		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
+		for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
+			AdjacentNodes[i] = nullptr;
+			AdjacentNodeBlockingMaterials[i] = outOfBounds; // Costs are infinite unless recalculated as otherwise.
+		}
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +101,7 @@ namespace RTE {
 		if (scene->WrapsX()) {
 			for (int y = 0; y < nodeYCount; ++y) {
 				node = m_NodeGrid[0][y];
-				if (node->Left) { node->Left->RightCost = CostAlongLine(node->Pos, node->Left->Pos); }
+				if (node->Left) { node->Left->RightMaterial = StrongestMaterialAlongLine(node->Pos, node->Left->Pos); }
 			}
 		}
 		// Set up all the costs between all nodes
@@ -252,54 +263,49 @@ namespace RTE {
 		const float costRadiationMultiplier = 0.2F;
 		float radiatedCost = GetNodeAverageTransitionCost(*node) * costRadiationMultiplier;
 
-		// Add cost for digging upwards
+		// Cost to discourage us from going up. Until we have jetpack-aware pathing, this it the best we can do!
+		const float extraUpCost = 3.0F;
+
+		// Add cost for digging upwards.
 		if (node->Up) {
-			float strength = node->UpCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F) + radiatedCost; // Four times more expensive when digging
+			adjCost.cost = 1.0F + extraUpCost + (GetMaterialTransitionCost(node->UpMaterial) * 4.0F) + radiatedCost; // Four times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Right) {
-			float strength = node->RightCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->RightMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Down) {
-			float strength = node->DownCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->DownMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Left) {
-			float strength = node->LeftCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->LeftMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
-		// Add cost for digging at 45 degrees and for digging upwards
+		// Add cost for digging at 45 degrees and for digging upwards.
 		if (node->UpRight) {
-			float strength = node->UpRightCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
-			float strength = node->RightDownCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->RightDownMaterial) * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
-			float strength = node->DownLeftCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->DownLeftMaterial) * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
-			float strength = node->LeftUpCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
@@ -307,8 +313,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::CostAlongLine(const Vector &start, const Vector &end) {
-		return g_SceneMan.CastMaxStrengthRay(start, end, 0, g_MaterialAir);
+	float PathFinder::GetMaterialTransitionCost(const Material *material) const {
+		float strength = material->GetIntegrity();
+		if (strength > m_DigStrength && material->GetIndex() != g_MaterialDoor) { // Always treat doors as diggable
+			strength *= 1000.0F;
+		}
+		return strength;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) {
+		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -318,31 +334,40 @@ namespace RTE {
 			return false;
 		}
 
-		std::array<float, PathNode::c_MaxAdjacentNodeCount> oldCosts = node->AdjacentNodeCosts;
+		std::array<const Material *, PathNode::c_MaxAdjacentNodeCount> oldMaterials = node->AdjacentNodeBlockingMaterials;
+
+		auto getStrongerMaterial = [](const Material *first, const Material *second) {
+			return first->GetIntegrity() > second->GetIntegrity() ? first : second;
+		};
 
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
-		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
-		if (node->Right) { node->RightCost = CostAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
-		if (node->Down) { node->DownCost = CostAlongLine(node->Pos + Vector(-3, 0), node->Down->Pos + Vector(-3, 0)); }
-		if (node->Left) { node->LeftCost = std::max(node->Left->RightCost, CostAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
+		if (node->Up) { node->UpMaterial = getStrongerMaterial(node->Up->DownMaterial, StrongestMaterialAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
+		if (node->Right) { node->RightMaterial = StrongestMaterialAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
+		if (node->Down) { node->DownMaterial = StrongestMaterialAlongLine(node->Pos + Vector(-3, 0), node->Down->Pos + Vector(-3, 0)); }
+		if (node->Left) { node->LeftMaterial = getStrongerMaterial(node->Left->RightMaterial, StrongestMaterialAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
 
-		if (node->UpRight) { node->UpRightCost = std::max(node->UpRight->DownLeftCost, CostAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
-		if (node->RightDown) { node->RightDownCost = CostAlongLine(node->Pos + Vector(2, -2), node->RightDown->Pos + Vector(2, -2)); }
-		if (node->DownLeft) { node->DownLeftCost = CostAlongLine(node->Pos + Vector(-2, -2), node->DownLeft->Pos + Vector(-2, -2)); }
-		if (node->LeftUp) { node->LeftUpCost = std::max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
+		if (node->UpRight) { node->UpRightMaterial = getStrongerMaterial(node->UpRight->DownLeftMaterial, StrongestMaterialAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
+		if (node->RightDown) { node->RightDownMaterial = StrongestMaterialAlongLine(node->Pos + Vector(2, -2), node->RightDown->Pos + Vector(2, -2)); }
+		if (node->DownLeft) { node->DownLeftMaterial = StrongestMaterialAlongLine(node->Pos + Vector(-2, -2), node->DownLeft->Pos + Vector(-2, -2)); }
+		if (node->LeftUp) { node->LeftUpMaterial = getStrongerMaterial(node->LeftUp->RightDownMaterial, StrongestMaterialAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
 
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
 		node->IsUpdated = true;
 
 		for (int i = 0; i < PathNode::c_MaxAdjacentNodeCount; ++i) {
-			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
-			if (delta > c_NodeCostChangeEpsilon) {
+			const Material *oldMat = oldMaterials[i];
+			const Material *newMat = node->AdjacentNodeBlockingMaterials[i];
+
+			// Check if the material strength is more than our delta, or if a door has appeared/dissappeared (since we handle their costs in a special manner)
+			float delta = std::abs(oldMat->GetIntegrity() - newMat->GetIntegrity());
+			bool doorChanged = oldMat != newMat || (oldMat->GetIndex() == g_MaterialDoor || newMat->GetIndex() == g_MaterialDoor);
+			if (delta > c_NodeCostChangeEpsilon || doorChanged) {
 				return true;
 			}
 		}
 
 		// None of the updates was past our epsilon, so ignore it and pretend it never happened
-		node->AdjacentNodeCosts = oldCosts;
+		node->AdjacentNodeBlockingMaterials = oldMaterials;
 		return false;
 	}
 
@@ -386,7 +411,9 @@ namespace RTE {
 	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) const {
 		float totalCostOfAdjacentNodes = 0.0F;
 		int count = 0;
-		for (const float &cost : node.AdjacentNodeCosts) {
+		for (const Material *material : node.AdjacentNodeBlockingMaterials) {
+			// Don't use node transition cost, because we don't care about digging
+			float cost = material->GetIntegrity();
 			if (cost < std::numeric_limits<float>::max()) {
 				totalCostOfAdjacentNodes += cost;
 				count++;

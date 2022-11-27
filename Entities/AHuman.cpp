@@ -1203,7 +1203,7 @@ float AHuman::EstimateDigStrength()
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
-            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+            maxPenetration = max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
 
@@ -1214,7 +1214,7 @@ float AHuman::EstimateDigStrength()
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
-            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+            maxPenetration = max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
     
@@ -3499,8 +3499,8 @@ void AHuman::Update()
 		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
 		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
-			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
-				m_pItemInReach = (m_pFGArm || foundDevice->IsOneHanded()) ? foundDevice : nullptr;
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent()); foundDevice && (m_pFGArm || foundDevice->IsOneHanded())) {
+				m_pItemInReach = foundDevice;
 			}
 		}
 	}

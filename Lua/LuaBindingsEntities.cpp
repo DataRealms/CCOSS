@@ -435,6 +435,7 @@ namespace RTE {
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 		.property("IsClimbing", &AHuman::IsClimbing)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
+		.property("ArmSwingRate", &AHuman::GetDeviceArmSwayRate, &AHuman::SetDeviceArmSwayRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)

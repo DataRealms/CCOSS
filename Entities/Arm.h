@@ -225,20 +225,11 @@ namespace RTE {
 		void SetHeldDeviceThisArmIsTryingToSupport(HeldDevice *newHeldDeviceThisArmShouldTryToSupport) { m_HeldDeviceThisArmIsTryingToSupport = newHeldDeviceThisArmShouldTryToSupport; }
 
 		/// <summary>
-		/// Releases the HeldDevice held by this Arm.
-		/// </summary>
-		/// <returns>The HeldDevice that was held by this Arm. Ownership IS transferred.</returns>
-		//HeldDevice * ReleaseHeldDevice();
-
-		/// <summary>
 		/// Replaces the HeldDevice currently held by this Arm with a new one, and returns the old one. Ownership IS transferred both ways.
 		/// </summary>
 		/// <param name="newHeldDevice">The new HeldDevice to be held by this Arm. Ownership IS transferred.</param>
 		/// <returns>The HeldDevice that was held by this Arm. Ownership IS transferred.</returns>
 		HeldDevice * SwapHeldDevice(HeldDevice *newHeldDevice);
-		//TODO, ReleaseHeldMO used to call m_pHeldMO->ClearForces(); and m_pHeldMO->ClearImpulseForces();. Make sure no weird force stuff is happening here. I don't think it would, since forces now transfer up the chain all the time.
-		//TODOTODOTODO - No weird force stuff is happening, but the ID not being set to zero can cause problems. Test swapping items a few times and see if it erro5rs consisntently, if so, make swap next and previous in ahuman set moid to 0. Need to worry about inventory gui methods too! THIS SHOULD BE FIXED NOW!!
-
 #pragma endregion
 
 #pragma region Override Methods

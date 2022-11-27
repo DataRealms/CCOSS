@@ -211,8 +211,8 @@ namespace RTE {
 
 		m_Recoiled = m_HeldDevice && m_HeldDevice->IsRecoiled();
 
-		//TODO why is this like this with the stuff above?!?!? I guess it's relevant that rotation is updated before/after updating current hand offset?
-		if (m_HeldDevice) {
+		// If there's a HeldDevice that's not a ThrownDevice, we can safely set the Arm rotation based on the hand's current offset, since it's been rotated to match the AHuman's aim angle when it was updated.
+		if (m_HeldDevice && !heldDeviceIsAThrownDevice) {
 			m_Rotation = m_HandCurrentOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0);
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 		}

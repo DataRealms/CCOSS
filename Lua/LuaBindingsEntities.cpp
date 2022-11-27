@@ -554,7 +554,7 @@ namespace RTE {
 			.property("SupportedHeldDevice", &Arm::GetHeldDeviceThisArmIsTryingToSupport)
 
 			.def("AddHandTarget", (void (Arm::*)(const std::string &description, const Vector &handTargetPositionToAdd))&Arm::AddHandTarget)
-			.def("AddHandTarget", (void (Arm::*)(const std::string & description, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
+			.def("AddHandTarget", (void (Arm::*)(const std::string &description, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
 			.def("RemoveNextHandTarget", &Arm::RemoveNextHandTarget)
 			.def("ClearHandTargets", &Arm::ClearHandTargets);
 	}

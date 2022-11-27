@@ -118,7 +118,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("MaxLength", m_MaxLength);
 		writer.NewPropertyWithValue("MoveSpeed", m_MoveSpeed);
-		writer.NewPropertyWithValue("HandIdleOffset", m_HandDefaultIdleOffset);
+		writer.NewPropertyWithValue("HandDefaultIdleOffset", m_HandDefaultIdleOffset);
 		writer.NewPropertyWithValue("HandSprite", m_HandSpriteFile);
 		writer.NewPropertyWithValue("GripStrength", m_GripStrength);
 		writer.NewPropertyWithValue("ThrowStrength", m_ThrowStrength);
@@ -140,7 +140,7 @@ namespace RTE {
 		if (!handTargetOffsetToAdd.IsZero()) {
 			handTargetOffsetToAdd.ClampMagnitude(m_MaxLength / 2.0F, m_MaxLength);
 			if (!m_HandTargets.empty()) {
-				if ((description == m_HandTargets.back().Description) || (handTargetOffsetToAdd - m_HandTargets.back().TargetOffset).MagnitudeIsLessThan(m_MaxLength / 10.0F)) {
+				if (description == m_HandTargets.back().Description) {
 					m_HandTargets.back() = { description, handTargetOffsetToAdd, std::max(m_HandTargets.back().DelayAtTarget, delayAtTarget) };
 					return;
 				}

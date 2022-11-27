@@ -539,10 +539,10 @@ namespace RTE {
 			.property("MoveSpeed", &Arm::GetMoveSpeed, &Arm::SetMoveSpeed)
 
 			.property("HandDefaultIdleOffset", &Arm::GetHandDefaultIdleOffset, &Arm::SetHandDefaultIdleOffset)
-			.property("HandIdleRotation", &Arm::GetHandIdleRotation, &Arm::SetHandIdleRotation)
 
 			.property("HandCurrentPos", &Arm::GetHandCurrentPos, &Arm::SetHandCurrentPos)
 			.property("HasAnyHandTargets", &Arm::HasAnyHandTargets)
+			.property("NumberOfHandTargets", &Arm::GetNumberOfHandTargets)
 			.property("NextHandTargetDescription", &Arm::GetNextHandTargetDescription)
 			.property("NextHandTargetPosition", &Arm::GetNextHandTargetPosition)
 			.property("HandHasReachedCurrentTarget", &Arm::GetHandHasReachedCurrentTarget)
@@ -553,8 +553,8 @@ namespace RTE {
 			.property("HeldDevice", &Arm::GetHeldDevice, &ArmSetHeldDevice)
 			.property("SupportedHeldDevice", &Arm::GetHeldDeviceThisArmIsTryingToSupport)
 
-			.def("AddHandTarget", (void (Arm::*)(const std::string &name, const Vector & handTargetPositionToAdd))&Arm::AddHandTarget)
-			.def("AddHandTarget", (void (Arm::*)(const std::string &name, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
+			.def("AddHandTarget", (void (Arm::*)(const std::string &description, const Vector &handTargetPositionToAdd))&Arm::AddHandTarget)
+			.def("AddHandTarget", (void (Arm::*)(const std::string & description, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
 			.def("RemoveNextHandTarget", &Arm::RemoveNextHandTarget)
 			.def("ClearHandTargets", &Arm::ClearHandTargets);
 	}

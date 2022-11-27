@@ -152,6 +152,12 @@ namespace RTE {
 		bool HasAnyHandTargets() const { return !m_HandTargets.empty(); }
 
 		/// <summary>
+		/// Gets the number of HandTargets this Arm has.
+		/// </summary>
+		/// <returns>The number of HandTargets this Arm has.</returns>
+		int GetNumberOfHandTargets() const { return m_HandTargets.size(); }
+
+		/// <summary>
 		/// Gets the name of this Arm's next HandTarget.
 		/// </summary>
 		/// <returns>The name of this Arm's next HandTarget.</returns>

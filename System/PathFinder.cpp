@@ -7,7 +7,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PathNode::PathNode(const Vector& pos) : Pos(pos) {
+	PathNode::PathNode(const Vector &pos) : Pos(pos) {
 		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
 		for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
 			AdjacentNodes[i] = nullptr;

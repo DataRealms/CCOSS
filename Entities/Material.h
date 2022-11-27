@@ -90,7 +90,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Overrides the integrity of this material to be unbreakable
-		/// This is dangerous! This is just used for special-case materials (i.e out-of-bounds), but should be used psaringly
+		/// This is dangerous! This is just used for special-case materials (i.e out-of-bounds), but should be used sparingly
 		/// </summary>
 		void SetAsForceUnbreakable() { m_Integrity = std::numeric_limits<float>::max(); }
 

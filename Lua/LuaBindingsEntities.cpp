@@ -237,6 +237,7 @@ namespace RTE {
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 		.property("PieMenu", &Actor::GetPieMenu, &ActorSetPieMenu)
+		.property("AIBaseDigStrength", &Actor::GetAIBaseDigStrength, &Actor::SetAIBaseDigStrength)
 
 		.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
 		.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)
@@ -600,6 +601,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Gib) {
+		return luabind::class_<Gib>("Gib")
+
+		.property("ParticlePreset", &Gib::GetParticlePreset, &Gib::SetParticlePreset)
+		.property("MinVelocity", &Gib::GetMinVelocity, &Gib::SetMinVelocity)
+		.property("MaxVelocity", &Gib::GetMaxVelocity, &Gib::SetMaxVelocity)
+		.property("SpreadMode", &Gib::GetSpreadMode, &Gib::SetSpreadMode)
+
+		.def_readwrite("Offset", &Gib::m_Offset)
+		.def_readwrite("Count", &Gib::m_Count)
+		.def_readwrite("Spread", &Gib::m_Spread)
+		.def_readwrite("LifeVariation", &Gib::m_LifeVariation)
+		.def_readwrite("InheritsVel", &Gib::m_InheritsVel)
+		.def_readwrite("IgnoresTeamHits", &Gib::m_IgnoresTeamHits)
+
+		.enum_("SpreadMode")[
+			luabind::value("SpreadRandom", Gib::SpreadMode::SpreadRandom),
+			luabind::value("SpreadEven", Gib::SpreadMode::SpreadEven),
+			luabind::value("SpreadSpiral", Gib::SpreadMode::SpreadSpiral)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, GlobalScript) {
 		return AbstractTypeLuaClassDefinition(GlobalScript, Entity)
 
@@ -843,6 +868,7 @@ namespace RTE {
 
 		.def_readonly("Attachables", &MOSRotating::m_Attachables, luabind::return_stl_iterator)
 		.def_readonly("Wounds", &MOSRotating::m_Wounds, luabind::return_stl_iterator)
+		.def_readonly("Gibs", &MOSRotating::m_Gibs, luabind::return_stl_iterator)
 
 		.def("AddRecoil", &MOSRotating::AddRecoil)
 		.def("SetRecoil", &MOSRotating::SetRecoil)

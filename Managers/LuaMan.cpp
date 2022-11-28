@@ -134,6 +134,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),

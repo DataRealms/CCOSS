@@ -244,8 +244,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
 	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+	
+- New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
+
+- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
+
+- New `Settings.ini` property `PathFinderGridNodeSize` to define the size of the pathfinder's graph nodes, in pixels. 
+
+- New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness.  
+This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInterval`.
+
+- New Lua (R) `TimerMan` properties `AIDeltaTimeMS` and `AIDeltaTimeSecs` to get the time that has passed since the last AI update.
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
+- New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
+
+- Expose `Gib` to Lua.  
+	You can read and write the following properties:  
+	```
+	gib.ParticlePreset = movableObject;
+	gib.Offset = vector;
+	gib.Count = intValue;
+	gib.Spread = angleInRadians;
+	gib.MinVelocity = floatValue;
+	gib.MaxVelocity = floatValue;
+	gib.LifeVariation = floatValue;
+	gib.InheritsVel = bool;
+	gib.IgnoresTeamHits = bool;
+	gib.SpreadMode = SpreadMode;
+	```
+
+	The `SpreadMode` property accepts values from the `SpreadMode` enum:  
+	```
+	(0) Gib.SpreadRandom
+	(1) Gib.SpreadEven
+	(2) Gib.SpreadSpiral
+	```
+
+	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
 
 </details>
 
@@ -347,6 +384,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(36) EditorTeam4
 	```
 
+- Major improvements to pathfinding performance and AI decision making.
+
 - Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
 
 - `MOSRotating` based presets without an `AtomGroup` definition will now crash with error message during loading.
@@ -373,6 +412,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
+- Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
 
 </details>
 

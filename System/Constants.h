@@ -22,6 +22,10 @@ namespace RTE {
 	static constexpr int c_DefaultAtomGroupResolution = 5; //!< The global default AtomGroup resolution setting.
 #pragma endregion
 
+#pragma region AI Constants
+    static constexpr float c_PathFindingDefaultDigStrength = 35.0F; //!< A default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
+#pragma endregion
+
 #pragma region Graphics Constants
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.

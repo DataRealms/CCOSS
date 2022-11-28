@@ -217,7 +217,7 @@ bool GAScripted::SceneIsCompatible(Scene *pScene, int teams) {
     }
 
     // Check if all Areas required by this are defined in the Scene
-    for (set<string>::iterator itr = m_RequiredAreas.begin(); itr != m_RequiredAreas.end(); ++itr) {
+    for (std::set<std::string>::iterator itr = m_RequiredAreas.begin(); itr != m_RequiredAreas.end(); ++itr) {
         // If Area is missing, this Scene is not up to par
         if (!pScene->HasArea(*itr)) {
             return false;
@@ -474,10 +474,10 @@ void GAScripted::CollectRequiredAreas() {
     m_RequiredAreas.clear();
 
     char rawLine[512];
-    string line;
-    string::size_type pos = 0;
-    string::size_type endPos = 0;
-    string::size_type commentPos = string::npos;
+    std::string line;
+    std::string::size_type pos = 0;
+    std::string::size_type endPos = 0;
+    std::string::size_type commentPos = std::string::npos;
     bool blockCommented = false;
 
     while (!pScriptFile->eof()) {
@@ -485,16 +485,16 @@ void GAScripted::CollectRequiredAreas() {
         pScriptFile->getline(rawLine, 512);
         line = rawLine;
         pos = endPos = 0;
-        commentPos = string::npos;
+        commentPos = std::string::npos;
 
         // Check for block comments
-        if (!blockCommented && (commentPos = line.find("--[[", 0)) != string::npos) {
+        if (!blockCommented && (commentPos = line.find("--[[", 0)) != std::string::npos) {
             blockCommented = true;
         }
 
         // Find the end of the block comment
         if (blockCommented) {
-            if ((commentPos = line.find("]]", commentPos == string::npos ? 0 : commentPos)) != string::npos) {
+            if ((commentPos = line.find("]]", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) {
                 blockCommented = false;
                 pos = commentPos;
             }
@@ -507,17 +507,17 @@ void GAScripted::CollectRequiredAreas() {
             do {
                 // Find the beginning of a mentioned Area name
                 pos = line.find(":GetArea(\"", pos);
-                if (pos != string::npos && pos < commentPos) {
+                if (pos != std::string::npos && pos < commentPos) {
                     // Move position forward to the actual Area name
                     pos += 10;
                     // Find the end of the Area name
                     endPos = line.find_first_of('"', pos);
                     // Copy it out and put into the list
-                    if (endPos != string::npos) {
+                    if (endPos != std::string::npos) {
                         m_RequiredAreas.insert(line.substr(pos, endPos - pos));
                     }
                 }
-            } while(pos != string::npos && pos < commentPos);
+            } while(pos != std::string::npos && pos < commentPos);
         }
     }
 

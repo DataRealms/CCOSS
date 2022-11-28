@@ -407,7 +407,7 @@ public:
 // Arguments:       Full preset name to add.
 // Return value:    None.
 
-	void AddAllowedItem(string presetName) { m_AllowedItems[presetName] = true; };
+	void AddAllowedItem(std::string presetName) { m_AllowedItems[presetName] = true; };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAllowedItem
@@ -416,7 +416,7 @@ public:
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
-	void RemoveAllowedItem(string presetName) { m_AllowedItems.erase(presetName); };
+	void RemoveAllowedItem(std::string presetName) { m_AllowedItems.erase(presetName); };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ClearAllowedItems
@@ -434,7 +434,7 @@ public:
 // Arguments:       Full preset name.
 // Return value:    None.
 
-	bool IsAllowedItem(string presetName) { return m_AllowedItems.find(presetName) != m_AllowedItems.end(); }
+	bool IsAllowedItem(std::string presetName) { return m_AllowedItems.find(presetName) != m_AllowedItems.end(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			AddAlwaysAllowedItem
@@ -443,7 +443,7 @@ public:
 // Arguments:       Full preset name to add.
 // Return value:    None.
 
-	void AddAlwaysAllowedItem(string presetName) { m_AlwaysAllowedItems[presetName] = true; };
+	void AddAlwaysAllowedItem(std::string presetName) { m_AlwaysAllowedItems[presetName] = true; };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveAlwaysAllowedItem
@@ -452,7 +452,7 @@ public:
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
-	void RemoveAlwaysAllowedItem(string presetName) { m_AlwaysAllowedItems.erase(presetName); };
+	void RemoveAlwaysAllowedItem(std::string presetName) { m_AlwaysAllowedItems.erase(presetName); };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ClearAlwaysAllowedItems
@@ -471,7 +471,7 @@ public:
 // Arguments:       Full preset name.
 // Return value:    None.
 
-	bool IsAlwaysAllowedItem(string presetName) { return m_AlwaysAllowedItems.find(presetName) != m_AlwaysAllowedItems.end(); }
+	bool IsAlwaysAllowedItem(std::string presetName) { return m_AlwaysAllowedItems.find(presetName) != m_AlwaysAllowedItems.end(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -482,7 +482,7 @@ public:
 // Arguments:       Full preset name to add.
 // Return value:    None.
 
-	void AddProhibitedItem(string presetName) { m_ProhibitedItems[presetName] = true; };
+	void AddProhibitedItem(std::string presetName) { m_ProhibitedItems[presetName] = true; };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			RemoveProhibitedItem
@@ -491,7 +491,7 @@ public:
 // Arguments:       Full preset name to remove.
 // Return value:    None.
 
-	void RemoveProhibitedItem(string presetName) { m_ProhibitedItems.erase(presetName); };
+	void RemoveProhibitedItem(std::string presetName) { m_ProhibitedItems.erase(presetName); };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ClearProhibitedItems
@@ -509,7 +509,7 @@ public:
 // Arguments:       Full preset name.
 // Return value:    None.
 
-	bool IsProhibitedItem(string presetName) { return m_ProhibitedItems.find(presetName) != m_ProhibitedItems.end(); }
+	bool IsProhibitedItem(std::string presetName) { return m_ProhibitedItems.find(presetName) != m_ProhibitedItems.end(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ForceRefresh
@@ -582,7 +582,7 @@ public:
 // Arguments:       Full preset name of item.
 // Return value:    Whether the purchase can be conducted or the item is out of stock.
 
-	bool CommitPurchase(string presetName);
+	bool CommitPurchase(std::string presetName);
 
 #pragma region Faction Theme Handling
 	/// <summary>

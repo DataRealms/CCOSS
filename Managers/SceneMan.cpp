@@ -337,7 +337,7 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
     if (propName == "AddMaterial")
     {
         // Get this before reading Object, since if it's the last one in its datafile, the stream will show the parent file instead
-        string objectFilePath = reader.GetCurrentFilePath();
+        std::string objectFilePath = reader.GetCurrentFilePath();
 
         // Don't use the << operator, because it adds the material to the PresetMan before we get a chance to set the proper ID!
         Material *pNewMat = new Material;
@@ -358,7 +358,7 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
                 // Assign the final ID to the material and register it in the palette
                 pNewMat->SetIndex(tryId);
                 m_apMatPalette.at(tryId) = pNewMat;
-                m_MatNameMap.insert(pair<string, unsigned char>(string(pNewMat->GetPresetName()), pNewMat->GetIndex()));
+                m_MatNameMap.insert(std::pair<std::string, unsigned char>(std::string(pNewMat->GetPresetName()), pNewMat->GetIndex()));
                 // Now add the instance, when ID has been registered!
                 g_PresetMan.AddEntityPreset(pNewMat, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
                 ++m_MaterialCount;
@@ -648,7 +648,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 
 Material const * SceneMan::GetMaterial(const std::string &matName)
 {
-    map<std::string, unsigned char>::iterator itr = m_MatNameMap.find(matName);
+    std::map<std::string, unsigned char>::iterator itr = m_MatNameMap.find(matName);
     if (itr == m_MatNameMap.end())
     {
         g_ConsoleMan.PrintString("ERROR: Material of name: " + matName + " not found!");
@@ -920,7 +920,7 @@ void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
 
 void SceneMan::ClearAllMOIDDrawings()
 {
-    for (list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
+    for (std::list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
         ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
 
     m_MOIDDrawings.clear();
@@ -3193,7 +3193,7 @@ int SceneMan::WrapRect(const IntRect &wrapRect, std::list<IntRect> &outputList)
 //                  wrapped scene axis, it will be added twice to the output list. If it
 //                  doesn't straddle any seam, it will be only added once.
 
-int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
+int SceneMan::WrapBox(const Box &wrapBox, std::list<Box> &outputList)
 {
     // Unflip the input box, or checking will be tedious
     Box flipBox(wrapBox);

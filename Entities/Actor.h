@@ -842,7 +842,7 @@ ClassInfoGetters;
 // Arguments:       Preset name of an item to remove.
 // Return value:    None.
 
-	void RemoveInventoryItem(string presetName);
+	void RemoveInventoryItem(std::string presetName);
 
     /// <summary>
     /// Removes and returns the inventory item at the given index. Ownership IS transferred.

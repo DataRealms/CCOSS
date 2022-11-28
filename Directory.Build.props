@@ -1,0 +1,5 @@
+<Project> 
+	<PropertyGroup>
+		<EnableUnitySupport>true</EnableUnitySupport> 
+	</PropertyGroup>
+</Project>

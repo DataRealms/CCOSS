@@ -234,7 +234,7 @@ namespace RTE {
 			std::string serverName;
 			int port;
 
-			string::size_type portPos = std::string::npos;
+			std::string::size_type portPos = std::string::npos;
 			portPos = g_SettingsMan.GetNATServiceAddress().find(":");
 
 			if (portPos != std::string::npos) {

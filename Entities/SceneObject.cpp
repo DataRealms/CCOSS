@@ -20,7 +20,7 @@
 namespace RTE {
 
 AbstractClassInfo(SceneObject, Entity);
-const string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
+const std::string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -349,7 +349,7 @@ float SceneObject::GetGoldValue(int nativeModule, float foreignMult, float nativ
 // Description:     Gets a descriptive string describing the cost to purchase this item,
 //                  in oz's of gold.
 
-string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, float nativeMult) const
+std::string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, float nativeMult) const
 {
     float subjValue = GetGoldValue(nativeModule, foreignMult, nativeMult);
 

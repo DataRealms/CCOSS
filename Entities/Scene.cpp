@@ -37,7 +37,7 @@
 namespace RTE {
 
 ConcreteClassInfo(Scene, Entity, 0);
-const string Scene::Area::c_ClassName = "Area";
+const std::string Scene::Area::c_ClassName = "Area";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ void Scene::Area::Clear()
 
 int Scene::Area::Create(const Area &reference)
 {
-    for (vector<Box>::const_iterator itr = reference.m_BoxList.begin(); itr != reference.m_BoxList.end(); ++itr)
+    for (std::vector<Box>::const_iterator itr = reference.m_BoxList.begin(); itr != reference.m_BoxList.end(); ++itr)
         m_BoxList.push_back(*itr);
 
     m_Name = reference.m_Name;
@@ -118,7 +118,7 @@ int Scene::Area::Save(Writer &writer) const
 {
     Serializable::Save(writer);
 
-    for (vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
+    for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
     {
         writer.NewProperty("AddBox");
         writer << *itr;
@@ -171,7 +171,7 @@ bool Scene::Area::HasNoArea() const
         return true;
 
     // Search through the boxes to see if we find any with both width and height
-    for (vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
+    for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
     {
         if (!itr->IsEmpty())
             return false;
@@ -188,15 +188,15 @@ bool Scene::Area::HasNoArea() const
 
 bool Scene::Area::IsInside(const Vector &point) const
 {
-    list<Box> wrappedBoxes;
-    for (vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             if (wItr->IsWithinBox(point))
                 return true;
@@ -214,15 +214,15 @@ bool Scene::Area::IsInside(const Vector &point) const
 
 bool Scene::Area::IsInsideX(float pointX) const
 {
-    list<Box> wrappedBoxes;
-    for (vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             if (wItr->IsWithinBoxX(pointX))
                 return true;
@@ -240,15 +240,15 @@ bool Scene::Area::IsInsideX(float pointX) const
 
 bool Scene::Area::IsInsideY(float pointY) const
 {
-    list<Box> wrappedBoxes;
-    for (vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             if (wItr->IsWithinBoxY(pointY))
                 return true;
@@ -273,15 +273,15 @@ bool Scene::Area::MovePointInsideX(float &pointX, int direction) const
     float shortest = notFoundValue;
     float shortestConstrained = notFoundValue;
     float testDistance = 0;
-    list<Box> wrappedBoxes;
-    for (vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::const_iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // Check against one edge of the box for the shortest distance
             testDistance = g_SceneMan.ShortestDistanceX(pointX, (*wItr).GetCorner().m_X, false, direction);
@@ -326,15 +326,15 @@ bool Scene::Area::MovePointInsideX(float &pointX, int direction) const
 
 Box * Scene::Area::GetBoxInside(const Vector &point)
 {
-    list<Box> wrappedBoxes;
-    for (vector<Box>::iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // Return the BoxList box, not the inconsequential wrapped copy
             if (wItr->IsWithinBox(point))
@@ -354,15 +354,15 @@ Box Scene::Area::RemoveBoxInside(const Vector &point)
 {
     Box returnBox;
 
-    list<Box> wrappedBoxes;
-    for (vector<Box>::iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
+    std::list<Box> wrappedBoxes;
+    for (std::vector<Box>::iterator aItr = m_BoxList.begin(); aItr != m_BoxList.end(); ++aItr)
     {
         // Handle wrapped boxes properly
         wrappedBoxes.clear();
         g_SceneMan.WrapBox(*aItr, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             if (wItr->IsWithinBox(point))
             {
@@ -390,7 +390,7 @@ Vector Scene::Area::GetCenterPoint() const
     if (!m_BoxList.empty())
     {
         float totalWeight = 0;
-        for (vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
+        for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
         {
             // Doubly weighted
             areaCenter += (*itr).GetCenter() * (*itr).GetArea() * 2;
@@ -533,11 +533,11 @@ int Scene::Create(const Scene &reference)
 
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
     {
-        for (list<SceneObject *>::const_iterator oItr = reference.m_PlacedObjects[set].begin(); oItr != reference.m_PlacedObjects[set].end(); ++oItr)
+        for (std::list<SceneObject *>::const_iterator oItr = reference.m_PlacedObjects[set].begin(); oItr != reference.m_PlacedObjects[set].end(); ++oItr)
             m_PlacedObjects[set].push_back(dynamic_cast<SceneObject *>((*oItr)->Clone()));
     }
 
-    for (list<SLBackground *>::const_iterator lItr = reference.m_BackLayerList.begin(); lItr != reference.m_BackLayerList.end(); ++lItr)
+    for (std::list<SLBackground *>::const_iterator lItr = reference.m_BackLayerList.begin(); lItr != reference.m_BackLayerList.end(); ++lItr)
         m_BackLayerList.push_back(dynamic_cast<SLBackground *>((*lItr)->Clone()));
 
     for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
@@ -553,7 +553,7 @@ int Scene::Create(const Scene &reference)
     }
 
     // Copy areas
-    for (list<Area>::const_iterator aItr = reference.m_AreaList.begin(); aItr != reference.m_AreaList.end(); ++aItr)
+    for (std::list<Area>::const_iterator aItr = reference.m_AreaList.begin(); aItr != reference.m_AreaList.end(); ++aItr)
         m_AreaList.push_back(*aItr);
 
     m_GlobalAcc = reference.m_GlobalAcc;
@@ -642,14 +642,14 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 
 		// Indicates whether we need to process static brain deployments or mobile
 		// whichever comes first is selected and used everywhere
-		string activeBrainDeployment[Activity::MaxTeamCount];
+        std::string activeBrainDeployment[Activity::MaxTeamCount];
 
 		// Lists of found brain deployment locations used to place brain
 		std::vector<Vector> brainLocations[Activity::MaxTeamCount];
 
         
-		//for (list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr) // I'm using this to dump AI plans with ctrl+w
-        for (list<SceneObject *>::iterator oItr = m_PlacedObjects[PLACEONLOAD].begin(); oItr != m_PlacedObjects[PLACEONLOAD].end(); ++oItr)
+		//for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr) // I'm using this to dump AI plans with ctrl+w
+        for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[PLACEONLOAD].begin(); oItr != m_PlacedObjects[PLACEONLOAD].end(); ++oItr)
 		{
             // MovableObject:s get added to the MovableMan
             MovableObject *pMO = dynamic_cast<MovableObject *>(*oItr);
@@ -769,7 +769,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 						// Try to select previousy selected assembly
 						if (pBAS->IsOneTypePerScene())
 						{
-							map<string, const BunkerAssembly *>::iterator itr = m_SelectedAssemblies.find(pBAS->GetModuleAndPresetName());
+							auto itr = m_SelectedAssemblies.find(pBAS->GetModuleAndPresetName());
 							if (itr != m_SelectedAssemblies.end())
 								pBAPreset = (*itr).second;
 						}
@@ -784,19 +784,19 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 								// Remember selected BunkerAssembly for this scheme to use it everywhere on the map.
 								if (pBAS->IsOneTypePerScene())
 								{
-									m_SelectedAssemblies.insert(pair<string, const BunkerAssembly *>(pBAS->GetModuleAndPresetName(), pBAPreset));
+									m_SelectedAssemblies.insert(std::pair<std::string, const BunkerAssembly *>(pBAS->GetModuleAndPresetName(), pBAPreset));
 
 									// Find out if this scheme has symmetric scheme, and this assembly have symmetric version
 									// so we could set them to be used when we need to create symmetric versions of this scheme
-									string symmetricScheme = pBAS->GetSymmetricSchemeName();
-									string symmetricAssembly = pBAPreset->GetSymmetricAssemblyName();
+                                    std::string symmetricScheme = pBAS->GetSymmetricSchemeName();
+                                    std::string symmetricAssembly = pBAPreset->GetSymmetricAssemblyName();
 
 									if (symmetricScheme.size() > 0 && symmetricAssembly.size() > 0)
 									{
 										const BunkerAssembly * pBAPresetSymmetric = dynamic_cast<const BunkerAssembly *>(g_PresetMan.GetEntityPreset("BunkerAssembly", symmetricAssembly));
 
 										if (pBAPresetSymmetric)
-											m_SelectedAssemblies.insert(pair<string, const BunkerAssembly *>(symmetricScheme, pBAPresetSymmetric));
+											m_SelectedAssemblies.insert(std::pair<std::string, const BunkerAssembly *>(symmetricScheme, pBAPresetSymmetric));
 									}
 								}
 							}
@@ -909,7 +909,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // Go through and init the teams on all remaining placed objects, so their flag icons etc are correct for the current Activity
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
     {
-        for (list<SceneObject *>::iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
+        for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
             (*oItr)->SetTeam((*oItr)->GetTeam());
     }
 
@@ -945,9 +945,9 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 
 int Scene::ExpandAIPlanAssemblySchemes()
 {
-	list<SceneObject *> newAIPlan;
+	std::list<SceneObject *> newAIPlan;
 
-    for (list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr)
+    for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr)
 	{
 		BunkerAssemblyScheme *pBAS = dynamic_cast<BunkerAssemblyScheme *>(*oItr);
 
@@ -959,7 +959,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 			// Try to select previousy selected assembly
 			if (pBAS->IsOneTypePerScene())
 			{
-				map<string, const BunkerAssembly *>::iterator itr = m_SelectedAssemblies.find(pBAS->GetModuleAndPresetName());
+                auto itr = m_SelectedAssemblies.find(pBAS->GetModuleAndPresetName());
 				if (itr != m_SelectedAssemblies.end())
 					pBAPreset = (*itr).second;
 			}
@@ -971,7 +971,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 
 				// Remember selected BunkerAssembly for this scheme to use it everywhere on the map.
 				if (pBAS->IsOneTypePerScene())
-					m_SelectedAssemblies.insert(pair<string, const BunkerAssembly *>(pBAS->GetModuleAndPresetName(), pBAPreset));
+					m_SelectedAssemblies.insert(std::pair<std::string, const BunkerAssembly *>(pBAS->GetModuleAndPresetName(), pBAPreset));
 			}
 
 			// Add found assembly to the AI plan
@@ -1006,7 +1006,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 
 	// Copy new AI plan list to replace the original
 	m_PlacedObjects[AIPLAN].clear();
-    for (list<SceneObject *>::iterator oItr = newAIPlan.begin(); oItr != newAIPlan.end(); ++oItr)
+    for (std::list<SceneObject *>::iterator oItr = newAIPlan.begin(); oItr != newAIPlan.end(); ++oItr)
 		m_PlacedObjects[AIPLAN].push_back(*oItr);
 
     return 0;
@@ -1021,7 +1021,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves currently loaded bitmap data in memory to disk.
 
-int Scene::SaveData(string pathBase)
+int Scene::SaveData(std::string pathBase)
 {
     if (pathBase.empty())
         return -1;
@@ -1375,8 +1375,8 @@ int Scene::Save(Writer &writer) const
 			Actor *pActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
             if (pActor)
             {
-                const deque<MovableObject *> *pInventory = pActor->GetInventory();
-                for (deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
+                const std::deque<MovableObject *> *pInventory = pActor->GetInventory();
+                for (std::deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
                 {
                     writer.NewProperty("AddInventory");
                     writer.ObjectStart((*iitr)->GetClassName());
@@ -1429,7 +1429,7 @@ int Scene::Save(Writer &writer) const
 
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
     {
-        for (list<SceneObject *>::const_iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
+        for (std::list<SceneObject *>::const_iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
         {
             std::string presetName = (*oItr)->GetModuleAndPresetName();
             if (presetName.empty() || presetName == "None")
@@ -1512,8 +1512,8 @@ int Scene::Save(Writer &writer) const
 							writer << pActor->GetDeploymentID();
 						}
 
-                        const deque<MovableObject *> *pInventory = pActor->GetInventory();
-                        for (deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
+                        const std::deque<MovableObject *> *pInventory = pActor->GetInventory();
+                        for (std::deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
                         {
                             writer.NewProperty("AddInventory");
                             writer.ObjectStart((*iitr)->GetClassName());
@@ -1557,7 +1557,7 @@ int Scene::Save(Writer &writer) const
         }
     }
 
-    for (list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (std::list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         writer.NewProperty("AddBackgroundLayer");
         (*slItr)->SavePresetCopy(writer);
@@ -1622,7 +1622,7 @@ int Scene::Save(Writer &writer) const
         writer.NewProperty("ScanScheduledTeam4");
         writer << m_ScanScheduled[Activity::TeamFour];
     }
-	for (list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
+	for (std::list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
 	{
 		// Only write the area if it has any boxes/area at all
 		if (!(*aItr).HasNoArea())
@@ -1653,20 +1653,20 @@ void Scene::Destroy(bool notInherited)
 
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
     {
-        for (list<SceneObject *>::iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
+        for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
         {
             delete (*oItr);
             *oItr = 0;
         }
     }
 
-    for (list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (std::list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         delete (*slItr);
         *slItr = 0;
     }
 
-	for (list<Deployment *>::iterator slItr = m_Deployments.begin(); slItr != m_Deployments.end(); ++slItr)
+	for (std::list<Deployment *>::iterator slItr = m_Deployments.begin(); slItr != m_Deployments.end(); ++slItr)
 	{
 		delete (*slItr);
 		*slItr = 0;
@@ -1763,7 +1763,7 @@ void Scene::ClearSeenPixels(int team)
         // Clear all the pixels off the map, set them to key color
         if (m_apUnseenLayer[team])
         {
-            for (list<Vector>::iterator itr = m_SeenPixels[team].begin(); itr != m_SeenPixels[team].end(); ++itr)
+            for (std::list<Vector>::iterator itr = m_SeenPixels[team].begin(); itr != m_SeenPixels[team].end(); ++itr)
             {
                 putpixel(m_apUnseenLayer[team]->GetBitmap(), (*itr).m_X, (*itr).m_Y, g_MaskColor);
 
@@ -1783,7 +1783,7 @@ void Scene::ClearSeenPixels(int team)
         m_SeenPixels[team].clear();
 
         // Transfer all cleaned pixels from orphans to the seen pixels for next frame
-        for (list<Vector>::iterator itr = m_CleanedPixels[team].begin(); itr != m_CleanedPixels[team].end(); ++itr)
+        for (std::list<Vector>::iterator itr = m_CleanedPixels[team].begin(); itr != m_CleanedPixels[team].end(); ++itr)
             m_SeenPixels[team].push_back(*itr);
 
         // We have moved the cleaned pixels to the seen pixels list, now clean up the list for next frame
@@ -2051,7 +2051,7 @@ void Scene::AddPlacedObject(int whichSet, SceneObject *pObjectToAdd, int listOrd
     else
     {
         // Find the spot
-        list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin();
+        std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin();
         for (int i = 0; i != listOrder && itr != m_PlacedObjects[whichSet].end(); ++i, ++itr)
             ;
 
@@ -2079,7 +2079,7 @@ void Scene::RemovePlacedObject(int whichSet, int whichToRemove)
     else
     {
         // Find the spot
-        list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin();
+        std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin();
         for (int i = 0; i != whichToRemove && itr != m_PlacedObjects[whichSet].end(); ++i, ++itr)
             ;
 
@@ -2099,7 +2099,7 @@ const SceneObject * Scene::PickPlacedObject(int whichSet, Vector &scenePoint, in
 {
     // REVERSE!
     int i = m_PlacedObjects[whichSet].size() - 1;
-    for (list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)
+    for (std::list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)
     {
         if ((*itr)->IsOnScenePoint(scenePoint))
         {
@@ -2136,7 +2136,7 @@ const SceneObject * Scene::PickPlacedActorInRange(int whichSet, Vector &scenePoi
 
 	// REVERSE!
     int i = m_PlacedObjects[whichSet].size() - 1;
-    for (list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)
+    for (std::list<SceneObject *>::const_reverse_iterator itr = m_PlacedObjects[whichSet].rbegin(); itr != m_PlacedObjects[whichSet].rend(); ++itr, --i)
     {
 		if (dynamic_cast<const Actor *>(*itr))
 		{
@@ -2176,7 +2176,7 @@ void Scene::UpdatePlacedObjects(int whichSet)
                 m_ResidentBrains[player]->Update();
     }
 
-    for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
+    for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
     {
         (*itr)->Update();
     }
@@ -2192,7 +2192,7 @@ int Scene::ClearPlacedObjectSet(int whichSet, bool weHaveOwnership)
 {
     if (weHaveOwnership) 
     {
-        for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
+        for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
         {
             delete *itr;
         }
@@ -2215,7 +2215,7 @@ SceneObject * Scene::GetResidentBrain(int player) const
 //    if (m_ResidentBrains[player])
         return m_ResidentBrains[player];
 
-//    for (list<SceneObject *>::iterator itr = m_PlacedObjects[PLACEONLOAD].begin(); itr != m_PlacedObjects[PLACEONLOAD].end(); ++itr)
+//    for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[PLACEONLOAD].begin(); itr != m_PlacedObjects[PLACEONLOAD].end(); ++itr)
 //    {
 //        (*itr)->teamUpdate();
 //    }
@@ -2259,7 +2259,7 @@ int Scene::GetResidentBrainCount() const
 
 bool Scene::SetArea(Area &newArea)
 {
-    for (list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
+    for (std::list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
     {
         // Try to find an existing area of the same name
         if ((*aItr).GetName() == newArea.GetName())
@@ -2283,9 +2283,9 @@ bool Scene::SetArea(Area &newArea)
 // Description:     Checks for the existence of a specific Area identified by a name.
 //                  This won't throw any errors to the console if the Area isn't found.
 
-bool Scene::HasArea(string areaName)
+bool Scene::HasArea(std::string areaName)
 {
-    for (list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
+    for (std::list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
     {
         if ((*aItr).GetName() == areaName)
             return true;
@@ -2320,7 +2320,7 @@ Scene::Area * Scene::GetArea(const std::string_view &areaName, bool luaWarnNotEr
 
 bool Scene::RemoveArea(std::string areaName)
 {
-    for (list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
+    for (std::list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
     {
         if ((*aItr).GetName() == areaName)
         {
@@ -2339,12 +2339,12 @@ bool Scene::RemoveArea(std::string areaName)
 //                  no Area of the name is found, this just returns false without error.
 // Arguments:       The name of the Area to try to check against.
 
-bool Scene::WithinArea(string areaName, const Vector &point) const
+bool Scene::WithinArea(std::string areaName, const Vector &point) const
 {
     if (areaName.empty())
         return false;
 
-    for (list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
+    for (std::list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
     {
         if ((*aItr).GetName() == areaName && (*aItr).IsInside(point))
             return true;
@@ -2366,7 +2366,7 @@ void Scene::SetTeamOwnership(int newTeam)
     // Go through all the things placed and make sure they are all set to the new owner team
     for (int set = PLACEONLOAD; set <= AIPLAN; ++set)
     {
-        for (list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
+        for (std::list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
         {
             if (*bpItr)
                 (*bpItr)->SetTeam(m_OwnedByTeam);
@@ -2411,9 +2411,9 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
     // The last resident brain that is encountered in the building list, starting with the preexisting resident brain. Not owned here
     SceneObject *pLastBrain = m_ResidentBrains[player];
     // The total list of objects that WILL be placed as the building phase goes on for real - nothing is owned by this!
-    list<SceneObject *> virtualPlacedList;
+    std::list<SceneObject *> virtualPlacedList;
     // Add all the already placed objects int he scene to it; then we'll add the objects that would be placed this round - ownership is NOT passed
-    for (list<SceneObject *>::const_iterator placedItr = m_PlacedObjects[PLACEONLOAD].begin(); placedItr != m_PlacedObjects[PLACEONLOAD].end(); ++placedItr)
+    for (std::list<SceneObject *>::const_iterator placedItr = m_PlacedObjects[PLACEONLOAD].begin(); placedItr != m_PlacedObjects[PLACEONLOAD].end(); ++placedItr)
         virtualPlacedList.push_back(*placedItr);
 
     // First go through the blueprints that are already placed, THEN go through the AI plan objects if we are specified to
@@ -2426,7 +2426,7 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
         // Two passes, one for only things placed by this player, second to see if we can still afford any placed by teammates
         for (int pass = 0; pass < 2; ++pass)
         {
-            for (list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
+            for (std::list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
             {
                 // Skip objects on the first pass that aren't placed by this player
                 // Skip objects on the second pass that WERE placed by this player.. because we already counted them 
@@ -2610,8 +2610,8 @@ float Scene::ApplyBuildBudget(int player, int *pObjectsBuilt)
     int placedCount = 0;
     float fundsSpent = 0;
     float objectCost = 0;
-    list<SceneObject *>::iterator bpItr;
-    list<SceneObject *>::iterator delItr;
+    std::list<SceneObject *>::iterator bpItr;
+    std::list<SceneObject *>::iterator delItr;
     SceneObject *pObjectToPlace = 0;
     Deployment *pDeployment = 0;
     // The last resident brain that is encountered in the building list, starting with the preexisting resident brain. Not owned here
@@ -2828,8 +2828,8 @@ int Scene::RemoveAllPlacedActors(int exceptTeam)
 
     bool remove = false;
     Actor *pActor = 0;
-    list<SceneObject *>::iterator soItr;
-    list<SceneObject *>::iterator delItr;
+    std::list<SceneObject *>::iterator soItr;
+    std::list<SceneObject *>::iterator delItr;
 
     // Scrub both blueprints and the stuff that is already bought and about to be placed on loading the scene
     for (int set = PLACEONLOAD; set <= BLUEPRINT; ++set)
@@ -2875,7 +2875,7 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
     int changedCount = 0;
 
     ADoor *pDoor = 0;
-    list<SceneObject *>::iterator soItr;
+    std::list<SceneObject *>::iterator soItr;
 
     // Affect both blueprints and the stuff that is already bought and about to be placed on loading the scene
     for (int set = PLACEONLOAD; set <= BLUEPRINT; ++set)
@@ -2985,8 +2985,8 @@ int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool moveP
             pathSize = m_ScenePath.size();
             if (movePathToGround) {
                 // Smash all airborne waypoints down to just above the ground
-                list<Vector>::iterator finalItr = m_ScenePath.end();
-				for (list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr) {
+                std::list<Vector>::iterator finalItr = m_ScenePath.end();
+				for (std::list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr) {
 					(*lItr) = g_SceneMan.MovePointToGround((*lItr), 20, 15);
 				}
             }
@@ -3053,7 +3053,7 @@ void Scene::Update()
 		{
 			if (m_apUnseenLayer[team])
 			{
-				for (list<Vector>::iterator itr = m_SeenPixels[team].begin(); itr != m_SeenPixels[team].end(); ++itr)
+				for (std::list<Vector>::iterator itr = m_SeenPixels[team].begin(); itr != m_SeenPixels[team].end(); ++itr)
 				{
 					putpixel(m_apUnseenLayer[team]->GetBitmap(), (*itr).m_X, (*itr).m_Y, g_WhiteColor);
 				}

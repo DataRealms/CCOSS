@@ -405,16 +405,16 @@ namespace RTE {
 		return isDefined;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
 		std::string fullPath = System::GetWorkingDirectory() + filePath;
 
 		m_Paths.clear();
 
-		for (const auto& entry : std::filesystem::directory_iterator{fullPath}) {
-			if (entry.is_directory()) {
-				m_Paths.push_back(entry.path().filename().string());
+		for (const auto &directoryEntry : std::filesystem::directory_iterator{fullPath}) {
+			if (directoryEntry.is_directory()) {
+				m_Paths.push_back(directoryEntry.path().filename().string());
 			}
 		}
 
@@ -428,9 +428,9 @@ namespace RTE {
 
 		m_Paths.clear();
 
-		for (const auto& entry : std::filesystem::directory_iterator{fullPath}) {
-			if (entry.is_regular_file()) {
-				m_Paths.push_back(entry.path().filename().string());
+		for (const auto &directoryEntry : std::filesystem::directory_iterator{fullPath}) {
+			if (directoryEntry.is_regular_file()) {
+				m_Paths.push_back(directoryEntry.path().filename().string());
 			}
 		}
 

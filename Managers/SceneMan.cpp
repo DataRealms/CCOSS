@@ -317,8 +317,10 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
                 pNewMat->SetIndex(tryId);
 
                 // Ensure out-of-bounds material is unbreakable
-                // This is set as a very high value in data anyways, but not high enough ;)
                 if (tryId == g_MaterialOutOfBounds) {
+                    RTEAssert(pNewMat->GetIntegrity() == 0.0F, 
+                        "Material with index " + std::to_string(g_MaterialOutOfBounds) + " (i.e out-of-bounds material) has an integrity set in ini!\n" +
+                        "This material is set as unbreakable, so this value will be ignored. Remove the Integrity/StructuralIntegrity value set for this material.");
                     pNewMat->SetAsForceUnbreakable();
                 }
 

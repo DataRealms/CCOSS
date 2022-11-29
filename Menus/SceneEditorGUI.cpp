@@ -1563,9 +1563,10 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
-	int offsetX = 0;
+    int offsetX = 0;
 	int spacing = 20;
 	int orbitPosX;
+
 	// If the ceiling directly above is blocked, search the surroundings for gaps.
 	for (int i = 0; i < g_SceneMan.GetSceneWidth() / spacing; i++) {
 		orbitPosX = brainPos.GetFloorIntX() + offsetX;
@@ -1576,7 +1577,9 @@ void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
 		}
 		if (!g_SceneMan.IsWithinBounds(orbitPosX, 0)) { offsetX *= -1; }
 	}
-	m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(brainPos, Vector(orbitPosX, 0), m_BrainSkyPath, 5.0F);
+
+	Activity::Teams team = static_cast<Activity::Teams>(g_ActivityMan.GetActivity()->GetTeamOfPlayer(m_pController->GetPlayer()));
+	m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(brainPos, Vector(orbitPosX, 0), m_BrainSkyPath, c_PathFindingDefaultDigStrength, team);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

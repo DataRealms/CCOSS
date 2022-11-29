@@ -504,14 +504,14 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrenght
+// Method:          EstimateDigStrength
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength any digger this actor is carrying
 //                  can penetrate.
 // Arguments:       None.
-// Return value:    One or the maximum material strength this actor's digger can penetrate.
+// Return value:    A default dig strength (what the actor can be expected to just walk through without tools), or the maximum material strength this actor's digger can penetrate.
 
-    float EstimateDigStrenght();
+    float EstimateDigStrength() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

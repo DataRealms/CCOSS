@@ -1184,25 +1184,27 @@ bool AHuman::EquipDiggingTool(bool doEquip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrenght
+// Method:          EstimateDigStrength
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength this actor can move through.
 
-float AHuman::EstimateDigStrenght()
+float AHuman::EstimateDigStrength()
 {
-    float maxPenetration = 1;
+    float maxPenetration = Actor::EstimateDigStrength();
     
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return maxPenetration;
     
-    HDFirearm *pTool = 0;
+    HDFirearm *pTool = nullptr;
 
     // Check if the currently held device is already the desired type
     if (m_pFGArm->HoldsSomething())
     {
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
-            return pTool->EstimateDigStrenght();
+        {
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+        }
     }
 
     // Go through the inventory looking for the proper device
@@ -1211,7 +1213,9 @@ float AHuman::EstimateDigStrenght()
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
-            maxPenetration = std::max(pTool->EstimateDigStrenght(), maxPenetration);
+        {
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+        }
     }
     
     return maxPenetration;
@@ -1709,10 +1713,7 @@ void AHuman::ResetAllTimers()
 // Description:     Updates the path to move along to the currently set movetarget.
 
 bool AHuman::UpdateMovePath()
-{
-    // Estimate how much material this actor can dig through
-    m_DigStrength = EstimateDigStrenght();
-    
+{    
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())
         return false;
@@ -1731,12 +1732,11 @@ bool AHuman::UpdateMovePath()
             nextItr++;
             smashedPoint = g_SceneMan.MovePointToGround((*lItr), m_CharHeight*0.2, 7);
 
-            Vector notUsed;
-
             // Only smash if the new location doesn't cause the path to intersect hard terrain ahead or behind of it
             // Try three times to halve the height to see if that won't intersect
             for (int i = 0; i < 3; i++)
             {
+                Vector notUsed;
                 if (!g_SceneMan.CastStrengthRay(previousPoint, smashedPoint - previousPoint, 5, notUsed, 3, g_MaterialDoor) &&
                     nextItr != m_MovePath.end() && !g_SceneMan.CastStrengthRay(smashedPoint, (*nextItr) - smashedPoint, 5, notUsed, 3, g_MaterialDoor))
                 {
@@ -1750,6 +1750,7 @@ bool AHuman::UpdateMovePath()
             previousPoint = (*lItr);
         }
     }
+
     return true;
 }
 

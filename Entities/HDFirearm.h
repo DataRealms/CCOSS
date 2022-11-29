@@ -738,13 +738,13 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  EstimateDigStrenght
+// Method:  EstimateDigStrength
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength one round in the magazine can destroy.
 // Arguments:       None.
 // Return value:    The maximum material strength the regular or the tracer round can destroy.
 
-    float EstimateDigStrenght ();
+    float EstimateDigStrength();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

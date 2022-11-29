@@ -83,7 +83,7 @@ namespace RTE {
 			}
 		}
 		// Create and allocate the pather class which will do the work
-		m_Pather = new MicroPather(this, allocate);
+		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, true);
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
 		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
@@ -172,8 +172,8 @@ namespace RTE {
 		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
 			for (PathNode *pathNode : nodeEntry) {
 				UpdateNodeCosts(pathNode);
-				// Should reset the changed flag since we're about to reset the pather
-				pathNode->IsChanged = false;
+				// Should reset the updated flag since we're about to reset the pather
+				pathNode->IsUpdated = false;
 			}
 		}
 		// Reset the pather when costs change, as per the docs
@@ -182,7 +182,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
+	bool PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
+		// If no node costs changed, then we don't need to reset the pather
+		bool anyChange = false;
+
 		Box box;
 		// Go through all the boxes and see if any of the node centers are inside each
 		for (const Box &boxListEntry : boxList) {
@@ -190,8 +193,8 @@ namespace RTE {
 			box = boxListEntry;
 			box.Unflip();
 
-			// Do the updates
-			UpdateNodeCostsInBox(box);
+			// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
+			anyChange = UpdateNodeCostsInBox(box) || anyChange;
 
 			// Take care of all wrapping situations of the box
 			if (g_SceneMan.SceneWrapsX()) {
@@ -199,10 +202,10 @@ namespace RTE {
 
 				if (box.m_Corner.m_X < 0) {
 					temp = Box(Vector(box.m_Corner.m_X + g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				} else if (box.m_Corner.m_X + box.m_Width > g_SceneMan.GetSceneWidth()) {
 					temp = Box(Vector(box.m_Corner.m_X - g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
@@ -210,23 +213,26 @@ namespace RTE {
 
 				if (box.m_Corner.m_Y < 0) {
 					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y + g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				} else if (box.m_Corner.m_Y + box.m_Height > g_SceneMan.GetSceneHeight()) {
 					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y - g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					UpdateNodeCostsInBox(temp);
+					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
 				}
 			}
 		}
 
-		// Reset the pather when costs change, as per the docs
-		m_Pather->Reset();
-
-		// Reset the changed flag on all nodes
 		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
 			for (PathNode *pathNode : nodeEntry) {
-				pathNode->IsChanged = false;
+				pathNode->IsUpdated = false;
 			}
 		}
+
+		if (anyChange) {
+			// Reset the pather when costs change, as per the micropather docs.
+			m_Pather->Reset();
+		}
+
+		return anyChange;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,56 +246,60 @@ namespace RTE {
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
 		const PathNode *node = static_cast<PathNode *>(state);
 		micropather::StateCost adjCost;
-		float strength = 0.0F;
+
+		// We do a little trick here, where we radiate out a little percentage of our average cost in all directions.
+		// This encourages the AI to generally try to give hard surfaces some berth when pathing, so we don't get too close and get stuck.
+		const float costRadiationMultiplier = 0.2F;
+		float radiatedCost = GetNodeAverageTransitionCost(*node) * costRadiationMultiplier;
 
 		// Add cost for digging upwards
 		if (node->Up) {
-			strength = node->UpCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F); // Four times more expensive when digging
+			float strength = node->UpCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 2000.0F : strength * 4.0F) + radiatedCost; // Four times more expensive when digging
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Right) {
-			strength = node->RightCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			float strength = node->RightCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Down) {
-			strength = node->DownCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			float strength = node->DownCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Left) {
-			strength = node->LeftCost;
-			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength);
+			float strength = node->LeftCost;
+			adjCost.cost = 1.0F + ((strength > m_DigStrength) ? strength * 1000.0F : strength) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
 		// Add cost for digging at 45 degrees and for digging upwards
 		if (node->UpRight) {
-			strength = node->UpRightCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
+			float strength = node->UpRightCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
-			strength = node->RightDownCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
+			float strength = node->RightDownCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
-			strength = node->DownLeftCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F);
+			float strength = node->DownLeftCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 1414.0F : strength * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
-			strength = node->LeftUpCost;
-			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F);  // Three times more expensive when digging
+			float strength = node->LeftUpCost;
+			adjCost.cost = 1.4F + ((strength > m_DigStrength) ? strength * 2828.0F : strength * 4.2F) + radiatedCost;;  // Three times more expensive when digging
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
@@ -298,15 +308,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float PathFinder::CostAlongLine(const Vector &start, const Vector &end) {
-		return g_SceneMan.CastMaxStrengthRay(start, end, 0);
+		return g_SceneMan.CastMaxStrengthRay(start, end, 0, g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::UpdateNodeCosts(PathNode *node) {
+	bool PathFinder::UpdateNodeCosts(PathNode *node) {
 		if (!node) {
-			return;
+			return false;
 		}
+
+		std::array<float, PathNode::c_MaxAdjacentNodeCount> oldCosts = node->AdjacentNodeCosts;
+
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
 		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
 		if (node->Right) { node->RightCost = CostAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
@@ -319,12 +332,25 @@ namespace RTE {
 		if (node->LeftUp) { node->LeftUpCost = std::max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
 
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
-		node->IsChanged = true;
+		node->IsUpdated = true;
+
+		for (int i = 0; i < PathNode::c_MaxAdjacentNodeCount; ++i) {
+			float delta = std::abs(oldCosts[i] - node->AdjacentNodeCosts[i]);
+			if (delta > c_NodeCostChangeEpsilon) {
+				return true;
+			}
+		}
+
+		// None of the updates was past our epsilon, so ignore it and pretend it never happened
+		node->AdjacentNodeCosts = oldCosts;
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::UpdateNodeCostsInBox(Box &box) {
+	bool PathFinder::UpdateNodeCostsInBox(Box &box) {
+		bool anyChange = false;
+
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
@@ -345,8 +371,27 @@ namespace RTE {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
 				node = m_NodeGrid[nodeX][nodeY];
 				// Update all the costs going out from each node which is found to be affected by the box
-				if (!node->IsChanged) { UpdateNodeCosts(node); }
+				if (!node->IsUpdated) {
+					// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
+					anyChange = UpdateNodeCosts(node) || anyChange;
+				}
 			}
 		}
+
+		return anyChange;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float PathFinder::GetNodeAverageTransitionCost(const PathNode &node) const {
+		float totalCostOfAdjacentNodes = 0.0F;
+		int count = 0;
+		for (const float &cost : node.AdjacentNodeCosts) {
+			if (cost < std::numeric_limits<float>::max()) {
+				totalCostOfAdjacentNodes += cost;
+				count++;
+			}
+		}
+		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0F);
 	}
 }

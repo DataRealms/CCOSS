@@ -1188,7 +1188,7 @@ public:
 //                  The ending position.
 //                  For every pixel checked along the line, how many to skip between them
 //                  for optimization reasons. 0 = every pixel is checked.
-//                  A material ID to ignore, IN ADDITION to Air. This defaults to doors, for legacy script purposes
+//                  A material ID to ignore, IN ADDITION to Air.
 // Return value:    The strongest material encountered
     const Material * CastMaxStrengthRayMaterial(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
 

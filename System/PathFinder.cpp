@@ -360,7 +360,7 @@ namespace RTE {
 
 			// Check if the material strength is more than our delta, or if a door has appeared/dissappeared (since we handle their costs in a special manner)
 			float delta = std::abs(oldMat->GetIntegrity() - newMat->GetIntegrity());
-			bool doorChanged = oldMat != newMat || (oldMat->GetIndex() == g_MaterialDoor || newMat->GetIndex() == g_MaterialDoor);
+			bool doorChanged = oldMat != newMat && (oldMat->GetIndex() == g_MaterialDoor || newMat->GetIndex() == g_MaterialDoor);
 			if (delta > c_NodeCostChangeEpsilon || doorChanged) {
 				return true;
 			}

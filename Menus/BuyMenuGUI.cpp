@@ -2034,7 +2034,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
             {
                 pSObject = dynamic_cast<SceneObject *>(*oItr);
                 // Only add buyable and non-brain items, unless they are explicitly set to be available.
-				if ((pSObject && pSObject->IsBuyable() && !pSObject->IsBuyableInObjectPickerOnly() && !pSObject->IsInGroup("Brains")) || GetOwnedItemsAmount((pSObject)->GetModuleAndPresetName()) > 0 || m_AlwaysAllowedItems.find((pSObject)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end()) {
+				if ((pSObject && pSObject->IsBuyable() && !pSObject->IsBuyableInObjectPickerOnly() && !pSObject->IsBuyableInAIOnly() && !pSObject->IsInGroup("Brains")) || GetOwnedItemsAmount((pSObject)->GetModuleAndPresetName()) > 0 || m_AlwaysAllowedItems.find((pSObject)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end()) {
 					tempList.push_back(pSObject);
 				}
             }

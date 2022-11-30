@@ -249,7 +249,7 @@ namespace RTE {
 				if (!dynamic_cast<BunkerAssemblyScheme *>(objectListEntry)) { onlyAssemblySchemesInGroup = false; }
 
 				const SceneObject *sceneObject = dynamic_cast<SceneObject *>(objectListEntry);
-				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly()) {
+				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly() && !sceneObject->IsBuyableInAIOnly()) {
 					hasObjectsToShow = true;
 					break;
 				}
@@ -391,7 +391,7 @@ namespace RTE {
 			std::list<SceneObject *> objectList;
 			for (Entity *moduleListEntryEntity : moduleList.at(moduleID)) {
 				SceneObject *sceneObject = dynamic_cast<SceneObject *>(moduleListEntryEntity);
-				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly()) { objectList.emplace_back(sceneObject); }
+				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly() && !sceneObject->IsBuyableInAIOnly()) { objectList.emplace_back(sceneObject); }
 			}
 			if (!objectList.empty()) {
 				if (moduleID != 0) { AddObjectsListModuleGroup(moduleID); }

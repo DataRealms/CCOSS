@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
 	
-- New INI 'BuyableMode' setting 'BuyableMode = 3' for AI only items. This makes the item unable to be bought by any player at all as if it were 'Buyable = 0', but without removing the item from the 'CreateRandom' lua functions that the AI and activities use.
+- New INI 'BuyableMode' setting 'BuyableMode = 3' for script only items. This makes the item unable to be bought by any player at all as if it were 'Buyable = 0', but without removing the item from the 'CreateRandom' lua functions that the AI and activities use. That way players can still find these weapons used by activities and AI enemies, and modders can have big arsenals, without actually having big arsenals.
 
 - New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
 

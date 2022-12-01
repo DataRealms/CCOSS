@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
 - New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
+	
+- New INI 'BuyableMode' setting 'BuyableMode = 3' for AI only items. This makes the item unable to be bought by any player at all as if it were 'Buyable = 0', but without removing the item from the 'CreateRandom' lua functions that the AI and activities use.
 
 - New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
 

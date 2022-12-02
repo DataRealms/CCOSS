@@ -9,7 +9,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Gib::Clear() {
-		m_GibParticle = 0;
+		m_GibParticle = nullptr;
 		m_Offset.Reset();
 		m_Count = 1;
 		m_Spread = 0.1F;
@@ -51,9 +51,9 @@ namespace RTE {
 		} else if (propName == "Spread") {
 			reader >> m_Spread;
 		} else if (propName == "MinVelocity") {
-			reader >> m_MinVelocity;
+			SetMinVelocity(std::stof(reader.ReadPropValue()));
 		} else if (propName == "MaxVelocity") {
-			reader >> m_MaxVelocity;
+			SetMaxVelocity(std::stof(reader.ReadPropValue()));
 		} else if (propName == "LifeVariation") {
 			reader >> m_LifeVariation;
 		} else if (propName == "InheritsVel") {
@@ -75,11 +75,9 @@ namespace RTE {
 
 		writer.NewProperty("GibParticle");
 		// All of this is needed to make a preset look like not original and save as CopyOf instead of separate preset.
-		Entity *gibEntity = m_GibParticle->Clone();
+		std::unique_ptr<Entity> gibEntity(m_GibParticle->Clone());
 		gibEntity->ResetOriginalPresetFlag();
-		writer << gibEntity;
-		delete gibEntity;
-		gibEntity = 0;
+		writer << gibEntity.get();
 
 		writer.NewProperty("Offset");
 		writer << m_Offset;

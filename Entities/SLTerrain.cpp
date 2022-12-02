@@ -16,6 +16,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Clear() {
+		m_Width = 0;
+		m_Height = 0;
 		m_LayerToDraw = LayerType::ForegroundLayer;
 		m_FGColorLayer = nullptr;
 		m_BGColorLayer = nullptr;
@@ -31,6 +33,9 @@ namespace RTE {
 	int SLTerrain::Create() {
 		SceneLayer::Create();
 
+		m_Width = m_BitmapFile.GetImageWidth();
+		m_Height = m_BitmapFile.GetImageHeight();
+
 		if (!m_FGColorLayer.get()) { m_FGColorLayer = std::make_unique<SceneLayer>(); }
 		if (!m_BGColorLayer.get()) { m_BGColorLayer = std::make_unique<SceneLayer>(); }
 
@@ -41,6 +46,9 @@ namespace RTE {
 
 	int SLTerrain::Create(const SLTerrain &reference) {
 		SceneLayer::Create(reference);
+
+		m_Width = reference.m_Width;
+		m_Height = reference.m_Height;
 
 		// Copy the layers but not the layer BITMAPs because they will be loaded later by LoadData.
 		m_FGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_FGColorLayer->Clone()));

@@ -109,14 +109,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::GetImageFileInfo(ImageFileInfoType infoTypeToGet) {
-		bool fileInfoIsEmpty = false;
+		bool fetchFileInfo = false;
 		for (const int &fileInfoEntry : m_ImageFileInfo) {
 			if (fileInfoEntry == -1) {
-				fileInfoIsEmpty = true;
+				fetchFileInfo = true;
 				break;
 			}
 		}
-		if (fileInfoIsEmpty) {
+		if (fetchFileInfo) {
 			FILE *imageFile = fopen(m_DataPath.c_str(), "rb");
 			RTEAssert(imageFile, "Failed to open file prior to reading info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may not exist or be corrupt.");
 
@@ -137,7 +137,7 @@ namespace RTE {
 	void ContentFile::ReadAndStorePNGFileInfo(FILE *imageFile) {
 		std::array<uint8_t, 8> fileSignature = {};
 
-		// Read the first 8 bytes to then verify they match the PNG file signature. Which is { 137, 80, 78, 71, 13, 10, 26, 10 } or { '\211', 'P', 'N', 'G', '\r', '\n', '\032', '\n' }.
+		// Read the first 8 bytes to then verify they match the PNG file signature which is { 137, 80, 78, 71, 13, 10, 26, 10 } or { '\211', 'P', 'N', 'G', '\r', '\n', '\032', '\n' }.
 		fread(fileSignature.data(), sizeof(uint8_t), fileSignature.size(), imageFile);
 		if (png_sig_cmp(fileSignature.data(), 0, fileSignature.size()) == 0) {
 			png_structp pngReadStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);

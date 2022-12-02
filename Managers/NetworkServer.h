@@ -10,7 +10,6 @@
 
 #include "Singleton.h"
 #include "NetworkMessages.h"
-#include "SceneMan.h"
 
 #define g_NetworkServer NetworkServer::Instance()
 
@@ -19,6 +18,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 namespace RTE {
+
+	class Timer;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer server.
@@ -47,6 +48,18 @@ namespace RTE {
 			SEND_BUFFER_IS_FULL,
 			SEND_BUFFER_IS_LIMITED_BY_CONGESTION,
 			LOCKED
+		};
+
+		/// <summary>
+		/// Struct for registering terrain change events for network transmission.
+		/// </summary>
+		struct NetworkTerrainChange {
+			int x;
+			int y;
+			int w;
+			int h;
+			unsigned char color;
+			bool back;
 		};
 
 #pragma region Creation
@@ -174,7 +187,7 @@ namespace RTE {
 		///
 		/// </summary>
 		/// <param name="terrainChange"></param>
-		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
+		void RegisterTerrainChange(NetworkTerrainChange terrainChange);
 #pragma endregion
 
 	protected:
@@ -258,8 +271,8 @@ namespace RTE {
 		unsigned char *m_PixelLineBuffersPrev[c_MaxClients]; //!<
 		unsigned char *m_PixelLineBuffersGUIPrev[c_MaxClients]; //!<
 
-		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
-		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<
+		std::queue<NetworkTerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
+		std::queue<NetworkTerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<
 
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
@@ -275,9 +288,9 @@ namespace RTE {
 		int m_FrameNumbers[c_MaxClients]; //!<
 
 		unsigned short m_Ping[c_MaxClients]; //!<
-		Timer m_PingTimer[c_MaxClients]; //!<
+		std::array<std::unique_ptr<Timer>, c_MaxClients> m_PingTimer; //!<
 
-		Timer m_LastPackedReceived; //!<
+		std::unique_ptr<Timer> m_LastPackedReceived; //!<
 
 		/// <summary>
 		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
@@ -480,7 +493,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="terrainChange"></param>
-		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange);
+		void SendTerrainChangeMsg(short player, NetworkTerrainChange terrainChange);
 
 		/// <summary>
 		///

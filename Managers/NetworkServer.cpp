@@ -93,7 +93,7 @@ namespace RTE {
 			m_FrameNumbers[i] = 0;
 
 			m_Ping[i] = 0;
-			m_PingTimer[i].Reset();
+			m_PingTimer[i] = nullptr;
 
 			ClearInputMessages(i);
 		}
@@ -143,7 +143,7 @@ namespace RTE {
 		m_BoxHeight = c_ServerDefaultBoxHeight;
 		m_UseNATService = false;
 		m_NatServerConnected = false;
-		m_LastPackedReceived.Reset();
+		m_LastPackedReceived = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +152,12 @@ namespace RTE {
 		m_IsInServerMode = false;
 		m_ServerPort = "";
 		m_Server = RakNet::RakPeerInterface::GetInstance();
+
+		m_LastPackedReceived = std::make_unique<Timer>();
+
+		for (std::unique_ptr<Timer> &pingTimer : m_PingTimer) {
+			pingTimer = std::make_unique<Timer>();
+		}
 
 		if (m_BoxWidth * m_BoxHeight % sizeof(unsigned long) != 0) {
 			g_ConsoleMan.PrintString("SERVER: Box area (width x height) is not divisible by 8 bytes! Resetting to defaults!");
@@ -306,7 +312,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::RegisterTerrainChange(SceneMan::TerrainChange terrainChange) {
+	void NetworkServer::RegisterTerrainChange(NetworkTerrainChange terrainChange) {
 		if (m_IsInServerMode) {
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (IsPlayerConnected(player)) {
@@ -944,7 +950,7 @@ namespace RTE {
 		while (!m_CurrentTerrainChanges[player].empty()) {
 			int maxSize = 1280;
 
-			SceneMan::TerrainChange terrainChange = m_CurrentTerrainChanges[player].front();
+			NetworkTerrainChange terrainChange = m_CurrentTerrainChanges[player].front();
 			m_CurrentTerrainChanges[player].pop();
 
 			// Fragment region if it does not fit one packet
@@ -959,7 +965,7 @@ namespace RTE {
 
 					// Store changed block if the size is over the MTU or if it's the last block.
 					if (size + terrainChange.w >= maxSize || y == terrainChange.h - 1) {
-						SceneMan::TerrainChange tcf;
+						NetworkTerrainChange tcf;
 						tcf.x = terrainChange.x;
 						tcf.y = terrainChange.y + heightStart;
 						tcf.w = terrainChange.w;
@@ -982,7 +988,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange) {
+	void NetworkServer::SendTerrainChangeMsg(short player, NetworkTerrainChange terrainChange) {
 		if (terrainChange.w == 1 && terrainChange.h == 1) {
 			MsgTerrainChange msg;
 			msg.Id = ID_SRV_TERRAIN;
@@ -1632,9 +1638,9 @@ namespace RTE {
 			m_EmptyBlocksDataSentCurrent[player][STAT_CURRENT] = 0;
 		}
 
-		if (m_PingTimer[player].IsPastRealMS(500)) {
+		if (m_PingTimer[player]->IsPastRealMS(500)) {
 			m_Ping[player] = m_Server->GetLastPing(m_ClientConnections[player].ClientId);
-			m_PingTimer[player].Reset();
+			m_PingTimer[player]->Reset();
 		}
 	}
 
@@ -1893,7 +1899,7 @@ namespace RTE {
 			}
 		}
 
-		if (m_SleepWhenIdle && m_LastPackedReceived.IsPastRealMS(10000)) {
+		if (m_SleepWhenIdle && m_LastPackedReceived->IsPastRealMS(10000)) {
 			short playersConnected = 0;
 			for (short player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player)) {
@@ -1911,7 +1917,7 @@ namespace RTE {
 		RakNet::Packet *packet;
 
 		for (packet = m_Server->Receive(); packet; m_Server->DeallocatePacket(packet), packet = m_Server->Receive()) {
-			m_LastPackedReceived.Reset();
+			m_LastPackedReceived->Reset();
 
 			// We got a packet, get the identifier with our handy function
 			unsigned char packetIdentifier = GetPacketIdentifier(packet);

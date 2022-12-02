@@ -24,8 +24,8 @@ namespace RTE {
 		m_IsConnected = false;
 		m_IsRegistered = false;
 		m_ClientInputFps = 120;
-		m_SceneBackgroundBitmap = 0;
-		m_SceneForegroundBitmap = 0;
+		m_SceneBackgroundBitmap = nullptr;
+		m_SceneForegroundBitmap = nullptr;
 		m_CurrentSceneLayerReceived = -1;
 		m_CurrentFrameNum = 0;
 		m_CurrentBoxWidth = 0;
@@ -52,9 +52,9 @@ namespace RTE {
 			m_MouseButtonReleasedState[i] = -1;
 		}
 		// Stop all sounds received from server
-		for (const std::pair<unsigned short, SoundContainer *> &soundEntry : m_ServerSounds) {
-			soundEntry.second->Stop();
-			delete soundEntry.second;
+		for (const auto &[channelIndex, soundContainer] : m_ServerSounds) {
+			soundContainer->Stop();
+			delete soundContainer;
 		}
 		m_ServerSounds.clear();
 	}
@@ -79,7 +79,7 @@ namespace RTE {
 		m_Client->Startup(8, &socketDescriptor, 1);
 		m_Client->SetOccasionalPing(true);
 		m_PlayerName = playerName;
-		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(serverName.c_str(), serverPort, NULL, 0);
+		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(serverName.c_str(), serverPort, nullptr, 0);
 
 		g_ConsoleMan.PrintString((connectionAttempt == RakNet::CONNECTION_ATTEMPT_STARTED) ? "CLIENT: Connect request sent" : "CLIENT: Unable to connect");
 	}
@@ -91,7 +91,7 @@ namespace RTE {
 		g_ConsoleMan.PrintString(address.ToString());
 
 		m_ServerID = address;
-		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(address.ToString(false), address.GetPort(), NULL, 0);
+		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(address.ToString(false), address.GetPort(), nullptr, 0);
 
 		g_ConsoleMan.PrintString((connectionAttempt == RakNet::CONNECTION_ATTEMPT_STARTED) ? "CLIENT: Connect request sent" : "CLIENT: Unable to connect");
 	}
@@ -136,7 +136,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	RakNet::SystemAddress NetworkClient::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port) {
-		if (rakPeer->Connect(address, port, 0, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
+		if (rakPeer->Connect(address, port, nullptr, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
 			return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		}
 
@@ -157,7 +157,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	unsigned char NetworkClient::GetPacketIdentifier(RakNet::Packet *packet) const {
-		if (packet == 0) {
+		if (packet == nullptr) {
 			return 255;
 		}
 		if (packet->data[0] == ID_TIMESTAMP) {
@@ -171,7 +171,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendRegisterMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_REGISTER;
 		msg.ResolutionX = g_FrameMan.GetResX();
 		msg.ResolutionY = g_FrameMan.GetResY();
@@ -190,7 +190,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendDisconnectMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_DISCONNECT;
 		m_Client->Send((const char *)&msg, sizeof(msg), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 		g_ConsoleMan.PrintString("CLIENT: Disconnection Sent");
@@ -199,7 +199,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword) {
-		MsgGetServerRequest msg;
+		MsgGetServerRequest msg = {};
 		msg.Id = ID_NAT_SERVER_GET_SERVER_GUID;
 		strncpy(msg.ServerName, serverName.c_str(), 62);
 		strncpy(msg.ServerPassword, serverPassword.c_str(), 62);
@@ -219,7 +219,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendInputMsg() {
-		MsgInput msg;
+		MsgInput msg = {};
 		msg.Id = ID_CLT_INPUT;
 
 		Vector mouse = g_UInputMan.GetNetworkAccumulatedRawMouseMovement(0);
@@ -276,7 +276,7 @@ namespace RTE {
 
 	void NetworkClient::ReceiveFrameSetupMsg(RakNet::Packet *packet) {
 		const MsgFrameSetup *frameData = (MsgFrameSetup *)packet->data;
-		if (frameData->FrameNumber < 0 || frameData->FrameNumber >= c_FramesToRemember) {
+		if (frameData->FrameNumber >= c_FramesToRemember) {
 			return;
 		}
 
@@ -306,7 +306,7 @@ namespace RTE {
 		int lineNumber = frameData->LineNumber;
 		m_CurrentSceneLayerReceived = -1;
 
-		BITMAP *bmp = 0;
+		BITMAP *bmp = nullptr;
 
 		if (frameData->Layer == 0) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
@@ -354,7 +354,7 @@ namespace RTE {
 		int bpy = frameData->BoxY * m_CurrentBoxHeight;
 		m_CurrentSceneLayerReceived = -1;
 
-		BITMAP *bmp = 0;
+		BITMAP *bmp = nullptr;
 		bool isDelta = frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA || frameData->Id == ID_SRV_FRAME_BOX_UI_DELTA;
 
 		if (frameData->Id == ID_SRV_FRAME_BOX_MO || frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA) {
@@ -377,7 +377,7 @@ namespace RTE {
 
 		if (m_CurrentFrameInterlaced) { uncompressedSize = maxWidth * (maxHeight / 2); }
 
-		float compressionRatio = (float)size / (float)uncompressedSize;
+		float compressionRatio = static_cast<float>(size) / static_cast<float>(uncompressedSize);
 
 		m_ReceivedData += frameData->DataSize;
 		m_CompressedData += uncompressedSize;
@@ -408,7 +408,7 @@ namespace RTE {
 				}
 
 				if (isDelta) {
-					unsigned char *lineAddr = m_PixelLineBuffer;
+					const unsigned char *lineAddr = m_PixelLineBuffer;
 					for (int y = lineStart; y < maxHeight; y += lineStep) {
 						for (int x = 0; x < maxWidth; x++) {
 							*(bmp->line[bpy + y] + bpx + x) += lineAddr[x];
@@ -417,7 +417,7 @@ namespace RTE {
 					}
 				} else {
 					// Copy box to bitmap line by line
-					unsigned char *lineAddr = m_PixelLineBuffer;
+					const unsigned char *lineAddr = m_PixelLineBuffer;
 					for (int y = lineStart; y < maxHeight; y += lineStep) {
 #ifdef _WIN32
 						memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
@@ -446,7 +446,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendSceneAcceptedMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_SCENE_ACCEPTED;
 		m_Client->Send((const char *)&msg, sizeof(msg), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 		g_ConsoleMan.PrintString("CLIENT: Scene ACK Sent");
@@ -463,7 +463,7 @@ namespace RTE {
 		int linex = frameData->X;
 		int liney = frameData->Y;
 
-		const BITMAP *bmp = 0;
+		const BITMAP *bmp = nullptr;
 
 		if (frameData->Layer == 0) {
 			bmp = m_SceneBackgroundBitmap;
@@ -624,7 +624,7 @@ namespace RTE {
 		const PostEffectNetworkData *effDataPtr = (PostEffectNetworkData *)((char *)msg + sizeof(MsgPostEffects));
 
 		for (int i = 0; i < msg->PostEffectsCount; i++) {
-			BITMAP *bmp = 0;
+			BITMAP *bmp = nullptr;
 			std::string bitmapPath = ContentFile::GetPathFromHash(effDataPtr->BitmapHash);
 			if (!bitmapPath.empty()) {
 				ContentFile fl(bitmapPath.c_str());
@@ -925,7 +925,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::DrawPostEffects(int frame) { g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]); }
+	void NetworkClient::DrawPostEffects(int frame) {
+		g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -941,8 +943,8 @@ namespace RTE {
 		clear_to_color(dst_gui_bmp, g_MaskColor);
 
 		// Draw Scene background
-		int sourceX = m_TargetPos[m_CurrentFrameNum].m_X;
-		int sourceY = m_TargetPos[m_CurrentFrameNum].m_Y;
+		int sourceX = m_TargetPos[m_CurrentFrameNum].GetFloorIntX();
+		int sourceY = m_TargetPos[m_CurrentFrameNum].GetFloorIntY();
 		int destX = 0;
 		int destY = 0;
 
@@ -995,9 +997,7 @@ namespace RTE {
 
 				if (src_bmp->w % m_CurrentBoxWidth != 0) { boxedWidth = boxedWidth + 1; }
 
-				int lineStep = 2;
 				int lineStart = 0;
-
 				if (clearEven) { lineStart = 1; }
 
 				for (int by = 0; by <= boxedHeight; by++) {
@@ -1014,13 +1014,6 @@ namespace RTE {
 
 						int maxHeight = m_CurrentBoxHeight;
 						if (bpy + m_CurrentBoxHeight >= src_bmp->h) { maxHeight = src_bmp->h - bpy; }
-
-						/*
-						for (int y = bpy + lineStart; y < bpy + maxHeight - 1; y += lineStep) {
-							//line(src_bmp, bpx, y, bpx + maxWidth - 1, y, ColorKeys::g_MaskColor);
-							//line(src_gui_bmp, bpx, y, bpx + maxWidth - 1, y, ColorKeys::g_MaskColor);
-						}
-						*/
 					}
 				}
 			} else {
@@ -1037,7 +1030,7 @@ namespace RTE {
 
 		// Draw level loading animation
 		if (m_CurrentSceneLayerReceived != -1) {
-			BITMAP * bmp = 0;
+			BITMAP * bmp = nullptr;
 
 			if (m_CurrentSceneLayerReceived == -1) {
 				bmp = m_SceneBackgroundBitmap;
@@ -1053,7 +1046,7 @@ namespace RTE {
 
 			float scale = static_cast<float>(dst_bmp->w) / static_cast<float>(bmp->w);
 			int w = dst_bmp->w;
-			int h = static_cast<float>(bmp->h) * scale;
+			int h = static_cast<int>(static_cast<float>(bmp->h) * scale);
 
 			int x = 0;
 			int y = g_FrameMan.GetResY() / 2 - h / 2;
@@ -1063,7 +1056,7 @@ namespace RTE {
 			if (static_cast<float>(bmp->h) / static_cast<float>(bmp->w) > 1) {
 				scale = static_cast<float>(dst_bmp->h) / static_cast<float>(bmp->h);
 				h = dst_bmp->h;
-				w = static_cast<float>(bmp->w) * scale;
+				w = static_cast<int>(static_cast<float>(bmp->w) * scale);
 
 				x = g_FrameMan.GetResX() / 2 - w / 2;
 				y = 0;
@@ -1090,7 +1083,7 @@ namespace RTE {
 		}
 
 		// Input is sent at whatever settings are set in inputs per second
-		float inputSend = m_ClientInputFps;
+		float inputSend = static_cast<float>(m_ClientInputFps);
 
 #if !defined DEBUG_RELEASE_BUILD && !defined RELEASE_BUILD
 		// Reduce input rate for debugging because it may overflow the input queue
@@ -1116,10 +1109,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::HandleNetworkPackets() {
-		RakNet::Packet *packet;
 		std::string msg;
 
-		for (packet = m_Client->Receive(); packet; m_Client->DeallocatePacket(packet), packet = m_Client->Receive()) {
+		for (RakNet::Packet *packet = m_Client->Receive(); packet; m_Client->DeallocatePacket(packet), packet = m_Client->Receive()) {
 			// We got a packet, get the identifier with our handy function
 			unsigned char packetIdentifier = GetPacketIdentifier(packet);
 

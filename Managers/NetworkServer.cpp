@@ -52,11 +52,11 @@ namespace RTE {
 		m_SimSleepWhenIdle = false;
 
 		for (short i = 0; i < c_MaxClients; i++) {
-			m_BackBuffer8[i] = 0;
-			m_BackBufferGUI8[i] = 0;
+			m_BackBuffer8[i] = nullptr;
+			m_BackBufferGUI8[i] = nullptr;
 
-			m_PixelLineBuffersPrev[i] = 0;
-			m_PixelLineBuffersGUIPrev[i] = 0;
+			m_PixelLineBuffersPrev[i] = nullptr;
+			m_PixelLineBuffersGUIPrev[i] = nullptr;
 
 			m_LastFrameSentTime[i] = 0;
 			m_LastStatResetTime[i] = 0;
@@ -65,8 +65,8 @@ namespace RTE {
 			m_MsecPerFrame[i] = 0;
 			m_MsecPerSendCall[i] = 0;
 
-			m_LZ4CompressionState[i] = 0;
-			m_LZ4FastCompressionState[i] = 0;
+			m_LZ4CompressionState[i] = nullptr;
+			m_LZ4FastCompressionState[i] = nullptr;
 
 			m_MouseState1[i] = 0;
 			m_MouseState2[i] = 0;
@@ -466,7 +466,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendNATServerRegistrationMsg(RakNet::SystemAddress address) {
-		MsgRegisterServer msg;
+		MsgRegisterServer msg = {};
 		msg.Id = ID_NAT_SERVER_REGISTER_SERVER;
 
 		strncpy(msg.ServerName, g_SettingsMan.GetNATServerName().c_str(), 62);
@@ -713,7 +713,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendSceneSetupData(short player) {
-		MsgSceneSetup msgSceneSetup;
+		MsgSceneSetup msgSceneSetup = {};
 		msgSceneSetup.Id = ID_SRV_SCENE_SETUP;
 		msgSceneSetup.SceneId = m_SceneID;
 		msgSceneSetup.Width = static_cast<short>(g_SceneMan.GetSceneWidth());
@@ -990,7 +990,7 @@ namespace RTE {
 
 	void NetworkServer::SendTerrainChangeMsg(short player, NetworkTerrainChange terrainChange) {
 		if (terrainChange.w == 1 && terrainChange.h == 1) {
-			MsgTerrainChange msg;
+			MsgTerrainChange msg = {};
 			msg.Id = ID_SRV_TERRAIN;
 			msg.X = terrainChange.x;
 			msg.Y = terrainChange.y;
@@ -1083,7 +1083,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendSceneEndMsg(short player) {
-		MsgSceneEnd msg;
+		MsgSceneEnd msg = {};
 		msg.Id = ID_SRV_SCENE_END;
 		m_Server->Send((const char *)&msg, sizeof(MsgSceneSetup), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 	}
@@ -1130,8 +1130,8 @@ namespace RTE {
 				delete[] m_PixelLineBuffersPrev[player];
 			}
 		}
-		m_BackBuffer8[player] = 0;
-		m_PixelLineBuffersPrev[player] = 0;
+		m_BackBuffer8[player] = nullptr;
+		m_PixelLineBuffersPrev[player] = nullptr;
 
 		if (m_BackBufferGUI8) {
 			destroy_bitmap(m_BackBufferGUI8[player]);
@@ -1139,8 +1139,8 @@ namespace RTE {
 				delete[] m_PixelLineBuffersGUIPrev[player];
 			}
 		}
-		m_BackBufferGUI8[player] = 0;
-		m_PixelLineBuffersGUIPrev[player] = 0;
+		m_BackBufferGUI8[player] = nullptr;
+		m_PixelLineBuffersGUIPrev[player] = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1301,7 +1301,7 @@ namespace RTE {
 			if (m_BackBuffer8[player]->w % m_BoxWidth != 0) { boxedWidth += 1; }
 
 			for (unsigned char layer = 0; layer < 2; layer++) {
-				BITMAP *backBuffer = 0;
+				const BITMAP *backBuffer = nullptr;
 				unsigned char *prevLineBuffers = 0;
 
 				if (layer == 0) {
@@ -1419,7 +1419,7 @@ namespace RTE {
 								pixelInt--;
 								counter -= sizeof(unsigned long);
 
-								unsigned char *pixelChr = (unsigned char*)pixelInt;
+								const unsigned char *pixelChr = (unsigned char*)pixelInt;
 								for (; counter < thisBoxSize; counter++) {
 									if (*pixelChr > 0) {
 										boxIsEmpty = false;
@@ -1914,9 +1914,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::HandleNetworkPackets() {
-		RakNet::Packet *packet;
-
-		for (packet = m_Server->Receive(); packet; m_Server->DeallocatePacket(packet), packet = m_Server->Receive()) {
+		for (RakNet::Packet *packet = m_Server->Receive(); packet; m_Server->DeallocatePacket(packet), packet = m_Server->Receive()) {
 			m_LastPackedReceived->Reset();
 
 			// We got a packet, get the identifier with our handy function

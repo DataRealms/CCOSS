@@ -82,10 +82,10 @@ namespace RTE {
 		bool SceneWrapsX() const { return m_SceneWrapsX; }
 
 		/// <summary>
-		/// Get the coordinates of the centre of the current frame.
+		/// Get the coordinates of the center of the current frame.
 		/// </summary>
 		/// <returns>A vector containing the X/Y coordinates of the frame target.</returns>
-		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrameNum]; }
+		const Vector & GetFrameTarget() const { return m_TargetPos[m_CurrentFrameNum]; }
 
 #pragma endregion
 
@@ -126,7 +126,6 @@ namespace RTE {
 		/// <param name="serverPassword">Server password.</param>
 		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serviceServerPort, std::string playerName, std::string serverName, std::string serverPassword);
 
-		// TODO: Figure out
 		/// <summary>
 		///
 		/// </summary>
@@ -140,7 +139,6 @@ namespace RTE {
 	protected:
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
-		static constexpr int c_MaxPossibleBoxes = 256; //!<
 
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
@@ -195,7 +193,7 @@ namespace RTE {
 
 		int m_MouseButtonPressedState[3]; //!<
 		int m_MouseButtonReleasedState[3]; //!<
-		int m_MouseWheelMoved; //!< Whether the mousewheel was moved this Update. Used to make mousewheel detection better.
+		int m_MouseWheelMoved; //!< Whether the mouse wheel was moved this Update. Used to make mouse wheel detection better.
 
 	private:
 
@@ -344,7 +342,7 @@ namespace RTE {
 		/// Gets the ping time between the client and the server.
 		/// </summary>
 		/// <returns>The ping time between the client and the server.</returns>
-		unsigned short GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
+		int GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkClient, effectively resetting the members of this abstraction level only.

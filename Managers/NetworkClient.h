@@ -10,7 +10,7 @@
 
 #include "Singleton.h"
 #include "NetworkMessages.h"
-#include "SoundContainer.h"
+#include "Vector.h"
 
 #define g_NetworkClient NetworkClient::Instance()
 
@@ -20,6 +20,7 @@
 
 namespace RTE {
 
+	class SoundContainer;
 	struct PostEffect;
 
 	/// <summary>

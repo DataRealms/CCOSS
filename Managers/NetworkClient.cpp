@@ -7,6 +7,7 @@
 #include "SettingsMan.h"
 #include "PerformanceMan.h"
 #include "UInputMan.h"
+#include "SoundContainer.h"
 
 #include "RakSleep.h"
 

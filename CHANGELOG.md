@@ -259,9 +259,13 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
 
+- New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Greatly reduce online multiplayer bandwidth usage.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
 
@@ -387,6 +391,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
+- Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
 
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
 

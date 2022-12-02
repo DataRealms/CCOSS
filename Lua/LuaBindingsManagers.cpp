@@ -290,7 +290,8 @@ namespace RTE {
 		.def("CastNotMaterialRay", (bool (SceneMan::*)(const Vector &, const Vector &, unsigned char, Vector &, int, bool))&SceneMan::CastNotMaterialRay)
 		.def("CastNotMaterialRay", (float (SceneMan::*)(const Vector &, const Vector &, unsigned char, int, bool))&SceneMan::CastNotMaterialRay)
 		.def("CastStrengthSumRay", &SceneMan::CastStrengthSumRay)
-		.def("CastMaxStrengthRay", &SceneMan::CastMaxStrengthRay)
+		.def("CastMaxStrengthRay", (float (SceneMan::*) (const Vector &, const Vector &, int, unsigned char))&SceneMan::CastMaxStrengthRay)
+		.def("CastMaxStrengthRay", (float (SceneMan::*) (const Vector &, const Vector &, int))&SceneMan::CastMaxStrengthRay)
 		.def("CastStrengthRay", &SceneMan::CastStrengthRay)
 		.def("CastWeaknessRay", &SceneMan::CastWeaknessRay)
 		.def("CastMORay", &SceneMan::CastMORay)
@@ -319,6 +320,7 @@ namespace RTE {
 
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
+		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
 		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
 	}
 
@@ -332,6 +334,8 @@ namespace RTE {
 		.property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 		.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 		.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
+		.property("AIDeltaTimeSecs", &TimerMan::GetAIDeltaTimeSecs)
+		.property("AIDeltaTimeMS", &TimerMan::GetAIDeltaTimeMS)
 		.property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
 
 		.property("TicksPerSecond", &GetTicksPerSecond)

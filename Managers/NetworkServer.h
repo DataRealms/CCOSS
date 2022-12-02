@@ -223,7 +223,7 @@ namespace RTE {
 
 		bool m_UseHighCompression; //!< Whether to use higher compression methods (default).
 		bool m_UseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
-		bool m_UseDeltaCompression; //!<
+		bool m_UseDeltaCompression; //!< Whether to use delta compression methods and conserve bandwidth.
 		int m_HighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
 
 		/// <summary>
@@ -247,11 +247,10 @@ namespace RTE {
 
 		unsigned char m_PixelLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
 		unsigned char m_PixelLineBufferDelta[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
+		unsigned char m_CompressedLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store compressed pixel data line.
 
-		unsigned char m_CompressedLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store compressed pixel data line
-
-		unsigned char *m_PixelLineBuffersPrev[c_MaxClients];
-		unsigned char *m_PixelLineBuffersGUIPrev[c_MaxClients];
+		unsigned char *m_PixelLineBuffersPrev[c_MaxClients]; //!<
+		unsigned char *m_PixelLineBuffersGUIPrev[c_MaxClients]; //!<
 
 		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
 		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<

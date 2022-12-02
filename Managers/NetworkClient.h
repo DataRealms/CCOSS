@@ -85,7 +85,7 @@ namespace RTE {
 		/// Get the coordinates of the centre of the current frame.
 		/// </summary>
 		/// <returns>A vector containing the X/Y coordinates of the frame target.</returns>
-		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrame]; }
+		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrameNum]; }
 
 #pragma endregion
 
@@ -154,7 +154,6 @@ namespace RTE {
 		RakNet::SystemAddress m_NATServiceServerID; //!< The NAT server's identifier.
 
 		bool m_UseNATPunchThroughService; //!< Whether to use NAT service for connecting to server.
-		bool m_UseInterlacing;
 
 		bool m_IsConnected; //!< Is client connected to server.
 		bool m_IsRegistered; //!< Is client registered at server.
@@ -168,10 +167,11 @@ namespace RTE {
 		int m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
 		long long m_LastInputSentTime; //!< The last time input was sent in real time ticks.
 
-		int m_CurrentFrame; //!<
-		int m_CurrentBoxWidth; //!<
-		int m_CurrentBoxHeight; //!<
-		bool m_CurrentFrameDeltaCompressed; //!<
+		int m_CurrentFrameNum; //!< The received frame number.
+		int m_CurrentBoxWidth; //!< The received frame box width.
+		int m_CurrentBoxHeight; //!< The received frame box height.
+		bool m_CurrentFrameInterlaced; //!< Whether the received frame data is interlaced.
+		bool m_CurrentFrameDeltaCompressed; //!< Whether the received frame data is delta compressed.
 
 		bool m_ShowFillRate; //!<
 

@@ -25,13 +25,13 @@ namespace RTE {
 		m_SceneBackgroundBitmap = 0;
 		m_SceneForegroundBitmap = 0;
 		m_CurrentSceneLayerReceived = -1;
-		m_CurrentFrame = 0;
+		m_CurrentFrameNum = 0;
 		m_CurrentBoxWidth = 0;
 		m_CurrentBoxHeight = 0;
 		m_CurrentFrameDeltaCompressed = false;
 		m_ShowFillRate = false;
 		m_UseNATPunchThroughService = false;
-		m_UseInterlacing = false;
+		m_CurrentFrameInterlaced = false;
 		m_ServerGUID = RakNet::UNASSIGNED_RAKNET_GUID;
 		m_NATServiceServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_ServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -280,20 +280,20 @@ namespace RTE {
 
 		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(frameData->FrameNumber, frameData->Interlaced, !frameData->DeltaCompressed); }
 
-		m_PostEffects[m_CurrentFrame].clear();
-		m_CurrentFrame = frameData->FrameNumber;
-		m_UseInterlacing = frameData->Interlaced;
+		m_PostEffects[m_CurrentFrameNum].clear();
+		m_CurrentFrameNum = frameData->FrameNumber;
+		m_CurrentFrameInterlaced = frameData->Interlaced;
 		m_CurrentFrameDeltaCompressed = frameData->DeltaCompressed;
 
 		m_CurrentBoxWidth = frameData->BoxWidth;
 		m_CurrentBoxHeight = frameData->BoxHeight;
 
-		m_TargetPos[m_CurrentFrame].m_X = frameData->TargetPosX;
-		m_TargetPos[m_CurrentFrame].m_Y = frameData->TargetPosY;
+		m_TargetPos[m_CurrentFrameNum].m_X = frameData->TargetPosX;
+		m_TargetPos[m_CurrentFrameNum].m_Y = frameData->TargetPosY;
 
 		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
-			m_BackgroundLayers[m_CurrentFrame][i].OffsetX = frameData->OffsetX[i];
-			m_BackgroundLayers[m_CurrentFrame][i].OffsetY = frameData->OffsetY[i];
+			m_BackgroundLayers[m_CurrentFrameNum][i].OffsetX = frameData->OffsetX[i];
+			m_BackgroundLayers[m_CurrentFrameNum][i].OffsetY = frameData->OffsetY[i];
 		}
 	}
 
@@ -373,7 +373,7 @@ namespace RTE {
 		int size = frameData->DataSize;
 		int uncompressedSize = maxWidth * maxHeight;
 
-		if (m_UseInterlacing) { uncompressedSize = maxWidth * (maxHeight / 2); }
+		if (m_CurrentFrameInterlaced) { uncompressedSize = maxWidth * (maxHeight / 2); }
 
 		float compressionRatio = (float)size / (float)uncompressedSize;
 
@@ -400,9 +400,9 @@ namespace RTE {
 				int lineStart = 0;
 				int lineStep = 1;
 
-				if (m_UseInterlacing) {
+				if (m_CurrentFrameInterlaced) {
 					lineStep = 2;
-					if (m_CurrentFrame % 2 != 0) { lineStart = 1; }
+					if (m_CurrentFrameNum % 2 != 0) { lineStart = 1; }
 				}
 
 				if (isDelta) {
@@ -748,7 +748,7 @@ namespace RTE {
 				Vector scrollOverride(0, 0);
 				bool scrollOverridden = false;
 
-				int frame = m_CurrentFrame;
+				int frame = m_CurrentFrameNum;
 
 				// Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension
 				Box targetBox(Vector(0, 0), targetBitmap->w, targetBitmap->h);
@@ -939,8 +939,8 @@ namespace RTE {
 		clear_to_color(dst_gui_bmp, g_MaskColor);
 
 		// Draw Scene background
-		int sourceX = m_TargetPos[m_CurrentFrame].m_X;
-		int sourceY = m_TargetPos[m_CurrentFrame].m_Y;
+		int sourceX = m_TargetPos[m_CurrentFrameNum].m_X;
+		int sourceY = m_TargetPos[m_CurrentFrameNum].m_Y;
 		int destX = 0;
 		int destY = 0;
 
@@ -978,7 +978,7 @@ namespace RTE {
 			masked_blit(m_SceneForegroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
 
-		DrawPostEffects(m_CurrentFrame);
+		DrawPostEffects(m_CurrentFrameNum);
 
 		g_PerformanceMan.SetCurrentPing(GetPing());
 
@@ -1101,7 +1101,7 @@ namespace RTE {
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
 			if (IsConnectedAndRegistered()) {
-				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(m_CurrentFrame, m_UseInterlacing, !m_CurrentFrameDeltaCompressed); }
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(m_CurrentFrameNum, m_CurrentFrameInterlaced, !m_CurrentFrameDeltaCompressed); }
 				SendInputMsg();
 			}
 		}

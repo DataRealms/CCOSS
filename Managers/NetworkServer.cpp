@@ -450,7 +450,6 @@ namespace RTE {
 					if (m_BackBuffer8[index]->w != frameManBmp->w || m_BackBuffer8[index]->h != frameManBmp->h) {
 						DestroyBackBuffer(index);
 						CreateBackBuffer(index, frameManBmp->w, frameManBmp->h);
-						//g_ConsoleMan.PrintString("SERVER: Backbuffer recreated");
 					}
 				}
 				ClearBackBuffer(index, frameManBmp->w, frameManBmp->h);

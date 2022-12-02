@@ -18,8 +18,8 @@
 #include "RakNetStatistics.h"
 #include "RakSleep.h"
 
-#include <lz4.h>
-#include <lz4hc.h>
+#include "lz4.h"
+#include "lz4hc.h"
 
 namespace RTE {
 

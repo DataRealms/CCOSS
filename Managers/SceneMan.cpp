@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 #include "SceneMan.h"
 #include "PresetMan.h"

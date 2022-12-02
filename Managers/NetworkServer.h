@@ -1,10 +1,16 @@
 #ifndef _RTENETWORKSERVER_
 #define _RTENETWORKSERVER_
 
-#include "Singleton.h"
-#include "SceneMan.h"
+// TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
+#include "RakPeerInterface.h"
+#include "NatPunchthroughClient.h"
 
-#include "NetworkClient.h"
+// RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
+#undef GetClassName
+
+#include "Singleton.h"
+#include "NetworkMessages.h"
+#include "SceneMan.h"
 
 #define g_NetworkServer NetworkServer::Instance()
 

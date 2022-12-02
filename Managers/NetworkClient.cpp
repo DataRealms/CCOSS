@@ -1,3 +1,5 @@
+#include "NetworkClient.h"
+
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
@@ -8,8 +10,7 @@
 
 #include "RakSleep.h"
 
-#include "NetworkClient.h"
-#include <lz4.h>
+#include "lz4.h"
 
 namespace RTE {
 

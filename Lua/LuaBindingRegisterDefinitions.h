@@ -137,6 +137,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Attachable);
 		LuaBindingRegisterFunctionDeclarationForType(Deployment);
 		LuaBindingRegisterFunctionDeclarationForType(Emission);
+		LuaBindingRegisterFunctionDeclarationForType(Gib);
 		LuaBindingRegisterFunctionDeclarationForType(GlobalScript);
 		LuaBindingRegisterFunctionDeclarationForType(HDFirearm);
 		LuaBindingRegisterFunctionDeclarationForType(HeldDevice);

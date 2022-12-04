@@ -3,6 +3,7 @@
 
 #include "Singleton.h"
 #include "SoundContainer.h"
+#include "PostProcessMan.h"
 
 #include "NetworkMessages.h"
 
@@ -20,8 +21,6 @@
 /////////////////////////////////////////////////////////////////////////
 
 namespace RTE {
-
-	struct PostEffect;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer client.

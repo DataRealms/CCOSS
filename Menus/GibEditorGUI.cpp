@@ -12,8 +12,8 @@
 // Inclusions of header files
 
 #include "GibEditorGUI.h"
-#include "GUISound.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -26,6 +26,7 @@
 #include "AHuman.h"
 #include "SLTerrain.h"
 #include "ObjectPickerGUI.h"
+#include "GUISound.h"
 
 using namespace RTE;
 
@@ -362,7 +363,7 @@ void GibEditorGUI::Update()
     }
 
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
     /////////////////////////////////////
     // ADDING GIB MODE
@@ -674,7 +675,7 @@ void GibEditorGUI::Update()
     bool cursorWrapped = g_SceneMan.ForceBounds(m_CursorPos);
 // TODO: make setscrolltarget with 'sloppy' target
     // Scroll to the cursor's scene position
-    g_SceneMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     // Apply the cursor position to the currently held object
     if (m_pCurrentGib && m_DrawCurrentGib)
     {

@@ -1,5 +1,6 @@
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
@@ -290,7 +291,7 @@ void Activity::Clear() {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Normal;
 			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
+			g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
 			m_PlayerController[player].Reset();
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);

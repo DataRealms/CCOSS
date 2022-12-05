@@ -45,8 +45,13 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
         const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
 
-        // Reduce screen-shake over time
         const float screenShakeDecay = 20.0F;
+
+        // Don't let our screen shake too much, not so much that it won't resolve within a few seconds
+        const float maxScreenShakeTimeInSeconds = 3.0f;
+        screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * maxScreenShakeTimeInSeconds);
+
+        // Reduce screen shake over time
         screen.m_ScreenShakeMagnitude -= screenShakeDecay * g_TimerMan.GetDeltaTimeSecs();
         screen.m_ScreenShakeMagnitude = std::max(screen.m_ScreenShakeMagnitude, 0.0F);
 
@@ -222,6 +227,30 @@ namespace RTE {
             screen.m_Offset.m_Y = 0.0F;
         }
 
+        Vector frameSize = GetFrameSize(screenId);
+        int frameWidth = frameSize.GetX();
+        int frameHeight = frameSize.GetY();
+
+        if (!pTerrain->WrapsX() && screen.m_Offset.m_X >= pTerrain->GetBitmap()->w - frameWidth) {
+            screen.m_Offset.m_X = pTerrain->GetBitmap()->w - frameWidth;
+        }
+
+        if (!pTerrain->WrapsY() && screen.m_Offset.m_Y >= pTerrain->GetBitmap()->h - frameHeight) {
+            screen.m_Offset.m_Y = pTerrain->GetBitmap()->h - frameHeight;
+        }
+
+        if (!pTerrain->WrapsX() && screen.m_Offset.m_X >= pTerrain->GetBitmap()->w - frameWidth) {
+            screen.m_Offset.m_X = pTerrain->GetBitmap()->w - frameWidth;
+        }
+
+        if (!pTerrain->WrapsY() && screen.m_Offset.m_Y >= pTerrain->GetBitmap()->h - frameHeight) {
+            screen.m_Offset.m_Y = pTerrain->GetBitmap()->h - frameHeight;
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Vector CameraMan::GetFrameSize(int screenId) {
         int frameWidth = g_FrameMan.GetResX();
         int frameHeight = g_FrameMan.GetResY();
         frameWidth = frameWidth / (g_FrameMan.GetVSplit() ? 2 : 1);
@@ -233,20 +262,35 @@ namespace RTE {
             frameHeight = g_FrameMan.GetPlayerFrameBufferHeight(screenId);
         }
 
-        if (!pTerrain->WrapsX() && screen.m_Offset.m_X >= pTerrain->GetBitmap()->w - frameWidth) {
-            screen.m_Offset.m_X = pTerrain->GetBitmap()->w - frameWidth;
-        }
+        return Vector(frameWidth, frameHeight);
+    }
 
-        if (!pTerrain->WrapsY() && screen.m_Offset.m_Y >= pTerrain->GetBitmap()->h - frameHeight) {
-            screen.m_Offset.m_Y = pTerrain->GetBitmap()->h - frameHeight;
-        }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        if (!pTerrain->WrapsX() && screen.m_Offset.m_X >= pTerrain->GetBitmap()->w - frameWidth) {
-            screen.m_Offset.m_X = pTerrain->GetBitmap()->w - frameWidth;
-        }
+    void CameraMan::AddScreenShake(float magnitude, const Vector &position) {
+        for (int screenId = 0; screenId < g_FrameMan.GetScreenCount(); ++screenId) {
+            Screen& screen = m_Screens[screenId];
 
-        if (!pTerrain->WrapsY() && screen.m_Offset.m_Y >= pTerrain->GetBitmap()->h - frameHeight) {
-            screen.m_Offset.m_Y = pTerrain->GetBitmap()->h - frameHeight;
+            Vector frameSize = GetFrameSize(screenId);
+
+            Box screenBox(screen.m_Offset, frameSize.GetX(), frameSize.GetY());
+            list<Box> wrappedBoxes;
+            g_SceneMan.WrapBox(screenBox, wrappedBoxes);
+
+            float closestDistanceFromScreen = std::numeric_limits<float>::max();
+            for (const Box &box : wrappedBoxes) {
+                // Determine how far the position is from the box
+                Vector closestPointOnBox = box.GetWithinBox(position);
+                Vector diff = closestPointOnBox - position;
+                closestDistanceFromScreen = std::min(closestDistanceFromScreen, diff.GetMagnitude());
+            }
+
+            // Beyond this many screen's distance, no shake will be applied
+            const float screenShakeFalloff = 0.3F;
+
+            float screenDistance = std::max(frameSize.GetX(), frameSize.GetY()) * screenShakeFalloff;
+            float screenShakeMultipler = std::max(1.0F - (closestDistanceFromScreen / screenDistance), 0.0F);
+            screen.m_ScreenShakeMagnitude += magnitude * screenShakeMultipler;
         }
     }
 

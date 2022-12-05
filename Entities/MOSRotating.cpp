@@ -1044,7 +1044,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             screenShakeAmount = energy * shakinessPerUnitOfEnergy;
         }
 
-        g_CameraMan.AddScreenShake(screenShakeAmount);
+        g_CameraMan.AddScreenShake(screenShakeAmount, m_Pos);
 
 		float velocityRange = maxVelocity - minVelocity;
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());

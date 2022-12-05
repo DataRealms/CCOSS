@@ -72,13 +72,6 @@ namespace RTE {
 		Vector GetUnwrappedOffset(int screenId = 0) const;
 
 		/// <summary>
-		/// Increases the magnitude of screen shake.
-		/// </summary>
-		/// <param name="magnitude">The amount of screen shake to add.</param>
-		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
-		void AddScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude += magnitude; }
-
-		/// <summary>
 		/// Sets the offset (scroll position) of the terrain to center on specific world coordinates. 
 		/// If the coordinate to center on is close to the terrain border edges, the view will not scroll outside the borders.
 		/// </summary>
@@ -149,6 +142,38 @@ namespace RTE {
 		/// </summary>
 		/// <param name="screen">Which screen you want to check the offset of.</param>
 		void CheckOffset(int screenId = 0);
+
+		/// <summary>
+		/// Gets the frame width/height for a given screen.
+		/// </summary>
+		/// <param name="screen">Which screen you want to get frame width/height.</param>
+		/// <returns>The frame width (x) and height (y).</returns>
+		Vector GetFrameSize(int screenId = 0);
+#pragma endregion
+
+#pragma region Screen Shake
+		/// <summary>
+		/// Increases the magnitude of screen shake. 
+		/// This is used for spatially located screenshake, and will automatically determine which screens have shake applied
+		/// If the screenshake position is outside our view, it'll gradually weaken and fade away depending on distance.
+		/// </summary>
+		/// <param name="magnitude">The amount of screen shake.</param>
+		/// <param name="position">The spatial location of the screen-shake event.</param>
+		void AddScreenShake(float magnitude, const Vector& position);
+
+		/// <summary>
+		/// Increases the magnitude of screen shake.
+		/// </summary>
+		/// <param name="magnitude">The amount of screen shake to add.</param>
+		/// <param name="screenId">Which screen you want to add screenshake to.</param>
+		void AddScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude += magnitude; }
+
+		/// <summary>
+		/// Sets the magnitude of screen shake.
+		/// </summary>
+		/// <param name="magnitude">The amount of screen shake.</param>
+		/// <param name="screenId">Which screen you want to set screenshake for.</param>
+		void SetScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude = magnitude; }
 #pragma endregion
 
 #pragma region Concrete Methods

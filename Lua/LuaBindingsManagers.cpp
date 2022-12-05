@@ -328,7 +328,8 @@ namespace RTE {
 			.def("TargetDistanceScalar", &CameraMan::TargetDistanceScalar)
 			.def("CheckOffset", &CameraMan::CheckOffset)
 			.def("SetScroll", &CameraMan::SetScroll)
-			.def("AddScreenShake", &CameraMan::AddScreenShake);
+			.def("AddScreenShake", (void (CameraMan::*)(float, int))&CameraMan::AddScreenShake)
+			.def("AddScreenShake", (void (CameraMan::*)(float, const Vector &))&CameraMan::AddScreenShake);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

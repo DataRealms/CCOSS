@@ -138,7 +138,12 @@ namespace RTE {
 		m_SelectedItemBackgroundColor = reference.m_SelectedItemBackgroundColor;
 
 		for (int i = 0; i < m_PieQuadrants.size(); i++) {
-			m_PieQuadrants[i].Create(reference.m_PieQuadrants[i]);
+			m_PieQuadrants[i].Create(reference.m_PieQuadrants[i], &reference, this);
+			for (const PieSlice *pieSlice : m_PieQuadrants[i].GetFlattenedPieSlices()) {
+				if (pieSlice->GetOriginalSource() != this) {
+					m_PieQuadrants[i].RemovePieSlice(pieSlice);
+				}
+			}
 		}
 
 		m_CurrentInnerRadius = reference.m_CurrentInnerRadius;

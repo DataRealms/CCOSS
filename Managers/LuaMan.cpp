@@ -1,8 +1,6 @@
 #include "LuaMan.h"
 
 #include "LuaBindingRegisterDefinitions.h"
-#include "LuaAdapters.h"
-#include "LuaAdaptersEntities.h"
 
 namespace RTE {
 
@@ -65,10 +63,10 @@ namespace RTE {
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF),
 
-			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
+			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
-			luabind::def("PosRand", &PosRand),
-			luabind::def("NormalRand", &NormalRand),
+			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
+			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
 			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
 			luabind::def("LERP", &LERP),
 			luabind::def("EaseIn", &EaseIn),
@@ -296,7 +294,7 @@ namespace RTE {
 		}
 
 		for (const Entity *functionEntityArgument : functionEntityArguments) {
-			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(s_LuaAdaptersEntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(functionEntityArgument, m_MasterState));
+			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(functionEntityArgument, m_MasterState));
 			downCastEntityAsLuabindObjectWrapper->GetLuabindObject()->push(m_MasterState);
 		}
 

@@ -2740,7 +2740,7 @@ void SceneMan::Update(int screenId) {
 	m_LastUpdatedScreen = screenId;
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screen == 0) { 
+	if (screenId == 0) { 
         m_pCurrentScene->Update(); 
     }
 

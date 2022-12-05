@@ -1345,7 +1345,7 @@ public:
 // Arguments:       Which screen to update for.
 // Return value:    None.
 
-    void Update(int screen = 0);
+    void Update(int screenId = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

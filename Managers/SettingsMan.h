@@ -232,6 +232,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable smart BuyMenu navigation or not.</param>
 		void SetSmartBuyMenuNavigation(bool enable) { m_EnableSmartBuyMenuNavigation = enable; }
+
+		/// <summary>
+		/// Gets the screen shake strength multiplier.
+		/// </summary>
+		/// <returns>The screen shake strength multiplier.</returns>
+		float GetScreenShakeStrength() const { return m_ScreenShakeStrength; }
+
+		/// <summary>
+		/// Sets the screen shake strength multiplier.
+		/// </summary>
+		/// <param name="newValue">New value for the screen shake strength multiplier.</param>
+		void SetScreenShakeStrength(float newValue) { m_ScreenShakeStrength = newValue; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -486,6 +498,7 @@ namespace RTE {
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 		bool m_EnableSmartBuyMenuNavigation; //!< Whether swapping to equipment mode and back should change active tabs in the BuyMenu.
+		float m_ScreenShakeStrength; //!< A global multiplier applied to screen shaking strength.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

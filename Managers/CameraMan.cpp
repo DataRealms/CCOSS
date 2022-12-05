@@ -4,6 +4,7 @@
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
+#include "SettingsMan.h"
 #include "SLTerrain.h"
 #include "NetworkClient.h"
 
@@ -57,7 +58,7 @@ namespace RTE {
 
         Vector screenShakeOffset(1.0f, 0.0f);
         screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
-        screenShakeOffset *= screen.m_ScreenShakeMagnitude;
+        screenShakeOffset *= screen.m_ScreenShakeMagnitude * g_SettingsMan.GetScreenShakeStrength();
 
         if (g_TimerMan.DrawnSimUpdate()) {
             // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.

@@ -552,7 +552,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
             }
 
             // Check if even within search radius
-            float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+            float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetSqrMagnitude();
             if (sqrDistance < sqrShortestDistance)
             {
                 sqrShortestDistance = sqrDistance;
@@ -569,7 +569,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 				continue;
 			}
 
-            Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+            Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 
             // Check if even within search radius
             float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -607,7 +607,7 @@ Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int
         if ((*aIt)->GetTeam() == team)
             continue;
 
-        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
         
         // Check if even within search radius
         float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -644,7 +644,7 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
         if ((*aIt) == pExcludeThis)
             continue;
 
-        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 
         // Check if even within search radius
         float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -682,7 +682,7 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
             continue;
 
         // Check if closer than best so far
-        float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+        float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetSqrMagnitude();
         if (sqrDistance < sqrShortestDistance)
         {
             sqrShortestDistance = sqrDistance;

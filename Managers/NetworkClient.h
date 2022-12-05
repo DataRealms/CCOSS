@@ -14,6 +14,10 @@
 // RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
 #undef GetClassName
 
+#include "Singleton.h"
+#include "NetworkMessages.h"
+#include "Vector.h"
+
 #define g_NetworkClient NetworkClient::Instance()
 
 /////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
 		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
-		
+
 		/// <summary>
 		/// Gets scene width for network client.
 		/// </summary>
@@ -73,7 +77,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Current scene height.</returns>
 		int GetSceneHeight() const { return m_SceneHeight; }
-		
+
 		/// <summary>
 		/// Indicates whether the scene wraps its scrolling around the X axis for network client.
 		/// </summary>
@@ -81,10 +85,10 @@ namespace RTE {
 		bool SceneWrapsX() const { return m_SceneWrapsX; }
 
 		/// <summary>
-		/// Get the coordinates of the centre of the current frame.
+		/// Get the coordinates of the center of the current frame.
 		/// </summary>
 		/// <returns>A vector containing the X/Y coordinates of the frame target.</returns>
-		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrame]; }
+		const Vector & GetFrameTarget() const { return m_TargetPos[m_CurrentFrameNum]; }
 
 #pragma endregion
 
@@ -125,9 +129,8 @@ namespace RTE {
 		/// <param name="serverPassword">Server password.</param>
 		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serviceServerPort, std::string playerName, std::string serverName, std::string serverPassword);
 
-		// TODO: Figure out
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="rakPeer"></param>
 		/// <param name="address"></param>
@@ -139,6 +142,7 @@ namespace RTE {
 	protected:
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
+
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
 		RakNet::RakPeerInterface *m_Client; //!< The client RakPeerInterface.
@@ -164,14 +168,20 @@ namespace RTE {
 		int m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
 		long long m_LastInputSentTime; //!< The last time input was sent in real time ticks.
 
-		int m_CurrentFrame; //!<
+		int m_CurrentFrameNum; //!< The received frame number.
+		int m_CurrentBoxWidth; //!< The received frame box width.
+		int m_CurrentBoxHeight; //!< The received frame box height.
+		bool m_CurrentFrameInterlaced; //!< Whether the received frame data is interlaced.
+		bool m_CurrentFrameDeltaCompressed; //!< Whether the received frame data is delta compressed.
+
+		bool m_ShowFillRate; //!<
 
 		Vector m_TargetPos[c_FramesToRemember]; //!<
 		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!< List of post-effects received from server.
 
 		std::unordered_map<int, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
-		unsigned char m_SceneID; //!< 
+		unsigned char m_SceneID; //!<
 		int m_CurrentSceneLayerReceived; //!<
 
 		BITMAP *m_SceneBackgroundBitmap; //!<
@@ -186,42 +196,42 @@ namespace RTE {
 
 		int m_MouseButtonPressedState[3]; //!<
 		int m_MouseButtonReleasedState[3]; //!<
-		int m_MouseWheelMoved; //!< Whether the mousewheel was moved this Update. Used to make mousewheel detection better.
+		int m_MouseWheelMoved; //!< Whether the mouse wheel was moved this Update. Used to make mouse wheel detection better.
 
 	private:
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void HandleNetworkPackets();
 #pragma endregion
 
 #pragma region Network Event Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
 		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendRegisterMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ReceiveAcceptedMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendDisconnectMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="address"></param>
 		/// <param name="serverName"></param>
@@ -229,58 +239,58 @@ namespace RTE {
 		void SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveServerGUIDAnswer(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendInputMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameSetupMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameLineMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveFrameBoxMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendSceneAcceptedMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ReceiveSceneEndMsg();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneSetupMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void SendSceneSetupAcceptedMsg();
 
@@ -291,7 +301,7 @@ namespace RTE {
 		void ReceiveTerrainChangeMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// Receive and handle a packet of post-effect data. 
+		/// Receive and handle a packet of post-effect data.
 		/// </summary>
 		/// <param name="packet">The packet to handle.</param>
 		void ReceivePostEffectsMsg(RakNet::Packet *packet);
@@ -311,28 +321,31 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="targetBitmap"></param>
 		void DrawBackgrounds(BITMAP *targetBitmap);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="frame"></param>
 		void DrawPostEffects(int frame);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
-		void DrawFrame();
+		/// <param name="frameNumber"></param>
+		/// <param name="useInterlacing"></param>
+		/// <param name="clearFramebuffer"></param>
+		void DrawFrame(int frameNumber, bool useInterlacing, bool clearFramebuffer);
 #pragma endregion
 
 		/// <summary>
 		/// Gets the ping time between the client and the server.
 		/// </summary>
 		/// <returns>The ping time between the client and the server.</returns>
-		unsigned short GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
+		int GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkClient, effectively resetting the members of this abstraction level only.

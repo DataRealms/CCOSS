@@ -36,6 +36,7 @@
 #include "PerformanceMan.h"
 #include "MetaMan.h"
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -228,7 +229,7 @@ namespace RTE {
 				// This is to support hot reloading entities in SceneEditorGUI. It's a bit hacky to put it in Main like this, but PresetMan has no update in which to clear the value, and I didn't want to set up a listener for the job.
 				// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
 				g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
-				
+
 				g_ConsoleMan.Update();
 				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 

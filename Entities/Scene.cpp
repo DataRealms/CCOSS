@@ -1861,32 +1861,41 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDimensions
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-
-Vector Scene::GetDimensions() const
-{
-    return (m_pTerrain && m_pTerrain->GetBitmap()) ? Vector(m_pTerrain->GetBitmap()->w, m_pTerrain->GetBitmap()->h) : Vector();
+Vector Scene::GetDimensions() const {
+	if (m_pTerrain) {
+		if (const BITMAP *terrainBitmap = m_pTerrain->GetBitmap()) {
+			return Vector(static_cast<float>(terrainBitmap->w), static_cast<float>(terrainBitmap->h));
+		}
+		return Vector(static_cast<float>(m_pTerrain->GetWidth()), static_cast<float>(m_pTerrain->GetHeight()));
+	}
+	return Vector();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
+int Scene::GetWidth() const {
+	if (m_pTerrain) {
+		if (const BITMAP *terrainBitmap = m_pTerrain->GetBitmap()) {
+			return terrainBitmap->w;
+		}
+		return m_pTerrain->GetWidth();
+	}
+	return 0;
+}
 
-int Scene::GetWidth() const { return (m_pTerrain && m_pTerrain->GetBitmap()) ? m_pTerrain->GetBitmap()->w : 0; }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-
-int Scene::GetHeight() const { return (m_pTerrain && m_pTerrain->GetBitmap()) ? m_pTerrain->GetBitmap()->h : 0; }
+int Scene::GetHeight() const {
+	if (m_pTerrain) {
+		if (const BITMAP *terrainBitmap = m_pTerrain->GetBitmap()) {
+			return terrainBitmap->h;
+		}
+		return m_pTerrain->GetHeight();
+	}
+	return 0;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -275,7 +275,7 @@ namespace RTE {
             Vector frameSize = GetFrameSize(screenId);
 
             Box screenBox(screen.m_Offset, frameSize.GetX(), frameSize.GetY());
-            list<Box> wrappedBoxes;
+            std::list<Box> wrappedBoxes;
             g_SceneMan.WrapBox(screenBox, wrappedBoxes);
 
             float closestDistanceFromScreen = std::numeric_limits<float>::max();

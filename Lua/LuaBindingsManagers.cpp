@@ -327,7 +327,8 @@ namespace RTE {
 			.def("GetScrollTarget", &CameraMan::GetScrollTarget)
 			.def("TargetDistanceScalar", &CameraMan::TargetDistanceScalar)
 			.def("CheckOffset", &CameraMan::CheckOffset)
-			.def("SetScroll", &CameraMan::SetScroll);
+			.def("SetScroll", &CameraMan::SetScroll)
+			.def("AddScreenShake", &CameraMan::AddScreenShake);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

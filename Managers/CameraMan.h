@@ -47,8 +47,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the offset (scroll position) of the terrain.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to set the offset of.</param>
 		/// <param name="offset">The new offset value.</param>
+		/// <param name="screenId">Which screen you want to set the offset of.</param>
 		void SetOffset(const Vector &offset, int screenId = 0);
 
 		/// <summary>
@@ -72,18 +72,25 @@ namespace RTE {
 		Vector GetUnwrappedOffset(int screenId = 0) const;
 
 		/// <summary>
+		/// Increases the magnitude of screen shake.
+		/// </summary>
+		/// <param name="magnitude">The amount of screen shake to add.</param>
+		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
+		void AddScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude += magnitude; }
+
+		/// <summary>
 		/// Sets the offset (scroll position) of the terrain to center on specific world coordinates. 
 		/// If the coordinate to center on is close to the terrain border edges, the view will not scroll outside the borders.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to set the offset of.</param>
 		/// <param name="center">The coordinates to center the terrain scroll on.</param>
+		/// <param name="screenId">Which screen you want to set the offset of.</param>
 		void SetScroll(const Vector& center, int screenId = 0);
 
 		/// <summary>
 		/// Sets the team associated with a specific screen.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to set the team of.</param>
 		/// <param name="team">The team to set the screen to.</param>
+		/// <param name="screenId">Which screen you want to set the team of.</param>
 		void SetScreenTeam(int team, int screenId = 0) { m_Screens[screenId].m_ScreenTeam = team; }
 
 		/// <summary>
@@ -97,25 +104,25 @@ namespace RTE {
 		/// Sets the amount that a specific screen is occluded by a GUI panel or something of the sort. 
 		/// This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to set the occlusion of.</param>
 		/// <param name="occlusion">The amount of occlusion of the screen.</param>
+		/// <param name="screenId">Which screen you want to set the occlusion of.</param>
 		void SetScreenOcclusion(const Vector &occlusion, int screenId = 0) { m_Screens[screenId].m_ScreenOcclusion = occlusion; }
 
 		/// <summary>
 		/// Gets the amount that a specific screen is occluded by a GUI panel or something of the sort. 
 		/// This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to get the team of.</param>
 		/// <returns>A vector indicating the screen occlusion amount.</returns>
+		/// <param name="screenId">Which screen you want to get the team of.</param>
 		Vector& GetScreenOcclusion(int screenId = 0) { return m_Screens[screenId].m_ScreenOcclusion; }
 
 		/// <summary>
 		/// Interpolates a smooth scroll of the view from wherever it is now, towards centering on a new scroll target over time.
 		/// </summary>
-		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
 		/// <param name="targetCenter">The new target vector in *scene coordinates*.</param>
 		/// <param name="speed">The normalized speed at screen the view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.</param>
 		/// <param name="targetWrapped">Whether the target was wrapped around the scene this frame or not.</param>
+		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
 		void SetScrollTarget(const Vector &targetCenter, float speed = 0.1F, bool targetWrapped = false, int screenId = 0);
 
 		/// <summary>
@@ -179,6 +186,8 @@ namespace RTE {
 			// This is used fo keeping the background layers' scroll from jumping when wrapping around.
 			// X and Y
 			int m_SeamCrossCount[2];
+			// The magnitude of screen shake that is currently being applied
+			float m_ScreenShakeMagnitude;
 		};
 
 		std::array<Screen, c_MaxScreenCount> m_Screens;

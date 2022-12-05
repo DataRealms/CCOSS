@@ -17,12 +17,13 @@ namespace RTE {
             screen.m_DeltaOffset.Reset();
             screen.m_ScrollTarget.Reset();
             screen.m_ScreenTeam = Activity::NoTeam;
-            screen.m_ScrollSpeed = 0.1;
+            screen.m_ScrollSpeed = 0.1F;
             screen.m_ScrollTimer.Reset();
             screen.m_ScreenOcclusion.Reset();
             screen.m_TargetWrapped = false;
             screen.m_SeamCrossCount[X] = 0;
             screen.m_SeamCrossCount[Y] = 0;
+            screen.m_ScreenShakeMagnitude = 0.0F;
         }
     }
 
@@ -44,6 +45,15 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
         const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
 
+        // Reduce screen-shake over time
+        const float screenShakeDecay = 20.0F;
+        screen.m_ScreenShakeMagnitude -= screenShakeDecay * g_TimerMan.GetDeltaTimeSecs();
+        screen.m_ScreenShakeMagnitude = std::max(screen.m_ScreenShakeMagnitude, 0.0F);
+
+        Vector screenShakeOffset(1.0f, 0.0f);
+        screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
+        screenShakeOffset *= screen.m_ScreenShakeMagnitude;
+
         if (g_TimerMan.DrawnSimUpdate()) {
             // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
             if (screen.m_TargetWrapped) {
@@ -60,6 +70,7 @@ namespace RTE {
             }
             screen.m_TargetWrapped = false;
         }
+        
         Vector oldOffset(screen.m_Offset);
 
         Vector offsetTarget;
@@ -74,11 +85,15 @@ namespace RTE {
         // Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
         offsetTarget -= (screen.m_ScreenOcclusion / 2);
 
+        Vector newOffset = screen.m_Offset;
         if (offsetTarget.GetFloored() != screen.m_Offset.GetFloored()) {
             Vector scrollVec(offsetTarget - screen.m_Offset);
             float scrollProgress = std::min(1.0F, static_cast<float>(screen.m_ScrollSpeed * screen.m_ScrollTimer.GetElapsedRealTimeMS() * 0.05F));
-            SetOffset(screen.m_Offset + (scrollVec * scrollProgress), screenId);
+            newOffset += scrollVec * scrollProgress;
         }
+
+        newOffset += screenShakeOffset;
+        SetOffset(newOffset, screenId);
 
         screen.m_DeltaOffset = screen.m_Offset - oldOffset;
         screen.m_ScrollTimer.Reset();

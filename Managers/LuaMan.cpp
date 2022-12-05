@@ -301,7 +301,16 @@ namespace RTE {
 		}
 
 		for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
-			lua_pushlstring(m_MasterState, functionLiteralArgument.data(), functionLiteralArgument.size());
+			char *stringToDoubleConversionFailed = nullptr;
+			if (functionLiteralArgument == "nil") {
+				lua_pushnil(m_MasterState);
+			} else if (functionLiteralArgument == "true" || functionLiteralArgument == "false") {
+				lua_pushboolean(m_MasterState, functionLiteralArgument == "true" ? 1 : 0);
+			} else if (double argumentAsNumber = std::strtod(functionLiteralArgument.data(), &stringToDoubleConversionFailed); !*stringToDoubleConversionFailed) {
+				lua_pushnumber(m_MasterState, argumentAsNumber);
+			} else {
+				lua_pushlstring(m_MasterState, functionLiteralArgument.data(), functionLiteralArgument.size());
+			}
 		}
 
 		if (lua_pcall(m_MasterState, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {

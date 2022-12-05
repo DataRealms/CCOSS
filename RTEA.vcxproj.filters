@@ -546,6 +546,9 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\CameraMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1052,6 +1055,9 @@
     </ClCompile>
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\CameraMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

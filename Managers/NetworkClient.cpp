@@ -1,3 +1,5 @@
+#include "NetworkClient.h"
+
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
@@ -5,11 +7,11 @@
 #include "SettingsMan.h"
 #include "PerformanceMan.h"
 #include "UInputMan.h"
+#include "SoundContainer.h"
 
 #include "RakSleep.h"
 
-#include "NetworkClient.h"
-#include <lz4.h>
+#include "lz4.h"
 
 namespace RTE {
 
@@ -22,11 +24,16 @@ namespace RTE {
 		m_IsConnected = false;
 		m_IsRegistered = false;
 		m_ClientInputFps = 120;
-		m_SceneBackgroundBitmap = 0;
-		m_SceneForegroundBitmap = 0;
+		m_SceneBackgroundBitmap = nullptr;
+		m_SceneForegroundBitmap = nullptr;
 		m_CurrentSceneLayerReceived = -1;
-		m_CurrentFrame = 0;
+		m_CurrentFrameNum = 0;
+		m_CurrentBoxWidth = 0;
+		m_CurrentBoxHeight = 0;
+		m_CurrentFrameDeltaCompressed = false;
+		m_ShowFillRate = false;
 		m_UseNATPunchThroughService = false;
+		m_CurrentFrameInterlaced = false;
 		m_ServerGUID = RakNet::UNASSIGNED_RAKNET_GUID;
 		m_NATServiceServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_ServerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -45,9 +52,9 @@ namespace RTE {
 			m_MouseButtonReleasedState[i] = -1;
 		}
 		// Stop all sounds received from server
-		for (const std::pair<unsigned short, SoundContainer *> &soundEntry : m_ServerSounds) {
-			soundEntry.second->Stop();
-			delete soundEntry.second;
+		for (const auto &[channelIndex, soundContainer] : m_ServerSounds) {
+			soundContainer->Stop();
+			delete soundContainer;
 		}
 		m_ServerSounds.clear();
 	}
@@ -72,7 +79,7 @@ namespace RTE {
 		m_Client->Startup(8, &socketDescriptor, 1);
 		m_Client->SetOccasionalPing(true);
 		m_PlayerName = playerName;
-		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(serverName.c_str(), serverPort, NULL, 0);
+		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(serverName.c_str(), serverPort, nullptr, 0);
 
 		g_ConsoleMan.PrintString((connectionAttempt == RakNet::CONNECTION_ATTEMPT_STARTED) ? "CLIENT: Connect request sent" : "CLIENT: Unable to connect");
 	}
@@ -84,7 +91,7 @@ namespace RTE {
 		g_ConsoleMan.PrintString(address.ToString());
 
 		m_ServerID = address;
-		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(address.ToString(false), address.GetPort(), NULL, 0);
+		RakNet::ConnectionAttemptResult connectionAttempt = m_Client->Connect(address.ToString(false), address.GetPort(), nullptr, 0);
 
 		g_ConsoleMan.PrintString((connectionAttempt == RakNet::CONNECTION_ATTEMPT_STARTED) ? "CLIENT: Connect request sent" : "CLIENT: Unable to connect");
 	}
@@ -127,9 +134,9 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	RakNet::SystemAddress NetworkClient::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port) {
-		if (rakPeer->Connect(address, port, 0, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
+		if (rakPeer->Connect(address, port, nullptr, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
 			return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		}
 
@@ -150,7 +157,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	unsigned char NetworkClient::GetPacketIdentifier(RakNet::Packet *packet) const {
-		if (packet == 0) {
+		if (packet == nullptr) {
 			return 255;
 		}
 		if (packet->data[0] == ID_TIMESTAMP) {
@@ -164,7 +171,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendRegisterMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_REGISTER;
 		msg.ResolutionX = g_FrameMan.GetResX();
 		msg.ResolutionY = g_FrameMan.GetResY();
@@ -183,7 +190,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendDisconnectMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_DISCONNECT;
 		m_Client->Send((const char *)&msg, sizeof(msg), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 		g_ConsoleMan.PrintString("CLIENT: Disconnection Sent");
@@ -192,7 +199,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword) {
-		MsgGetServerRequest msg;
+		MsgGetServerRequest msg = {};
 		msg.Id = ID_NAT_SERVER_GET_SERVER_GUID;
 		strncpy(msg.ServerName, serverName.c_str(), 62);
 		strncpy(msg.ServerPassword, serverPassword.c_str(), 62);
@@ -212,7 +219,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendInputMsg() {
-		MsgInput msg;
+		MsgInput msg = {};
 		msg.Id = ID_CLT_INPUT;
 
 		Vector mouse = g_UInputMan.GetNetworkAccumulatedRawMouseMovement(0);
@@ -269,21 +276,26 @@ namespace RTE {
 
 	void NetworkClient::ReceiveFrameSetupMsg(RakNet::Packet *packet) {
 		const MsgFrameSetup *frameData = (MsgFrameSetup *)packet->data;
-		if (frameData->FrameNumber < 0 || frameData->FrameNumber >= c_FramesToRemember) {
+		if (frameData->FrameNumber >= c_FramesToRemember) {
 			return;
 		}
 
-		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(frameData->FrameNumber, frameData->Interlaced, !frameData->DeltaCompressed); }
 
-		m_PostEffects[m_CurrentFrame].clear();
-		m_CurrentFrame = frameData->FrameNumber;
+		m_PostEffects[m_CurrentFrameNum].clear();
+		m_CurrentFrameNum = frameData->FrameNumber;
+		m_CurrentFrameInterlaced = frameData->Interlaced;
+		m_CurrentFrameDeltaCompressed = frameData->DeltaCompressed;
 
-		m_TargetPos[m_CurrentFrame].m_X = frameData->TargetPosX;
-		m_TargetPos[m_CurrentFrame].m_Y = frameData->TargetPosY;
+		m_CurrentBoxWidth = frameData->BoxWidth;
+		m_CurrentBoxHeight = frameData->BoxHeight;
+
+		m_TargetPos[m_CurrentFrameNum].m_X = frameData->TargetPosX;
+		m_TargetPos[m_CurrentFrameNum].m_Y = frameData->TargetPosY;
 
 		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
-			m_BackgroundLayers[m_CurrentFrame][i].OffsetX = frameData->OffsetX[i];
-			m_BackgroundLayers[m_CurrentFrame][i].OffsetY = frameData->OffsetY[i];
+			m_BackgroundLayers[m_CurrentFrameNum][i].OffsetX = frameData->OffsetX[i];
+			m_BackgroundLayers[m_CurrentFrameNum][i].OffsetY = frameData->OffsetY[i];
 		}
 	}
 
@@ -294,7 +306,7 @@ namespace RTE {
 		int lineNumber = frameData->LineNumber;
 		m_CurrentSceneLayerReceived = -1;
 
-		BITMAP *bmp = 0;
+		BITMAP *bmp = nullptr;
 
 		if (frameData->Layer == 0) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
@@ -333,59 +345,99 @@ namespace RTE {
 
 	void NetworkClient::ReceiveFrameBoxMsg(RakNet::Packet *packet) {
 		const MsgFrameBox *frameData = (MsgFrameBox *)packet->data;
-		int bpx = frameData->BoxX;
-		int bpy = frameData->BoxY;
+
+		if (m_CurrentBoxWidth == 0 || m_CurrentBoxHeight == 0) {
+			return;
+		}
+
+		int bpx = frameData->BoxX * m_CurrentBoxWidth;
+		int bpy = frameData->BoxY * m_CurrentBoxHeight;
 		m_CurrentSceneLayerReceived = -1;
 
-		BITMAP *bmp = 0;
+		BITMAP *bmp = nullptr;
+		bool isDelta = frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA || frameData->Id == ID_SRV_FRAME_BOX_UI_DELTA;
 
-		if (frameData->Layer == 0) {
+		if (frameData->Id == ID_SRV_FRAME_BOX_MO || frameData->Id == ID_SRV_FRAME_BOX_MO_DELTA) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
-		} else if (frameData->Layer == 1) {
+		} else if (frameData->Id == ID_SRV_FRAME_BOX_UI || frameData->Id == ID_SRV_FRAME_BOX_UI_DELTA) {
 			bmp = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0);
 		}
 
 		acquire_bitmap(bmp);
 
-		int maxWidth = frameData->BoxWidth;
-		int maxHeight = frameData->BoxHeight;
+		int maxWidth = m_CurrentBoxWidth;
+		int maxHeight = m_CurrentBoxHeight;
+
+		// If box with default size is out of bounds, then it was truncated by the screen edge
+		if (bpx + maxWidth >= bmp->w) { maxWidth = bmp->w - bpx; }
+		if (bpy + maxHeight >= bmp->h) { maxHeight = bmp->h - bpy; }
+
 		int size = frameData->DataSize;
+		int uncompressedSize = maxWidth * maxHeight;
+
+		if (m_CurrentFrameInterlaced) { uncompressedSize = maxWidth * (maxHeight / 2); }
+
+		float compressionRatio = static_cast<float>(size) / static_cast<float>(uncompressedSize);
 
 		m_ReceivedData += frameData->DataSize;
-		m_CompressedData += frameData->UncompressedSize;
+		m_CompressedData += uncompressedSize;
 
 		if (bpx + maxWidth - 1 < bmp->w && bpy + maxHeight - 1 < bmp->h && bpx >= 0 && bpy >= 0) {
 			// Unpack box
 			if (frameData->DataSize == 0) {
-				//memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			} else {
-				if (frameData->DataSize == frameData->UncompressedSize) {
+				if (frameData->DataSize == uncompressedSize) {
 #ifdef _WIN32
 					memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgFrameBox), size);
 #else
 					// Fallback to unsafe memcpy
 					memcpy(m_PixelLineBuffer, packet->data + sizeof(MsgFrameBox), size);
 #endif
-
 				} else {
-					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameBox)), (char *)(m_PixelLineBuffer), size, frameData->UncompressedSize);
+					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameBox)), (char *)(m_PixelLineBuffer), size, uncompressedSize);
 				}
-				// Copy box to bitmap line by line
-				const unsigned char *lineAddr = m_PixelLineBuffer;
-				for (int y = 0; y < maxHeight; y++) {
+
+
+				int lineStart = 0;
+				int lineStep = 1;
+
+				if (m_CurrentFrameInterlaced) {
+					lineStep = 2;
+					if (m_CurrentFrameNum % 2 != 0) { lineStart = 1; }
+				}
+
+				if (isDelta) {
+					const unsigned char *lineAddr = m_PixelLineBuffer;
+					for (int y = lineStart; y < maxHeight; y += lineStep) {
+						for (int x = 0; x < maxWidth; x++) {
+							*(bmp->line[bpy + y] + bpx + x) += lineAddr[x];
+						}
+						lineAddr += maxWidth;
+					}
+				} else {
+					// Copy box to bitmap line by line
+					const unsigned char *lineAddr = m_PixelLineBuffer;
+					for (int y = lineStart; y < maxHeight; y += lineStep) {
 #ifdef _WIN32
-					memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
+						memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
 #else
-					memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
+						memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
 #endif
-
-					lineAddr += maxWidth;
+						lineAddr += maxWidth;
+					}
 				}
 
-#ifndef RELEASE_BUILD
-				if (g_UInputMan.KeyHeld(KEY_0)) { rect(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_BlackColor); }
-#endif
+				if (m_ShowFillRate && frameData->DataSize > 0) {
+					rect(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_WhiteColor);
+
+					int color = isDelta ? ColorKeys::g_GreenColor : ColorKeys::g_RedColor;
+					if (maxHeight == m_CurrentBoxHeight) {
+						line(bmp, bpx, bpy, bpx + maxWidth - 1, bpy, color);
+						line(bmp, bpx, bpy, bpx, bpy + compressionRatio * maxHeight, color);
+						line(bmp, bpx + maxWidth - 1, bpy, bpx + maxWidth - 1, bpy + compressionRatio * maxHeight, color);
+					}
+				}
 			}
 		}
 		release_bitmap(bmp);
@@ -394,7 +446,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::SendSceneAcceptedMsg() {
-		MsgRegister msg;
+		MsgRegister msg = {};
 		msg.Id = ID_CLT_SCENE_ACCEPTED;
 		m_Client->Send((const char *)&msg, sizeof(msg), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 		g_ConsoleMan.PrintString("CLIENT: Scene ACK Sent");
@@ -411,7 +463,7 @@ namespace RTE {
 		int linex = frameData->X;
 		int liney = frameData->Y;
 
-		const BITMAP *bmp = 0;
+		const BITMAP *bmp = nullptr;
 
 		if (frameData->Layer == 0) {
 			bmp = m_SceneBackgroundBitmap;
@@ -508,6 +560,13 @@ namespace RTE {
 				m_BackgroundLayers[f][i].FillDownColor = frameData->BackgroundLayers[i].FillDownColor;
 			}
 		}
+		// Reset network framebuffers
+		BITMAP *net_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
+		BITMAP *net_gui_bmp = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0);
+
+		clear_to_color(net_bmp, ColorKeys::g_MaskColor);
+		clear_to_color(net_gui_bmp, ColorKeys::g_MaskColor);
+
 		SendSceneSetupAcceptedMsg();
 		g_ConsoleMan.PrintString("CLIENT: Scene setup accepted");
 	}
@@ -565,7 +624,7 @@ namespace RTE {
 		const PostEffectNetworkData *effDataPtr = (PostEffectNetworkData *)((char *)msg + sizeof(MsgPostEffects));
 
 		for (int i = 0; i < msg->PostEffectsCount; i++) {
-			BITMAP *bmp = 0;
+			BITMAP *bmp = nullptr;
 			std::string bitmapPath = ContentFile::GetPathFromHash(effDataPtr->BitmapHash);
 			if (!bitmapPath.empty()) {
 				ContentFile fl(bitmapPath.c_str());
@@ -691,7 +750,7 @@ namespace RTE {
 				Vector scrollOverride(0, 0);
 				bool scrollOverridden = false;
 
-				int frame = m_CurrentFrame;
+				int frame = m_CurrentFrameNum;
 
 				// Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension
 				Box targetBox(Vector(0, 0), targetBitmap->w, targetBitmap->h);
@@ -723,7 +782,7 @@ namespace RTE {
 					// Regular scroll
 					offsetX = std::floor(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
 					offsetY = std::floor(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
-			
+
 					// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 					// ForceBounds(offsetX, offsetY);
 					// WrapPosition(offsetX, offsetY);
@@ -866,11 +925,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::DrawPostEffects(int frame) { g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]); }
+	void NetworkClient::DrawPostEffects(int frame) {
+		g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::DrawFrame() {
+	void NetworkClient::DrawFrame(int frameNumber, bool useInterlacing, bool clearFramebuffer) {
 		BITMAP *src_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
 		BITMAP *dst_bmp = g_FrameMan.GetNetworkBackBuffer8Ready(0);
 
@@ -882,14 +943,14 @@ namespace RTE {
 		clear_to_color(dst_gui_bmp, g_MaskColor);
 
 		// Draw Scene background
-		int sourceX = m_TargetPos[m_CurrentFrame].m_X;
-		int sourceY = m_TargetPos[m_CurrentFrame].m_Y;
+		int sourceX = m_TargetPos[m_CurrentFrameNum].GetFloorIntX();
+		int sourceY = m_TargetPos[m_CurrentFrameNum].GetFloorIntY();
 		int destX = 0;
 		int destY = 0;
 
 		DrawBackgrounds(dst_bmp);
 		masked_blit(m_SceneBackgroundBitmap, dst_bmp, sourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
-		
+
 		if (sourceX < 0) {
 			// Draw if the out of seam portion is to the left
 			int newSourceX = m_SceneBackgroundBitmap->w + sourceX;
@@ -903,7 +964,7 @@ namespace RTE {
 			masked_blit(m_SceneBackgroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
 
-		//draw_sprite(src_bmp, dst_bmp, 0, 0);
+		//Draw received bitmap
 		masked_blit(src_bmp, dst_bmp, 0, 0, 0, 0, src_bmp->w, src_bmp->h);
 		masked_blit(src_gui_bmp, dst_gui_bmp, 0, 0, 0, 0, src_bmp->w, src_bmp->h);
 		masked_blit(m_SceneForegroundBitmap, dst_bmp, sourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
@@ -921,9 +982,45 @@ namespace RTE {
 			masked_blit(m_SceneForegroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
 
-		DrawPostEffects(m_CurrentFrame);
+		DrawPostEffects(m_CurrentFrameNum);
 
 		g_PerformanceMan.SetCurrentPing(GetPing());
+
+		if (clearFramebuffer) {
+			if (useInterlacing) {
+				if (m_CurrentBoxWidth == 0 || m_CurrentBoxHeight == 0) {
+					return;
+				}
+				bool clearEven = !(frameNumber % 2 == 0);
+				int boxedWidth = src_bmp->w / m_CurrentBoxWidth;
+				int boxedHeight = src_bmp->h / m_CurrentBoxHeight;
+
+				if (src_bmp->w % m_CurrentBoxWidth != 0) { boxedWidth = boxedWidth + 1; }
+
+				int lineStart = 0;
+				if (clearEven) { lineStart = 1; }
+
+				for (int by = 0; by <= boxedHeight; by++) {
+					for (int bx = 0; bx <= boxedWidth; bx++) {
+						int bpx = bx * m_CurrentBoxWidth;
+						int bpy = by * m_CurrentBoxHeight;
+
+						if (bpx >= src_bmp->w || bpy >= src_bmp->h) {
+							break;
+						}
+
+						int maxWidth = m_CurrentBoxWidth;
+						if (bpx + m_CurrentBoxWidth >= src_bmp->w) { maxWidth = src_bmp->w - bpx; }
+
+						int maxHeight = m_CurrentBoxHeight;
+						if (bpy + m_CurrentBoxHeight >= src_bmp->h) { maxHeight = src_bmp->h - bpy; }
+					}
+				}
+			} else {
+				clear_to_color(src_bmp, ColorKeys::g_MaskColor);
+				clear_to_color(src_gui_bmp, ColorKeys::g_MaskColor);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -933,7 +1030,7 @@ namespace RTE {
 
 		// Draw level loading animation
 		if (m_CurrentSceneLayerReceived != -1) {
-			BITMAP * bmp = 0;
+			BITMAP * bmp = nullptr;
 
 			if (m_CurrentSceneLayerReceived == -1) {
 				bmp = m_SceneBackgroundBitmap;
@@ -949,21 +1046,21 @@ namespace RTE {
 
 			float scale = static_cast<float>(dst_bmp->w) / static_cast<float>(bmp->w);
 			int w = dst_bmp->w;
-			int h = static_cast<float>(bmp->h) * scale;
+			int h = static_cast<int>(static_cast<float>(bmp->h) * scale);
 
 			int x = 0;
 			int y = g_FrameMan.GetResY() / 2 - h / 2;
 			if (h >= g_FrameMan.GetResY()) { y = 0; }
-				
+
 			// Recalculate everything for tall maps
 			if (static_cast<float>(bmp->h) / static_cast<float>(bmp->w) > 1) {
 				scale = static_cast<float>(dst_bmp->h) / static_cast<float>(bmp->h);
 				h = dst_bmp->h;
-				w = static_cast<float>(bmp->w) * scale;
+				w = static_cast<int>(static_cast<float>(bmp->w) * scale);
 
 				x = g_FrameMan.GetResX() / 2 - w / 2;
 				y = 0;
-				if (w >= g_FrameMan.GetResX()) { x = 0; }					
+				if (w >= g_FrameMan.GetResX()) { x = 0; }
 			}
 
 			// Draw previous layer
@@ -986,7 +1083,7 @@ namespace RTE {
 		}
 
 		// Input is sent at whatever settings are set in inputs per second
-		float inputSend = m_ClientInputFps;
+		float inputSend = static_cast<float>(m_ClientInputFps);
 
 #if !defined DEBUG_RELEASE_BUILD && !defined RELEASE_BUILD
 		// Reduce input rate for debugging because it may overflow the input queue
@@ -999,19 +1096,22 @@ namespace RTE {
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
 			if (IsConnectedAndRegistered()) {
-				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(m_CurrentFrameNum, m_CurrentFrameInterlaced, !m_CurrentFrameDeltaCompressed); }
 				SendInputMsg();
 			}
 		}
+
+#ifndef RELEASE_BUILD
+		m_ShowFillRate = g_UInputMan.KeyHeld(KEY_0);
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::HandleNetworkPackets() {
-		RakNet::Packet *packet;
 		std::string msg;
 
-		for (packet = m_Client->Receive(); packet; m_Client->DeallocatePacket(packet), packet = m_Client->Receive()) {
+		for (RakNet::Packet *packet = m_Client->Receive(); packet; m_Client->DeallocatePacket(packet), packet = m_Client->Receive()) {
 			// We got a packet, get the identifier with our handy function
 			unsigned char packetIdentifier = GetPacketIdentifier(packet);
 
@@ -1098,7 +1198,10 @@ namespace RTE {
 				case ID_SRV_FRAME_LINE:
 					ReceiveFrameLineMsg(packet);
 					break;
-				case ID_SRV_FRAME_BOX:
+				case ID_SRV_FRAME_BOX_MO:
+				case ID_SRV_FRAME_BOX_UI:
+				case ID_SRV_FRAME_BOX_MO_DELTA:
+				case ID_SRV_FRAME_BOX_UI_DELTA:
 					ReceiveFrameBoxMsg(packet);
 					break;
 				case ID_SRV_SCENE_SETUP:

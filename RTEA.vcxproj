@@ -561,6 +561,7 @@
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h" />
     <ClInclude Include="Lua\LuaAdaptersEntities.h" />
     <ClInclude Include="GUI\GUIWriter.h" />
+    <ClInclude Include="Managers\CameraMan.h" />
     <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
@@ -838,6 +839,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Managers\CameraMan.cpp" />
     <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />

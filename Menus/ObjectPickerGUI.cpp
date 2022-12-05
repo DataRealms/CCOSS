@@ -1,5 +1,6 @@
 #include "ObjectPickerGUI.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -563,7 +564,7 @@ namespace RTE {
 			float travelCompletionDistance = std::floor(static_cast<float>(enabledPos - m_ParentBox->GetXPos()) * m_OpenCloseSpeed);
 
 			m_ParentBox->SetPositionAbs(m_ParentBox->GetXPos() + static_cast<int>(travelCompletionDistance), 0);
-			g_SceneMan.SetScreenOcclusion(Vector(static_cast<float>(m_ParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller->GetPlayer()));
+			g_CameraMan.SetScreenOcclusion(Vector(static_cast<float>(m_ParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller->GetPlayer()));
 
 			if (m_ParentBox->GetXPos() <= enabledPos) {
 				m_ParentBox->SetEnabled(true);
@@ -577,7 +578,7 @@ namespace RTE {
 			float travelCompletionDistance = std::ceil(static_cast<float>(disabledPos - m_ParentBox->GetXPos()) * m_OpenCloseSpeed);
 
 			m_ParentBox->SetPositionAbs(m_ParentBox->GetXPos() + static_cast<int>(travelCompletionDistance), 0);
-			g_SceneMan.SetScreenOcclusion(Vector(static_cast<float>(m_ParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller->GetPlayer()));
+			g_CameraMan.SetScreenOcclusion(Vector(static_cast<float>(m_ParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller->GetPlayer()));
 
 			if (m_ParentBox->GetXPos() >= g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())) {
 				m_ParentBox->SetVisible(false);

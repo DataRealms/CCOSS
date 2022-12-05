@@ -686,34 +686,23 @@ EntityAllocation(Scene)
     bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDimensions
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-// Arguments:       None.
-// Return value:    A Vector describing the scene dimensions.
+	/// <summary>
+	/// Gets the total dimensions (width and height) of the scene, in pixels.
+	/// </summary>
+	/// <returns>A Vector describing the scene dimensions.</returns>
+	Vector GetDimensions() const;
 
-    Vector GetDimensions() const;
+	/// <summary>
+	/// Gets the total width of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene width.</returns>
+	int GetWidth() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetWidth() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetHeight() const;
+	/// <summary>
+	/// Gets the total height of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene height.</returns>
+	int GetHeight() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

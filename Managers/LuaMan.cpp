@@ -134,6 +134,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
@@ -151,6 +152,7 @@ namespace RTE {
 			RegisterLuaBindingsOfType(GUILuaBindings, SceneEditorGUI),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, ActivityMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, AudioMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, CameraMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, ConsoleMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, FrameMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, MetaMan),
@@ -183,6 +185,7 @@ namespace RTE {
 		luabind::globals(m_MasterState)["ActivityMan"] = &g_ActivityMan;
 		luabind::globals(m_MasterState)["MetaMan"] = &g_MetaMan;
 		luabind::globals(m_MasterState)["MovableMan"] = &g_MovableMan;
+		luabind::globals(m_MasterState)["CameraMan"] = &g_CameraMan;
 		luabind::globals(m_MasterState)["ConsoleMan"] = &g_ConsoleMan;
 		luabind::globals(m_MasterState)["LuaMan"] = &g_LuaMan;
 		luabind::globals(m_MasterState)["SettingsMan"] = &g_SettingsMan;

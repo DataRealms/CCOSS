@@ -13,6 +13,7 @@
 
 #include "BuyMenuGUI.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -887,7 +888,7 @@ void BuyMenuGUI::Update()
         }
 
         m_pParentBox->SetPositionAbs(position.m_X, position.m_Y);
-        g_SceneMan.SetScreenOcclusion(occlusion, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(occlusion, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
 		if (m_pParentBox->GetXPos() >= 0)
 		{
@@ -903,7 +904,7 @@ void BuyMenuGUI::Update()
         if (goProgress > 1.0)
             goProgress = 1.0;
         m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + std::floor(toGo * goProgress), 0);
-        g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetWidth() + m_pParentBox->GetXPos(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(m_pParentBox->GetWidth() + m_pParentBox->GetXPos(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
         m_pPopupBox->SetVisible(false);
 
         if (m_pParentBox->GetXPos() <= -m_pParentBox->GetWidth())

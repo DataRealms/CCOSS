@@ -11,12 +11,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 #include "SceneMan.h"
 #include "PresetMan.h"
 #include "FrameMan.h"
 #include "ActivityMan.h"
 #include "UInputMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PrimitiveMan.h"
 #include "SettingsMan.h"
@@ -81,19 +83,6 @@ void SceneMan::Clear()
     m_MaterialCount = 0;
 
 	m_MaterialCopiesVector.clear();
-
-    for (int i = 0; i < c_MaxScreenCount; ++i) {
-        m_Offset[i].Reset();
-        m_DeltaOffset[i].Reset();
-        m_ScrollTarget[i].Reset();
-        m_ScreenTeam[i] = Activity::NoTeam;
-        m_ScrollSpeed[i] = 0.1;
-        m_ScrollTimer[i].Reset();
-        m_ScreenOcclusion[i].Reset();
-        m_TargetWrapped[i] = false;
-        m_SeamCrossCount[i][X] = 0;
-        m_SeamCrossCount[i][Y] = 0;
-    }
 
     m_pUnseenRevealSound = 0;
     m_DrawRayCastVisualizations = false;
@@ -570,156 +559,6 @@ Vector SceneMan::GetGlobalAcc() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
-{
-    if (screen >= c_MaxScreenCount)
-        return;
-
-    m_Offset[screen].m_X = offsetX;
-    m_Offset[screen].m_Y = offsetY;
-    CheckOffset(screen);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SetScroll(const Vector &center, int screen)
-{
-    if (screen >= c_MaxScreenCount)
-        return;
-
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		m_Offset[screen].m_X = center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2);
-		m_Offset[screen].m_Y = center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2);
-	}
-	else 
-	{
-		m_Offset[screen].m_X = center.GetFloorIntX() - (g_FrameMan.GetResX() / 2);
-		m_Offset[screen].m_Y = center.GetFloorIntY() - (g_FrameMan.GetResY() / 2);
-	}
-
-    CheckOffset(screen);
-
-// *** Temp hack
-//    m_OffsetX = -m_OffsetX;
-//    m_OffsetY = -m_OffsetY;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SetScrollTarget(const Vector &targetCenter,
-                               float speed,
-                               bool targetWrapped,
-                               int screen)
-{
-    // See if it would make sense to automatically wrap
-    if (!targetWrapped)
-    {
-        SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-        // If the difference is more than half the scene width, then wrap
-        if ((pTerrain->WrapsX() && fabs(targetCenter.m_X - m_ScrollTarget[screen].m_X) > pTerrain->GetBitmap()->w / 2) ||
-            (pTerrain->WrapsY() && fabs(targetCenter.m_Y - m_ScrollTarget[screen].m_Y) > pTerrain->GetBitmap()->h / 2))
-            targetWrapped = true;
-    }
-
-    m_ScrollTarget[screen].m_X = targetCenter.m_X;
-    m_ScrollTarget[screen].m_Y = targetCenter.m_Y;
-    m_ScrollSpeed[screen] = speed;
-    // Don't override a set wrapping, it will be reset to false upon a drawn frame
-    m_TargetWrapped[screen] = m_TargetWrapped[screen] || targetWrapped;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-const Vector & SceneMan::GetScrollTarget(int screen) const {
-	 const Vector & offsetTarget = (g_NetworkClient.IsConnectedAndRegistered()) ? g_NetworkClient.GetFrameTarget() : m_ScrollTarget[screen];
-	 return offsetTarget;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-float SceneMan::TargetDistanceScalar(Vector point)
-{
-    if (!m_pCurrentScene)
-        return 0;
-
-    int screenCount = g_FrameMan.GetScreenCount();
-    float screenRadius = static_cast<float>(std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight())) / 2.0F;
-    float sceneRadius = static_cast<float>(std::max(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight())) / 2.0F;
-    // Avoid divide by zero problems if scene and screen radius are the same
-	if (screenRadius == sceneRadius) { sceneRadius += 100.0F; }
-
-    float distance = 0;
-    float scalar = 0;
-    float closestScalar = 1.0;
-
-    for (int screen = 0; screen < screenCount; ++screen)
-    {
-        distance = ShortestDistance(point, m_ScrollTarget[screen]).GetMagnitude();
-
-        // Check if we're off the screen and then fall off
-        if (distance > screenRadius)
-        {
-            // Get ratio of how close to the very opposite of the scene the point is
-            scalar = 0.5F + 0.5F * (distance - screenRadius) / (sceneRadius - screenRadius);
-        }
-        // Full audio if within the screen
-        else
-            scalar = 0.0F;
-
-        // See if this screen's distance scalar is the closest one yet
-        if (scalar < closestScalar)
-            closestScalar = scalar;
-    }
-
-    // Return the scalar that was shows the closest scroll target of any current screen to the point
-    return closestScalar;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::CheckOffset(int screen)
-{
-    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
-
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-    RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X < 0)
-        m_Offset[screen].m_X = 0;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y < 0)
-        m_Offset[screen].m_Y = 0;
-
-    int frameWidth = g_FrameMan.GetResX();
-    int frameHeight = g_FrameMan.GetResY();
-    frameWidth = frameWidth / (g_FrameMan.GetVSplit() ? 2 : 1);
-    frameHeight = frameHeight / (g_FrameMan.GetHSplit() ? 2 : 1);
-
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		frameWidth = g_FrameMan.GetPlayerFrameBufferWidth(screen);
-		frameHeight = g_FrameMan.GetPlayerFrameBufferHeight(screen);
-	}
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X >= pTerrain->GetBitmap()->w - frameWidth)
-        m_Offset[screen].m_X = pTerrain->GetBitmap()->w - frameWidth;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y >= pTerrain->GetBitmap()->h - frameHeight)
-        m_Offset[screen].m_Y = pTerrain->GetBitmap()->h - frameHeight;
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X >= pTerrain->GetBitmap()->w - frameWidth)
-        m_Offset[screen].m_X = pTerrain->GetBitmap()->w - frameWidth;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y >= pTerrain->GetBitmap()->h - frameHeight)
-        m_Offset[screen].m_Y = pTerrain->GetBitmap()->h - frameHeight;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
 void SceneMan::LockScene()
 {
 //    RTEAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
@@ -981,7 +820,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 			if (x + w >= GetSceneWidth())
 			{
 				// Left part, on the scene
-				TerrainChange tc1;
+				NetworkServer::NetworkTerrainChange tc1;
 				tc1.x = x;
 				tc1.y = y;
 				tc1.w = GetSceneWidth() - x;
@@ -995,7 +834,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 					return;
 
 				// Right part, out of scene
-				TerrainChange tc2;
+				NetworkServer::NetworkTerrainChange tc2;
 				tc2.x = 0;
 				tc2.y = y;
 				tc2.w = w - (GetSceneWidth() - x);
@@ -1010,7 +849,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 			if (x < 0)
 			{
 				// Right part, on the scene
-				TerrainChange tc2;
+				NetworkServer::NetworkTerrainChange tc2;
 				tc2.x = 0;
 				tc2.y = y;
 				tc2.w = w + x;
@@ -1024,7 +863,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 					return;
 
 				// Left part, out of the scene
-				TerrainChange tc1;
+				NetworkServer::NetworkTerrainChange tc1;
 				tc1.x = GetSceneWidth() + x;
 				tc1.y = y;
 				tc1.w = -x;
@@ -1037,7 +876,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 		}
 	}
 
-	TerrainChange tc;
+	NetworkServer::NetworkTerrainChange tc;
 	tc.x = x;
 	tc.y = y;
 	tc.w = w;
@@ -2893,74 +2732,49 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::Update(int screen) {
+void SceneMan::Update(int screenId) {
 	if (!m_pCurrentScene) {
 		return;
 	}
-	m_LastUpdatedScreen = screen;
+
+	m_LastUpdatedScreen = screenId;
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screen == 0) { m_pCurrentScene->Update(); }
+	if (screen == 0) { 
+        m_pCurrentScene->Update(); 
+    }
+
+    g_CameraMan.Update(screenId);
 
 	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
 
-	if (g_TimerMan.DrawnSimUpdate()) {
-		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
-		if (m_TargetWrapped[screen]) {
-			if (terrain->WrapsX()) {
-				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
-				m_Offset[screen].SetX(m_Offset[screen].GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
-				m_SeamCrossCount[screen][X] += wrappingScrollDirection;
-			}
-			if (terrain->WrapsY()) {
-				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
-				m_Offset[screen].SetY(m_Offset[screen].GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
-				m_SeamCrossCount[screen][Y] += wrappingScrollDirection;
-			}
-		}
-		m_TargetWrapped[screen] = false;
-	}
-	Vector oldOffset(m_Offset[screen]);
-	Vector offsetTarget;
+    const Vector& offset = g_CameraMan.GetOffset(screenId);
+	m_pMOColorLayer->SetOffset(offset);
+	m_pMOIDLayer->SetOffset(offset);
+	if (m_pDebugLayer) { 
+        m_pDebugLayer->SetOffset(offset);
+    }
 
-	if (g_FrameMan.IsInMultiplayerMode()) {
-		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2));
-		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2));
-	} else {
-		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
-		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
-	}
-	// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
-	offsetTarget -= (m_ScreenOcclusion[screen] / 2);
-
-	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
-		Vector scrollVec(offsetTarget - m_Offset[screen]);
-		float scrollProgress = std::min(1.0F, static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F));
-		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
-	}
-
-	m_pMOColorLayer->SetOffset(m_Offset[screen]);
-	m_pMOIDLayer->SetOffset(m_Offset[screen]);
-	if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
-
-	terrain->SetOffset(m_Offset[screen]);
+	terrain->SetOffset(offset);
 	terrain->Update();
 
 	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
-	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
+    const Vector& unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();
 	}
+
 	// Update the unseen obstruction layer for this team's screen view, if there is one.
-	if (SceneLayer *unseenLayer = (m_ScreenTeam[screen] != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(m_ScreenTeam[screen]) : nullptr) { unseenLayer->SetOffset(m_Offset[screen]); }
+    const int teamId = g_CameraMan.GetScreenTeam(screenId);
+	if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) {
+        unseenLayer->SetOffset(offset);
+    }
 
 	if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL) {
 		terrain->CleanAir();
 		m_CleanTimer.Reset();
 	}
-	m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
-	m_ScrollTimer[screen].Reset();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -3006,16 +2820,20 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
 				terrain->Draw(targetBitmap, targetBox);
 			}
-			if (!g_FrameMan.IsInMultiplayerMode()) {
-				int team = m_ScreenTeam[m_LastUpdatedScreen];
-				if (SceneLayer *unseenLayer = (team != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(team) : nullptr) { unseenLayer->Draw(targetBitmap, targetBox); }
+            if (!g_FrameMan.IsInMultiplayerMode()) {
+                int teamId = g_CameraMan.GetScreenTeam(m_LastUpdatedScreen);
+				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) { 
+                    unseenLayer->Draw(targetBitmap, targetBox); 
+                }
 			}
 
 			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-			if (m_pDebugLayer) { m_pDebugLayer->Draw(targetBitmap, targetBox); }
+			if (m_pDebugLayer) { 
+                m_pDebugLayer->Draw(targetBitmap, targetBox); 
+            }
 
 			break;
 	}
@@ -3065,5 +2883,16 @@ BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) c
 	}
 	return m_IntermediateSettlingBitmaps.back().second;
 }
+
+// For script backwards compat
+void SceneMan::SetOffset(const Vector& offset, int screenId) { return g_CameraMan.SetOffset(offset, screenId); }
+Vector SceneMan::GetOffset(int screenId) const { return g_CameraMan.GetOffset(screenId); }
+void SceneMan::SetScroll(const Vector& center, int screenId) { return g_CameraMan.SetScroll(center, screenId); }
+void SceneMan::SetScreenOcclusion(const Vector& occlusion, int screenId) { return g_CameraMan.SetScreenOcclusion(occlusion, screenId); }
+Vector& SceneMan::GetScreenOcclusion(int screenId) { return g_CameraMan.GetScreenOcclusion(screenId); }
+void SceneMan::SetScrollTarget(const Vector& targetCenter, float speed, bool targetWrapped, int screenId) { return g_CameraMan.SetScrollTarget(targetCenter, speed, targetWrapped, screenId); }
+Vector SceneMan::GetScrollTarget(int screenId) const { return g_CameraMan.GetScrollTarget(screenId); }
+float SceneMan::TargetDistanceScalar(const Vector& point) const { return g_CameraMan.TargetDistanceScalar(point); }
+void SceneMan::CheckOffset(int screenId) { return g_CameraMan.CheckOffset(screenId); }
 
 } // namespace RTE

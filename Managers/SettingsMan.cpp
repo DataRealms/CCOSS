@@ -28,6 +28,7 @@ namespace RTE {
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
+		m_ScreenShakeStrength = 1.0F;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -161,6 +162,8 @@ namespace RTE {
 			reader >> m_ShowEnemyHUD;
 		} else if (propName == "SmartBuyMenuNavigation") {
 			reader >> m_EnableSmartBuyMenuNavigation;
+		} else if (propName == "ScreenShakeStrength") {
+			reader >> m_ScreenShakeStrength;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -253,6 +256,8 @@ namespace RTE {
 			reader >> g_NetworkServer.m_UseHighCompression;
 		} else if (propName == "ServerUseFastCompression") {
 			reader >> g_NetworkServer.m_UseFastCompression;
+		} else if (propName == "ServerUseDeltaCompression") {
+			reader >> g_NetworkServer.m_UseDeltaCompression;
 		} else if (propName == "ServerHighCompressionLevel") {
 			reader >> g_NetworkServer.m_HighCompressionLevel;
 		} else if (propName == "ServerFastAccelerationFactor") {
@@ -340,6 +345,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
+		writer.NewPropertyWithValue("ScreenShakeStrength", m_ScreenShakeStrength);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
@@ -421,6 +427,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ServerBoxHeight", g_NetworkServer.m_BoxHeight);
 		writer.NewPropertyWithValue("ServerUseHighCompression", g_NetworkServer.m_UseHighCompression);
 		writer.NewPropertyWithValue("ServerUseFastCompression", g_NetworkServer.m_UseFastCompression);
+		writer.NewPropertyWithValue("ServerUseDeltaCompression", g_NetworkServer.m_UseDeltaCompression);
 		writer.NewPropertyWithValue("ServerHighCompressionLevel", g_NetworkServer.m_HighCompressionLevel);
 		writer.NewPropertyWithValue("ServerFastAccelerationFactor", g_NetworkServer.m_FastAccelerationFactor);
 		writer.NewPropertyWithValue("ServerUseInterlacing", g_NetworkServer.m_UseInterlacing);

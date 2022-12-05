@@ -57,9 +57,14 @@ namespace RTE {
 		GUICheckbox *m_EnableSmartBuyMenuNavigationCheckbox;
 		GUITextBox *m_MaxUnheldItemsTextbox;
 		GUITextBox *m_CrabBombThresholdTextbox;
+
 		GUISlider *m_UnheldItemsHUDDisplayRangeSlider;
 		GUILabel *m_UnheldItemsHUDDisplayRangeLabel;
+
 		GUICheckbox *m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox;
+
+		GUISlider *m_ScreenShakeStrengthSlider;
+		GUILabel *m_ScreenShakeStrengthLabel;
 
 #pragma region Gameplay Settings Handling
 		/// <summary>
@@ -76,6 +81,11 @@ namespace RTE {
 		/// Updates the UnheldItemsHUDDisplayRange setting and label according to the slider value.
 		/// </summary>
 		void UpdateUnheldItemsHUDDisplayRange();
+
+		/// <summary>
+		/// Updates the Screen Shake strength setting and label according to the slider value.
+		/// </summary>
+		void UpdateScreenShakeStrength();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

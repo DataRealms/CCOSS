@@ -1,4 +1,6 @@
 #include "AudioMan.h"
+
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "SettingsMan.h"
@@ -116,7 +118,7 @@ namespace RTE {
 				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
 					if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
 						int screen = currentActivity->ScreenOfPlayer(player);
-						Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
+						Vector humanPlayerPosition = g_CameraMan.GetScrollTarget(screen);
 						if (IsInMultiplayerMode()) { humanPlayerPosition += (Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
 						m_CurrentActivityHumanPlayerPositions.push_back(std::make_unique<const RTE::Vector>(humanPlayerPosition));
 					}
@@ -138,7 +140,7 @@ namespace RTE {
 					status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(1) : status;
 				}
 				if (status == FMOD_OK) {
-					FMOD_VECTOR scrollTarget = GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset);
+					FMOD_VECTOR scrollTarget = GetAsFMODVector(g_CameraMan.GetScrollTarget(), m_ListenerZOffset);
 					status = m_AudioSystem->set3DListenerAttributes(0, &scrollTarget, nullptr, &c_FMODForward, &c_FMODUp);
 				}
 			}

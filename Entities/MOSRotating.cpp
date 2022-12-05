@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+#include "CameraMan.h"
 #include "SettingsMan.h"
 #include "AtomGroup.h"
 #include "SLTerrain.h"
@@ -1024,6 +1025,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 		float spread = gibSettingsObject.GetSpread();
 		float minVelocity = gibSettingsObject.GetMinVelocity();
 		float maxVelocity = gibSettingsObject.GetMaxVelocity();
+        float screenShakeAmount = gibSettingsObject.GetScreenShakeAmount();
 
 		float mass = (gibParticleClone->GetMass() != 0 ? gibParticleClone->GetMass() : 0.0001F);
 		int lifetime = gibParticleClone->GetLifetime();
@@ -1032,6 +1034,18 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             minVelocity = m_GibBlastStrength / mass;
             maxVelocity = minVelocity + 10.0F;
         }
+
+        if (screenShakeAmount == -1.0F) {
+            // Automatically calculate a value based on the amount of energy going on here
+            float averageSpeed = (minVelocity + maxVelocity) * 0.5F;
+            float energy = mass * averageSpeed * static_cast<float>(count);
+
+            const float shakinessPerUnitOfEnergy = 0.001f;
+            screenShakeAmount = energy * shakinessPerUnitOfEnergy;
+        }
+
+        g_CameraMan.AddScreenShake(screenShakeAmount, m_Pos);
+
 		float velocityRange = maxVelocity - minVelocity;
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
 

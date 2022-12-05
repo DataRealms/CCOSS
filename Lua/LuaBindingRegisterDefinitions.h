@@ -14,6 +14,7 @@
 
 #include "ActivityMan.h"
 #include "AudioMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
@@ -107,6 +108,7 @@ namespace RTE {
 	struct ManagerLuaBindings {
 		LuaBindingRegisterFunctionDeclarationForType(ActivityMan);
 		LuaBindingRegisterFunctionDeclarationForType(AudioMan);
+		LuaBindingRegisterFunctionDeclarationForType(CameraMan);
 		LuaBindingRegisterFunctionDeclarationForType(ConsoleMan);
 		LuaBindingRegisterFunctionDeclarationForType(FrameMan);
 		LuaBindingRegisterFunctionDeclarationForType(MetaMan);
@@ -137,6 +139,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Attachable);
 		LuaBindingRegisterFunctionDeclarationForType(Deployment);
 		LuaBindingRegisterFunctionDeclarationForType(Emission);
+		LuaBindingRegisterFunctionDeclarationForType(Gib);
 		LuaBindingRegisterFunctionDeclarationForType(GlobalScript);
 		LuaBindingRegisterFunctionDeclarationForType(HDFirearm);
 		LuaBindingRegisterFunctionDeclarationForType(HeldDevice);

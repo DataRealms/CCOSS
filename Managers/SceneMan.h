@@ -1420,6 +1420,18 @@ public:
 		bool back;
 	};
 
+    // These are all just for script backwards compatibility, so they're undocumented here and deprecated.
+    // Check g_CameraMan for documentation and details
+    void SetOffset(const Vector& offset, int screenId = 0);
+    Vector GetOffset(int screenId = 0) const;
+    void SetScroll(const Vector& center, int screenId = 0);
+    void SetScreenOcclusion(const Vector& occlusion, int screenId = 0);
+    Vector& GetScreenOcclusion(int screenId = 0);
+    void SetScrollTarget(const Vector& targetCenter, float speed = 0.1F, bool targetWrapped = false, int screenId = 0);
+    Vector GetScrollTarget(int screenId = 0) const;
+    float TargetDistanceScalar(const Vector& point) const;
+    void CheckOffset(int screenId = 0);
+
 	/// <summary>
 	/// Sets the current scene pointer to null
 	/// </summary>

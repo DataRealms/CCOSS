@@ -145,7 +145,7 @@ namespace RTE {
 
 	protected:
 
-		static constexpr int c_MSPAverageSampleSize = 20; //!< How many samples to use to calculate average milliseconds-per-something value.
+		static constexpr int c_MSPAverageSampleSize = 10; //!< How many samples to use to calculate average milliseconds-per-something value.
 		static constexpr int c_MaxSamples = 120; //!< How many performance samples to store, directly affects graph size.
 		static constexpr int c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.
 		static const std::array<std::string, PerformanceCounters::PerfCounterCount> m_PerfCounterNames; //!< Performance counter names displayed on screen.

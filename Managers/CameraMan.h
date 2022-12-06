@@ -174,6 +174,13 @@ namespace RTE {
 		/// <param name="magnitude">The amount of screen shake.</param>
 		/// <param name="screenId">Which screen you want to set screenshake for.</param>
 		void SetScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude = magnitude; }
+
+		/// <summary>
+		/// Applies screen shake to be at least magnitude.
+		/// </summary>
+		/// <param name="magnitude">The amount of screen shake.</param>
+		/// <param name="screenId">Which screen you want to set screenshake for.</param>
+		void ApplyScreenShake(float magnitude, int screenId = 0) { m_Screens[screenId].m_ScreenShakeMagnitude = std::max(magnitude, m_Screens[screenId].m_ScreenShakeMagnitude); }
 #pragma endregion
 
 #pragma region Concrete Methods

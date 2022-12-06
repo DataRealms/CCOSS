@@ -209,7 +209,7 @@ namespace RTE {
 			int peak = 0;
 			int sample = m_Sample;
 			for (int i = 0; i < c_MaxSamples; ++i) {
-				// Show microseconds in graphs, assume that the RealToSimCap (33333 microseconds (one frame of 30 fps) by default) is the highest value on the graph. The graph will scale with the RealToSimCap if it is changed.
+				// Show microseconds in graphs, assume that the RealToSimCap is the highest value on the graph. The graph will scale with the RealToSimCap if it is changed.
 				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData[pc][sample]) / (g_TimerMan.GetRealToSimCap() * 1000000.0F) * 100.0F), 0, 100);
 				int dotHeight = static_cast<int>(static_cast<float>(c_GraphHeight) / 100.0F * static_cast<float>(value));
 

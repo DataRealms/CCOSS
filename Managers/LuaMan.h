@@ -11,6 +11,8 @@ struct lua_State;
 
 namespace RTE {
 
+	class LuabindObjectWrapper;
+
 	/// <summary>
 	/// The singleton manager of the master Lua script state.
 	/// </summary>
@@ -50,18 +52,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Returns an ID string unique to this runtime for use by original presets that have scripts associated with them.
-		/// </summary>
-		/// <returns>Returns the unique ID as a string.</returns>
-		std::string GetNewPresetID();
-
-		/// <summary>
-		/// Returns an ID string unique to this runtime for use by individual objects that are also tracked in the Lua state and have scripts associated with them.
-		/// </summary>
-		/// <returns>Returns the unique ID as a string.</returns>
-		std::string GetNewObjectID();
-
-		/// <summary>
 		/// Gets a temporary Entity that can be accessed in the Lua state.
 		/// </summary>
 		/// <returns>The temporary entity. Ownership is NOT transferred!</returns>
@@ -89,9 +79,9 @@ namespace RTE {
 		/// <param name="selfObjectName">The name that gives access to the self object in the global Lua namespace.</param>
 		/// <param name="variablesToSafetyCheck">Optional vector of strings that should be safety checked in order before running the Lua function. Defaults to empty.</param>
 		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
-		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc. Defaults to empty.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck = std::vector<std::string_view>(), const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+		int RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck = std::vector<std::string_view>(), const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 		/// <summary>
 		/// Takes a string containing a script snippet and runs it on the master state.
@@ -102,12 +92,33 @@ namespace RTE {
 		int RunScriptString(const std::string &scriptString, bool consoleErrors = true);
 
 		/// <summary>
+		/// Runs the given Lua function object. The first argument to the function will always be the self object.
+		/// If either argument list has entries, they will be passed into the function in order, with entity arguments first.
+		/// </summary>
+		/// <param name="functionObjectWrapper">The LuabindObjectWrapper containing the Lua function to be run.</param>
+		/// <param name="selfGlobalTableName">The name of the global Lua table that gives access to the self object.</param>
+		/// <param name="selfGlobalTableKey">The key for this object in the respective global Lua table.</param>
+		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int RunScriptFunctionObject(const LuabindObjectWrapper *functionObjectWrapper, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+
+		/// <summary>
 		/// Opens and loads a file containing a script and runs it on the master state.
 		/// </summary>
 		/// <param name="filePath">The path to the file to load and run.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
+
+		/// <summary>
+		/// Opens and loads a file containing a script and runs it on the master state, then retrieves all of the specified functions that exist into the output map.
+		/// </summary>
+		/// <param name="filePath">The path to the file to load and run.</param>
+		/// <param name="functionNamesToLookFor">The vector of strings defining the function names to be retrieved.</param>
+		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
+		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
+		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
 #pragma endregion
 
 #pragma region
@@ -238,12 +249,16 @@ namespace RTE {
 
 		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
 
-		long m_NextPresetID; //!< The next unique preset ID to hand out to the next Preset that wants to define some functions. This gets incremented each time a new one is requested to give unique ID's to all original presets.
-		long m_NextObjectID; //!< The next unique object ID to hand out to the next scripted Entity instance that wants to run its preset's scripts. This gets incremented each time a new one is requested to give unique ID's to all scripted objects.
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
+
+		/// <summary>
+		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
+		/// </summary>
+		/// <returns>A string that describes the current state of the Lua stack.</returns>
+		std::string DescribeLuaStack();
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

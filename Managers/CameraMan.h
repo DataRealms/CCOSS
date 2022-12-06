@@ -217,10 +217,6 @@ namespace RTE {
 
 		std::array<Screen, c_MaxScreenCount> m_Screens;
 
-#pragma region Update Breakdown
-		
-#pragma endregion
-
 		/// <summary>
 		/// Clears all the member variables of this CameraMan, effectively resetting the members of this abstraction level only.
 		/// </summary>

@@ -53,7 +53,7 @@ namespace RTE {
         screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * maxScreenShakeTimeInSeconds);
 
         // Reduce screen shake over time
-        screen.m_ScreenShakeMagnitude -= screenShakeDecay * g_TimerMan.GetDeltaTimeSecs();
+        screen.m_ScreenShakeMagnitude -= screenShakeDecay * screen.m_ScrollTimer.GetElapsedRealTimeS();
         screen.m_ScreenShakeMagnitude = std::max(screen.m_ScreenShakeMagnitude, 0.0F);
 
         Vector screenShakeOffset(1.0f, 0.0f);

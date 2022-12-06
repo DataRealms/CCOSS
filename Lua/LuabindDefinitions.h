@@ -5,12 +5,13 @@
 
 #include "lua.hpp"
 #include "luabind.hpp"
-#include "operator.hpp"
-#include "copy_policy.hpp"
-#include "adopt_policy.hpp"
-#include "out_value_policy.hpp"
-#include "iterator_policy.hpp"
-#include "return_reference_to_policy.hpp"
+#include "luabind/object.hpp"
+#include "luabind/operator.hpp"
+#include "luabind/copy_policy.hpp"
+#include "luabind/adopt_policy.hpp"
+#include "luabind/out_value_policy.hpp"
+#include "luabind/iterator_policy.hpp"
+#include "luabind/return_reference_to_policy.hpp"
 
 namespace luabind {
 	/// <summary>

@@ -138,7 +138,12 @@ namespace RTE {
 		m_SelectedItemBackgroundColor = reference.m_SelectedItemBackgroundColor;
 
 		for (int i = 0; i < m_PieQuadrants.size(); i++) {
-			m_PieQuadrants[i].Create(reference.m_PieQuadrants[i]);
+			m_PieQuadrants[i].Create(reference.m_PieQuadrants[i], &reference, this);
+			for (const PieSlice *pieSlice : m_PieQuadrants[i].GetFlattenedPieSlices()) {
+				if (pieSlice->GetOriginalSource() != this) {
+					m_PieQuadrants[i].RemovePieSlice(pieSlice);
+				}
+			}
 		}
 
 		m_CurrentInnerRadius = reference.m_CurrentInnerRadius;
@@ -765,8 +770,7 @@ namespace RTE {
 				m_ActiveSubPieMenu->m_HoverTimer.Reset();
 			} else if (m_ActivatedPieSlice && !m_ActivatedPieSlice->GetScriptPath().empty() && !m_ActivatedPieSlice->GetFunctionName().empty()) {
 				if (const MovableObject *scriptTarget = m_Owner ? m_Owner : m_AffectedObject) {
-					g_LuaMan.RunScriptFile(m_ActivatedPieSlice->GetScriptPath());
-					g_LuaMan.RunScriptedFunction(m_ActivatedPieSlice->GetFunctionName(), "", { m_ActivatedPieSlice->GetFunctionName() }, { this, m_ActivatedPieSlice, scriptTarget });
+					g_LuaMan.RunScriptFunctionObject(m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper(), "", "", { this, m_ActivatedPieSlice, scriptTarget });
 				}
 			}
 		}

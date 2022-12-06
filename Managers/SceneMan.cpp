@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 #include "SceneMan.h"
 #include "PresetMan.h"
@@ -1151,7 +1152,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 			if (x + w >= GetSceneWidth())
 			{
 				// Left part, on the scene
-				TerrainChange tc1;
+				NetworkServer::NetworkTerrainChange tc1;
 				tc1.x = x;
 				tc1.y = y;
 				tc1.w = GetSceneWidth() - x;
@@ -1165,7 +1166,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 					return;
 
 				// Right part, out of scene
-				TerrainChange tc2;
+				NetworkServer::NetworkTerrainChange tc2;
 				tc2.x = 0;
 				tc2.y = y;
 				tc2.w = w - (GetSceneWidth() - x);
@@ -1180,7 +1181,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 			if (x < 0)
 			{
 				// Right part, on the scene
-				TerrainChange tc2;
+				NetworkServer::NetworkTerrainChange tc2;
 				tc2.x = 0;
 				tc2.y = y;
 				tc2.w = w + x;
@@ -1194,7 +1195,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 					return;
 
 				// Left part, out of the scene
-				TerrainChange tc1;
+				NetworkServer::NetworkTerrainChange tc1;
 				tc1.x = GetSceneWidth() + x;
 				tc1.y = y;
 				tc1.w = -x;
@@ -1207,7 +1208,7 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 		}
 	}
 
-	TerrainChange tc;
+	NetworkServer::NetworkTerrainChange tc;
 	tc.x = x;
 	tc.y = y;
 	tc.w = w;
@@ -2095,8 +2096,9 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
 
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
-            if (materialID != g_MaterialAir && materialID != ignoreMaterial)
+            if (materialID != g_MaterialAir && materialID != ignoreMaterial) {
                 strengthSum += GetMaterialFromID(materialID)->GetIntegrity();
+            }
 
             skipped = 0;
 
@@ -2112,10 +2114,10 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
 // Method:          CastMaxStrengthRay
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Traces along a vector and returns the strongest of all encountered pixels'
-//                  material strength values exept doors.
+//                  material strength values.
 //                  This will take wrapping into account.
 
-float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int skip)
+float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial)
 {
     Vector ray = g_SceneMan.ShortestDistance(start, end);
     float maxStrength = 0;
@@ -2131,7 +2133,7 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
     delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
     delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
-    if (delta[X] == 0 &&  delta[Y] == 0)
+    if (delta[X] == 0 && delta[Y] == 0)
         return false;
 
     /////////////////////////////////////////////////////
@@ -2191,8 +2193,9 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
 
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
-            if (materialID != g_MaterialDoor)
+            if (materialID != g_MaterialAir && materialID != ignoreMaterial) {
                 maxStrength = std::max(maxStrength, GetMaterialFromID(materialID)->GetIntegrity());
+            }
 
             skipped = 0;
 

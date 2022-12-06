@@ -111,7 +111,6 @@ void Actor::Clear() {
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
-    m_ScriptedAIUpdate = false;
     m_AIMode = AIMODE_NONE;
     m_Waypoints.clear();
     m_DrawWaypoints = false;
@@ -131,7 +130,7 @@ void Actor::Clear() {
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrength = 1.0F;
+    m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
 
@@ -274,7 +273,6 @@ int Actor::Create(const Actor &reference)
 	m_DeploymentID = reference.m_DeploymentID;
     m_PassengerSlots = reference.m_PassengerSlots;
 
-    m_ScriptedAIUpdate = reference.m_ScriptedAIUpdate;
     m_AIMode = reference.m_AIMode;
 //    m_Waypoints = reference.m_Waypoints;
     m_DrawWaypoints = reference.m_DrawWaypoints;
@@ -384,16 +382,19 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         int mode;
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
-	} else if (propName == "Organic") {
-		reader >> m_Organic;
-	} else if (propName == "Mechanical") {
-		reader >> m_Mechanical;
 	} else if (propName == "PieMenu") {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
 		m_PieMenu->Create(this);
-	} else
+    } else if (propName == "Organic") {
+        reader >> m_Organic;
+    } else if (propName == "Mechanical") {
+        reader >> m_Mechanical;
+    } else if (propName == "AIBaseDigStrength") {
+        reader >> m_AIBaseDigStrength;
+    } else {
         return MOSRotating::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -467,7 +468,8 @@ int Actor::Save(Writer &writer) const
     writer << m_PieMenu.get();
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
-	writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("AIBaseDigStrength", m_AIBaseDigStrength);
 
     return 0;
 }
@@ -492,20 +494,6 @@ void Actor::Destroy(bool notInherited)
     if (!notInherited)
         MOSRotating::Destroy();
     Clear();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
-    int status = MOSRotating::LoadScript(scriptPath, loadAsEnabledScript);
-    if (status < 0) {
-        return status;
-    }
-
-    // If UpdateAI existed it'll be in the lua global namespace, so we can check that to know whether or not to use Lua AI
-    m_ScriptedAIUpdate = m_ScriptedAIUpdate || g_LuaMan.GlobalIsDefined("UpdateAI");
-
-    return status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1179,15 +1167,12 @@ bool Actor::UpdateMovePath()
 {
     // TODO: Do throttling of calls for this function over time??
 
-
-    // Remove the material representation of all doors of this guy's team so he can navigate through them (they'll open for him)
-    g_MovableMan.OverrideMaterialDoors(true, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
+    // Estimate how much material this actor can dig through
+    float digStrength = EstimateDigStrength();
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength);
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1197,7 +1182,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1208,17 +1193,12 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength);
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     }
-
-    // Place back the material representation of all doors of this guy's team so they are as we found them
-    g_MovableMan.OverrideMaterialDoors(false, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())
@@ -1255,16 +1235,26 @@ bool Actor::UpdateMovePath()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+float Actor::EstimateDigStrength() {
+    return m_AIBaseDigStrength;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Actor::UpdateAIScripted() {
-    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.at("UpdateAI").empty()) {
         return false;
     }
 
-    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
-    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	int status = 0;
+	if (!ObjectScriptsInitialized()) {
+		status = InitializeObjectScripts();
+	}
+	if (status >= 0) {
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+		status = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	}
 
     return status >= 0;
 }

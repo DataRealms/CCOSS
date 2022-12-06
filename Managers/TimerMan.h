@@ -17,33 +17,21 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a TimerMan object in system memory. This constructor calls Create() so it shouldn't be called again.
+		/// Constructor method used to instantiate a TimerMan object in system memory. Initialize() should be called before using this object.
 		/// </summary>
-		// TODO: Figure out why removing Create() here kills fps and if it's already here then why are we calling Create() again during main().
-		TimerMan() { Clear(); Initialize(); }
+		TimerMan();
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize();
+		void Initialize();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a TimerMan object before deletion from system memory.
-		/// </summary>
-		~TimerMan() { Destroy(); }
-
-		/// <summary>
 		/// Destroys and resets (through Clear()) the TimerMan object.
 		/// </summary>
 		void Destroy() { Clear(); }
-
-		/// <summary>
-		/// Resets the entire TimerMan, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -106,7 +94,7 @@ namespace RTE {
 		/// Sets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
 		/// </summary>
 		/// <param name="newCap">A float specifying the new cap in seconds.</param>
-		void SetRealToSimCap(float newCap) { m_RealToSimCap = newCap * m_TicksPerSecond; }
+		void SetRealToSimCap(float newCap) { m_RealToSimCap = static_cast<long long>(newCap * static_cast<float>(m_TicksPerSecond)); }
 
 		/// <summary>
 		/// Shows whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
@@ -151,22 +139,28 @@ namespace RTE {
 		long long GetSimTickCount() const { return m_SimTimeTicks; }
 
 		/// <summary>
+		/// Gets a current global simulation time, measured in sim updates, from the start of the simulation up to the last Update of this TimerMan.
+		/// </summary>
+		/// <returns>The number of simulation updates that have occurred since the simulation started.</returns>
+		long long GetSimUpdateCount() const { return m_SimUpdateCount; }
+
+		/// <summary>
 		/// Gets a current global simulation time measured in ms ticks from the start of the simulation up to the last UpdateSim of this TimerMan.
 		/// </summary>
 		/// <returns>The number of ms passed since the simulation started.</returns>
-		long long GetSimTimeMS() const { return (m_SimTimeTicks / m_TicksPerSecond) * 0.001F; }
+		long long GetSimTimeMS() const { return static_cast<long long>((static_cast<float>(m_SimTimeTicks) / static_cast<float>(m_TicksPerSecond)) * 0.001F); }
 
 		/// <summary>
 		/// Gets the current number of ticks that the simulation should be updating with.
 		/// </summary>
 		/// <returns>The current fixed delta time that the simulation should be updating with, in ticks.</returns>
-		int GetDeltaTimeTicks() const { return m_DeltaTime; }
+		long long GetDeltaTimeTicks() const { return m_DeltaTime; }
 
 		/// <summary>
 		/// Sets the number of ticks that a simulation update delta time should take.
 		/// </summary>
 		/// <param name="newDelta">The new delta time in ticks.</param>
-		void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = m_DeltaTime / m_TicksPerSecond; }
+		void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = static_cast<float>(m_DeltaTime) / static_cast<float>(m_TicksPerSecond); }
 
 		/// <summary>
 		/// Gets the current fixed delta time of the simulation updates, in ms.
@@ -181,10 +175,22 @@ namespace RTE {
 		float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
 
 		/// <summary>
+		/// Gets the current fixed delta time of AI updates, in seconds.
+		/// </summary>
+		/// <returns>The current fixed delta time of AI updates, in seconds.</returns>
+		float GetAIDeltaTimeSecs() const;
+
+		/// <summary>
+		/// Gets the current fixed delta time of AI updates, in ms.
+		/// </summary>
+		/// <returns>The current fixed delta time of AI updates, in ms.</returns>
+		float GetAIDeltaTimeMS() const { return GetAIDeltaTimeSecs() * 1000; };
+
+		/// <summary>
 		/// Sets the number of seconds that a simulation update delta time should take.
 		/// </summary>
 		/// <param name="newDelta">The new delta time in seconds.</param>
-		void SetDeltaTimeSecs(float newDelta) { m_DeltaTimeS = newDelta; m_DeltaTime = m_DeltaTimeS * m_TicksPerSecond; }
+		void SetDeltaTimeSecs(float newDelta) { m_DeltaTimeS = newDelta; m_DeltaTime = static_cast<long long>(m_DeltaTimeS * static_cast<float>(m_TicksPerSecond)); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -215,14 +221,14 @@ namespace RTE {
 	protected:
 
 		long long m_StartTime; //!< The point in real time when the simulation (re)started.
-		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.	
+		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.
 		long long m_RealTimeTicks; //!< The number of actual time ticks counted so far.
 		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
 		long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 
-		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.	
+		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 

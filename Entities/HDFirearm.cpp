@@ -12,7 +12,12 @@
 // Inclusions of header files
 
 #include "HDFirearm.h"
+
+#include "ActivityMan.h"
+#include "CameraMan.h"
+#include "FrameMan.h"
 #include "PresetMan.h"
+
 #include "Magazine.h"
 #include "ThrownDevice.h"
 #include "MOPixel.h"
@@ -769,14 +774,16 @@ void HDFirearm::Update()
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
     if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
+    Actor* pActor = dynamic_cast<Actor*>(GetRootParent());
+
     /////////////////////////////////
     // Activation/firing logic
 
     int roundsFired = 0;
 	m_RoundsFired = 0;
     float degAimAngle = m_Rotation.GetDegAngle();
-    degAimAngle = m_HFlipped ? (180 + degAimAngle) : degAimAngle;
-    float totalFireForce = 0;
+    degAimAngle = m_HFlipped ? (180.0F + degAimAngle) : degAimAngle;
+    float totalFireForce = 0.0F;
     m_FireFrame = false;
     m_DoneReloading = false;
     bool playedRoundFireSound = false;
@@ -784,10 +791,6 @@ void HDFirearm::Update()
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
         if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
-
-            // Get the parent root of this AEmitter
-// TODO: Potentially get this once outside instead, like in attach/detach")
-            MovableObject *pRootParent = GetRootParent();
 
             // Full auto
             if (m_FullAuto)
@@ -834,10 +837,10 @@ void HDFirearm::Update()
             MOPixel *pPixel;
             float shake, particleSpread, shellSpread, lethalRange;
 
-            lethalRange = m_MaxSharpLength * m_SharpAim + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.51F;
-            Actor *pUser = dynamic_cast<Actor *>(pRootParent);
-            if (pUser)
-                lethalRange += pUser->GetAimDistance();
+            lethalRange = m_MaxSharpLength * m_SharpAim + std::max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.51F;
+            if (pActor) {
+                lethalRange += pActor->GetAimDistance();
+            }
 
             // Fire all rounds that were fired this frame.
             for (int i = 0; i < roundsFired && !m_pMagazine->IsEmpty(); ++i)
@@ -885,13 +888,16 @@ void HDFirearm::Update()
 
                     // Remove from parent if it's an attachable
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
-                    if (pAttachable)
-                    {
-                        if (pAttachable->IsAttached()) { pAttachable->GetParent()->RemoveAttachable(pAttachable); }
+                    if (pAttachable) {
+                        if (pAttachable->IsAttached()) { 
+                            pAttachable->GetParent()->RemoveAttachable(pAttachable); 
+                        }
+
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
-                        if (pTD)
+                        if (pTD) {
                             pTD->Activate();
+                        }
                     }
 
                     // Set the fired particle to not hit this HeldDevice's parent, if applicable
@@ -1009,6 +1015,18 @@ void HDFirearm::Update()
 			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
         }
 
+        // Screen shake
+        if (pActor) {
+            int controllingPlayer = pActor->GetController()->GetPlayer();
+            int screenId = g_ActivityMan.GetActivity()->ScreenOfPlayer(controllingPlayer);
+            if (screenId != -1) {
+                const float shakinessPerUnitOfRecoilEnergy = 0.5f;
+                const float maxShakiness = 10.0f; // Some weapons fire huge rounds, so restrict the amount
+                float screenShakeAmount = totalFireForce * m_JointStiffness * shakinessPerUnitOfRecoilEnergy;
+                g_CameraMan.ApplyScreenShake(std::min(screenShakeAmount, maxShakiness), screenId);
+            }
+        }
+
         AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
@@ -1033,7 +1051,7 @@ void HDFirearm::Update()
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		if (m_RecoilForce.GetMagnitude() > 0.01F) {
+		if (m_RecoilForce.MagnitudeIsGreaterThan(0.01F)) {
 			m_RecoilForce *= 0.6F;
 		} else {
 			m_RecoilForce.Reset();

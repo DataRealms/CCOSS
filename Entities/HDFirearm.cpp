@@ -65,7 +65,7 @@ void HDFirearm::Clear()
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
 	m_ShellVelVariation = 0.1F;
-    m_RecoilScreenShakeAmount = -1.0F;
+    m_RecoilScreenShakeAmount = 0.0F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;

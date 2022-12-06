@@ -880,7 +880,7 @@ protected:
     float m_ShellAngVelRange;
 	float m_ShellVelVariation; //!< The velocity variation scalar of ejected shells.
 	// The amount of screenshake that recoil causes
-	float m_RecoilScreenShake;
+	float m_RecoilScreenShakeAmount;
     // The muzzle velocity the AI use when aiming this weapon
     float m_AIFireVel;
     // The bullet life time the AI use when aiming this weapon

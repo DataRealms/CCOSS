@@ -1,6 +1,7 @@
 #include "TimerMan.h"
 #include "Constants.h"
 #include "PerformanceMan.h"
+#include "SettingsMan.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -71,6 +72,12 @@ namespace RTE {
 		long long ticks = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 #endif
 		return (ticks * 1000000) / m_TicksPerSecond;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float TimerMan::GetAIDeltaTimeSecs() const {
+		return m_DeltaTimeS * static_cast<float>(g_SettingsMan.GetAIUpdateInterval());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

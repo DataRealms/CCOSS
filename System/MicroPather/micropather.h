@@ -134,7 +134,7 @@ namespace micropather
 	struct StateCost
 	{
 		void* state;			///< The state as a void*
-		float cost;				///< The cost to the state. Use FLT_MAX for infinite cost.
+		float cost;				///< The cost to the state. Use std::numeric_limits<float>::max() for infinite cost.
 	};
 
 
@@ -211,7 +211,7 @@ namespace micropather
 		}
 		void InitSentinel() {
 			Clear();
-			Init( 0, 0, FLT_MAX, FLT_MAX, 0 );
+			Init( 0, 0, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 0 );
 			prev = next = this;
 		}	
 
@@ -246,7 +246,7 @@ namespace micropather
 		#ifdef DEBUG
 		void CheckList()
 		{
-			MPASSERT( totalCost == FLT_MAX );
+			MPASSERT( totalCost == std::numeric_limits<float>::max() );
 			for( PathNode* it = next; it != this; it=it->next ) {
 				MPASSERT( it->prev == this || it->totalCost >= it->prev->totalCost );
 				MPASSERT( it->totalCost <= it->next->totalCost );
@@ -255,10 +255,10 @@ namespace micropather
 		#endif
 
 		void CalcTotalCost() {
-			if ( costFromStart < FLT_MAX && estToGoal < FLT_MAX )
+			if ( costFromStart < std::numeric_limits<float>::max() && estToGoal < std::numeric_limits<float>::max() )
 				totalCost = costFromStart + estToGoal;
 			else
-				totalCost = FLT_MAX;
+				totalCost = std::numeric_limits<float>::max();
 		}
 
 	  private:
@@ -363,7 +363,7 @@ namespace micropather
 
 			// Data:
 			void*	next;
-			float	cost;	// from 'start' to 'next'. FLT_MAX if unsolveable.
+			float	cost;	// from 'start' to 'next'. std::numeric_limits<float>::max() if unsolveable.
 
 			unsigned Hash() const {
 				const unsigned char *p = (const unsigned char *)(&start);

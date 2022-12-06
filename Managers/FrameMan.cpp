@@ -1025,7 +1025,8 @@ namespace RTE {
 			}
 			// Need to clear the backbuffers because Scene background layers can be too small to fill the whole backbuffer or drawn masked resulting in artifacts from the previous frame.
 			clear_to_color(drawScreenGUI, ColorKeys::g_MaskColor);
-			clear_to_color(drawScreen, m_BlackColor);
+			// If in online multiplayer mode clear to mask color otherwise the scene background layers will get drawn over.
+			clear_to_color(drawScreen, IsInMultiplayerMode() ? ColorKeys::g_MaskColor : m_BlackColor);
 
 			AllegroBitmap playerGUIBitmap(drawScreenGUI);
 

@@ -1168,7 +1168,7 @@ namespace RTE {
 		// Move the dialog to the center of the player 0 screen so it could operate in absoute mouse coordintaes of the player 0 screen
 		// During draw we move the dialog to 0,0 before drawing to draw it properly into the intermediate buffer co we can draw it centered on other player's screens.
 		BITMAP* drawBitmap = m_pUIDrawBitmap;
-		BITMAP* finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediate8Current(0);
+		BITMAP* finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Current(0);
 
 		int offsetX = finalDestBitmap->w / 2 - m_pRootBox->GetWidth() / 2;
 		int offsetY = finalDestBitmap->h / 2 - m_pRootBox->GetHeight() / 2;
@@ -1299,7 +1299,7 @@ namespace RTE {
 		for (int i = 0; i < 4; i++)
 		{
 			if (i < c_MaxClients)
-				finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediate8Current(i);
+				finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediateGUI8Current(i);
 			else
 				finalDestBitmap = pTargetBitmap;
 

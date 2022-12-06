@@ -36,6 +36,7 @@
 #include "PerformanceMan.h"
 #include "MetaMan.h"
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 

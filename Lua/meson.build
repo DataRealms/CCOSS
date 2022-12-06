@@ -1,4 +1,6 @@
 sources += files(
+'LuabindObjectWrapper.cpp',
+'LuaAdapters.cpp',
 'LuaBindingsActivities.cpp',
 'LuaBindingsEntities.cpp',
 'LuaBindingsGUI.cpp',

@@ -220,7 +220,7 @@ namespace RTE {
 	/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
 	/// This handling avoids that, and is a bit safer since there's no actual ownership transfer from Lua to C++.
 	/// </summary>
-#define LuaPropertyOwnershipSafetyFakerFunctionDeclaration(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
+	#define LuaPropertyOwnershipSafetyFakerFunctionDeclaration(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
 		static void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet);
 
 	struct LuaAdaptersPropertyOwnershipSafetyFaker {

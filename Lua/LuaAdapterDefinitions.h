@@ -173,10 +173,10 @@ namespace RTE {
 		static TYPE * To##TYPE(Entity *entity);																\
 		static const TYPE * ToConst##TYPE(const Entity *entity);											\
 		static bool Is##TYPE(Entity *entity);																\
-		static LuabindObjectWrapper * ToLuabindObject##TYPE(const Entity *entity, lua_State *luaState)
+		static LuabindObjectWrapper * ToLuabindObject##TYPE(Entity *entity, lua_State *luaState)
 
 	struct LuaAdaptersEntityCast {
-		static std::unordered_map<std::string, std::function<LuabindObjectWrapper * (const Entity *, lua_State *)>> s_EntityToLuabindObjectCastFunctions; //!< Map of preset names to casting methods for ensuring objects are downcast properly when passed into Lua.
+		static std::unordered_map<std::string, std::function<LuabindObjectWrapper * (Entity *, lua_State *)>> s_EntityToLuabindObjectCastFunctions; //!< Map of preset names to casting methods for ensuring objects are downcast properly when passed into Lua.
 
 		LuaEntityCastFunctionsDeclarationsForType(Entity);
 		LuaEntityCastFunctionsDeclarationsForType(SoundContainer);

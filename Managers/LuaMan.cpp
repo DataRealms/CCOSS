@@ -293,7 +293,7 @@ namespace RTE {
 		}
 
 		for (const Entity *functionEntityArgument : functionEntityArguments) {
-			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(functionEntityArgument, m_MasterState));
+			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(const_cast<Entity *>(functionEntityArgument), m_MasterState));
 			downCastEntityAsLuabindObjectWrapper->GetLuabindObject()->push(m_MasterState);
 		}
 

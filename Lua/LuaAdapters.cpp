@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	std::unordered_map<std::string, std::function<LuabindObjectWrapper * (const Entity *, lua_State *)>> LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions = {};
+	std::unordered_map<std::string, std::function<LuabindObjectWrapper * (Entity *, lua_State *)>> LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions = {};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -133,14 +133,14 @@ namespace RTE {
 	bool LuaAdaptersEntityCast::Is##TYPE(Entity *entity) { \
 		return dynamic_cast<TYPE *>(entity) ? true : false; \
 	} \
-	LuabindObjectWrapper * LuaAdaptersEntityCast::ToLuabindObject##TYPE (const Entity *entity, lua_State *luaState) { \
-		return new LuabindObjectWrapper(new luabind::object(luaState, dynamic_cast<const TYPE *>(entity)), ""); \
+	LuabindObjectWrapper * LuaAdaptersEntityCast::ToLuabindObject##TYPE (Entity *entity, lua_State *luaState) { \
+		return new LuabindObjectWrapper(new luabind::object(luaState, dynamic_cast<TYPE *>(entity)), ""); \
 	} \
 	/* Bullshit semi-hack to automatically populate the Luabind Object cast function map that is used in LuaMan::RunScriptFunctionObject */ \
 	static const bool EntityToLuabindObjectCastMapAutoInserterForType##TYPE = []() { \
 		LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.try_emplace(std::string(#TYPE), &LuaAdaptersEntityCast::ToLuabindObject##TYPE); \
 		return true; \
-	}()
+	}();
 
 	LuaEntityCastFunctionsDefinitionsForType(Entity);
 	LuaEntityCastFunctionsDefinitionsForType(SoundContainer);

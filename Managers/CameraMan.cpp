@@ -49,7 +49,7 @@ namespace RTE {
         const float screenShakeDecay = 50.0F;
 
         // Don't let our screen shake too much, not so much that it won't resolve within a few seconds
-        const float maxScreenShakeTimeInSeconds = 2.0f;
+        const float maxScreenShakeTimeInSeconds = 1.5f;
         screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * maxScreenShakeTimeInSeconds);
 
         // Reduce screen shake over time

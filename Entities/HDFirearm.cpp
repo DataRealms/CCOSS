@@ -65,6 +65,7 @@ void HDFirearm::Clear()
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
 	m_ShellVelVariation = 0.1F;
+    m_RecoilScreenShake = -1.0F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;
@@ -140,7 +141,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
-	m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_RecoilScreenShake = reference.m_RecoilScreenShake;
     m_MuzzleOff = reference.m_MuzzleOff;
     m_EjectOff = reference.m_EjectOff;
     m_MagOff = reference.m_MagOff;
@@ -230,6 +232,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_ShellAngVelRange /= 2;
 	} else if (propName == "ShellVelVariation") {
 		reader >> m_ShellVelVariation;
+    } else if (propName == "RecoilScreenShake") {
+		reader >> m_RecoilScreenShake;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
 	} else if (propName == "EjectionOffset") {
@@ -306,8 +310,10 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
     writer << m_ShellAngVelRange * 2;
-	writer.NewProperty("ShellVelocityVariation");
+	writer.NewProperty("ShellVelVariation");
 	writer << m_ShellVelVariation;
+    writer.NewProperty("RecoilScreenShake");
+    writer << m_RecoilScreenShake;
     writer.NewProperty("MuzzleOffset");
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
@@ -1022,8 +1028,8 @@ void HDFirearm::Update()
             if (screenId != -1) {
                 const float shakinessPerUnitOfRecoilEnergy = 0.5f;
                 const float maxShakiness = 10.0f; // Some weapons fire huge rounds, so restrict the amount
-                float screenShakeAmount = totalFireForce * m_JointStiffness * shakinessPerUnitOfRecoilEnergy;
-                g_CameraMan.ApplyScreenShake(std::min(screenShakeAmount, maxShakiness), screenId);
+                float screenShakeAmount = m_RecoilScreenShake == -1 ? std::min(totalFireForce * m_JointStiffness * shakinessPerUnitOfRecoilEnergy, maxShakiness) : m_RecoilScreenShake;
+                g_CameraMan.ApplyScreenShake(screenShakeAmount, screenId);
             }
         }
 

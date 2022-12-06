@@ -330,7 +330,7 @@ namespace RTE {
 
 		.property("TimeScale", &TimerMan::GetTimeScale, &TimerMan::SetTimeScale)
 		.property("RealToSimCap", &TimerMan::GetRealToSimCap, &TimerMan::SetRealToSimCap)
-		.property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
+		.property("DeltaTimeTicks", &LuaAdaptersTimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 		.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 		.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
 		.property("AIDeltaTimeSecs", &TimerMan::GetAIDeltaTimeSecs)

@@ -441,8 +441,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Update() {
-		g_PerformanceMan.Update();
-
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
@@ -1126,16 +1124,14 @@ namespace RTE {
 
 		if (g_ActivityMan.IsInActivity()) { g_PostProcessMan.PostProcess(); }
 
-		// Draw the console on top of everything
+		// Draw the performance stats and console on top of everything.
+		g_PerformanceMan.Draw(m_BackBuffer32);
 		g_ConsoleMan.Draw(m_BackBuffer32);
 
 #ifdef DEBUG_BUILD
 		// Draw scene seam
 		vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
-
-		// Reset the frame timer so we can measure how much it takes until next frame being drawn
-		g_PerformanceMan.ResetFrameTimer();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1176,8 +1172,6 @@ namespace RTE {
 				default:
 					break;
 			}
-			g_PerformanceMan.Draw(playerGUIBitmap);
-
 		} else {
 			// If superfluous screen (as in a three-player match), make the fourth the Observer one
 			GetLargeFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, textPosY, "- Observer View -", GUIFont::Centre);

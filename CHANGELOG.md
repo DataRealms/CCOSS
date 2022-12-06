@@ -263,6 +263,20 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
 
+- Added key combinations for resetting time scales to defaults while performance stats are visible.  
+	`Ctrl + 1` to reset the time scale.  
+	`Ctrl + 3` to reset the `RealToSimCap`.  
+	`Ctrl + 5` to reset the `DeltaTime`.
+
+- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.
+
+- Added new `UPS` (Updates per second) measurement to the performance stats which is probably the most reliable performance indicator.  
+	The sim update target is ~60 UPS (defined by `DeltaTime`).  
+	When UPS dips due to load there will be noticeable FPS impact because more time is spent updating the sim and less time is left to draw frames before the next sim update.  
+	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
+	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
+	Results will obviously vary depending on system performance.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -389,6 +403,14 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
+	The `MSPF` measurement now displays 3 values:  
+	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
+	`Update` - The total time spent updating the sim during the frame (as the sim can be updated multiple times per frame), in milliseconds.  
+	`Draw` - The time spend drawing during the frame, in milliseconds.
+
+- Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -400,6 +422,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
 
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
+- Fix advanced performance stats (graphs) peak values stuck at 0.
 
 </details>
 

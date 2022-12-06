@@ -3,6 +3,7 @@
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
+#include "png.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 
@@ -20,9 +21,12 @@ namespace RTE {
 		m_DataPath.clear();
 		m_DataPathExtension.clear();
 		m_DataPathWithoutExtension.clear();
+		m_DataPathIsImageFile = false;
 		m_FormattedReaderPosition.clear();
 		m_DataPathAndReaderPosition.clear();
 		m_DataModuleID = 0;
+
+		m_ImageFileInfo.fill(-1);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +92,8 @@ namespace RTE {
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
 
+		m_DataPathIsImageFile = m_DataPathExtension == ".png" || m_DataPathExtension == ".bmp";
+
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
 		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
@@ -98,6 +104,93 @@ namespace RTE {
 	void ContentFile::SetFormattedReaderPosition(const std::string &newPosition) {
 		m_FormattedReaderPosition = newPosition;
 		m_DataPathAndReaderPosition = m_DataPath + "\n" + newPosition;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int ContentFile::GetImageFileInfo(ImageFileInfoType infoTypeToGet) {
+		bool fetchFileInfo = false;
+		for (const int &fileInfoEntry : m_ImageFileInfo) {
+			if (fileInfoEntry == -1) {
+				fetchFileInfo = true;
+				break;
+			}
+		}
+		if (fetchFileInfo) {
+			FILE *imageFile = fopen(m_DataPath.c_str(), "rb");
+			RTEAssert(imageFile, "Failed to open file prior to reading info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may not exist or be corrupt.");
+
+			if (m_DataPathExtension == ".png") {
+				ReadAndStorePNGFileInfo(imageFile);
+			} else if (m_DataPathExtension == ".bmp") {
+				ReadAndStoreBMPFileInfo(imageFile);
+			} else {
+				RTEAbort("Somehow ended up attempting to read image file info for an unsupported image file type.\nThe file path and name were:\n\n" + m_DataPath);
+			}
+			fclose(imageFile);
+		}
+		return m_ImageFileInfo[infoTypeToGet];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::ReadAndStorePNGFileInfo(FILE *imageFile) {
+		std::array<uint8_t, 8> fileSignature = {};
+
+		// Read the first 8 bytes to then verify they match the PNG file signature which is { 137, 80, 78, 71, 13, 10, 26, 10 } or { '\211', 'P', 'N', 'G', '\r', '\n', '\032', '\n' }.
+		fread(fileSignature.data(), sizeof(uint8_t), fileSignature.size(), imageFile);
+		if (png_sig_cmp(fileSignature.data(), 0, fileSignature.size()) == 0) {
+			png_structp pngReadStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+			png_infop pngInfo = png_create_info_struct(pngReadStruct);
+
+			png_init_io(pngReadStruct, imageFile);
+			// Set the PNG reader to skip the first 8 bytes since we already handled them.
+			png_set_sig_bytes(pngReadStruct, fileSignature.size());
+			png_read_info(pngReadStruct, pngInfo);
+
+			m_ImageFileInfo[ImageFileInfoType::ImageBitDepth] = static_cast<int>(png_get_bit_depth(pngReadStruct, pngInfo));
+			m_ImageFileInfo[ImageFileInfoType::ImageWidth] = static_cast<int>(png_get_image_width(pngReadStruct, pngInfo));
+			m_ImageFileInfo[ImageFileInfoType::ImageHeight] = static_cast<int>(png_get_image_height(pngReadStruct, pngInfo));
+
+			png_destroy_read_struct(&pngReadStruct, &pngInfo, nullptr);
+		} else {
+			RTEAbort("Encountered invalid PNG file signature while attempting to read info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may be corrupt or is not a PNG file.");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::ReadAndStoreBMPFileInfo(FILE *imageFile) {
+		std::array<uint8_t, 2> bmpSignature = { 0x42, 0x4D }; // { 'B', 'M' }.
+		std::array<uint8_t, 2> fileSignature = {};
+
+		// Read the first 2 bytes to then verify they match the BMP file signature.
+		fread(fileSignature.data(), sizeof(uint8_t), fileSignature.size(), imageFile);
+		if (fileSignature == bmpSignature) {
+			std::array<uint8_t, 4> bmpData = {};
+
+			const auto toInt32 = [](uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3) {
+				return (static_cast<int32_t>(b0)) | (static_cast<int32_t>(b1) << 8) | (static_cast<int32_t>(b2) << 16) | (static_cast<int32_t>(b3) << 24);
+			};
+
+			// Skip the next 16 bytes. Dimensions data starts at the 18th byte.
+			fseek(imageFile, 16, SEEK_CUR);
+
+			fread(bmpData.data(), sizeof(uint8_t), bmpData.size(), imageFile);
+			m_ImageFileInfo[ImageFileInfoType::ImageWidth] = toInt32(bmpData[0], bmpData[1], bmpData[2], bmpData[3]);
+
+			fread(bmpData.data(), sizeof(uint8_t), bmpData.size(), imageFile);
+			m_ImageFileInfo[ImageFileInfoType::ImageHeight] = toInt32(bmpData[0], bmpData[1], bmpData[2], bmpData[3]);
+
+			// Skip the next 2 bytes. Bit depth data starts at the 28th byte.
+			fseek(imageFile, 2, SEEK_CUR);
+
+			// Bit depth is stored as 2 bytes, so ignore the last 2 in the array when converting to int32.
+			fread(bmpData.data(), sizeof(uint8_t), bmpData.size(), imageFile);
+			m_ImageFileInfo[ImageFileInfoType::ImageBitDepth] = toInt32(bmpData[0], bmpData[1], 0, 0);
+		} else {
+			RTEAbort("Encountered invalid BMP file signature while attempting to read info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may be corrupt or is not a BMP file.");
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

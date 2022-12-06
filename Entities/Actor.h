@@ -143,14 +143,6 @@ ClassInfoGetters;
     void Destroy(bool notInherited = false) override;
 
     /// <summary>
-    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to load.</param>
-    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false) override;
-
-    /// <summary>
     /// Gets the mass of this Actor's inventory. Does not include any equipped item (for actor subtypes that have that).
     /// </summary>
     /// <returns>The mass of this Actor's inventory.</returns>
@@ -1533,8 +1525,6 @@ protected:
     static std::vector<BITMAP *> m_apAlarmExclamation;
     // Whether the static icons have been loaded yet or not
     static bool m_sIconsLoaded;
-    // Whether a Lua update AI function was provided in this' script file
-    bool m_ScriptedAIUpdate;
     // The current mode the AI is set to perform as
     AIMode m_AIMode;
     // The list of waypoints remaining between which the paths are made. If this is empty, the last path is in teh MovePath

@@ -123,17 +123,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool TerrainObject::IsOnScenePoint(Vector &scenePoint) const {
-		BITMAP *bitmapToCheck = nullptr;
-		if (m_FGColorBitmap) {
-			bitmapToCheck = m_FGColorBitmap;
-		} else {
-			bitmapToCheck = m_BGColorBitmap ? m_BGColorBitmap : m_MaterialBitmap;
-		}
 		// TODO: TAKE CARE OF WRAPPING
 		Vector bitmapPos = m_Pos + m_BitmapOffset;
 		if (WithinBox(scenePoint, bitmapPos, static_cast<float>(GetBitmapWidth()), static_cast<float>(GetBitmapHeight()))) {
 			Vector bitmapPoint = scenePoint - bitmapPos;
-			if (getpixel(bitmapToCheck, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
+			if (m_FGColorBitmap && getpixel(m_FGColorBitmap, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
+				return true;
+			}
+			if (m_BGColorBitmap && getpixel(m_BGColorBitmap, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
+				return true;
+			}
+			if (m_MaterialBitmap && getpixel(m_MaterialBitmap, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
 				return true;
 			}
 		}

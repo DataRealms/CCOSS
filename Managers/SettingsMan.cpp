@@ -253,6 +253,8 @@ namespace RTE {
 			reader >> g_NetworkServer.m_UseHighCompression;
 		} else if (propName == "ServerUseFastCompression") {
 			reader >> g_NetworkServer.m_UseFastCompression;
+		} else if (propName == "ServerUseDeltaCompression") {
+			reader >> g_NetworkServer.m_UseDeltaCompression;
 		} else if (propName == "ServerHighCompressionLevel") {
 			reader >> g_NetworkServer.m_HighCompressionLevel;
 		} else if (propName == "ServerFastAccelerationFactor") {
@@ -421,6 +423,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ServerBoxHeight", g_NetworkServer.m_BoxHeight);
 		writer.NewPropertyWithValue("ServerUseHighCompression", g_NetworkServer.m_UseHighCompression);
 		writer.NewPropertyWithValue("ServerUseFastCompression", g_NetworkServer.m_UseFastCompression);
+		writer.NewPropertyWithValue("ServerUseDeltaCompression", g_NetworkServer.m_UseDeltaCompression);
 		writer.NewPropertyWithValue("ServerHighCompressionLevel", g_NetworkServer.m_HighCompressionLevel);
 		writer.NewPropertyWithValue("ServerFastAccelerationFactor", g_NetworkServer.m_FastAccelerationFactor);
 		writer.NewPropertyWithValue("ServerUseInterlacing", g_NetworkServer.m_UseInterlacing);

@@ -4,13 +4,14 @@
 #include "Singleton.h"
 #include "Serializable.h"
 #include "Entity.h"
-#include "LuabindObjectWrapper.h"
 
 #define g_LuaMan LuaMan::Instance()
 
 struct lua_State;
 
 namespace RTE {
+
+	class LuabindObjectWrapper;
 
 	/// <summary>
 	/// The singleton manager of the master Lua script state.
@@ -96,7 +97,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="functionObjectWrapper">The LuabindObjectWrapper containing the Lua function to be run.</param>
 		/// <param name="selfGlobalTableName">The name of the global Lua table that gives access to the self object.</param>
-		/// <param name="selfGlobalTableKey">The key for this object in the resepective global Lua table.</param>
+		/// <param name="selfGlobalTableKey">The key for this object in the respective global Lua table.</param>
 		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -238,15 +239,15 @@ namespace RTE {
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
 		/// <summary>
-		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
-
-		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
 		/// </summary>
 		/// <returns>A string that describes the current state of the Lua stack.</returns>
 		std::string DescribeLuaStack();
+
+		/// <summary>
+		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
 
 		// Disallow the use of some implicit methods.
 		LuaMan(const LuaMan &reference) = delete;

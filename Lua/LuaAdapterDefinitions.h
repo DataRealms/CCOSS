@@ -1,7 +1,7 @@
 #ifndef _RTELUAADAPTERDEFINITIONS_
 #define _RTELUAADAPTERDEFINITIONS_
 
-#include "LuaBindDefinitions.h"
+#include "LuabindDefinitions.h"
 
 #include "ActivityMan.h"
 #include "AudioMan.h"

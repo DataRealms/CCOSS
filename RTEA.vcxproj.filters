@@ -516,7 +516,7 @@
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaBindDefinitions.h">
+    <ClInclude Include="Lua\LuabindDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h">

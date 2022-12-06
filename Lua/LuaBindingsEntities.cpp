@@ -1104,7 +1104,7 @@ namespace RTE {
 		.property("Pos", &PieMenu::GetPos)
 		.property("RotAngle", &PieMenu::GetRotAngle, &PieMenu::SetRotAngle)
 		.property("FullInnerRadius", &PieMenu::GetFullInnerRadius, &PieMenu::SetFullInnerRadius)
-		
+
 		.property("PieSlices", &PieMenu::GetPieSlices, luabind::return_stl_iterator)
 
 		.def("IsSubPieMenu", &PieMenu::IsSubPieMenu)
@@ -1252,6 +1252,7 @@ namespace RTE {
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
+
 		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue);
 	}
 

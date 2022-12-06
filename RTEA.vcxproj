@@ -550,7 +550,7 @@
     <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Lua\LuaAdapterDefinitions.h" />
     <ClInclude Include="Lua\LuabindObjectWrapper.h" />
-    <ClInclude Include="Lua\LuaBindDefinitions.h" />
+    <ClInclude Include="Lua\LuabindDefinitions.h" />
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h" />
     <ClInclude Include="GUI\GUIWriter.h" />
     <ClInclude Include="Managers\MenuMan.h" />

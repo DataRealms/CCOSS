@@ -1,7 +1,7 @@
 #ifndef _RTELUAREGISTERDEFINITIONS_
 #define _RTELUAREGISTERDEFINITIONS_
 
-#include "LuaBindDefinitions.h"
+#include "LuabindDefinitions.h"
 #include "LuaAdapterDefinitions.h"
 
 namespace RTE {

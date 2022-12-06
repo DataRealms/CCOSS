@@ -1,5 +1,5 @@
 #include "LuaMan.h"
-
+#include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {
@@ -178,7 +178,6 @@ namespace RTE {
 			"print = function(toPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(toPrint)); end;\n"
 			// Add cls() as a shortcut to ConsoleMan:Clear().
 			"cls = function() ConsoleMan:Clear(); end;"
-
 			// Add package path to the defaults.
 			"package.path = package.path .. \";Base.rte/?.lua\";\n"
 		);
@@ -577,25 +576,26 @@ namespace RTE {
 		if (indexOfTopOfStack == 0) {
 			return "The Lua stack is empty.";
 		}
+		std::stringstream stackDescription;
+		stackDescription << "The Lua stack contains " + std::to_string(indexOfTopOfStack) + " elements. From top to bottom, they are:\n";
 
-		std::string stackDescription = "The Lua stack contains " + std::to_string(indexOfTopOfStack ) + " elements. From top to bottom, they are:\n";
-		for (int i = indexOfTopOfStack; i > 0; i--) {
-			int type = lua_type(m_MasterState, i);
-			switch (type) {
+		for (int i = indexOfTopOfStack; i > 0; --i) {
+			switch (int type = lua_type(m_MasterState, i)) {
 				case LUA_TBOOLEAN:
-					stackDescription = stackDescription + (lua_toboolean(m_MasterState, i) ? "true" : "false") + "\n";
+					stackDescription << (lua_toboolean(m_MasterState, i) ? "true" : "false");
 					break;
 				case LUA_TNUMBER:
-					stackDescription = stackDescription + std::to_string(lua_tonumber(m_MasterState, i)) + "\n";
+					stackDescription << std::to_string(lua_tonumber(m_MasterState, i));
 					break;
 				case LUA_TSTRING:
-					stackDescription = stackDescription + lua_tostring(m_MasterState, i) + "\n";
+					stackDescription << lua_tostring(m_MasterState, i);
 					break;
 				default:
-					stackDescription = stackDescription + lua_typename(m_MasterState, type) + "\n";
+					stackDescription << lua_typename(m_MasterState, type);
 					break;
 			}
+			if (i - 1 > 0) { stackDescription << "\n"; }
 		}
-		return stackDescription;
+		return stackDescription.str();
 	}
 }

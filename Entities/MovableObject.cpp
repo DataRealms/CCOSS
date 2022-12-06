@@ -495,6 +495,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
 	std::string luaClearSupportedFunctionsString;
+	luaClearSupportedFunctionsString.reserve(160);
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
 		luaClearSupportedFunctionsString += functionName + " = nil;";
 	}
@@ -536,7 +537,7 @@ int MovableObject::ReloadScripts() {
 
 	int status = 0;
 
-	//TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
+	//TODO consider getting rid of this const_cast. It would require either code duplication or creating some non-const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
 	MovableObject *movableObjectPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
 	if (this != movableObjectPreset) {
 		movableObjectPreset->ReloadScripts();
@@ -917,8 +918,7 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Update() {
-	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum();
+	if (m_RandomizeEffectRotAngleEveryFrame) { m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

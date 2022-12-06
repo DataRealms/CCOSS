@@ -131,7 +131,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
 	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
 	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
-	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.  
 	**`PieSlices`** - Gets all of the `PieSlice`s in the `PieMenu` for iterating over in a for loop.  
 
 	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
@@ -269,6 +269,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Greatly reduce online multiplayer bandwidth usage.
 
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
+
 - The landing zone cursor will now show the width of the selected delivery craft.
 
 - Completely replaced `ScriptFile` with `ScriptPath`.
@@ -385,8 +388,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		SomeObjectProperty = Something
 				CopyOf = Thing // Over-indented. Will crash.
 	```
-
-- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game. `PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s
 
 </details>
 

@@ -585,7 +585,7 @@ namespace RTE {
 		}
 
 		// Save the scene bitmaps
-		if (scene->SaveData(sc_scriptSavesPath + "/" + fileName) < 0) {
+		if (scene->SaveData(sc_scriptSavesModuleName + "/" + fileName) < 0) {
 			return false;
 		}
 
@@ -605,7 +605,7 @@ namespace RTE {
 		sceneAltered->SetScriptSave(true);
 
 		// We don't need to block the main thread for too long, just need to let writer access the relevant data
-		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Scene", sceneAltered.get());
 		writer->NewPropertyWithValue("Activity", activity);
 
@@ -632,7 +632,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(new Scene());
 		std::unique_ptr<GAScripted> activity(new GAScripted());
 
- 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true, nullptr, true);
+ 		Reader reader((sc_scriptSavesModuleName + fileName + ".ini").c_str(), true, nullptr, true);
 		if (!reader.ReaderOK()) {
 			return false;
 		}

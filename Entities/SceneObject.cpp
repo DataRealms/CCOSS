@@ -295,7 +295,7 @@ int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
 // Description:     Saves the complete state of this SceneObject to an output stream for
 //                  later recreation with Create(istream &stream);
 
-int SceneObject::Save(Writer& writer) const
+int SceneObject::Save(Writer &writer) const
 {
     Entity::Save(writer);
 // TODO: Make proper save system that knows not to save redundant data!

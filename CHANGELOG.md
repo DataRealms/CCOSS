@@ -131,7 +131,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
 	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
 	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
-	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.  
+	**`PieSlices`** - Gets all of the `PieSlice`s in the `PieMenu` for iterating over in a for loop.  
 
 	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
 	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
@@ -144,7 +145,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
 	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
 	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
-	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
 	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
 	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
 
@@ -244,12 +244,72 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
 	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+	
+- New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
+
+- New optional parameter `ignoreMaterial` for Lua function `SceneMan:CastMaxStrengthRay(start, end, skip, ignoreMaterial)`, which allows specifying a material that the ray will ignore. Defaults to the door material, for legacy compatibility purposes.
+
+- New `Settings.ini` property `PathFinderGridNodeSize` to define the size of the pathfinder's graph nodes, in pixels. 
+
+- New `Settings.ini` property `AIUpdateInterval` to define how often actor AI will update, in simulation updates. Higher values may give better performance with large actor counts, at a cost of AI capability and awareness.  
+This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInterval`.
+
+- New Lua (R) `TimerMan` properties `AIDeltaTimeMS` and `AIDeltaTimeSecs` to get the time that has passed since the last AI update.
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
+- New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
+
+- Expose `Gib` to Lua.  
+	You can read and write the following properties:  
+	```
+	gib.ParticlePreset = movableObject;
+	gib.Offset = vector;
+	gib.Count = intValue;
+	gib.Spread = angleInRadians;
+	gib.MinVelocity = floatValue;
+	gib.MaxVelocity = floatValue;
+	gib.LifeVariation = floatValue;
+	gib.InheritsVel = bool;
+	gib.IgnoresTeamHits = bool;
+	gib.SpreadMode = SpreadMode;
+	```
+
+	The `SpreadMode` property accepts values from the `SpreadMode` enum:  
+	```
+	(0) Gib.SpreadRandom
+	(1) Gib.SpreadEven
+	(2) Gib.SpreadSpiral
+	```
+
+	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
+
+- New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
+
+- Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
+
+- Added key combinations for resetting time scales to defaults while performance stats are visible.  
+	`Ctrl + 1` to reset the time scale.  
+	`Ctrl + 3` to reset the `RealToSimCap`.  
+	`Ctrl + 5` to reset the `DeltaTime`.
+
+- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.
+
+- Added new `UPS` (Updates per second) measurement to the performance stats which is probably the most reliable performance indicator.  
+	The sim update target is ~60 UPS (defined by `DeltaTime`).  
+	When UPS dips due to load there will be noticeable FPS impact because more time is spent updating the sim and less time is left to draw frames before the next sim update.  
+	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
+	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
+	Results will obviously vary depending on system performance.
 
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Greatly reduce online multiplayer bandwidth usage.
+
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
 
@@ -347,6 +407,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	(36) EditorTeam4
 	```
 
+- Major improvements to pathfinding performance and AI decision making.
+
 - Having the pie menu open no longer blocks user input when using mouse+keyboard or a controller.
 
 - `MOSRotating` based presets without an `AtomGroup` definition will now crash with error message during loading.
@@ -366,6 +428,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
+	The `MSPF` measurement now displays 3 values:  
+	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
+	`Update` - The total time spent updating the sim during the frame (as the sim can be updated multiple times per frame), in milliseconds.  
+	`Draw` - The time spend drawing during the frame, in milliseconds.
+
+- Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -373,6 +443,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
+
+- Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
+
+- Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
+- Fix advanced performance stats (graphs) peak values stuck at 0.
 
 </details>
 

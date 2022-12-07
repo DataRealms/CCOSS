@@ -259,7 +259,7 @@ void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
     GameActivity::HandleCraftEnteringOrbit(orbitedCraft);
 
     if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
-        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
+        g_LuaMan.RunScriptFunctionString(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
         for (const GlobalScript *globalScript : m_GlobalScriptsList) {
             if (globalScript->IsActive()) { globalScript->HandleCraftEnteringOrbit(orbitedCraft); }
         }

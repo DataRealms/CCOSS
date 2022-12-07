@@ -17,6 +17,7 @@
 #include "Entity.h"
 #include "Box.h"
 #include "Activity.h"
+#include "PathFinder.h"
 
 namespace RTE
 {
@@ -685,34 +686,23 @@ EntityAllocation(Scene)
     bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDimensions
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-// Arguments:       None.
-// Return value:    A Vector describing the scene dimensions.
+	/// <summary>
+	/// Gets the total dimensions (width and height) of the scene, in pixels.
+	/// </summary>
+	/// <returns>A Vector describing the scene dimensions.</returns>
+	Vector GetDimensions() const;
 
-    Vector GetDimensions() const;
+	/// <summary>
+	/// Gets the total width of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene width.</returns>
+	int GetWidth() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetWidth() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetHeight() const;
+	/// <summary>
+	/// Gets the total height of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene height.</returns>
+	int GetHeight() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1191,12 +1181,15 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Calculates and returns the least difficult path between two points on
 //                  the current scene. Takes both distance and materials into account.
+//                  When pathing using the NoTeam pathFinder, no doors are considered passable.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  A list which will be filled out with waypoints between the start and end.
+//                  The maximum material strength any actor traveling along the path can dig through.
+//                  The team we're pathing for (doors for this team will be considered passable)
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght = 1);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1.0F, Activity::Teams team = Activity::Teams::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1208,11 +1201,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  For exposing CalculatePath to Lua.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  If the path should be moved to the ground or not.
-//                  The maximum material strength any actor traveling along the paht can
-//                  dig through.
+//                  The maximum material strength any actor traveling along the path can dig through.
 // Return value:    The number of waypoints from start to goal, or -1 if no path.
 
-    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1);
+    int CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength = 1.0F);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1359,13 +1351,15 @@ protected:
     float m_TotalInvestment;
     // Terrain definition
     SLTerrain *m_pTerrain;
+
     // Pathfinding graph and logic. Owned by this
-    PathFinder *m_pPathFinder;
+    // The array of PathFinders for each team. Because we also have a shared pathfinder using index 0, we need to use MaxTeamCount + 1 to handle all the Teams' PathFinders.
+    std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
-    // Timers for when to do an update of all or only part of the pathfinding data
-    Timer m_FullPathUpdateTimer;
+    // Timer for when to do an update of the pathfinding data
     Timer m_PartialPathUpdateTimer;
+
     // SceneObject:s to be placed in the scene, divided up by different sets - OWNED HERE
     std::list<SceneObject *> m_PlacedObjects[PLACEDSETSCOUNT];
     // List of background layers, first is the closest to the terrain, last is closest to the back
@@ -1411,6 +1405,13 @@ protected:
 
 private:
 
+	/// <summary>
+	/// Gets the pathfinder for a given team.
+	/// </summary>
+	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+	/// <returns>A pointer to the pathfinder for the given team.</returns>
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1420,7 +1421,6 @@ private:
 // Return value:    None.
 
     void Clear();
-
 
     // Disallow the use of some implicit methods.
     Scene(const Scene &reference) = delete;

@@ -3152,7 +3152,8 @@ void AHuman::Update()
             }
 
             // Walk backwards if the aiming is already focused in the opposite direction of travel.
-            if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
+            // Check against zero, not deadzone, otherwise mouse aiming while jetpacking is messed up
+            if (!analogAim.IsZero() || isSharpAiming) {
                 m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
                 m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
             } else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {

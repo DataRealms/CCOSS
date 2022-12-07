@@ -63,13 +63,13 @@ namespace RTE {
 		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->SetCheck(g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode());
 
 		m_ScreenShakeStrengthSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderScreenShakeStrength"));
-		float screenShakeStrengthValue = static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F);
+		int screenShakeStrengthValue = static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F);
 		if (screenShakeStrengthValue == 0) {
-			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMinimum());
+			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMinimum());
 		} else if (screenShakeStrengthValue <= -1) {
-			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMaximum());
+			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMaximum());
 		} else {
-			m_UnheldItemsHUDDisplayRangeSlider->SetValue(static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F));
+			m_ScreenShakeStrengthSlider->SetValue(static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F));
 		}
 		m_ScreenShakeStrengthLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelScreenShakeStrengthValue"));
 		UpdateScreenShakeStrength();

@@ -165,7 +165,7 @@ bool PresetMan::LoadAllDataModules() {
 	FindAndExtractZippedModules();
 
 	// Load all the official modules first!
-	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	std::array<std::string, 11> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte", "Saves.rte" };
 	for (const std::string &officialModule : officialModules) {
 		if (!LoadDataModule(officialModule, true, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;

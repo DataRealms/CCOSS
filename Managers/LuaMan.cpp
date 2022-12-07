@@ -13,7 +13,7 @@
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	constexpr static char* sc_scriptSavesPath = "Saves.rte/";
+	constexpr static char* sc_scriptSavesModuleName = "Saves.rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -585,7 +585,7 @@ namespace RTE {
 		}
 
 		// Save the scene bitmaps
-		if (scene->SaveData(sc_scriptSavesPath + fileName) < 0) {
+		if (scene->SaveData(sc_scriptSavesPath + "/" + fileName) < 0) {
 			return false;
 		}
 
@@ -600,11 +600,12 @@ namespace RTE {
 
 		// We also need to stop being a copy of the scene we got cloned from - otherwise we'll still pick up the PlacedObjectSets from our parent when loading
 		// So become our own original preset
-		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
+		sceneAltered->SetPresetName(fileName);
+		sceneAltered->MigrateToModule(g_PresetMan.GetModuleID(sc_scriptSavesModuleName));
 		sceneAltered->SetScriptSave(true);
 
 		// We don't need to block the main thread for too long, just need to let writer access the relevant data
-		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Scene", sceneAltered.get());
 		writer->NewPropertyWithValue("Activity", activity);
 

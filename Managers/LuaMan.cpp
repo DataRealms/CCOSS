@@ -71,8 +71,8 @@ namespace RTE {
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF)
-				.def("SaveScene", &LuaMan::SaveScriptedScene)
-				.def("LoadScene", &LuaMan::LoadScriptedScene),
+				.def("SaveGame", &LuaMan::SaveGame)
+				.def("LoadGame", &LuaMan::LoadGame),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
@@ -576,7 +576,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::SaveScriptedScene(const std::string &fileName) {
+	bool LuaMan::SaveGame(const std::string &fileName) {
 		Scene* scene = dynamic_cast<Scene*>(g_SceneMan.GetScene());
 		GAScripted* activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
 
@@ -627,7 +627,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::LoadScriptedScene(const std::string &fileName) {
+	bool LuaMan::LoadGame(const std::string &fileName) {
 		std::unique_ptr<Scene> scene(new Scene());
 		std::unique_ptr<GAScripted> activity(new GAScripted());
 

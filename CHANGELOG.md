@@ -216,8 +216,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New functionality to support save games.
 	```lua
-	LuaMan:SaveScene(fileName) -- Saves the currently playing scene and activity to Saves.rte.
-	LuaMan:LoadScene(fileName) -- Loads and resumes a previously saved scene and activity.
+	LuaMan:SaveGame(fileName) -- Saves the currently playing scene and activity to Saves.rte.
+	LuaMan:LoadGame(fileName) -- Loads and resumes a previously saved scene and activity.
 	```
 	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.
 	
@@ -237,7 +237,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadScene("Autosave")`.
+	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadGame("Autosave")`.
 	
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  

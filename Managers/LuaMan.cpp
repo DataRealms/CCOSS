@@ -13,7 +13,7 @@
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	constexpr static char* sc_scriptSavesPath = "Saves.rte/";
+	constexpr static char* sc_scriptSavesModuleName = "Saves.rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,8 +71,8 @@ namespace RTE {
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF)
-				.def("SaveScene", &LuaMan::SaveScriptedScene)
-				.def("LoadScene", &LuaMan::LoadScriptedScene),
+				.def("SaveGame", &LuaMan::SaveGame)
+				.def("LoadGame", &LuaMan::LoadGame),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
@@ -578,7 +578,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::SaveScriptedScene(const std::string &fileName) {
+	bool LuaMan::SaveGame(const std::string &fileName) {
 		Scene* scene = dynamic_cast<Scene*>(g_SceneMan.GetScene());
 		GAScripted* activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
 
@@ -587,7 +587,7 @@ namespace RTE {
 		}
 
 		// Save the scene bitmaps
-		if (scene->SaveData(sc_scriptSavesPath + fileName) < 0) {
+		if (scene->SaveData(sc_scriptSavesModuleName + ("/" + fileName)) < 0) {
 			return false;
 		}
 
@@ -602,11 +602,12 @@ namespace RTE {
 
 		// We also need to stop being a copy of the scene we got cloned from - otherwise we'll still pick up the PlacedObjectSets from our parent when loading
 		// So become our own original preset
-		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
+		sceneAltered->SetPresetName(fileName);
+		sceneAltered->MigrateToModule(g_PresetMan.GetModuleID(sc_scriptSavesModuleName));
 		sceneAltered->SetScriptSave(true);
 
 		// We don't need to block the main thread for too long, just need to let writer access the relevant data
-		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesModuleName + ("/" + fileName + ".ini")));
 		writer->NewPropertyWithValue("Scene", sceneAltered.get());
 		writer->NewPropertyWithValue("Activity", activity);
 
@@ -629,11 +630,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::LoadScriptedScene(const std::string &fileName) {
+	bool LuaMan::LoadGame(const std::string &fileName) {
 		std::unique_ptr<Scene> scene(new Scene());
 		std::unique_ptr<GAScripted> activity(new GAScripted());
 
- 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true, nullptr, true);
+		std::string readerFilepath = sc_scriptSavesModuleName + ("/" + fileName + ".ini");
+ 		Reader reader(readerFilepath.c_str(), true, nullptr, true);
 		if (!reader.ReaderOK()) {
 			return false;
 		}

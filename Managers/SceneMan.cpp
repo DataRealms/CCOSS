@@ -81,7 +81,6 @@ void SceneMan::Clear()
     m_pCurrentScene = 0;
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
-    m_MOIDDrawings.clear();
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -235,7 +234,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOIDLayer;
     pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
-    m_pMOIDLayer = new SceneLayer();
+    m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -899,83 +898,19 @@ bool SceneMan::SceneIsLocked() const
     return m_pCurrentScene->IsLocked();
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
 
-void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
-{
-    if (radius != 0)
-        RegisterMOIDDrawing(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+void SceneMan::RegisterMOIDDrawing(int left, int top, int right, int bottom) {
+    m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearAllMOIDDrawings
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all registered drawn areas of the MOID layer to the g_NoMOID
-//                  color and clears the registrations too. Should be done each sim update.
-
-void SceneMan::ClearAllMOIDDrawings()
-{
-    for (list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
-        ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
-
-    m_MOIDDrawings.clear();
+void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius) {
+    m_pMOIDLayer->RegisterDrawing(center, radius);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets a specific rectangle of the scene's MOID layer to not contain
-//                  any MOID data anymore. Sets it all to NoMOID. Will take care of wrapping.
-
-void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
-{
-    // Draw the first unwrapped rect
-    rectfill(m_pMOIDLayer->GetBitmap(), left, top, right, bottom, g_NoMOID);
-
-    // Draw wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-        {
-            int wrapLeft = left + sceneWidth;
-            int wrapRight = sceneWidth - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-        if (right >= sceneWidth)
-        {
-            int wrapLeft = 0;
-            int wrapRight = right - sceneWidth;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-        {
-            int wrapTop = top + sceneHeight;
-            int wrapBottom = sceneHeight - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-        if (bottom >= sceneHeight)
-        {
-            int wrapTop = 0;
-            int wrapBottom = bottom - sceneHeight;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-    }
+void SceneMan::ClearAllMOIDDrawings() {
+    m_pMOIDLayer->ClearBitmap(g_NoMOID);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          WillPenetrate
@@ -3416,19 +3351,6 @@ void SceneMan::ClearMOColorLayer()
     m_pMOColorLayer->ClearBitmap(g_MaskColor);
     if (m_pDebugLayer) { m_pDebugLayer->ClearBitmap(g_MaskColor); }
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDLayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the MOID layer. Should be done every frame.
-//					Looks like it never actually called anymore
-
-void SceneMan::ClearMOIDLayer()
-{
-    clear_to_color(m_pMOIDLayer->GetBitmap(), g_NoMOID);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearSeenPixels

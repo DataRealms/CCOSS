@@ -1659,7 +1659,6 @@ void MovableMan::Update()
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
 
     g_SceneMan.ClearAllMOIDDrawings();
-//    g_SceneMan.MOIDClearCheck();
 
     ///////////////////////////////////////////////////
     // Determine whether we should go into a brief period of slo-mo for when the sim gets hit heavily all of a sudden

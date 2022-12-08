@@ -46,11 +46,10 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
         const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
 
-        const float screenShakeDecay = 50.0F;
+        const float screenShakeDecay = g_SettingsMan.GetScreenShakeDecay();
 
-        // Don't let our screen shake too much, not so much that it won't resolve within a few seconds
-        const float maxScreenShakeTimeInSeconds = 2.0f;
-        screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * maxScreenShakeTimeInSeconds);
+        // Don't let our screen shake beyond our max
+        screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * g_SettingsMan.GetMaxScreenShakeTime());
 
         // Reduce screen shake over time
         screen.m_ScreenShakeMagnitude -= screenShakeDecay * screen.m_ScrollTimer.GetElapsedRealTimeS();

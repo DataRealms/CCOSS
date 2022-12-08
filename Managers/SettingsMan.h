@@ -244,6 +244,36 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newValue">New value for the screen shake strength multiplier.</param>
 		void SetScreenShakeStrength(float newValue) { m_ScreenShakeStrength = newValue; }
+
+		/// <summary>
+		/// Gets how quickly screen shake decays, per second.
+		/// </summary>
+		/// <returns>The screen shake decay.</returns>
+		float GetScreenShakeDecay() const { return m_ScreenShakeDecay; }
+
+		/// <summary>
+		/// Gets the maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
+		/// </summary>
+		/// <returns>The maximum screen shake time, in seconds.</returns>
+		float GetMaxScreenShakeTime() const { return m_MaxScreenShakeTime; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of gib energy.</returns>
+		float GetDefaultShakePerUnitOfGibEnergy() const { return m_DefaultShakePerUnitOfGibEnergy; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of recoil energy.</returns>
+		float GetDefaultShakePerUnitOfRecoilEnergy() const { return m_DefaultShakePerUnitOfRecoilEnergy; }
+
+		/// <summary>
+		/// The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
+		/// </summary>
+		/// <returns>The maximum auto-calculated recoil shakiness.</returns>
+		float GetDefaultShakeFromRecoilMaximum() const { return m_DefaultShakeFromRecoilMaximum; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -498,7 +528,13 @@ namespace RTE {
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 		bool m_EnableSmartBuyMenuNavigation; //!< Whether swapping to equipment mode and back should change active tabs in the BuyMenu.
+
 		float m_ScreenShakeStrength; //!< A global multiplier applied to screen shaking strength.
+		float m_ScreenShakeDecay; //!< How quickly screen shake falls off.
+		float m_MaxScreenShakeTime; //!< The maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
+		float m_DefaultShakePerUnitOfGibEnergy; //!< How much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
+		float m_DefaultShakePerUnitOfRecoilEnergy; //!< How much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
+		float m_DefaultShakeFromRecoilMaximum; //!< The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

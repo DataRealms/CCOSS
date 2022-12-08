@@ -28,7 +28,13 @@ namespace RTE {
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
+
 		m_ScreenShakeStrength = 1.0F;
+		m_ScreenShakeDecay = 50.0f;
+		m_MaxScreenShakeTime = 1.0F;
+		m_DefaultShakePerUnitOfGibEnergy = 0.001F;
+		m_DefaultShakePerUnitOfRecoilEnergy = 0.5F;
+		m_DefaultShakeFromRecoilMaximum = 0.0F; // You were too good for this world :(
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -164,6 +170,16 @@ namespace RTE {
 			reader >> m_EnableSmartBuyMenuNavigation;
 		} else if (propName == "ScreenShakeStrength") {
 			reader >> m_ScreenShakeStrength;
+		} else if (propName == "ScreenShakeDecay") {
+			reader >> m_ScreenShakeDecay;
+		} else if (propName == "MaxScreenShakeTime") {
+			reader >> m_MaxScreenShakeTime;
+		} else if (propName == "DefaultShakePerUnitOfGibEnergy") {
+			reader >> m_DefaultShakePerUnitOfGibEnergy;
+		} else if (propName == "DefaultShakePerUnitOfRecoilEnergy") {
+			reader >> m_DefaultShakePerUnitOfRecoilEnergy;
+		} else if (propName == "DefaultShakeFromRecoilMaximum") {
+			reader >> m_DefaultShakeFromRecoilMaximum;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -345,7 +361,17 @@ namespace RTE {
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Screen Shake Settings", false);
+		writer.NewLine(false);
 		writer.NewPropertyWithValue("ScreenShakeStrength", m_ScreenShakeStrength);
+		writer.NewPropertyWithValue("ScreenShakeDecay", m_ScreenShakeDecay);
+		writer.NewPropertyWithValue("MaxScreenShakeTime", m_MaxScreenShakeTime);
+		writer.NewPropertyWithValue("DefaultShakePerUnitOfGibEnergy", m_DefaultShakePerUnitOfGibEnergy);
+		writer.NewPropertyWithValue("DefaultShakePerUnitOfRecoilEnergy", m_DefaultShakePerUnitOfRecoilEnergy);
+		writer.NewPropertyWithValue("DefaultShakeFromRecoilMaximum", m_DefaultShakeFromRecoilMaximum);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

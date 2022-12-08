@@ -17,6 +17,7 @@
 #include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
+#include "SettingsMan.h"
 
 #include "Magazine.h"
 #include "ThrownDevice.h"
@@ -65,6 +66,7 @@ void HDFirearm::Clear()
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
 	m_ShellVelVariation = 0.1F;
+    m_RecoilScreenShakeAmount = 0.0F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;
@@ -140,7 +142,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
-	m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_RecoilScreenShakeAmount = reference.m_RecoilScreenShakeAmount;
     m_MuzzleOff = reference.m_MuzzleOff;
     m_EjectOff = reference.m_EjectOff;
     m_MagOff = reference.m_MagOff;
@@ -230,6 +233,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_ShellAngVelRange /= 2;
 	} else if (propName == "ShellVelVariation") {
 		reader >> m_ShellVelVariation;
+    } else if (propName == "RecoilScreenShakeAmount") {
+		reader >> m_RecoilScreenShakeAmount;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
 	} else if (propName == "EjectionOffset") {
@@ -306,8 +311,10 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
     writer << m_ShellAngVelRange * 2;
-	writer.NewProperty("ShellVelocityVariation");
+	writer.NewProperty("ShellVelVariation");
 	writer << m_ShellVelVariation;
+    writer.NewProperty("RecoilScreenShakeAmount");
+    writer << m_RecoilScreenShakeAmount;
     writer.NewProperty("MuzzleOffset");
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
@@ -1020,10 +1027,10 @@ void HDFirearm::Update()
             int controllingPlayer = pActor->GetController()->GetPlayer();
             int screenId = g_ActivityMan.GetActivity()->ScreenOfPlayer(controllingPlayer);
             if (screenId != -1) {
-                const float shakinessPerUnitOfRecoilEnergy = 0.5f;
-                const float maxShakiness = 10.0f; // Some weapons fire huge rounds, so restrict the amount
-                float screenShakeAmount = totalFireForce * m_JointStiffness * shakinessPerUnitOfRecoilEnergy;
-                g_CameraMan.ApplyScreenShake(std::min(screenShakeAmount, maxShakiness), screenId);
+                const float shakiness = g_SettingsMan.GetDefaultShakePerUnitOfRecoilEnergy();
+                const float maxShakiness = g_SettingsMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
+                float screenShakeAmount = m_RecoilScreenShakeAmount == -1.0F ? std::min(totalFireForce * m_JointStiffness * shakiness, maxShakiness) : m_RecoilScreenShakeAmount;
+                g_CameraMan.ApplyScreenShake(screenShakeAmount, screenId);
             }
         }
 

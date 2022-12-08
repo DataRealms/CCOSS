@@ -1039,9 +1039,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             // Automatically calculate a value based on the amount of energy going on here
             float averageSpeed = (minVelocity + maxVelocity) * 0.5F;
             float energy = mass * averageSpeed * static_cast<float>(count);
-
-            const float shakinessPerUnitOfEnergy = 0.001f;
-            screenShakeAmount = energy * shakinessPerUnitOfEnergy;
+            screenShakeAmount = energy * g_SettingsMan.GetDefaultShakePerUnitOfGibEnergy();;
         }
 
         g_CameraMan.AddScreenShake(screenShakeAmount, m_Pos);

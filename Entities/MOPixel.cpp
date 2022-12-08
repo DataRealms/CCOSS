@@ -2,7 +2,6 @@
 
 #include "Atom.h"
 #include "PostProcessMan.h"
-#include "SceneLayer.h"
 
 namespace RTE {
 

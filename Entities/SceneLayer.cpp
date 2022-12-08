@@ -40,9 +40,7 @@ namespace RTE {
 	int SceneLayerImpl<TRACK_DRAWINGS>::Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_BitmapFile = bitmapFile;
 		m_MainBitmap = m_BitmapFile.GetAsBitmap();
-
-		m_BackBitmap = nullptr;
-		m_LastClearColor = g_InvalidColor;
+		Create(m_MainBitmap, drawMasked, offset, wrapX, wrapY, scrollInfo);
 
 		m_MainBitmapOwned = false;
 

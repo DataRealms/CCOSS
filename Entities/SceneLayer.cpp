@@ -33,7 +33,7 @@ namespace RTE {
 		m_BitmapFile = bitmapFile;
 		m_MainBitmap = m_BitmapFile.GetAsBitmap();
 
-		m_BackBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+		m_BackBitmap = nullptr;
 		m_LastClearColor = g_InvalidColor;
 
 		m_MainBitmapOwned = false;
@@ -263,6 +263,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SceneLayer::ClearBitmap(ColorKeys clearTo) {
+		RTEAssert(m_MainBitmapOwned, "Bitmap not owned! We shouldn't be clearing this!");
+
 		m_BitmapClearMutex.lock();
 		if (m_LastClearColor != clearTo) {
 			// Damnit, our backbuffer is the wrong colour. Fix it up!

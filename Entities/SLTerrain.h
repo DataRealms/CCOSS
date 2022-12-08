@@ -170,7 +170,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
 		/// <param name="materialID">The material index to set the pixel to.</param>
-		void SetMaterialPixel(int pixelX, int pixelY, int materialID) const { SetPixel(pixelX, pixelY, materialID); }
+		void SetMaterialPixel(int pixelX, int pixelY, int materialID) { SetPixel(pixelX, pixelY, materialID); }
 
 		/// <summary>
 		/// Indicates whether a terrain pixel is of Air or Cavity material.

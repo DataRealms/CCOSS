@@ -1315,7 +1315,7 @@ namespace RTE {
 			atomOffset = m_OwnerMOSR->RotateOffset(atom->GetOffset());
 			atom->SetupPos(position + atomOffset);
 			atomPos = atom->GetCurrentPos();
-			hitMaterial = g_SceneMan.GetTerrain()->GetPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY());
+			hitMaterial = g_SceneMan.GetTerrain()->GetMaterialPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY());
 			if (hitMaterial != g_MaterialAir && strengthThreshold > 0.0F && g_SceneMan.GetMaterialFromID(hitMaterial)->GetIntegrity() > strengthThreshold) {
 				intersectingAtoms.push_back(atom);
 			}

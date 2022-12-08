@@ -1533,12 +1533,14 @@ void MovableMan::Update()
 	m_SimUpdateFrameNumber++;
 
     // Clear the MO color layer only if this is a drawn update
-    if (g_TimerMan.DrawnSimUpdate())
+    if (g_TimerMan.DrawnSimUpdate()) {
         g_SceneMan.ClearMOColorLayer();
+    }
 
     // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
-		g_PostProcessMan.ClearScenePostEffects();
+    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
+        g_PostProcessMan.ClearScenePostEffects();
+    }
 
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TeamOne] = false;
@@ -1687,7 +1689,6 @@ void MovableMan::Update()
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
 
     g_SceneMan.ClearAllMOIDDrawings();
-//    g_SceneMan.MOIDClearCheck();
 
     ///////////////////////////////////////////////////
     // Determine whether we should go into a brief period of slo-mo for when the sim gets hit heavily all of a sudden

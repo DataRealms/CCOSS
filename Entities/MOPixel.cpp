@@ -1,6 +1,8 @@
 #include "MOPixel.h"
+
 #include "Atom.h"
 #include "PostProcessMan.h"
+#include "SceneLayer.h"
 
 namespace RTE {
 
@@ -251,9 +253,9 @@ namespace RTE {
 		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
 		release_bitmap(targetBitmap);
 
-		if (mode == g_DrawMOID) {
-			g_SceneMan.RegisterMOIDDrawing(m_Pos - targetPos, 1);
-		} else if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
+		g_SceneMan.RegisterDrawing(mode, m_Pos - targetPos, 1);
+		
+		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();
 		}
 	}

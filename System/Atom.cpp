@@ -984,11 +984,21 @@ namespace RTE {
 		//RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segments!!");
 
 		// Draw the trail
-		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
+		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength && trailPoints.size() > 0) {
+			Vector topLeftExtent = Vector(trailPoints[0].first, trailPoints[0].second);
+			Vector bottomRightExtent = topLeftExtent + Vector(1.0F, 1.0F);
+
 			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
+
+				topLeftExtent.m_X = std::min(topLeftExtent.m_X, static_cast<float>(trailPoints[i].first));
+				topLeftExtent.m_Y = std::min(topLeftExtent.m_Y, static_cast<float>(trailPoints[i].second));
+				bottomRightExtent.m_X = std::max(bottomRightExtent.m_X, static_cast<float>(trailPoints[i].first));
+				bottomRightExtent.m_Y = std::max(bottomRightExtent.m_Y, static_cast<float>(trailPoints[i].second));
 			}
+
+			g_SceneMan.RegisterDrawing(DrawMode::g_DrawColor, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
 		}
 
 		// Unlock all bitmaps involved.

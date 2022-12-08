@@ -72,7 +72,6 @@ void SceneMan::Clear()
     m_pCurrentScene = 0;
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
-    m_MOIDDrawings.clear();
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -192,7 +191,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = new SceneLayer();
+    m_pMOColorLayer = new SceneLayerTracked();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -200,7 +199,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOIDLayer;
     pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
-    m_pMOIDLayer = new SceneLayer();
+    m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -593,66 +592,32 @@ bool SceneMan::SceneIsLocked() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
-{
-    if (radius != 0)
-        RegisterMOIDDrawing(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
-}
+    void SceneMan::RegisterDrawing(DrawMode mode, int left, int top, int right, int bottom) {
+        switch(mode) {
+        case DrawMode::g_DrawColor:
+            if (m_pMOColorLayer) { 
+                m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+            }
+            break;
+        case DrawMode::g_DrawMOID:
+            m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
+            break;
+        }
+    }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearAllMOIDDrawings()
-{
-    for (std::list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
-        ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
-
-    m_MOIDDrawings.clear();
-}
+    void SceneMan::RegisterDrawing(DrawMode mode, const Vector &center, float radius) {
+        if (radius != 0.0F) {
+			RegisterDrawing(mode, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+		}
+    }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
-{
-    // Draw the first unwrapped rect
-    rectfill(m_pMOIDLayer->GetBitmap(), left, top, right, bottom, g_NoMOID);
-
-    // Draw wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-        {
-            int wrapLeft = left + sceneWidth;
-            int wrapRight = sceneWidth - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-        if (right >= sceneWidth)
-        {
-            int wrapLeft = 0;
-            int wrapRight = right - sceneWidth;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-        {
-            int wrapTop = top + sceneHeight;
-            int wrapBottom = sceneHeight - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-        if (bottom >= sceneHeight)
-        {
-            int wrapTop = 0;
-            int wrapBottom = bottom - sceneHeight;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-    }
+void SceneMan::ClearAllMOIDDrawings() {
+    m_pMOIDLayer->ClearBitmap(g_NoMOID);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2843,16 +2808,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 
 void SceneMan::ClearMOColorLayer()
 {
-    clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
-
-    if (m_pDebugLayer) { clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor); }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::ClearMOIDLayer()
-{
-    clear_to_color(m_pMOIDLayer->GetBitmap(), g_NoMOID);
+    m_pMOColorLayer->ClearBitmap(g_MaskColor);
+    if (m_pDebugLayer) { m_pDebugLayer->ClearBitmap(g_MaskColor); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

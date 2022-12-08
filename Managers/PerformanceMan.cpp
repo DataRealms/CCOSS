@@ -2,29 +2,41 @@
 #include "MovableMan.h"
 #include "FrameMan.h"
 #include "AudioMan.h"
-#include "Timer.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
 namespace RTE {
 
+	const std::array<std::string, PerformanceMan::PerformanceCounters::PerfCounterCount> PerformanceMan::m_PerfCounterNames = { "Total", "Act AI", "Act Travel", "Act Update", "Prt Travel", "Prt Update", "Activity" };
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::Clear() {
 		m_ShowPerfStats = false;
 		m_AdvancedPerfStats = true;
-		m_CurrentPing = 0;
-		m_FrameTimer = nullptr;
+		m_Sample = 0;
+		m_SimUpdateTimer = nullptr;
+		m_MSPSUs.clear();
+		m_MSPSUAverage = 0;
 		m_MSPFs.clear();
 		m_MSPFAverage = 0;
+		m_MSPUs.clear();
+		m_MSPUAverage = 0;
+		m_MSPDs.clear();
+		m_MSPDAverage = 0;
+		m_CurrentPing = 0;
+		m_IntermediateDrawBitmap = nullptr;
+		m_ColorConversionBitmap = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PerformanceMan::Initialize() {
-		m_FrameTimer = std::make_unique<Timer>();
-		m_Sample = 0;
+	void PerformanceMan::Initialize() {
+		m_SimUpdateTimer = std::make_unique<Timer>();
+
+		m_IntermediateDrawBitmap = create_bitmap_ex(8, 280, 380);
+		m_ColorConversionBitmap = create_bitmap_ex(32, 280, 380);
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
 			m_PerfData[counter].fill(0);
@@ -32,40 +44,14 @@ namespace RTE {
 		}
 		m_PerfMeasureStart.fill(0);
 		m_PerfMeasureStop.fill(0);
-
-		// Set up performance counter's names
-		m_PerfCounterNames[PerformanceCounters::SimTotal] = "Total";
-		m_PerfCounterNames[PerformanceCounters::ActorsTravel] = "Act Travel";
-		m_PerfCounterNames[PerformanceCounters::ParticlesTravel] = "Prt Travel";
-		m_PerfCounterNames[PerformanceCounters::ActorsUpdate] = "Act Update";
-		m_PerfCounterNames[PerformanceCounters::ParticlesUpdate] = "Prt Update";
-		m_PerfCounterNames[PerformanceCounters::ActorsAIUpdate] = "Act AI";
-		m_PerfCounterNames[PerformanceCounters::ActivityUpdate] = "Activity";
-
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Update() {
-		// Time and store the milliseconds per frame reading of the sim update to the buffer, and trim the buffer as needed
-		m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
-		while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
-			m_MSPFs.pop_front();
-		}
-
-		// Calculate the average milliseconds per frame over the last sampleSize frames
-		m_MSPFAverage = 0;
-		for (const int &mspf : m_MSPFs) {
-			m_MSPFAverage += mspf;
-		}
-		m_MSPFAverage /= m_MSPFs.size();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::ResetFrameTimer() const {
-		m_FrameTimer->Reset();
+	void PerformanceMan::Destroy() {
+		destroy_bitmap(m_IntermediateDrawBitmap);
+		destroy_bitmap(m_ColorConversionBitmap);
+		Clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,8 +74,8 @@ namespace RTE {
 		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
-			m_PerfData[counter].at(m_Sample) = 0;
-			m_PerfPercentages[counter].at(m_Sample) = 0;
+			m_PerfData[counter][m_Sample] = 0;
+			m_PerfPercentages[counter][m_Sample] = 0;
 		}
 	}
 
@@ -97,8 +83,8 @@ namespace RTE {
 
 	void PerformanceMan::CalculateSamplePercentages() {
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
-			int samplePercentage = static_cast<int>(static_cast<float>(m_PerfData[counter].at(m_Sample)) / static_cast<float>(m_PerfData[counter][PerformanceCounters::SimTotal]) * 100);
-			m_PerfPercentages[counter].at(m_Sample) = samplePercentage;
+			int samplePercentage = static_cast<int>(static_cast<float>(m_PerfData[counter][m_Sample]) / static_cast<float>(m_PerfData[counter][PerformanceCounters::SimTotal]) * 100);
+			m_PerfPercentages[counter][m_Sample] = samplePercentage;
 		}
 	}
 
@@ -108,73 +94,87 @@ namespace RTE {
 		uint64_t totalPerformanceMeasurement = 0;
 		int sample = m_Sample;
 		for (int i = 0; i < c_Average; ++i) {
-			totalPerformanceMeasurement += m_PerfData[counter].at(sample);
-			if (sample == 0) { sample = c_MaxSamples; }
+			totalPerformanceMeasurement += m_PerfData[counter][sample];
 			sample--;
+			if (sample < 0) { sample = c_MaxSamples - 1; }
 		}
 		return totalPerformanceMeasurement / c_Average;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Draw(AllegroBitmap &bitmapToDrawTo) {
-		if (m_ShowPerfStats) {
-			// Time and store the milliseconds per frame reading of the drawing frame to the buffer, and trim the buffer as needed
-			m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
-			m_FrameTimer->Reset();
-			while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
-				m_MSPFs.pop_front();
-			}
-			// Calculate the average milliseconds per frame over the last sampleSize frames
-			for(const int &mspf : m_MSPFs){
-				m_MSPFAverage += mspf;
-			}
-			m_MSPFAverage /= m_MSPFs.size();
+	void PerformanceMan::CalculateTimeAverage(std::deque<float> &timeMeasurements, float &avgResult, float newTimeMeasurement) const {
+		timeMeasurements.emplace_back(newTimeMeasurement);
+		while (timeMeasurements.size() > c_MSPAverageSampleSize) {
+			timeMeasurements.pop_front();
+		}
+		avgResult = 0;
+		for (const float &timeMeasurement : timeMeasurements) {
+			avgResult += timeMeasurement;
+		}
+		avgResult /= static_cast<float>(timeMeasurements.size());
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime) {
+		CalculateTimeAverage(m_MSPUs, m_MSPUAverage, static_cast<float>(measuredUpdateTime / 1000));
+		CalculateTimeAverage(m_MSPDs, m_MSPDAverage, static_cast<float>(measuredDrawTime / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>((measuredUpdateTime + measuredDrawTime) / 1000));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::Draw(BITMAP *bitmapToDrawTo) {
+		if (m_ShowPerfStats) {
+			clear_to_color(m_IntermediateDrawBitmap, ColorKeys::g_MaskColor);
+			AllegroBitmap intermediateDrawBitmap(m_IntermediateDrawBitmap);
+
+			GUIFont *guiFont = g_FrameMan.GetLargeFont();
 			char str[128];
 
-			// Calculate the fps from the average
-			float fps = 1.0F / (static_cast<float>(m_MSPFAverage) / 1000.0F);
-			std::snprintf(str, sizeof(str), "FPS: %.0f", fps);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
+			float fps = 1.0F / (m_MSPFAverage / 1000.0F);
+			float ups = 1.0F / (m_MSPSUAverage / 1000.0F);
+			std::snprintf(str, sizeof(str), "FPS: %.0f | UPS: %.0f", fps, ups);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
-			// Display the average
-			std::snprintf(str, sizeof(str), "MSPF: %i", m_MSPFAverage);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
+			std::snprintf(str, sizeof(str), "Frame: %.1fms | Update: %.1fms | Draw: %.1fms", m_MSPFAverage, m_MSPUAverage, m_MSPDAverage);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+)", g_TimerMan.IsOneSimUpdatePerFrame() ? g_TimerMan.GetSimSpeed() : g_TimerMan.GetTimeScale());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
+			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Rst)", g_TimerMan.IsOneSimUpdatePerFrame() ? g_TimerMan.GetSimSpeed() : g_TimerMan.GetTimeScale());
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+)", g_TimerMan.GetRealToSimCap() * 1000.0F);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
+			std::snprintf(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+, [Ctrl+3]Rst)", g_TimerMan.GetRealToSimCap() * 1000.0F);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
 
 			float deltaTime = g_TimerMan.GetDeltaTimeMS();
-			std::snprintf(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+)", deltaTime);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
+			std::snprintf(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+, [Ctrl+5]Rst)", deltaTime);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Particles: %li", g_MovableMan.GetParticleCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
 
-			if (g_TimerMan.IsOneSimUpdatePerFrame()) { g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 90, "ONE Sim Update Per Frame!", GUIFont::Left); }
+			if (g_TimerMan.IsOneSimUpdatePerFrame()) { guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 90, "ONE Sim Update Per Frame!", GUIFont::Left); }
 
-			int totalPlayingChannelCount;
-			int realPlayingChannelCount;
-			if (g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
+			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
-			// If in split screen mode don't draw graphs because they don't fit anyway.
-			if (m_AdvancedPerfStats && g_FrameMan.GetScreenCount() == 1) { DrawPeformanceGraphs(bitmapToDrawTo); }
+			if (m_AdvancedPerfStats) { DrawPeformanceGraphs(intermediateDrawBitmap); }
+
+			// Regular blit performs color conversion from 8bpp to 32bpp, then the converted result is drawn masked to the 32bpp target bitmap.
+			blit(m_IntermediateDrawBitmap, m_ColorConversionBitmap, 0, 0, 0, 0, m_IntermediateDrawBitmap->w, m_IntermediateDrawBitmap->h);
+			masked_blit(m_ColorConversionBitmap, bitmapToDrawTo, 0, 0, 0, 0, m_ColorConversionBitmap->w, m_ColorConversionBitmap->h);
 		}
 	}
 
@@ -183,45 +183,46 @@ namespace RTE {
 	void PerformanceMan::DrawPeformanceGraphs(AllegroBitmap &bitmapToDrawTo) {
 		CalculateSamplePercentages();
 
+		GUIFont *guiFont = g_FrameMan.GetLargeFont();
 		char str[128];
 
 		for (int pc = 0; pc < PerformanceCounters::PerfCounterCount; ++pc) {
 			int blockStart = c_GraphsStartOffsetY + pc * c_GraphBlockHeight;
 
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
+			guiFont->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
 
-			// Print percentage from PerformanceCounters::SimTotal
 			int perc = static_cast<int>((static_cast<float>(GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerformanceCounterAverage(PerformanceCounters::SimTotal)) * 100));
 			std::snprintf(str, sizeof(str), "%%: %u", perc);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 60, blockStart, str, GUIFont::Left);
+			guiFont->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 60, blockStart, str, GUIFont::Left);
 
-			// Print average processing time in ms
+			// Print average processing time in milliseconds.
 			std::snprintf(str, sizeof(str), "T: %llu", GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 96, blockStart, str, GUIFont::Left);
+			guiFont->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 96, blockStart, str, GUIFont::Left);
 
 			int graphStart = blockStart + c_GraphsOffsetX;
 
-			// Draw graph backgrounds
+			// Draw graph backgrounds.
 			bitmapToDrawTo.DrawRectangle(c_StatsOffsetX, graphStart, c_MaxSamples, c_GraphHeight, 240, true);
 			bitmapToDrawTo.DrawLine(c_StatsOffsetX, graphStart + c_GraphHeight / 2, c_StatsOffsetX - 1 + c_MaxSamples, graphStart + c_GraphHeight / 2, 96);
 
-			// Draw sample dots
+			// Draw sample dots.
 			int peak = 0;
 			int sample = m_Sample;
 			for (int i = 0; i < c_MaxSamples; ++i) {
-				// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
-				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData[pc].at(sample)) / (1000000.0F / 30.0F) * 100.0F), 0, 100);
+				// Show microseconds in graphs, assume that the RealToSimCap is the highest value on the graph. The graph will scale with the RealToSimCap if it is changed.
+				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData[pc][sample]) / (g_TimerMan.GetRealToSimCap() * 1000000.0F) * 100.0F), 0, 100);
 				int dotHeight = static_cast<int>(static_cast<float>(c_GraphHeight) / 100.0F * static_cast<float>(value));
 
 				bitmapToDrawTo.SetPixel(c_StatsOffsetX - 1 + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
-				peak = std::clamp(peak, 0, static_cast<int>(m_PerfData[pc].at(sample)));
+
+				if (peak < m_PerfData[pc][sample]) { peak = static_cast<int>(m_PerfData[pc][sample]); }
 
 				if (sample == 0) { sample = c_MaxSamples; }
 				sample--;
 			}
 
 			// Print peak values
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 130, blockStart, "Peak: " + std::to_string(peak / 1000), GUIFont::Left);
+			guiFont->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 130, blockStart, "Peak: " + std::to_string(peak / 1000), GUIFont::Left);
 		}
 	}
 

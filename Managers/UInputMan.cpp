@@ -813,6 +813,14 @@ namespace RTE {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
+			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
+				if (KeyHeld(KEY_1)) {
+					g_TimerMan.SetTimeScale(1.0F);
+				} else if (KeyHeld(KEY_3)) {
+					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
+				} else if (KeyHeld(KEY_5)) {
+					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
+				}
 			}
 		} else if (!FlagCtrlState() && FlagAltState()) {
 			// Alt+Enter to switch resolution multiplier
@@ -821,6 +829,10 @@ namespace RTE {
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
+			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
+				if (KeyPressed(KEY_P)) {
+					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
+				}
 			}
 		} else {
 			// PrntScren to save a single ScreenDump

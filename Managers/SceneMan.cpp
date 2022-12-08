@@ -226,7 +226,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = new SceneLayer();
+    m_pMOColorLayer = new SceneLayerTracked();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -900,13 +900,28 @@ bool SceneMan::SceneIsLocked() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterMOIDDrawing(int left, int top, int right, int bottom) {
-    m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
-}
+    void SceneMan::RegisterDrawing(DrawMode mode, int left, int top, int right, int bottom) {
+        switch(mode) {
+        case DrawMode::g_DrawColor:
+            if (m_pMOColorLayer) { 
+                m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+            }
+            break;
+        case DrawMode::g_DrawMOID:
+            m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
+            break;
+        }
+    }
 
-void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius) {
-    m_pMOIDLayer->RegisterDrawing(center, radius);
-}
+//////////////////////////////////////////////////////////////////////////////////////////
+
+    void SceneMan::RegisterDrawing(DrawMode mode, const Vector &center, float radius) {
+        if (radius != 0.0F) {
+			RegisterDrawing(mode, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+		}
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::ClearAllMOIDDrawings() {
     m_pMOIDLayer->ClearBitmap(g_NoMOID);

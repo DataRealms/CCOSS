@@ -714,29 +714,23 @@ public:
 
     bool SceneIsLocked() const;
 
+    /// <summary>
+    /// Registers an area to be drawn upon, so they can be tracked and cleared later.
+    /// </summary>
+    /// <param name="mode">The drawing mode.</param>
+    /// <param name="left"></param>
+    /// <param name="top"></param>
+    /// <param name="right"></param>
+    /// <param name="bottom"></param>
+    void RegisterDrawing(DrawMode mode, int left, int top, int right, int bottom);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The coordinates of the new area on the MOID layer to clear upon the
-//                  end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(int left, int top, int right, int bottom);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The center coordinates and a radius around it of the new area on the
-//                  MOID layer to clear upon the end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(const Vector &center, float radius);
+    /// <summary>
+    /// Registers an area of to be drawn upon, so they can be tracked and cleared later.
+    /// </summary>
+    /// <param name="mode">The drawing mode.</param>
+    /// <param name="center"></param>
+    /// <param name="radius"></param>
+    void RegisterDrawing(DrawMode mode, const Vector &center, float radius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1598,7 +1592,7 @@ public:
     // Current scene being used
     Scene *m_pCurrentScene;
     // Color MO layer
-    SceneLayer *m_pMOColorLayer;
+    SceneLayerTracked *m_pMOColorLayer;
     // MovableObject ID layer
     SceneLayerTracked *m_pMOIDLayer;
 

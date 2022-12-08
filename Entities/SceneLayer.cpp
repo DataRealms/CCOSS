@@ -264,7 +264,7 @@ namespace RTE {
 
 	template <bool TRACK_DRAWINGS>
 	void SceneLayerImpl<TRACK_DRAWINGS>::SetPixel(int pixelX, int pixelY, int materialID) {
-		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayerImpl's bitmap which isn't owned!");
+		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
 		WrapPosition(pixelX, pixelY);
 

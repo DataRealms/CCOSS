@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+
 #include "SettingsMan.h"
 #include "AtomGroup.h"
 #include "SLTerrain.h"
@@ -1911,9 +1912,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
 
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+                g_SceneMan.RegisterDrawing(mode, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }
@@ -1959,9 +1958,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
 
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+                g_SceneMan.RegisterDrawing(mode, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }

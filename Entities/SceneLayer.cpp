@@ -13,6 +13,8 @@ namespace RTE {
 	void SceneLayer::Clear() {
 		m_BitmapFile.Reset();
 		m_MainBitmap = nullptr;
+		m_BackBitmap = nullptr;
+		m_LastClearColor = g_InvalidColor;
 		m_MainBitmapOwned = false;
 		m_DrawMasked = true;
 		m_WrapX = true;
@@ -30,7 +32,10 @@ namespace RTE {
 	int SceneLayer::Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_BitmapFile = bitmapFile;
 		m_MainBitmap = m_BitmapFile.GetAsBitmap();
-		Create(m_MainBitmap, drawMasked, offset, wrapX, wrapY, scrollInfo);
+
+		m_BackBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+		m_LastClearColor = g_InvalidColor;
+
 		m_MainBitmapOwned = false;
 
 		return 0;
@@ -40,9 +45,11 @@ namespace RTE {
 
 	int SceneLayer::Create(BITMAP *bitmap, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_MainBitmap = bitmap;
+		m_MainBitmapOwned = true;
 		RTEAssert(m_MainBitmap, "Null bitmap passed in when creating SceneLayer");
 
-		m_MainBitmapOwned = true;
+		m_BackBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+		m_LastClearColor = g_InvalidColor;
 
 		m_DrawMasked = drawMasked;
 		m_Offset = offset;
@@ -78,6 +85,9 @@ namespace RTE {
 			m_MainBitmap = create_bitmap_ex(8, bitmapToCopy->w, bitmapToCopy->h);
 			RTEAssert(m_MainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
 			blit(bitmapToCopy, m_MainBitmap, 0, 0, 0, 0, bitmapToCopy->w, bitmapToCopy->h);
+
+			m_BackBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+			m_LastClearColor = g_InvalidColor;
 
 			InitScrollRatios();
 
@@ -120,6 +130,8 @@ namespace RTE {
 
 	void SceneLayer::Destroy(bool notInherited) {
 		if (m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
+		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
+		m_LastClearColor = ColorKeys::g_InvalidColor;
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
 	}
@@ -167,6 +179,10 @@ namespace RTE {
 		// Load from disk and take ownership. Don't cache because the bitmap will be modified.
 		m_MainBitmap = m_BitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 		m_MainBitmapOwned = true;
+
+		m_BackBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+		m_LastClearColor = ColorKeys::g_InvalidColor;
+
 		InitScrollRatios();
 		return 0;
 	}
@@ -203,8 +219,11 @@ namespace RTE {
 
 	int SceneLayer::ClearData() {
 		if (m_MainBitmap && m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
+		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
+		m_LastClearColor = ColorKeys::g_InvalidColor;
 		m_MainBitmap = nullptr;
 		m_MainBitmapOwned = false;
+		m_BackBitmap = nullptr;
 		return 0;
 	}
 
@@ -240,6 +259,29 @@ namespace RTE {
 	bool SceneLayer::IsWithinBounds(const int pixelX, const int pixelY, const int margin) const {
 		// TODO: This doesn't take Y wrapping into account!
 		return (m_WrapX || (pixelX >= -margin) && pixelX < (m_MainBitmap->w + margin)) && (pixelY >= -1000) && (pixelY < (m_MainBitmap->h + margin));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SceneLayer::ClearBitmap(ColorKeys clearTo) {
+		m_BitmapClearMutex.lock();
+		if (m_LastClearColor != clearTo) {
+			// Damnit, our backbuffer is the wrong colour. Fix it up!
+			clear_to_color(m_BackBitmap, clearTo);
+			m_LastClearColor = clearTo;
+		}
+
+		std::swap(m_MainBitmap, m_BackBitmap);
+
+		// Now, in another thread, start clearing our back bitmap
+		std::thread clearBackBitmapThread([this](BITMAP* bitmap, ColorKeys clearTo) {
+			this->m_BitmapClearMutex.lock();
+			clear_to_color(bitmap, clearTo);
+			this->m_BitmapClearMutex.unlock();
+		}, m_BackBitmap, clearTo);
+
+		clearBackBitmapThread.detach();
+		m_BitmapClearMutex.unlock();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

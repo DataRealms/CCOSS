@@ -208,6 +208,12 @@ namespace RTE {
 		void UnlockBitmaps() { /*release_bitmap(m_MainBitmap);*/ }
 
 		/// <summary>
+		/// Clears our BITMAP.
+		/// </summary>
+		/// <param name="clearTo"> What color to clear the bitmap to</param>
+		void ClearBitmap(ColorKeys clearTo);
+
+		/// <summary>
 		/// Wraps the given position coordinate if it is out of bounds of this SceneLayer and wrapping is enabled on the appropriate axes.
 		/// Does not force the position coordinate within bounds if wrapping is not enabled.
 		/// </summary>
@@ -260,7 +266,16 @@ namespace RTE {
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
-		BITMAP *m_MainBitmap; //!< The BITMAP of this SceneLayer.
+
+		// We use two bitmaps, as a backbuffer.
+		// While the main bitmap is being used, the secondary bitmap will be cleared on a seperate thread.
+		// This is because we tend to want to clear some scene layers every frame... and that is veeeerrry costly.
+		// TODO - speed up further by using dirty rects or some other diff system
+		std::mutex m_BitmapClearMutex; //!< mutex for clearing bitmap in background
+		ColorKeys m_LastClearColor;
+		BITMAP* m_MainBitmap; //!< The main BITMAP of this SceneLayer.
+		BITMAP *m_BackBitmap; //!< The backbuffer BITMAP of this SceneLayer.
+
 		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
 		bool m_DrawMasked; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
 

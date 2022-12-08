@@ -1503,12 +1503,14 @@ void MovableMan::Update()
 	m_SimUpdateFrameNumber++;
 
     // Clear the MO color layer only if this is a drawn update
-    if (g_TimerMan.DrawnSimUpdate())
+    if (g_TimerMan.DrawnSimUpdate()) {
         g_SceneMan.ClearMOColorLayer();
+    }
 
     // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
-		g_PostProcessMan.ClearScenePostEffects();
+    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
+        g_PostProcessMan.ClearScenePostEffects();
+    }
 
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TeamOne] = false;

@@ -114,7 +114,7 @@ namespace RTE {
 
 	void GlobalScript::HandleCraftEnteringOrbit(const ACraft *orbitedCraft) const {
 		if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
-			g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, { m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit" }, { orbitedCraft });
+			g_LuaMan.RunScriptFunctionString(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, { m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit" }, { orbitedCraft });
 		}
 	}
 

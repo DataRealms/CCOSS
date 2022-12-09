@@ -516,7 +516,7 @@
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaBindDefinitions.h">
+    <ClInclude Include="Lua\LuabindDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h">
@@ -531,10 +531,7 @@
     <ClInclude Include="GUI\GUIWriter.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaAdaptersEntities.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaAdapters.h">
+    <ClInclude Include="Lua\LuabindObjectWrapper.h">
       <Filter>Lua</Filter>
     </ClInclude>
     <ClInclude Include="Entities\TerrainFrosting.h">
@@ -548,6 +545,9 @@
     </ClInclude>
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaAdapterDefinitions.h">
+      <Filter>Lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1029,6 +1029,9 @@
     <ClCompile Include="GUI\GUIWriter.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Lua\LuabindObjectWrapper.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
     <ClCompile Include="Lua\LuaBindingsMisc.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
@@ -1058,6 +1061,9 @@
     </ClCompile>
     <ClCompile Include="Managers\CameraMan.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaAdapters.cpp">
+      <Filter>Lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 
 #include "PieMenu.h"
 #include "PresetMan.h"
+#include "LuaMan.h"
 
 namespace RTE {
 
@@ -18,8 +19,9 @@ namespace RTE {
 		m_Enabled = true;
 		m_Icon = nullptr;
 
-		m_ScriptPath.clear();
+		m_LuabindFunctionObject.reset();
 		m_FunctionName.clear();
+
 		m_SubPieMenu.reset();
 
 		m_StartAngle = 0;
@@ -52,8 +54,12 @@ namespace RTE {
 		m_Enabled = reference.m_Enabled;
 		m_Icon = std::unique_ptr<Icon>(dynamic_cast<Icon *>(reference.m_Icon->Clone()));
 
-		m_ScriptPath = reference.m_ScriptPath;
 		m_FunctionName = reference.m_FunctionName;
+		if (reference.m_LuabindFunctionObject) {
+			m_LuabindFunctionObject = std::make_unique<LuabindObjectWrapper>(nullptr, reference.m_LuabindFunctionObject->GetFilePath());
+			ReloadScripts();
+		}
+
 		if (reference.m_SubPieMenu) { SetSubPieMenu(dynamic_cast<PieMenu *>(reference.m_SubPieMenu->Clone())); }
 
 		m_StartAngle = reference.m_StartAngle;
@@ -88,9 +94,17 @@ namespace RTE {
 		} else if (propName == "Icon") {
 			SetIcon(dynamic_cast<Icon *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "ScriptPath") {
-			reader >> m_ScriptPath;
+			std::string scriptPath;
+			reader >> scriptPath;
+			m_LuabindFunctionObject = std::make_unique<LuabindObjectWrapper>(nullptr, scriptPath);
+			if (!m_FunctionName.empty()) {
+				ReloadScripts();
+			}
 		} else if (propName == "FunctionName") {
 			reader >> m_FunctionName;
+			if (m_LuabindFunctionObject) {
+				ReloadScripts();
+			}
 		} else if (propName == "SubPieMenu") {
 			SetSubPieMenu(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "DrawFlippedToMatchAbsoluteAngle") {
@@ -111,8 +125,8 @@ namespace RTE {
 		if (m_Direction != Directions::Any) { writer.NewPropertyWithValue("Direction", static_cast<int>(m_Direction)); }
 		if (!m_Enabled) { writer.NewPropertyWithValue("Enabled", m_Enabled); }
 		writer.NewPropertyWithValue("Icon", m_Icon.get());
-		if (!m_ScriptPath.empty() && !m_FunctionName.empty()) {
-			writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
+		if (m_LuabindFunctionObject && !m_FunctionName.empty()) {
+			writer.NewPropertyWithValue("ScriptPath", m_LuabindFunctionObject->GetFilePath());
 			writer.NewPropertyWithValue("FunctionName", m_FunctionName);
 		}
 		if (m_SubPieMenu) { writer.NewPropertyWithValue("SubPieMenu", m_SubPieMenu.get()); }
@@ -149,7 +163,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieSlice::RecalculateMidAngle() {
+    int PieSlice::ReloadScripts() {
+		int status = 0;
+
+		if (m_LuabindFunctionObject) {
+			std::string filePath = m_LuabindFunctionObject->GetFilePath();
+			std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
+
+			status = g_LuaMan.RunScriptFileAndRetrieveFunctions(filePath, { m_FunctionName }, scriptFileFunctions);
+			if (scriptFileFunctions.find(m_FunctionName) != scriptFileFunctions.end()) {
+				m_LuabindFunctionObject = std::unique_ptr<LuabindObjectWrapper>(scriptFileFunctions.at(m_FunctionName));
+			}
+		}
+
+        return status;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void PieSlice::RecalculateMidAngle() {
 		m_MidAngle = m_StartAngle + (static_cast<float>(m_SlotCount) * PieQuadrant::c_PieSliceSlotSize / 2.0F);
 	}
 

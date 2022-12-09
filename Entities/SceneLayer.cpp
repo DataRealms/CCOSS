@@ -7,8 +7,8 @@
 namespace RTE {
 
 	// Force instantiation
-	template SceneLayerImpl<false>;
-	template SceneLayerImpl<true>;
+	template class SceneLayerImpl<false>;
+	template class SceneLayerImpl<true>;
 
 	ConcreteClassInfo(SceneLayer, Entity, 0);
 	ConcreteClassInfo(SceneLayerTracked, Entity, 0);

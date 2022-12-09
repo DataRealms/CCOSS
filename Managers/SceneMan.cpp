@@ -592,24 +592,19 @@ bool SceneMan::SceneIsLocked() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    void SceneMan::RegisterDrawing(DrawMode mode, int left, int top, int right, int bottom) {
-        switch(mode) {
-        case DrawMode::g_DrawColor:
-            if (m_pMOColorLayer) { 
-                m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-            }
-            break;
-        case DrawMode::g_DrawMOID:
+    void SceneMan::RegisterDrawing(const BITMAP *bitmap, int left, int top, int right, int bottom) {
+        if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+            m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+        } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
             m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
-            break;
         }
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    void SceneMan::RegisterDrawing(DrawMode mode, const Vector &center, float radius) {
+    void SceneMan::RegisterDrawing(const BITMAP *bitmap, const Vector &center, float radius) {
         if (radius != 0.0F) {
-			RegisterDrawing(mode, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+			RegisterDrawing(bitmap, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
 		}
     }
 

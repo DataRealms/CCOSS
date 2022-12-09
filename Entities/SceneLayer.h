@@ -270,14 +270,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="center"></param>
 		/// <param name="radius"></param>
-		void RegisterDrawing(const Vector& center, float radius);
+		void RegisterDrawing(const Vector &center, float radius);
 
 	private:
 		/// <summary>
 		/// Clears any tracked and drawn to areas.
 		/// </summary>
 		/// <param name="clearTo">Color to clear to</param>
-		void ClearDrawings(BITMAP* bitmap, const std::vector<IntRect>& drawings, ColorKeys clearTo);
+		void ClearDrawings(BITMAP *bitmap, const std::vector<IntRect>& drawings, ColorKeys clearTo);
 #pragma endregion
 
 	protected:
@@ -293,7 +293,7 @@ namespace RTE {
 		ColorKeys m_LastClearColor; //!< The last color we cleared to
 		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on the layer since last clear
 
-		BITMAP* m_MainBitmap; //!< The main BITMAP of this SceneLayer.
+		BITMAP *m_MainBitmap; //!< The main BITMAP of this SceneLayer.
 		BITMAP *m_BackBitmap; //!< The backbuffer BITMAP of this SceneLayer.
 
 		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
@@ -370,8 +370,8 @@ namespace RTE {
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		/*const*/ BITMAP* GetBitmap() const { return m_MainBitmap; }
 
-		void RegisterDrawing(int left, int top, int right, int bottom) { SceneLayerImpl::RegisterDrawing(left, top, right, bottom); };
-		void RegisterDrawing(const Vector& center, float radius) { SceneLayerImpl::RegisterDrawing(center, radius); };
+		void RegisterDrawing(int left, int top, int right, int bottom) { SceneLayerImpl<true>::RegisterDrawing(left, top, right, bottom); };
+		void RegisterDrawing(const Vector &center, float radius) { SceneLayerImpl<true>::RegisterDrawing(center, radius); };
 	};
 
 	class SceneLayer : public SceneLayerImpl<false> {

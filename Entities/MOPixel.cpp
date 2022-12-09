@@ -252,7 +252,7 @@ namespace RTE {
 		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
 		release_bitmap(targetBitmap);
 
-		g_SceneMan.RegisterDrawing(mode, m_Pos - targetPos, 1);
+		g_SceneMan.RegisterDrawing(targetBitmap, m_Pos - targetPos, 1);
 		
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();

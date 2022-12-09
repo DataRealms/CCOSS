@@ -1580,18 +1580,23 @@ void MOSRotating::Update() {
 
 bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
 {
-    if (pOverlapMO != this && m_GetsHitByMOs)
-    {
-        float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
-        Vector otherPos = pOverlapMO->GetPos();
+    if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
+        return false;
+    }
 
-        // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
-        {
-            // They may be overlapping, so draw the MOID rep of this to the MOID layer
-            Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-            return true;
-        }
+    if (m_Team == pOverlapMO->GetTeam() && (m_IgnoresTeamHits || pOverlapMO->IgnoresTeamHits())) {
+        return false;
+    }
+
+    float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
+    Vector otherPos = pOverlapMO->GetPos();
+
+    // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
+    if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
+    {
+        // They may be overlapping, so draw the MOID rep of this to the MOID layer
+        Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+        return true;
     }
 
     return false;

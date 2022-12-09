@@ -281,9 +281,6 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-
-		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
-
 		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
 
 		// We use two bitmaps, as a backbuffer.
@@ -370,8 +367,11 @@ namespace RTE {
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		/*const*/ BITMAP* GetBitmap() const { return m_MainBitmap; }
 
-		void RegisterDrawing(int left, int top, int right, int bottom) { SceneLayerImpl<true>::RegisterDrawing(left, top, right, bottom); };
-		void RegisterDrawing(const Vector &center, float radius) { SceneLayerImpl<true>::RegisterDrawing(center, radius); };
+		void RegisterDrawing(int left, int top, int right, int bottom);
+		void RegisterDrawing(const Vector& center, float radius);
+
+	protected:
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 	};
 
 	class SceneLayer : public SceneLayerImpl<false> {
@@ -387,6 +387,9 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		BITMAP* GetBitmap() const { return m_MainBitmap; }
+
+	protected:
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 	};
 }
 #endif

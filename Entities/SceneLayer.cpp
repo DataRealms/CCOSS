@@ -578,11 +578,11 @@ namespace RTE {
 		SceneLayerImpl::RegisterDrawing(left, top, right, bottom); 
 	};
 
-	void SceneLayerTracked::RegisterDrawing(const Vector& center, float radius) { 
+	void SceneLayerTracked::RegisterDrawing(const Vector &center, float radius) { 
 		SceneLayerImpl::RegisterDrawing(center, radius); 
 	};
 
-	int SceneLayer::ReadProperty(const std::string_view& propName, Reader& reader) {
+	int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		return SceneLayerImpl::ReadProperty(propName, reader);
 	}
 
@@ -590,11 +590,11 @@ namespace RTE {
 		return SceneLayerImpl::Save(writer);
 	}
 
-	int SceneLayerTracked::ReadProperty(const std::string_view& propName, Reader& reader) {
+	int SceneLayerTracked::ReadProperty(const std::string_view &propName, Reader &reader) {
 		return SceneLayerImpl::ReadProperty(propName, reader);
 	}
 
-	int SceneLayerTracked::Save(Writer& writer) const {
+	int SceneLayerTracked::Save(Writer &writer) const {
 		return SceneLayerImpl::Save(writer);
 	}
 }

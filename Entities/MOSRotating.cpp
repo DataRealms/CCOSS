@@ -1584,7 +1584,7 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         return false;
     }
 
-    if (m_Team == pOverlapMO->GetTeam() && (m_IgnoresTeamHits || pOverlapMO->IgnoresTeamHits())) {
+    if (m_IgnoresTeamHits && pOverlapMO->IgnoresTeamHits() && m_Team == pOverlapMO->GetTeam()) {
         return false;
     }
 

@@ -353,6 +353,11 @@ namespace RTE {
 		void operator=(const SceneLayerImpl&rhs) = delete;
 	};
 
+
+	// Forward declare
+	template class SceneLayerImpl<false>;
+	template class SceneLayerImpl<true>;
+
 	// If we track drawings, then disallow getting non-const access to the underlying bitmap - we must draw through special functions on scenelayer that'll track the drawings
 	class SceneLayerTracked : public SceneLayerImpl<true> {
 	public:

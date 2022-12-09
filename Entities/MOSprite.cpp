@@ -603,7 +603,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
                 }
         }
 
-        g_SceneMan.RegisterDrawing(mode, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
+        g_SceneMan.RegisterDrawing(pTargetBitmap, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
     }
 }
 

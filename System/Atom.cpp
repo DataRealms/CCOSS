@@ -998,7 +998,7 @@ namespace RTE {
 				bottomRightExtent.m_Y = std::max(bottomRightExtent.m_Y, static_cast<float>(trailPoints[i].second));
 			}
 
-			g_SceneMan.RegisterDrawing(DrawMode::g_DrawColor, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
+			g_SceneMan.RegisterDrawing(trailBitmap, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
 		}
 
 		// Unlock all bitmaps involved.

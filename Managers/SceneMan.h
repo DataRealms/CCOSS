@@ -722,7 +722,7 @@ public:
     /// <param name="top"></param>
     /// <param name="right"></param>
     /// <param name="bottom"></param>
-    void RegisterDrawing(DrawMode mode, int left, int top, int right, int bottom);
+    void RegisterDrawing(const BITMAP *bitmap, int left, int top, int right, int bottom);
 
     /// <summary>
     /// Registers an area of to be drawn upon, so they can be tracked and cleared later.
@@ -730,7 +730,7 @@ public:
     /// <param name="mode">The drawing mode.</param>
     /// <param name="center"></param>
     /// <param name="radius"></param>
-    void RegisterDrawing(DrawMode mode, const Vector &center, float radius);
+    void RegisterDrawing(const BITMAP *bitmap, const Vector &center, float radius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

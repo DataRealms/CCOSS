@@ -353,11 +353,6 @@ namespace RTE {
 		void operator=(const SceneLayerImpl&rhs) = delete;
 	};
 
-
-	// Forward declare
-	template class SceneLayerImpl<false>;
-	template class SceneLayerImpl<true>;
-
 	// If we track drawings, then disallow getting non-const access to the underlying bitmap - we must draw through special functions on scenelayer that'll track the drawings
 	class SceneLayerTracked : public SceneLayerImpl<true> {
 	public:
@@ -375,8 +370,8 @@ namespace RTE {
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		/*const*/ BITMAP* GetBitmap() const { return m_MainBitmap; }
 
-		void RegisterDrawing(int left, int top, int right, int bottom) { SceneLayerImpl<true>::RegisterDrawing(left, top, right, bottom); };
-		void RegisterDrawing(const Vector &center, float radius) { SceneLayerImpl<true>::RegisterDrawing(center, radius); };
+		void RegisterDrawing(int left, int top, int right, int bottom);
+		void RegisterDrawing(const Vector& center, float radius);
 	};
 
 	class SceneLayer : public SceneLayerImpl<false> {

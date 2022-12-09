@@ -6,6 +6,10 @@
 
 namespace RTE {
 
+	// Force instantiation
+	template class SceneLayerImpl<false>;
+	template class SceneLayerImpl<true>;
+
 	ConcreteClassInfo(SceneLayer, Entity, 0);
 	ConcreteClassInfo(SceneLayerTracked, Entity, 0);
 
@@ -569,6 +573,14 @@ namespace RTE {
 			}
 		}
 	}
+
+	void SceneLayerTracked::RegisterDrawing(int left, int top, int right, int bottom) { 
+		SceneLayerImpl::RegisterDrawing(left, top, right, bottom); 
+	};
+
+	void SceneLayerTracked::RegisterDrawing(const Vector& center, float radius) { 
+		SceneLayerImpl::RegisterDrawing(center, radius); 
+	};
 
 	int SceneLayer::ReadProperty(const std::string_view& propName, Reader& reader) {
 		return SceneLayerImpl::ReadProperty(propName, reader);

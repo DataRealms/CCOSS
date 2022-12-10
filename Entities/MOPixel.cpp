@@ -231,7 +231,7 @@ namespace RTE {
 			return;
 		}
 
-		unsigned char drawColor = 0;
+		int drawColor = -1;
 
 		switch (mode) {
 			case g_DrawMaterial:
@@ -248,11 +248,16 @@ namespace RTE {
 				break;
 		}
 
-		acquire_bitmap(targetBitmap);
-		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
-		release_bitmap(targetBitmap);
+#ifdef DRAW_MOID_LAYER
+		if (mode != g_DrawMOID)
+#endif
+		{
+			acquire_bitmap(targetBitmap);
+			putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
+			release_bitmap(targetBitmap);
+		}
 
-		g_SceneMan.RegisterDrawing(targetBitmap, m_Pos - targetPos, 1);
+		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1);
 		
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();

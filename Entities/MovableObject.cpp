@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MovableObject.h"
+
 #include "PresetMan.h"
 #include "SceneMan.h"
 #include "ConsoleMan.h"
@@ -830,13 +831,11 @@ void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
-		if (g_SettingsMan.SimplifiedCollisionDetection()) {
-			m_IsTraveling = true;
-		} else {
+        m_IsTraveling = true;
+		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 #ifdef DRAW_MOID_LAYER
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
 #endif
-            m_tempDisableGettingHit = true;
 		}
 	}
 
@@ -875,13 +874,9 @@ void MovableObject::PostTravel()
 
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
-			if (g_SettingsMan.SimplifiedCollisionDetection()) {
-				m_IsTraveling = false;
-			} else {
-#ifdef DRAW_MOID_LAYER
-				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
-#endif
-                m_tempDisableGettingHit = false;
+            m_IsTraveling = false;
+			if (!g_SettingsMan.SimplifiedCollisionDetection()) {
+                Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
 			}
 		}
 		m_AlreadyHitBy.clear();

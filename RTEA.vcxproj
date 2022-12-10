@@ -370,7 +370,7 @@
       <Optimization>Full</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>UseLinkTimeCodeGeneration</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -582,6 +582,7 @@
     <ClInclude Include="System\GraphicalPrimitive.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\PieQuadrant.h" />
+    <ClInclude Include="System\SpatialPartitionGrid.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -893,6 +894,7 @@
     <ClCompile Include="System\GraphicalPrimitive.cpp" />
     <ClCompile Include="System\PieQuadrant.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
+    <ClCompile Include="System\SpatialPartitionGrid.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">Create</PrecompiledHeader>

@@ -30,6 +30,7 @@ class MovableObject;
 class Actor;
 class HeldDevice;
 class MOPixel;
+class MOSprite;
 class AHuman;
 class SceneLayer;
 
@@ -157,7 +158,7 @@ public:
 // Arguments:       The X and Y coordinates of screen Scene pixel to test the MO at.
 // Return value:    Whether the MOID is currently at the specified pixel location.
 
-    bool HitTestMOIDAtPixel(MOID moid, int pixelX, int pixelY);
+    bool HitTestMOAtPixel(const MOSprite &mo, int pixelX, int pixelY) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMOIDPixel
@@ -166,7 +167,7 @@ public:
 // Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
 // Return value:    The MOID currently at the specified pixel location.
 
-    MOID GetMOIDPixel(int pixelX, int pixelY);
+    MOID GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTeamMOIDCount

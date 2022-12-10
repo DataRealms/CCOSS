@@ -783,7 +783,7 @@ namespace RTE {
 			for (Atom *atom : m_Atoms) {
 				const Vector flippedOffset = atom->GetOffset().GetXFlipped(m_OwnerMOSR->m_HFlipped);
 				// See if the Atom is starting out on top of another MO
-				MOID tempMOID = g_SceneMan.GetMOIDPixel(intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY());
+				MOID tempMOID = g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY());
 
 				if (tempMOID != g_NoMOID) {
 					// Make the appropriate entry in the MO-Atom interaction ignore map
@@ -891,7 +891,7 @@ namespace RTE {
 					// First check if we hit any MO's, if applicable.
 					bool ignoreHit = false;
 					if (hitMOs) {
-						tempMOID = g_SceneMan.GetMOIDPixel(intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY());
+						tempMOID = g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY());
 						// Check the ignore map for Atoms that should ignore hits against certain MOs.
 						if (tempMOID != g_NoMOID && (MOIgnoreMap.count(tempMOID) != 0)) { ignoreHit = MOIgnoreMap.at(tempMOID).count(atom) != 0; }
 					}
@@ -978,14 +978,14 @@ namespace RTE {
 							hitData.BitmapNormal.Reset();
 
 							// Check for the collision point in the dominant direction of travel.
-							if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+							if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), hitPos[X], intPos[Y]) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), intPos[X], hitPos[Y]) != g_NoMOID))) {
 								hit[dom] = true;
 								hitData.HitPoint = (dom == X) ? Vector(static_cast<float>(hitPos[X]), static_cast<float>(intPos[Y])) : Vector(static_cast<float>(intPos[X]), static_cast<float>(hitPos[Y]));
 								hitData.BitmapNormal[dom] = static_cast<float>(-increment[dom]);
 							}
 
 							// Check for the collision point in the submissive direction of travel.
-							if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+							if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), hitPos[X], intPos[Y]) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), intPos[X], hitPos[Y]) != g_NoMOID))) {
 								hit[sub] = true;
 
 								//if (hitData.HitPoint.IsZero()) {
@@ -1014,7 +1014,7 @@ namespace RTE {
 							hitPos[X] -= atomOffset.GetFloorIntX();
 							hitPos[Y] -= atomOffset.GetFloorIntY();
 
-							MOID hitMOID = g_SceneMan.GetMOIDPixel(hitData.HitPoint.GetFloorIntX(), hitData.HitPoint.GetFloorIntY());
+							MOID hitMOID = g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), hitData.HitPoint.GetFloorIntX(), hitData.HitPoint.GetFloorIntY());
 
 							if (hitMOID != g_NoMOID) {
 								hitData.Body[HITOR] = m_OwnerMOSR;
@@ -1401,7 +1401,7 @@ namespace RTE {
 			atomOffset = m_OwnerMOSR->RotateOffset(atom->GetOffset());
 			atom->SetupPos(position + atomOffset);
 			atomPos = atom->GetCurrentPos();
-			hitMOID = g_SceneMan.GetMOIDPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY());
+			hitMOID = g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), atomPos.GetFloorIntX(), atomPos.GetFloorIntY());
 
 			if (hitMOID != g_NoMOID && !atom->IsIgnoringMOID(hitMOID)) {
 				// Save the correct MOID to search for other atom intersections with
@@ -1415,9 +1415,7 @@ namespace RTE {
 				if (tempMO->GetsHitByMOs()) {
 					// Make that MO draw itself again in the MOID layer so we can find its true edges
 					intersectedMO = tempMO;
-#ifdef DRAW_MOID_LAYER
 					intersectedMO->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-#endif
 					break;
 				}
 			}
@@ -1437,7 +1435,7 @@ namespace RTE {
 		// Restart and go through all Atoms to find all intersecting the specific intersected MO
 		for (Atom *atom : m_Atoms) {
 			atomPos = atom->GetCurrentPos();
-			if (g_SceneMan.GetMOIDPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY()) == currentMOID) {
+			if (g_SceneMan.GetMOIDPixel(m_OwnerMOSR->GetTeam(), atomPos.GetFloorIntX(), atomPos.GetFloorIntY()) == currentMOID) {
 				// Add atom to list of intersecting ones
 				intersectingAtoms.push_back(atom);
 			}

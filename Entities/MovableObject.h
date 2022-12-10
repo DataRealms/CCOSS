@@ -1792,15 +1792,18 @@ enum MOType
     /// <returns>Whether this MO's RootParent can GetHitByMOs and is currently traveling.</returns>
     bool GetTraveling() const { return GetRootParent()->m_IsTraveling; }
 
+    /// <summary>
+    /// Sets whether this MO's RootParent is currently traveling.
+    /// </summary>
+    /// <param name="newValue">Whether this MO's RootParent is currently traveling.</param>
+    void SetTraveling(bool newValue) { GetRootParent()->m_IsTraveling = newValue; }
+
 	/// <summary>
 	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
 	/// </summary>
 	/// <param name="terrain">The SLTerrain to draw this MovableObject to. Ownership is NOT transferred!</param>
 	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
 	bool DrawToTerrain(SLTerrain *terrain);
-
-    // Set to true while travelling; prevents self-intersection
-    bool m_tempDisableGettingHit;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1944,7 +1947,7 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-	bool m_IsTraveling; //!< Prevents self-intersection while traveling when simplified collision detection is used.
+	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.

@@ -621,6 +621,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
+#ifdef DRAW_MOID_LAYER
     if (pixelX < 0 ||
        pixelX >= m_pMOIDLayer->GetBitmap()->w ||
        pixelY < 0 ||
@@ -628,6 +629,9 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
         return g_NoMOID;
 
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+#else
+    MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY);
+#endif
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
@@ -635,9 +639,9 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 		} else {
 			return ColorKeys::g_NoMOID;
 		}
-	} else {
-		return moid;
 	}
+
+	return moid;
 }
 
 
@@ -919,7 +923,9 @@ bool SceneMan::SceneIsLocked() const
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::ClearAllMOIDDrawings() {
+#ifdef DRAW_MOID_LAYER
     m_pMOIDLayer->ClearBitmap(g_NoMOID);
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -3064,7 +3070,7 @@ float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int 
 
 bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
-    bool obscured = m_pMOIDLayer->GetPixel(x, y) != g_NoMOID || m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir;
+    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(x, y) != g_NoMOID;
 
     if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);

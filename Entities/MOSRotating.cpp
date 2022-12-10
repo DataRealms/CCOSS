@@ -1595,7 +1595,9 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
     if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
     {
         // They may be overlapping, so draw the MOID rep of this to the MOID layer
+#ifdef DRAW_MOID_LAYER
         Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+#endif
         return true;
     }
 

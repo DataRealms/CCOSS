@@ -22,6 +22,7 @@
 #include "ActivityMan.h"
 
 #define g_SceneMan SceneMan::Instance()
+//#define DRAW_MOID_LAYER
 
 namespace RTE
 {

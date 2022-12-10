@@ -833,7 +833,10 @@ void MovableObject::PreTravel()
 		if (g_SettingsMan.SimplifiedCollisionDetection()) {
 			m_IsTraveling = true;
 		} else {
+#ifdef DRAW_MOID_LAYER
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
+#endif
+            m_tempDisableGettingHit = true;
 		}
 	}
 
@@ -875,7 +878,10 @@ void MovableObject::PostTravel()
 			if (g_SettingsMan.SimplifiedCollisionDetection()) {
 				m_IsTraveling = false;
 			} else {
+#ifdef DRAW_MOID_LAYER
 				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
+#endif
+                m_tempDisableGettingHit = false;
 			}
 		}
 		m_AlreadyHitBy.clear();

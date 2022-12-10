@@ -1799,6 +1799,9 @@ enum MOType
 	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
 	bool DrawToTerrain(SLTerrain *terrain);
 
+    // Set to true while travelling; prevents self-intersection
+    bool m_tempDisableGettingHit;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

@@ -18,10 +18,12 @@
 #include "Timer.h"
 #include "Box.h"
 #include "Singleton.h"
+#include "SpatialPartitionGrid.h"
 
 #include "ActivityMan.h"
 
 #define g_SceneMan SceneMan::Instance()
+//#define DRAW_MOID_LAYER
 
 namespace RTE
 {
@@ -414,7 +416,7 @@ public:
 // Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
 // Return value:    The MOID currently at the specified pixel location.
 
-    MOID GetMOIDPixel(int pixelX, int pixelY);
+    MOID GetMOIDPixel(int team, int pixelX, int pixelY);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -504,7 +506,7 @@ public:
     /// <param name="top"></param>
     /// <param name="right"></param>
     /// <param name="bottom"></param>
-    void RegisterDrawing(const BITMAP *bitmap, int left, int top, int right, int bottom);
+    void RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom);
 
     /// <summary>
     /// Registers an area of to be drawn upon, so they can be tracked and cleared later.
@@ -512,7 +514,7 @@ public:
     /// <param name="mode">The drawing mode.</param>
     /// <param name="center"></param>
     /// <param name="radius"></param>
-    void RegisterDrawing(const BITMAP *bitmap, const Vector &center, float radius);
+    void RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1413,6 +1415,8 @@ public:
     SceneLayerTracked *m_pMOColorLayer;
     // MovableObject ID layer
     SceneLayerTracked *m_pMOIDLayer;
+    // A spatial partitioning grid of moids, used to optimize collision and distance queries
+    SpatialPartitionGrid m_MOIDsGrid;
 
     // Debug layer for seeing cast rays etc
     SceneLayer *m_pDebugLayer;

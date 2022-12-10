@@ -271,14 +271,14 @@ namespace RTE {
 			bool validHit = true;
 
 			// Check for the collision point in the dominant direction of travel.
-			if (m_Delta[m_Dom] && ((m_Dom == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Dom == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
+			if (m_Delta[m_Dom] && ((m_Dom == X && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Dom == Y && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
 				hit[m_Dom] = true;
 				m_LastHit.HitPoint = (m_Dom == X) ? Vector(m_HitPos[X], m_IntPos[Y]) : Vector(m_IntPos[X], m_HitPos[Y]);
 				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom];
 			}
 
 			// Check for the collision point in the submissive direction of travel.
-			if (m_SubStepped && m_Delta[m_Sub] && ((m_Sub == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Sub == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
+			if (m_SubStepped && m_Delta[m_Sub] && ((m_Sub == X && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Sub == Y && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
 				hit[m_Sub] = true;
 				if (m_LastHit.HitPoint.IsZero()) {
 					m_LastHit.HitPoint = (m_Sub == X) ? Vector(m_HitPos[X], m_IntPos[Y]) : Vector(m_IntPos[X], m_HitPos[Y]);
@@ -424,13 +424,7 @@ namespace RTE {
 		} else {
 			m_TerrainHitsDisabled = false;
 		}
-		/*
-		if (m_OwnerMO->m_HitsMOs && (m_MOIDHit = g_SceneMan.GetMOIDPixel(m_IntPos[X], m_IntPos[Y])) != g_NoMOID) {
-			m_MOHitsDisabled = true;
-		} else {
-			m_MOHitsDisabled = false;
-		}
-		*/
+
 		return m_MOIDHit != g_NoMOID || m_TerrainMatHit != g_MaterialAir;
 	}
 
@@ -540,7 +534,7 @@ namespace RTE {
 
 				// Detect hits with non-ignored MO's, if enabled.
 				if (m_OwnerMO->m_HitsMOs) {
-					m_MOIDHit = g_SceneMan.GetMOIDPixel(m_IntPos[X], m_IntPos[Y]);
+					m_MOIDHit = g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), m_IntPos[X], m_IntPos[Y]);
 					if (IsIgnoringMOID(m_MOIDHit)) { m_MOIDHit = g_NoMOID; }
 
 					if (m_MOIDHit != g_NoMOID) {
@@ -765,7 +759,7 @@ namespace RTE {
 				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
-				m_MOIDHit = g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]);
+				m_MOIDHit = g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), intPos[X], intPos[Y]);
 
 				if (m_OwnerMO->m_HitsMOs && m_MOIDHit != g_NoMOID && !IsIgnoringMOID(m_MOIDHit)) {
 					m_OwnerMO->SetHitWhatMOID(m_MOIDHit);
@@ -818,14 +812,14 @@ namespace RTE {
 					}
 
 					// Check for the collision point in the dominant direction of travel.
-					if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+					if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), hitPos[X], intPos[Y]) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), intPos[X], hitPos[Y]) != g_NoMOID))) {
 						hit[dom] = true;
 						m_LastHit.HitPoint = (dom == X) ? Vector(hitPos[X], intPos[Y]) : Vector(intPos[X], hitPos[Y]);
 						m_LastHit.BitmapNormal[dom] = -increment[dom];
 					}
 
 					// Check for the collision point in the submissive direction of travel.
-					if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+					if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), hitPos[X], intPos[Y]) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), intPos[X], hitPos[Y]) != g_NoMOID))) {
 						hit[sub] = true;
 						if (m_LastHit.HitPoint.IsZero()) {
 							m_LastHit.HitPoint = (sub == X) ? Vector(hitPos[X], intPos[Y]) : Vector(intPos[X], hitPos[Y]);
@@ -998,7 +992,7 @@ namespace RTE {
 				bottomRightExtent.m_Y = std::max(bottomRightExtent.m_Y, static_cast<float>(trailPoints[i].second));
 			}
 
-			g_SceneMan.RegisterDrawing(trailBitmap, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
+			g_SceneMan.RegisterDrawing(trailBitmap, g_NoMOID, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
 		}
 
 		// Unlock all bitmaps involved.

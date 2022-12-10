@@ -194,7 +194,9 @@ namespace RTE {
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_WhiteColor, -1);
 					break;
 				case g_DrawMOID:
+#ifdef DRAW_MOID_LAYER
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_MOID, -1);
+#endif
 					break;
 				case g_DrawNoMOID:
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_NoMOID, -1);
@@ -211,7 +213,7 @@ namespace RTE {
 					break;
 			}
 
-			g_SceneMan.RegisterDrawing(targetBitmap, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
+			g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
 		}
 
 		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { SetPostScreenEffectToDraw(); }

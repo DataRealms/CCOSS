@@ -1822,8 +1822,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);
+#ifdef DRAW_MOID_LAYER
         else if (mode == g_DrawMOID)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_MOID, -1);
+#endif
         else if (mode == g_DrawNoMOID)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
 		else if (mode == g_DrawDoor)
@@ -1910,8 +1912,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
             for (int i = 0; i < passes; ++i) {
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
                 draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
-                g_SceneMan.RegisterDrawing(pTargetBitmap, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
         // Non-transparent mode
@@ -1920,6 +1922,12 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             // Do the passes loop in here so the flipping operation doesn't get done multiple times
             for (int i = 0; i < passes; ++i)
             {
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
                 // Take into account the h-flipped pivot point
                 pivot_scaled_sprite(pTargetBitmap,
                                     pFlipBitmap,
@@ -1929,8 +1937,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                                     -(m_SpriteOffset.m_Y),
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
-
-                g_SceneMan.RegisterDrawing(pTargetBitmap, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }
@@ -1960,8 +1966,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
             for (int i = 0; i < passes; ++i) {
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
                 draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
-                g_SceneMan.RegisterDrawing(pTargetBitmap, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
         // Non-transparent mode
@@ -1969,6 +1975,12 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         {
             for (int i = 0; i < passes; ++i)
             {
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
                 pivot_scaled_sprite(pTargetBitmap,
                                     mode == g_DrawColor ? m_aSprite[m_Frame] : pTempBitmap,
                                     aDrawPos[i].GetFloorIntX(),
@@ -1977,8 +1989,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                                     -(m_SpriteOffset.m_Y),
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
-
-                g_SceneMan.RegisterDrawing(pTargetBitmap, aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }

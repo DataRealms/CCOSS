@@ -26,6 +26,8 @@
 #include "ADoor.h"
 #include "Atom.h"
 
+#include "PrimitiveMan.h"
+
 namespace RTE {
 
 const std::string MovableMan::c_ClassName = "MovableMan";
@@ -171,6 +173,53 @@ MovableObject * MovableMan::GetMOFromID(MOID whichID) {
 	return nullptr;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          HitTestMOAtPixel
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Tests whether this MOID is present at this Pixel Position
+
+bool MovableMan::HitTestMOAtPixel(const MOSprite &mo, int pixelX, int pixelY) const {
+    if (mo.GetsHitByMOs()) {
+        // Check if the pixel is nearer than the "maximum sprite radius"
+        Vector sampleToMO = g_SceneMan.ShortestDistance(mo.GetPos(), Vector(pixelX, pixelY));
+        if (sampleToMO.MagnitudeIsLessThan(mo.GetRadius())) {
+            // Check the scene position in the current local space of the MO
+            // Account for Position, Sprite Offset, Angle and HFlipped (and Scale eventually maybe)
+            Matrix rotation = mo.GetRotMatrix(); // <- Copy to non-const variable so / operator overload works
+            Vector entryPos = (sampleToMO / rotation).GetXFlipped(mo.IsHFlipped()) - mo.GetSpriteOffset();
+            int localX = std::floor(entryPos.m_X);
+            int localY = std::floor(entryPos.m_Y);
+
+            // Return the MOID if we hit the Sprite
+            BITMAP* sprite = mo.GetSpriteFrame(mo.GetFrame());
+            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != g_MaskColor;
+        }
+    }
+
+    return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetMOIDPixel
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets a MOID from pixel coordinates in the Scene.
+
+MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList) {
+    // Loop through the MOs. We do this in reverse, as we want to collide with the top layer (last drawn)
+    for (auto itr = moidList.rbegin(), itrEnd = moidList.rend(); itr < itrEnd; ++itr) {
+        MOID moid = *itr;
+        MOSprite* mo = dynamic_cast<MOSprite*>(GetMOFromID(moid));
+        RTEAssert(mo, "Null MO found in moid list!");
+        if (mo->GetsHitByMOs() && !mo->GetRootParent()->GetTraveling()) {
+            if (HitTestMOAtPixel(*mo, pixelX, pixelY)) {
+                return moid;
+            }
+        }
+    }
+
+    // If no MO's were found at this location, return g_NoMOID
+    return g_NoMOID;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RegisterObject
@@ -1878,8 +1927,6 @@ void MovableMan::Update()
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
 
-// Not anymore, we're using ClearAllMOIDDrawings instead.. much more efficient
-//    g_SceneMan.ClearMOIDLayer();
     UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
 
 	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////

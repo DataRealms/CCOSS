@@ -546,6 +546,9 @@
     <ClInclude Include="Lua\LuaAdapterDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="System\SpatialPartitionGrid.h">
+      <Filter>System</Filter>
+    </ClInclude>
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -1064,6 +1067,9 @@
     </ClCompile>
     <ClCompile Include="Managers\CameraMan.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="System\SpatialPartitionGrid.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

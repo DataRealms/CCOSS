@@ -72,6 +72,7 @@ void SceneMan::Clear()
     m_pCurrentScene = 0;
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
+    m_MOIDsGrid = SpatialPartitionGrid();
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -202,6 +203,9 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
+
+    const int cellSize = 20;
+    m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), cellSize);
 
     // Create the Debug SceneLayer
     if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
@@ -509,19 +513,23 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
+MOID SceneMan::GetMOIDPixel(int team, int pixelX, int pixelY)
 {
     WrapPosition(pixelX, pixelY);
 
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
-    if (pixelX < 0 ||
-       pixelX >= m_pMOIDLayer->GetBitmap()->w ||
-       pixelY < 0 ||
-       pixelY >= m_pMOIDLayer->GetBitmap()->h)
+    if (pixelX < 0 || pixelX >= m_pMOIDLayer->GetBitmap()->w ||
+        pixelY < 0 || pixelY >= m_pMOIDLayer->GetBitmap()->h) {
         return g_NoMOID;
+    }
 
+#ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+#else
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(team, pixelX, pixelY);
+    MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
+#endif
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
@@ -529,9 +537,9 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 		} else {
 			return ColorKeys::g_NoMOID;
 		}
-	} else {
-		return moid;
 	}
+
+	return moid;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -592,26 +600,39 @@ bool SceneMan::SceneIsLocked() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    void SceneMan::RegisterDrawing(const BITMAP *bitmap, int left, int top, int right, int bottom) {
-        if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
-            m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-        } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
-            m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
-        }
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
+    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+        m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+    }  
+        
+    if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+#ifdef DRAW_MOID_LAYER
+        m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
+#else
+        const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
+        RTEAssert(mo, "Trying to register a no MOID to the MOID grid! This is not allowed.")
+        IntRect rect(left, top, right, bottom);
+        m_MOIDsGrid.Add(rect, *mo);
+#endif
     }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    void SceneMan::RegisterDrawing(const BITMAP *bitmap, const Vector &center, float radius) {
-        if (radius != 0.0F) {
-			RegisterDrawing(bitmap, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
-		}
-    }
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius) {
+    if (radius != 0.0F) {
+		RegisterDrawing(bitmap, moid, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::ClearAllMOIDDrawings() {
+#ifdef DRAW_MOID_LAYER
     m_pMOIDLayer->ClearBitmap(g_NoMOID);
+#else
+    m_MOIDsGrid.Reset();
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1515,7 +1536,7 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
             // See if we found the looked-for pixel of the correct material,
             // Or an MO is blocking the way
             if (GetTerrMatter(intPos[X], intPos[Y]) != material ||
-                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]) != g_NoMOID))
+                (checkMOs && g_SceneMan.GetMOIDPixel(Activity::NoTeam, intPos[X], intPos[Y]) != g_NoMOID))
             {
                 // Save result and report success
                 foundPixel = true;
@@ -2016,9 +2037,10 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(ignoreTeam, intPos[X], intPos[Y]);
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level
                 // Check if we're supposed to ignore the team of what we hit
                 if (ignoreTeam != Activity::NoTeam)
                 {
@@ -2038,6 +2060,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                 }
                 // Legit hit
                 else
+#endif
                 {
                     // Save last ray pos
                     m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
@@ -2139,7 +2162,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(Activity::NoTeam, intPos[X], intPos[Y]);
             if (hitMOID == targetMOID || g_MovableMan.GetRootMOID(hitMOID) == targetMOID)
             {
                 // Found target MOID, so save result and report success
@@ -2244,7 +2267,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             unsigned char checkMat = GetTerrMatter(intPos[X], intPos[Y]);
-            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            MOID checkMOID = GetMOIDPixel(ignoreTeam, intPos[X], intPos[Y]);
 
             // Translate any found MOID into the root MOID of that hit MO
             if (checkMOID != g_NoMOID)
@@ -2253,14 +2276,17 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 if (pHitMO)
                 {
                     checkMOID = pHitMO->GetRootID();
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level
                     // Check if we're supposed to ignore the team of what we hit
                     if (ignoreTeam != Activity::NoTeam)
                     {
                         pHitMO = pHitMO->GetRootParent();
                         // We are indeed supposed to ignore this object because of its ignoring of its specific team
-                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam)
+                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam) {
                             checkMOID = g_NoMOID;
+                        }
                     }
+#endif
                 }
             }
 
@@ -2557,7 +2583,7 @@ float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int 
 
 bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
-    bool obscured = m_pMOIDLayer->GetPixel(x, y) != g_NoMOID || m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir;
+    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(Activity::NoTeam, x, y) != g_NoMOID;
 
     if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);

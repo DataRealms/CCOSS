@@ -917,19 +917,18 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // Pathfinding init
     if (initPathfinding)
     {
-        // Create the pathfinding stuff based on the current scene
+		// Create the pathfinding stuff based on the current scene
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-        // TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+		// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 		//int sceneArea = GetWidth() * GetHeight();
-        //unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
-        for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
-        }
-        ResetPathFinding();
-    }
+		for (int i = 0; i < m_pPathFinders.size(); ++i) {
+			m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
+		}
+	}
 
     return 0;
 }

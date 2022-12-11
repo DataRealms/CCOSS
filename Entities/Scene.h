@@ -763,7 +763,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
+// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
 // Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.

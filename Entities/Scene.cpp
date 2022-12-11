@@ -656,12 +656,10 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
             if (pMO)
             {
                 // PASSING OWNERSHIP INTO the Add* ones - we are clearing out this list!
-                if (pMO->IsActor()) {
-					// Skip playable actors if we're told to not place actors
-                    bool shouldPlace = placeUnits || dynamic_cast<ADoor*>(pMO);
+				if (Actor *actor = dynamic_cast<Actor *>(pMO)) {
+                    bool shouldPlace = placeUnits || dynamic_cast<ADoor *>(actor);
 
-                    // Because we don't save/load all data yet and do a bit of a hack with scene loading,
-                    // We can potentially save a dead actor that still technically exists
+                    // Because we don't save/load all data yet and do a bit of a hack with scene loading, we can potentially save a dead actor that still technically exists.
                     // If we find one of these, just skip them!
                     shouldPlace = shouldPlace && dynamic_cast<Actor*>(pMO)->GetHealth() > 0.0F;
 
@@ -1456,9 +1454,8 @@ int Scene::Save(Writer &writer) const
             writer.NewProperty("Position");
             writer << (*oItr)->GetPos();
 
-            MovableObject* mo = dynamic_cast<MovableObject*>(*oItr);
-            if (mo && !mo->GetVel().IsZero())
-            {
+            MovableObject *mo = dynamic_cast<MovableObject*>(*oItr);
+            if (mo && !mo->GetVel().IsZero()) {
                 writer.NewProperty("Velocity");
                 writer << mo->GetVel();
             }
@@ -2022,15 +2019,9 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
     return found;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveSceneObjects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
-//                  puts them into this' list of objects to place on next load.
-
-int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBrains)
-{
+int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBrains) {
     int found = 0;
     
     found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
@@ -2039,6 +2030,8 @@ int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBra
 
     return found;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddPlacedObject
@@ -2199,10 +2192,8 @@ void Scene::UpdatePlacedObjects(int whichSet)
 
 int Scene::ClearPlacedObjectSet(int whichSet, bool weHaveOwnership)
 {
-    if (weHaveOwnership) 
-    {
-        for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
-        {
+    if (weHaveOwnership) {
+        for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr) {
             delete *itr;
         }
     }

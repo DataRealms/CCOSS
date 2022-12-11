@@ -240,7 +240,7 @@ namespace RTE {
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
-		// Atomic to allow other threads to pause the simulation.
+		// Note - these are atomic to allow other threads to pause the simulation (which also resets the SimAccumulator).
 		std::atomic<bool> m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
 		std::atomic<long long> m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 

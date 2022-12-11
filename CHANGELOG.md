@@ -219,7 +219,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	LuaMan:SaveGame(fileName) -- Saves the currently playing scene and activity to Saves.rte.
 	LuaMan:LoadGame(fileName) -- Loads and resumes a previously saved scene and activity.
 	```
-	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.
+	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.  
 	
 	To determine if we're resuming a previously saved game, we can check against ActivityState in Start() as follows:
 	```lua
@@ -237,7 +237,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadGame("Autosave")`.
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section. To load games saved by this script, open the console and enter the command `LuaMan:LoadGame("Autosave")`.
 	
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
@@ -301,6 +301,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
+
+- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.. These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
 </details>
 

@@ -13,7 +13,7 @@
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	constexpr static char* sc_scriptSavesModuleName = "Saves.rte";
+	const std::string LuaMan::c_ScriptSavesModuleName = "Saves.rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -577,51 +577,48 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaMan::SaveGame(const std::string &fileName) {
-		Scene* scene = dynamic_cast<Scene*>(g_SceneMan.GetScene());
-		GAScripted* activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		Scene *scene = g_SceneMan.GetScene();
+		GAScripted *activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
 
 		if (!scene || !activity) {
 			return false;
 		}
 
-		// Save the scene bitmaps
-		if (scene->SaveData(sc_scriptSavesModuleName + ("/" + fileName)) < 0) {
+		// Save the scene bitmaps.
+		if (scene->SaveData(c_ScriptSavesModuleName + "/" + fileName) < 0) {
 			return false;
 		}
 
-		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current g_movableMan state
-		std::unique_ptr<Scene> sceneAltered(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
+		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
+		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));
 
-		// Delete any existing objects from our scene - we don't want replace broken doors or repair any stuff when we load
-		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
+		// Delete any existing objects from our scene - we don't want to replace broken doors or repair any stuff when we load.
+		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
 
-		// Pull all stuff from movableMan into the scene for saving, so existing actors/doors are transfered
-		sceneAltered->RetrieveSceneObjects(false); // Don't transfer ownership
+		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
+		modifiableScene->RetrieveSceneObjects(false);
 
-		// We also need to stop being a copy of the scene we got cloned from - otherwise we'll still pick up the PlacedObjectSets from our parent when loading
-		// So become our own original preset
-		sceneAltered->SetPresetName(fileName);
-		sceneAltered->MigrateToModule(g_PresetMan.GetModuleID(sc_scriptSavesModuleName));
-		sceneAltered->SetScriptSave(true);
+		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
+		modifiableScene->SetPresetName(fileName);
+		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_ScriptSavesModuleName));
+		modifiableScene->SetScriptSave(true);
 
-		// We don't need to block the main thread for too long, just need to let writer access the relevant data
-		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesModuleName + ("/" + fileName + ".ini")));
-		writer->NewPropertyWithValue("Scene", sceneAltered.get());
+		// Block the main thread for a bit to let the Writer access the relevant data.
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_ScriptSavesModuleName + "/" + fileName + ".ini"));
+		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 		writer->NewPropertyWithValue("Activity", activity);
 
-		auto saveWriterData = [](std::unique_ptr<Writer> writer) {
-			// Explicitly flush to disk...
-			// This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
-			writer->EndWrite();
+		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
+			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
+			writerToSave->EndWrite();
 		};
 
+		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
 		std::thread saveThread(saveWriterData, std::move(writer));
-
-		// Now we can continue and the flushing to disk can be done concurrently with the simulation
 		saveThread.detach();
 
-		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan
-		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
+		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
+		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
 
 		return true;
 	}
@@ -629,11 +626,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaMan::LoadGame(const std::string &fileName) {
-		std::unique_ptr<Scene> scene(new Scene());
-		std::unique_ptr<GAScripted> activity(new GAScripted());
+		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
+		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		std::string readerFilepath = sc_scriptSavesModuleName + ("/" + fileName + ".ini");
- 		Reader reader(readerFilepath.c_str(), true, nullptr, true);
+ 		Reader reader(c_ScriptSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
 		if (!reader.ReaderOK()) {
 			return false;
 		}
@@ -647,9 +643,10 @@ namespace RTE {
 			}
     	}
 
-		g_SceneMan.SetSceneToLoad(scene.get(), true, true); // SetSceneToLoad() doesn't Clone(), but when the activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally
-		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone())); // But for activity we need to do the Clone() here
-		// Messy, right? :/
+		// SetSceneToLoad() doesn't Clone(), but when the Activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally.
+		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
+		// For starting Activity, we need to directly clone the Activity we want to start.
+		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
 
 		return true;
 	}

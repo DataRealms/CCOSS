@@ -452,11 +452,8 @@ int MovableObject::Save(Writer &writer) const
     writer << m_CanBeSquished;
     writer.NewProperty("HUDVisible");
     writer << m_HUDVisible;
-    for (const auto &pair : m_AllLoadedScripts)
-    {
-        const std::string &scriptPath = pair.first;
-        if (!scriptPath.empty())
-        {
+    for (const auto &[scriptPath, scriptEnabled] : m_AllLoadedScripts) {
+        if (!scriptPath.empty()) {
             writer.NewProperty("ScriptPath");
             writer << scriptPath;
         }

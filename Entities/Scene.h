@@ -1289,7 +1289,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsScriptSave
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a script saved scene
+// Description:     Whether this scene is a script saved scene.
 // Arguments:       None.
 // Return value:    Whether scene is a script save or not.
 
@@ -1299,7 +1299,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetScriptSave
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a script saved scene
+// Description:     Sets whether this scene is a script saved scene.
 // Arguments:       New value.
 // Return value:    None.
 

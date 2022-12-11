@@ -65,10 +65,9 @@ namespace RTE {
 		}
 		m_SensorInterval = reference.m_SensorInterval;
 
-		// Set the door redraw timer, to force an immediate redraw
-		m_DoorMaterialRedrawTimer.SetElapsedSimTimeMS(m_DoorMaterialRedrawTimer.GetSimTimeLimitMS() + 1);
-
 		m_DoorState = reference.m_DoorState;
+		// We need the door material layer to redraw right away when it's copied, so set the door material redraw timer to be almost at its limit, thereby forcing an immediate redraw.
+		m_DoorMaterialRedrawTimer.SetElapsedSimTimeMS(m_DoorMaterialRedrawTimer.GetSimTimeLimitMS() + 1);
 
 		m_ClosedByDefault = reference.m_ClosedByDefault;
 		m_OpenOffset = reference.m_OpenOffset;
@@ -489,7 +488,7 @@ namespace RTE {
 				m_Door->SetParentOffset(updatedOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));
 
-				// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
+				// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground.
 				if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 			}
 		}

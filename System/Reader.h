@@ -128,9 +128,9 @@ namespace RTE {
 		bool NextProperty();
 
 		/// <summary>
-		/// Notifies the reader that we're starting reading a new object.
+		/// Notifies the reader that we're starting reading a new object, by making it expect another level of indentation.
 		/// </summary>
-		void StartObject();
+		void StartObject() { --m_ObjectEndings; }
 
 		/// <summary>
 		/// Takes out whitespace from the beginning and the end of a string.

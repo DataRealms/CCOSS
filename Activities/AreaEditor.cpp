@@ -194,6 +194,8 @@ int AreaEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + m_pLoadNameCombo->GetDropHeight()); // Make sure the dropdown can fit, no matter how tall it is.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
 

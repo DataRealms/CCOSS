@@ -3156,8 +3156,9 @@ void AHuman::Update()
                 m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
                 m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
             }
-
-            // Walk backwards if the aiming is already focused in the opposite direction of travel. Need to check against zero rather than the deadzone, otherwise mouse players can't aim one way and fly the other while jetpacking.
+			
+			// Walk backwards if the aiming is already focused in the opposite direction of travel.
+			// Note that we check against zero here rather than the deadzone, because using the deadzone makes jetpacking mouse players unable to fly one way and aim the other.
             if (!analogAim.IsZero() || isSharpAiming) {
                 m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
                 m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));

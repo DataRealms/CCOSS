@@ -175,16 +175,15 @@ namespace RTE {
 		);
 
 		// Fix up the left-and-up connections
-		const Material* outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
 		std::for_each(
 			std::execution::par_unseq,
 			m_NodeGrid.begin(),
 			m_NodeGrid.end(),
-			[outOfBounds](PathNode* node) {
-				node->LeftMaterial = node->Left ? node->Left->RightMaterial : outOfBounds;
-				node->UpMaterial = node->Up ? node->Up->DownMaterial : outOfBounds;
-				node->DownLeftMaterial = node->DownLeft ? node->DownLeft->UpRightMaterial : outOfBounds;
-				node->LeftUpMaterial = node->LeftUp ? node->LeftUp->RightDownMaterial : outOfBounds;
+			[](PathNode* node) {
+				if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
+				if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
+				if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
+				if (node->RightDown) { node->RightDown->LeftUpMaterial = node->RightDownMaterial; }
 			}
 		);
 
@@ -211,10 +210,7 @@ namespace RTE {
 		}
 
 		bool anyChange = UpdateNodeList(nodeIdsToUpdate);
-		if (anyChange) {
-			// Reset the pather when costs change, as per the micropather docs.
-			m_Pather->Reset();
-		} else {
+		if (!anyChange) {
 			// We didn't really update anything, so return an empty list
 			nodeIdsToUpdate.clear();
 		}
@@ -421,19 +417,20 @@ namespace RTE {
 
 		if (anyChange) {
 			// Fix up the left-and-up connections
-			const Material* outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
 			std::for_each(
 				std::execution::par_unseq,
 				nodeVec.begin(),
 				nodeVec.end(),
-				[this, outOfBounds](int nodeId) {
+				[this](int nodeId) {
 					PathNode* node = m_NodeGrid[nodeId];
-					node->LeftMaterial = node->Left ? node->Left->RightMaterial : outOfBounds;
-					node->UpMaterial = node->Up ? node->Up->DownMaterial : outOfBounds;
-					node->DownLeftMaterial = node->DownLeft ? node->DownLeft->UpRightMaterial : outOfBounds;
-					node->LeftUpMaterial = node->LeftUp ? node->LeftUp->RightDownMaterial : outOfBounds;
+					if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
+					if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
+					if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
+					if (node->RightDown) { node->RightDown->LeftUpMaterial = node->RightDownMaterial; }
 				}
 			);
+
+			m_Pather->Reset();
 		}
 
 		return anyChange;

@@ -119,6 +119,12 @@ namespace RTE {
 	const SpatialPartitionGrid::MOIDList& SpatialPartitionGrid::GetMOIDsAtPosition(int team, int x, int y) const {
 		int cellX = x / m_CellSize;
 		int cellY = y / m_CellSize;
+
+		// Lua sometimes decides to give SceneMan an ignoreTeam value of... -2.
+		// Yeah, seriously.
+		// So let's sanity check this shit.
+		team = team < Activity::NoTeam || team > Activity::MaxTeamCount ? Activity::NoTeam : team;
+
 		return m_Cells[team + 1][GetCellIdForCellCoords(cellX, cellY)];
 	}
 

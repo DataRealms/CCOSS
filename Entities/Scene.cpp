@@ -917,19 +917,18 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // Pathfinding init
     if (initPathfinding)
     {
-        // Create the pathfinding stuff based on the current scene
+		// Create the pathfinding stuff based on the current scene
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-        // TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+		// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 		//int sceneArea = GetWidth() * GetHeight();
-        //unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
-        for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
-        }
-        ResetPathFinding();
-    }
+		for (int i = 0; i < m_pPathFinders.size(); ++i) {
+			m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
+		}
+	}
 
     return 0;
 }
@@ -2929,9 +2928,18 @@ void Scene::ResetPathFinding()
 
 void Scene::UpdatePathFinding()
 {
+    constexpr int nodeUpdatesPerCall = 100;
+    constexpr int maxUnupdatedMaterialAreas = 1000;
+
+    int nodesToUpdate = nodeUpdatesPerCall / g_ActivityMan.GetActivity()->GetTeamCount();
+    if (m_pTerrain->GetUpdatedMaterialAreas().size() > maxUnupdatedMaterialAreas) {
+        // Our list of boxes is getting too big and a bit out of hand, so clear everything.
+        nodesToUpdate = std::numeric_limits<int>::max();
+    }
+
     // Update our shared pathFinder
-    bool updated = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
-    if (updated) {
+    std::unordered_set<int> updatedNodes = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas(), nodesToUpdate);
+    if (!updatedNodes.empty()) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
             if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) { 
@@ -2941,14 +2949,13 @@ void Scene::UpdatePathFinding()
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
             g_MovableMan.OverrideMaterialDoors(true, team);
 
-            GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
+            GetPathFinder(static_cast<Activity::Teams>(team))->UpdateNodeList(updatedNodes);
 
             // Place back the material representation of all doors of this team so they are as we found them.
             g_MovableMan.OverrideMaterialDoors(false, team);
         }
     }
 
-    m_pTerrain->ClearUpdatedMaterialAreas();
     m_PartialPathUpdateTimer.Reset();
     m_PathfindingUpdated = true;
 }
@@ -3070,9 +3077,8 @@ void Scene::Update()
 		}
 	}
 
-    // Only update the pathfinding on occasion, as it's a costly operation
-    if (m_PartialPathUpdateTimer.IsPastRealMS(10000)) 
-    {
+    // Ocassionaly update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
+    if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {
         UpdatePathFinding();
     }
 }

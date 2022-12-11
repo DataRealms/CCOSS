@@ -265,7 +265,7 @@ namespace RTE {
 		.def("GetMaterial", &SceneMan::GetMaterial)
 		.def("GetMaterialFromID", &SceneMan::GetMaterialFromID)
 		.def("GetTerrMatter", &SceneMan::GetTerrMatter)
-		.def("GetMOIDPixel", &SceneMan::GetMOIDPixel)
+		.def("GetMOIDPixel", (MOID (SceneMan::*)(int, int))&SceneMan::GetMOIDPixel)
 		.def("SetLayerDrawMode", &SceneMan::SetLayerDrawMode)
 		.def("SetScroll", &SceneMan::SetScroll)
 		.def("SetScrollTarget", &SceneMan::SetScrollTarget)

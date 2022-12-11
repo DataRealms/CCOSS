@@ -190,10 +190,6 @@ namespace RTE {
 
 		// Reset the pather when costs change, as per the docs
 		m_Pather->Reset();
-		
-		//std::deque<Box> boxList;
-		//boxList.push_back(Box(40, 40, (m_GridWidth * m_NodeDimension) - 40, (m_GridHeight * m_NodeDimension) - 40));
-		//RecalculateAreaCosts(boxList, std::numeric_limits<int>::max());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -403,11 +399,18 @@ namespace RTE {
 	bool PathFinder::UpdateNodeList(const std::unordered_set<int> &nodeList) {
 		std::atomic<bool> anyChange = false;
 
+		// "Hah!" - I hear you say. "This silly person who wrote this code is doing a pointless copy."
+		std::vector<int> nodeVec(nodeList.begin(), nodeList.end());
+		// In a fair and just world, you would be correct.
+		// I've spent all day debugging this, where nodes were seemingly randomly not updated.
+		// Turns out that, for whatever reason, std::for_each with parallel execution + unordered_set is just not working...
+		// This copy fixes it. Yes, I hate it.
+
 		// Update all the costs going out from each node
 		std::for_each(
 			std::execution::par,
-			nodeList.begin(),
-			nodeList.end(),
+			nodeVec.begin(),
+			nodeVec.end(),
 			[this, &anyChange](int nodeId) {
 				PathNode* node = m_NodeGrid[nodeId];
 				if (UpdateNodeCosts(node)) {
@@ -421,8 +424,8 @@ namespace RTE {
 			const Material* outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
 			std::for_each(
 				std::execution::par_unseq,
-				nodeList.begin(),
-				nodeList.end(),
+				nodeVec.begin(),
+				nodeVec.end(),
 				[this, outOfBounds](int nodeId) {
 					PathNode* node = m_NodeGrid[nodeId];
 					node->LeftMaterial = node->Left ? node->Left->RightMaterial : outOfBounds;

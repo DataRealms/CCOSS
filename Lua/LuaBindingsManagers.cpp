@@ -271,7 +271,7 @@ namespace RTE {
 		.def("GetMaterial", &SceneMan::GetMaterial)
 		.def("GetMaterialFromID", &SceneMan::GetMaterialFromID)
 		.def("GetTerrMatter", &SceneMan::GetTerrMatter)
-		.def("GetMOIDPixel", &SceneMan::GetMOIDPixel)
+		.def("GetMOIDPixel", (MOID (SceneMan::*)(int, int))&SceneMan::GetMOIDPixel)
 		.def("SetLayerDrawMode", &SceneMan::SetLayerDrawMode)
 		.def("LoadUnseenLayer", &SceneMan::LoadUnseenLayer)
 		.def("MakeAllUnseen", &SceneMan::MakeAllUnseen)

@@ -417,6 +417,7 @@ public:
 // Return value:    The MOID currently at the specified pixel location.
 
     MOID GetMOIDPixel(int team, int pixelX, int pixelY);
+    MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(Activity::NoTeam, pixelX, pixelY); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

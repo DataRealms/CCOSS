@@ -1,4 +1,7 @@
 #include "PathFinder.h"
+
+#include <execution>
+
 #include "Material.h"
 #include "Scene.h"
 #include "SceneMan.h"
@@ -34,76 +37,57 @@ namespace RTE {
 		int sceneHeight = g_SceneMan.GetSceneHeight();
 
 		// Make overlapping nodes at seams if necessary, to make sure all scene pixels are covered
-		int nodeXCount = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
-		int nodeYCount = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
+		m_GridWidth = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
+		m_GridHeight = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
+
+		m_WrapsX = scene->WrapsX();
+		m_WrapsY = scene->WrapsY();
 
 		// Create and assign scene coordinate positions for all nodes
-		PathNode *node = 0;
 		Vector nodePos = Vector(static_cast<float>(nodeDimension) / 2.0F, static_cast<float>(nodeDimension) / 2.0F);
-		for (int x = 0; x < nodeXCount; ++x) {
+		m_NodeGrid.reserve(m_GridWidth * m_GridHeight);
+		for (int y = 0; y < m_GridHeight; ++y) {
 			// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
-			if (nodePos.m_X >= sceneWidth) { nodePos.m_X = sceneWidth - 1; }
-			// Start the column height over at middle of the top node each new column
-			nodePos.m_Y = static_cast<float>(nodeDimension) / 2.0F;
-			// Create the new column and fill it out
-			std::vector<PathNode *> newColumn;
-			for (int y = 0; y < nodeYCount; ++y) {
+			if (nodePos.m_Y >= sceneHeight) { nodePos.m_Y = sceneHeight - 1.0F; }
+
+			// Start the row over at middle of the leftmost node each new row
+			nodePos.m_X = static_cast<float>(nodeDimension) / 2.0F;
+
+			// Create the new row and fill it out
+			for (int x = 0; x < m_GridWidth; ++x) {
 				// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
-				if (nodePos.m_Y >= sceneHeight) { nodePos.m_Y = sceneHeight - 1; }
+				if (nodePos.m_X >= sceneWidth) { nodePos.m_X = sceneWidth - 1.0F; }
 				// Create the new node with its in-scene position in the center of it
-				node = new PathNode(nodePos);
-				// Move current position down for the next node in the column
-				nodePos.m_Y += nodeDimension;
+				PathNode *node = new PathNode(nodePos);
+				// Move current position right for the next node in the row
+				nodePos.m_X += nodeDimension;
 				// Add the newly created node to the column, transferring ownership to it
-				newColumn.push_back(node);
+				m_NodeGrid.push_back(node);
 			}
-			// Move current position one to the right for the next column
-			nodePos.m_X += nodeDimension;
-			// Add the entire new column to the right end of the grid
-			m_NodeGrid.push_back(newColumn);
+
+			// Move current position one down for the next row
+			nodePos.m_Y += nodeDimension;
 		}
-		// Assign all the adjacent nodes on each node, taking into account scene wrapping etc.
-		int wrappedUp;
-		int wrappedRight;
-		int wrappedDown;
-		int wrappedLeft;
-		for (int x = 0; x < nodeXCount; ++x) {
-			for (int y = 0; y < nodeYCount; ++y) {
-				node = m_NodeGrid[x][y];
 
-				wrappedLeft = x - 1;
-				if (wrappedLeft < 0 && scene->WrapsX()) { wrappedLeft = nodeXCount - 1; }
-				wrappedRight = x + 1;
-				if (wrappedRight >= nodeXCount && scene->WrapsX()) { wrappedRight = 0; }
-				wrappedUp = y - 1;
-				if (wrappedUp < 0 && scene->WrapsY()) { wrappedUp = nodeYCount - 1; }
-				wrappedDown = y + 1;
-				if (wrappedDown >= nodeYCount && scene->WrapsY()) { wrappedDown = 0; }
+		// Assign all the adjacent nodes on each node. GetNodeForCoords handles scene wrapping
+		for (int x = 0; x < m_GridWidth; ++x) {
+			for (int y = 0; y < m_GridHeight; ++y) {
+				PathNode *node = GetNodeForCoords(x, y);
 
-				// Leave nulls if any are out of bounds, even after wrapping (ie there was no wrapping in effect in that direction)
-				if (wrappedUp >= 0) { node->Up = m_NodeGrid[x][wrappedUp]; }
-				if (wrappedRight < nodeXCount) { node->Right = m_NodeGrid[wrappedRight][y]; }
-				if (wrappedDown < nodeYCount) { node->Down = m_NodeGrid[x][wrappedDown]; }
-				if (wrappedLeft >= 0) { node->Left = m_NodeGrid[wrappedLeft][y]; }
-
-				// Diagonals
-				if (wrappedUp >= 0 && wrappedRight < nodeXCount) { node->UpRight = m_NodeGrid[wrappedRight][wrappedUp]; }
-				if (wrappedRight < nodeXCount && wrappedDown < nodeYCount) { node->RightDown = m_NodeGrid[wrappedRight][wrappedDown]; }
-				if (wrappedDown < nodeYCount && wrappedLeft >= 0) { node->DownLeft = m_NodeGrid[wrappedLeft][wrappedDown]; }
-				if (wrappedLeft >= 0 && wrappedUp >= 0) { node->LeftUp = m_NodeGrid[wrappedLeft][wrappedUp]; }
+				node->Up = GetNodeForCoords(x, y - 1);
+				node->Right = GetNodeForCoords(x + 1, y);
+				node->Down = GetNodeForCoords(x, y + 1);
+				node->Left = GetNodeForCoords(x - 1, y);
+				node->UpRight = GetNodeForCoords(x + 1, y - 1);
+				node->RightDown = GetNodeForCoords(x + 1, y + 1);
+				node->DownLeft = GetNodeForCoords(x - 1, y + 1);
+				node->LeftUp = GetNodeForCoords(x - 1, y - 1);
 			}
 		}
+
 		// Create and allocate the pather class which will do the work
 		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, true);
 
-		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
-		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
-		if (scene->WrapsX()) {
-			for (int y = 0; y < nodeYCount; ++y) {
-				node = m_NodeGrid[0][y];
-				if (node->Left) { node->Left->RightMaterial = StrongestMaterialAlongLine(node->Pos, node->Left->Pos); }
-			}
-		}
 		// Set up all the costs between all nodes
 		RecalculateAllCosts();
 
@@ -113,10 +97,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PathFinder::Destroy() {
-		for (unsigned int x = 0; x < m_NodeGrid.size(); ++x) {
-			for (unsigned int y = 0; y < m_NodeGrid[x].size(); ++y) {
-				delete m_NodeGrid[x][y];
-				m_NodeGrid[x][y] = 0;
+		for (unsigned int x = 0; x < m_GridWidth; ++x) {
+			for (unsigned int y = 0; y < m_GridHeight; ++y) {
+				int nodeId = GetNodeIdForCoords(x, y);
+				delete m_NodeGrid[nodeId];
+				m_NodeGrid[nodeId] = nullptr;
 			}
 		}
 		delete m_Pather;
@@ -146,7 +131,7 @@ namespace RTE {
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve(static_cast<void *>(m_NodeGrid[startNodeX][startNodeY]), static_cast<void *>(m_NodeGrid[endNodeX][endNodeY]), &statePath, &totalCostResult);
+		int result = m_Pather->Solve(static_cast<void *>(m_NodeGrid[GetNodeIdForCoords(startNodeX, startNodeY)]), static_cast<void*>(m_NodeGrid[GetNodeIdForCoords(endNodeX, endNodeY)]), &statePath, &totalCostResult);
 
 		// We got something back
 		if (!statePath.empty()) {
@@ -180,70 +165,65 @@ namespace RTE {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
 
 		// Update all the costs going out from each node
-		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
-			for (PathNode *pathNode : nodeEntry) {
-				UpdateNodeCosts(pathNode);
-				// Should reset the updated flag since we're about to reset the pather
-				pathNode->IsUpdated = false;
+		std::for_each(
+			std::execution::par_unseq,
+			m_NodeGrid.begin(),
+			m_NodeGrid.end(),
+			[this](PathNode* node) {
+				UpdateNodeCosts(node);
 			}
-		}
+		);
+
+		// Fix up the left-and-up connections
+		const Material* outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
+		std::for_each(
+			std::execution::par_unseq,
+			m_NodeGrid.begin(),
+			m_NodeGrid.end(),
+			[outOfBounds](PathNode* node) {
+				node->LeftMaterial = node->Left ? node->Left->RightMaterial : outOfBounds;
+				node->UpMaterial = node->Up ? node->Up->DownMaterial : outOfBounds;
+				node->DownLeftMaterial = node->DownLeft ? node->DownLeft->UpRightMaterial : outOfBounds;
+				node->LeftUpMaterial = node->LeftUp ? node->LeftUp->RightDownMaterial : outOfBounds;
+			}
+		);
+
 		// Reset the pather when costs change, as per the docs
 		m_Pather->Reset();
+		
+		//std::deque<Box> boxList;
+		//boxList.push_back(Box(40, 40, (m_GridWidth * m_NodeDimension) - 40, (m_GridHeight * m_NodeDimension) - 40));
+		//RecalculateAreaCosts(boxList, std::numeric_limits<int>::max());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
-		// If no node costs changed, then we don't need to reset the pather
-		bool anyChange = false;
+	std::unordered_set<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		std::unordered_set<int> nodeIdsToUpdate;
 
-		Box box;
-		// Go through all the boxes and see if any of the node centers are inside each
-		for (const Box &boxListEntry : boxList) {
-			// Get the current area box and make sure it's unflipped
-			box = boxListEntry;
-			box.Unflip();
-
-			// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
-			anyChange = UpdateNodeCostsInBox(box) || anyChange;
-
-			// Take care of all wrapping situations of the box
-			if (g_SceneMan.SceneWrapsX()) {
-				Box temp;
-
-				if (box.m_Corner.m_X < 0) {
-					temp = Box(Vector(box.m_Corner.m_X + g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
-				} else if (box.m_Corner.m_X + box.m_Width > g_SceneMan.GetSceneWidth()) {
-					temp = Box(Vector(box.m_Corner.m_X - g_SceneMan.GetSceneWidth(), box.m_Corner.m_Y), box.m_Width, box.m_Height);
-					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
-				}
+		// Go through all the boxes and get their nodes to update
+		while (!boxList.empty()) {
+			std::vector<int> nodesInside = GetNodeIdsInBox(boxList.front());
+			for (int nodeId : nodesInside) {
+				nodeIdsToUpdate.insert(nodeId);
 			}
-			if (g_SceneMan.SceneWrapsY()) {
-				Box temp;
+			boxList.pop_front();
 
-				if (box.m_Corner.m_Y < 0) {
-					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y + g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
-				} else if (box.m_Corner.m_Y + box.m_Height > g_SceneMan.GetSceneHeight()) {
-					temp = Box(Vector(box.m_Corner.m_X, box.m_Corner.m_Y - g_SceneMan.GetSceneHeight()), box.m_Width, box.m_Height);
-					anyChange = UpdateNodeCostsInBox(temp) || anyChange;
-				}
+			if (nodeIdsToUpdate.size() > nodeUpdateLimit) {
+				break;
 			}
 		}
 
-		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
-			for (PathNode *pathNode : nodeEntry) {
-				pathNode->IsUpdated = false;
-			}
-		}
-
+		bool anyChange = UpdateNodeList(nodeIdsToUpdate);
 		if (anyChange) {
 			// Reset the pather when costs change, as per the micropather docs.
 			m_Pather->Reset();
+		} else {
+			// We didn't really update anything, so return an empty list
+			nodeIdsToUpdate.clear();
 		}
 
-		return anyChange;
+		return nodeIdsToUpdate;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -323,13 +303,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) {
+	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) const {
 		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::UpdateNodeCosts(PathNode *node) {
+	bool PathFinder::UpdateNodeCosts(PathNode *node) const {
 		if (!node) {
 			return false;
 		}
@@ -340,19 +320,24 @@ namespace RTE {
 			return first->GetIntegrity() > second->GetIntegrity() ? first : second;
 		};
 
+		// We only calculate transitions to one side (down and right), because for the other side we can pull our up-and-left transition data from the other node's down-and-right
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
-		if (node->Up) { node->UpMaterial = getStrongerMaterial(node->Up->DownMaterial, StrongestMaterialAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
-		if (node->Right) { node->RightMaterial = StrongestMaterialAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
-		if (node->Down) { node->DownMaterial = StrongestMaterialAlongLine(node->Pos + Vector(-3, 0), node->Down->Pos + Vector(-3, 0)); }
-		if (node->Left) { node->LeftMaterial = getStrongerMaterial(node->Left->RightMaterial, StrongestMaterialAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
-
-		if (node->UpRight) { node->UpRightMaterial = getStrongerMaterial(node->UpRight->DownLeftMaterial, StrongestMaterialAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
-		if (node->RightDown) { node->RightDownMaterial = StrongestMaterialAlongLine(node->Pos + Vector(2, -2), node->RightDown->Pos + Vector(2, -2)); }
-		if (node->DownLeft) { node->DownLeftMaterial = StrongestMaterialAlongLine(node->Pos + Vector(-2, -2), node->DownLeft->Pos + Vector(-2, -2)); }
-		if (node->LeftUp) { node->LeftUpMaterial = getStrongerMaterial(node->LeftUp->RightDownMaterial, StrongestMaterialAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
-
-		// Mark this as already changed so the above expensive calculation isn't done redundantly
-		node->IsUpdated = true;
+		if (node->Right) {
+			Vector offset(0.0F, 3.0F);
+			node->RightMaterial = getStrongerMaterial(StrongestMaterialAlongLine(node->Pos - offset, node->Right->Pos - offset), StrongestMaterialAlongLine(node->Pos + offset, node->Right->Pos + offset));
+		}
+		if (node->Down) {
+			Vector offset(3.0F, 0.0F);
+			node->DownMaterial = getStrongerMaterial(StrongestMaterialAlongLine(node->Pos - offset, node->Down->Pos - offset), StrongestMaterialAlongLine(node->Pos + offset, node->Down->Pos + offset));
+		}
+		if (node->UpRight) {
+			Vector offset(2.0F, 2.0F);
+			node->UpRightMaterial = getStrongerMaterial(StrongestMaterialAlongLine(node->Pos - offset, node->UpRight->Pos - offset), StrongestMaterialAlongLine(node->Pos + offset, node->UpRight->Pos + offset));
+		}
+		if (node->RightDown) {
+			Vector offset(2.0F, -2.0F);
+			node->RightDownMaterial = getStrongerMaterial(StrongestMaterialAlongLine(node->Pos - offset, node->RightDown->Pos - offset), StrongestMaterialAlongLine(node->Pos + offset, node->RightDown->Pos + offset));
+		}
 
 		for (int i = 0; i < PathNode::c_MaxAdjacentNodeCount; ++i) {
 			const Material *oldMat = oldMaterials[i];
@@ -373,9 +358,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::UpdateNodeCostsInBox(Box &box) {
-		bool anyChange = false;
-
+	std::vector<int> PathFinder::GetNodeIdsInBox(Box box) {
+		std::vector<int> result;
+		
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
@@ -384,26 +369,17 @@ namespace RTE {
 		int firstY = std::floor((box.m_Corner.m_Y / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
 		int lastY = std::floor(((box.m_Corner.m_Y + box.m_Height) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
 
-		// Truncate the influence
-		if (firstX < 0) { firstX = 0; }
-		if (lastX >= m_NodeGrid.size()) { lastX = m_NodeGrid.size() - 1; }
-		if (firstY < 0) { firstY = 0; }
-		if (lastY >= m_NodeGrid[0].size()) { lastY = m_NodeGrid[0].size() - 1; }
-
 		// Only iterate through the grid where the box overlaps any edges
-		PathNode *node = 0;
 		for (int nodeX = firstX; nodeX <= lastX; ++nodeX) {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
-				node = m_NodeGrid[nodeX][nodeY];
-				// Update all the costs going out from each node which is found to be affected by the box
-				if (!node->IsUpdated) {
-					// Careful, we don't want to short-circuit and skip updating node costs! So don't flip the operands of the || here!
-					anyChange = UpdateNodeCosts(node) || anyChange;
+				int nodeId = GetNodeIdForCoords(nodeX, nodeY);
+				if (nodeId != -1) {
+					result.push_back(nodeId);
 				}
 			}
 		}
 
-		return anyChange;
+		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -420,5 +396,83 @@ namespace RTE {
 			}
 		}
 		return totalCostOfAdjacentNodes / std::max(static_cast<float>(count), 1.0F);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool PathFinder::UpdateNodeList(const std::unordered_set<int> &nodeList) {
+		std::atomic<bool> anyChange = false;
+
+		// Update all the costs going out from each node
+		std::for_each(
+			std::execution::par,
+			nodeList.begin(),
+			nodeList.end(),
+			[this, &anyChange](int nodeId) {
+				PathNode* node = m_NodeGrid[nodeId];
+				if (UpdateNodeCosts(node)) {
+					anyChange = true;
+				};
+			}
+		);
+
+		if (anyChange) {
+			// Fix up the left-and-up connections
+			const Material* outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
+			std::for_each(
+				std::execution::par_unseq,
+				nodeList.begin(),
+				nodeList.end(),
+				[this, outOfBounds](int nodeId) {
+					PathNode* node = m_NodeGrid[nodeId];
+					node->LeftMaterial = node->Left ? node->Left->RightMaterial : outOfBounds;
+					node->UpMaterial = node->Up ? node->Up->DownMaterial : outOfBounds;
+					node->DownLeftMaterial = node->DownLeft ? node->DownLeft->UpRightMaterial : outOfBounds;
+					node->LeftUpMaterial = node->LeftUp ? node->LeftUp->RightDownMaterial : outOfBounds;
+				}
+			);
+		}
+
+		return anyChange;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	PathNode* PathFinder::GetNodeForCoords(int x, int y) {
+		if (m_WrapsX) {
+			x = x % m_GridWidth;
+			x = x < 0 ? x + m_GridWidth : x;
+		}
+		if (m_WrapsY) {
+			y = y % m_GridHeight;
+			y = y < 0 ? y + m_GridHeight : y;
+		}
+
+		// Out-of-bounds
+		if (x < 0 || x >= m_GridWidth || y < 0 || y >= m_GridHeight) {
+			return nullptr;
+		}
+
+		return m_NodeGrid[(y * m_GridWidth) + x];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int PathFinder::GetNodeIdForCoords(int x, int y) {
+		if (m_WrapsX) {
+			x = x % m_GridWidth;
+			x = x < 0 ? x + m_GridWidth : x;
+		}
+		if (m_WrapsY) {
+			y = y % m_GridHeight;
+			y = y < 0 ? y + m_GridHeight : y;
+		}
+
+		// Out-of-bounds
+		if (x < 0 || x >= m_GridWidth || y < 0 || y >= m_GridHeight) {
+			return -1;
+		}
+
+		return (y * m_GridWidth) + x;
 	}
 }

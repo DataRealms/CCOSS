@@ -19,7 +19,6 @@ namespace RTE {
 		static constexpr int c_MaxAdjacentNodeCount = 8; //!< The maximum number of adjacent nodes to any given node. Thusly, also the number of directions for nodes to be in.
 
 		Vector Pos; //!< Absolute position of the center of this node in the scene.
-		bool IsUpdated = false; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
@@ -116,8 +115,17 @@ namespace RTE {
 		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself, if necessary.
 		/// </summary>
 		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
-		/// <returns>Whether any costs were updated.</returns>
-		bool RecalculateAreaCosts(const std::deque<Box> &boxList);
+		/// <param name="nodeUpdateLimit">The maximum number of nodes we'll try to update this frame. True node update count can be higher if we received a big box, as we always do at least 1 box.</param>
+		/// <returns>The set of nodes that were updated.</returns>
+		std::unordered_set<int> RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit);
+
+		/// <summary>
+		/// Updates a set of nodes, adjusting their transitions
+		/// This does NOT update the pather, which is required if node costs changed.
+		/// </summary>
+		/// <param name="nodeList">The set of node IDs to update.</param>
+		/// <returns>Whether any node costs changed.</returns>
+		bool UpdateNodeList(const std::unordered_set<int>& nodeList);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
@@ -147,12 +155,15 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
 		static constexpr float c_NodeCostChangeEpsilon = 5.0F; //!< The minimum change in a node's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 
 		MicroPather *m_Pather; //!< The actual pathing object that does the pathfinding work. Owned.
-		std::vector<std::vector<PathNode *>> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
+		std::vector<PathNode *> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
 		unsigned int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
+		int m_GridWidth; //!< The width of the pathing grid, in nodes.
+		int m_GridHeight; //!< The height of the pathing grid, in nodes.
+		bool m_WrapsX; //!< Whether the pathing grid wraps on the X axis
+		bool m_WrapsY; //!< Whether the pathing grid wraps on the Y axis
 
 		float m_DigStrength; //!< What material strength the search is capable of digging through.
 
@@ -163,7 +174,7 @@ namespace RTE {
 		/// <param name="start">Origin point.</param>
 		/// <param name="end">Destination point.</param>
 		/// <returns>The strongest material.</returns>
-		const Material * StrongestMaterialAlongLine(const Vector &start, const Vector &end);
+		const Material * StrongestMaterialAlongLine(const Vector &start, const Vector &end) const;
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges going out from a specific node.
@@ -171,22 +182,21 @@ namespace RTE {
 		/// </summary>
 		/// <param name="node">The node to update all costs of. It's safe to pass 0 here. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <returns>Whether the node costs changed.</returns>
-		bool UpdateNodeCosts(PathNode *node);
+		bool UpdateNodeCosts(PathNode *node) const;
 
 		/// <summary>
-		/// Helper function for updating all the values of cost edges crossed by a specific box.
-		/// This does NOT update the pather, which is required before solving more paths after calling this. Also it does NOT wrap the box coming in here, only truncates it!
+		/// Helper function for getting the nodes in a box
 		/// </summary>
-		/// <param name="box">The Box of which all edges it touches should be recalculated.</param>
-		/// <returns>Whether any node costs changed.</returns>
-		bool UpdateNodeCostsInBox(Box &box);
+		/// <param name="box">The Box of which all nodes it touches should be returned.</param>
+		/// <returns>A list of the node ids inside the box.</returns>
+		std::vector<int> GetNodeIdsInBox(Box box);
 
 		/// <summary>
 		/// Gets the cost for transitioning through this material
 		/// </summary>
 		/// <param name="node">The material to get the transition cost for.</param>
 		/// <returns>The transition cost.</returns>
-		float GetMaterialTransitionCost(const Material * material) const ;
+		float GetMaterialTransitionCost(const Material *material) const ;
 
 		/// <summary>
 		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions
@@ -195,6 +205,22 @@ namespace RTE {
 		/// <returns>The average transition cost.</returns>
 		float GetNodeAverageTransitionCost(const PathNode &node) const;
 #pragma endregion
+
+		/// <summary>
+		/// Gets a pathnode at the coordinates.
+		/// </summary>
+		/// <param name="x">The x coordinate, in Nodes.</param>
+		/// <param name="y">The y coordinate, in Nodes.</param>
+		/// <returns>The node.</returns>
+		PathNode* GetNodeForCoords(int x, int y);
+
+		/// <summary>
+		/// Converts a 2d x,y into a 1d node ID.
+		/// </summary>
+		/// <param name="x">The x coordinate, in Nodes.</param>
+		/// <param name="y">The y coordinate, in Nodes.</param>
+		/// <returns>The node ID.</returns>
+		int GetNodeIdForCoords(int x, int y);
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.

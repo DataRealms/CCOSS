@@ -8,7 +8,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool RTEAbortFunc(const std::string &description, const std::string &file, int line) {
+	void RTEAbortFunc(const std::string &description, const std::string &file, int line) {
 		// Save out the screen bitmap, after making a copy of it, faster sometimes
 		if (screen) {
 			BITMAP *abortScreenBuffer = create_bitmap(screen->w, screen->h);
@@ -33,20 +33,13 @@ namespace RTE {
 #endif
 		ShowMessageBox(abortMessage);
 
-		// True so that the debugbreak code is run and the debugger goes there.
-		return true;
+		AbortAction;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore) {
-		if (!expression) {
-			// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-			RTEAbortFunc(description, __FILE__, __LINE__);
-
-			// True so that the debugbreak code is run and the debugger goes there.
-			return true;
-		}
-		return false;
+	void RTEAssertFunc(const char *description, const char *file, int line, bool &alwaysIgnore) {
+		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
+		RTEAbortFunc(description, __FILE__, __LINE__);
 	}
 }

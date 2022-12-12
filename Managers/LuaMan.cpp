@@ -408,32 +408,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
-		std::filesystem::path fullPath = std::filesystem::path(System::GetWorkingDirectory()) / filePath;
-
 		m_Paths.clear();
 
-		for (const auto &directoryEntry : std::filesystem::directory_iterator{fullPath}) {
-			if (directoryEntry.is_directory()) {
-				m_Paths.push_back(directoryEntry.path().filename().generic_string());
-			}
+		for (const std::filesystem::directory_entry& directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_directory()) { m_Paths.emplace_back(directoryEntry.path().filename().generic_string()); }
 		}
-
 		return m_Paths;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const std::vector<std::string> & LuaMan::FileList(const std::string &filePath) {
-		std::filesystem::path fullPath = std::filesystem::path(System::GetWorkingDirectory()) / filePath;
-
 		m_Paths.clear();
 
-		for (const auto &directoryEntry : std::filesystem::directory_iterator{fullPath}) {
-			if (directoryEntry.is_regular_file()) {
-				m_Paths.push_back(directoryEntry.path().filename().generic_string());
-			}
+		for (const std::filesystem::directory_entry& directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_regular_file()) { m_Paths.emplace_back(directoryEntry.path().filename().generic_string()); }
 		}
-
 		return m_Paths;
 	}
 

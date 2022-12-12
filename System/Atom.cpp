@@ -642,11 +642,11 @@ namespace RTE {
 		Vector segTraj;
 		Vector hitAccel;
 
-		std::vector<std::pair<int, int>> trailPoints;
+		// Static buffer to avoid having to realloc with every atom's travel
+		// This saves us time because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
+		thread_local std::vector<std::pair<int, int>> trailPoints;
+		trailPoints.clear();
 
-		// This saves us a few ms because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
-		// 6 should be enough for most not so fast travels, everything above simply works as usual.
-		trailPoints.reserve(6);
 		didWrap = false;
 		int removeOrphansRadius = m_OwnerMO->m_RemoveOrphanTerrainRadius;
 		int removeOrphansMaxArea = m_OwnerMO->m_RemoveOrphanTerrainMaxArea;

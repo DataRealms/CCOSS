@@ -62,7 +62,6 @@ void MovableMan::Clear()
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
@@ -280,7 +279,6 @@ void MovableMan::PurgeAllMOs()
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
@@ -1099,37 +1097,11 @@ bool MovableMan::ValidateMOIDs()
 // Method:          ValidMO
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the passed in MovableObject pointer points to an
-//                  MO that's currently active in the simulation, and kept by this
-//                  MovableMan. Internal optimization is made so that the same MO can
-//                  efficiently be checked many times during the same frame.
+//                  MO that's currently active in the simulation, and kept by this MovableMan.
 
 bool MovableMan::ValidMO(const MovableObject *pMOToCheck)
 {
-    bool found = false;
-
-    if (pMOToCheck)
-    {
-
-        // See if this MO has been found earlier this frame
-        for (auto itr = m_ValiditySearchResults.begin(); !found && itr != m_ValiditySearchResults.end(); ++itr)
-        {
-            // If the MO is found to have been searched for earlier this frame, then just return the search results
-            if (itr->first == pMOToCheck)
-                return itr->second;
-        }
-
-        // Check actors
-        found = found ? true : IsActor(pMOToCheck);
-        // Check Items
-        found = found ? true : IsDevice(pMOToCheck);
-        // Check particles
-        found = found ? true : IsParticle(pMOToCheck);
-
-        // Save search result for future requests this frame
-        m_ValiditySearchResults.push_back(std::pair<const MovableObject *, bool>(pMOToCheck, found));
-    }
-
-    return found;
+    return pMOToCheck && pMOToCheck->GetID() != g_NoMOID;
 }
 
 
@@ -1596,8 +1568,6 @@ void MovableMan::Update()
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    // Clear out MO finding optimization buffer - will be added to each frame as thigns are searched for as curently exisitng in the manager
-    m_ValiditySearchResults.clear();
 
     // Move all last frame's alarm events into the proper buffer, and clear out the new one to fill up with this frame's
     m_AlarmEvents.clear();

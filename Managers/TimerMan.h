@@ -1,8 +1,6 @@
 #ifndef _RTETIMERMAN_
 #define _RTETIMERMAN_
 
-#include <atomic>
-
 #include "Singleton.h"
 
 #define g_TimerMan TimerMan::Instance()
@@ -242,7 +240,6 @@ namespace RTE {
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
 		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
-
 		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
 		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
 

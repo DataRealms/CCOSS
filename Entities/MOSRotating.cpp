@@ -1403,8 +1403,10 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 void MOSRotating::PreTravel() {
 	MOSprite::PreTravel();
 
+#ifdef DRAW_MOID_LAYER
 	// If this is going slow enough, check for and redraw the MOID representations of any other MOSRotatings that may be overlapping this
 	if (m_GetsHitByMOs && m_HitsMOs && m_Vel.GetX() < 2.0F && m_Vel.GetY() < 2.0F) { g_MovableMan.RedrawOverlappingMOIDs(this); }
+#endif
 }
 
 

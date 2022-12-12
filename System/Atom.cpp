@@ -759,9 +759,8 @@ namespace RTE {
 				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
-				m_MOIDHit = g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), intPos[X], intPos[Y]);
-
-				if (m_OwnerMO->m_HitsMOs && m_MOIDHit != g_NoMOID && !IsIgnoringMOID(m_MOIDHit)) {
+				m_MOIDHit = m_OwnerMO->m_HitsMOs ? g_SceneMan.GetMOIDPixel(m_OwnerMO->GetTeam(), intPos[X], intPos[Y]) : g_NoMOID;
+				if (m_MOIDHit != g_NoMOID && !IsIgnoringMOID(m_MOIDHit)) {
 					m_OwnerMO->SetHitWhatMOID(m_MOIDHit);
 
 					++hitCount;

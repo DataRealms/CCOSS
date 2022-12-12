@@ -925,11 +925,6 @@ protected:
 	// Every team's MO footprint
 	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
-    // Optimization implementation
-    // MO's that have already been asked whether they exist in the manager this frame, and the search result.
-    // Gets cleaned out each frame. Does NOT own any instances.
-    std::deque<std::pair<const MovableObject *, bool> > m_ValiditySearchResults;
-
     // The alarm events on the scene where something alarming happened, for use with AI firings awareness os they react to shots fired etc.
     // This is the last frame's events, is the one for Actors to poll for events, should be cleaned out and refilled each frame.
     std::list<AlarmEvent> m_AlarmEvents;

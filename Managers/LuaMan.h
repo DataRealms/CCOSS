@@ -217,18 +217,18 @@ namespace RTE {
 
 #pragma region Saving and Loading
 		/// <summary>
-		/// Saves the currently running scene and activity to a savegame file. Note this only works for GAScripted activities.
+		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
-		/// <returns>Whether or not the game was successfully saved.</returns>
+		/// <returns>Whether or not the saved game was successfully saved.</returns>
 		bool SaveCurrentGame(const std::string &fileName);
 
 		/// <summary>
-		/// Loads a savegame, and starts it.
+		/// Loads a savegame, and launches its Scene and Activity.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
-		/// <returns>Whether or not the savegame was successfully loaded.</returns>
-		bool LoadAndStartGame(const std::string &fileName);
+		/// <returns>Whether or not the saved game was successfully loaded.</returns>
+		bool LoadAndLaunchGame(const std::string &fileName);
 #pragma endregion
 
 #pragma region Concrete Methods

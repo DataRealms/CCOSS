@@ -72,7 +72,7 @@ namespace RTE {
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF)
 				.def("SaveGame", &LuaMan::SaveCurrentGame)
-				.def("LoadGame", &LuaMan::LoadAndStartGame),
+				.def("LoadGame", &LuaMan::LoadAndLaunchGame),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
@@ -625,7 +625,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::LoadAndStartGame(const std::string &fileName) {
+	bool LuaMan::LoadAndLaunchGame(const std::string &fileName) {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 

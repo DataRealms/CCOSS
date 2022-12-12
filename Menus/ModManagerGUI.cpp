@@ -55,7 +55,7 @@ namespace RTE {
 
 	void ModManagerGUI::PopulateKnownModsList() {
 		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-			if (i >= g_PresetMan.GetOfficialModuleCount() && i < g_PresetMan.GetTotalModuleCount() - 3) {
+			if (i >= g_PresetMan.GetOfficialModuleCount() && i < g_PresetMan.GetTotalModuleCount() - c_NumberOfModulesToIgnoreWhenPopulatingKnownMods) {
 				if (const DataModule *dataModule = g_PresetMan.GetDataModule(i)) {
 					ModRecord modRecord = { dataModule->GetFileName(), dataModule->GetFriendlyName(), dataModule->GetDescription(), g_SettingsMan.IsModDisabled(dataModule->GetFileName()) };
 					m_KnownMods.emplace_back(modRecord);

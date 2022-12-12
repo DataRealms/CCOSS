@@ -607,6 +607,8 @@ namespace RTE {
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_ScriptSavesModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 		writer->NewPropertyWithValue("Activity", activity);
+		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjects());
+		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnits());
 
 		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
 			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
@@ -634,12 +636,18 @@ namespace RTE {
 			return false;
 		}
 
+		bool placeObjectsIfSceneIsRestarted = true;
+		bool placeUnitsIfSceneIsRestarted = true;
 		while (reader.NextProperty()) {
 			std::string propName = reader.ReadPropName();
         	if (propName == "Scene") {
 				reader >> scene.get();
 			} else if (propName == "Activity") {
 				reader >> activity.get();
+			} else if (propName == "PlaceObjectsIfSceneIsRestarted") {
+				reader >> placeObjectsIfSceneIsRestarted;
+			} else if (propName == "PlaceUnitsIfSceneIsRestarted") {
+				reader >> placeUnitsIfSceneIsRestarted;
 			}
     	}
 
@@ -647,6 +655,8 @@ namespace RTE {
 		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
 		// For starting Activity, we need to directly clone the Activity we want to start.
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
+		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
+		g_SceneMan.SetSceneToLoad(scene->GetPresetName(), placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		return true;
 	}

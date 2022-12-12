@@ -167,7 +167,7 @@ namespace RTE {
 		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
 		/// </summary>
 		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
-		/// <returns>An iterator over the directories in relativeDirectory.</returns>
+		/// <returns>A vector of the directories in relativeDirectory.</returns>
 		const std::vector<std::string> & DirectoryList(const std::string &relativeDirectory);
 
 		/// <summary>
@@ -175,7 +175,7 @@ namespace RTE {
 		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
 		/// </summary>
 		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
-		/// <returns>An iterator over the files in relativeDirectory.</returns>
+		/// <returns>A vector of the files in relativeDirectory.</returns>
 		const std::vector<std::string> & FileList(const std::string &relativeDirectory);
 
 		/// <summary>

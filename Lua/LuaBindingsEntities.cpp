@@ -221,6 +221,7 @@ namespace RTE {
 		.property("CPUPos", &Actor::GetCPUPos)
 		.property("EyePos", &Actor::GetEyePos)
 		.property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
+		.property("ReloadOffset", &Actor::GetReloadOffset, &Actor::SetReloadOffset)
 		.property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
 		.property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
 		.property("SharpAimProgress", &Actor::GetSharpAimProgress)

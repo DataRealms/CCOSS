@@ -97,7 +97,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SpatialPartitionGrid::MOIDList SpatialPartitionGrid::GetMOIDsInArea(int team, const IntRect &rect) const {
+	SpatialPartitionGrid::MOIDList SpatialPartitionGrid::GetMOIDsInArea(const IntRect &rect, int ignoreTeam) const {
 		MOIDList moidList;
 
 		int topLeftCellX = rect.m_Left / m_CellSize;
@@ -106,7 +106,7 @@ namespace RTE {
 		int bottomRightCellY = rect.m_Bottom / m_CellSize;
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
 			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
-				const MOIDList& moidsInCell = m_Cells[team + 1][GetCellIdForCellCoords(x, y)];
+				const MOIDList &moidsInCell = m_Cells[ignoreTeam + 1][GetCellIdForCellCoords(x, y)];
 				moidList.insert(moidList.end(), moidsInCell.begin(), moidsInCell.end());
 			}
 		}
@@ -116,16 +116,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const SpatialPartitionGrid::MOIDList& SpatialPartitionGrid::GetMOIDsAtPosition(int team, int x, int y) const {
+	const SpatialPartitionGrid::MOIDList& SpatialPartitionGrid::GetMOIDsAtPosition(int x, int y, int ignoreTeam) const {
 		int cellX = x / m_CellSize;
 		int cellY = y / m_CellSize;
 
 		// Lua sometimes decides to give SceneMan an ignoreTeam value of... -2.
 		// Yeah, seriously.
 		// So let's sanity check this shit.
-		team = team < Activity::NoTeam || team > Activity::MaxTeamCount ? Activity::NoTeam : team;
+		ignoreTeam = ignoreTeam < Activity::NoTeam || ignoreTeam > Activity::MaxTeamCount ? Activity::NoTeam : ignoreTeam;
 
-		return m_Cells[team + 1][GetCellIdForCellCoords(cellX, cellY)];
+		return m_Cells[ignoreTeam + 1][GetCellIdForCellCoords(cellX, cellY)];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

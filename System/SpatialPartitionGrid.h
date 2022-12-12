@@ -64,12 +64,12 @@ namespace RTE {
 		/// <summary>
 		/// Get MOIDs that are potentially overlapping a box
 		/// </summary>
-		MOIDList GetMOIDsInArea(int team, const IntRect &rect) const;
+		MOIDList GetMOIDsInArea(const IntRect &rect, int ignoreTeam) const;
 
 		/// <summary>
 		/// Get MOIDs that are potentially overlapping a pixel
 		/// </summary>
-		const SpatialPartitionGrid::MOIDList& GetMOIDsAtPosition(int team, int x, int y) const;
+		const SpatialPartitionGrid::MOIDList& GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
 #pragma endregion
 
 	private:

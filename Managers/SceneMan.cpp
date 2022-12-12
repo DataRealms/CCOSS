@@ -619,7 +619,7 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 // Description:     Gets a MOID from pixel coordinates in the Scene. LockScene() must be
 //                  called before using this method.
 
-MOID SceneMan::GetMOIDPixel(int team, int pixelX, int pixelY)
+MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 {
     WrapPosition(pixelX, pixelY);
 
@@ -633,7 +633,7 @@ MOID SceneMan::GetMOIDPixel(int team, int pixelX, int pixelY)
 #ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
 #else
-    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(team, pixelX, pixelY);
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
     MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
 #endif
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
@@ -1940,7 +1940,7 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
             // See if we found the looked-for pixel of the correct material,
             // Or an MO is blocking the way
             if (GetTerrMatter(intPos[X], intPos[Y]) != material ||
-                (checkMOs && g_SceneMan.GetMOIDPixel(Activity::NoTeam, intPos[X], intPos[Y]) != g_NoMOID))
+                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam) != g_NoMOID))
             {
                 // Save result and report success
                 foundPixel = true;
@@ -2468,7 +2468,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(ignoreTeam, intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
 #ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level
@@ -2597,7 +2597,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(Activity::NoTeam, intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam);
             if (hitMOID == targetMOID || g_MovableMan.GetRootMOID(hitMOID) == targetMOID)
             {
                 // Found target MOID, so save result and report success
@@ -2707,7 +2707,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             unsigned char checkMat = GetTerrMatter(intPos[X], intPos[Y]);
-            MOID checkMOID = GetMOIDPixel(ignoreTeam, intPos[X], intPos[Y]);
+            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
 
             // Translate any found MOID into the root MOID of that hit MO
             if (checkMOID != g_NoMOID)
@@ -3090,7 +3090,7 @@ float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int 
 
 bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
-    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(Activity::NoTeam, x, y) != g_NoMOID;
+    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(x, y, Activity::NoTeam) != g_NoMOID;
 
     if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);

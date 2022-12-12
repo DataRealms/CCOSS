@@ -163,16 +163,16 @@ namespace RTE {
 
 #pragma region File I/O Handling
 		/// <summary>
-		/// Returns an iterator over all the directories in relativeDirectory, which is relative to the working directory.
-		/// Note that a call to this method overwrites any previously returned iterator from DirectoryList() or FileList().
+		/// Returns a vector of all the directories in relativeDirectory, which is relative to the working directory.
+		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
 		/// </summary>
 		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
 		/// <returns>An iterator over the directories in relativeDirectory.</returns>
 		const std::vector<std::string> & DirectoryList(const std::string &relativeDirectory);
 
 		/// <summary>
-		/// Returns an iterator over all the files in relativeDirectory, which is relative to the working directory.
-		/// Note that a call to this method overwrites any previously returned iterator from DirectoryList() or FileList().
+		/// Returns a vector of all the files in relativeDirectory, which is relative to the working directory.
+		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
 		/// </summary>
 		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
 		/// <returns>An iterator over the files in relativeDirectory.</returns>
@@ -245,7 +245,7 @@ namespace RTE {
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
-		std::vector<std::string> m_Paths; //!< Storage location for the iterators returned by the methods DirectoryList() and FileList().
+		std::vector<std::string> m_Paths; //!< Storage location of the vector returned by the methods DirectoryList() and FileList().
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

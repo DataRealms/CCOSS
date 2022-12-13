@@ -174,6 +174,22 @@ namespace RTE {
 
 #pragma region File I/O Handling
 		/// <summary>
+		/// Returns a vector of all the directories in relativeDirectory, which is relative to the working directory.
+		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
+		/// </summary>
+		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
+		/// <returns>A vector of the directories in relativeDirectory.</returns>
+		const std::vector<std::string> & DirectoryList(const std::string &relativeDirectory);
+
+		/// <summary>
+		/// Returns a vector of all the files in relativeDirectory, which is relative to the working directory.
+		/// Note that a call to this method overwrites any previously returned vector from DirectoryList() or FileList().
+		/// </summary>
+		/// <param name="relativeDirectory">Directory path relative to the working directory.</param>
+		/// <returns>A vector of the files in relativeDirectory.</returns>
+		const std::vector<std::string> & FileList(const std::string &relativeDirectory);
+
+		/// <summary>
 		/// Opens a file or creates one if it does not exist, depending on access mode. You can open files only inside .rte folders in the working directly. You can't open more that c_MaxOpenFiles file simultaneously.
 		/// On Linux will attempt to open a file case insensitively.
 		/// </summary>
@@ -237,6 +253,8 @@ namespace RTE {
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
+
+		std::vector<std::string> m_FileOrDirectoryPaths; //!< Vector of file or directory paths, that gets filled by the DirectorList and FileList methods for use in Lua.
 
 		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.

@@ -1,35 +1,8 @@
 #ifndef _RTELUAREGISTERDEFINITIONS_
 #define _RTELUAREGISTERDEFINITIONS_
 
-#include "LuaBindDefinitions.h"
-
-#include "GameActivity.h"
-#include "MetaPlayer.h"
-#include "SLTerrain.h"
-#include "TerrainObject.h"
-
-#include "GUIBanner.h"
-#include "BuyMenuGUI.h"
-#include "SceneEditorGUI.h"
-
-#include "ActivityMan.h"
-#include "AudioMan.h"
-#include "ConsoleMan.h"
-#include "FrameMan.h"
-#include "MetaMan.h"
-#include "MovableMan.h"
-#include "PostProcessMan.h"
-#include "PresetMan.h"
-#include "PrimitiveMan.h"
-#include "SceneMan.h"
-#include "SettingsMan.h"
-#include "TimerMan.h"
-#include "UInputMan.h"
-
-#include "Box.h"
-#include "Controller.h"
-#include "DataModule.h"
-#include "PieMenu.h"
+#include "LuabindDefinitions.h"
+#include "LuaAdapterDefinitions.h"
 
 namespace RTE {
 
@@ -49,16 +22,16 @@ namespace RTE {
 	/// <summary>
 	/// Convenience macro for a LuaBind scope definition of an abstract type.
 	/// </summary>
-	#define AbstractTypeLuaClassDefinition(TYPE, PARENTTYPE)	\
-		luabind::class_<TYPE, PARENTTYPE>(#TYPE)				\
+	#define AbstractTypeLuaClassDefinition(TYPE, PARENTTYPE) \
+		luabind::class_<TYPE, PARENTTYPE>(#TYPE) \
 			.property("ClassName", &TYPE::GetClassName)
 
 	/// <summary>
 	/// Convenience macro for a LuaBind scope definition of a concrete type.
 	/// </summary>
-	#define ConcreteTypeLuaClassDefinition(TYPE, PARENTTYPE)				\
-		luabind::class_<TYPE, PARENTTYPE>(#TYPE)							\
-			.def("Clone", &Clone##TYPE, luabind::adopt(luabind::result))	\
+	#define ConcreteTypeLuaClassDefinition(TYPE, PARENTTYPE) \
+		luabind::class_<TYPE, PARENTTYPE>(#TYPE)													\
+			.def("Clone", &LuaAdaptersEntityClone::Clone##TYPE, luabind::adopt(luabind::result))	\
 			.property("ClassName", &TYPE::GetClassName)
 
 	/// <summary>
@@ -70,23 +43,23 @@ namespace RTE {
 	/// <summary>
 	/// Convenience macro for calling a register function of an abstract type, along with registering global bindings for adapters relevant to the type.
 	/// </summary>
-	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE)															\
-		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),						\
-		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\
+	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE) \
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&LuaAdaptersEntityCast::To##TYPE),						\
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&LuaAdaptersEntityCast::ToConst##TYPE),		\
 		OWNINGSCOPE::Register##TYPE##LuaBindings()
 
 	/// <summary>
 	/// Convenience macro for calling a register function of a concrete type, along with registering global bindings for adapters relevant to the type.
 	/// </summary>
-	#define RegisterLuaBindingsOfConcreteType(OWNINGSCOPE, TYPE)																									\
-		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Create##TYPE, luabind::adopt(luabind::result)),	\
-		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Create##TYPE, luabind::adopt(luabind::result)),					\
-		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, int))&Random##TYPE, luabind::adopt(luabind::result)),			\
-		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Random##TYPE, luabind::adopt(luabind::result)),	\
-		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Random##TYPE, luabind::adopt(luabind::result)),					\
-		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),																\
-		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),											\
-		luabind::def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE),															\
+	#define RegisterLuaBindingsOfConcreteType(OWNINGSCOPE, TYPE) \
+		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&LuaAdaptersEntityCreate::Create##TYPE, luabind::adopt(luabind::result)),		\
+		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&LuaAdaptersEntityCreate::Create##TYPE, luabind::adopt(luabind::result)),					\
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, int))&LuaAdaptersEntityCreate::Random##TYPE, luabind::adopt(luabind::result)),				\
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&LuaAdaptersEntityCreate::Random##TYPE, luabind::adopt(luabind::result)),		\
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&LuaAdaptersEntityCreate::Random##TYPE, luabind::adopt(luabind::result)),					\
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&LuaAdaptersEntityCast::To##TYPE),																	\
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&LuaAdaptersEntityCast::ToConst##TYPE),													\
+		luabind::def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&LuaAdaptersEntityCast::Is##TYPE),																\
 		OWNINGSCOPE::Register##TYPE##LuaBindings()
 #pragma endregion
 

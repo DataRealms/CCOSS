@@ -89,6 +89,18 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
+		/// Gets the width of this SLTerrain as determined by the main (material) bitmap.
+		/// </summary>
+		/// <returns>The width of this SLTerrain, in pixels.</returns>
+		int GetWidth() const { return m_Width; }
+
+		/// <summary>
+		/// Gets the height of this SLTerrain as determined by the main (material) bitmap.
+		/// </summary>
+		/// <returns>The height of this SLTerrain, in pixels.</returns>
+		int GetHeight() const { return m_Height; }
+
+		/// <summary>
 		/// Sets the layer of this SLTerrain that should be drawn to the screen when Draw() is called.
 		/// </summary>
 		/// <param name="layerToDraw">The layer that should be drawn. See LayerType enumeration.</param>
@@ -240,6 +252,9 @@ namespace RTE {
 	private:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		int m_Width; //!< The width of this SLTerrain as determined by the main (material) bitmap, in pixels.
+		int m_Height; //!< The height of this SLTerrain as determined by the main (material) bitmap, in pixels.
 
 		std::unique_ptr<SceneLayer> m_FGColorLayer; //!< The foreground color layer of this SLTerrain.
 		std::unique_ptr<SceneLayer> m_BGColorLayer; //!< The background color layer of this SLTerrain.

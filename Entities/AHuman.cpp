@@ -1520,20 +1520,22 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) const {
 			}
 
 			if (reloadHeldFirearm) {
+				//TODO it would be nice to calculate this based on arm movement speed, so it accounts for moving the arm there and back but I couldn't figure out the maths. Alternatively, the reload time could be calculated based on this, instead of this trying to calculate from the reload time.
+				float percentageOfReloadTimeToStayAtReloadOffset = 0.85F;
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
 
 				heldFirearm->Reload(!otherArmIsAvailable);
 				if (otherArmIsAvailable) {
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (!m_ReloadOffset.IsZero()) {
-						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * 0.8F);
+						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
 					} else {
-						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), heldFirearm->GetReloadTime() * 0.8F);
+						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
 					}
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				} else if (!m_ReloadOffset.IsZero()) {
-					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * 0.8F);
+					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				}
 			}
@@ -3895,7 +3897,7 @@ void AHuman::Update()
 	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
 		if (arm && arm->HasAnyHandTargets()) {
 			if (HeldDevice *heldDevice = arm->GetHeldDevice(); heldDevice && heldDevice->IsReloading()) {
-				float currentForearmAngle = GetFlipFactor() * (NormalizeAngleBetween0And2PI(arm->GetHandCurrentOffset().GetAbsRadAngle()) + m_OneHandedReloadAngle) + GetRotAngle();
+				float currentForearmAngle = (arm->GetHandCurrentOffset().GetAbsRadAngle() - (m_HFlipped ? c_PI : 0)) + (m_OneHandedReloadAngle * GetFlipFactor()) + GetRotAngle();
 				heldDevice->SetRotAngle(currentForearmAngle);
 			} else if (heldDevice && !heldDevice->IsReloading() && arm->GetNextHandTargetDescription() == "Reload Offset") {
 				arm->RemoveNextHandTarget();

@@ -1627,17 +1627,6 @@ public:
 	/// <returns>Pointer to the temp BITMAP of the appropriate size. Ownership is NOT transferred!</returns>
 	BITMAP * GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) const;
 
-	//	Struct to register terrain change events
-	struct TerrainChange
-	{
-		int x;
-		int y;
-		int w;
-		int h;
-		unsigned char color;
-		bool back;
-	};
-
 	/// <summary>
 	/// Sets the current scene pointer to null
 	/// </summary>

@@ -21,11 +21,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieQuadrant::Create(const PieQuadrant &reference) {
+	void PieQuadrant::Create(const PieQuadrant &reference, const Entity *oldOriginalPieSliceSourceToCheck, const Entity *newOriginalPieSliceSourceToSet) {
 		m_Enabled = reference.m_Enabled;
 		m_Direction = reference.m_Direction;
-		for (const PieSlice *pieSlice : reference.GetFlattenedPieSlices()) {
-			AddPieSlice(dynamic_cast<PieSlice *>(pieSlice->Clone()));
+		for (const PieSlice *referencePieSlice : reference.GetFlattenedPieSlices()) {
+			PieSlice *pieSliceToAdd = dynamic_cast<PieSlice *>(referencePieSlice->Clone());
+			if (referencePieSlice->GetOriginalSource() == oldOriginalPieSliceSourceToCheck) {
+				pieSliceToAdd->SetOriginalSource(newOriginalPieSliceSourceToSet);
+			}
+			AddPieSlice(pieSliceToAdd);
 		}
 	}
 

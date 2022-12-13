@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
 - New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
+	
+- New INI `BuyableMode` setting `BuyableMode = 3` for script only items.  
+	This makes the item unable to be bought by any player at all as if it were `Buyable = 0`, but without removing the item from the `CreateRandom` Lua functions that the AI and activities use.  
+	That way players can still find these weapons used by activities and AI enemies, and modders can have big arsenals, without actually having big arsenals.
 
 - New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
 
@@ -131,7 +135,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
 	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
 	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
-	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.  
+	**`PieSlices`** - Gets all of the `PieSlice`s in the `PieMenu` for iterating over in a for loop.  
 
 	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
 	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
@@ -144,7 +149,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
 	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
 	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
-	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
 	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
 	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
 
@@ -233,9 +237,58 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
+
+- Expose `Gib` to Lua.  
+	You can read and write the following properties:  
+	```
+	gib.ParticlePreset = movableObject;
+	gib.Offset = vector;
+	gib.Count = intValue;
+	gib.Spread = angleInRadians;
+	gib.MinVelocity = floatValue;
+	gib.MaxVelocity = floatValue;
+	gib.LifeVariation = floatValue;
+	gib.InheritsVel = bool;
+	gib.IgnoresTeamHits = bool;
+	gib.SpreadMode = SpreadMode;
+	```
+
+	The `SpreadMode` property accepts values from the `SpreadMode` enum:  
+	```
+	(0) Gib.SpreadRandom
+	(1) Gib.SpreadEven
+	(2) Gib.SpreadSpiral
+	```
+
+	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
+
+- New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
+
+- Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
+
+- Added key combinations for resetting time scales to defaults while performance stats are visible.  
+	`Ctrl + 1` to reset the time scale.  
+	`Ctrl + 3` to reset the `RealToSimCap`.  
+	`Ctrl + 5` to reset the `DeltaTime`.
+
+- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.
+
+- Added new `UPS` (Updates per second) measurement to the performance stats which is probably the most reliable performance indicator.  
+	The sim update target is ~60 UPS (defined by `DeltaTime`).  
+	When UPS dips due to load there will be noticeable FPS impact because more time is spent updating the sim and less time is left to draw frames before the next sim update.  
+	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
+	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
+	Results will obviously vary depending on system performance.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Greatly reduce online multiplayer bandwidth usage.
+
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
 
@@ -354,6 +407,14 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
+	The `MSPF` measurement now displays 3 values:  
+	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
+	`Update` - The total time spent updating the sim during the frame (as the sim can be updated multiple times per frame), in milliseconds.  
+	`Draw` - The time spend drawing during the frame, in milliseconds.
+
+- Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -362,7 +423,11 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
 
+- Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
+
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
+- Fix advanced performance stats (graphs) peak values stuck at 0.
 
 </details>
 

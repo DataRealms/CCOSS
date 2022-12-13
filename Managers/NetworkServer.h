@@ -1,10 +1,15 @@
 #ifndef _RTENETWORKSERVER_
 #define _RTENETWORKSERVER_
 
-#include "Singleton.h"
-#include "SceneMan.h"
+// TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
+#include "RakPeerInterface.h"
+#include "NatPunchthroughClient.h"
 
-#include "NetworkClient.h"
+// RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
+#undef GetClassName
+
+#include "Singleton.h"
+#include "NetworkMessages.h"
 
 #define g_NetworkServer NetworkServer::Instance()
 
@@ -13,6 +18,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 namespace RTE {
+
+	class Timer;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer server.
@@ -23,7 +30,7 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		enum NetworkServerStats {
 			STAT_CURRENT = 0,
@@ -32,7 +39,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		enum ThreadExitReasons {
 			NORMAL = 0,
@@ -41,6 +48,18 @@ namespace RTE {
 			SEND_BUFFER_IS_FULL,
 			SEND_BUFFER_IS_LIMITED_BY_CONGESTION,
 			LOCKED
+		};
+
+		/// <summary>
+		/// Struct for registering terrain change events for network transmission.
+		/// </summary>
+		struct NetworkTerrainChange {
+			int x;
+			int y;
+			int w;
+			int h;
+			unsigned char color;
+			bool back;
 		};
 
 #pragma region Creation
@@ -81,7 +100,7 @@ namespace RTE {
 		void EnableServerMode() { m_IsInServerMode = true; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <returns></returns>
 		bool ReadyForSimulation();
@@ -154,27 +173,27 @@ namespace RTE {
 
 #pragma region Network Scene Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="isLocked"></param>
 		void LockScene(bool isLocked);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void ResetScene();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="terrainChange"></param>
-		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
+		void RegisterTerrainChange(NetworkTerrainChange terrainChange);
 #pragma endregion
 
 	protected:
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		struct ClientConnection {
 			bool IsActive; //!<
@@ -207,10 +226,8 @@ namespace RTE {
 		RakNet::SystemAddress m_NATServiceServerID; //!<
 		bool m_NatServerConnected; //!<
 
-		unsigned char m_PixelLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!<
-
-		BITMAP *m_BackBuffer8[c_MaxClients]; //!<
-		BITMAP *m_BackBufferGUI8[c_MaxClients]; //!<
+		BITMAP *m_BackBuffer8[c_MaxClients]; //!< Buffers to store client screens before compression.
+		BITMAP *m_BackBufferGUI8[c_MaxClients]; //!< Buffers to store client GUI screens before compression.
 
 		void *m_LZ4CompressionState[c_MaxClients]; //!<
 		void *m_LZ4FastCompressionState[c_MaxClients]; //!<
@@ -225,11 +242,12 @@ namespace RTE {
 
 		bool m_UseHighCompression; //!< Whether to use higher compression methods (default).
 		bool m_UseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
+		bool m_UseDeltaCompression; //!< Whether to use delta compression methods and conserve bandwidth.
 		int m_HighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
 
 		/// <summary>
 		/// Acceleration factor, higher values consume more bandwidth but less CPU.
-		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
+		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed.
 		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
 		/// </summary>
 		int m_FastAccelerationFactor;
@@ -239,22 +257,25 @@ namespace RTE {
 
 		bool m_SendEven[c_MaxClients]; //!<
 
-		bool m_ShowStats; //!<
-		bool m_ShowInput; //!<
-
 		bool m_SendSceneSetupData[c_MaxClients]; //!<
 		bool m_SendSceneData[c_MaxClients]; //!<
 		bool m_SceneAvailable[c_MaxClients]; //!<
 		bool m_SendFrameData[c_MaxClients]; //!<
+
 		std::mutex m_SceneLock[c_MaxClients]; //!<
 
-		unsigned char m_TerrainChangeBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!<
-		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
-		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<
+		unsigned char m_PixelLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
+		unsigned char m_PixelLineBufferDelta[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store currently transferred pixel data line.
+		unsigned char m_CompressedLineBuffer[c_MaxClients][c_MaxPixelLineBufferSize]; //!< Buffer to store compressed pixel data line.
+
+		unsigned char *m_PixelLineBuffersPrev[c_MaxClients]; //!<
+		unsigned char *m_PixelLineBuffersGUIPrev[c_MaxClients]; //!<
+
+		std::queue<NetworkTerrainChange> m_PendingTerrainChanges[c_MaxClients]; //!<
+		std::queue<NetworkTerrainChange> m_CurrentTerrainChanges[c_MaxClients]; //!<
 
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
-		//std::mutex m_InputQueueMutex[c_MaxClients];
 		std::queue<MsgInput> m_InputMessages[c_MaxClients]; //!<
 
 		unsigned char m_SceneID; //!<
@@ -266,10 +287,10 @@ namespace RTE {
 
 		int m_FrameNumbers[c_MaxClients]; //!<
 
-		unsigned short m_Ping[c_MaxClients]; //!< 
-		Timer m_PingTimer[c_MaxClients]; //!<
+		unsigned short m_Ping[c_MaxClients]; //!<
+		std::array<std::unique_ptr<Timer>, c_MaxClients> m_PingTimer; //!<
 
-		Timer m_LastPackedReceived; //!<
+		std::unique_ptr<Timer> m_LastPackedReceived; //!<
 
 		/// <summary>
 		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
@@ -296,6 +317,12 @@ namespace RTE {
 		unsigned long m_DataSentCurrent[MAX_STAT_RECORDS][2]; //!<
 		unsigned long m_DataSentTotal[MAX_STAT_RECORDS]; //!<
 
+		unsigned long m_FullBlocksSentCurrent[MAX_STAT_RECORDS][2];
+		unsigned long m_EmptyBlocksSentCurrent[MAX_STAT_RECORDS][2];
+
+		unsigned long m_FullBlocksDataSentCurrent[MAX_STAT_RECORDS][2];
+		unsigned long m_EmptyBlocksDataSentCurrent[MAX_STAT_RECORDS][2];
+
 		unsigned long m_DataUncompressedTotal[MAX_STAT_RECORDS]; //!<
 		unsigned long m_DataUncompressedCurrent[MAX_STAT_RECORDS][2]; //!<
 
@@ -318,14 +345,14 @@ namespace RTE {
 
 #pragma region Thread Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="server"></param>
 		/// <param name="player"></param>
 		static void BackgroundSendThreadFunction(NetworkServer *server, short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="reason"></param>
@@ -334,69 +361,69 @@ namespace RTE {
 
 #pragma region Network Event Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
 		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveNewIncomingConnection(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendAcceptedMsg(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveDisconnection(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveRegisterMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="addr"></param>
 		void SendNATServerRegistrationMsg(RakNet::SystemAddress address);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveInputMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="msg"></param>
 		void ProcessInputMsg(short player, MsgInput msg);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ClearInputMessages(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSoundData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendMusicData(short player);
@@ -404,78 +431,78 @@ namespace RTE {
 
 #pragma region Network Scene Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool IsSceneAvailable(short player) const { return m_SceneAvailable[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToSendSceneSetupData(short player) const { return m_SendSceneSetupData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneSetupData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneSetupDataAccepted(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToSendSceneData(short player) const { return m_SendSceneData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ClearTerrainChangeQueue(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool NeedToProcessTerrainChanges(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void ProcessTerrainChanges(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="terrainChange"></param>
-		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange);
+		void SendTerrainChangeMsg(short player, NetworkTerrainChange terrainChange);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="packet"></param>
 		void ReceiveSceneAcceptedMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendSceneEndMsg(short player);
@@ -483,7 +510,7 @@ namespace RTE {
 
 #pragma region Network Frame Handling and Drawing
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="w"></param>
@@ -491,32 +518,40 @@ namespace RTE {
 		void CreateBackBuffer(short player, int w, int h);
 
 		/// <summary>
-		/// 
+		///
+		/// </summary>
+		/// <param name="player"></param>
+		/// <param name="w"></param>
+		/// <param name="h"></param>
+		void ClearBackBuffer(int player, int w, int h);
+
+		/// <summary>
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void DestroyBackBuffer(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendFrameSetupMsg(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
 		bool SendFrameData(short player) const { return m_SendFrameData[player]; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void SendPostEffectData(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
@@ -525,20 +560,20 @@ namespace RTE {
 
 #pragma region Network Stats Handling
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="player"></param>
 		void UpdateStats(short player);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void DrawStatisticsData();
 #pragma endregion
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		void HandleNetworkPackets();
 #pragma endregion
@@ -550,7 +585,7 @@ namespace RTE {
 		RakNet::RakNetGUID GetServerGUID() const { return m_Server->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS); }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="rakPeer"></param>
 		/// <param name="address"></param>

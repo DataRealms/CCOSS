@@ -174,8 +174,6 @@ int AssemblyEditor::Start()
     if (pRootBox)
         pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-    m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
-
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pLoadDialogBox)
     {
@@ -185,6 +183,10 @@ int AssemblyEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
+	m_pModuleCombo->SetDropHeight(std::min(m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + (std::max(m_pLoadNameCombo->GetDropHeight(), m_pModuleCombo->GetDropHeight()))); // Make sure the dropdowns can fit, no matter how tall they are.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
 
@@ -777,6 +779,7 @@ void AssemblyEditor::UpdateLoadDialog()
 			}
 		}
 
+		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2 }));
         // Select the "Scenes.rte" module
         m_pModuleCombo->SetSelectedIndex(scenesIndex);
     }

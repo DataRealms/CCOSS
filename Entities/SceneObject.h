@@ -44,7 +44,7 @@ public:
 	/// <summary>
 	/// Enumeration for the different buyable modes of this SceneObject.
 	/// </summary>
-	enum class BuyableMode { NoRestrictions, BuyMenuOnly, ObjectPickerOnly };
+	enum class BuyableMode { NoRestrictions, BuyMenuOnly, ObjectPickerOnly, ScriptOnly };
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -476,6 +476,11 @@ public:
 	/// <returns>Whether this SceneObject is available only in the ObjectPicker list when buyable.</returns>
 	bool IsBuyableInObjectPickerOnly() const { return m_BuyableMode == BuyableMode::ObjectPickerOnly; }
 
+	/// <summary>
+	/// Gets whether this SceneObject is available only by lua functions like CreateRandom
+	/// </summary>
+	/// <returns>Whether this SceneObject is available only in the AI list when buyable.</returns>
+	bool IsBuyableInScriptOnly() const { return m_BuyableMode == BuyableMode::ScriptOnly; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGraphicalIcon

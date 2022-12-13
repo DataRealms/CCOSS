@@ -6,7 +6,7 @@
 namespace RTE {
 
 	/// <summary>
-	///
+	/// A quadrant in a PieMenu, for easy PieSlice organization.
 	/// </summary>
 	class PieQuadrant {
 
@@ -33,7 +33,9 @@ namespace RTE {
 		///  Creates a PieQuadrant to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the PieQuadrant to deep copy.</param>
-		void Create(const PieQuadrant &reference);
+		/// <param name="oldOriginalPieSliceSourceToCheck">A pointer to the old original source to check. This is generally the PieMenu the reference quadrant belongs to.</param>
+		/// <param name="newOriginalPieSliceSourceToSet">A pointer to the new original source to be set for PieSlices whose reference's original source is the old original source to check. This is generally the PieMenu this quadrant belongs to.</param>
+		void Create(const PieQuadrant &reference, const Entity *oldOriginalPieSliceSourceToCheck, const Entity *newOriginalPieSliceSourceToSet);
 #pragma endregion
 
 #pragma region Destruction

@@ -245,7 +245,7 @@ namespace RTE {
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
-		std::vector<std::string> m_Paths; //!< Storage location of the vector returned by the methods DirectoryList() and FileList().
+		std::vector<std::string> m_FileOrDirectoryPaths; //!< Vector of file or directory paths, that gets filled by the DirectorList and FileList methods for use in Lua.
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

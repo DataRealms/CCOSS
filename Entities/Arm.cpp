@@ -139,15 +139,13 @@ namespace RTE {
 		Vector handTargetOffsetToAdd = g_SceneMan.ShortestDistance(m_JointPos, handTargetPositionToAdd, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 		if (!handTargetOffsetToAdd.IsZero()) {
 			handTargetOffsetToAdd.ClampMagnitude(m_MaxLength / 2.0F, m_MaxLength);
-			if (!m_HandTargets.empty()) {
-				if (description == m_HandTargets.back().Description) {
-					m_HandTargets.back() = { description, handTargetOffsetToAdd, std::max(m_HandTargets.back().DelayAtTarget, delayAtTarget) };
-					return;
-				}
-			} else {
+			if (m_HandTargets.empty()) {
 				m_HandHasReachedCurrentTarget = false;
+			} else if (description == m_HandTargets.back().Description) {
+				m_HandTargets.back() = { description, handTargetOffsetToAdd, std::max(m_HandTargets.back().DelayAtTarget, delayAtTarget), m_HFlipped };
+				return;
 			}
-			m_HandTargets.emplace(description, handTargetOffsetToAdd, delayAtTarget);
+			m_HandTargets.emplace(description, handTargetOffsetToAdd, delayAtTarget, m_HFlipped);
 		}
 	}
 
@@ -241,7 +239,8 @@ namespace RTE {
 					targetOffset.RadRotate(m_HandIdleRotation);
 				}
 			} else {
-				targetOffset = m_HandTargets.front().TargetOffset;
+				const HandTarget &nextHandTarget = m_HandTargets.front();
+				targetOffset = nextHandTarget.TargetOffset.GetXFlipped(nextHandTarget.HFlippedWhenTargetWasCreated != m_HFlipped);
 			}
 
 			if (m_HeldDevice && !heldDeviceIsAThrownDevice) {

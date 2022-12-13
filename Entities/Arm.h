@@ -273,10 +273,11 @@ namespace RTE {
 		/// Struct for storing data about each target in the Arm's queue of HandTargets.
 		/// </summary>
 		struct HandTarget {
-			HandTarget(const std::string_view &description, const Vector &targetOffset, float delayAtTarget) { Description = description, TargetOffset = targetOffset, DelayAtTarget = delayAtTarget; }
+			HandTarget(const std::string_view &description, const Vector &targetOffset, float delayAtTarget, bool hFlippedWhenTargetWasCreated) { Description = description, TargetOffset = targetOffset, DelayAtTarget = delayAtTarget, HFlippedWhenTargetWasCreated = hFlippedWhenTargetWasCreated; }
 			std::string Description;
 			Vector TargetOffset = Vector();
 			float DelayAtTarget = 0;
+			bool HFlippedWhenTargetWasCreated = false;
 		};
 	
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.

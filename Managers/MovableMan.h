@@ -898,6 +898,18 @@ public:
 
 	unsigned int GetSimUpdateFrameNumber() const { return m_SimUpdateFrameNumber; }
 
+    /// <summary>
+    /// Get MOs that are within a box
+    /// </summary>
+    const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); }
+    const std::vector<MovableObject *> & GetMOsInBox(const Box &box) const { return GetMOsInBox(box, Activity::NoTeam); }
+
+    /// <summary>
+    /// Get MOs that are within a radius
+    /// </summary>
+    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam); }
+    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

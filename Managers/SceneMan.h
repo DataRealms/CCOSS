@@ -475,6 +475,12 @@ public:
     MOID GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam);
     MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(pixelX, pixelY, Activity::NoTeam); }
 
+    /// <summary>
+    /// Gets this scene's MOID spatial partitioning grid
+    /// </summary>
+    /// <returns>This scene's MOID spatial partitioning grid</returns>
+    const SpatialPartitionGrid & GetMOIDGrid() const { return m_MOIDsGrid; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGlobalAcc

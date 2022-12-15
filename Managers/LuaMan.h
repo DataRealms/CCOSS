@@ -242,7 +242,7 @@ namespace RTE {
 
 		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
 		static const std::unordered_set<std::string> c_FileAccessModes; //!< Valid file access modes when opening files with FileOpen.
-		static const std::string c_ScriptSavesModuleName; //!< The name of the module to save games to and load them from.
+		static const std::string c_SavedGameModuleName; //!< The name of the module to save games to and load them from.
 
 		lua_State *m_MasterState; //!< The master parent script state.
 

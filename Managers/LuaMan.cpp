@@ -13,7 +13,7 @@
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	const std::string LuaMan::c_ScriptSavesModuleName = "Saves.rte";
+	const std::string LuaMan::c_SavedGameModuleName = "Saves.rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -589,7 +589,7 @@ namespace RTE {
 		}
 
 		// Save the scene bitmaps, or spit out an error if we can't.
-		if (scene->SaveData(c_ScriptSavesModuleName + "/" + fileName) < 0) {
+		if (scene->SaveData(c_SavedGameModuleName + "/" + fileName) < 0) {
 			return 4;
 		}
 
@@ -604,11 +604,11 @@ namespace RTE {
 
 		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
 		modifiableScene->SetPresetName(fileName);
-		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_ScriptSavesModuleName));
+		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_SavedGameModuleName));
 		modifiableScene->SetScriptSave(true);
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_ScriptSavesModuleName + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_SavedGameModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjects());
@@ -636,7 +636,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
- 		Reader reader(c_ScriptSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
+ 		Reader reader(c_SavedGameModuleName + "/" + fileName + ".ini", true, nullptr, true);
 		if (!reader.ReaderOK()) {
 			return false;
 		}
@@ -646,9 +646,7 @@ namespace RTE {
 		bool placeUnitsIfSceneIsRestarted = true;
 		while (reader.NextProperty()) {
 			std::string propName = reader.ReadPropName();
-        	if (propName == "Scene") {
-				reader >> scene.get();
-			} else if (propName == "Activity") {
+			if (propName == "Activity") {
 				reader >> activity.get();
 			} else if (propName == "OriginalScenePresetName") {
 				reader >> originalScenePresetName;
@@ -656,6 +654,8 @@ namespace RTE {
 				reader >> placeObjectsIfSceneIsRestarted;
 			} else if (propName == "PlaceUnitsIfSceneIsRestarted") {
 				reader >> placeUnitsIfSceneIsRestarted;
+			} else if (propName == "Scene") {
+				reader >> scene.get();
 			}
     	}
 

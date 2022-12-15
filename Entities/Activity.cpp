@@ -276,6 +276,7 @@ void Activity::Clear() {
 	int Activity::Start() {
 		m_ActivityState = ActivityState::Running;
 		m_Paused = false;
+		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
 		if (!g_FrameMan.IsInMultiplayerMode()) {

@@ -805,7 +805,7 @@ namespace RTE {
 			// Ctrl+W to save a WorldDump
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldToPNG("WorldDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full map saved to WorldDump.png");
+				g_ConsoleMan.PrintString("SYSTEM: Full level saved to WorldDump.png");
 			// Ctrl+M to cycle draw modes
 			} else if (KeyPressed(KEY_M)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
@@ -833,7 +833,7 @@ namespace RTE {
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full map preview saved to ScenePreviewDump.png");
+				g_ConsoleMan.PrintString("SYSTEM: Full level preview saved to ScenePreviewDump.png");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyPressed(KEY_P)) {
 					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
@@ -864,7 +864,7 @@ namespace RTE {
 						g_ConsoleMan.PrintString("ERROR: Cannot quick-save when there's no game running, or the game is finished!");
 						break;
 					case 2:
-						g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving!");
+						g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving! Make sure it's a scripted activity, and that it has an OnSave function.");
 						break;
 					case 3:
 						g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while quick-saving!");

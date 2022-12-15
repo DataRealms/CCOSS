@@ -31,6 +31,7 @@ namespace RTE {
 		m_DefaultActivityName = "Tutorial Mission";
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
+		m_ActivityAllowsSaving = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
@@ -162,6 +163,8 @@ namespace RTE {
 
 		// Stop all music played by the current activity. It will be re-started by the new Activity. 
 		g_AudioMan.StopMusic();
+
+		m_ActivityAllowsSaving = false;
 
 		m_StartActivity.reset(activity);
 		m_Activity.reset(dynamic_cast<Activity *>(m_StartActivity->Clone()));

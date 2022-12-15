@@ -576,17 +576,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::SaveCurrentGame(const std::string &fileName) {
+	int LuaMan::SaveCurrentGame(const std::string &fileName) {
 		Scene *scene = g_SceneMan.GetScene();
-		GAScripted *activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
-		if (!scene || !activity) {
-			return false;
+		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
+			return 1;
+		}
+		
+		if (!g_ActivityMan.GetActivityAllowsSaving()) {
+			return 2;
 		}
 
-		// Save the scene bitmaps.
+		// Save the scene bitmaps, or spit out an error if we can't.
 		if (scene->SaveData(c_ScriptSavesModuleName + "/" + fileName) < 0) {
-			return false;
+			return 4;
 		}
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
@@ -622,7 +626,7 @@ namespace RTE {
 		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
 
-		return true;
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

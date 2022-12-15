@@ -167,6 +167,12 @@ namespace RTE {
 		void SetActivityState(ActivityState newState) { m_ActivityState = newState; }
 
 		/// <summary>
+		/// Gets whether or not this Activity can be saved.
+		/// </summary>
+		/// <returns>Whether or not this Activity can be saved.</returns>
+		virtual bool ActivityCanBeSaved() const { return false; }
+
+		/// <summary>
 		/// Indicates whether the Activity is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the Activity is running or not.</returns>

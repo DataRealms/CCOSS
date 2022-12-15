@@ -220,8 +220,8 @@ namespace RTE {
 		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
-		/// <returns>Whether or not the saved game was successfully saved.</returns>
-		bool SaveCurrentGame(const std::string &fileName);
+		/// <returns>An exit code, where 0 is success and anything above 0 is an error.</returns>
+		int SaveCurrentGame(const std::string &fileName);
 
 		/// <summary>
 		/// Loads a savegame, and launches its Scene and Activity.

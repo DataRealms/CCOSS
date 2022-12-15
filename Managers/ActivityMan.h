@@ -49,6 +49,18 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
+		/// Gets whether or not the currently active Activity allows saving. 
+		/// </summary>
+		/// <returns>Whether or not the currently active Activity allows saving.</returns>
+		bool GetActivityAllowsSaving() const { return m_Activity && m_ActivityAllowsSaving; }
+
+		/// <summary>
+		/// Sets whether or not the currently active Activity allows saving.
+		/// </summary>
+		/// <param name="activityAllowsSaving">Whether or not the currently active Activity should allow saving.</param>
+		void SetActivityAllowsSaving(bool activityAllowsSaving) { m_ActivityAllowsSaving = activityAllowsSaving; }
+
+		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
@@ -241,6 +253,8 @@ namespace RTE {
 
 		std::unique_ptr<Activity> m_Activity; //!< The currently active Activity.
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
+
+		bool m_ActivityAllowsSaving; //!< Whether or not the current Activity allows saving and loading. The details on whether or not an Activity allows this are set up when the Activity is started.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.

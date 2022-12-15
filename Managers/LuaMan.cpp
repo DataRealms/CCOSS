@@ -609,10 +609,11 @@ namespace RTE {
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_ScriptSavesModuleName + "/" + fileName + ".ini"));
-		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 		writer->NewPropertyWithValue("Activity", activity);
+		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjects());
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnits());
+		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
 		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
 			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)

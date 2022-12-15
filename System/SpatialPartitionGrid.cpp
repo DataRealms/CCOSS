@@ -2,6 +2,7 @@
 
 #include "Box.h"
 #include "MovableObject.h"
+#include "SceneMan.h"
 
 namespace RTE {
 
@@ -167,7 +168,8 @@ namespace RTE {
 
 		for (MOID moid : potentialMOIDs) {
 			MovableObject* mo = g_MovableMan.GetMOFromID(moid);
-			if (mo && !(mo->GetPos() - centre).MagnitudeIsGreaterThan(radius)) {
+			Vector shortest = g_SceneMan.ShortestDistance(centre, mo->GetPos());
+			if (mo && !shortest.MagnitudeIsGreaterThan(radius)) {
 				s_MOList.push_back(mo);
 			}
 		}

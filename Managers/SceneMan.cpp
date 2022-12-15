@@ -318,7 +318,7 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 
                 // Ensure out-of-bounds material is unbreakable
                 if (tryId == g_MaterialOutOfBounds) {
-                    RTEAssert(pNewMat->GetIntegrity() == std::numeric_limits<float>::max();, 
+                    RTEAssert(pNewMat->GetIntegrity() == std::numeric_limits<float>::max(), 
                         "Material with index " + std::to_string(g_MaterialOutOfBounds) + " (i.e out-of-bounds material) has a finite integrity!\n This should be infinity (-1).");
                 }
 

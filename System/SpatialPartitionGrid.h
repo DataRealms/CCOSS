@@ -8,6 +8,7 @@
 
 namespace RTE {
 
+	class Box;
 	struct IntRect;
 	class MovableObject;
 
@@ -62,14 +63,19 @@ namespace RTE {
 		void Add(const IntRect &rect, const MovableObject &mo);
 
 		/// <summary>
-		/// Get MOIDs that are potentially overlapping a box
+		/// Get MOIDs that are within a box
 		/// </summary>
-		MOIDList GetMOIDsInArea(int team, const IntRect &rect) const;
+		const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const;
+
+		/// <summary>
+		/// Get MOIDs that are within a radius
+		/// </summary>
+		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
 
 		/// <summary>
 		/// Get MOIDs that are potentially overlapping a pixel
 		/// </summary>
-		const SpatialPartitionGrid::MOIDList& GetMOIDsAtPosition(int team, int x, int y) const;
+		const SpatialPartitionGrid::MOIDList & GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
 #pragma endregion
 
 	private:

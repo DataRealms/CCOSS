@@ -150,6 +150,10 @@ namespace RTE {
 		.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)
 		.def("EnableParticleSettling", &MovableMan::EnableParticleSettling)
 		.def("IsMOSubtractionEnabled", &MovableMan::IsMOSubtractionEnabled)
+		.def("GetMOsInBox", (const std::vector<MovableObject *> & (MovableMan::*)(const Box &) const)&MovableMan::GetMOsInBox)
+		.def("GetMOsInBox", (const std::vector<MovableObject *> & (MovableMan::*)(const Box &, int) const)&MovableMan::GetMOsInBox)
+		.def("GetMOsInRadius", (const std::vector<MovableObject *> & (MovableMan::*)(const Vector &, float) const)&MovableMan::GetMOsInRadius)
+		.def("GetMOsInRadius", (const std::vector<MovableObject *> & (MovableMan::*)(const Vector &, float, int) const)&MovableMan::GetMOsInRadius)
 
 		.def("AddMO", &LuaAdaptersMovableMan::AddMO, luabind::adopt(_2))
 		.def("AddActor", &LuaAdaptersMovableMan::AddActor, luabind::adopt(_2))

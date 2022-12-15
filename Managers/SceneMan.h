@@ -428,8 +428,14 @@ public:
 // Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
 // Return value:    The MOID currently at the specified pixel location.
 
-    MOID GetMOIDPixel(int team, int pixelX, int pixelY);
-    MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(Activity::NoTeam, pixelX, pixelY); }
+    MOID GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam);
+    MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(pixelX, pixelY, Activity::NoTeam); }
+
+    /// <summary>
+    /// Gets this scene's MOID spatial partitioning grid
+    /// </summary>
+    /// <returns>This scene's MOID spatial partitioning grid</returns>
+    const SpatialPartitionGrid & GetMOIDGrid() const { return m_MOIDsGrid; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

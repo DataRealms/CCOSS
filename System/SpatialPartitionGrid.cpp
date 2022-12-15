@@ -2,6 +2,7 @@
 
 #include "Box.h"
 #include "MovableObject.h"
+#include "SceneMan.h"
 
 namespace RTE {
 
@@ -94,38 +95,100 @@ namespace RTE {
 			}
 		}
 	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInBox(const Box &box, int ignoreTeam) const {
+		static std::vector<MovableObject *> s_MOList; // For script interop... :(
+		s_MOList.clear();
 
-	SpatialPartitionGrid::MOIDList SpatialPartitionGrid::GetMOIDsInArea(int team, const IntRect &rect) const {
-		MOIDList moidList;
+		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to GetMOsInRect()!");
 
-		int topLeftCellX = rect.m_Left / m_CellSize;
-		int topLeftCellY = rect.m_Top / m_CellSize;
-		int bottomRightCellX = rect.m_Right / m_CellSize;
-		int bottomRightCellY = rect.m_Bottom / m_CellSize;
+		std::unordered_set<MOID> potentialMOIDs;
+
+		Vector topLeft = box.GetCorner();
+		Vector bottomRight = topLeft + Vector(box.GetWidth(), box.GetHeight());
+
+		int topLeftCellX = topLeft.m_X / m_CellSize;
+		int topLeftCellY = topLeft.m_Y / m_CellSize;
+		int bottomRightCellX = bottomRight.m_X / m_CellSize;
+		int bottomRightCellY = bottomRight.m_Y / m_CellSize;
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
 			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
-				const MOIDList& moidsInCell = m_Cells[team + 1][GetCellIdForCellCoords(x, y)];
-				moidList.insert(moidList.end(), moidsInCell.begin(), moidsInCell.end());
+				const MOIDList& moidsInCell = m_Cells[ignoreTeam + 1][GetCellIdForCellCoords(x, y)];
+				for (MOID moid : moidsInCell) {
+					potentialMOIDs.insert(moid);
+				}
 			}
 		}
 
-		return moidList;
+		std::list<Box> boxes;
+		g_SceneMan.WrapBox(box, boxes);
+
+		auto isWithinAnyBox = [&](const MovableObject* mo) {
+			for (const Box& wrappedBox : boxes) {
+				if (wrappedBox.IsWithinBox(mo->GetPos())) {
+					return true;
+				}
+			}
+			return false;
+		};
+
+		for (MOID moid : potentialMOIDs) {
+			MovableObject* mo = g_MovableMan.GetMOFromID(moid);
+			if (mo && isWithinAnyBox(mo)) {
+				s_MOList.push_back(mo);
+			}
+		}
+
+		return s_MOList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const SpatialPartitionGrid::MOIDList& SpatialPartitionGrid::GetMOIDsAtPosition(int team, int x, int y) const {
+	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const {
+		static std::vector<MovableObject *> s_MOList; // For script interop... :(
+		s_MOList.clear();
+
+		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to GetMOsInRadius()!");
+
+		std::unordered_set<MOID> potentialMOIDs;
+
+		int topLeftCellX = (centre.m_X - radius) / m_CellSize;
+		int topLeftCellY = (centre.m_Y - radius) / m_CellSize;
+		int bottomRightCellX = (centre.m_X + radius) / m_CellSize;
+		int bottomRightCellY = (centre.m_Y + radius) / m_CellSize;
+		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
+			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
+				const MOIDList& moidsInCell = m_Cells[ignoreTeam + 1][GetCellIdForCellCoords(x, y)];
+				for (MOID moid : moidsInCell) {
+					potentialMOIDs.insert(moid);
+				}
+			}
+		}
+
+		for (MOID moid : potentialMOIDs) {
+			MovableObject* mo = g_MovableMan.GetMOFromID(moid);
+			Vector shortest = g_SceneMan.ShortestDistance(centre, mo->GetPos());
+			if (mo && !shortest.MagnitudeIsGreaterThan(radius)) {
+				s_MOList.push_back(mo);
+			}
+		}
+
+		return s_MOList;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const SpatialPartitionGrid::MOIDList& SpatialPartitionGrid::GetMOIDsAtPosition(int x, int y, int ignoreTeam) const {
 		int cellX = x / m_CellSize;
 		int cellY = y / m_CellSize;
 
 		// Lua sometimes decides to give SceneMan an ignoreTeam value of... -2.
 		// Yeah, seriously.
 		// So let's sanity check this shit.
-		team = team < Activity::NoTeam || team > Activity::MaxTeamCount ? Activity::NoTeam : team;
+		ignoreTeam = ignoreTeam < Activity::NoTeam || ignoreTeam > Activity::MaxTeamCount ? Activity::NoTeam : ignoreTeam;
 
-		return m_Cells[team + 1][GetCellIdForCellCoords(cellX, cellY)];
+		return m_Cells[ignoreTeam + 1][GetCellIdForCellCoords(cellX, cellY)];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

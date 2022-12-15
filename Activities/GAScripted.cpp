@@ -311,6 +311,8 @@ void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
 //                  the activity.
 
 int GAScripted::Start() {
+	ActivityState initialActivityState = m_ActivityState;
+
     int error = GameActivity::Start();
     if (error < 0) {
         return error;

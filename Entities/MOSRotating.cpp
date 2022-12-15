@@ -1799,32 +1799,34 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
     Vector spritePos(m_Pos.GetRounded() - targetPos);
 
-    if (m_Recoiled)
+    if (m_Recoiled) {
         spritePos += m_RecoilOffset;
+    }
 
     // If we're drawing a material silhouette, then create an intermediate material bitmap as well
-    if (mode != g_DrawColor && mode != g_DrawTrans)
-    {
+#ifdef DRAW_MOID_LAYER
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans;
+#else
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans && mode != g_DrawMOID;
+    RTEAssert(mode != g_DrawNoMOID, "DrawNoMOID drawing mode used with no MOID layer!");
+#endif
+    if (intermediateBitmapUsed) {
         clear_to_color(pTempBitmap, keyColor);
 
-// TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
+        // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
         // Draw the requested material silhouette on the material bitmap
-        if (mode == g_DrawMaterial)
+        if (mode == g_DrawMaterial) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
-        else if (mode == g_DrawWhite)
+        } else if (mode == g_DrawWhite) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);
-#ifdef DRAW_MOID_LAYER
-        else if (mode == g_DrawMOID)
+        } else if (mode == g_DrawMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_MOID, -1);
-#endif
-        else if (mode == g_DrawNoMOID)
+        } else if (mode == g_DrawNoMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
-		else if (mode == g_DrawDoor)
+        } else if (mode == g_DrawDoor) {
 			draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialDoor, -1);
-        else
-        {
-//            return;
-//            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
+        } else {
+            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
         }
     }
 

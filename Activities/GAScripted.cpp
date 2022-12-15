@@ -328,6 +328,7 @@ int GAScripted::Start() {
         return error;
     }
 
+	g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
     // Call the defined function, but only after first checking if it exists
     if ((error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity(); end")) < 0) {
         return error;

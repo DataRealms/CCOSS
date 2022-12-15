@@ -167,6 +167,12 @@ namespace RTE {
 		void SetActivityState(ActivityState newState) { m_ActivityState = newState; }
 
 		/// <summary>
+		/// Gets whether or not this Activity can be saved.
+		/// </summary>
+		/// <returns>Whether or not this Activity can be saved.</returns>
+		virtual bool ActivityCanBeSaved() const { return false; }
+
+		/// <summary>
 		/// Indicates whether the Activity is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the Activity is running or not.</returns>
@@ -259,11 +265,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Start();
-
-		/// <summary>
-		/// Sets this activity to running state, after everything has been initialized in the Create()
-		/// </summary>
-		virtual void PostStart() { m_ActivityState = (m_ActivityState == ActivityState::NotStarted ? ActivityState::Running : m_ActivityState); };
 
 		/// <summary>
 		/// Forces this Activity to end.

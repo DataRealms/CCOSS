@@ -204,6 +204,42 @@ int GAScripted::ReloadScripts() {
     return error;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool GAScripted::ActivityCanBeSaved() const {
+	if (const Scene *scene = g_SceneMan.GetScene(); scene && !scene->IsMetagameInternal()) {
+		std::ifstream scriptInputFileStream(m_ScriptPath);
+		if (scriptInputFileStream.good()) {
+			std::string::size_type commentPos;
+			bool inBlockComment = false;
+			while (!scriptInputFileStream.eof()) {
+				char rawLine[512];
+				scriptInputFileStream.getline(rawLine, 512);
+				std::string currentLine(rawLine);
+
+				if (!inBlockComment) {
+					commentPos = currentLine.find("--[[", 0);
+					inBlockComment = commentPos != std::string::npos;
+				}
+				if (inBlockComment) {
+					commentPos = currentLine.find("]]", commentPos == string::npos ? 0 : commentPos);
+					inBlockComment = commentPos != std::string::npos;
+				}
+				if (!inBlockComment) {
+					commentPos = currentLine.find("--", 0);
+					std::string::size_type foundTextPos = currentLine.find("OnSave");
+					if (foundTextPos != std::string::npos && foundTextPos < commentPos) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible
@@ -275,6 +311,8 @@ void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
 //                  the activity.
 
 int GAScripted::Start() {
+	ActivityState initialActivityState = m_ActivityState;
+
     int error = GameActivity::Start();
     if (error < 0) {
         return error;
@@ -291,7 +329,7 @@ int GAScripted::Start() {
     }
 
     // Call the defined function, but only after first checking if it exists
-    if ((error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity(); end")) < 0) {
+    if ((error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity( " + (initialActivityState == ActivityState::NotStarted ? "true" : "false") + "); end")) < 0) {
         return error;
     }
 

@@ -146,6 +146,12 @@ ClassInfoGetters;
 
 	const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
+	/// <summary>
+	/// Gets whether or not this GAScripted can be saved. For this to be true, the GAScripted's Lua script must have an OnSave function, and the Scene must not be MetagameInternal.
+	/// </summary>
+	/// <returns>Whether or not this GAScripted can be saved.</returns>
+	bool ActivityCanBeSaved() const override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible

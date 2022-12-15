@@ -763,7 +763,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
+// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
 // Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
@@ -1289,7 +1289,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsScriptSave
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a script saved scene
+// Description:     Whether this scene is a script saved scene.
 // Arguments:       None.
 // Return value:    Whether scene is a script save or not.
 
@@ -1299,7 +1299,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetScriptSave
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a script saved scene
+// Description:     Sets whether this scene is a script saved scene.
 // Arguments:       New value.
 // Return value:    None.
 
@@ -1411,6 +1411,14 @@ private:
 	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
 	/// <returns>A pointer to the pathfinder for the given team.</returns>
 	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
+
+	/// <summary>
+	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties
+	/// </summary>
+	/// <param name="writer">The Writer being used for serialization.</param>
+	/// <param name="sceneObjectToSave">The SceneObject to save.</param>
+	/// <param name="isChildAttachable">Convenience flag for whether or not this SceneObject is a child Attachable, and certain properties shouldn't be saved.</param>
+	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

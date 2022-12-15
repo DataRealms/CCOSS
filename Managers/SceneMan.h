@@ -179,6 +179,18 @@ public:
 
 	const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
 
+	/// <summary>
+	/// Gets whether objects are placed when the Scene is initially started. Used for saving/loading games.
+	/// </summary>
+	/// <returns>Whether objects are placed when the Scene is initially started.</returns>
+	bool GetPlaceObjects() { return m_PlaceObjects; }
+
+	/// <summary>
+	/// Gets whether units are placed when the Scene is initially started. Used for saving/loading games.
+	/// </summary>
+	/// <returns>Whether units are placed when the Scene is initially started.</returns>
+	bool GetPlaceUnits() { return m_PlaceUnits; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  LoadScene

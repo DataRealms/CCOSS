@@ -223,22 +223,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
 =========
-- New functionality to support save games.
+- The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
 	```lua
-	LuaMan:SaveGame(fileName) -- Saves the currently playing scene and activity to Saves.rte.
-	LuaMan:LoadGame(fileName) -- Loads and resumes a previously saved scene and activity.
+	LuaMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity to Saves.rte. Returns 0 if it works, or an error code if it doesn't, where 1 means there's no running Activity, 2 means the Activity doesn't allow saving, and 3 means the Activity's Scene couldn't be properly loaded.
+	LuaMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
 	```
-	Scripts on activities now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This allows the script to additionally save any extra information it needs.
-	
-	To determine if we're resuming a previously saved game, we can check against ActivityState in Start() as follows:
-	```lua
-	if self.ActivityState == Activity.NOTSTARTED then
-		-- Starting a new game.
-	else
-		-- Loading a previously saved game.
-	end
-	```
-	Activity now has several Lua convenience functions to support extra saved generic values, that will be saved along with the scene:
+	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
+	  
+	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This function must exist for the `Activity` to be saveable!  
+	To support saving and loading, `Activity` now has several Lua convenience functions to for dealing with script variables:
 	```lua
 	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey
 	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey
@@ -246,7 +239,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	A new global script has been added to support this functionality, and will auto-save every three minutes. This can be enabled in the global scripts menu, and the autosave can be loaded later by opening the console and typing `LuaMan:LoadGame("Autosave")`.
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section. To load games saved by this script, open the console and enter the command `LuaMan:LoadGame("Autosave")`.
 	
 - New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
 
@@ -291,6 +284,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
+
+- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.. These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
 </details>
 
@@ -425,6 +420,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`Draw` - The time spend drawing during the frame, in milliseconds.
 
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
+- The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
 
 </details>
 

@@ -275,7 +275,9 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
+		m_ActivityState = ActivityState::Running;
 		m_Paused = false;
+		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
 		if (!g_FrameMan.IsInMultiplayerMode()) {
@@ -309,11 +311,9 @@ void Activity::Clear() {
 
 			m_MessageTimer[player].Reset();
 
-			// Set our brains if they already exist
-			// For now, this does so in an arbritrary manner - TODO, we should save information on which brain is for which player in the scene!
+			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {
-				Actor* brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player));
-				if (brain) {
+				if (Actor *brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player))) {
 					SetPlayerBrain(brain, player);
 				}
 			}
@@ -865,17 +865,6 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GenericSavedData::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		writer.NewProperty("GenericSavedStrings");
-		writer << m_SavedStrings;
-		writer.NewProperty("GenericSavedNumbers");
-		writer << m_SavedNumbers;
-
-		return 0;
-	}
-
 	int GenericSavedData::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "GenericSavedStrings") {
 			reader >> m_SavedStrings;
@@ -890,20 +879,16 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GenericSavedData::GenericSavedStrings::Save(Writer &writer) const {
+	int GenericSavedData::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		for (const auto& pair : m_Data) {
-			if (pair.second.empty()) {
-				continue;
-			}
-
-			writer.NewProperty(pair.first);
-			writer << pair.second;
-		}
+		writer.NewPropertyWithValue("GenericSavedStrings", m_SavedStrings);
+		writer.NewPropertyWithValue("GenericSavedNumbers", m_SavedNumbers);
 
 		return 0;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GenericSavedData::GenericSavedStrings::ReadProperty(const std::string_view &propName, Reader &reader) {
 		std::string value;
@@ -914,16 +899,19 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GenericSavedData::GenericSavedNumbers::Save(Writer &writer) const {
+	int GenericSavedData::GenericSavedStrings::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		for (const auto& pair : m_Data) {
-			writer.NewProperty(pair.first);
-			writer << pair.second;
+		for (const auto &[key, value]: m_Data) {
+			if (!value.empty()) {
+				writer.NewPropertyWithValue(key, value);
+			}
 		}
 
 		return 0;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GenericSavedData::GenericSavedNumbers::ReadProperty(const std::string_view &propName, Reader &reader) {
 		float value;
@@ -932,4 +920,15 @@ void Activity::Clear() {
 		return 0;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int GenericSavedData::GenericSavedNumbers::Save(Writer &writer) const {
+		Entity::Save(writer);
+
+		for (const auto &[key, value] : m_Data) {
+			writer.NewPropertyWithValue(key, value);
+		}
+
+		return 0;
+	}
 }

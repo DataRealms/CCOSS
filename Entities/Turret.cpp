@@ -72,7 +72,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::SetFirstMountedDevice(HeldDevice *newMountedDevice) {
-		if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices[0]); }
+		if (HasMountedDevice()) {
+			RemoveAndDeleteAttachable(m_MountedDevices[0]);
+		}
 		if (newMountedDevice != nullptr) {
 			m_MountedDevices.emplace(m_MountedDevices.begin(), newMountedDevice);
 			AddAttachable(newMountedDevice);
@@ -94,20 +96,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::AddMountedDevice(HeldDevice *newMountedDevice) {
-		m_MountedDevices.emplace_back(newMountedDevice);
-		AddAttachable(newMountedDevice);
+		if (newMountedDevice != nullptr) {
+			m_MountedDevices.emplace_back(newMountedDevice);
+			AddAttachable(newMountedDevice);
 
-		m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
-			HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
-			RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to RemoveMountedDevice.");
-			dynamic_cast<Turret *>(parent)->RemoveMountedDevice(castedAttachable);
-		}});
+			m_HardcodedAttachableUniqueIDsAndRemovers.insert({ newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+				HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
+				RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to RemoveMountedDevice.");
+				dynamic_cast<Turret *>(parent)->RemoveMountedDevice(castedAttachable);
+			} });
 
-		newMountedDevice->SetInheritsRotAngle(false);
-		newMountedDevice->SetUnPickupable(true);
-		newMountedDevice->SetGibWithParentChance(1.0F);
-		//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
-		newMountedDevice->SetJointStrength(0.0F);
+			newMountedDevice->SetInheritsRotAngle(false);
+			newMountedDevice->SetUnPickupable(true);
+			newMountedDevice->SetGibWithParentChance(1.0F);
+			//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
+			newMountedDevice->SetJointStrength(0.0F);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

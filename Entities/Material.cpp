@@ -71,6 +71,7 @@ namespace RTE {
 			reader >> m_Piling;
 		} else if (propName == "Integrity" || propName == "StructuralIntegrity") {
 			reader >> m_Integrity;
+			m_Integrity = m_Integrity == -1.0F ? std::numeric_limits<float>::max() : m_Integrity;
 		} else if (propName == "Restitution" || propName == "Bounce") {
 			reader >> m_Restitution;
 		} else if (propName == "Friction") {

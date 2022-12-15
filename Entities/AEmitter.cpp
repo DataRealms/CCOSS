@@ -364,7 +364,7 @@ float AEmitter::GetParticlesPerMinute() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline int AEmitter::GetBurstSize() const {
+int AEmitter::GetBurstSize() const {
 	float totalBurstSize = 0;
 	for (const Emission *emission : m_EmissionList) {
 		totalBurstSize += emission->m_BurstSize;

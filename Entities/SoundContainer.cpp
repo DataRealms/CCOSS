@@ -61,7 +61,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "TopLevelSoundSet") {
+		if (propName == "SpecialBehaviour_TopLevelSoundSet") {
 			reader >> m_TopLevelSoundSet;
 		} else if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
@@ -113,8 +113,8 @@ namespace RTE {
 	int SoundContainer::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		writer.NewProperty("TopLevelSoundSet");
-		writer << m_TopLevelSoundSet;
+		// Due to writer limitations, the top level SoundSet has to be explicitly written out, even though SoundContainer standard behaviour is to hide it in INI and just have properties be part of the SoundContainer.
+		writer.NewPropertyWithValue("SpecialBehaviour_TopLevelSoundSet", m_TopLevelSoundSet);
 
 		writer.NewProperty("SoundSelectionCycleMode");
 		SoundSet::SaveSoundSelectionCycleMode(writer, m_TopLevelSoundSet.GetSoundSelectionCycleMode());

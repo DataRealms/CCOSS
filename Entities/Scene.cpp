@@ -1525,7 +1525,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		if (!attachablesToSave.empty()) {
 			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachablesAndWounds", true);
 		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviourClearAllAttachablesAndWounds", true);
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachablesAndWounds", true);
 		}
 
 		for (const Attachable *attachable : attachablesToSave) {

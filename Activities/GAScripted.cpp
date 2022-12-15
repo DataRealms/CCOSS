@@ -208,7 +208,7 @@ int GAScripted::ReloadScripts() {
 
 bool GAScripted::ActivityCanBeSaved() const {
 	//TODO this method is complicated and manually parsing lua like this sucks. It should be replaceable with a simple check if the function exists in Lua, but it wasn't working when I tried so I just copied this from SceneIsCompatible.
-	if (const Scene *scene = g_SceneMan.GetScene(); scene && !scene->IsMetagameInternal()) {
+	if (const Scene *scene = g_SceneMan.GetScene(); !scene || (scene && !scene->IsMetagameInternal())) {
 		std::ifstream scriptInputFileStream(m_ScriptPath);
 		if (scriptInputFileStream.good()) {
 			std::string::size_type commentPos;

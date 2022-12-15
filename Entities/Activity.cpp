@@ -274,7 +274,9 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
-		m_ActivityState = ActivityState::Running;
+		if (m_ActivityState != ActivityState::Editing) {
+			m_ActivityState = ActivityState::Running;
+		}
 		m_Paused = false;
 		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 

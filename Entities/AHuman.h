@@ -696,7 +696,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 // Arguments:       Whether or not to only reload empty fireams.
 // Return value:    None.
 
-	void ReloadFirearms(bool onlyReloadEmptyFirearms = false) const;
+	void ReloadFirearms(bool onlyReloadEmptyFirearms = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1028,6 +1028,7 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
+	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
 	float m_OneHandedReloadAngle; //!< The angle to which HDFirearms should point when they're being reloaded one-handed.
     // Blink timer
     Timer m_IconBlinkTimer;

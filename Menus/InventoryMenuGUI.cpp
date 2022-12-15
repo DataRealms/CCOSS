@@ -1247,7 +1247,7 @@ namespace RTE {
 		if (!m_InventoryActorIsHuman) {
 			return;
 		}
-		const AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
+		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
 		if (m_GUISelectedItem == nullptr) {
 			inventoryActorAsAHuman->ReloadFirearms();
 		} else if (const HDFirearm *selectedItemObjectAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {

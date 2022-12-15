@@ -74,6 +74,7 @@ void AHuman::Clear()
     m_JetTimeLeft = 0.0;
 	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
+	m_WaitingToReloadOffhand = false;
 	m_OneHandedReloadAngle = 0.75F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
@@ -178,6 +179,7 @@ int AHuman::Create(const AHuman &reference) {
     m_JetTimeLeft = reference.m_JetTimeLeft;
     m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
+	m_WaitingToReloadOffhand = reference.m_WaitingToReloadOffhand;
 	m_OneHandedReloadAngle = reference.m_OneHandedReloadAngle;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
@@ -1493,7 +1495,7 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) const {
+void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
 		if (arm) {
 			HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(arm->GetHeldDevice());
@@ -1514,6 +1516,9 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) const {
 					reloadHeldFirearm = true;
 				} else if (!otherHeldFirearm->IsReloading()) {
 					reloadHeldFirearm = true;
+					if (arm == m_pFGArm) {
+						m_WaitingToReloadOffhand = true;
+					}
 				}
 			} else {
 				reloadHeldFirearm = true;
@@ -3207,6 +3212,12 @@ void AHuman::Update()
 	
 	if (m_Controller.IsState(ControlState::WEAPON_RELOAD)) {
 		ReloadFirearms();
+	}
+	if (m_WaitingToReloadOffhand) {
+		if (HeldDevice *equippedItem = GetEquippedItem(); equippedItem && !equippedItem->IsReloading()) {
+			ReloadFirearms();
+			m_WaitingToReloadOffhand = false;
+		}
 	}
 
     ////////////////////////////////////

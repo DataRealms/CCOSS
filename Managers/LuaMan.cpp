@@ -636,6 +636,7 @@ namespace RTE {
 			return false;
 		}
 
+		std::string originalScenePresetName = fileName;
 		bool placeObjectsIfSceneIsRestarted = true;
 		bool placeUnitsIfSceneIsRestarted = true;
 		while (reader.NextProperty()) {
@@ -644,6 +645,8 @@ namespace RTE {
 				reader >> scene.get();
 			} else if (propName == "Activity") {
 				reader >> activity.get();
+			} else if (propName == "OriginalScenePresetName") {
+				reader >> originalScenePresetName;
 			} else if (propName == "PlaceObjectsIfSceneIsRestarted") {
 				reader >> placeObjectsIfSceneIsRestarted;
 			} else if (propName == "PlaceUnitsIfSceneIsRestarted") {
@@ -656,7 +659,7 @@ namespace RTE {
 		// For starting Activity, we need to directly clone the Activity we want to start.
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
 		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
-		g_SceneMan.SetSceneToLoad(scene->GetPresetName(), placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
+		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		return true;
 	}

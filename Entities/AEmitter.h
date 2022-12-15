@@ -136,29 +136,17 @@ ClassInfoGetters;
 
     float EstimateImpulse(bool burst = false);
 
+	/// <summary>
+	/// Gets the rate at which all of the Emissions of this AEmitter, combined, emit their particles.
+	/// </summary>
+	/// <returns>The combined particles per minute of all Emissions in this AEmitter.</returns>
+	float GetParticlesPerMinute() const { float totalPPM = 0; for (const Emission *emission : m_EmissionList) { totalPPM += emission->m_PPM; } return totalPPM; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetEmitRate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the rate at which this AEmitter emits its particles.
-// Arguments:       None.
-// Return value:    A float with the rate in #/min.
-
-    float GetEmitRate() const { return m_PPM; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBurstCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of particles that will be emitted in one shot upon
-//                  a triggered burst of this AEmitter.
-// Arguments:       None.
-// Return value:    The number of emitted particles a burst should have. 0 means burst
-//                  are disabled.
-
-    int GetBurstCount() const { return m_BurstSize; }
-*/
+	/// <summary>
+	/// Gets the number of particles that will be emitted by all the Emissions of this AEmitter combined, in one shot when a burst is triggered.
+	/// </summary>
+	/// <returns>The combined burst size of all Emissions in this AEmitter.</returns>
+	int GetBurstSize() const { float totalBurstSize = 0; for (const Emission *emission : m_EmissionList) { totalBurstSize += emission->m_BurstSize; } return totalBurstSize; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBurstScale
@@ -179,6 +167,12 @@ ClassInfoGetters;
 // Return value:    A float with the angle in radians.
 
     float GetEmitAngle() const { return m_EmitAngle.GetRadAngle(); }
+
+	/// <summary>
+	/// Gets the offset of the emission point from this' sprite center, which gets rotated with this.
+	/// </summary>
+	/// <returns>The emission offset.</returns>
+	Vector GetEmitOffset() const { return m_EmissionOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -572,6 +566,13 @@ ClassInfoGetters;
 // Return value:    Returns true if this emitter deals damage.
 
 	bool IsDamaging() { return (m_EmitDamage > 0 || m_BurstDamage > 0) && m_EmitterDamageMultiplier > 0; }
+
+	/// <summary>
+	/// Gets the number of emissions emitted since emission was last enabled.
+	/// </summary>
+	/// <returns>The number of emissions emitted since emission was last enabled.</returns>
+	long GetEmitCount() const { return m_EmitCount; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetEmitCountLimit

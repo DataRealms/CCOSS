@@ -1412,6 +1412,14 @@ private:
 	/// <returns>A pointer to the pathfinder for the given team.</returns>
 	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
+	/// <summary>
+	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties
+	/// </summary>
+	/// <param name="writer">The Writer being used for serialization.</param>
+	/// <param name="sceneObjectToSave">The SceneObject to save.</param>
+	/// <param name="isChildAttachable">Convenience flag for whether or not this SceneObject is a child Attachable, and certain properties shouldn't be saved.</param>
+	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////

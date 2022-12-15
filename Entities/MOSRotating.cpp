@@ -313,7 +313,20 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DeepCheck;
     else if (propName == "OrientToVel")
         reader >> m_OrientToVel;
-    else if (propName == "AddEmitter")
+	else if (propName == "SpecialBehaviour_ClearAllAttachablesAndWounds") {
+		// This special property is used to allow Attachables and Wounds to save with our limited serialization system, when saving the game. Note that we discard the property value because all that matters is having the property.
+		reader.ReadPropValue();
+		for (list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ++woundIterator) {
+			delete (*woundIterator);
+		}
+		m_Wounds.clear();
+
+		for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+			Attachable *attachable = *attachableIterator;
+			++attachableIterator;
+			delete RemoveAttachable(attachable);
+		}
+	} else if (propName == "AddEmitter")
     {
         AEmitter *pEmitter = new AEmitter;
         reader >> pEmitter;
@@ -324,7 +337,11 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         Attachable *pAttachable = new Attachable;
         reader >> pAttachable;
         m_Attachables.push_back(pAttachable);
-    }
+	} else if (propName == "SpecialBehaviour_AddWound") {
+		AEmitter *wound = new AEmitter;
+		reader >> wound;
+		m_Wounds.push_back(wound);
+	}
     else if (propName == "AddGib")
     {
         Gib gib;
@@ -1606,6 +1623,17 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID root
         // Anything that doesn't get hit by MOs doesn't need an ID, since that's only actually used for collision stuff.
         if (attachable->GetsHitByMOs()) { attachable->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID); }
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MOSRotating::AttachableIsHardcoded(const Attachable *attachableToCheck) const {
+	if (attachableToCheck->GetParent() != this) {
+		return false;
+	}
+
+	unsigned long attachableUniqueID = attachableToCheck->GetUniqueID();
+	return m_HardcodedAttachableUniqueIDsAndRemovers.find(attachableUniqueID) != m_HardcodedAttachableUniqueIDsAndRemovers.end() || m_HardcodedAttachableUniqueIDsAndSetters.find(attachableUniqueID) != m_HardcodedAttachableUniqueIDsAndSetters.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

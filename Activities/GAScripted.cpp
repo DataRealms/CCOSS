@@ -222,7 +222,7 @@ bool GAScripted::ActivityCanBeSaved() const {
 					inBlockComment = commentPos != std::string::npos;
 				}
 				if (inBlockComment) {
-					commentPos = currentLine.find("]]", commentPos == string::npos ? 0 : commentPos);
+					commentPos = currentLine.find("]]", commentPos == std::string::npos ? 0 : commentPos);
 					inBlockComment = commentPos != std::string::npos;
 				}
 				if (!inBlockComment) {

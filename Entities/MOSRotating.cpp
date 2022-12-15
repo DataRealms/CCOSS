@@ -316,7 +316,7 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "SpecialBehaviour_ClearAllAttachablesAndWounds") {
 		// This special property is used to allow Attachables and Wounds to save with our limited serialization system, when saving the game. Note that we discard the property value because all that matters is having the property.
 		reader.ReadPropValue();
-		for (list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ++woundIterator) {
+		for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ++woundIterator) {
 			delete (*woundIterator);
 		}
 		m_Wounds.clear();

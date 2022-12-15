@@ -221,14 +221,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
 		/// <returns>An exit code, where 0 is success and anything above 0 is an error.</returns>
-		int SaveCurrentGame(const std::string &fileName);
+		int SaveCurrentGame(const std::string &fileName) const;
 
 		/// <summary>
 		/// Loads a savegame, and launches its Scene and Activity.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
 		/// <returns>Whether or not the saved game was successfully loaded.</returns>
-		bool LoadAndLaunchGame(const std::string &fileName);
+		bool LoadAndLaunchGame(const std::string &fileName) const;
 #pragma endregion
 
 #pragma region Concrete Methods

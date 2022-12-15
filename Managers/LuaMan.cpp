@@ -576,7 +576,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::SaveCurrentGame(const std::string &fileName) {
+	//TODO would be nice to return an enum instead of a error code to make things more obvious. Lua will need to understand this enum value, so I didn't bother yet.
+	int LuaMan::SaveCurrentGame(const std::string &fileName) const {
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
@@ -632,7 +633,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::LoadAndLaunchGame(const std::string &fileName) {
+	bool LuaMan::LoadAndLaunchGame(const std::string &fileName) const {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 

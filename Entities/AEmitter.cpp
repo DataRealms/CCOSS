@@ -354,6 +354,26 @@ float AEmitter::EstimateImpulse(bool burst)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+float AEmitter::GetParticlesPerMinute() const {
+	float totalPPM = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalPPM += emission->m_PPM;
+	}
+	return totalPPM;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline int AEmitter::GetBurstSize() const {
+	float totalBurstSize = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalBurstSize += emission->m_BurstSize;
+	}
+	return totalBurstSize;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void AEmitter::SetFlash(Attachable *newFlash) {
     if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {

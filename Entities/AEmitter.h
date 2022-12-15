@@ -140,13 +140,13 @@ ClassInfoGetters;
 	/// Gets the rate at which all of the Emissions of this AEmitter, combined, emit their particles.
 	/// </summary>
 	/// <returns>The combined particles per minute of all Emissions in this AEmitter.</returns>
-	float GetParticlesPerMinute() const { float totalPPM = 0; for (const Emission *emission : m_EmissionList) { totalPPM += emission->m_PPM; } return totalPPM; }
+	float GetParticlesPerMinute() const;
 
 	/// <summary>
 	/// Gets the number of particles that will be emitted by all the Emissions of this AEmitter combined, in one shot when a burst is triggered.
 	/// </summary>
 	/// <returns>The combined burst size of all Emissions in this AEmitter.</returns>
-	int GetBurstSize() const { float totalBurstSize = 0; for (const Emission *emission : m_EmissionList) { totalBurstSize += emission->m_BurstSize; } return totalBurstSize; }
+	int GetBurstSize() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBurstScale

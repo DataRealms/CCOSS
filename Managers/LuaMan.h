@@ -231,22 +231,6 @@ namespace RTE {
 		bool FileEOF(int fileIndex);
 #pragma endregion
 
-#pragma region Saving and Loading
-		/// <summary>
-		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
-		/// </summary>
-		/// <param name="fileName">Path to the file.</param>
-		/// <returns>An exit code, where 0 is success and anything above 0 is an error.</returns>
-		int SaveCurrentGame(const std::string &fileName) const;
-
-		/// <summary>
-		/// Loads a savegame, and launches its Scene and Activity.
-		/// </summary>
-		/// <param name="fileName">Path to the file.</param>
-		/// <returns>Whether or not the saved game was successfully loaded.</returns>
-		bool LoadAndLaunchGame(const std::string &fileName) const;
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this LuaMan.
@@ -258,7 +242,6 @@ namespace RTE {
 
 		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
 		static const std::unordered_set<std::string> c_FileAccessModes; //!< Valid file access modes when opening files with FileOpen.
-		static const std::string c_SavedGameModuleName; //!< The name of the module to save games to and load them from.
 
 		lua_State *m_MasterState; //!< The master parent script state.
 

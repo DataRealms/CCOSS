@@ -19,7 +19,9 @@ namespace RTE {
 		.def("PauseActivity", &ActivityMan::PauseActivity)
 		.def("EndActivity", &ActivityMan::EndActivity)
 		.def("ActivityRunning", &ActivityMan::ActivityRunning)
-		.def("ActivityPaused", &ActivityMan::ActivityPaused);
+		.def("ActivityPaused", &ActivityMan::ActivityPaused)
+		.def("SaveGame", &ActivityMan::SaveCurrentGame)
+		.def("LoadGame", &ActivityMan::LoadAndLaunchGame);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

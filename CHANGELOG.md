@@ -220,8 +220,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
 	```lua
-	LuaMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity to Saves.rte. Returns 0 if it works, or an error code if it doesn't, where 1 means there's no running Activity, 2 means the Activity doesn't allow saving, and 3 means the Activity's Scene couldn't be properly loaded.
-	LuaMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
+	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity to Saves.rte. Returns 0 if it works, or an error code if it doesn't, where 1 means there's no running Activity, 2 means the Activity doesn't allow saving, and 3 means the Activity's Scene couldn't be properly loaded.
+	ActivityMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
 	```
 	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
 	  
@@ -234,7 +234,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section. To load games saved by this script, open the console and enter the command `LuaMan:LoadGame("Autosave")`.
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section. To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`.
 	
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  

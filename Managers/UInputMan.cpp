@@ -856,7 +856,7 @@ namespace RTE {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 				g_ConsoleMan.PrintString("SYSTEM: Console input saved to Console.input.log");
 			} else if (KeyPressed(KEY_F5)) {
-				switch (g_LuaMan.SaveCurrentGame("Quicksave")) {
+				switch (g_ActivityMan.SaveCurrentGame("Quicksave")) {
 					case 0:
 						g_ConsoleMan.PrintString("SYSTEM: Game quick-saved");
 						break;
@@ -873,7 +873,7 @@ namespace RTE {
 						RTEAbort("An unexpected error occured while quick-saving!");
 				}
 			} else if (KeyPressed(KEY_F9)) {
-				if (g_LuaMan.LoadAndLaunchGame("Quicksave")) {
+				if (g_ActivityMan.LoadAndLaunchGame("Quicksave")) {
 					g_ConsoleMan.PrintString("SYSTEM: Game quick-loaded");
 				} else {
 					g_ConsoleMan.PrintString("ERROR: Quick-loading failed! Make sure you have a saved game called Quicksave.");

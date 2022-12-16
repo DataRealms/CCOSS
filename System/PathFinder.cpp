@@ -26,12 +26,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PathFinder::Create(Scene *scene, int nodeDimension, unsigned int allocate) {
-		RTEAssert(scene, "Scene doesn't exist or isn't loaded when creating PathFinder!");
+	int PathFinder::Create(int nodeDimension, unsigned int allocate) {
+		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when creating PathFinder!");
 
 		m_NodeDimension = nodeDimension;
 		int sceneWidth = g_SceneMan.GetSceneWidth();
 		int sceneHeight = g_SceneMan.GetSceneHeight();
+		bool sceneWrapsX = g_SceneMan.SceneWrapsX();
+		bool sceneWrapsY = g_SceneMan.SceneWrapsY();
 
 		// Make overlapping nodes at seams if necessary, to make sure all scene pixels are covered
 		int nodeXCount = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
@@ -72,13 +74,13 @@ namespace RTE {
 				node = m_NodeGrid[x][y];
 
 				wrappedLeft = x - 1;
-				if (wrappedLeft < 0 && scene->WrapsX()) { wrappedLeft = nodeXCount - 1; }
+				if (wrappedLeft < 0 && sceneWrapsX) { wrappedLeft = nodeXCount - 1; }
 				wrappedRight = x + 1;
-				if (wrappedRight >= nodeXCount && scene->WrapsX()) { wrappedRight = 0; }
+				if (wrappedRight >= nodeXCount && sceneWrapsX) { wrappedRight = 0; }
 				wrappedUp = y - 1;
-				if (wrappedUp < 0 && scene->WrapsY()) { wrappedUp = nodeYCount - 1; }
+				if (wrappedUp < 0 && sceneWrapsY) { wrappedUp = nodeYCount - 1; }
 				wrappedDown = y + 1;
-				if (wrappedDown >= nodeYCount && scene->WrapsY()) { wrappedDown = 0; }
+				if (wrappedDown >= nodeYCount && sceneWrapsY) { wrappedDown = 0; }
 
 				// Leave nulls if any are out of bounds, even after wrapping (ie there was no wrapping in effect in that direction)
 				if (wrappedUp >= 0) { node->Up = m_NodeGrid[x][wrappedUp]; }
@@ -98,7 +100,7 @@ namespace RTE {
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
 		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
-		if (scene->WrapsX()) {
+		if (sceneWrapsX) {
 			for (int y = 0; y < nodeYCount; ++y) {
 				node = m_NodeGrid[0][y];
 				if (node->Left) { node->Left->RightMaterial = StrongestMaterialAlongLine(node->Pos, node->Left->Pos); }

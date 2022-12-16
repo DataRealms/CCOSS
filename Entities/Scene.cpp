@@ -929,7 +929,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		unsigned int numberOfBlocksToAllocate = 4000;
 
         for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
+            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
         }
         ResetPathFinding();
     }

@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
 - New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
+	
+- New INI `BuyableMode` setting `BuyableMode = 3` for script only items.  
+	This makes the item unable to be bought by any player at all as if it were `Buyable = 0`, but without removing the item from the `CreateRandom` Lua functions that the AI and activities use.  
+	That way players can still find these weapons used by activities and AI enemies, and modders can have big arsenals, without actually having big arsenals.
 
 - New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
 
@@ -295,7 +299,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
 
-- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.. These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
+- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
+
+- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
+	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
 </details>
 
@@ -821,7 +828,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	You can get all wounds with `GetWounds`, get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), get the gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property), and remove wounds with `RemoveWounds`.  
+	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.

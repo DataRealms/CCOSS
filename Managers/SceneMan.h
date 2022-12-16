@@ -1191,6 +1191,19 @@ public:
     float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
     float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          CastMaxStrengthRayMaterial
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Traces along a vector and returns the strongest of all encountered pixels' materials
+//                  This will take wrapping into account.
+// Arguments:       The starting position.
+//                  The ending position.
+//                  For every pixel checked along the line, how many to skip between them
+//                  for optimization reasons. 0 = every pixel is checked.
+//                  A material ID to ignore, IN ADDITION to Air.
+// Return value:    The strongest material encountered
+    const Material * CastMaxStrengthRayMaterial(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          CastStrengthRay

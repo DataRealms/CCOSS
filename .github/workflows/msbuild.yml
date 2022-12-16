@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
@@ -34,7 +34,7 @@ jobs:
       run: msbuild /m /p:Configuration="${{env.BUILD_CONFIGURATION}}" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Upload Artifact2
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: Cortex Command.exe
         path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/Cortex Command x64.exe

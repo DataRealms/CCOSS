@@ -41,7 +41,10 @@ namespace RTE {
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
 		if (!progressReportDisabled) { draw_sprite(g_FrameMan.GetBackBuffer32(), m_ProgressListboxBitmap, m_ProgressListboxPosX, m_ProgressListboxPosY); }
+		
+		g_FrameMan.ClearFrame();
 		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.SwapWindow();
 
 		if (!m_LoadingLogWriter) {
 			m_LoadingLogWriter = std::make_unique<Writer>("LogLoading.txt");
@@ -106,7 +109,9 @@ namespace RTE {
 
 			blit(g_LoadingScreen.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingScreen.m_ProgressListboxPosX, g_LoadingScreen.m_ProgressListboxPosY, g_LoadingScreen.m_ProgressListboxBitmap->w, g_LoadingScreen.m_ProgressListboxBitmap->h);
 
+			g_FrameMan.ClearFrame();
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 		}
 	}
 }

@@ -260,6 +260,7 @@ namespace RTE {
 
 			g_FrameMan.ClearBackBuffer8();
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -274,6 +275,7 @@ namespace RTE {
 
 		g_FrameMan.ClearBackBuffer8();
 		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.SwapWindow();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

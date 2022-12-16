@@ -3,10 +3,9 @@ project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_s
 #### Build environment Setup ####
 
 deps=[]
-if host_machine.system() in ['linux','osx']
+if host_machine.system() in ['linux','darwin']
   deps = [
-    dependency('allegro', version:'<5.0'),
-    dependency('loadpng'),
+    dependency('sdl2'),
     dependency('flac'),
     dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
@@ -16,8 +15,10 @@ if host_machine.system() in ['linux','osx']
     dependency('boost'), #needed for luabind
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2']),
   ]
-  if host_machine.system() == 'linux'
-    deps += dependency('x11')
+  allegro_dep = dependency('allegro', required: false)
+  loadpng_dep = dependency('loadpng', required: false)
+  if (allegro_dep.found() and loadpng_dep.found())
+    deps += [allegro_dep, loadpng_dep]
   endif
 endif
 
@@ -35,7 +36,9 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   #suffix = 'x86_64'
+	if host_machine.system()=='linux'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
+	endif
 
   # Set preprocessor flags and cpp arguments according to build options
   buildtype_debug = get_option('debug')
@@ -45,7 +48,10 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
 
     if get_option('sane_warnings')
-      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-inconsistent-missing-override']
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual']
+      if compiler.get_id() == 'clang'
+        extra_args += ['-Wno-inconsistent-missing-override', '-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
+      endif
     endif
 
     debug_type = get_option('debug_type')

@@ -2,6 +2,7 @@
 #define _ALLEGROINPUT_
 
 #include "GUIInput.h"
+#include "SDL2/SDL_scancode.h"
 
 namespace RTE {
 
@@ -21,14 +22,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player this AllegroInput will handle input for. -1 means no specific player and will default to player 1.</param>
 		/// <param name="keyJoyMouseCursor">Whether the keyboard and joysticks also can control the mouse cursor.</param>
 		AllegroInput(int whichPlayer, bool keyJoyMouseCursor = false);
-#pragma endregion
-
-#pragma region Concrete Methods
-		/// <summary>
-		/// Changes the mouse movement speed based on the graphics driver in use. The default (2) movement speed is slow and sluggish in dedicated fullscreen so this is used to change between default and faster (1) when switching drivers.
-		/// </summary>
-		/// <param name="graphicsDriver">The graphics driver to adjust mouse movement speed to.</param>
-		void AdjustMouseMovementSpeedToGraphicsDriver(int graphicsDriver) const;
+		~AllegroInput() = default;
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -55,6 +49,7 @@ namespace RTE {
 		std::unique_ptr<Timer> m_KeyTimer; //!< Timer for checking key hold duration.
 		std::unique_ptr<Timer> m_CursorAccelTimer; //!< Timer to calculate the mouse cursor acceleration when it is controller with the keyboard or joysticks.
 
+
 #pragma region Update Breakdown
 		/// <summary>
 		/// Updates the keyboard input.
@@ -78,7 +73,7 @@ namespace RTE {
 		/// <param name="allegroKey">The Allegro scancode.</param>
 		/// <param name="guilibKey">The corresponding GUIlib scancode</param>
 		/// <param name="elapsedS">The elapsed time since the last update, in seconds.</param>
-		void ConvertKeyEvent(int allegroKey, int guilibKey, float elapsedS);
+		void ConvertKeyEvent(SDL_Scancode sdlKey, int guilibKey, float elapsedS);
 
 		// Disallow the use of some implicit methods.
 		AllegroInput(const AllegroInput &reference) = delete;

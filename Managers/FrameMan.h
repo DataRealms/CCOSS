@@ -4,21 +4,30 @@
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
+#include "glm/glm.hpp"
 
 #define g_FrameMan FrameMan::Instance()
 
-#ifdef __unix__
-	// Define the missing Windows drivers as autodetect drivers so we don't need to add directives in every place they are used.
-	#define GFX_DIRECTX_ACCEL GFX_AUTODETECT_FULLSCREEN
-	#define GFX_DIRECTX_WIN_BORDERLESS GFX_AUTODETECT_WINDOWED
-#endif
+
+extern "C" {
+	struct SDL_Window;
+	typedef void* SDL_GLContext;
+}
 
 namespace RTE {
 
 	class AllegroScreen;
 	class AllegroBitmap;
 	class GUIFont;
+	class ScreenShader;
 
+	struct SdlWindowDeleter {
+		void operator()(SDL_Window *window);
+	};
+
+	struct SdlContextDeleter {
+		void operator()(SDL_GLContext context);
+	};
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
 	/// </summary>
@@ -33,7 +42,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a FrameMan object in system memory. Create() should be called before using the object.
 		/// </summary>
-		FrameMan() { Clear(); }
+		FrameMan();
 
 		/// <summary>
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
@@ -46,7 +55,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		~FrameMan() { Destroy(); }
+		~FrameMan();
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
@@ -95,20 +104,42 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
+
+		/// <summary>
+		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
+		/// </summary>
+		/// <returns>
+		/// The pointer to the main window.
+		/// </returns>
+		SDL_Window* GetWindow() const { return m_Window.get();}
+
+		SDL_GLContext GetContext() const { return m_GLContext.get(); }
 #pragma endregion
 
+#pragma region Display Switch Callbacks
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
+		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
+		/// </summary>
+		void DisplaySwitchOut();
+
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
+		/// </summary>
+		void DisplaySwitchIn();
+#pragma endregion
 #pragma region Resolution Handling
 		/// <summary>
 		/// Gets the graphics driver that is used for rendering.
 		/// </summary>
 		/// <returns>The graphics driver that is used for rendering.</returns>
-		int GetGraphicsDriver() const { return m_GfxDriver; }
+		int GetGraphicsDriver() const { return m_Fullscreen; }
 
 		/// <summary>
 		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
 		/// </summary>
 		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
-		bool IsUsingDedicatedGraphicsDriver() const { return m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL; }
+		bool IsUsingDedicatedGraphicsDriver() const { return false; }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
@@ -147,6 +178,14 @@ namespace RTE {
 		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
+		/// Checks whether the game window is currently in fullscreen mode.
+		/// </summary>
+		/// <returns>
+		/// Whether the window is fullscreen.
+		/// </returns>
+		bool IsWindowFullscreen() const { return m_Fullscreen; }
+
+		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="newMultiplier">The multiplier to switch to.</param>
@@ -159,7 +198,18 @@ namespace RTE {
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, int newGfxDriver);
+		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
+
+		/// <summary>
+		/// Apply resolution change after window resize.
+		/// </summary>
+		/// <param name="newResX">
+		/// The new horizontal resolution.
+		/// </param>
+		/// <param name="newResY">
+		/// The new verticla resolution.
+		/// </param>
+		void WindowResizedCallback(int newResX, int newResY);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -302,9 +352,19 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// Flips the frame buffers, showing the backbuffer on the current display.
+		/// Clear the GL backbuffer to start a new frame.
+		/// </summary>
+		void ClearFrame() const;
+
+		/// <summary>
+		/// Flips the frame buffers, draws the software backbuffer to the gl backbuffer. Draw other gl things (imgui) after this.
 		/// </summary>
 		void FlipFrameBuffers() const;
+
+		/// <summary>
+		/// Present the window content.
+		/// </summary>
+		void SwapWindow() const;
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
@@ -528,8 +588,20 @@ namespace RTE {
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
+		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
+		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
+		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
+		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
+		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
+		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
+		std::unique_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
+		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
+		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
+		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
+
+
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
-		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
+		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
 		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
 		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
 
@@ -632,29 +704,12 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
-#pragma region Display Switch Callbacks
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
-		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-		/// </summary>
-		static void DisplaySwitchOut();
-
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-		/// </summary>
-		static void DisplaySwitchIn();
-#pragma endregion
 
 #pragma region Create Breakdown
 		/// <summary>
 		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
 		/// </summary>
 		void SetInitialGraphicsDriver();
-
-		/// <summary>
-		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
-		/// </summary>
-		void SetDisplaySwitchMode() const;
 
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
@@ -678,6 +733,23 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();
+
+		/// <summary>
+		/// Create additional windows for multi display fullscreen. Will create as many windows as necessary to fulfill resXxresY resolution.
+		/// </summary>
+		/// <param name="resX">
+		/// Requested horizontal resolution (not including scaling).
+		/// </param>
+		/// <param name="resY">
+		/// Requested vertical resolution (not including scaling).
+		/// </param>
+		/// <param name="resMultiplier">
+		/// Requested resolution multiplier.
+		/// </param>
+		/// <returns>
+		/// Whether all displays were created successfully.
+		/// </returns>
+		bool CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier);
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -776,6 +848,7 @@ namespace RTE {
 		/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
 
 		// Disallow the use of some implicit methods.
 		FrameMan(const FrameMan &reference) = delete;

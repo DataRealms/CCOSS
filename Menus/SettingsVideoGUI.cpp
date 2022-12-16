@@ -12,12 +12,14 @@
 #include "GUIComboBox.h"
 #include "GUITextBox.h"
 
+#include "SDL2/SDL_video.h"
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
+		m_NewFullscreen = g_FrameMan.GetGraphicsDriver();
 		m_NewResX = g_FrameMan.GetResX();
 		m_NewResY = g_FrameMan.GetResY();
 		m_NewResUpscaled = g_FrameMan.GetResMultiplier() > 1;
@@ -155,13 +157,27 @@ namespace RTE {
 		m_PresetResolutions.clear();
 
 		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
-#ifdef _WIN32
-		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-#elif __unix__
-		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
-#endif
 
-		if (!resList) {
+		std::vector<SDL_DisplayMode> modeList;
+
+		std::set<PresetResolutionRecord> resRecords;
+		int dpIndex= SDL_GetWindowDisplayIndex(g_FrameMan.GetWindow());
+		for (int i = 0; i < SDL_GetNumDisplayModes(dpIndex); ++i) {
+			SDL_DisplayMode mode;
+			if (SDL_GetDisplayMode(dpIndex, i, &mode) != 0) {
+				(void)SDL_GetError();
+				continue;
+			}
+
+			if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
+				if (IsSupportedResolution(mode.w, mode.h)) {
+					resRecords.emplace(mode.w, mode.h, false);
+				}
+			}
+			modeList.push_back(mode);
+		}
+
+		if (modeList.size() == 0) {
 			m_PresetResolutionComboBox->SetVisible(false);
 			m_PresetResolutionApplyButton->SetVisible(false);
 
@@ -171,14 +187,6 @@ namespace RTE {
 			return;
 		}
 
-		std::set<PresetResolutionRecord> resRecords;
-		for (int i = 0; i < resList->num_modes; ++i) {
-			if (resList->mode[i].bpp == 32) {
-				int width = resList->mode[i].width;
-				int height = resList->mode[i].height;
-				if (IsSupportedResolution(width, height)) { resRecords.emplace(width, height, false); }
-			}
-		}
 		// Manually add qHD (960x540) to the list because it's rarely present in drivers.
 		resRecords.emplace(960, 540, false);
 
@@ -197,7 +205,6 @@ namespace RTE {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
 			}
 		}
-		destroy_gfx_mode_list(resList);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,8 +216,7 @@ namespace RTE {
 		} else {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
-			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
-			dynamic_cast<AllegroInput *>(m_GUIControlManager->GetManager()->GetInputController())->AdjustMouseMovementSpeedToGraphicsDriver(m_NewGraphicsDriver);
+			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewFullscreen);
 		}
 	}
 
@@ -219,21 +225,21 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
-				m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
+				m_NewFullscreen = false;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
 				break;
 			case ResolutionQuickChangeType::Borderless:
 			case ResolutionQuickChangeType::Dedicated:
-				m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				m_NewFullscreen = true;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX();
 				m_NewResY = g_FrameMan.GetMaxResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledBorderless:
 			case ResolutionQuickChangeType::UpscaledDedicated:
-				m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				m_NewFullscreen = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = true;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
@@ -256,11 +262,7 @@ namespace RTE {
 			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
-			m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
-
-#ifdef __unix__
-			m_NewGraphicsDriver = ((m_NewResX * newResMultiplier == g_FrameMan.GetMaxResX()) && (m_NewResY * newResMultiplier == g_FrameMan.GetMaxResY())) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
-#endif
+			m_NewFullscreen = false;
 
 			g_GUISound.ButtonPressSound()->Play();
 			ApplyNewResolution();
@@ -276,7 +278,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck() ? GFX_AUTODETECT_WINDOWED : GFX_DIRECTX_ACCEL;
+		m_NewFullscreen = m_CustomResolutionDedicatedRadioButton->GetCheck();
 
 		bool invalidResolution = false;
 
@@ -286,13 +288,6 @@ namespace RTE {
 		} else if (m_NewResX * newMultiplier < 640 || m_NewResY * newMultiplier < 384) {
 			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (640x384) is not supported.");
 			invalidResolution = true;
-
-#ifndef __unix__
-		} else if (m_NewGraphicsDriver == GFX_AUTODETECT_WINDOWED && m_NewResX % 4 != 0) {
-			m_CustomResolutionMessageLabel->SetText("Resolution width not divisible by 4 is not supported by the borderless driver.\nPlease use the dedicated driver instead.");
-			invalidResolution = true;
-#endif
-
 		}
 		g_GUISound.ButtonPressSound()->Play();
 

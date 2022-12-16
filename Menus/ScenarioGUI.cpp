@@ -385,7 +385,7 @@ namespace RTE {
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
 			return m_UpdateResult;
 		}
-		if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 			g_GUISound.BackButtonPressSound()->Play();
 			if (m_ActivityConfigBox->IsEnabled()) {
 				m_ActivityConfigBox->SetEnabled(false);
@@ -486,14 +486,14 @@ namespace RTE {
 				}
 			}
 		}
-		if (g_UInputMan.MouseButtonPressed(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
+		if (g_UInputMan.MenuButtonPressed(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
 			if (m_HoveredScene) {
 				g_GUISound.ItemChangeSound()->Play();
 				SetSelectedScene(m_HoveredScene);
 			} else {
 				SetDraggedBox(mouseX, mouseY);
 			}
-		} else if (g_UInputMan.MouseButtonReleased(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
+		} else if (g_UInputMan.MenuButtonReleased(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
 			m_DraggedBox = nullptr;
 		}
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MenuCursorButtons::MENU_PRIMARY)) { DragBox(mouseX, mouseY); }

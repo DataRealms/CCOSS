@@ -217,9 +217,9 @@ namespace RTE {
 	/// </summary>
 	enum MouseButtons {
 		MOUSE_NONE = -1,
-		MOUSE_LEFT = 0,
-		MOUSE_RIGHT,
+		MOUSE_LEFT = 1,
 		MOUSE_MIDDLE,
+		MOUSE_RIGHT,
 		MAX_MOUSE_BUTTONS
 	};
 
@@ -240,6 +240,15 @@ namespace RTE {
 		JOY_10,
 		JOY_11,
 		JOY_12,
+		JOY_13,
+		JOY_15,
+		JOY_16,
+		JOY_17,
+		JOY_18,
+		JOY_19,
+		JOY_20,
+		JOY_21,
+		JOY_22,
 		MAX_JOY_BUTTONS
 	};
 

@@ -18,6 +18,8 @@
 /// Cortex Command Community Project Discord - https://discord.gg/TSU6StNQUG
 /// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
+#include "allegro.h"
+#include "SDL2/SDL.h"
 
 #include "GUI.h"
 #include "AllegroInput.h"
@@ -159,6 +161,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
+			g_FrameMan.ClearFrame();
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -179,6 +182,7 @@ namespace RTE {
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 		}
 	}
 
@@ -206,6 +210,7 @@ namespace RTE {
 
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
 			g_TimerMan.Update();
+			g_FrameMan.ClearFrame();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
@@ -287,6 +292,7 @@ namespace RTE {
 
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
 			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);
@@ -301,9 +307,20 @@ namespace RTE {
 /// </summary>
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
-	allegro_init();
+	// allegro_init();
+	install_allegro(SYSTEM_NONE, &errno, atexit);
 	loadpng_init();
-	set_close_button_callback(System::WindowCloseButtonHandler);
+
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER);
+#if SDL_MINOR_VERSION > 22
+	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
+#endif
+	SDL_ShowCursor(SDL_DISABLE);
+	SDL_SetHint("SDL_ALLOW_TOPMOST", 0);
+
+	if (std::filesystem::exists("Base.rte/gamecontrollerdb.txt")) {
+		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
+	}
 
 	System::Initialize();
 	SeedRNG();
@@ -330,6 +347,9 @@ int main(int argc, char **argv) {
 	RunGameLoop();
 
 	DestroyManagers();
+
+	allegro_exit();
+	SDL_Quit();
 	return 0;
 }
 

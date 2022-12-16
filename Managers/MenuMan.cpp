@@ -110,7 +110,7 @@ namespace RTE {
 		}
 		if (quitResult) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOutQuit);
-		} else if (m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit && g_UInputMan.DetectJoystickHotPlug()) {
+		} else if (m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit) {
 			m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0);
 		}
 		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEndQuit) {

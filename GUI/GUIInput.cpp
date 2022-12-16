@@ -22,6 +22,9 @@ GUIInput::GUIInput(int whichPlayer, bool keyJoyMouseCursor) {
 	memset(m_MouseButtonsEvents, 0, sizeof(int) * 3);
 	memset(m_MouseButtonsStates, 0, sizeof(int) * 3);
 
+	m_TextInput = "";
+	m_HasTextInput = false;
+
 	//memset(m_NetworkMouseButtonsEvents, -1, sizeof(int) * 3);
 	//memset(m_NetworkMouseButtonsStates, -1, sizeof(int) * 3);
 

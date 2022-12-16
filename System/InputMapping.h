@@ -94,10 +94,9 @@ namespace RTE {
 		/// <summary>
 		/// Sets the joystick direction mapping.
 		/// </summary>
-		/// <param name="newStick">The number of the stick this should be mapped to.</param>
 		/// <param name="newAxis">The number of the axis this should be mapped to.</param>
 		/// <param name="newDirection">The number of the direction this should be mapped to.</param>
-		void SetDirection(int newStick, int newAxis, int newDirection) { m_DirectionMapped = true; m_StickMap = newStick; m_AxisMap = newAxis; m_DirectionMap = newDirection; }
+		void SetDirection(int newAxis, int newDirection) { m_DirectionMapped = true; m_AxisMap = newAxis; m_DirectionMap = newDirection; }
 
 		/// <summary>
 		/// Gets the joystick button mapping.
@@ -110,12 +109,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newButton">The number of the joystick button this should be mapped to.</param>
 		void SetJoyButton(int newButton) { m_JoyButtonMap = newButton; }
-
-		/// <summary>
-		/// Gets the joystick stick number that this is mapped to.
-		/// </summary>
-		/// <returns>The joystick stick number.</returns>
-		int GetStick() const { return m_StickMap; }
 
 		/// <summary>
 		/// Gets the joystick axis number that this is mapped to.
@@ -134,7 +127,6 @@ namespace RTE {
 		bool m_DirectionMapped; //!< Whether joystick direction mapping is enabled.
 
 		int m_JoyButtonMap; //!< The joystick button mapping.
-		int m_StickMap; //!< The joystick stick mapping, if any.
 		int m_AxisMap; //!< The joystick axis mapping.
 		int m_DirectionMap; //!< The joystick direction mapping.
 

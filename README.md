@@ -1,7 +1,7 @@
 # Cortex Command Community Project Source
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
-[![Linux Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
+[![Meson Build (Linux, macOS)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
 
 This is a community-driven effort to continue the development of Cortex Command.  
 Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
@@ -47,28 +47,27 @@ If you want to use an IDE other than Visual Studio, you will have to build using
 
 ***
 
-# Linux Build Instructions
+# Linux and macOS Build Instructions
 The Linux build uses the meson build system, and builds against system libraries.
 
 ## Dependencies
 
-* `g++>=8.1` (needs to support c++17 filesystem)
-* `allegro4`
-* `loadpng`
+* `g++>=8.1` or `clang++` (needs to support c++17 filesystem)
+* `allegro4` (optional, if missing will attempt to compile a stripped down version)
+* `loadpng` (optional, will be compiled if missing)
+* `sdl2`
 * `flac`
 * `luajit`
 * `lua`
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
-* `libX11`
-* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson=0.63.0 ninja=1.11.0` if your distro doesn't include a recent version)
+* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson` if your distro doesn't include a recent version)
 * `boost>=1.55`
-* (optional) `xmessage`
 
 ## Building
 
-1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
+1. Install Dependencies (see [below](#installing-dependencies) for instructions).
 
 2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data).
 
@@ -93,28 +92,31 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
 
-3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
-
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
 ## Installing Dependencies
+
+**macOS additional dependencies:**  
+- `brew` [brew.sh](https://brew.sh) (or any other package manager)  
+- `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
+
+**Homebrew (macOS):**  
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`
 
 **Arch Linux:**  
 `# pacman -S allegro4 boost flac luajit lua minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`sudo apt-get install build-essential liballegro4-dev libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev ninja-build python-pip`  
+`sudo python -m pip install meson`
+
 
 **Fedora:**  
 `# dnf install allegro-loadpng-devel allegro-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel libX11-devel xmessage lua-devel libX11-devel gcc gcc-c++`  
 
 ## Troubleshooting
 
-* On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
-
-* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
-
-* Gamepad triggers may be inverted, to work around that: Hold down the trigger, select the input you want it assigned to and release to assign it, then it will be correct in use.
+* older versions of `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
 
 ***
 

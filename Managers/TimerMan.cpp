@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#elif __unix__
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <time.h>
 #endif
 
@@ -43,7 +43,7 @@ namespace RTE {
 		LARGE_INTEGER tempLInt;
 		QueryPerformanceFrequency(&tempLInt);
 		m_TicksPerSecond = tempLInt.QuadPart;
-#elif __unix__
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		timespec my_TimeSpec;
 		clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
 		m_TicksPerSecond = ((1e9 / my_TimeSpec.tv_nsec) / 1000);
@@ -65,7 +65,7 @@ namespace RTE {
 		LARGE_INTEGER tickReading;
 		QueryPerformanceCounter(&tickReading);
 		long long ticks = tickReading.QuadPart;
-#elif __unix__
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		timespec my_TimeSpec;
 		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
 		// Get the nanoseconds value for right now and convert it to microseconds, since we don't honestly need anything more than that.
@@ -87,7 +87,7 @@ namespace RTE {
 		LARGE_INTEGER tempLInt;
 		QueryPerformanceCounter(&tempLInt);
 		m_StartTime = tempLInt.QuadPart;
-#elif __unix__
+#elif defined(__unix__) || (defined(__unix__) && defined(__MACH__))
 		timespec my_TimeSpec;
 		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
 		// Get the nanoseconds value for right now and convert it to microseconds, since we don't honestly need anything more than that.
@@ -130,7 +130,7 @@ namespace RTE {
 		LARGE_INTEGER tickReading;
 		QueryPerformanceCounter(&tickReading);
 		m_RealTimeTicks = tickReading.QuadPart - m_StartTime;
-#elif __unix__
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		std::uint64_t curTime;
 		timespec my_TimeSpec;
 		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);

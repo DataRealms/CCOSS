@@ -223,6 +223,7 @@ void GUIManager::Update(bool ignoreKeyboardEvents) {
 
 
 		for (i = 1; i < 256; i++) {
+
 			switch (KeyboardBuffer[i]) {
 				// KeyDown & KeyPress
 				case GUIInput::Pushed:
@@ -242,6 +243,10 @@ void GUIManager::Update(bool ignoreKeyboardEvents) {
 				default:
 					break;
 			}
+		}
+		std::string_view textInput;
+		if (m_Input->GetTextInput(textInput)) {
+			m_FocusPanel->OnTextInput(textInput);
 		}
 	}
 }

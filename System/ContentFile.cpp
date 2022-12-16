@@ -6,6 +6,7 @@
 #include "png.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
+#include "boost/functional/hash.hpp"
 
 namespace RTE {
 
@@ -106,6 +107,8 @@ namespace RTE {
 		m_DataPathAndReaderPosition = m_DataPath + "\n" + newPosition;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	size_t ContentFile::GetHash() const { return boost::hash<std::string>()(m_DataPath); }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::GetImageFileInfo(ImageFileInfoType infoTypeToGet) {

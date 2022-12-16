@@ -4,9 +4,13 @@
 #include "Singleton.h"
 #include "Vector.h"
 #include "InputScheme.h"
+#include "Gamepad.h"
+#include "SDL2/SDL_keyboard.h"
 
 #define g_UInputMan UInputMan::Instance()
-
+extern "C" {
+union SDL_Event;
+}
 namespace RTE {
 
 	class GUIInput;
@@ -51,12 +55,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Concrete Methods
-		/// <summary>
-		/// Workaround for Allegro being unable to detect joystick plugging/unplugging at runtime to enable/disable them accordingly. Uses OS functions to check if the number of connected joysticks changed and reinitializes the joystick handler if necessary.
-		/// </summary>
-		/// <returns>Whether plugging/unplugging was detected and the joystick handler was reinitialized.</returns>
-		bool DetectJoystickHotPlug() const;
-
 		/// <summary>
 		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.
 		/// </summary>
@@ -206,19 +204,19 @@ namespace RTE {
 		/// Gets the state of the Ctrl key.
 		/// </summary>
 		/// <returns>The state of the Ctrl key.</returns>
-		bool FlagCtrlState() const { return ((key_shifts & KB_CTRL_FLAG) > 0) ? true : false; }
+		bool FlagCtrlState() const { return ((SDL_GetModState() & KMOD_CTRL) > 0) ? true : false; }
 
 		/// <summary>
 		/// Gets the state of the Alt key.
 		/// </summary>
 		/// <returns>The state of the Alt key.</returns>
-		bool FlagAltState() const { return ((key_shifts & KB_ALT_FLAG) > 0) ? true : false; }
+		bool FlagAltState() const { return ((SDL_GetModState() & KMOD_ALT) > 0) ? true : false; }
 
 		/// <summary>
 		/// Gets the state of the Shift key.
 		/// </summary>
 		/// <returns>The state of the Shift key.</returns>
-		bool FlagShiftState() const { return ((key_shifts & KB_SHIFT_FLAG) > 0) ? true : false; }
+		bool FlagShiftState() const { return ((SDL_GetModState() & KMOD_SHIFT) > 0) ? true : false; }
 #pragma endregion
 
 #pragma region Keyboard Handling
@@ -233,33 +231,54 @@ namespace RTE {
 		/// </summary>
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <returns>Whether the key is held or not.</returns>
-		bool KeyHeld(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
+		bool KeyHeld(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
+		bool KeyHeld(SDL_Keycode keyToTest) const { return KeyHeld(SDL_GetScancodeFromKey(keyToTest));}
 
 		/// <summary>
 		/// Shows the scancode of the keyboard key which is currently down.
 		/// </summary>
 		/// <returns>The scancode of the first keyboard key in the keyboard buffer. 0 means none.</returns>
-		int WhichKeyHeld() const { int key = readkey(); return key >> 8; }
+		int WhichKeyHeld() const { return 0; } // int key = readkey(); return key >> 8; }
 
 		/// <summary>
 		/// Gets whether a key was pressed between the last update and the one previous to it.
 		/// </summary>
-		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="keyToTest">A SDL_Scancode with the SDL scancode enumeration to test (follows usb-hid definitions).</param>
 		/// <returns>Whether the key is pressed or not.</returns>
-		bool KeyPressed(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+		bool KeyPressed(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether a key was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="keyToTest">A SDL_Keycode with the SDL key enumeration to test.</param>
+		/// <returns>Whether the key is pressed or not.</returns>
+		bool KeyPressed(SDL_Keycode keyToTest) const { return KeyPressed(SDL_GetScancodeFromKey(keyToTest)); }
 
 		/// <summary>
 		/// Gets whether a key was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <returns>Whether the key is released or not.</returns>
-		bool KeyReleased(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+		bool KeyReleased(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+
+		bool KeyReleased(SDL_Keycode keyToTest) const { return KeyReleased(SDL_GetScancodeFromKey(keyToTest)); }
 
 		/// <summary>
 		/// Return true if there are any keyboard button presses at all.
 		/// </summary>
 		/// <returns>Whether any keyboard buttons have been pressed at all since last frame.</returns>
 		bool AnyKeyPress() const;
+
+		/// <summary>
+		/// Fills the given string with the text input since the last frame (if any).
+		/// </summary>
+		/// <param name="text">
+		/// The std::string to fill.
+		/// </param>
+		/// <returns>
+		/// Whether there is text input.
+		/// </returns>
+		bool GetTextInput(std::string& text) const {text = m_TextInput; return !m_TextInput.empty();}
 #pragma endregion
 
 #pragma region Mouse Handling
@@ -275,6 +294,22 @@ namespace RTE {
 		/// </summary>
 		/// <param name="disable">Whether to disable mouse positioning or not.</param>
 		void DisableMouseMoving(bool disable = true);
+
+		/// <summary>
+		/// Get the absolute mouse position in window coordinates.
+		/// </summary>
+		/// <returns>
+		/// The absoulte mouse position.
+		/// </returns>
+		Vector GetAbsoluteMousePosition() const { return m_AbsoluteMousePos; }
+
+		/// <summary>
+		/// Set the absolute mouse position (e.g. for player input mouse movement). Does not move the system cursor.
+		/// </summary>
+		/// <param name="pos">
+		/// The new mouse position.
+		/// </param>
+		void SetAbsoluteMousePosition(const Vector pos) { m_AbsoluteMousePos = pos; }
 
 		/// <summary>
 		/// Gets the relative movement of the mouse since last update. Only returns true if the selected player is actually using the mouse.
@@ -396,7 +431,7 @@ namespace RTE {
 		/// Gets the number of active joysticks.
 		/// </summary>
 		/// <returns>The number of active joysticks.</returns>
-		int GetJoystickCount() const { return (num_joysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : num_joysticks; }
+		int GetJoystickCount() const { return (m_NumJoysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : m_NumJoysticks; }
 
 		/// <summary>
 		/// Gets the index number of a joystick from InputDevice. Basically just subtract 2 from the passed in value because the Allegro joystick indices are 0-3 and ours are 2-5.
@@ -405,12 +440,14 @@ namespace RTE {
 		/// <returns>The corrected index. A non-joystick device will result in an out of range value returned which will not affect any active joysticks.</returns>
 		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT ; }
 
+		int GetJoystickAxisCount(int whichJoy) const;
+
 		/// <summary>
 		/// Gets whether the specified joystick is active. The joystick number does not correspond to the player number.
 		/// </summary>
 		/// <param name="joystickNumber">Joystick to check for.</param>
 		/// <returns>Whether the specified joystick is active.</returns>
-		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && joystickNumber < num_joysticks; }
+		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && s_PrevJoystickStates[joystickNumber].m_JoystickID   != -1; }
 
 		/// <summary>
 		/// Gets whether a joystick button is being held down right now.
@@ -454,48 +491,36 @@ namespace RTE {
 		/// Gets whether a joystick axis is being held down in a specific direction right now. Two adjacent directions can be held down to produce diagonals.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is held in the specified direction or not.</returns>
-		bool JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Held); }
+		bool JoyDirectionHeld(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Held); }
 
 		/// <summary>
 		/// Gets whether a joystick axis direction was pressed between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is pressed or not.</returns>
-		bool JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Pressed); }
+		bool JoyDirectionPressed(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Pressed); }
 
 		/// <summary>
 		/// Gets whether a joystick axis direction was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
 		/// <returns>Whether the stick axis is released or not.</returns>
-		bool JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Released); }
+		bool JoyDirectionReleased(int whichJoy, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichAxis, whichDir, InputState::Released); }
 
 		/// <summary>
 		/// Gets the normalized value of a certain joystick's stick's axis.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <returns>The analog axis value ranging between -1.0 to 1.0, or 0.0 to 1.0 if it's a throttle type control.</returns>
-		float AnalogAxisValue(int whichJoy = 0, int whichStick = 0, int whichAxis = 0) const;
-
-		/// <summary>
-		/// Gets the analog values of a certain joystick device stick.
-		/// </summary>
-		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
-		/// <returns>The analog axis values ranging between -1.0 to 1.0.</returns>
-		Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0) const { return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1)); }
+		float AnalogAxisValue(int whichJoy = 0, int whichAxis = 0) const;
 
 		/// <summary>
 		/// Gets whether there is any joystick input at all, buttons or D-pad.
@@ -629,21 +654,27 @@ namespace RTE {
 
 		static GUIInput *s_GUIInputInstanceToCaptureKeyStateFrom; //!< Pointer to the GUIInput instance to capture key state from, if any. This is used for better key detection during input mapping input capture.
 
-		static char *s_PrevKeyStates; //!< Key states as they were the previous update.
-		static char *s_ChangedKeyStates; //!< Key states that have changed.
+		static std::array<uint8_t, SDL_NUM_SCANCODES> s_PrevKeyStates; //!< Key states as they were the previous update.
+		static std::array<uint8_t, SDL_NUM_SCANCODES> s_ChangedKeyStates; //!< Key states that have changed.
+		std::string m_TextInput;
 
-		static bool s_CurrentMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Current mouse button states.
-		static bool s_PrevMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states as they were the previous update.
-		static bool s_ChangedMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states that have changed since previous update.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_CurrentMouseButtonStates; //!< Current mouse button states.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_PrevMouseButtonStates; //!< Mouse button states as they were the previous update.
+		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_ChangedMouseButtonStates; //!< Mouse button states that have changed since previous update.
 
-		static JOYSTICK_INFO s_PrevJoystickStates[Players::MaxPlayerCount]; //!< Joystick states as they were the previous update.
-		static JOYSTICK_INFO s_ChangedJoystickStates[Players::MaxPlayerCount]; //!< Joystick states that have changed.
+		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
+		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
+		int m_NumJoysticks; //!< The number of currently connected gamecontrollers;
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
 		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
 
+		bool m_GameHasAnyFocus; //!< Whether any game window might have focus.
+		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
+
+		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
 		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.
 		float m_MouseSensitivity; //!< Mouse sensitivity, to replace hardcoded 0.6 value in Update.
@@ -699,7 +730,7 @@ namespace RTE {
 		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the keyboard key is in the specified state or not.</returns>
-		bool GetKeyboardButtonState(const char keyToTest, InputState whichState) const;
+		bool GetKeyboardButtonState(SDL_Scancode keyToTest, InputState whichState) const;
 
 		/// <summary>
 		/// Gets whether a mouse button is in the specified state.
@@ -723,12 +754,11 @@ namespace RTE {
 		/// Gets whether a joystick axis direction is in the specified state or not.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
-		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for. See JoyDirections enumeration.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the joystick stick axis is in the specified state or not.</returns>
-		bool GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const;
+		bool GetJoystickDirectionState(int whichJoy, int whichAxis, int whichDir, InputState whichState) const;
 
 		/// <summary>
 		/// Sets an input element of a player to the specified state during network multiplayer.
@@ -784,9 +814,18 @@ namespace RTE {
 		void UpdateMouseInput();
 
 		/// <summary>
-		/// Handles the joysticks input. This is called from Update().
+		/// Handles a joystick axis input. This is called from Update().
 		/// </summary>
-		void UpdateJoystickInput();
+		void UpdateJoystickAxis(std::vector<Gamepad>::iterator device, int axis, int newValue);
+
+		/// <summary>
+		/// Open a joystick or gamecontroller device and add it to the joystick list if a gamepad slot is available (up to max player count).
+		/// </summary>
+		/// <param name="deviceIndex">
+		/// The device index (generated by the connected event or a value up to SDL_NumJoysticks()).
+		/// </param>
+
+		void OpenJoystick(int deviceIndex);
 
 		/// <summary>
 		/// Stores all the input events that happened during this update to be compared to in the next update. This is called from Update().
@@ -802,31 +841,6 @@ namespace RTE {
 		// Disallow the use of some implicit methods.
 		UInputMan(const UInputMan &reference) = delete;
 		UInputMan & operator=(const UInputMan &rhs) = delete;
-
-#ifdef __unix__
-		int m_AllegroMousePreviousX; //!< Stored mouse x position for the allegro event handler.
-		int m_AllegroMousePreviousY; //!< Stored mouse y position for the allegro event handler.
-
-		/// <summary>
-		/// Necessary static handler method ensuring mouse inputs work well on Linux. Must be applied to _xwin_input_handler when manager is initialized.
-		/// </summary>
-		static void XWinInputHandlerOverride() { g_UInputMan.HandleAllegroMouseInput(); }
-
-		/// <summary>
-		/// Mouse input handler to circumvent the input drops that Allegro does regularly, by replacing and disabling the default warping behavior.
-		/// Motion events that are generated while the handler is working are offset such that the Allegro driver doesn't mess up the mickeys.
-		/// This also handles the centering warp for relative mouse motion. Might not run in the main thread, depending on how Allegro was built.
-		/// </summary>
-		void HandleAllegroMouseInput();
-
-		/// <summary>
-		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events if the requested position is different from the actual mouse position.
-		/// Replaces position_mouse and sets the Allegro internal mouse position to the requested coordinates.
-		/// </summary>
-		/// <param name="x"> The x coordinate to warp to. </param>
-		/// <param name="y"> The y coordinate to warp to. </param>
-		void WarpMouse(int x, int y) const;
-#endif
 	};
 }
 #endif

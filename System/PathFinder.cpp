@@ -8,7 +8,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	PathNode::PathNode(const Vector &pos) : Pos(pos) {
-		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
+		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(MaterialColorKeys::g_MaterialOutOfBounds);
 		for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
 			AdjacentNodes[i] = nullptr;
 			AdjacentNodeBlockingMaterials[i] = outOfBounds; // Costs are infinite unless recalculated as otherwise.
@@ -21,7 +21,7 @@ namespace RTE {
 		m_NodeGrid.clear();
 		m_NodeDimension = 20;
 		m_DigStrength = 1;
-		m_Pather = 0;
+		m_Pather = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ namespace RTE {
 		int nodeYCount = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
 		// Create and assign scene coordinate positions for all nodes
-		PathNode *node = 0;
+		PathNode *node = nullptr;
 		Vector nodePos = Vector(static_cast<float>(nodeDimension) / 2.0F, static_cast<float>(nodeDimension) / 2.0F);
 		for (int x = 0; x < nodeXCount; ++x) {
 			// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
@@ -292,22 +292,22 @@ namespace RTE {
 
 		// Add cost for digging at 45 degrees and for digging upwards.
 		if (node->UpRight) {
-			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
-			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->RightDownMaterial) * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->RightDownMaterial) * 1.4F) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
-			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->DownLeftMaterial) * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->DownLeftMaterial) * 1.4F) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
-			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
@@ -317,16 +317,15 @@ namespace RTE {
 
 	float PathFinder::GetMaterialTransitionCost(const Material *material) const {
 		float strength = material->GetIntegrity();
-		if (strength > m_DigStrength && material->GetIndex() != g_MaterialDoor) { // Always treat doors as diggable
-			strength *= 1000.0F;
-		}
+		// Always treat doors as diggable.
+		if (strength > m_DigStrength && material->GetIndex() != MaterialColorKeys::g_MaterialDoor) { strength *= 1000.0F; }
 		return strength;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) {
-		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, g_MaterialAir);
+	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) const {
+		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, MaterialColorKeys::g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -360,9 +359,9 @@ namespace RTE {
 			const Material *oldMat = oldMaterials[i];
 			const Material *newMat = node->AdjacentNodeBlockingMaterials[i];
 
-			// Check if the material strength is more than our delta, or if a door has appeared/dissappeared (since we handle their costs in a special manner)
+			// Check if the material strength is more than our delta, or if a door has appeared/disappeared (since we handle their costs in a special manner)
 			float delta = std::abs(oldMat->GetIntegrity() - newMat->GetIntegrity());
-			bool doorChanged = oldMat != newMat && (oldMat->GetIndex() == g_MaterialDoor || newMat->GetIndex() == g_MaterialDoor);
+			bool doorChanged = oldMat != newMat && (oldMat->GetIndex() == MaterialColorKeys::g_MaterialDoor || newMat->GetIndex() == MaterialColorKeys::g_MaterialDoor);
 			if (delta > c_NodeCostChangeEpsilon || doorChanged) {
 				return true;
 			}
@@ -393,7 +392,7 @@ namespace RTE {
 		if (lastY >= m_NodeGrid[0].size()) { lastY = m_NodeGrid[0].size() - 1; }
 
 		// Only iterate through the grid where the box overlaps any edges
-		PathNode *node = 0;
+		PathNode *node = nullptr;
 		for (int nodeX = firstX; nodeX <= lastX; ++nodeX) {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
 				node = m_NodeGrid[nodeX][nodeY];

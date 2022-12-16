@@ -25,7 +25,6 @@ namespace RTE {
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
 		std::array<PathNode *, c_MaxAdjacentNodeCount> AdjacentNodes;
-
 		PathNode *&Up = AdjacentNodes[0];
 		PathNode *&UpRight = AdjacentNodes[1];
 		PathNode *&Right = AdjacentNodes[2];
@@ -39,7 +38,6 @@ namespace RTE {
 		/// The strongest material between us and our adjacent nodes, in clockwise order with top first.
 		/// </summary>
 		std::array<const Material *, c_MaxAdjacentNodeCount> AdjacentNodeBlockingMaterials;
-
 		const Material *&UpMaterial = AdjacentNodeBlockingMaterials[0];
 		const Material *&UpRightMaterial = AdjacentNodeBlockingMaterials[1];
 		const Material *&RightMaterial = AdjacentNodeBlockingMaterials[2];
@@ -49,7 +47,11 @@ namespace RTE {
 		const Material *&LeftMaterial = AdjacentNodeBlockingMaterials[6];
 		const Material *&LeftUpMaterial = AdjacentNodeBlockingMaterials[7];
 
-		explicit PathNode(const Vector& pos);
+		/// <summary>
+		/// Constructor method used to instantiate a PathNode object in system memory and make it ready for use.
+		/// </summary>
+		/// <param name="pos">Absolute position of the center of the node in the scene.</param>
+		explicit PathNode(const Vector &pos);
 	};
 
 	/// <summary>
@@ -156,12 +158,12 @@ namespace RTE {
 
 #pragma region Path Cost Updates
 		/// <summary>
-		/// Helper function for getting the strongest material we need to path though between nodes
+		/// Helper function for getting the strongest material we need to path though between nodes.
 		/// </summary>
 		/// <param name="start">Origin point.</param>
 		/// <param name="end">Destination point.</param>
 		/// <returns>The strongest material.</returns>
-		const Material * StrongestMaterialAlongLine(const Vector &start, const Vector &end);
+		const Material * StrongestMaterialAlongLine(const Vector &start, const Vector &end) const;
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges going out from a specific node.
@@ -182,9 +184,9 @@ namespace RTE {
 		/// <summary>
 		/// Gets the cost for transitioning through this material
 		/// </summary>
-		/// <param name="node">The material to get the transition cost for.</param>
+		/// <param name="material">The material to get the transition cost for.</param>
 		/// <returns>The transition cost.</returns>
-		float GetMaterialTransitionCost(const Material * material) const ;
+		float GetMaterialTransitionCost(const Material *material) const ;
 
 		/// <summary>
 		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions

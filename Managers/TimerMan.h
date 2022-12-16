@@ -19,7 +19,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TimerMan object in system memory. Initialize() should be called before using this object.
 		/// </summary>
-		TimerMan();
+		TimerMan() { Clear(); Initialize(); };
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.

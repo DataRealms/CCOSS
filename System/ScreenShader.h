@@ -59,7 +59,7 @@ namespace RTE {
 			"void main() {\n"
 			"gl_Position = rteProjMatrix * vec4(rtePos.xy, 0.1, 1.0);\n"
 			"texCoord = (rteUVTransform * vec4(rteUV, 0.0, 1.0)).st;\n"
-			"};";
+			"}";
 
 		//!< Fragment shader. Simple shader to draw a texture to the entire screen.
 		static constexpr const char *m_FragmentShader =

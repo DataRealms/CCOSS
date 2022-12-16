@@ -2,6 +2,7 @@
 #define _RTEPIESLICE_
 
 #include "Constants.h"
+#include "LuabindObjectWrapper.h"
 #include "Icon.h"
 
 namespace RTE {
@@ -180,16 +181,22 @@ namespace RTE {
 		void SetIcon(Icon *newIcon) { m_Icon = std::unique_ptr<Icon>(newIcon); }
 
 		/// <summary>
+		/// Gets the LuabindObjectWrapper for the function this PieSlice should run when activated.
+		/// </summary>
+		/// <returns>The LuabindObjectWrapper this PieSlice should run when activated.</returns>
+		const LuabindObjectWrapper * GetLuabindFunctionObjectWrapper() const { return m_LuabindFunctionObject.get(); }
+
+		/// <summary>
 		/// Gets the file path of the Lua file this PieSlice should run when activated, if any.
 		/// </summary>
 		/// <returns>The file path to the script file this PieSlice should load when activated.</returns>
-		const std::string & GetScriptPath() const { return m_ScriptPath; }
+		std::string GetScriptPath() const { return m_LuabindFunctionObject ? m_LuabindFunctionObject->GetFilePath() : ""; }
 
 		/// <summary>
 		/// Sets the file path of the scripted file this PieSlice should run when activated.
 		/// </summary>
 		/// <param name="newScriptPath">The file path of the Lua file this PieSlice should run when activated.</param>
-		void SetScriptPath(const std::string &newScriptPath) { m_ScriptPath = newScriptPath; }
+		void SetScriptPath(const std::string &newScriptPath) { m_LuabindFunctionObject = std::make_unique<LuabindObjectWrapper>(nullptr, newScriptPath); ReloadScripts(); }
 
 		/// <summary>
 		/// Gets the name of the Lua function to run when this PieSlice is activated.
@@ -201,7 +208,7 @@ namespace RTE {
 		/// Sets the name of the Lua function to run when this PieSlice is activated as a scripted pie menu option.
 		/// </summary>
 		/// <param name="newFunctionName">The name of the Lua function to run when this PieSlice is activated.</param>
-		void SetFunctionName(const std::string &newFunctionName) { m_FunctionName = newFunctionName; }
+		void SetFunctionName(const std::string &newFunctionName) { m_FunctionName = newFunctionName; ReloadScripts(); }
 
 		//TODO Ideally this would be done with a weak_ptr but I'm not sure how it'll go with LuaMan. Try it out and see
 		/// <summary>
@@ -267,6 +274,12 @@ namespace RTE {
 		void SetDrawFlippedToMatchAbsoluteAngle(bool shouldDrawFlippedToMatchAbsoluteAngle) { m_DrawFlippedToMatchAbsoluteAngle = shouldDrawFlippedToMatchAbsoluteAngle; }
 #pragma endregion
 
+		/// <summary>
+		/// Reloads the the script on this PieSlice.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int ReloadScripts() final;
+
 	private:
 
 		/// <summary>
@@ -286,8 +299,9 @@ namespace RTE {
 		bool m_Enabled; //!< Whether this PieSlice is enabled or disabled and grayed out.
 		std::unique_ptr<Icon> m_Icon; //!< The icon of this PieSlice.
 
-		std::string m_ScriptPath; //!< Path to the script file this should run when activated.
-		std::string m_FunctionName; //!< Name of the function in the script this should run when activated.
+		std::unique_ptr<LuabindObjectWrapper> m_LuabindFunctionObject; //!< The LuabindObjectWrapper holding the function this PieSlice runs when activated.
+		std::string m_FunctionName; //!< Name of the function in the script this PieSlice runs. Used for safely reloading scripts.
+
 		std::unique_ptr<PieMenu, PieMenuCustomDeleter> m_SubPieMenu; //!< Unique pointer to the sub-PieMenu this should open when activated.
 
 		float m_StartAngle; //!< The start angle of this PieSlice's area on the PieMenu, counted in radians from straight out right and going counter clockwise.

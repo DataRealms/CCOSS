@@ -283,6 +283,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
 
+- Added a new Lua event function for `Actor`s, `OnSelect(self, previousMode, previousPlayer)` that triggers when an Actors controller state changes (between AI/Player/Network control etc).
+This provides a script hook that fire when a player starts/stops controlling an actor.
+Exposes the previous controller mode and controlling player (if applicable).
+
 </details>
 
 <details><summary><b>Changed</b></summary>

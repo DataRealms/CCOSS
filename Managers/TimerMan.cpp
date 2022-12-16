@@ -40,7 +40,6 @@ namespace RTE {
 		// Get the frequency of ticks/s for this machine
 		m_TicksPerSecond = 1000000;
 
-	void TimerMan::Initialize() {
 		ResetTime();
 		if (m_DeltaTimeS <= 0) { SetDeltaTimeSecs(c_DefaultDeltaTimeS); }
 		if (m_RealToSimCap <= 0) { SetRealToSimCap(c_DefaultRealToSimCap); }

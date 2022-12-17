@@ -158,7 +158,7 @@ public:
 // Arguments:       The X and Y coordinates of screen Scene pixel to test the MO at.
 // Return value:    Whether the MOID is currently at the specified pixel location.
 
-    bool HitTestMOAtPixel(const MOSprite &mo, int pixelX, int pixelY) const;
+    bool HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMOIDPixel

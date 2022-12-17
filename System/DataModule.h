@@ -55,6 +55,16 @@ namespace RTE {
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const std::string &moduleName, const ProgressCallback &progressCallback = nullptr);
+
+		/// <summary>
+		/// Creates a new DataModule directory with "Index.ini" on disk. Does NOT instantiate the newly created DataModule.
+		/// </summary>
+		/// <param name="moduleName">File/folder name of the data module, eg "MyMod.rte".</param>
+		/// <param name="friendlyName">Friendly name of the data module, eg "My Weapons Mod".</param>
+		/// <param name="scanFolderContents">Whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.</param>
+		/// <param name="ignoreMissingItems">Whether module loader should ignore missing items in this module.</param>
+		/// <returns>Whether the DataModule was successfully created on disk.</returns>
+		static bool CreateOnDisk(const std::string &moduleName, const std::string_view &friendlyName, bool scanFolderContents = false, bool ignoreMissingItems = false);
 #pragma endregion
 
 #pragma region Destruction

@@ -196,13 +196,22 @@ bool PresetMan::LoadAllDataModules() {
 				}
 			}
 		}
-		// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods.
-		if (!LoadDataModule("Scenes.rte", false, &LoadingScreen::LoadingSplashProgressReport)) {
+
+		// Load user scenes and saved games AFTER all other techs etc are loaded; might be referring to stuff in user mods.
+		std::string userScenesModuleName = "UserScenes.rte";
+		if (!std::filesystem::exists(System::GetWorkingDirectory() + userScenesModuleName)) { DataModule::CreateOnDisk(userScenesModuleName, "User Scenes", true, true); }
+		if (!LoadDataModule(userScenesModuleName, false, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
-		if (!LoadDataModule("Metagames.rte", false, &LoadingScreen::LoadingSplashProgressReport)) {
+
+		std::string savedMetaGamesModuleName = "SavedGamesConquest.rte";
+		if (!std::filesystem::exists(System::GetWorkingDirectory() + savedMetaGamesModuleName)) { DataModule::CreateOnDisk(savedMetaGamesModuleName, "Conquest Saves"); }
+		if (!LoadDataModule(savedMetaGamesModuleName, false, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
+
+		std::string scriptedActivitySavedGamesModuleName = "SavedGamesScripted.rte";
+		if (!std::filesystem::exists(System::GetWorkingDirectory() + scriptedActivitySavedGamesModuleName)) { DataModule::CreateOnDisk(scriptedActivitySavedGamesModuleName, "Scripted Activity Saves"); }
 	}
 
 	if (g_SettingsMan.IsMeasuringModuleLoadTime()) {

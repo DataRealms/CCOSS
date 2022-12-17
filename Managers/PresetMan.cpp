@@ -187,7 +187,7 @@ bool PresetMan::LoadAllDataModules() {
 		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : userdataModules) {
 			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
 				bool scanContentsAndIgnoreMissing = userdataModuleName == "UserScenes.rte";
-				DataModule::CreateOnDisk(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
+				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
 			}
 			if (!LoadDataModule(userdataModuleName, false, true, &LoadingScreen::LoadingSplashProgressReport)) {
 				return false;

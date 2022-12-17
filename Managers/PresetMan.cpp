@@ -150,14 +150,14 @@ bool PresetMan::LoadAllDataModules() {
 
 	// Load all the official modules first!
 	for (const std::string &officialModule : officialModules) {
-		if (!LoadDataModule(officialModule, true, false, &LoadingScreen::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(officialModule, true, false, LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
 	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
-		if (!LoadDataModule(m_SingleModuleToLoad, false, false, &LoadingScreen::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, false, LoadingScreen::LoadingSplashProgressReport)) {
 			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
 			return false;
 		}
@@ -177,7 +177,7 @@ bool PresetMan::LoadAllDataModules() {
 					if (userdataModuleItr == userdataModules.end()) {
 						int moduleID = GetModuleID(moduleName);
 						// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-						if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, &LoadingScreen::LoadingSplashProgressReport); }
+						if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, LoadingScreen::LoadingSplashProgressReport); }
 					}
 				}
 			}
@@ -189,7 +189,7 @@ bool PresetMan::LoadAllDataModules() {
 				bool scanContentsAndIgnoreMissing = userdataModuleName == c_UserScenesModuleName;
 				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
 			}
-			if (!LoadDataModule(userdataModuleName, false, true, &LoadingScreen::LoadingSplashProgressReport)) {
+			if (!LoadDataModule(userdataModuleName, false, true, LoadingScreen::LoadingSplashProgressReport)) {
 				return false;
 			}
 		}

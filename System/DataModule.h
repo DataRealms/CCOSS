@@ -102,6 +102,17 @@ namespace RTE {
 
 #pragma region Module Information Getters
 		/// <summary>
+		/// Gets whether this DataModule is a userdata module.
+		/// </summary>
+		/// <returns>Whether this DataModule is used for userdata written by the game.</returns>
+		bool IsUserdata() const { return m_IsUserdata; }
+
+		/// <summary>
+		/// Sets this DataModule as a userdata module.
+		/// </summary>
+		void SetAsUserdata() { m_IsUserdata = true; }
+
+		/// <summary>
 		/// Gets the file name of this DataModule, e.g. "MyMod.rte".
 		/// </summary>
 		/// <returns>A string with the data module file name.</returns>
@@ -298,6 +309,7 @@ namespace RTE {
 			std::string m_FileReadFrom; //!< Where the instance was read from.
 		};
 
+		bool m_IsUserdata; //!< Whether this DataModule contains userdata written by the game (e.g saved games or editor scenes), meaning it is not an official nor a 3rd party module and is ignored anywhere where that is relevant.
 		bool m_ScanFolderContents; //!< Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
 		bool m_IgnoreMissingItems; //!< Indicates whether module loader should ignore missing items in this module.
 

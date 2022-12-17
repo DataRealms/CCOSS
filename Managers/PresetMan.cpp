@@ -82,76 +82,53 @@ void PresetMan::Destroy()
     Clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          LoadDataModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads an entire data module and adds it to this. NOTE that official
-//                  modules can't be loaded after any non-official ones!
+bool PresetMan::LoadDataModule(const std::string &moduleName, bool official, bool userdata, const ProgressCallback &progressCallback) {
+	if (moduleName.empty()) {
+		return false;
+	}
+	// Make a lowercase-version of the module name so it makes it easier to compare to and find case-agnostically.
+	std::string lowercaseName = moduleName;
+	std::transform(lowercaseName.begin(), lowercaseName.end(), lowercaseName.begin(), ::tolower);
 
-bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallback fpProgressCallback)
-{
-    if (moduleName.empty())
-        return false;
+	// Make sure we don't add the same module twice.
+	for (const DataModule *dataModule : m_pDataModules) {
+		if (dataModule->GetFileName() == moduleName) {
+			return false;
+		}
+	}
 
-    vector<DataModule *>::iterator itr;
-    // Make a lowercase-version of the module name so it makes it easier to compare to and find case-agnostically
-    string lowercaseName = moduleName;
-    std::transform(lowercaseName.begin(), lowercaseName.end(), lowercaseName.begin(), ::tolower);
+	// Only instantiate it here, because it needs to be in the lists of this before being created.
+	DataModule *newModule = new DataModule();
 
-    // Make sure we don't add the same module twice
-    for (itr = m_pDataModules.begin(); itr != m_pDataModules.end(); ++itr)
-    {
-        if ((*itr)->GetFileName() == moduleName)
-            return false;
-    }
+	// Official modules are stacked in the beginning of the vector.
+	if (official && !userdata) {
+		// Halt if an official module is being loaded after any non-official ones!
+		//RTEAssert(m_pDataModules.size() == m_OfficialModuleCount, "Trying to load an official module after a non-official one has been loaded!");
 
-    // Only instantiate it here, because it needs to be in the lists of this before being created
-    DataModule *pModule = new DataModule();
+		// Find where the official modules end in the vector.
+		std::vector<DataModule *>::iterator moduleItr = m_pDataModules.begin();
+		size_t newModuleID = 0;
+		for (; newModuleID < m_OfficialModuleCount; ++newModuleID) {
+			moduleItr++;
+		}
+		// Insert into after the last official one.
+		m_pDataModules.emplace(moduleItr, newModule);
+		m_DataModuleIDs.try_emplace(lowercaseName, newModuleID);
+		m_OfficialModuleCount++;
+	} else {
+		if (userdata) { newModule->SetAsUserdata(); }
+		m_pDataModules.emplace_back(newModule);
+		m_DataModuleIDs.try_emplace(lowercaseName, m_pDataModules.size() - 1);
+	}
 
-    // Official modules are stacked in the beginning of the vector
-    if (official)
-    {
-        // Halt if an official module is being loaded after any non-official ones!
-// We need to disable this because Metagames.rte gets loaded after non-official modules
-//        RTEAssert(m_pDataModules.size() == m_OfficialModuleCount, "Trying to load an official module after a non-official one has been loaded!");
-
-        // Find where the offical modules end in the vector
-        itr = m_pDataModules.begin();
-        int i = 0;
-        for (; i < m_OfficialModuleCount; ++i)
-            itr++;
-
-        // Insert into after the last official one
-        m_pDataModules.insert(itr, pModule);
-
-        // Add the name to ID mapping
-        // Adding the lowercase name version so we can more easily find with case-agnostic search
-        m_DataModuleIDs.insert(pair<string, int>(lowercaseName, i));
-
-        // Adjust offical tally
-        m_OfficialModuleCount++;
-    }
-    // Non-official modules are just added the end
-    else
-    {
-        m_pDataModules.push_back(pModule);
-
-        // Add the name to ID mapping - note that official modules can't be loaded after any non-official ones!
-        // Adding the lowercase name version so we can more easily find with case-agnostic search
-		m_DataModuleIDs.insert(pair<string, size_t>(lowercaseName, m_pDataModules.size() - 1));
-    }
-
-    // Now actually create it
-    if (pModule->Create(moduleName, fpProgressCallback) < 0)
-    {
-        RTEAbort("Failed to find the " + moduleName + " Data Module!");
-        return false;
-    }
-
-    pModule = 0;
-
-    return true;
+	if (newModule->Create(moduleName, progressCallback) < 0) {
+		RTEAbort("Failed to find the " + moduleName + " Data Module!");
+		return false;
+	}
+	newModule = nullptr;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,17 +141,23 @@ bool PresetMan::LoadAllDataModules() {
 
 	FindAndExtractZippedModules();
 
-	// Load all the official modules first!
 	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	std::array<std::pair<std::string, std::string>, 3> userdataModules = {{
+		{"UserScenes.rte", "User Scenes"},
+		{"SavedGamesConquest.rte", "Conquest Saves"},
+		{"SavedGamesScripted.rte", "Scripted Activity Saves" }
+	}};
+
+	// Load all the official modules first!
 	for (const std::string &officialModule : officialModules) {
-		if (!LoadDataModule(officialModule, true, &LoadingScreen::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(officialModule, true, false, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
 	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
-		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingScreen::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, false, &LoadingScreen::LoadingSplashProgressReport)) {
 			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
 			return false;
 		}
@@ -189,29 +172,27 @@ bool PresetMan::LoadAllDataModules() {
 			std::string directoryEntryPath = directoryEntry.path().generic_string();
 			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
-				if (!g_SettingsMan.IsModDisabled(moduleName) && (std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end() && moduleName != "Metagames.rte" && moduleName != "Scenes.rte")) {
-					int moduleID = GetModuleID(moduleName);
-					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, &LoadingScreen::LoadingSplashProgressReport); }
+				if (!g_SettingsMan.IsModDisabled(moduleName) && std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end()) {
+					auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModuleEntry) { return userdataModuleEntry.first == moduleName; });
+					if (userdataModuleItr == userdataModules.end()) {
+						int moduleID = GetModuleID(moduleName);
+						// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
+						if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, &LoadingScreen::LoadingSplashProgressReport); }
+					}
 				}
 			}
 		}
 
-		// Load user scenes and saved games AFTER all other techs etc are loaded; might be referring to stuff in user mods.
-		std::string userScenesModuleName = "UserScenes.rte";
-		if (!std::filesystem::exists(System::GetWorkingDirectory() + userScenesModuleName)) { DataModule::CreateOnDisk(userScenesModuleName, "User Scenes", true, true); }
-		if (!LoadDataModule(userScenesModuleName, false, &LoadingScreen::LoadingSplashProgressReport)) {
-			return false;
+		// Load userdata modules AFTER all other techs etc are loaded; might be referring to stuff in user mods.
+		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : userdataModules) {
+			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
+				bool scanContentsAndIgnoreMissing = userdataModuleName == "UserScenes.rte";
+				DataModule::CreateOnDisk(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
+			}
+			if (!LoadDataModule(userdataModuleName, false, true, &LoadingScreen::LoadingSplashProgressReport)) {
+				return false;
+			}
 		}
-
-		std::string savedMetaGamesModuleName = "SavedGamesConquest.rte";
-		if (!std::filesystem::exists(System::GetWorkingDirectory() + savedMetaGamesModuleName)) { DataModule::CreateOnDisk(savedMetaGamesModuleName, "Conquest Saves"); }
-		if (!LoadDataModule(savedMetaGamesModuleName, false, &LoadingScreen::LoadingSplashProgressReport)) {
-			return false;
-		}
-
-		std::string scriptedActivitySavedGamesModuleName = "SavedGamesScripted.rte";
-		if (!std::filesystem::exists(System::GetWorkingDirectory() + scriptedActivitySavedGamesModuleName)) { DataModule::CreateOnDisk(scriptedActivitySavedGamesModuleName, "Scripted Activity Saves"); }
 	}
 
 	if (g_SettingsMan.IsMeasuringModuleLoadTime()) {

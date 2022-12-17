@@ -816,7 +816,7 @@ namespace RTE {
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
 			} else if (KeyPressed(KEY_F9)) {
-				g_ActivityMan.LoadAndLaunchGame("Autosave");
+				g_ActivityMan.LoadAndLaunchGame("AutoSave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(KEY_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
@@ -851,9 +851,9 @@ namespace RTE {
 			} else if (KeyPressed(KEY_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 			} else if (KeyPressed(KEY_F5)) {
-				g_ActivityMan.SaveCurrentGame("Quicksave");
+				g_ActivityMan.SaveCurrentGame("QuickSave");
 			} else if (KeyPressed(KEY_F9)) {
-				g_ActivityMan.LoadAndLaunchGame("Quicksave");
+				g_ActivityMan.LoadAndLaunchGame("QuickSave");
 			} else if (KeyPressed(KEY_F10)) {
 				g_ConsoleMan.ClearLog();
 			}

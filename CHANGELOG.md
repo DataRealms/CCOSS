@@ -220,19 +220,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
 	```lua
-	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity to Saves.rte. Returns 0 if it works, or an error code if it doesn't, where 1 means there's no running Activity, 2 means the Activity doesn't allow saving, and 3 means the Activity's Scene couldn't be properly loaded.
+	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity. The save result will be printed to the console.
 	ActivityMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
 	```
 	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
-	  
+
 	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This function must exist for the `Activity` to be saveable!  
 	To support saving and loading, `Activity` now has several Lua convenience functions to for dealing with script variables:
 	```lua
-	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey
-	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey
+	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey.
+	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey.
 
-	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
-	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
+	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey.
+	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey.
 	```
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.

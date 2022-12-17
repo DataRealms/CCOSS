@@ -72,14 +72,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::SetFirstMountedDevice(HeldDevice *newMountedDevice) {
-		if (HasMountedDevice()) {
-			RemoveAndDeleteAttachable(m_MountedDevices[0]);
-		}
+		if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices[0]); }
 		if (newMountedDevice != nullptr) {
 			m_MountedDevices.emplace(m_MountedDevices.begin(), newMountedDevice);
 			AddAttachable(newMountedDevice);
 
-			m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+			m_HardcodedAttachableUniqueIDsAndRemovers.insert({ newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
 				RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to RemoveMountedDevice.");
 				dynamic_cast<Turret *>(parent)->RemoveMountedDevice(castedAttachable);

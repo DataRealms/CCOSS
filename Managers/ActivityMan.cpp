@@ -65,16 +65,16 @@ namespace RTE {
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
 		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
-			g_ConsoleMan.PrintString("ERROR: Cannot quick-save when there's no game running, or the game is finished!");
+			g_ConsoleMan.PrintString("ERROR: Cannot save when there's no game running, or the game is finished!");
 			return false;
 		}
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving! Make sure it's a scripted activity, and that it has an OnSave function.");
+			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function.");
 			return false;
 		}
 		if (scene->SaveData(c_SavedGameModuleName + "/" + fileName) < 0) {
-			// This print is actually pointless because game will abort if it fails to save layer bitmaps but that may change one day so it is what it is.
-			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while quick-saving!");
+			// This print is actually pointless because game will abort if it fails to save layer bitmaps. It stays here for now because in reality the game doesn't properly abort if the layer bitmaps fail to save. It is what it is.
+			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
 		}
 
@@ -96,8 +96,8 @@ namespace RTE {
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_SavedGameModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
-		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjects());
-		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnits());
+		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());
+		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
 		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
@@ -112,7 +112,7 @@ namespace RTE {
 		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
 
-		g_ConsoleMan.PrintString("SYSTEM: Game quick-saved!");
+		g_ConsoleMan.PrintString("SYSTEM: Game saved to \"" + fileName + "\"!");
 		return true;
 	}
 
@@ -124,7 +124,7 @@ namespace RTE {
 
 		Reader reader(c_SavedGameModuleName + "/" + fileName + ".ini", true, nullptr, true);
 		if (!reader.ReaderOK()) {
-			g_ConsoleMan.PrintString("ERROR: Quick-loading failed! Make sure you have a saved game called \"" + fileName + "\"");
+			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
 		}
 
@@ -153,7 +153,7 @@ namespace RTE {
 		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
-		g_ConsoleMan.PrintString("SYSTEM: Game quick-loaded!");
+		g_ConsoleMan.PrintString("SYSTEM: Game loaded!");
 		return true;
 	}
 
@@ -262,7 +262,7 @@ namespace RTE {
 	int ActivityMan::StartActivity(Activity *activity) {
 		RTEAssert(activity, "Trying to start a null activity!");
 
-		// Stop all music played by the current activity. It will be re-started by the new Activity. 
+		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
 
 		m_ActivityAllowsSaving = false;

@@ -49,7 +49,7 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
-		/// Gets whether or not the currently active Activity allows saving. 
+		/// Gets whether or not the currently active Activity allows saving.
 		/// </summary>
 		/// <returns>Whether or not the currently active Activity allows saving.</returns>
 		bool GetActivityAllowsSaving() const { return m_Activity && m_ActivityAllowsSaving; }
@@ -161,7 +161,7 @@ namespace RTE {
 		bool SaveCurrentGame(const std::string &fileName) const;
 
 		/// <summary>
-		/// Loads a savegame, and launches its Scene and Activity.
+		/// Loads a saved game, and launches its Scene and Activity.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
 		/// <returns>Whether or not the saved game was successfully loaded.</returns>
@@ -262,7 +262,7 @@ namespace RTE {
 		void Update() const { if (m_Activity) { m_Activity->Update(); } }
 #pragma endregion
 
-	protected:
+	private:
 
 		static const std::string c_SavedGameModuleName; //!< The name of the module to save games to and load them from.
 
@@ -284,8 +284,6 @@ namespace RTE {
 		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default Activity instead.
 		bool m_LaunchIntoEditor; //!< Whether to skip the intro and main menu and launch directly into the set editor Activity instead.
 		std::string_view m_EditorToLaunch; //!< The name of the editor Activity to launch directly into.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this ActivityMan, effectively resetting the members of this abstraction level only.

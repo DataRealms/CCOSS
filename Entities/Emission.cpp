@@ -157,9 +157,9 @@ int Emission::Save(Writer &writer) const
 	writer.NewProperty("Spread");
 	writer << m_Spread;
 	writer.NewProperty("MinVelocity");
-	writer << m_MaxVelocity;
-	writer.NewProperty("MaxVelocity");
 	writer << m_MinVelocity;
+	writer.NewProperty("MaxVelocity");
+	writer << m_MaxVelocity;
 	writer.NewProperty("LifeVariation");
 	writer << m_LifeVariation;
 	writer.NewProperty("PushesEmitter");

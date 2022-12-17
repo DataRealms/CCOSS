@@ -863,20 +863,14 @@ string PresetMan::GetEntityDataLocation(string type, string preset, int whichMod
     return pRetPath;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReloadAllScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads all scripted Entity Presets witht he latest version of their
-//                  respective script files.
-
-void PresetMan::ReloadAllScripts()
-{
+void PresetMan::ReloadAllScripts() const {
 	g_LuaMan.ClearUserModuleCache();
-
-    // Go through all modules and reset all scripts in all their Presets
-    for (int i = 0; i < m_pDataModules.size(); ++i)
-        m_pDataModules[i]->ReloadAllScripts();
+	for (const DataModule *dataModule : m_pDataModules) {
+		dataModule->ReloadAllScripts();
+	}
+	g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

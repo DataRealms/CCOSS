@@ -412,16 +412,10 @@ public:
     std::string GetEntityDataLocation(std::string type, std::string preset, int whichModule);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReloadAllScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads all scripted Entity Presets witht he latest version of their
-//                  respective script files.
-// Arguments:       None.
-// Return value:    None.
-
-    void ReloadAllScripts();
-
+    /// <summary>
+    /// Reloads all scripted Entity Presets with the latest version of their respective script files.
+    /// </summary>
+    void ReloadAllScripts() const;
 
 	/// <summary>
 	/// Reloads an Entity preset and all related presets with the latest version of their respective files.

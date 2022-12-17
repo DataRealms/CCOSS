@@ -844,7 +844,6 @@ namespace RTE {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.ReloadAllScripts();
-				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded");
 			} else if (KeyPressed(KEY_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
 			} else if (KeyPressed(KEY_F4)) {

@@ -1530,7 +1530,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 		for (const Attachable *attachable : attachablesToSave) {
 			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
-				writer.NewProperty("AddAttachable");
+				writer.NewProperty("Add" + attachable->GetClassName());
 				SaveSceneObject(writer, attachable, true);
 			}
 		}

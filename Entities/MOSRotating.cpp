@@ -326,7 +326,7 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
 		}
-	} else if (propName == "AddEmitter")
+	} else if (propName == "AddAEmitter" || propName == "AddEmitter")
     {
         AEmitter *pEmitter = new AEmitter;
         reader >> pEmitter;

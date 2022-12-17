@@ -59,8 +59,8 @@ namespace RTE {
 		/// <summary>
 		/// Creates a new DataModule directory with "Index.ini" on disk to be used for userdata. Does NOT instantiate the newly created DataModule.
 		/// </summary>
-		/// <param name="moduleName">File/folder name of the data module, eg "MyMod.rte".</param>
-		/// <param name="friendlyName">Friendly name of the data module, eg "My Weapons Mod".</param>
+		/// <param name="moduleName">File/folder name of the data module, e.g. "MyMod.rte".</param>
+		/// <param name="friendlyName">Friendly name of the data module, e.g. "My Weapons Mod".</param>
 		/// <param name="scanFolderContents">Whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.</param>
 		/// <param name="ignoreMissingItems">Whether module loader should ignore missing items in this module.</param>
 		/// <returns>Whether the DataModule was successfully created on disk.</returns>

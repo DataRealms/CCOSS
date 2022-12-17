@@ -151,7 +151,7 @@ namespace RTE {
 		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
-		g_ConsoleMan.PrintString("SYSTEM: Game loaded!");
+		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");
 		return true;
 	}
 

@@ -224,8 +224,8 @@ namespace RTE {
 		PrintString("F3 - Save console log");
 		PrintString("F4 - Save console user input log");
 		PrintString("F5 - Quick save");
-		PrintString("F9 - Quick load latest quick-save");
-		PrintString("CTRL + F9 - Quick load latest auto-save");
+		PrintString("F9 - Load latest quick-save");
+		PrintString("CTRL + F9 - Load latest auto-save");
 		PrintString("F10 - Clear Console log");
 	}
 

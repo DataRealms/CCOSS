@@ -199,7 +199,7 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
         }
     } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
         const Vector &pos = moPixel->GetPos();
-        return std::floor(pos.GetX()) == pixelX && std::floor(pos.GetY()) == pixelY;
+        return pos.GetFloorIntX() == pixelX && pos.GetFloorIntY() == pixelY;
     }
 
     return false;

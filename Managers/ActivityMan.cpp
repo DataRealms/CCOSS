@@ -60,22 +60,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//TODO would be nice to return an enum instead of a error code to make things more obvious. Lua will need to understand this enum value, so I didn't bother yet.
-	int ActivityMan::SaveCurrentGame(const std::string &fileName) const {
+	bool ActivityMan::SaveCurrentGame(const std::string &fileName) const {
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
 		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
-			return 1;
+			g_ConsoleMan.PrintString("ERROR: Cannot quick-save when there's no game running, or the game is finished!");
+			return false;
 		}
-
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			return 2;
+			g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving! Make sure it's a scripted activity, and that it has an OnSave function.");
+			return false;
 		}
-
-		// Save the scene bitmaps, or spit out an error if we can't.
 		if (scene->SaveData(c_SavedGameModuleName + "/" + fileName) < 0) {
-			return 4;
+			// This print is actually pointless because game will abort if it fails to save layer bitmaps but that may change one day so it is what it is.
+			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while quick-saving!");
+			return false;
 		}
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
@@ -112,7 +112,8 @@ namespace RTE {
 		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
 
-		return 0;
+		g_ConsoleMan.PrintString("SYSTEM: Game quick-saved!");
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +124,7 @@ namespace RTE {
 
 		Reader reader(c_SavedGameModuleName + "/" + fileName + ".ini", true, nullptr, true);
 		if (!reader.ReaderOK()) {
+			g_ConsoleMan.PrintString("ERROR: Quick-loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
 		}
 
@@ -151,6 +153,7 @@ namespace RTE {
 		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
+		g_ConsoleMan.PrintString("SYSTEM: Game quick-loaded!");
 		return true;
 	}
 

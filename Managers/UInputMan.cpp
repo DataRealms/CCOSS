@@ -849,28 +849,9 @@ namespace RTE {
 			} else if (KeyPressed(KEY_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 			} else if (KeyPressed(KEY_F5)) {
-				switch (g_ActivityMan.SaveCurrentGame("Quicksave")) {
-					case 0:
-						g_ConsoleMan.PrintString("SYSTEM: Game quick-saved");
-						break;
-					case 1:
-						g_ConsoleMan.PrintString("ERROR: Cannot quick-save when there's no game running, or the game is finished!");
-						break;
-					case 2:
-						g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving! Make sure it's a scripted activity, and that it has an OnSave function.");
-						break;
-					case 3:
-						g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while quick-saving!");
-						break;
-					default:
-						RTEAbort("An unexpected error occured while quick-saving!");
-				}
+				g_ActivityMan.SaveCurrentGame("Quicksave");
 			} else if (KeyPressed(KEY_F9)) {
-				if (g_ActivityMan.LoadAndLaunchGame("Quicksave")) {
-					g_ConsoleMan.PrintString("SYSTEM: Game quick-loaded");
-				} else {
-					g_ConsoleMan.PrintString("ERROR: Quick-loading failed! Make sure you have a saved game called Quicksave.");
-				}
+				g_ActivityMan.LoadAndLaunchGame("Quicksave");
 			} else if (KeyPressed(KEY_F10)) {
 				g_ConsoleMan.ClearLog();
 			}

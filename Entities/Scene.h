@@ -371,7 +371,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ExpandAIPlanAssemblySchemes
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replace all assembly shemes by corresponding bunker assemblies in 
+// Description:     Replace all assembly shemes by corresponding bunker assemblies in
 //					AI plan objects set.
 // Arguments:       None.
 // Return value:    None.
@@ -1268,7 +1268,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a temprorary metagame scene and should 
+// Description:     Whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       None.
 // Return value:    Whether scene belongs to metagame or not.
@@ -1279,31 +1279,25 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a temprorary metagame scene and should 
+// Description:     Sets whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       New value.
 // Return value:    None.
 
 	void SetMetagameInternal(bool newValue) { m_IsMetagameInternal = newValue; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsScriptSave
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a script saved scene.
-// Arguments:       None.
-// Return value:    Whether scene is a script save or not.
 
-	bool IsScriptSave() const { return m_IsScriptSave; }
+	/// <summary>
+	/// Gets whether this Scene is a saved game scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <returns>Whether this Scene is a saved game scene copy.</returns>
+	bool IsSavedGameInternal() const { return m_IsSavedGameInternal; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScriptSave
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a script saved scene.
-// Arguments:       New value.
-// Return value:    None.
-
-	void SetScriptSave(bool newValue) { m_IsScriptSave = newValue; }
+	/// <summary>
+	/// Sets whether this Scene is a saved game scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <param name="newValue">Whether this Scene is a saved game scene copy.</param>
+	void SetSavedGameInternal(bool newValue) { m_IsSavedGameInternal = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1396,7 +1390,7 @@ protected:
 
 	// Whether this scene must be shown anywhere in UIs
 	bool m_IsMetagameInternal;
-    bool m_IsScriptSave;
+    bool m_IsSavedGameInternal;
 
 	std::list<Deployment *>m_Deployments;
 
@@ -1413,7 +1407,7 @@ private:
 	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
 
 	/// <summary>
-	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties
+	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties.
 	/// </summary>
 	/// <param name="writer">The Writer being used for serialization.</param>
 	/// <param name="sceneObjectToSave">The SceneObject to save.</param>

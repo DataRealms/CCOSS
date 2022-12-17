@@ -664,32 +664,32 @@ namespace RTE {
 		virtual void HandleCraftEnteringOrbit (ACraft *orbitedCraft);
 #pragma endregion
 
-#pragma region Save/Load
+#pragma region Save and Load Handling
 		/// <summary>
-		/// Saves a string which will be stored in our ini
+		/// Saves a string which will be stored in our ini.
 		/// </summary>
-		/// <param name="key">The key of the saved string</param>
-		/// <param name="value">The string to save</param>
-		void SaveString(const std::string& key, const std::string& value) { m_SavedValues.m_SavedStrings.m_Data[key] = value; };
+		/// <param name="key">The key of the saved string.</param>
+		/// <param name="value">The string to save.</param>
+		void SaveString(const std::string &key, const std::string &value) { m_SavedValues.m_SavedStrings.m_Data[key] = value; };
 
 		/// <summary>
-		/// Loads and returns a previously saved string
+		/// Loads and returns a previously saved string.
 		/// </summary>
-		/// <param name="key">The key of the string to load</param>
-		const std::string& LoadString(const std::string& key) { return m_SavedValues.m_SavedStrings.m_Data[key]; };
+		/// <param name="key">The key of the string to load.</param>
+		const std::string & LoadString(const std::string &key) { return m_SavedValues.m_SavedStrings.m_Data[key]; };
 
 		/// <summary>
-		/// Saves a number which will be stored in our ini
+		/// Saves a number which will be stored in our ini.
 		/// </summary>
-		/// <param name="key">The key of the saved number</param>
-		/// <param name="value">The number to save</param>
-		void SaveNumber(const std::string& key, float value) { m_SavedValues.m_SavedNumbers.m_Data[key] = value; };
+		/// <param name="key">The key of the saved number.</param>
+		/// <param name="value">The number to save.</param>
+		void SaveNumber(const std::string &key, float value) { m_SavedValues.m_SavedNumbers.m_Data[key] = value; };
 
 		/// <summary>
-		/// Loads and returns a previously saved number
+		/// Loads and returns a previously saved number.
 		/// </summary>
-		/// <param name="key">The key of the string to load</param>
-		float LoadNumber(const std::string& key) { return m_SavedValues.m_SavedNumbers.m_Data[key]; };
+		/// <param name="key">The key of the string to load.</param>
+		float LoadNumber(const std::string &key) { return m_SavedValues.m_SavedNumbers.m_Data[key]; };
 #pragma endregion
 
 	protected:
@@ -739,10 +739,11 @@ namespace RTE {
 
 		Timer m_MessageTimer[Players::MaxPlayerCount]; //!< Message timer for each player.
 
-		// Generic additional saved strings/numbers, which are used for scripts primarily
-		// They live here in the base class because GAScripted doesn't have a lua interface
-		// Although it's a little messy.
-		// On the bright side, this would allows other parts of the code to add some metadata to stamp extra information onto an activity if needed, that'll be ignored otherwise
+		/// <summary>
+		/// Generic additional saved strings/numbers, which are used for scripts primarily.
+		/// They live here in the base class because GAScripted doesn't have a lua interface although it's a little messy.
+		/// On the bright side, this would allows other parts of the code to add some metadata to stamp extra information onto an activity if needed, that'll be ignored otherwise.
+		/// </summary>
 		GenericSavedData m_SavedValues;
 
 	private:

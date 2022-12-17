@@ -275,7 +275,7 @@ void SceneEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }
@@ -648,7 +648,7 @@ void SceneEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int wh
 
 void SceneEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 {
-    EditorActivity::Draw(pTargetBitmap, targetPos);    
+    EditorActivity::Draw(pTargetBitmap, targetPos);
 }
 
 
@@ -751,7 +751,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 void SceneEditor::UpdateNewDialog()
 {
     int scenesIndex = 0;
-	
+
 	// Only refill modules if empty
     if (m_pNewModuleCombo->GetCount() <= 0)
     {
@@ -844,7 +844,7 @@ void SceneEditor::UpdateLoadDialog()
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-		if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsScriptSave() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+		if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 

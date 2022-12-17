@@ -411,7 +411,7 @@ ClassInfoGetters;
 	void ApplyImpulses() override;
 
 	/// <summary>
-	/// Gets the list of Attachables on this MOSRotating, optionally excluding hardcoded Attachables.
+	/// Gets the list of Attachables on this MOSRotating.
 	/// </summary>
 	/// <returns>The list of Attachables on this MOSRotating.</returns>
 	const std::list<Attachable *> & GetAttachables() const { return m_Attachables; }
@@ -660,7 +660,7 @@ ClassInfoGetters;
 	/// </summary>
 	/// <returns>Whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.</returns>
 	bool GetGibAtEndOfLifetime() const { return m_GibAtEndOfLifetime; }
-	
+
 	/// <summary>
 	/// Sets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
 	/// </summary>

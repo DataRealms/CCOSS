@@ -134,7 +134,7 @@ bool PresetMan::LoadDataModule(const std::string &moduleName, bool official, boo
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
-	auto moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
+	auto moduleLoadTimerStart = std::chrono::steady_clock::now();
 
 	// Destroy any possible loaded modules
 	Destroy();
@@ -173,7 +173,7 @@ bool PresetMan::LoadAllDataModules() {
 			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
 				if (!g_SettingsMan.IsModDisabled(moduleName) && std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end()) {
-					auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModuleEntry) { return userdataModuleEntry.first == moduleName; });
+					auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModulesEntry) { return userdataModulesEntry.first == moduleName; });
 					if (userdataModuleItr == userdataModules.end()) {
 						int moduleID = GetModuleID(moduleName);
 						// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
@@ -196,7 +196,7 @@ bool PresetMan::LoadAllDataModules() {
 	}
 
 	if (g_SettingsMan.IsMeasuringModuleLoadTime()) {
-		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);
+		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - moduleLoadTimerStart);
 		g_ConsoleMan.PrintString("Module load duration is: " + std::to_string(moduleLoadElapsedTime.count()) + "ms");
 	}
 	return true;

@@ -88,7 +88,7 @@ namespace RTE {
 		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
 		modifiableScene->SetPresetName(fileName);
 		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
-		modifiableScene->SetScriptSave(true);
+		modifiableScene->SetSavedGameInternal(true);
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));

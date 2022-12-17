@@ -223,9 +223,10 @@ namespace RTE {
 		PrintString("CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset");
 		PrintString("F3 - Save console log");
 		PrintString("F4 - Save console user input log");
-		PrintString("F5 - Quick Save");
-		PrintString("F9 - Quick Load");
-		PrintString("F10 - Clear Console");
+		PrintString("F5 - Quick save");
+		PrintString("F9 - Quick load latest quick-save");
+		PrintString("CTRL + F9 - Quick load latest auto-save");
+		PrintString("F10 - Clear Console log");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -815,6 +815,8 @@ namespace RTE {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
+			} else if (KeyPressed(KEY_F9)) {
+				g_ActivityMan.LoadAndLaunchGame("Autosave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(KEY_1)) {
 					g_TimerMan.SetTimeScale(1.0F);

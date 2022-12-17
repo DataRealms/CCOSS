@@ -234,7 +234,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey
 	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey
 	```
-	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section. To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`.
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
+	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  

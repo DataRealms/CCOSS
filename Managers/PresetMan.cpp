@@ -143,9 +143,9 @@ bool PresetMan::LoadAllDataModules() {
 
 	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	std::array<std::pair<std::string, std::string>, 3> userdataModules = {{
-		{"UserScenes.rte", "User Scenes"},
-		{"SavedGamesConquest.rte", "Conquest Saves"},
-		{"SavedGamesScripted.rte", "Scripted Activity Saves" }
+		{c_UserScenesModuleName, "User Scenes"},
+		{c_UserConquestSavesModuleName, "Conquest Saves"},
+		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
 	}};
 
 	// Load all the official modules first!
@@ -186,7 +186,7 @@ bool PresetMan::LoadAllDataModules() {
 		// Load userdata modules AFTER all other techs etc are loaded; might be referring to stuff in user mods.
 		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : userdataModules) {
 			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
-				bool scanContentsAndIgnoreMissing = userdataModuleName == "UserScenes.rte";
+				bool scanContentsAndIgnoreMissing = userdataModuleName == c_UserScenesModuleName;
 				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
 			}
 			if (!LoadDataModule(userdataModuleName, false, true, &LoadingScreen::LoadingSplashProgressReport)) {
@@ -399,7 +399,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 		// Try to read in the preset instance's data from the reader
 		if (pNewInstance && pNewInstance->Create(reader, false) < 0)
 		{
-			// Abort loading if we can't create entity and it's not in Scenes.rte
+			// Abort loading if we can't create entity and it's not in a module that allows ignoring missing items.
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
 				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLine());
 		}

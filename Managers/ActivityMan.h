@@ -264,8 +264,6 @@ namespace RTE {
 
 	private:
 
-		static const std::string c_SavedGameModuleName; //!< The name of the module to save games to and load them from.
-
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
 

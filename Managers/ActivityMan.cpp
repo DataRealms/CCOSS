@@ -24,8 +24,6 @@
 
 namespace RTE {
 
-	const std::string ActivityMan::c_SavedGameModuleName = "Saves.rte";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ActivityMan::Clear() {
@@ -72,7 +70,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function.");
 			return false;
 		}
-		if (scene->SaveData(c_SavedGameModuleName + "/" + fileName) < 0) {
+		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
 			// This print is actually pointless because game will abort if it fails to save layer bitmaps. It stays here for now because in reality the game doesn't properly abort if the layer bitmaps fail to save. It is what it is.
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
@@ -89,11 +87,11 @@ namespace RTE {
 
 		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
 		modifiableScene->SetPresetName(fileName);
-		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_SavedGameModuleName));
+		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 		modifiableScene->SetScriptSave(true);
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_SavedGameModuleName + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());
@@ -122,7 +120,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_SavedGameModuleName + "/" + fileName + ".ini", true, nullptr, true);
+		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;

@@ -381,8 +381,15 @@ namespace RTE {
 
 		// TODO: Deal with GUI resetting here!$@#") // Figure out what the hell this is about.
 
-		// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
-		int activityStarted = m_StartActivity ? StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone())) : StartActivity(m_DefaultActivityType, m_DefaultActivityName);
+		int activityStarted;
+		if (m_StartActivity) {
+			// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
+			Activity *startActivityToUse = dynamic_cast<Activity *>(m_StartActivity->Clone());
+			startActivityToUse->SetActivityState(Activity::ActivityState::NotStarted);
+			activityStarted = StartActivity(startActivityToUse);
+		} else {
+			activityStarted = StartActivity(m_DefaultActivityType, m_DefaultActivityName);
+		}
 		g_TimerMan.PauseSim(false);
 		if (activityStarted >= 0) {
 			m_InActivity = true;

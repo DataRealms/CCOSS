@@ -3,45 +3,12 @@
 
 #include "Icon.h"
 #include "Controller.h"
+#include "GenericSavedData.h"
 
 namespace RTE {
 
 	class Scene;
 	class ACraft;
-
-	/// <summary>
-	/// Helper class to save generic data
-	/// </summary>
-	class GenericSavedData : public Entity {
-	public:
-		SerializableOverrideMethods;
-		ClassInfoGetters;
-
-		GenericSavedData() { };
-		GenericSavedData(const GenericSavedData &other) = default;
-
-		class GenericSavedStrings : public Entity {
-		public:
-			SerializableOverrideMethods;
-			ClassInfoGetters;
-
-			GenericSavedStrings() { };
-			GenericSavedStrings(const GenericSavedStrings &other) = default;
-			std::unordered_map<std::string, std::string> m_Data;
-		};
-		GenericSavedStrings m_SavedStrings;
-
-		class GenericSavedNumbers : public Entity {
-		public:
-			SerializableOverrideMethods;
-			ClassInfoGetters;
-
-			GenericSavedNumbers() { };
-			GenericSavedNumbers(const GenericSavedNumbers &other) = default;
-			std::unordered_map<std::string, float> m_Data;
-		};
-		GenericSavedNumbers m_SavedNumbers;
-	};
 
 	/// <summary>
 	/// Base class for all Activities, including game modes and editors.
@@ -536,7 +503,7 @@ namespace RTE {
 		int AIBrainCount() const { return GetBrainCount(false); }
 
 		/// <summary>
-		/// Gets the current Brain actor for a specific player. 
+		/// Gets the current Brain actor for a specific player.
 		/// </summary>
 		/// <param name="player">Which player to get the brain actor for.</param>
 		/// <returns>A pointer to the Brain Actor. Ownership is NOT transferred!</returns>
@@ -729,7 +696,7 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ActivityState m_ActivityState; //!< Current state of this Activity.	
+		ActivityState m_ActivityState; //!< Current state of this Activity.
 		bool m_Paused; //!< Whether this Activity is paused or not.
 
 		std::string m_Description; //!< User-friendly description of what this Activity is all about.
@@ -754,7 +721,7 @@ namespace RTE {
 
 		int m_TeamCount; //!< The number of teams in the current Activity.
 		bool m_TeamActive[Teams::MaxTeamCount]; //!< Whether a specific team is active or not in this Activity.
-		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
+		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.
 		int m_TeamDeaths[Teams::MaxTeamCount]; //!< The count of how many actors have died on this team.
 		int m_TeamAISkillLevels[Teams::MaxTeamCount]; //!< AI skill levels for teams.
 

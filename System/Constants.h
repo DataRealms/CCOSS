@@ -15,7 +15,7 @@ namespace RTE {
 
 #pragma region Userdata Constants
 	static const std::string c_UserScenesModuleName = "UserScenes.rte"; //!< Module name where user created Scenes are saved.
-	static const std::string c_UserScriptedSavesModuleName = "UserSavesScripted.rte"; //!< Module name where user scripted Activity saves are saved.
+	static const std::string c_UserScriptedSavesModuleName = "UserSavedGames.rte"; //!< Module name where user scripted Activity saves are saved.
 	static const std::string c_UserConquestSavesModuleName = "UserSavesConquest.rte"; //!< Module name where user conquest saves are saved.
 #pragma endregion
 

@@ -801,11 +801,9 @@ namespace RTE {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(KEY_S)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-				g_ConsoleMan.PrintString("SYSTEM: Screen saved to ScreenDump.png");
 			// Ctrl+W to save a WorldDump
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldToPNG("WorldDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full level saved to WorldDump.png");
 			// Ctrl+M to cycle draw modes
 			} else if (KeyPressed(KEY_M)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
@@ -833,7 +831,6 @@ namespace RTE {
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full level preview saved to ScenePreviewDump.png");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyPressed(KEY_P)) {
 					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
@@ -843,7 +840,6 @@ namespace RTE {
 			// PrntScren to save a single ScreenDump
 			if (KeyPressed(KEY_PRTSCR)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-				g_ConsoleMan.PrintString("SYSTEM: Screen saved to ScreenDump.png");
 			} else if (KeyPressed(KEY_F1)) {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {
@@ -851,10 +847,8 @@ namespace RTE {
 				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded");
 			} else if (KeyPressed(KEY_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
-				g_ConsoleMan.PrintString("SYSTEM: Console text saved to Console.dump.log");
 			} else if (KeyPressed(KEY_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
-				g_ConsoleMan.PrintString("SYSTEM: Console input saved to Console.input.log");
 			} else if (KeyPressed(KEY_F5)) {
 				switch (g_ActivityMan.SaveCurrentGame("Quicksave")) {
 					case 0:

@@ -237,6 +237,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
+- New Lua `AEmitter` properties:  
+	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
+	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
+	**EmitCount** (R/O) - The number of emissions emitted since emission was last enabled.  
+	**EmitOffset** (R/W) - The offset (`Vector`) of the emission point from this `AEmitter`'s sprite center.  
+
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  

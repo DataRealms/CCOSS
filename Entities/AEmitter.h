@@ -174,6 +174,12 @@ ClassInfoGetters;
 	/// <returns>The emission offset.</returns>
 	Vector GetEmitOffset() const { return m_EmissionOffset; }
 
+	/// <summary>
+	/// Sets the offset of the emission point from this' sprite center, which gets rotated with this.
+	/// </summary>
+	/// <param name="newOffset">The new emission offset.</param>
+	void SetEmitOffset(const Vector &newOffset) { m_EmissionOffset = newOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEmitVector

@@ -198,7 +198,7 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
             return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != g_MaskColor;
         }
     } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
-        const Vector &pos == moPixel->GetPos();
+        const Vector &pos = moPixel->GetPos();
         return std::floor(pos.GetX()) == pixelX && std::floor(pos.GetY()) == pixelY;
     }
 

@@ -48,7 +48,9 @@ namespace RTE {
 		m_NodeGrid.reserve(m_GridWidth * m_GridHeight);
 		for (int y = 0; y < m_GridHeight; ++y) {
 			// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
-			if (nodePos.m_Y >= sceneHeight) { nodePos.m_Y = sceneHeight - 1.0F; }
+			if (nodePos.m_Y >= sceneHeight) {
+				nodePos.m_Y = sceneHeight - 1.0F;
+			}
 
 			// Start the row over at middle of the leftmost node each new row
 			nodePos.m_X = static_cast<float>(nodeDimension) / 2.0F;
@@ -56,13 +58,15 @@ namespace RTE {
 			// Create the new row and fill it out
 			for (int x = 0; x < m_GridWidth; ++x) {
 				// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
-				if (nodePos.m_X >= sceneWidth) { nodePos.m_X = sceneWidth - 1.0F; }
-				// Create the new node with its in-scene position in the center of it
-				PathNode *node = new PathNode(nodePos);
+				if (nodePos.m_X >= sceneWidth) {
+					nodePos.m_X = sceneWidth - 1.0F; 
+				}
+
+				// Add the newly created node to the column
+				m_NodeGrid.push_back(PathNode(nodePos));
+
 				// Move current position right for the next node in the row
 				nodePos.m_X += nodeDimension;
-				// Add the newly created node to the column, transferring ownership to it
-				m_NodeGrid.push_back(node);
 			}
 
 			// Move current position one down for the next row
@@ -72,16 +76,16 @@ namespace RTE {
 		// Assign all the adjacent nodes on each node. GetNodeForCoords handles scene wrapping
 		for (int x = 0; x < m_GridWidth; ++x) {
 			for (int y = 0; y < m_GridHeight; ++y) {
-				PathNode *node = GetNodeForCoords(x, y);
+				PathNode &node = *GetNodeForCoords(x, y);
 
-				node->Up = GetNodeForCoords(x, y - 1);
-				node->Right = GetNodeForCoords(x + 1, y);
-				node->Down = GetNodeForCoords(x, y + 1);
-				node->Left = GetNodeForCoords(x - 1, y);
-				node->UpRight = GetNodeForCoords(x + 1, y - 1);
-				node->RightDown = GetNodeForCoords(x + 1, y + 1);
-				node->DownLeft = GetNodeForCoords(x - 1, y + 1);
-				node->LeftUp = GetNodeForCoords(x - 1, y - 1);
+				node.Up = GetNodeForCoords(x, y - 1);
+				node.Right = GetNodeForCoords(x + 1, y);
+				node.Down = GetNodeForCoords(x, y + 1);
+				node.Left = GetNodeForCoords(x - 1, y);
+				node.UpRight = GetNodeForCoords(x + 1, y - 1);
+				node.RightDown = GetNodeForCoords(x + 1, y + 1);
+				node.DownLeft = GetNodeForCoords(x - 1, y + 1);
+				node.LeftUp = GetNodeForCoords(x - 1, y - 1);
 			}
 		}
 
@@ -97,13 +101,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PathFinder::Destroy() {
-		for (unsigned int x = 0; x < m_GridWidth; ++x) {
-			for (unsigned int y = 0; y < m_GridHeight; ++y) {
-				int nodeId = GetNodeIdForCoords(x, y);
-				delete m_NodeGrid[nodeId];
-				m_NodeGrid[nodeId] = nullptr;
-			}
-		}
 		delete m_Pather;
 		Clear();
 	}
@@ -131,7 +128,7 @@ namespace RTE {
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve(static_cast<void *>(m_NodeGrid[GetNodeIdForCoords(startNodeX, startNodeY)]), static_cast<void*>(m_NodeGrid[GetNodeIdForCoords(endNodeX, endNodeY)]), &statePath, &totalCostResult);
+		int result = m_Pather->Solve(static_cast<void *>(&m_NodeGrid[GetNodeIdForCoords(startNodeX, startNodeY)]), static_cast<void*>(&m_NodeGrid[GetNodeIdForCoords(endNodeX, endNodeY)]), &statePath, &totalCostResult);
 
 		// We got something back
 		if (!statePath.empty()) {
@@ -169,8 +166,8 @@ namespace RTE {
 			std::execution::par_unseq,
 			m_NodeGrid.begin(),
 			m_NodeGrid.end(),
-			[this](PathNode* node) {
-				UpdateNodeCosts(node);
+			[this](PathNode &node) {
+				UpdateNodeCosts(&node);
 			}
 		);
 
@@ -179,11 +176,11 @@ namespace RTE {
 			std::execution::par_unseq,
 			m_NodeGrid.begin(),
 			m_NodeGrid.end(),
-			[](PathNode* node) {
-				if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
-				if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
-				if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
-				if (node->RightDown) { node->RightDown->LeftUpMaterial = node->RightDownMaterial; }
+			[](PathNode &node) {
+				if (node.Right) { node.Right->LeftMaterial = node.RightMaterial; }
+				if (node.Down) { node.Down->UpMaterial = node.DownMaterial; }
+				if (node.UpRight) { node.UpRight->DownLeftMaterial = node.UpRightMaterial; }
+				if (node.RightDown) { node.RightDown->LeftUpMaterial = node.RightDownMaterial; }
 			}
 		);
 
@@ -240,44 +237,44 @@ namespace RTE {
 
 		// Add cost for digging upwards.
 		if (node->Up) {
-			adjCost.cost = 1.0F + extraUpCost + (GetMaterialTransitionCost(node->UpMaterial) * 4.0F) + radiatedCost; // Four times more expensive when digging.
+			adjCost.cost = 1.0F + extraUpCost + (GetMaterialTransitionCost(*node->UpMaterial) * 4.0F) + radiatedCost; // Four times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Right) {
-			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->RightMaterial) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->RightMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Down) {
-			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->DownMaterial) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->DownMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->Left) {
-			adjCost.cost = 1.0F + GetMaterialTransitionCost(node->LeftMaterial) + radiatedCost;
+			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->LeftMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
 		// Add cost for digging at 45 degrees and for digging upwards.
 		if (node->UpRight) {
-			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(*node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->RightDown) {
-			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->RightDownMaterial) * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(*node->RightDownMaterial) * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->DownLeft) {
-			adjCost.cost = 1.4F + (GetMaterialTransitionCost(node->DownLeftMaterial) * 1.4F) + radiatedCost;;
+			adjCost.cost = 1.4F + (GetMaterialTransitionCost(*node->DownLeftMaterial) * 1.4F) + radiatedCost;;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
 		if (node->LeftUp) {
-			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
+			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(*node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
@@ -285,9 +282,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::GetMaterialTransitionCost(const Material *material) const {
-		float strength = material->GetIntegrity();
-		if (strength > m_DigStrength && material->GetIndex() != g_MaterialDoor) { // Always treat doors as diggable
+	float PathFinder::GetMaterialTransitionCost(const Material &material) const {
+		float strength = material.GetIntegrity();
+		if (strength > m_DigStrength && material.GetIndex() != g_MaterialDoor) { // Always treat doors as diggable
 			strength *= 1000.0F;
 		}
 		return strength;
@@ -408,8 +405,8 @@ namespace RTE {
 			nodeVec.begin(),
 			nodeVec.end(),
 			[this, &anyChange](int nodeId) {
-				PathNode* node = m_NodeGrid[nodeId];
-				if (UpdateNodeCosts(node)) {
+				PathNode &node = m_NodeGrid[nodeId];
+				if (UpdateNodeCosts(&node)) {
 					anyChange = true;
 				};
 			}
@@ -422,11 +419,11 @@ namespace RTE {
 				nodeVec.begin(),
 				nodeVec.end(),
 				[this](int nodeId) {
-					PathNode* node = m_NodeGrid[nodeId];
-					if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
-					if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
-					if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
-					if (node->RightDown) { node->RightDown->LeftUpMaterial = node->RightDownMaterial; }
+					PathNode &node = m_NodeGrid[nodeId];
+					if (node.Right) { node.Right->LeftMaterial = node.RightMaterial; }
+					if (node.Down) { node.Down->UpMaterial = node.DownMaterial; }
+					if (node.UpRight) { node.UpRight->DownLeftMaterial = node.UpRightMaterial; }
+					if (node.RightDown) { node.RightDown->LeftUpMaterial = node.RightDownMaterial; }
 				}
 			);
 
@@ -453,7 +450,7 @@ namespace RTE {
 			return nullptr;
 		}
 
-		return m_NodeGrid[(y * m_GridWidth) + x];
+		return &m_NodeGrid[(y * m_GridWidth) + x];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

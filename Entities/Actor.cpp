@@ -624,7 +624,7 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
 
-	RunScriptedFunctionInAppropriateScripts("OnSelect", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
+	RunScriptedFunctionInAppropriateScripts("OnControllerSwitch", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
 
 
     // So the AI doesn't jerk around

@@ -49,10 +49,6 @@ namespace version {
 		using State = tuple<Transitions, string&, Validator>;
 		using State_machine = map<Parser_state, State>;
 
-		// Ranges of characters allowed in prerelease and build identifiers.
-		const vector<pair<char, char>> allowed_prerel_id_chars = {
-				{ '0', '9' },{ 'A','Z' },{ 'a','z' },{ '-','-' }
-		};
 
 		inline Transition mkx(const char c, Parser_state p, State_transition_hook pth) {
 			return make_tuple(c, p, pth);
@@ -89,6 +85,10 @@ namespace version {
 		/// Validate that prerelease and build version identifiers are comprised of allowed chars only.
 		inline void prerelease_version_validator(const string&, const char c) {
 			bool res = false;
+			// Ranges of characters allowed in prerelease and build identifiers.
+			const vector<pair<char, char>> allowed_prerel_id_chars = {
+					{ '0', '9' },{ 'A','Z' },{ 'a','z' },{ '-','-' }
+			};
 			for (const auto& r : allowed_prerel_id_chars) {
 				res |= (c >= r.first && c <= r.second);
 			}

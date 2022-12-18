@@ -34,7 +34,7 @@ namespace version {
 		/// Utility function to splice all vector elements to output stream, using designated separator 
 		/// between elements and function object for getting values from vector elements.
 		template<typename T, typename F>
-		std::ostream& splice(std::ostream& os, const std::vector<T>& vec, const std::string& sep, F read) {
+		std::ostream &splice(std::ostream &os, const std::vector<T> &vec, const std::string &sep, F read) {
 			if (!vec.empty()) {
 				for (auto it = vec.cbegin(); it < vec.cend() - 1; ++it) {
 					os << read(*it) << sep;
@@ -50,19 +50,34 @@ namespace version {
 		: parser_(p), comparator_(c), modifier_(m), ver_(parser_.parse("0.0.0")) {}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier>::Basic_version(const std::string& v, Parser p, Comparator c, Modifier m)
+	Basic_version<Parser, Comparator, Modifier>::Basic_version(const std::string &v, Parser p, Comparator c, Modifier m)
 		: parser_(p), comparator_(c), modifier_(m), ver_(parser_.parse(v)) {}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier>::Basic_version(const Version_data& v, Parser p, Comparator c, Modifier m)
+	Basic_version<Parser, Comparator, Modifier>::Basic_version(const Version_data &v, Parser p, Comparator c, Modifier m)
 		: parser_(p), comparator_(c), modifier_(m), ver_(v) {}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier>::Basic_version(const Basic_version<Parser, Comparator, Modifier>&) = default;
+	Basic_version<Parser, Comparator, Modifier>::Basic_version(const Basic_version<Parser, Comparator, Modifier> &) = default;
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier>& Basic_version<Parser, Comparator, Modifier>::operator=(
-		const Basic_version<Parser, Comparator, Modifier>&) = default;
+	Basic_version<Parser, Comparator, Modifier> &Basic_version<Parser, Comparator, Modifier>::operator=(
+		const Basic_version<Parser, Comparator, Modifier> &) = default;
+
+	template<typename Parser, typename Comparator, typename Modifier>
+	const std::string Basic_version<Parser, Comparator, Modifier>::str() const {
+		std::stringstream buffer;
+		buffer << ver_.major << "." << ver_.minor << "." << ver_.patch;
+		std::string prl = prerelease();
+		if (!prl.empty()) {
+			buffer << "-" << prl;
+		}
+		std::string bld = build();
+		if (!bld.empty()) {
+			buffer << "+" << bld;
+		}
+		return buffer.str();
+	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
 	int Basic_version<Parser, Comparator, Modifier>::major() const {
@@ -82,14 +97,14 @@ namespace version {
 	template<typename Parser, typename Comparator, typename Modifier>
 	const std::string Basic_version<Parser, Comparator, Modifier>::prerelease() const {
 		std::stringstream ss;
-		splice(ss, ver_.prerelease_ids, ".", [](const auto& id) { return id.first;});
+		splice(ss, ver_.prerelease_ids, ".", [](const auto &id) { return id.first; });
 		return ss.str();
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
 	const std::string Basic_version<Parser, Comparator, Modifier>::build() const {
 		std::stringstream ss;
-		splice(ss, ver_.build_ids, ".", [](const auto& id) { return id;});
+		splice(ss, ver_.build_ids, ".", [](const auto &id) { return id; });
 		return ss.str();
 	}
 
@@ -109,13 +124,13 @@ namespace version {
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::set_prerelease(const std::string& pr) const {
+	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::set_prerelease(const std::string &pr) const {
 		auto vd = parser_.parse("0.0.0-" + pr);
 		return Basic_version<Parser, Comparator, Modifier>(modifier_.set_prerelease(ver_, vd.prerelease_ids), parser_, comparator_, modifier_);
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::set_build(const std::string& b) const {
+	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::set_build(const std::string &b) const {
 		auto vd = parser_.parse("0.0.0+" + b);
 		return Basic_version<Parser, Comparator, Modifier>(modifier_.set_build(ver_, vd.build_ids), parser_, comparator_, modifier_);
 	}
@@ -136,14 +151,14 @@ namespace version {
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::reset_prerelease(const std::string& pr) const {
+	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::reset_prerelease(const std::string &pr) const {
 		std::string ver = "0.0.0-" + pr;
 		auto vd = parser_.parse(ver);
 		return Basic_version<Parser, Comparator, Modifier>(modifier_.reset_prerelease(ver_, vd.prerelease_ids), parser_, comparator_, modifier_);
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::reset_build(const std::string& b) const {
+	Basic_version<Parser, Comparator, Modifier> Basic_version<Parser, Comparator, Modifier>::reset_build(const std::string &b) const {
 		std::string ver = "0.0.0+" + b;
 		auto vd = parser_.parse(ver);
 		return Basic_version<Parser, Comparator, Modifier>(modifier_.reset_build(ver_, vd.build_ids), parser_, comparator_, modifier_);
@@ -165,20 +180,20 @@ namespace version {
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	bool operator<(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	bool operator<(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return l.comparator_.compare(l.ver_, r.ver_) == -1;
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	bool operator==(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	bool operator==(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return l.comparator_.compare(l.ver_, r.ver_) == 0;
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	std::ostream& operator<<(std::ostream& os,
-		const Basic_version<Parser, Comparator, Modifier>& v) {
+	std::ostream &operator<<(std::ostream &os,
+		const Basic_version<Parser, Comparator, Modifier> &v) {
 		os << v.ver_.major << "." << v.ver_.minor << "." << v.ver_.patch;
 		std::string prl = v.prerelease();
 		if (!prl.empty()) {
@@ -192,26 +207,26 @@ namespace version {
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	inline bool operator!=(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	inline bool operator!=(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return !(l == r);
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	inline bool operator>(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	inline bool operator>(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return r < l;
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	inline bool operator>=(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	inline bool operator>=(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return !(l < r);
 	}
 
 	template<typename Parser, typename Comparator, typename Modifier>
-	inline bool operator<=(const Basic_version<Parser, Comparator, Modifier>& l,
-		const Basic_version<Parser, Comparator, Modifier>& r) {
+	inline bool operator<=(const Basic_version<Parser, Comparator, Modifier> &l,
+		const Basic_version<Parser, Comparator, Modifier> &r) {
 		return !(l > r);
 	}
 }

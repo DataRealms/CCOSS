@@ -67,7 +67,7 @@ namespace RTE {
 			return false;
 		}
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function.");
+			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function. Note that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
 		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {

@@ -371,7 +371,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ExpandAIPlanAssemblySchemes
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replace all assembly shemes by corresponding bunker assemblies in 
+// Description:     Replace all assembly shemes by corresponding bunker assemblies in
 //					AI plan objects set.
 // Arguments:       None.
 // Return value:    None.
@@ -761,16 +761,15 @@ EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveActorsAndDevices
+// Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
+// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
-//                  Should be done AFTER RetrieveResidentBrains!
 // Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
-    int RetrieveActorsAndDevices(int onlyTeam = -1, bool noBrains = false);
+    int RetrieveSceneObjects(bool transferOwnership, int onlyTeam = -1, bool noBrains = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -856,9 +855,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all entries in a specific set of placed Objects.
 // Arguments:       Which set of placed objects to clear. See the PlacedObjectSets enum.
+//                  Whether or not we have ownership of these items, and should delete them.
 // Return value:    How many things were removed in teh process of clearing that set.
 
-    int ClearPlacedObjectSet(int whichSet);
+    int ClearPlacedObjectSet(int whichSet, bool weHaveOwnership = true);
 
 
 
@@ -1268,7 +1268,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a temprorary metagame scene and should 
+// Description:     Whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       None.
 // Return value:    Whether scene belongs to metagame or not.
@@ -1279,12 +1279,25 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a temprorary metagame scene and should 
+// Description:     Sets whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       New value.
 // Return value:    None.
 
 	void SetMetagameInternal(bool newValue) { m_IsMetagameInternal = newValue; }
+
+
+	/// <summary>
+	/// Gets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <returns>Whether this Scene is a saved game Scene copy.</returns>
+	bool IsSavedGameInternal() const { return m_IsSavedGameInternal; }
+
+	/// <summary>
+	/// Sets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <param name="newValue">Whether this Scene is a saved game Scene copy.</param>
+	void SetSavedGameInternal(bool newValue) { m_IsSavedGameInternal = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1374,8 +1387,10 @@ protected:
 	// Scenes with m_MetaSceneParent field set will be invisible for editors and activities unless
 	// ShowMetaScenes flag in settings.ini is set
 	string m_MetasceneParent;
+
 	// Whether this scene must be shown anywhere in UIs
 	bool m_IsMetagameInternal;
+    bool m_IsSavedGameInternal;
 
 	std::list<Deployment *>m_Deployments;
 
@@ -1390,6 +1405,14 @@ private:
 	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
 	/// <returns>A pointer to the pathfinder for the given team.</returns>
 	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
+
+	/// <summary>
+	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties.
+	/// </summary>
+	/// <param name="writer">The Writer being used for serialization.</param>
+	/// <param name="sceneObjectToSave">The SceneObject to save.</param>
+	/// <param name="isChildAttachable">Convenience flag for whether or not this SceneObject is a child Attachable, and certain properties shouldn't be saved.</param>
+	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

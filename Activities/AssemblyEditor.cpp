@@ -357,7 +357,7 @@ void AssemblyEditor::Update()
 						m_ModuleSpaceID = g_PresetMan.GetModuleID(m_pModuleCombo->GetSelectedItem()->m_Name);
                         RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
-						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
+						if (m_ModuleSpaceID == g_PresetMan.GetModuleID(c_UserScenesModuleName))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, -1);
 						else
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
@@ -624,7 +624,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 {
 	BunkerAssembly *pBA = BuildAssembly(saveAsName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
@@ -748,11 +748,11 @@ void AssemblyEditor::UpdateLoadDialog()
 			// If metascenes are visible then allow to save assemblies to Base.rte
 			if (g_SettingsMan.ShowMetascenes())
 			{
-				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 												&& g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			} else {
-				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			}
@@ -773,14 +773,14 @@ void AssemblyEditor::UpdateLoadDialog()
 				}
 				else
 				{
-					if (g_PresetMan.GetDataModule(module)->GetFileName() == "Scenes.rte")
+					if (g_PresetMan.GetDataModule(module)->GetFileName() == c_UserScenesModuleName)
 						scenesIndex = m_pModuleCombo->GetCount() - 1;
 				}
 			}
 		}
 
 		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2 }));
-        // Select the "Scenes.rte" module
+        // Select the user scenes module
         m_pModuleCombo->SetSelectedIndex(scenesIndex);
     }
 
@@ -797,7 +797,7 @@ void AssemblyEditor::UpdateLoadDialog()
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 

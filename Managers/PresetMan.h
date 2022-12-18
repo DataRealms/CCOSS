@@ -97,30 +97,22 @@ public:
     void Destroy();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          LoadDataModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads an entire data module and adds it to this. NOTE that official
-//                  modules can't be loaded after any non-official ones!
-// Arguments:       The module name to read, eg "Base.rte"
-//                  Whether this module is 'official' or user-made. If official, it has to
-//                  not have any name conflicts with any other offical module.
-//                  A function pointer to a function that will be called and sent a string
-//                  with information about the progress of this DataModule's creation.
-// Return value:    Whether the DataModule was read and added correctly.
+    /// <summary>
+    /// Reads an entire DataModule and adds it to this. NOTE that official modules can't be loaded after any non-official ones!
+    /// </summary>
+    /// <param name="moduleName">The module name to read, e.g. "Base.rte".</param>
+    /// <param name="official">Whether this module is 'official' or third party. If official, it has to not have any name conflicts with any other official module.</param>
+	/// <param name="userdata">Whether this module is a userdata module. If true, will be treated as an unofficial module.
+    /// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
+    /// <returns>Whether the DataModule was read and added correctly.</returns>
+    bool LoadDataModule(const std::string &moduleName, bool official, bool userdata = false, const ProgressCallback &progressCallback = nullptr);
 
-    bool LoadDataModule(std::string moduleName, bool official, ProgressCallback fpProgressCallback = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          LoadDataModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads an entire data module and adds it to this. NOTE that official
-//                  modules can't be loaded after any non-official ones!
-// Arguments:       The module name to read, eg "Base.rte"
-// Return value:    Whether the DataModule was read and added correctly.
-
-    bool LoadDataModule(std::string moduleName) { return LoadDataModule(moduleName, false, 0); }
+    /// <summary>
+    /// Reads an entire DataModule and adds it to this. NOTE that official modules can't be loaded after any non-official ones!
+    /// </summary>
+    /// <param name="moduleName">The module name to read, e.g. "Base.rte".</param>
+    /// <returns>Whether the DataModule was read and added correctly.</returns>
+    bool LoadDataModule(const std::string &moduleName) { return LoadDataModule(moduleName, false); }
 
 	/// <summary>
 	/// Loads all the official data modules individually with LoadDataModule, then proceeds to look for any non-official modules and loads them as well.
@@ -412,16 +404,10 @@ public:
     std::string GetEntityDataLocation(std::string type, std::string preset, int whichModule);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReloadAllScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads all scripted Entity Presets witht he latest version of their
-//                  respective script files.
-// Arguments:       None.
-// Return value:    None.
-
-    void ReloadAllScripts();
-
+    /// <summary>
+    /// Reloads all scripted Entity Presets with the latest version of their respective script files.
+    /// </summary>
+    void ReloadAllScripts() const;
 
 	/// <summary>
 	/// Reloads an Entity preset and all related presets with the latest version of their respective files.

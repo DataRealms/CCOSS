@@ -2,7 +2,6 @@
 #define _RTELUAMAN_
 
 #include "Singleton.h"
-#include "Serializable.h"
 #include "Entity.h"
 
 #define g_LuaMan LuaMan::Instance()

@@ -49,6 +49,18 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
+		/// Gets whether or not the currently active Activity allows saving.
+		/// </summary>
+		/// <returns>Whether or not the currently active Activity allows saving.</returns>
+		bool GetActivityAllowsSaving() const { return m_Activity && m_ActivityAllowsSaving; }
+
+		/// <summary>
+		/// Sets whether or not the currently active Activity allows saving.
+		/// </summary>
+		/// <param name="activityAllowsSaving">Whether or not the currently active Activity should allow saving.</param>
+		void SetActivityAllowsSaving(bool activityAllowsSaving) { m_ActivityAllowsSaving = activityAllowsSaving; }
+
+		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
@@ -138,6 +150,22 @@ namespace RTE {
 		/// </summary>
 		/// <param name="editorName"></param>
 		void SetEditorToLaunch(const std::string_view &editorName) { if (!editorName.empty()) { m_EditorToLaunch = editorName; m_LaunchIntoEditor = true; } }
+#pragma endregion
+
+#pragma region Saving and Loading
+		/// <summary>
+		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether the game was successfully saved.</returns>
+		bool SaveCurrentGame(const std::string &fileName) const;
+
+		/// <summary>
+		/// Loads a saved game, and launches its Scene and Activity.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether or not the saved game was successfully loaded.</returns>
+		bool LoadAndLaunchGame(const std::string &fileName) const;
 #pragma endregion
 
 #pragma region Activity Start Handling
@@ -234,13 +262,15 @@ namespace RTE {
 		void Update() const { if (m_Activity) { m_Activity->Update(); } }
 #pragma endregion
 
-	protected:
+	private:
 
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
 
 		std::unique_ptr<Activity> m_Activity; //!< The currently active Activity.
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
+
+		bool m_ActivityAllowsSaving; //!< Whether or not the current Activity allows saving and loading. The details on whether or not an Activity allows this are set up when the Activity is started.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.
@@ -252,8 +282,6 @@ namespace RTE {
 		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default Activity instead.
 		bool m_LaunchIntoEditor; //!< Whether to skip the intro and main menu and launch directly into the set editor Activity instead.
 		std::string_view m_EditorToLaunch; //!< The name of the editor Activity to launch directly into.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this ActivityMan, effectively resetting the members of this abstraction level only.

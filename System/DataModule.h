@@ -3,6 +3,7 @@
 
 #include "ContentFile.h"
 #include "Constants.h"
+#include <System/Semver200/semver200.h>
 
 //struct DATAFILE; // DataFile loading not implemented.
 struct BITMAP;
@@ -298,7 +299,7 @@ namespace RTE {
 		std::string m_ScriptPath; //!< Path to script to execute when this module is loaded.
 		bool m_IsFaction; //!< Whether this data module is considered a faction.
 		bool m_IsMerchant; //!< Whether this data module is considered a merchant.
-		std::string m_SupportedGameVersion; //!< Game version this DataModule supports. Needs to match exactly for this DataModule to be allowed. Base DataModules don't need this.
+		version::Semver200_version m_SupportedGameVersion; //!< Game version this DataModule supports. Needs to match exactly for this DataModule to be allowed. Base DataModules don't need this.
 		int m_Version; //!< Version number, starting with 1.
 		int m_ModuleID; //!< ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
 

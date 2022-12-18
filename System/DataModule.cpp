@@ -14,7 +14,7 @@ namespace RTE {
 		m_FriendlyName.clear();
 		m_Author.clear();
 		m_Description.clear();
-		m_SupportedGameVersion.clear();
+		m_SupportedGameVersion = version::Semver200_version();
 		m_Version = 1;
 		m_ModuleID = -1;
 		m_IconFile.Reset();
@@ -52,8 +52,25 @@ namespace RTE {
 			int result = Serializable::Create(reader);
 
 			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && m_SupportedGameVersion != c_GameVersion) {
-				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
-				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				
+				RTEAssert(m_SupportedGameVersion != version::Semver200_version(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\nPlease contact the mod author or ask for help in the CCCP discord server.");
+		
+				bool modulePrereleaseVersionMismatch = !m_SupportedGameVersion.prerelease().empty();
+				bool moduleBuildVersionMismatch = !m_SupportedGameVersion.build().empty();
+				RTEAssert(!modulePrereleaseVersionMismatch && !moduleBuildVersionMismatch, m_FileName + " was developed for prerelease build of Cortex Command v" + m_SupportedGameVersion.str() + ", this game version (v" + c_GameVersion.str() + ") is incompatible.\n\nMods developed on a prerelease must match the game version exactly.\nPlease contact the mod author or ask for help in the CCCP discord server.");
+
+				bool gamePrereleaseVersionMismatch = !c_GameVersion.prerelease().empty();
+				bool gameBuildVersionMismatch = !c_GameVersion.build().empty();
+				RTEAssert(!gamePrereleaseVersionMismatch && !gameBuildVersionMismatch, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion.str() + ", this prerelease version of the game (v" + c_GameVersion.str() + ") may not support it.\n\nMods must match the game version exactly to use prerelease builds.\nPlease contact the mod author or ask for help in the CCCP discord server.");
+
+
+				// Game engine is the same major version as the Module
+				bool majorVersionMatch = c_GameVersion.major() == m_SupportedGameVersion.major();
+				// Game engine is at least the minor version the Module requires (allow patch mismatch)
+				bool minorVersionInRange = m_SupportedGameVersion.inc_minor() <= c_GameVersion.inc_minor();
+
+				RTEAssert(majorVersionMatch && minorVersionInRange, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion.str() + ", so this version of Cortex Command (v" + c_GameVersion.str() + ") may not support it.\nPlease contact the mod author or ask for help in the CCCP discord server.");
+		
 			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.
@@ -122,7 +139,14 @@ namespace RTE {
 			reader >> m_IsMerchant;
 			if (m_IsMerchant) { m_IsFaction = false; }
 		} else if (propName == "SupportedGameVersion") {
-			reader >> m_SupportedGameVersion;
+			std::string versionText;
+			reader >> versionText;
+			versionText = versionText == "Pre-Release 4.0" ? "4.0.0" : versionText;
+			try {
+				m_SupportedGameVersion = version::Semver200_version(versionText);
+			} catch (version::Parse_error) {
+				reader.ReportError("Couldn't parse the supported game version from the value provided: \"" + versionText + "\"!\nThe supported game version must be a valid semantic version number.\n");
+			}
 		} else if (propName == "Version") {
 			reader >> m_Version;
 		} else if (propName == "ScanFolderContents") {
@@ -179,7 +203,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("Author", m_Author);
 		writer.NewPropertyWithValue("Description", m_Description);
 		writer.NewPropertyWithValue("IsFaction", m_IsFaction);
-		writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion);
+		writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion.str());
 		writer.NewPropertyWithValue("Version", m_Version);
 		writer.NewPropertyWithValue("IconFile", m_IconFile);
 

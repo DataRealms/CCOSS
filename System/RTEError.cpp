@@ -24,16 +24,13 @@ namespace RTE {
 
 		std::string abortMessage;
 
-#ifndef RELEASE_BUILD
 		// Show message box with explanation
 		abortMessage = "Runtime Error in file " + file + ", line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
-#else
-		// Shortened and less confusing one. users have no use of knowing which source file and where.
-		abortMessage = description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
-#endif
 		ShowMessageBox(abortMessage);
 
+#ifndef RELEASE_BUILD
 		AbortAction;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

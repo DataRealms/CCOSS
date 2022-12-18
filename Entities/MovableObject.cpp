@@ -295,7 +295,11 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_RestThreshold;
 	else if (propName == "LifeTime")
 		reader >> m_Lifetime;
-	else if (propName == "Sharpness")
+	else if (propName == "Age") {
+		double age;
+		reader >> age;
+		m_AgeTimer.SetElapsedSimTimeMS(age);
+	} else if (propName == "Sharpness")
 		reader >> m_Sharpness;
 	else if (propName == "HitsMOs")
 		reader >> m_HitsMOs;

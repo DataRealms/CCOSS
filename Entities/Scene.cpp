@@ -1509,6 +1509,8 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
+		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
+		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
 	}
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
@@ -1523,9 +1525,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
 		// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
 		if (!attachablesToSave.empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachablesAndWounds", true);
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
 		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachablesAndWounds", true);
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
 		}
 
 		for (const Attachable *attachable : attachablesToSave) {
@@ -1557,11 +1559,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmissionEnabled", aemitterToSave->IsEmitting());
 			writer.NewPropertyWithValue("EmissionCount", aemitterToSave->GetEmitCount());
 			writer.NewPropertyWithValue("EmissionCountLimit", aemitterToSave->GetEmitCountLimit());
-			writer.NewPropertyWithValue("ParticlesPerMinute", aemitterToSave->GetTotalParticlesPerMinute());
 			writer.NewPropertyWithValue("NegativeThrottleMultiplier", aemitterToSave->GetNegativeThrottleMultiplier());
 			writer.NewPropertyWithValue("PositiveThrottleMultiplier", aemitterToSave->GetPositiveThrottleMultiplier());
 			writer.NewPropertyWithValue("Throttle", aemitterToSave->GetThrottle());
-			writer.NewPropertyWithValue("BurstSize", aemitterToSave->GetTotalBurstSize());
 			writer.NewPropertyWithValue("BurstScale", aemitterToSave->GetBurstScale());
 			writer.NewPropertyWithValue("BurstDamage", aemitterToSave->GetBurstDamage());
 			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());

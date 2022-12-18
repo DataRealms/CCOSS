@@ -313,14 +313,9 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DeepCheck;
     else if (propName == "OrientToVel")
         reader >> m_OrientToVel;
-	else if (propName == "SpecialBehaviour_ClearAllAttachablesAndWounds") {
-		// This special property is used to allow Attachables and Wounds to save with our limited serialization system, when saving the game. Note that we discard the property value because all that matters is having the property.
+	else if (propName == "SpecialBehaviour_ClearAllAttachables") {
+		// This special property is used to make Attachables work with our limited serialization system, when saving the game. Note that we discard the property value here, because all that matters is whether or not we have the property.
 		reader.ReadPropValue();
-		for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ++woundIterator) {
-			delete (*woundIterator);
-		}
-		m_Wounds.clear();
-
 		for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
 			Attachable *attachable = *attachableIterator;
 			++attachableIterator;

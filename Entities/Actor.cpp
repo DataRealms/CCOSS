@@ -618,13 +618,13 @@ void Actor::SetTeam(int team)
 void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 {
 
-	Controller::InputMode previousMode = m_Controller.GetInputMode();
-	int previousPlayer = m_Controller.GetPlayer();
+	Controller::InputMode previousControllerMode = m_Controller.GetInputMode();
+	int previousControllingPlayer = m_Controller.GetPlayer();
 
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
 
-	RunScriptedFunctionInAppropriateScripts("OnSelect", false, false, {}, {std::to_string(previousMode), std::to_string(previousPlayer) });
+	RunScriptedFunctionInAppropriateScripts("OnSelect", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
 
 
     // So the AI doesn't jerk around

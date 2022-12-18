@@ -158,7 +158,7 @@ namespace RTE {
 		static constexpr float c_NodeCostChangeEpsilon = 5.0F; //!< The minimum change in a node's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 
 		MicroPather *m_Pather; //!< The actual pathing object that does the pathfinding work. Owned.
-		std::vector<PathNode *> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
+		std::vector<PathNode> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene.
 		unsigned int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
 		int m_GridWidth; //!< The width of the pathing grid, in nodes.
 		int m_GridHeight; //!< The height of the pathing grid, in nodes.
@@ -196,7 +196,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="node">The material to get the transition cost for.</param>
 		/// <returns>The transition cost.</returns>
-		float GetMaterialTransitionCost(const Material *material) const ;
+		float GetMaterialTransitionCost(const Material &material) const ;
 
 		/// <summary>
 		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions

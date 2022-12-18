@@ -28,9 +28,7 @@ namespace RTE {
 		abortMessage = "Runtime Error in file " + file + ", line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
 		ShowMessageBox(abortMessage);
 
-#ifndef RELEASE_BUILD
 		AbortAction;
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

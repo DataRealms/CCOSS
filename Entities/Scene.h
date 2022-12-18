@@ -1288,15 +1288,15 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 
 	/// <summary>
-	/// Gets whether this Scene is a saved game scene copy and should not be used anywhere except for game saving and loading.
+	/// Gets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
 	/// </summary>
-	/// <returns>Whether this Scene is a saved game scene copy.</returns>
+	/// <returns>Whether this Scene is a saved game Scene copy.</returns>
 	bool IsSavedGameInternal() const { return m_IsSavedGameInternal; }
 
 	/// <summary>
-	/// Sets whether this Scene is a saved game scene copy and should not be used anywhere except for game saving and loading.
+	/// Sets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
 	/// </summary>
-	/// <param name="newValue">Whether this Scene is a saved game scene copy.</param>
+	/// <param name="newValue">Whether this Scene is a saved game Scene copy.</param>
 	void SetSavedGameInternal(bool newValue) { m_IsSavedGameInternal = newValue; }
 
 

@@ -19,6 +19,8 @@
 #include "ConsoleMan.h"
 #include "AudioMan.h"
 #include "SettingsMan.h"
+#include "MetaMan.h"
+#include "NetworkClient.h"
 #include "AHuman.h"
 #include "ACrab.h"
 #include "ACraft.h"
@@ -207,31 +209,35 @@ int GAScripted::ReloadScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool GAScripted::ActivityCanBeSaved() const {
+	if (const Scene *scene = g_SceneMan.GetScene(); (scene && scene->IsMetagameInternal()) || g_MetaMan.GameInProgress()) {
+		return false;
+	}
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return false;
+	}
 	//TODO this method is complicated and manually parsing lua like this sucks. It should be replaceable with a simple check if the function exists in Lua, but it wasn't working when I tried so I just copied this from SceneIsCompatible.
-	if (const Scene *scene = g_SceneMan.GetScene(); !scene || (scene && !scene->IsMetagameInternal())) {
-		std::ifstream scriptInputFileStream(m_ScriptPath);
-		if (scriptInputFileStream.good()) {
-			std::string::size_type commentPos;
-			bool inBlockComment = false;
-			while (!scriptInputFileStream.eof()) {
-				char rawLine[512];
-				scriptInputFileStream.getline(rawLine, 512);
-				std::string currentLine(rawLine);
+	std::ifstream scriptInputFileStream(m_ScriptPath);
+	if (scriptInputFileStream.good()) {
+		std::string::size_type commentPos;
+		bool inBlockComment = false;
+		while (!scriptInputFileStream.eof()) {
+			char rawLine[512];
+			scriptInputFileStream.getline(rawLine, 512);
+			std::string currentLine(rawLine);
 
-				if (!inBlockComment) {
-					commentPos = currentLine.find("--[[", 0);
-					inBlockComment = commentPos != std::string::npos;
-				}
-				if (inBlockComment) {
-					commentPos = currentLine.find("]]", commentPos == std::string::npos ? 0 : commentPos);
-					inBlockComment = commentPos != std::string::npos;
-				}
-				if (!inBlockComment) {
-					commentPos = currentLine.find("--", 0);
-					std::string::size_type foundTextPos = currentLine.find("OnSave");
-					if (foundTextPos != std::string::npos && foundTextPos < commentPos) {
-						return true;
-					}
+			if (!inBlockComment) {
+				commentPos = currentLine.find("--[[", 0);
+				inBlockComment = commentPos != std::string::npos;
+			}
+			if (inBlockComment) {
+				commentPos = currentLine.find("]]", commentPos == std::string::npos ? 0 : commentPos);
+				inBlockComment = commentPos != std::string::npos;
+			}
+			if (!inBlockComment) {
+				commentPos = currentLine.find("--", 0);
+				std::string::size_type foundTextPos = currentLine.find("OnSave");
+				if (foundTextPos != std::string::npos && foundTextPos < commentPos) {
+					return true;
 				}
 			}
 		}

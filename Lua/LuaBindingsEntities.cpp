@@ -383,10 +383,14 @@ namespace RTE {
 		.property("BurstSpacing", &AEmitter::GetBurstSpacing, &AEmitter::SetBurstSpacing)
 		.property("BurstDamage", &AEmitter::GetBurstDamage, &AEmitter::SetBurstDamage)
 		.property("EmitterDamageMultiplier", &AEmitter::GetEmitterDamageMultiplier, &AEmitter::SetEmitterDamageMultiplier)
+		.property("EmitCount", &AEmitter::GetEmitCount)
 		.property("EmitCountLimit", &AEmitter::GetEmitCountLimit, &AEmitter::SetEmitCountLimit)
 		.property("EmitDamage", &AEmitter::GetEmitDamage, &AEmitter::SetEmitDamage)
+		.property("EmitOffset", &AEmitter::GetEmitOffset, &AEmitter::SetEmitOffset)
 		.property("Flash", &AEmitter::GetFlash, &LuaAdaptersPropertyOwnershipSafetyFaker::AEmitterSetFlash)
 		.property("FlashScale", &AEmitter::GetFlashScale, &AEmitter::SetFlashScale)
+		.property("TotalParticlesPerMinute", &AEmitter::GetTotalParticlesPerMinute)
+		.property("TotalBurstSize", &AEmitter::GetTotalBurstSize)
 
 		.def_readwrite("Emissions", &AEmitter::m_EmissionList, luabind::return_stl_iterator)
 

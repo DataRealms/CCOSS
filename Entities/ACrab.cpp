@@ -273,6 +273,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
+        delete m_BackupLFGFootGroup;
+        delete m_BackupLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
         m_pLBGFootGroup = new AtomGroup();
         reader >> m_pLFGFootGroup;
@@ -285,6 +287,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
+        delete m_BackupRFGFootGroup;
+        delete m_BackupRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
         m_pRBGFootGroup = new AtomGroup();
         reader >> m_pRFGFootGroup;
@@ -294,6 +298,38 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
+    } else if (propName == "LFGFootGroup" || propName == "LeftFGFootGroup") {
+        delete m_pLFGFootGroup;
+        delete m_BackupLFGFootGroup;
+        m_pLFGFootGroup = new AtomGroup();
+        reader >> m_pLFGFootGroup;
+        m_pLFGFootGroup->SetOwner(this);
+        m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
+        m_BackupLFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "LBGFootGroup" || propName == "LeftBGFootGroup") {
+        delete m_pLBGFootGroup;
+        delete m_BackupLBGFootGroup;
+        m_pLBGFootGroup = new AtomGroup();
+        reader >> m_pLBGFootGroup;
+        m_pLBGFootGroup->SetOwner(this);
+        m_BackupLBGFootGroup = new AtomGroup(*m_pLBGFootGroup);
+        m_BackupLBGFootGroup->RemoveAllAtoms();
+    } else if (propName == "RFGFootGroup" || propName == "RightFGFootGroup") {
+        delete m_pRFGFootGroup;
+        delete m_BackupRFGFootGroup;
+        m_pRFGFootGroup = new AtomGroup();
+        reader >> m_pRFGFootGroup;
+        m_pRFGFootGroup->SetOwner(this);
+        m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
+        m_BackupRFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "RBGFootGroup" || propName == "RightBGFootGroup") {
+        delete m_pRBGFootGroup;
+        delete m_BackupRBGFootGroup;
+        m_pRBGFootGroup = new AtomGroup();
+        reader >> m_pRBGFootGroup;
+        m_pRBGFootGroup->SetOwner(this);
+        m_BackupRBGFootGroup = new AtomGroup(*m_pRBGFootGroup);
+        m_BackupRBGFootGroup->RemoveAllAtoms();
     } else if (propName == "StrideSound") {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;

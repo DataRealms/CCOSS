@@ -786,7 +786,9 @@ namespace RTE {
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
-			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) { g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress()); }
+			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
+				g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress());
+			}
 			if (g_ActivityMan.ActivitySetToRestart()) {
 				return;
 			}
@@ -813,6 +815,8 @@ namespace RTE {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
+			} else if (KeyPressed(KEY_F9)) {
+				g_ActivityMan.LoadAndLaunchGame("AutoSave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(KEY_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
@@ -842,12 +846,15 @@ namespace RTE {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.ReloadAllScripts();
-				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 			} else if (KeyPressed(KEY_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
 			} else if (KeyPressed(KEY_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 			} else if (KeyPressed(KEY_F5)) {
+				g_ActivityMan.SaveCurrentGame("QuickSave");
+			} else if (KeyPressed(KEY_F9)) {
+				g_ActivityMan.LoadAndLaunchGame("QuickSave");
+			} else if (KeyPressed(KEY_F10)) {
 				g_ConsoleMan.ClearLog();
 			}
 

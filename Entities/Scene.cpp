@@ -1401,7 +1401,7 @@ int Scene::Save(Writer &writer) const {
 		}
     }
 
-    for (list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (std::list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         writer.NewProperty("AddBackgroundLayer");
         (*slItr)->SavePresetCopy(writer);

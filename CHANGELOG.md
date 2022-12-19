@@ -417,6 +417,18 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
 
+- Mods and non-official modules now use [Semantic Versioning](https://semver.org/) to check which version of the game they require to run on.  
+As such, the `Index.ini` property `SupportedGameVersion` must now be a valid semantic version number. The game version has also been updated to match this standard.  
+
+  To maintain backwards compatability, mods targeting game version `Pre-Release 4.0` / `Pre-Release 4.1` will be read internally as supporting version `4.0.0` and `4.1.0` respectively.
+  
+  For Pre-Release 5.0 and onwards this version number must be of the form `X.Y.z`, where:
+  - `X` is the major version of the game, 
+  - `Y` is no greater than the minor version of the game,
+  - `z` is the patch number, and not enforced.
+
+  Mods published for any development builds must match that development version exactly. 
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

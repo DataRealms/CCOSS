@@ -141,7 +141,13 @@ namespace RTE {
 		} else if (propName == "SupportedGameVersion") {
 			std::string versionText;
 			reader >> versionText;
-			versionText = versionText == "Pre-Release 4.0" ? "4.0.0" : versionText;
+
+			if (versionText == "Pre-Release 4.0") {
+				versionText = "4.0.0";
+			} else if (versionText == "Pre-Release 4.1"){
+				versionText = "4.1.0";
+			}
+			
 			try {
 				m_SupportedGameVersion = version::Semver200_version(versionText);
 			} catch (version::Parse_error) {

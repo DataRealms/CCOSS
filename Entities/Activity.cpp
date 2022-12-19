@@ -115,6 +115,8 @@ void Activity::Clear() {
 			m_TeamAISkillLevels[team] = reference.m_TeamAISkillLevels[team];
 		}
 
+		m_SavedValues = reference.m_SavedValues;
+
 		return 0;
 	}
 
@@ -135,6 +137,8 @@ void Activity::Clear() {
 			reader >> m_CraftOrbitAtTheEdge;
 		} else if (propName == "InCampaignStage") {
 			reader >> m_InCampaignStage;
+		} else if (propName == "ActivityState") {
+			m_ActivityState = static_cast<ActivityState>(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "TeamOfPlayer1" || propName == "TeamOfPlayer2" || propName == "TeamOfPlayer3" || propName == "TeamOfPlayer4") {
 			for (int playerTeam = Teams::TeamOne; playerTeam < Teams::MaxTeamCount; playerTeam++) {
 				std::string playerTeamNum = std::to_string(playerTeam + 1);
@@ -202,6 +206,8 @@ void Activity::Clear() {
 					break;
 				}
 			}
+		} else if (propName == "GenericSavedValues") {
+			reader >> m_SavedValues;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -227,6 +233,8 @@ void Activity::Clear() {
 		writer << m_CraftOrbitAtTheEdge;
 		writer.NewProperty("InCampaignStage");
 		writer << m_InCampaignStage;
+		writer.NewProperty("ActivityState");
+		writer << m_ActivityState;
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			std::string playerNum = std::to_string(player + 1);
@@ -257,14 +265,20 @@ void Activity::Clear() {
 			}
 		}
 
+		writer.NewProperty("GenericSavedValues");
+		writer << m_SavedValues;
+
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
-		m_ActivityState = ActivityState::Running;
+		if (m_ActivityState != ActivityState::Editing) {
+			m_ActivityState = ActivityState::Running;
+		}
 		m_Paused = false;
+		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
 		if (!g_FrameMan.IsInMultiplayerMode()) {
@@ -297,6 +311,13 @@ void Activity::Clear() {
 			m_PlayerController[player].SetTeam(m_Team[player]);
 
 			m_MessageTimer[player].Reset();
+
+			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
+			if (m_IsActive[player]) {
+				if (Actor *brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player))) {
+					SetPlayerBrain(brain, player);
+				}
+			}
 		}
 
 		return 0;
@@ -745,7 +766,7 @@ void Activity::Clear() {
 		float nativeCostMult = 0.9F;
 		int orbitedCraftTeam = orbitedCraft->GetTeam();
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
-		
+
 		if (g_MetaMan.GameInProgress()) {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				if (GetTeamOfPlayer(static_cast<Players>(player)) == orbitedCraftTeam) {

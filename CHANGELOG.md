@@ -218,6 +218,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
 
+- The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
+	```lua
+	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity. The save result will be printed to the console.
+	ActivityMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
+	```
+	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
+
+	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This function must exist for the `Activity` to be saveable!  
+	To support saving and loading, `Activity` now has several Lua convenience functions to for dealing with script variables:
+	```lua
+	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey.
+	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey.
+
+	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey.
+	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey.
+	```
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
+	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
+	
+- New Lua `AEmitter` properties:  
+	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
+	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
+	**EmitCount** (R/O) - The number of emissions emitted since emission was last enabled.  
+	**EmitOffset** (R/W) - The offset (`Vector`) of the emission point from this `AEmitter`'s sprite center.  
+
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
@@ -281,9 +306,12 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
 
-- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
+- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.  
 
 - Added a new Lua scripted function for `Actor`s: `OnControllerSwitch(self, previousControllerMode, previousControllingPlayer)` that triggers when an `Actor`'s `Controller` state changes (between AI/Player/Network control etc). This provides a script hook that fires when a player starts/stops controlling an `Actor`.
+
+- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
+	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.  
 
 </details>
 
@@ -418,6 +446,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	`Draw` - The time spend drawing during the frame, in milliseconds.
 
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
+- The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
 
 </details>
 

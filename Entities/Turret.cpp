@@ -77,7 +77,7 @@ namespace RTE {
 			m_MountedDevices.emplace(m_MountedDevices.begin(), newMountedDevice);
 			AddAttachable(newMountedDevice);
 
-			m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+			m_HardcodedAttachableUniqueIDsAndRemovers.insert({ newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
 				RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to RemoveMountedDevice.");
 				dynamic_cast<Turret *>(parent)->RemoveMountedDevice(castedAttachable);
@@ -94,10 +94,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::AddMountedDevice(HeldDevice *newMountedDevice) {
+		if (newMountedDevice == nullptr) {
+			return;
+		}
 		m_MountedDevices.emplace_back(newMountedDevice);
 		AddAttachable(newMountedDevice);
 
-		m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+		m_HardcodedAttachableUniqueIDsAndRemovers.insert({ newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 			HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
 			RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to RemoveMountedDevice.");
 			dynamic_cast<Turret *>(parent)->RemoveMountedDevice(castedAttachable);

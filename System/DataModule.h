@@ -55,6 +55,16 @@ namespace RTE {
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const std::string &moduleName, const ProgressCallback &progressCallback = nullptr);
+
+		/// <summary>
+		/// Creates a new DataModule directory with "Index.ini" on disk to be used for userdata. Does NOT instantiate the newly created DataModule.
+		/// </summary>
+		/// <param name="moduleName">File/folder name of the data module, e.g. "MyMod.rte".</param>
+		/// <param name="friendlyName">Friendly name of the data module, e.g. "My Weapons Mod".</param>
+		/// <param name="scanFolderContents">Whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.</param>
+		/// <param name="ignoreMissingItems">Whether module loader should ignore missing items in this module.</param>
+		/// <returns>Whether the DataModule was successfully created on disk.</returns>
+		static bool CreateOnDiskAsUserdata(const std::string &moduleName, const std::string_view &friendlyName, bool scanFolderContents = false, bool ignoreMissingItems = false);
 #pragma endregion
 
 #pragma region Destruction
@@ -91,6 +101,17 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Module Information Getters
+		/// <summary>
+		/// Gets whether this DataModule is a userdata module.
+		/// </summary>
+		/// <returns>Whether this DataModule is used for userdata written by the game.</returns>
+		bool IsUserdata() const { return m_IsUserdata; }
+
+		/// <summary>
+		/// Sets this DataModule as a userdata module.
+		/// </summary>
+		void SetAsUserdata() { m_IsUserdata = true; }
+
 		/// <summary>
 		/// Gets the file name of this DataModule, e.g. "MyMod.rte".
 		/// </summary>
@@ -288,6 +309,7 @@ namespace RTE {
 			std::string m_FileReadFrom; //!< Where the instance was read from.
 		};
 
+		bool m_IsUserdata; //!< Whether this DataModule contains userdata written by the game (e.g saved games or editor scenes), meaning it is not an official nor a 3rd party module and is ignored anywhere where that is relevant.
 		bool m_ScanFolderContents; //!< Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
 		bool m_IgnoreMissingItems; //!< Indicates whether module loader should ignore missing items in this module.
 

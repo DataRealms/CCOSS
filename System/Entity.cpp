@@ -49,12 +49,14 @@ namespace RTE {
 	int Entity::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
-			std::string className = GetClassName();
-			const Entity *preset = g_PresetMan.GetEntityPreset(className, refName, reader.GetReadModuleID());
-			if (preset) {
-				preset->Clone(this);
-			} else {
-				reader.ReportError("Couldn't find the preset \"" + refName + "\" of type \"" + className + "\" when trying to do CopyOf.");
+			if (refName != "None") {
+				std::string className = GetClassName();
+				const Entity* preset = g_PresetMan.GetEntityPreset(className, refName, reader.GetReadModuleID());
+				if (preset) {
+					preset->Clone(this);
+				} else {
+					reader.ReportError("Couldn't find the preset \"" + refName + "\" of type \"" + className + "\" when trying to do CopyOf.");
+				}
 			}
 		} else if (propName == "PresetName" || propName == "InstanceName") {
 			SetPresetName(reader.ReadPropValue());

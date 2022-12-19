@@ -2955,7 +2955,7 @@ void MetagameGUI::CompletedActivity()
             }
             // Suck up all the remaining Actors and Items left in the world and put them into the list to place next load
             // However, don't suck up actors of any non-winning team, and don't save the brains if we autoresolved, because that took care of placing the resident brains already
-            pAlteredScene->RetrieveActorsAndDevices(winningTeam, autoResolved);
+            pAlteredScene->RetrieveSceneObjects(true, winningTeam, autoResolved);
             // Save out the altered scene before clearing out its data from memory
             pAlteredScene->SaveData(METASAVEPATH + string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over
@@ -5989,8 +5989,10 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         }
 
         // Write the description, and add the total defense investment in this place so far as a lil stat
-        std::snprintf(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
-        m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n" + string(str));
+		Vector sceneSizeMeters = m_pSelectedScene->GetDimensions() / c_PPM;
+		std::string sceneDimensions = "Site Dimensions: " + std::to_string(sceneSizeMeters.GetFloorIntX()) + " x " + std::to_string(sceneSizeMeters.GetFloorIntY()) + " meters";
+		std::string sceneInvestments = "Total base investments here: " + std::to_string(static_cast<int>(m_pSelectedScene->GetTotalInvestment())) + "oz";
+        m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n\n" + sceneDimensions + "\n\n" + sceneInvestments);
         // Adjust the height of the text box and container so it fits the text to display
         int newHeight = m_pSceneInfoLabel->ResizeHeightToFit();
         m_pSceneInfoPopup->Resize(m_pSceneInfoPopup->GetWidth(), newHeight + 96);

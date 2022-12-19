@@ -552,7 +552,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
             }
 
             // Check if even within search radius
-            float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+            float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetSqrMagnitude();
             if (sqrDistance < sqrShortestDistance)
             {
                 sqrShortestDistance = sqrDistance;
@@ -569,7 +569,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 				continue;
 			}
 
-            Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+            Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 
             // Check if even within search radius
             float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -607,7 +607,7 @@ Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int
         if ((*aIt)->GetTeam() == team)
             continue;
 
-        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
         
         // Check if even within search radius
         float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -644,7 +644,7 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
         if ((*aIt) == pExcludeThis)
             continue;
 
-        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
+        Vector distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 
         // Check if even within search radius
         float sqrDistance = distanceVec.GetSqrMagnitude();
@@ -682,7 +682,7 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
             continue;
 
         // Check if closer than best so far
-        float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint).GetSqrMagnitude();
+        float sqrDistance = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).GetSqrMagnitude();
         if (sqrDistance < sqrShortestDistance)
         {
             sqrShortestDistance = sqrDistance;
@@ -1333,62 +1333,62 @@ int MovableMan::KillAllEnemyActors(int teamNotToKill) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Actors in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-
-int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, bool noBrains)
+int MovableMan::GetAllActors(bool transferOwnership, std::list<SceneObject *> &actorList, int onlyTeam, bool noBrains)
 {
     int addedCount = 0;
 
     // Add all regular Actors
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
+        Actor *actor = *aIt;
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || actor->GetTeam() == onlyTeam) && (!noBrains || !actor->HasObjectInGroup("Brains")))
         {
-            actorList.push_back((*aIt));
+            actorList.push_back(actor);
             addedCount++;
         }
-        else
-            delete *aIt;
+        else if (transferOwnership)
+        {
+            delete actor;
+        }
     }
-    // Clear the internal Actor list; we transferred the ownership of them
-    m_Actors.clear();
 
     // Add all Actors added this frame
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
+        Actor *actor = *aIt;
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || actor->GetTeam() == onlyTeam) && (!noBrains || !actor->HasObjectInGroup("Brains")))
         {
-            actorList.push_back((*aIt));
+            actorList.push_back(actor);
             addedCount++;
         }
-        else
-            delete *aIt;
+        else if (transferOwnership) 
+        {
+            delete actor;
+        }
     }
-    // Clear the internal Actor list; we transferred the ownership of them
-    m_AddedActors.clear();
 
-    // Also clear the actor rosters
-    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
-        m_ActorRoster[team].clear();
+    if (transferOwnership)
+    {
+        // Clear the internal Actor list; we transferred the ownership of them
+        m_Actors.clear();
+        // Clear the internal Actor list; we transferred the ownership of them
+        m_AddedActors.clear();
+
+        // Also clear the actor rosters
+        for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
+        {
+            m_ActorRoster[team].clear();
+        }
+    }
 
     return addedCount;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllItems
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Items in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-
-int MovableMan::EjectAllItems(list<SceneObject *> &itemList)
+int MovableMan::GetAllItems(bool transferOwnership, std::list<SceneObject *> &itemList)
 {
     int addedCount = 0;
 
@@ -1398,8 +1398,6 @@ int MovableMan::EjectAllItems(list<SceneObject *> &itemList)
         itemList.push_back((*iIt));
         addedCount++;
     }
-    // Clear the internal Actor list; we transferred the ownership of them
-    m_Items.clear();
 
     // Add all Items added this frame
     for (deque<MovableObject *>::iterator iIt = m_AddedItems.begin(); iIt != m_AddedItems.end(); ++iIt)
@@ -1407,16 +1405,48 @@ int MovableMan::EjectAllItems(list<SceneObject *> &itemList)
         itemList.push_back((*iIt));
         addedCount++;
     }
-    // Clear the internal Item list; we transferred the ownership of them
-    m_AddedItems.clear();
+
+    if (transferOwnership)
+    {
+        // Clear the internal Item list; we transferred the ownership of them
+        m_Items.clear();
+        m_AddedItems.clear();
+    }
 
     return addedCount;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTeamMOIDCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns MO count for specified team
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableMan::GetAllParticles(bool transferOwnership, std::list<SceneObject *> &particleList)
+{
+    int addedCount = 0;
+
+    // Add all regular particles
+    for (deque<MovableObject *>::iterator iIt = m_Particles.begin(); iIt != m_Particles.end(); ++iIt)
+    {
+        particleList.push_back((*iIt));
+        addedCount++;
+    }
+
+    // Add all particles added this frame
+    for (deque<MovableObject *>::iterator iIt = m_AddedParticles.begin(); iIt != m_AddedParticles.end(); ++iIt)
+    {
+        particleList.push_back((*iIt));
+        addedCount++;
+    }
+
+    if (transferOwnership)
+    {
+        // Clear the internal Particle list; we transferred the ownership of them
+        m_Particles.clear();
+        m_AddedParticles.clear();
+    }
+
+    return addedCount;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableMan::GetTeamMOIDCount(int team) const
 {

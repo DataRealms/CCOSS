@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
 - New INI and Lua (R) `HDFirearm` property `InheritsFirerVelocity`, which determines whether or not the particles in a `Round` should inherit their firer's velocity. Defaults to true to preserve normal behavior.
+	
+- New INI `BuyableMode` setting `BuyableMode = 3` for script only items.  
+	This makes the item unable to be bought by any player at all as if it were `Buyable = 0`, but without removing the item from the `CreateRandom` Lua functions that the AI and activities use.  
+	That way players can still find these weapons used by activities and AI enemies, and modders can have big arsenals, without actually having big arsenals.
 
 - New `DataModule` INI property `SupportedGameVersion` to define what version of the game a mod supports. This must be specified, and must match the current game version, in order for the mod to load successfully.
 
@@ -131,7 +135,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`AffectedObject`** (R) - Gets the affected `MovableObject` for the `PieMenu` if there is one. Support isn't fully here for it yet, but `PieMenu`s can theoretically be made to affect objects that aren't `Actors`.  
 	**`Pos`** (R) - Gets the position of the center of the `PieMenu`. Generally updated to move with its `Owner` or `AffectedObject`.  
 	**`RotAngle`** (R/W) - Gets/sets the rotation of the `PieMenu`. Note that changing this may cause oddities and issues, especially if the **`PieMenu`** is currently visible.  
-	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.
+	**`FullInnerRadius`** (R/W) - Gets/sets the inner radius of the `PieMenu`, i.e. the radius distance before the inside of the ring.  
+	**`PieSlices`** - Gets all of the `PieSlice`s in the `PieMenu` for iterating over in a for loop.  
 
 	**`IsEnabled()`** - Gets whether or not the `PieMenu` is enabled or enabling.  
 	**`IsEnabling()`** - Gets whether or not the `PieMenu` is currently enabling.  
@@ -144,7 +149,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**`Wobble()`** - Makes the `PieMenu` do its wobbling animation.  
 	**`FreezeAtRadius(radius)`** - Makes the `PieMenu` freeze open at the given radius.  
 	**`GetPieCommand()`** - Gets the command given to the `PieMenu`, either by pressing a `PieSlice` button, or by selecting a `PieSlice` and closing the `PieMenu`.  
-	**`GetPieSlices()`** - Gets all of the `PieSlice`s in the `PieMenu`.  
 	**`GetFirstPieSliceByPresetName(presetName)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PresetName`.  
 	**`GetFirstPieSliceByType(pieSliceType)`** - Searches through the `PieSlice`s in the `PieMenu` and returns the first one with the given `PieSlice` `Type`.
 
@@ -214,6 +218,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
 
+- The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
+	```lua
+	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity. The save result will be printed to the console.
+	ActivityMan:LoadGame(fileName) -- Loads and resumes a previously saved Scene and Activity.
+	```
+	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
+
+	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This function must exist for the `Activity` to be saveable!  
+	To support saving and loading, `Activity` now has several Lua convenience functions to for dealing with script variables:
+	```lua
+	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey.
+	Activity:LoadNumber(stringKey) -- Retrieves a previously saved float value with key stringKey.
+
+	Activity:SaveString(stringKey, stringValue) -- Saves a string value which can later be retrieved using stringKey.
+	Activity:LoadString(stringKey) -- Retrieves a previously saved string value with key stringKey.
+	```
+	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
+	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
+	
+- New Lua `AEmitter` properties:  
+	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
+	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
+	**EmitCount** (R/O) - The number of emissions emitted since emission was last enabled.  
+	**EmitOffset** (R/W) - The offset (`Vector`) of the emission point from this `AEmitter`'s sprite center.  
+
 - New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
@@ -233,9 +262,63 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
+- New `MOSRotating` Lua property `Gibs` (R/O) to access an iterator of the `MOSRotating`'s `Gib`s.
+
+- Expose `Gib` to Lua.  
+	You can read and write the following properties:  
+	```
+	gib.ParticlePreset = movableObject;
+	gib.Offset = vector;
+	gib.Count = intValue;
+	gib.Spread = angleInRadians;
+	gib.MinVelocity = floatValue;
+	gib.MaxVelocity = floatValue;
+	gib.LifeVariation = floatValue;
+	gib.InheritsVel = bool;
+	gib.IgnoresTeamHits = bool;
+	gib.SpreadMode = SpreadMode;
+	```
+
+	The `SpreadMode` property accepts values from the `SpreadMode` enum:  
+	```
+	(0) Gib.SpreadRandom
+	(1) Gib.SpreadEven
+	(2) Gib.SpreadSpiral
+	```
+
+	The collection of a `MOSRotating`'s `Gib`s can be accessed via `mosRotating.Gibs`.
+
+- New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
+
+- Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
+
+- Added key combinations for resetting time scales to defaults while performance stats are visible.  
+	`Ctrl + 1` to reset the time scale.  
+	`Ctrl + 3` to reset the `RealToSimCap`.  
+	`Ctrl + 5` to reset the `DeltaTime`.
+
+- Added `Alt + P` key combination for toggling advanced performance stats (graphs) visibility while performance stats are visible.
+
+- Added new `UPS` (Updates per second) measurement to the performance stats which is probably the most reliable performance indicator.  
+	The sim update target is ~60 UPS (defined by `DeltaTime`).  
+	When UPS dips due to load there will be noticeable FPS impact because more time is spent updating the sim and less time is left to draw frames before the next sim update.  
+	When UPS dips to ~30 the FPS will be equal to UPS because there is only enough time to draw one frame before it is time for the next sim update.  
+	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
+	Results will obviously vary depending on system performance.
+
+- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
+
+- Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
+	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Greatly reduce online multiplayer bandwidth usage.
+
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
 
@@ -354,6 +437,16 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
+	The `MSPF` measurement now displays 3 values:  
+	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
+	`Update` - The total time spent updating the sim during the frame (as the sim can be updated multiple times per frame), in milliseconds.  
+	`Draw` - The time spend drawing during the frame, in milliseconds.
+
+- Advanced performance stats (graphs) will now scale to `RealToSimCap`.
+
+- The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -362,7 +455,11 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix `TerrainObject`s not wrapping when placed over the Y seam on Y-wrapped scenes.
 
+- Fix black striping in online multiplayer when client screen width isn't divisible by transmitted box width.
+
 - Fixed issue where actors refused to pathfind around enemy doors. ([Issue #396](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/396))
+
+- Fix advanced performance stats (graphs) peak values stuck at 0.
 
 </details>
 
@@ -738,7 +835,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	You can get all wounds with `GetWounds`, get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), get the gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property), and remove wounds with `RemoveWounds`.  
+	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.

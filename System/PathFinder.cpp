@@ -11,7 +11,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	PathNode::PathNode(const Vector &pos) : Pos(pos) {
-		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(g_MaterialOutOfBounds);
+		const Material *outOfBounds = g_SceneMan.GetMaterialFromID(MaterialColorKeys::g_MaterialOutOfBounds);
 		for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
 			AdjacentNodes[i] = nullptr;
 			AdjacentNodeBlockingMaterials[i] = outOfBounds; // Costs are infinite unless recalculated as otherwise.
@@ -24,13 +24,13 @@ namespace RTE {
 		m_NodeGrid.clear();
 		m_NodeDimension = 20;
 		m_DigStrength = 1;
-		m_Pather = 0;
+		m_Pather = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PathFinder::Create(Scene *scene, int nodeDimension, unsigned int allocate) {
-		RTEAssert(scene, "Scene doesn't exist or isn't loaded when creating PathFinder!");
+	int PathFinder::Create(int nodeDimension, unsigned int allocate) {
+		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when creating PathFinder!");
 
 		m_NodeDimension = nodeDimension;
 		int sceneWidth = g_SceneMan.GetSceneWidth();
@@ -40,8 +40,8 @@ namespace RTE {
 		m_GridWidth = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
 		m_GridHeight = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
-		m_WrapsX = scene->WrapsX();
-		m_WrapsY = scene->WrapsY();
+		m_WrapsX = g_SceneMan.SceneWrapsX();;
+		m_WrapsY = g_SceneMan.SceneWrapsY();
 
 		// Create and assign scene coordinate positions for all nodes
 		Vector nodePos = Vector(static_cast<float>(nodeDimension) / 2.0F, static_cast<float>(nodeDimension) / 2.0F);
@@ -284,7 +284,8 @@ namespace RTE {
 
 	float PathFinder::GetMaterialTransitionCost(const Material &material) const {
 		float strength = material.GetIntegrity();
-		if (strength > m_DigStrength && material.GetIndex() != g_MaterialDoor) { // Always treat doors as diggable
+		// Always treat doors as diggable
+		if (strength > m_DigStrength && material.GetIndex() != MaterialColorKeys::g_MaterialDoor) {
 			strength *= 1000.0F;
 		}
 		return strength;
@@ -293,7 +294,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const Material * PathFinder::StrongestMaterialAlongLine(const Vector &start, const Vector &end) const {
-		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, g_MaterialAir);
+		return g_SceneMan.CastMaxStrengthRayMaterial(start, end, 0, MaterialColorKeys::g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,9 +333,9 @@ namespace RTE {
 			const Material *oldMat = oldMaterials[i];
 			const Material *newMat = node->AdjacentNodeBlockingMaterials[i];
 
-			// Check if the material strength is more than our delta, or if a door has appeared/dissappeared (since we handle their costs in a special manner)
+			// Check if the material strength is more than our delta, or if a door has appeared/disappeared (since we handle their costs in a special manner)
 			float delta = std::abs(oldMat->GetIntegrity() - newMat->GetIntegrity());
-			bool doorChanged = oldMat != newMat && (oldMat->GetIndex() == g_MaterialDoor || newMat->GetIndex() == g_MaterialDoor);
+			bool doorChanged = oldMat != newMat && (oldMat->GetIndex() == MaterialColorKeys::g_MaterialDoor || newMat->GetIndex() == MaterialColorKeys::g_MaterialDoor);
 			if (delta > c_NodeCostChangeEpsilon || doorChanged) {
 				return true;
 			}

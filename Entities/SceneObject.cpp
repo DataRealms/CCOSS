@@ -306,8 +306,8 @@ int SceneObject::Save(Writer &writer) const
     writer << m_OzValue;
     writer.NewProperty("Buyable");
     writer << m_Buyable;
-	writer.NewProperty("BuyableMode");
-	writer << m_BuyableMode;
+    writer.NewProperty("BuyableMode");
+    writer << static_cast<int>(m_BuyableMode);
     writer.NewProperty("Team");
     writer << m_Team;
     writer.NewProperty("PlacedByPlayer");

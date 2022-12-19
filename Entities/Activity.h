@@ -3,45 +3,12 @@
 
 #include "Icon.h"
 #include "Controller.h"
+#include "GenericSavedData.h"
 
 namespace RTE {
 
 	class Scene;
 	class ACraft;
-
-	/// <summary>
-	/// Helper class to save generic data
-	/// </summary>
-	class GenericSavedData : public Entity {
-	public:
-		SerializableOverrideMethods;
-		ClassInfoGetters;
-
-		GenericSavedData() { };
-		GenericSavedData(const GenericSavedData &other) = default;
-
-		class GenericSavedStrings : public Entity {
-		public:
-			SerializableOverrideMethods;
-			ClassInfoGetters;
-
-			GenericSavedStrings() { };
-			GenericSavedStrings(const GenericSavedStrings &other) = default;
-			std::unordered_map<std::string, std::string> m_Data;
-		};
-		GenericSavedStrings m_SavedStrings;
-
-		class GenericSavedNumbers : public Entity {
-		public:
-			SerializableOverrideMethods;
-			ClassInfoGetters;
-
-			GenericSavedNumbers() { };
-			GenericSavedNumbers(const GenericSavedNumbers &other) = default;
-			std::unordered_map<std::string, float> m_Data;
-		};
-		GenericSavedNumbers m_SavedNumbers;
-	};
 
 	/// <summary>
 	/// Base class for all Activities, including game modes and editors.
@@ -167,6 +134,12 @@ namespace RTE {
 		void SetActivityState(ActivityState newState) { m_ActivityState = newState; }
 
 		/// <summary>
+		/// Gets whether or not this Activity can be saved.
+		/// </summary>
+		/// <returns>Whether or not this Activity can be saved.</returns>
+		virtual bool ActivityCanBeSaved() const { return false; }
+
+		/// <summary>
 		/// Indicates whether the Activity is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the Activity is running or not.</returns>
@@ -259,11 +232,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Start();
-
-		/// <summary>
-		/// Sets this activity to running state, after everything has been initialized in the Create()
-		/// </summary>
-		virtual void PostStart() { m_ActivityState = (m_ActivityState == ActivityState::NotStarted ? ActivityState::Running : m_ActivityState); };
 
 		/// <summary>
 		/// Forces this Activity to end.
@@ -535,7 +503,7 @@ namespace RTE {
 		int AIBrainCount() const { return GetBrainCount(false); }
 
 		/// <summary>
-		/// Gets the current Brain actor for a specific player. 
+		/// Gets the current Brain actor for a specific player.
 		/// </summary>
 		/// <param name="player">Which player to get the brain actor for.</param>
 		/// <returns>A pointer to the Brain Actor. Ownership is NOT transferred!</returns>
@@ -696,39 +664,39 @@ namespace RTE {
 		virtual void HandleCraftEnteringOrbit (ACraft *orbitedCraft);
 #pragma endregion
 
-#pragma region Save/Load
+#pragma region Save and Load Handling
 		/// <summary>
-		/// Saves a string which will be stored in our ini
+		/// Saves a string which will be stored in our ini.
 		/// </summary>
-		/// <param name="key">The key of the saved string</param>
-		/// <param name="value">The string to save</param>
-		void SaveString(const std::string& key, const std::string& value) { m_SavedValues.m_SavedStrings.m_Data[key] = value; };
+		/// <param name="key">The key of the saved string.</param>
+		/// <param name="value">The string to save.</param>
+		void SaveString(const std::string &key, const std::string &value) { m_SavedValues.m_SavedStrings.m_Data[key] = value; };
 
 		/// <summary>
-		/// Loads and returns a previously saved string
+		/// Loads and returns a previously saved string.
 		/// </summary>
-		/// <param name="key">The key of the string to load</param>
-		const std::string& LoadString(const std::string& key) { return m_SavedValues.m_SavedStrings.m_Data[key]; };
+		/// <param name="key">The key of the string to load.</param>
+		const std::string & LoadString(const std::string &key) { return m_SavedValues.m_SavedStrings.m_Data[key]; };
 
 		/// <summary>
-		/// Saves a number which will be stored in our ini
+		/// Saves a number which will be stored in our ini.
 		/// </summary>
-		/// <param name="key">The key of the saved number</param>
-		/// <param name="value">The number to save</param>
-		void SaveNumber(const std::string& key, float value) { m_SavedValues.m_SavedNumbers.m_Data[key] = value; };
+		/// <param name="key">The key of the saved number.</param>
+		/// <param name="value">The number to save.</param>
+		void SaveNumber(const std::string &key, float value) { m_SavedValues.m_SavedNumbers.m_Data[key] = value; };
 
 		/// <summary>
-		/// Loads and returns a previously saved number
+		/// Loads and returns a previously saved number.
 		/// </summary>
-		/// <param name="key">The key of the string to load</param>
-		float LoadNumber(const std::string& key) { return m_SavedValues.m_SavedNumbers.m_Data[key]; };
+		/// <param name="key">The key of the string to load.</param>
+		float LoadNumber(const std::string &key) { return m_SavedValues.m_SavedNumbers.m_Data[key]; };
 #pragma endregion
 
 	protected:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ActivityState m_ActivityState; //!< Current state of this Activity.	
+		ActivityState m_ActivityState; //!< Current state of this Activity.
 		bool m_Paused; //!< Whether this Activity is paused or not.
 
 		std::string m_Description; //!< User-friendly description of what this Activity is all about.
@@ -753,7 +721,7 @@ namespace RTE {
 
 		int m_TeamCount; //!< The number of teams in the current Activity.
 		bool m_TeamActive[Teams::MaxTeamCount]; //!< Whether a specific team is active or not in this Activity.
-		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
+		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.
 		int m_TeamDeaths[Teams::MaxTeamCount]; //!< The count of how many actors have died on this team.
 		int m_TeamAISkillLevels[Teams::MaxTeamCount]; //!< AI skill levels for teams.
 
@@ -771,10 +739,11 @@ namespace RTE {
 
 		Timer m_MessageTimer[Players::MaxPlayerCount]; //!< Message timer for each player.
 
-		// Generic additional saved strings/numbers, which are used for scripts primarily
-		// They live here in the base class because GAScripted doesn't have a lua interface
-		// Although it's a little messy.
-		// On the bright side, this would allows other parts of the code to add some metadata to stamp extra information onto an activity if needed, that'll be ignored otherwise
+		/// <summary>
+		/// Generic additional saved strings/numbers, which are used for scripts primarily.
+		/// They live here in the base class because GAScripted doesn't have a lua interface although it's a little messy.
+		/// On the bright side, this would allows other parts of the code to add some metadata to stamp extra information onto an activity if needed, that'll be ignored otherwise.
+		/// </summary>
 		GenericSavedData m_SavedValues;
 
 	private:

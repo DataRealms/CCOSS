@@ -176,7 +176,11 @@ namespace RTE {
 			}
 
 			m_SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
-			m_SceneDescriptionLabel->SetText(m_SelectedScene->GetDescription());
+
+			Vector sceneSizeMeters = m_SelectedScene->GetDimensions() / c_PPM;
+			std::string sceneDimensions = "Site Dimensions: " + std::to_string(sceneSizeMeters.GetFloorIntX()) + " x " + std::to_string(sceneSizeMeters.GetFloorIntY()) + " meters";
+
+			m_SceneDescriptionLabel->SetText(m_SelectedScene->GetDescription() + "\n\n" + sceneDimensions);
 
 			// TODO: Some stupidity going on so have to do this twice, otherwise everything resizes correctly but some description text gets cut off as if it didn't.
 			for (int i = 0; i < 2; ++i) {
@@ -221,7 +225,7 @@ namespace RTE {
 		std::vector<Scene *> filteredScenes;
 		for (Entity *presetEntity : presetList) {
 			Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && !presetScene->IsScriptSave() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.emplace_back(presetScene); }
+			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && !presetScene->IsSavedGameInternal() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.emplace_back(presetScene); }
 		}
 		AdjustSitePointOffsetsOnPlanet(filteredScenes);
 

@@ -18,8 +18,8 @@
 #include "RakNetStatistics.h"
 #include "RakSleep.h"
 
-#include <lz4.h>
-#include <lz4hc.h>
+#include "lz4.h"
+#include "lz4hc.h"
 
 namespace RTE {
 
@@ -52,8 +52,11 @@ namespace RTE {
 		m_SimSleepWhenIdle = false;
 
 		for (short i = 0; i < c_MaxClients; i++) {
-			m_BackBuffer8[i] = 0;
-			m_BackBufferGUI8[i] = 0;
+			m_BackBuffer8[i] = nullptr;
+			m_BackBufferGUI8[i] = nullptr;
+
+			m_PixelLineBuffersPrev[i] = nullptr;
+			m_PixelLineBuffersGUIPrev[i] = nullptr;
 
 			m_LastFrameSentTime[i] = 0;
 			m_LastStatResetTime[i] = 0;
@@ -62,8 +65,8 @@ namespace RTE {
 			m_MsecPerFrame[i] = 0;
 			m_MsecPerSendCall[i] = 0;
 
-			m_LZ4CompressionState[i] = 0;
-			m_LZ4FastCompressionState[i] = 0;
+			m_LZ4CompressionState[i] = nullptr;
+			m_LZ4FastCompressionState[i] = nullptr;
 
 			m_MouseState1[i] = 0;
 			m_MouseState2[i] = 0;
@@ -90,7 +93,7 @@ namespace RTE {
 			m_FrameNumbers[i] = 0;
 
 			m_Ping[i] = 0;
-			m_PingTimer[i].Reset();
+			m_PingTimer[i] = nullptr;
 
 			ClearInputMessages(i);
 		}
@@ -107,6 +110,10 @@ namespace RTE {
 				m_SoundDataSentCurrent[i][j] = 0;
 				m_TerrainDataSentCurrent[i][j] = 0;
 				m_OtherDataSentCurrent[i][j] = 0;
+				m_FullBlocksSentCurrent[i][j] = 0;
+				m_EmptyBlocksSentCurrent[i][j] = 0;
+				m_FullBlocksDataSentCurrent[i][j] = 0;
+				m_EmptyBlocksDataSentCurrent[i][j] = 0;
 			}
 
 			m_FrameDataSentTotal[i] = 0;
@@ -126,18 +133,17 @@ namespace RTE {
 
 		m_UseHighCompression = true;
 		m_UseFastCompression = false;
+		m_UseDeltaCompression = true;
 		m_HighCompressionLevel = LZ4HC_CLEVEL_OPT_MIN;
 		m_FastAccelerationFactor = 10;
 		m_UseInterlacing = false;
 		m_EncodingFps = 60;
-		m_ShowInput = false;
-		m_ShowStats = false;
 		m_TransmitAsBoxes = true;
-		m_BoxWidth = 64;
-		m_BoxHeight = 88;
+		m_BoxWidth = c_ServerDefaultBoxWidth;
+		m_BoxHeight = c_ServerDefaultBoxHeight;
 		m_UseNATService = false;
 		m_NatServerConnected = false;
-		m_LastPackedReceived.Reset();
+		m_LastPackedReceived = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +152,28 @@ namespace RTE {
 		m_IsInServerMode = false;
 		m_ServerPort = "";
 		m_Server = RakNet::RakPeerInterface::GetInstance();
+
+		m_LastPackedReceived = std::make_unique<Timer>();
+
+		for (std::unique_ptr<Timer> &pingTimer : m_PingTimer) {
+			pingTimer = std::make_unique<Timer>();
+		}
+
+		if (m_BoxWidth * m_BoxHeight % sizeof(unsigned long) != 0) {
+			g_ConsoleMan.PrintString("SERVER: Box area (width x height) is not divisible by 8 bytes! Resetting to defaults!");
+			m_BoxWidth = c_ServerDefaultBoxWidth;
+			m_BoxHeight = c_ServerDefaultBoxHeight;
+		}
+		if (m_BoxWidth * m_BoxHeight > c_MaxPixelLineBufferSize) {
+			g_ConsoleMan.PrintString("SERVER: Box area (width x height) is greater than 8KB! Resetting to defaults!");
+			m_BoxWidth = c_ServerDefaultBoxWidth;
+			m_BoxHeight = c_ServerDefaultBoxHeight;
+		}
+		if (m_BoxHeight % 2 != 0) {
+			g_ConsoleMan.PrintString("SERVER: Box height must be divisible by 2! Box height will be adjusted!");
+			m_BoxHeight -= 1;
+			if (m_BoxHeight == 0) { m_BoxHeight = 2; }
+		}
 
 		for (int i = 0; i < c_MaxClients; i++) {
 			m_ClientConnections[i].InternalId = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -174,10 +202,10 @@ namespace RTE {
 		for (short i = 0; i < c_MaxClients; i++) {
 			DestroyBackBuffer(i);
 
-			if (m_LZ4CompressionState[i]) { free(m_LZ4CompressionState[i]); }		
+			if (m_LZ4CompressionState[i]) { free(m_LZ4CompressionState[i]); }
 			m_LZ4CompressionState[i] = 0;
 
-			if (m_LZ4FastCompressionState[i]) { free(m_LZ4FastCompressionState[i]); }		
+			if (m_LZ4FastCompressionState[i]) { free(m_LZ4FastCompressionState[i]); }
 			m_LZ4FastCompressionState[i] = 0;
 		}
 		Clear();
@@ -284,7 +312,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::RegisterTerrainChange(SceneMan::TerrainChange terrainChange) {
+	void NetworkServer::RegisterTerrainChange(NetworkTerrainChange terrainChange) {
 		if (m_IsInServerMode) {
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (IsPlayerConnected(player)) {
@@ -416,6 +444,21 @@ namespace RTE {
 				m_SendSceneSetupData[index] = true;
 				m_SendSceneData[index] = false;
 				m_SendFrameData[index] = false;
+
+				// Get backbuffer bitmap for this player
+				BITMAP *frameManBmp = g_FrameMan.GetNetworkBackBuffer8Ready(index);
+				BITMAP *frameManGUIBmp = g_FrameMan.GetNetworkBackBufferGUI8Ready(index);
+
+				if (!m_BackBuffer8[index]) {
+					CreateBackBuffer(index, frameManBmp->w, frameManBmp->h);
+				} else {
+					// If for whatever reasons frameMans back buffer changed dimensions, recreate our internal backbuffer
+					if (m_BackBuffer8[index]->w != frameManBmp->w || m_BackBuffer8[index]->h != frameManBmp->h) {
+						DestroyBackBuffer(index);
+						CreateBackBuffer(index, frameManBmp->w, frameManBmp->h);
+					}
+				}
+				ClearBackBuffer(index, frameManBmp->w, frameManBmp->h);
 			}
 		}
 	}
@@ -423,7 +466,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendNATServerRegistrationMsg(RakNet::SystemAddress address) {
-		MsgRegisterServer msg;
+		MsgRegisterServer msg = {};
 		msg.Id = ID_NAT_SERVER_REGISTER_SERVER;
 
 		strncpy(msg.ServerName, g_SettingsMan.GetNATServerName().c_str(), 62);
@@ -568,7 +611,7 @@ namespace RTE {
 			return;
 		}
 
-		MsgSoundEvents *msg = (MsgSoundEvents *)m_PixelLineBuffer[player];
+		MsgSoundEvents *msg = (MsgSoundEvents *)m_CompressedLineBuffer[player];
 		AudioMan::NetworkSoundData *soundDataPointer = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 		msg->Id = ID_SRV_SOUND_EVENTS;
 		msg->FrameNumber = m_FrameNumbers[player];
@@ -625,7 +668,7 @@ namespace RTE {
 			return;
 		}
 
-		MsgMusicEvents *msg = (MsgMusicEvents *)m_PixelLineBuffer[player];
+		MsgMusicEvents *msg = (MsgMusicEvents *)m_CompressedLineBuffer[player];
 		AudioMan::NetworkMusicData *musicDataPointer = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
 
 		msg->Id = ID_SRV_MUSIC_EVENTS;
@@ -670,7 +713,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendSceneSetupData(short player) {
-		MsgSceneSetup msgSceneSetup;
+		MsgSceneSetup msgSceneSetup = {};
 		msgSceneSetup.Id = ID_SRV_SCENE_SETUP;
 		msgSceneSetup.SceneId = m_SceneID;
 		msgSceneSetup.Width = static_cast<short>(g_SceneMan.GetSceneWidth());
@@ -760,7 +803,7 @@ namespace RTE {
 		// Check for congestion
 		RakNet::RakNetStatistics rns;
 
-		MsgSceneLine *sceneData = (MsgSceneLine *)m_PixelLineBuffer[player];
+		MsgSceneLine *sceneData = (MsgSceneLine *)m_CompressedLineBuffer[player];
 
 		// Save message ID
 		sceneData->Id = ID_SRV_SCENE;
@@ -811,14 +854,14 @@ namespace RTE {
 					int result = 0;
 					//bool lineIsEmpty = false;
 
-					result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)bmp->line[lineY] + lineX, (char *)(m_PixelLineBuffer[player] + sizeof(MsgSceneLine)), width, width, LZ4HC_CLEVEL_MAX);
+					result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)bmp->line[lineY] + lineX, (char *)(m_CompressedLineBuffer[player] + sizeof(MsgSceneLine)), width, width, LZ4HC_CLEVEL_MAX);
 
 					// Compression failed or ineffective, send as is
 					if (result == 0 || result == width) {
 #ifdef _WIN32
-						memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), c_MaxPixelLineBufferSize, bmp->line[lineY] + lineX, width);
+						memcpy_s(m_CompressedLineBuffer[player] + sizeof(MsgSceneLine), c_MaxPixelLineBufferSize, bmp->line[lineY] + lineX, width);
 #else
-						memcpy(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), bmp->line[lineY] + lineX, width);
+						memcpy(m_CompressedLineBuffer[player] + sizeof(MsgSceneLine), bmp->line[lineY] + lineX, width);
 #endif
 					} else {
 						sceneData->DataSize = result;
@@ -907,7 +950,7 @@ namespace RTE {
 		while (!m_CurrentTerrainChanges[player].empty()) {
 			int maxSize = 1280;
 
-			SceneMan::TerrainChange terrainChange = m_CurrentTerrainChanges[player].front();
+			NetworkTerrainChange terrainChange = m_CurrentTerrainChanges[player].front();
 			m_CurrentTerrainChanges[player].pop();
 
 			// Fragment region if it does not fit one packet
@@ -922,7 +965,7 @@ namespace RTE {
 
 					// Store changed block if the size is over the MTU or if it's the last block.
 					if (size + terrainChange.w >= maxSize || y == terrainChange.h - 1) {
-						SceneMan::TerrainChange tcf;
+						NetworkTerrainChange tcf;
 						tcf.x = terrainChange.x;
 						tcf.y = terrainChange.y + heightStart;
 						tcf.w = terrainChange.w;
@@ -945,9 +988,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange) {
+	void NetworkServer::SendTerrainChangeMsg(short player, NetworkTerrainChange terrainChange) {
 		if (terrainChange.w == 1 && terrainChange.h == 1) {
-			MsgTerrainChange msg;
+			MsgTerrainChange msg = {};
 			msg.Id = ID_SRV_TERRAIN;
 			msg.X = terrainChange.x;
 			msg.Y = terrainChange.y;
@@ -972,7 +1015,7 @@ namespace RTE {
 			m_DataUncompressedCurrent[player][STAT_CURRENT] += payloadSize;
 			m_DataUncompressedTotal[player] += payloadSize;
 		} else {
-			MsgTerrainChange *msg = (MsgTerrainChange *)m_PixelLineBuffer[player];
+			MsgTerrainChange *msg = (MsgTerrainChange *)m_CompressedLineBuffer[player];
 			msg->Id = ID_SRV_TERRAIN;
 			msg->X = terrainChange.x;
 			msg->Y = terrainChange.y;
@@ -991,7 +1034,7 @@ namespace RTE {
 			const BITMAP *bmp = 0;
 			bmp = msg->Back ? terrain->GetBGColorBitmap() : terrain->GetFGColorBitmap();
 
-			unsigned char *dest = (unsigned char *)(m_TerrainChangeBuffer[player]);
+			unsigned char *dest = (unsigned char *)(m_PixelLineBuffer[player]);
 
 			// Copy bitmap data
 			for (int y = 0; y < msg->H && msg->Y + y < bmp->h; y++) {
@@ -1001,14 +1044,14 @@ namespace RTE {
 
 			int result = 0;
 
-			result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)m_TerrainChangeBuffer[player], (char *)(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange)), size, size, LZ4HC_CLEVEL_OPT_MIN);
+			result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)m_PixelLineBuffer[player], (char *)(m_CompressedLineBuffer[player] + sizeof(MsgTerrainChange)), size, size, LZ4HC_CLEVEL_OPT_MIN);
 
 			// Compression failed or ineffective, send as is
 			if (result == 0 || result == size) {
 #ifdef _WIN32
-				memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+				memcpy_s(m_CompressedLineBuffer[player] + sizeof(MsgTerrainChange), c_MaxPixelLineBufferSize, m_PixelLineBuffer[player], size);
 #else
-				memcpy(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), m_TerrainChangeBuffer[player], size);
+				memcpy(m_CompressedLineBuffer[player] + sizeof(MsgTerrainChange), m_PixelLineBuffer[player], size);
 #endif
 			} else {
 				msg->DataSize = result;
@@ -1040,7 +1083,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::SendSceneEndMsg(short player) {
-		MsgSceneEnd msg;
+		MsgSceneEnd msg = {};
 		msg.Id = ID_SRV_SCENE_END;
 		m_Server->Send((const char *)&msg, sizeof(MsgSceneSetup), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 	}
@@ -1050,16 +1093,54 @@ namespace RTE {
 	void NetworkServer::CreateBackBuffer(short player, int w, int h) {
 		m_BackBuffer8[player] = create_bitmap_ex(8, w, h);
 		m_BackBufferGUI8[player] = create_bitmap_ex(8, w, h);
+
+		if (m_UseDeltaCompression) {
+			int lines = (w / m_BoxWidth + 1) * (h / m_BoxHeight + 1);
+			int boxSize = m_BoxWidth * m_BoxHeight;
+
+			m_PixelLineBuffersPrev[player] = new unsigned char[lines * boxSize];
+			m_PixelLineBuffersGUIPrev[player] = new unsigned char[lines * boxSize];
+
+			memset(m_PixelLineBuffersPrev[player], 0, lines * boxSize);
+			memset(m_PixelLineBuffersGUIPrev[player], 0, lines * boxSize);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void NetworkServer::ClearBackBuffer(int player, int w, int h) {
+		clear_to_color(m_BackBuffer8[player], ColorKeys::g_MaskColor);
+		clear_to_color(m_BackBufferGUI8[player], ColorKeys::g_MaskColor);
+
+		if (m_UseDeltaCompression) {
+			int lines = (w / m_BoxWidth + 1) * (h / m_BoxHeight + 1);
+			int boxSize = m_BoxWidth * m_BoxHeight;
+
+			memset(m_PixelLineBuffersPrev[player], 0, lines * boxSize);
+			memset(m_PixelLineBuffersGUIPrev[player], 0, lines * boxSize);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::DestroyBackBuffer(short player) {
-		if (m_BackBuffer8) { destroy_bitmap(m_BackBuffer8[player]); }
-		m_BackBuffer8[player] = 0;
+		if (m_BackBuffer8) {
+			destroy_bitmap(m_BackBuffer8[player]);
+			if (m_PixelLineBuffersPrev[player]) {
+				delete[] m_PixelLineBuffersPrev[player];
+			}
+		}
+		m_BackBuffer8[player] = nullptr;
+		m_PixelLineBuffersPrev[player] = nullptr;
 
-		if (m_BackBufferGUI8) { destroy_bitmap(m_BackBufferGUI8[player]); }
-		m_BackBufferGUI8[player] = 0;
+		if (m_BackBufferGUI8) {
+			destroy_bitmap(m_BackBufferGUI8[player]);
+			if (m_PixelLineBuffersGUIPrev[player]) {
+				delete[] m_PixelLineBuffersGUIPrev[player];
+			}
+		}
+		m_BackBufferGUI8[player] = nullptr;
+		m_PixelLineBuffersGUIPrev[player] = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1070,13 +1151,17 @@ namespace RTE {
 		msgFrameSetup.FrameNumber = m_FrameNumbers[player];
 		msgFrameSetup.TargetPosX = g_FrameMan.GetTargetPos(player).m_X;
 		msgFrameSetup.TargetPosY = g_FrameMan.GetTargetPos(player).m_Y;
+		msgFrameSetup.BoxWidth = m_BoxWidth;
+		msgFrameSetup.BoxHeight = m_BoxHeight;
+		msgFrameSetup.Interlaced = m_UseInterlacing;
+		msgFrameSetup.DeltaCompressed = m_UseDeltaCompression;
 
 		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
 			msgFrameSetup.OffsetX[i] = g_FrameMan.SLOffset[player][i].m_X;
 			msgFrameSetup.OffsetY[i] = g_FrameMan.SLOffset[player][i].m_Y;
 		}
 
-		int payloadSize = sizeof(MsgSceneSetup);
+		int payloadSize = sizeof(MsgFrameSetup);
 
 		m_Server->Send((const char *)&msgFrameSetup, payloadSize, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 
@@ -1102,7 +1187,7 @@ namespace RTE {
 			return;
 		}
 
-		MsgPostEffects *msg = (MsgPostEffects *)m_PixelLineBuffer[player];
+		MsgPostEffects *msg = (MsgPostEffects *)m_CompressedLineBuffer[player];
 		PostEffectNetworkData *effDataPtr = (PostEffectNetworkData *)((char *)msg + sizeof(MsgPostEffects));
 
 		msg->Id = ID_SRV_POST_EFFECTS;
@@ -1207,147 +1292,207 @@ namespace RTE {
 		m_SendEven[player] = !m_SendEven[player];
 
 		if (m_TransmitAsBoxes) {
-			MsgFrameBox *frameData = (MsgFrameBox *)m_PixelLineBuffer[player];
-			frameData->FrameNumber = m_FrameNumbers[player];
+			MsgFrameBox *frameData = (MsgFrameBox *)m_CompressedLineBuffer[player];
 
-			// Save message ID
-			frameData->Id = ID_SRV_FRAME_BOX;
-			frameData->BoxWidth = m_BoxWidth;
-			frameData->BoxHeight = m_BoxHeight;
+			int boxedWidth = m_BackBuffer8[player]->w / m_BoxWidth;
+			int boxedHeight = m_BackBuffer8[player]->h / m_BoxHeight;
+			int boxMaxSize = m_BoxWidth * m_BoxHeight;
 
-			int bw = m_BackBuffer8[player]->w / m_BoxWidth;
-			int bh = m_BackBuffer8[player]->h / m_BoxHeight;
+			if (m_BackBuffer8[player]->w % m_BoxWidth != 0) { boxedWidth += 1; }
 
-			for (int by = 0; by <= bh; by++) {
-				int step = 1;
-				int startLine = 0;
+			for (unsigned char layer = 0; layer < 2; layer++) {
+				const BITMAP *backBuffer = nullptr;
+				unsigned char *prevLineBuffers = 0;
 
-				if (m_UseInterlacing) {
-					step = 2;
-					if (m_SendEven[player]) {
-						startLine = (by % 2 == 0) ? 1 : 0;
-					} else {
-						startLine = (by % 2 == 0) ? 0 : 1;
-					}
+				if (layer == 0) {
+					backBuffer = m_BackBuffer8[player];
+					prevLineBuffers = m_PixelLineBuffersPrev[player];
+				} else if (layer == 1) {
+					backBuffer = m_BackBufferGUI8[player];
+					prevLineBuffers = m_PixelLineBuffersGUIPrev[player];
 				}
 
-				for (int bx = startLine; bx <= bw; bx += step) {
-					int bpx = bx * m_BoxWidth;
-					int bpy = by * m_BoxHeight;
+				for (int by = 0; by <= boxedHeight; by++) {
+					for (int bx = 0; bx <= boxedWidth; bx++) {
+						int bpx = bx * m_BoxWidth;
+						int bpy = by * m_BoxHeight;
 
-					if (bpx >= m_BackBuffer8[player]->w || bpy >= m_BackBuffer8[player]->h) {
-						break;
-					}
-
-					frameData->BoxX = bpx;
-					frameData->BoxY = bpy;
-
-					int maxWidth = m_BoxWidth;
-					if (bpx + m_BoxWidth >= m_BackBuffer8[player]->w) {
-						maxWidth = m_BackBuffer8[player]->w - bpx;
-						frameData->BoxWidth = maxWidth;
-					}
-
-					int maxHeight = m_BoxHeight;
-					if (bpy + m_BoxHeight >= m_BackBuffer8[player]->h) {
-						maxHeight = m_BackBuffer8[player]->h - bpy;
-						frameData->BoxHeight = maxHeight;
-					}
-
-					int size = maxWidth * maxHeight;
-					frameData->UncompressedSize = size;
-					frameData->DataSize = size;
-
-					for (int layer = 0; layer < 2; layer++) {
-						bool boxIsEmpty = true;
-						int line = 0;
-
-						const BITMAP *backBuffer = 0;
-						if (layer == 0) {
-							backBuffer = m_BackBuffer8[player];
-						} else if (layer == 1) {
-							backBuffer = m_BackBufferGUI8[player];
+						if (bpx >= m_BackBuffer8[player]->w || bpy >= m_BackBuffer8[player]->h) {
+							break;
 						}
 
-						frameData->Layer = layer;
+						frameData->BoxX = bx;
+						frameData->BoxY = by;
 
-						unsigned char *dest = (unsigned char *)(m_TerrainChangeBuffer[player]);
+						int maxWidth = m_BoxWidth;
+						if (bpx + m_BoxWidth >= m_BackBuffer8[player]->w) { maxWidth = m_BackBuffer8[player]->w - bpx; }
 
-						// Copy block to line buffer and also check if block is empty
-						for (line = 0; line < maxHeight; line++) {
+						int maxHeight = m_BoxHeight;
+						if (bpy + m_BoxHeight >= m_BackBuffer8[player]->h) { maxHeight = m_BackBuffer8[player]->h - bpy; }
+
+						int lineStart = 0;
+						int lineStep = 1;
+						int lineCount = maxHeight;
+
+						if (m_UseInterlacing) {
+							lineStep = 2;
+							if (m_SendEven[player]) { lineStart = 1; }
+							maxHeight /= 2;
+						}
+						int thisBoxSize = maxWidth * maxHeight;
+
+						bool boxIsEmpty = true;
+						bool boxIsDelta = false;
+						bool sendEmptyBox = false;
+
+						unsigned char *dest = (unsigned char *)(m_PixelLineBuffer[player]);
+
+						// Copy block line by line to linear buffer
+						for (int line = lineStart; line < lineCount; line += lineStep) {
 							// Copy bitmap data
 							memcpy(dest, backBuffer->line[bpy + line] + bpx, maxWidth);
 							dest += maxWidth;
 						}
 
-						// Check if block is empty
-						unsigned long *pixelInt = (unsigned long *)m_TerrainChangeBuffer[player];
-						int counter = 0;
+						if (m_UseDeltaCompression) {
+							// Store a copy of a line buffer to calculate and store delta
+							memcpy(m_PixelLineBufferDelta[player], m_PixelLineBuffer[player], thisBoxSize);
 
-						for (counter = 0; counter < size; counter += sizeof(unsigned long)) {
-							if (*pixelInt > 0) {
-								boxIsEmpty = false;
-								break;
+							int bytesNeededPlain = 0;
+							int bytesNeededPrev = 0;
+							int bytesNeededDelta = 0;
+
+							// Previous line to delta against
+							int interlacedOffset = 0;
+							if (m_UseInterlacing) { interlacedOffset = m_SendEven[player] ? thisBoxSize : 0; }
+
+							unsigned char *prevLineBufferStart = prevLineBuffers + by * boxedWidth * boxMaxSize + bx * boxMaxSize;
+							unsigned char *prevLineBufferWithOffset = prevLineBufferStart + interlacedOffset;
+							// Currently processed box line buffer and delta storage
+							unsigned char *currLineBuffer = (unsigned char*)(m_PixelLineBufferDelta[player]);
+
+							// Calculate delta and decide whether we use it
+							for (int i = 0; i < thisBoxSize; i++) {
+								if (currLineBuffer[i] > 0) { bytesNeededPlain++; }
+								if (prevLineBufferWithOffset[i] > 0) { bytesNeededPrev++; }
+
+								currLineBuffer[i] = currLineBuffer[i] - prevLineBufferWithOffset[i];
+
+								if (currLineBuffer[i] > 0) { bytesNeededDelta++; }
 							}
-							pixelInt++;
-						}
-						if (boxIsEmpty && counter > size) {
-							pixelInt--;
-							counter -= sizeof(unsigned long);
 
-							const unsigned char *pixelChr = (unsigned char *)pixelInt;
-							for (; counter < size; counter++) {
-								if (*pixelChr > 0) {
+							// Store current line for delta check in the next frame
+							memcpy(prevLineBufferWithOffset, m_PixelLineBuffer[player], thisBoxSize);
+
+							if (bytesNeededPlain > 0) {
+								boxIsEmpty = false;
+
+								// If delta compression provides less significant bytes then use it
+								if (bytesNeededDelta < bytesNeededPlain) {
+									boxIsDelta = true;
+
+									if (bytesNeededDelta == 0) {
+										boxIsEmpty = true;
+									} else {
+										// Copy delta compressed buffer into plain pixel line
+										memcpy(m_PixelLineBuffer[player], m_PixelLineBufferDelta[player], thisBoxSize);
+									}
+								}
+							} else {
+								// Previous non empty block is now empty, clear it
+								if (bytesNeededPrev > 0 && bytesNeededPlain == 0) { sendEmptyBox = true; }
+							}
+						} else {
+							// Check if block is empty by evaluating by 64-bit ints
+							unsigned long *pixelInt = (unsigned long *)m_PixelLineBuffer[player];
+							int counter = 0;
+
+							for (counter = 0; counter < thisBoxSize; counter += sizeof(unsigned long)) {
+								if (*pixelInt > 0) {
 									boxIsEmpty = false;
 									break;
 								}
-								pixelChr++;
+								pixelInt++;
+							}
+							// Box area is not divisible by 8
+							if (boxIsEmpty && counter > thisBoxSize) {
+								pixelInt--;
+								counter -= sizeof(unsigned long);
+
+								const unsigned char *pixelChr = (unsigned char*)pixelInt;
+								for (; counter < thisBoxSize; counter++) {
+									if (*pixelChr > 0) {
+										boxIsEmpty = false;
+										break;
+									}
+									pixelChr++;
+								}
 							}
 						}
 
-						if (!boxIsEmpty) {
+						// Save msg ID
+						if (boxIsDelta) {
+							frameData->Id = layer == 0 ? ID_SRV_FRAME_BOX_MO_DELTA : ID_SRV_FRAME_BOX_UI_DELTA;
+						} else {
+							frameData->Id = layer == 0 ? ID_SRV_FRAME_BOX_MO : ID_SRV_FRAME_BOX_UI;
+						}
+						frameData->DataSize = thisBoxSize;
+
+						if (boxIsEmpty) {
+							frameData->DataSize = 0;
+							if (!sendEmptyBox) { m_EmptyBlocks[player]++; }
+						} else {
 							int result = 0;
 
 							if (m_UseHighCompression) {
-								result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)m_TerrainChangeBuffer[player], (char *)(m_PixelLineBuffer[player] + sizeof(MsgFrameBox)), size, size, compressionMethod);
+								result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)m_PixelLineBuffer[player], (char *)(m_CompressedLineBuffer[player] + sizeof(MsgFrameBox)), thisBoxSize, thisBoxSize, compressionMethod);
 							} else if (m_UseFastCompression) {
-								result = LZ4_compress_fast_extState(m_LZ4FastCompressionState[player], (char *)m_TerrainChangeBuffer[player], (char *)(m_PixelLineBuffer[player] + sizeof(MsgFrameBox)), size, size, accelerationFactor);
+								result = LZ4_compress_fast_extState(m_LZ4FastCompressionState[player], (char *)m_PixelLineBuffer[player], (char *)(m_CompressedLineBuffer[player] + sizeof(MsgFrameBox)), thisBoxSize, thisBoxSize, accelerationFactor);
 							}
 
 							// Compression failed or ineffective, send as is
 							if (result == 0 || result == backBuffer->w) {
 #ifdef _WIN32
-								memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+								memcpy_s(m_CompressedLineBuffer[player] + sizeof(MsgFrameBox), c_MaxPixelLineBufferSize, m_PixelLineBuffer[player], thisBoxSize);
 #else
-								memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), m_TerrainChangeBuffer[player], size);
+								memcpy(m_CompressedLineBuffer[player] + sizeof(MsgFrameBox), m_PixelLineBuffer[player], thisBoxSize);
 #endif
 							} else {
 								frameData->DataSize = result;
 							}
 
 							m_FullBlocks[player]++;
-						} else {
-							frameData->DataSize = 0;
-							m_EmptyBlocks[player]++;
 						}
 
 						int payloadSize = frameData->DataSize + sizeof(MsgFrameBox);
 
-						m_Server->Send((const char *)frameData, payloadSize, MEDIUM_PRIORITY, UNRELIABLE_SEQUENCED, 0, m_ClientConnections[player].ClientId, false);
+						if (!boxIsEmpty || sendEmptyBox) {
+							m_Server->Send((const char *)frameData, payloadSize, MEDIUM_PRIORITY, UNRELIABLE_SEQUENCED, 0, m_ClientConnections[player].ClientId, false);
+						} else {
+							payloadSize = 0;
+						}
 
-						m_DataSentCurrent[player][STAT_CURRENT] += payloadSize;
-						m_DataSentTotal[player] += payloadSize;
+						if (boxIsEmpty) {
+							m_EmptyBlocksSentCurrent[player][STAT_CURRENT] += 1;
+							m_EmptyBlocksDataSentCurrent[player][STAT_CURRENT] += payloadSize;
+						} else {
+							m_FullBlocksSentCurrent[player][STAT_CURRENT] += 1;
+							m_FullBlocksDataSentCurrent[player][STAT_CURRENT] += payloadSize;
 
-						m_FrameDataSentCurrent[player][STAT_CURRENT] += payloadSize;
-						m_FrameDataSentTotal[player] += payloadSize;
+							m_DataSentCurrent[player][STAT_CURRENT] += payloadSize;
+							m_DataSentTotal[player] += payloadSize;
 
-						m_DataUncompressedCurrent[player][STAT_CURRENT] += frameData->UncompressedSize;
-						m_DataUncompressedTotal[player] += frameData->UncompressedSize;
+							m_FrameDataSentCurrent[player][STAT_CURRENT] += payloadSize;
+							m_FrameDataSentTotal[player] += payloadSize;
+
+							m_DataUncompressedCurrent[player][STAT_CURRENT] += thisBoxSize;
+							m_DataUncompressedTotal[player] += thisBoxSize;
+						}
 					}
 				}
 			}
 		} else {
-			MsgFrameLine *frameData = (MsgFrameLine *)m_PixelLineBuffer[player];
+			MsgFrameLine *frameData = (MsgFrameLine *)m_CompressedLineBuffer[player];
 			frameData->FrameNumber = m_FrameNumbers[player];
 
 			// Save message ID
@@ -1412,17 +1557,17 @@ namespace RTE {
 
 					if (!lineIsEmpty) {
 						if (m_UseHighCompression) {
-							result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)backBuffer->line[m_CurrentFrameLine], (char *)(m_PixelLineBuffer[player] + sizeof(MsgFrameLine)), backBuffer->w, backBuffer->w, compressionMethod);
+							result = LZ4_compress_HC_extStateHC(m_LZ4CompressionState[player], (char *)backBuffer->line[m_CurrentFrameLine], (char *)(m_CompressedLineBuffer[player] + sizeof(MsgFrameLine)), backBuffer->w, backBuffer->w, compressionMethod);
 						} else if (m_UseFastCompression) {
-							result = LZ4_compress_fast_extState(m_LZ4FastCompressionState[player], (char *)backBuffer->line[m_CurrentFrameLine], (char *)(m_PixelLineBuffer[player] + sizeof(MsgFrameLine)), backBuffer->w, backBuffer->w, accelerationFactor);
+							result = LZ4_compress_fast_extState(m_LZ4FastCompressionState[player], (char *)backBuffer->line[m_CurrentFrameLine], (char *)(m_CompressedLineBuffer[player] + sizeof(MsgFrameLine)), backBuffer->w, backBuffer->w, accelerationFactor);
 						}
 
 						// Compression failed or ineffective, send as is
 						if (result == 0 || result == m_BackBuffer8[player]->w) {
 #ifdef _WIN32
-							memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), c_MaxPixelLineBufferSize, backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+							memcpy_s(m_CompressedLineBuffer[player] + sizeof(MsgFrameLine), c_MaxPixelLineBufferSize, backBuffer->line[m_CurrentFrameLine], backBuffer->w);
 #else
-							memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+							memcpy(m_CompressedLineBuffer[player] + sizeof(MsgFrameLine), backBuffer->line[m_CurrentFrameLine], backBuffer->w);
 #endif
 						} else {
 							frameData->DataSize = result;
@@ -1475,6 +1620,10 @@ namespace RTE {
 			m_SoundDataSentCurrent[player][STAT_SHOWN] = m_SoundDataSentCurrent[player][STAT_CURRENT];
 			m_TerrainDataSentCurrent[player][STAT_SHOWN] = m_TerrainDataSentCurrent[player][STAT_CURRENT];
 			m_OtherDataSentCurrent[player][STAT_SHOWN] = m_OtherDataSentCurrent[player][STAT_CURRENT];
+			m_FullBlocksSentCurrent[player][STAT_SHOWN] = m_FullBlocksSentCurrent[player][STAT_CURRENT];
+			m_EmptyBlocksSentCurrent[player][STAT_SHOWN] = m_EmptyBlocksSentCurrent[player][STAT_CURRENT];
+			m_FullBlocksDataSentCurrent[player][STAT_SHOWN] = m_FullBlocksDataSentCurrent[player][STAT_CURRENT];
+			m_EmptyBlocksDataSentCurrent[player][STAT_SHOWN] = m_EmptyBlocksDataSentCurrent[player][STAT_CURRENT];
 
 			m_DataUncompressedCurrent[player][STAT_CURRENT] = 0;
 			m_DataSentCurrent[player][STAT_CURRENT] = 0;
@@ -1483,11 +1632,15 @@ namespace RTE {
 			m_SoundDataSentCurrent[player][STAT_CURRENT] = 0;
 			m_TerrainDataSentCurrent[player][STAT_CURRENT] = 0;
 			m_OtherDataSentCurrent[player][STAT_CURRENT] = 0;
+			m_FullBlocksSentCurrent[player][STAT_CURRENT] = 0;
+			m_EmptyBlocksSentCurrent[player][STAT_CURRENT] = 0;
+			m_FullBlocksDataSentCurrent[player][STAT_CURRENT] = 0;
+			m_EmptyBlocksDataSentCurrent[player][STAT_CURRENT] = 0;
 		}
 
-		if (m_PingTimer[player].IsPastRealMS(500)) {
+		if (m_PingTimer[player]->IsPastRealMS(500)) {
 			m_Ping[player] = m_Server->GetLastPing(m_ClientConnections[player].ClientId);
-			m_PingTimer[player].Reset();
+			m_PingTimer[player]->Reset();
 		}
 	}
 
@@ -1505,7 +1658,7 @@ namespace RTE {
 		guid += GetServerGUID().ToString();
 		g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 5, guid, GUIFont::Centre);
 
-		char buf[256];
+		char buf[512];
 
 		if (m_NatServerConnected) {
 			std::snprintf(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
@@ -1532,6 +1685,10 @@ namespace RTE {
 		m_FrameDataSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
 		m_TerrainDataSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
 		m_OtherDataSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
+		m_FullBlocksSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
+		m_EmptyBlocksSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
+		m_FullBlocksDataSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
+		m_EmptyBlocksDataSentCurrent[c_MaxClients][STAT_SHOWN] = 0;
 
 		m_FrameDataSentTotal[c_MaxClients] = 0;
 		m_TerrainDataSentTotal[c_MaxClients] = 0;
@@ -1558,6 +1715,10 @@ namespace RTE {
 				m_FrameDataSentCurrent[c_MaxClients][STAT_SHOWN] += m_FrameDataSentCurrent[i][STAT_SHOWN];
 				m_TerrainDataSentCurrent[c_MaxClients][STAT_SHOWN] += m_TerrainDataSentCurrent[i][STAT_SHOWN];
 				m_OtherDataSentCurrent[c_MaxClients][STAT_SHOWN] += m_OtherDataSentCurrent[i][STAT_SHOWN];
+				m_FullBlocksSentCurrent[c_MaxClients][STAT_SHOWN] += m_FullBlocksSentCurrent[i][STAT_SHOWN];
+				m_EmptyBlocksSentCurrent[c_MaxClients][STAT_SHOWN] += m_EmptyBlocksSentCurrent[i][STAT_SHOWN];
+				m_FullBlocksDataSentCurrent[c_MaxClients][STAT_SHOWN] += m_FullBlocksDataSentCurrent[i][STAT_SHOWN];
+				m_EmptyBlocksDataSentCurrent[c_MaxClients][STAT_SHOWN] += m_EmptyBlocksDataSentCurrent[i][STAT_SHOWN];
 
 				m_FrameDataSentTotal[c_MaxClients] += m_FrameDataSentTotal[i];
 				m_TerrainDataSentTotal[c_MaxClients] += m_TerrainDataSentTotal[i];
@@ -1577,30 +1738,50 @@ namespace RTE {
 			double compressionRatio = (m_DataUncompressedTotal[i] > 0) ? static_cast<double>(m_DataSentTotal[i]) / static_cast<double>(m_DataUncompressedTotal[i]) : 0;
 			double emptyRatio = (m_EmptyBlocks[i] > 0) ? static_cast<double>(m_FullBlocks[i]) / static_cast<double>(m_EmptyBlocks[i]) : 0;
 
-			int fps = 0;
-			if (m_MsecPerFrame[i] > 0) { fps = 1000 / m_MsecPerFrame[i]; }
 			std::string playerName = IsPlayerConnected(i) ? GetPlayerName(i) : "- NO PLAYER -";
 
 			// Jesus christ
 			std::snprintf(buf, sizeof(buf),
-					  "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
-					  (i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
-					  (i < c_MaxClients) ? m_Ping[i] : 0,
-					  static_cast<double>(m_DataSentCurrent[i][STAT_SHOWN]) / 125000,
-					  static_cast<double>(m_DataUncompressedCurrent[i][STAT_SHOWN]) / 125000,
-					  compressionRatio,
-					  m_FrameDataSentCurrent[i][STAT_SHOWN] / 125,
-					  m_PostEffectDataSentCurrent[i][STAT_SHOWN] / 125,
-					  m_SoundDataSentCurrent[i][STAT_SHOWN] / 125,
-					  m_TerrainDataSentCurrent[i][STAT_SHOWN] / 125,
-					  m_FramesSent[i] / 1000,
-					  m_FramesSkipped[i] / 1000,
-					  m_FullBlocks[i] / 1000,
-					  m_EmptyBlocks[i] / 1000,
-					  emptyRatio,
-					  (i < c_MaxClients) ? fps : 0,
-					  (i < c_MaxClients) ? m_MsecPerSendCall[i] : 0,
-					  m_DataSentTotal[i] / (1024 * 1024)
+				"%s\nPing %u\n"
+				"Cmp Mbit : % .1f\n"
+				"Unc Mbit : % .1f\n"
+				"R : % .2f\n"
+				"Full Blck %lu (%.1f Kb)\n"
+				"Empty Blck %lu (%.1f Kb)\n"
+				"Frame Kb : % lu\n"
+				"Glow Kb : % lu\n"
+				"Sound Kb : % lu\n"
+				"Scene Kb : % lu\n"
+				"Frames sent : % uK\n"
+				"Frame skipped : % uK\n"
+				"Blocks full : % uK\n"
+				"Blocks empty : % uK\n"
+				"Blk Ratio : % .2f\n"
+				"Frames ms : % d\n"
+				"Send ms % d\n"
+				"Total Data % lu MB",
+
+				(i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
+				(i < c_MaxClients) ? m_Ping[i] : 0,
+				static_cast<double>(m_DataSentCurrent[i][STAT_SHOWN]) / 125000,
+				static_cast<double>(m_DataUncompressedCurrent[i][STAT_SHOWN]) / 125000,
+				compressionRatio,
+				m_FullBlocksSentCurrent[i][STAT_SHOWN],
+				static_cast<double>(m_FullBlocksDataSentCurrent[i][STAT_SHOWN]) / (125),
+				m_EmptyBlocksSentCurrent[i][STAT_SHOWN],
+				static_cast<double>(m_EmptyBlocksDataSentCurrent[i][STAT_SHOWN]) / (125),
+				m_FrameDataSentCurrent[i][STAT_SHOWN] / 125,
+				m_PostEffectDataSentCurrent[i][STAT_SHOWN] / 125,
+				m_SoundDataSentCurrent[i][STAT_SHOWN] / 125,
+				m_TerrainDataSentCurrent[i][STAT_SHOWN] / 125,
+				m_FramesSent[i] / 1000,
+				m_FramesSkipped[i],
+				m_FullBlocks[i] / 1000,
+				m_EmptyBlocks[i] / 1000,
+				emptyRatio,
+				(i < c_MaxClients) ? m_MsecPerFrame[i] : 0,
+				(i < c_MaxClients) ? m_MsecPerSendCall[i] : 0,
+				m_DataSentTotal[i] / (1024 * 1024)
 			);
 
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_FrameMan.GetResX() / 5, 75, buf, GUIFont::Left);
@@ -1718,7 +1899,7 @@ namespace RTE {
 			}
 		}
 
-		if (m_SleepWhenIdle && m_LastPackedReceived.IsPastRealMS(10000)) {
+		if (m_SleepWhenIdle && m_LastPackedReceived->IsPastRealMS(10000)) {
 			short playersConnected = 0;
 			for (short player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player)) {
@@ -1733,10 +1914,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::HandleNetworkPackets() {
-		RakNet::Packet *packet;
-
-		for (packet = m_Server->Receive(); packet; m_Server->DeallocatePacket(packet), packet = m_Server->Receive()) {
-			m_LastPackedReceived.Reset();
+		for (RakNet::Packet *packet = m_Server->Receive(); packet; m_Server->DeallocatePacket(packet), packet = m_Server->Receive()) {
+			m_LastPackedReceived->Reset();
 
 			// We got a packet, get the identifier with our handy function
 			unsigned char packetIdentifier = GetPacketIdentifier(packet);

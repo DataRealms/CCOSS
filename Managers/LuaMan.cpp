@@ -1,21 +1,10 @@
 #include "LuaMan.h"
-
+#include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
-#include "LuaAdapters.h"
-#include "LuaAdaptersEntities.h"
-
-#include "Reader.h"
-#include "Writer.h"
-
-#include "ActivityMan.h"
-#include "GAScripted.h"
-#include "Scene.h"
-#include "SceneMan.h"
 
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	constexpr static char* sc_scriptSavesPath = "Saves.rte/";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,8 +12,6 @@ namespace RTE {
 		m_MasterState = nullptr;
 		m_DisableLuaJIT = false;
 		m_LastError.clear();
-		m_NextPresetID = 0;
-		m_NextObjectID = 0;
 		m_TempEntity = nullptr;
 		m_TempEntityVector.clear();
 
@@ -70,18 +57,18 @@ namespace RTE {
 			luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
 				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
+				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
+				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
 				.def("FileOpen", &LuaMan::FileOpen)
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
-				.def("FileEOF", &LuaMan::FileEOF)
-				.def("SaveScene", &LuaMan::SaveScriptedScene)
-				.def("LoadScene", &LuaMan::LoadScriptedScene),
+				.def("FileEOF", &LuaMan::FileEOF),
 
-			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
+			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
-			luabind::def("PosRand", &PosRand),
-			luabind::def("NormalRand", &NormalRand),
+			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
+			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
 			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
 			luabind::def("LERP", &LERP),
 			luabind::def("EaseIn", &EaseIn),
@@ -134,6 +121,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
@@ -216,26 +204,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string LuaMan::GetNewPresetID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
-
-		m_NextPresetID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::string LuaMan::GetNewObjectID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
-
-		m_NextObjectID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
 		m_TempEntityVector.reserve(entityVector.size());
 		for (const Entity *entity : entityVector) {
@@ -245,7 +213,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+	int LuaMan::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
@@ -312,6 +280,52 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int LuaMan::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+		int status = 0;
+
+		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
+		functionObject->GetLuabindObject()->push(m_MasterState);
+
+		int argumentCount = functionEntityArguments.size() + functionLiteralArguments.size();
+		if (!selfGlobalTableName.empty() && TableEntryIsDefined(selfGlobalTableName, selfGlobalTableKey)) {
+			lua_getglobal(m_MasterState, selfGlobalTableName.c_str());
+			lua_getfield(m_MasterState, -1, selfGlobalTableKey.c_str());
+			lua_remove(m_MasterState, -2);
+			argumentCount++;
+		}
+
+		for (const Entity *functionEntityArgument : functionEntityArguments) {
+			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(const_cast<Entity *>(functionEntityArgument), m_MasterState));
+			downCastEntityAsLuabindObjectWrapper->GetLuabindObject()->push(m_MasterState);
+		}
+
+		for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+			char *stringToDoubleConversionFailed = nullptr;
+			if (functionLiteralArgument == "nil") {
+				lua_pushnil(m_MasterState);
+			} else if (functionLiteralArgument == "true" || functionLiteralArgument == "false") {
+				lua_pushboolean(m_MasterState, functionLiteralArgument == "true" ? 1 : 0);
+			} else if (double argumentAsNumber = std::strtod(functionLiteralArgument.data(), &stringToDoubleConversionFailed); !*stringToDoubleConversionFailed) {
+				lua_pushnumber(m_MasterState, argumentAsNumber);
+			} else {
+				lua_pushlstring(m_MasterState, functionLiteralArgument.data(), functionLiteralArgument.size());
+			}
+		}
+
+		if (lua_pcall(m_MasterState, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
+			m_LastError = lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+			status = -1;
+		}
+		lua_pop(m_MasterState, 1);
+
+		return status;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
 		if (filePath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
@@ -344,6 +358,24 @@ namespace RTE {
 		lua_pop(m_MasterState, 1);
 
 		return error;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaMan::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
+		if (int error = RunScriptFile(filePath); error < 0) {
+			return error;
+		}
+
+		for (const std::string &functionName : functionNamesToLookFor) {
+			luabind::object functionObject = luabind::globals(m_MasterState)[functionName];
+			if (luabind::type(functionObject) == LUA_TFUNCTION) {
+				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
+				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+			}
+		}
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -412,6 +444,28 @@ namespace RTE {
 		lua_pop(m_MasterState, 2);
 
 		return isDefined;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_directory()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::FileList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_regular_file()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -535,85 +589,37 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::SaveScriptedScene(const std::string &fileName) {
-		Scene* scene = dynamic_cast<Scene*>(g_SceneMan.GetScene());
-		GAScripted* activity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
-
-		if (!scene || !activity) {
-			return false;
-		}
-
-		// Save the scene bitmaps
-		if (scene->SaveData(sc_scriptSavesPath + fileName) < 0) {
-			return false;
-		}
-
-		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current g_movableMan state
-		std::unique_ptr<Scene> sceneAltered(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
-
-		// Delete any existing objects from our scene - we don't want replace broken doors or repair any stuff when we load
-		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
-
-		// Pull all stuff from movableMan into the scene for saving, so existing actors/doors are transfered
-		sceneAltered->RetrieveSceneObjects(false); // Don't transfer ownership
-
-		// We also need to stop being a copy of the scene we got cloned from - otherwise we'll still pick up the PlacedObjectSets from our parent when loading
-		// So become our own original preset
-		sceneAltered->SetPresetName(sceneAltered->GetPresetName() + " - " + fileName);
-		sceneAltered->SetScriptSave(true);
-
-		// We don't need to block the main thread for too long, just need to let writer access the relevant data
-		std::unique_ptr<Writer> writer(new Writer(sc_scriptSavesPath + fileName + ".ini"));
-		writer->NewPropertyWithValue("Scene", sceneAltered.get());
-		writer->NewPropertyWithValue("Activity", activity);
-
-		auto saveWriterData = [](std::unique_ptr<Writer> writer) {
-			// Explicitly flush to disk...
-			// This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
-			writer->EndWrite();
-		};
-
-		std::thread saveThread(saveWriterData, std::move(writer));
-
-		// Now we can continue and the flushing to disk can be done concurrently with the simulation
-		saveThread.detach();
-
-		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan
-		sceneAltered->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
-
-		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool LuaMan::LoadScriptedScene(const std::string &fileName) {
-		std::unique_ptr<Scene> scene(new Scene());
-		std::unique_ptr<GAScripted> activity(new GAScripted());
-
- 		Reader reader((sc_scriptSavesPath + fileName + ".ini").c_str(), true, nullptr, true);
-		if (!reader.ReaderOK()) {
-			return false;
-		}
-
-		while (reader.NextProperty()) {
-			std::string propName = reader.ReadPropName();
-        	if (propName == "Scene") {
-				reader >> scene.get();
-			} else if (propName == "Activity") {
-				reader >> activity.get();
-			}
-    	}
-
-		g_SceneMan.SetSceneToLoad(scene.get(), true, true); // SetSceneToLoad() doesn't Clone(), but when the activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally
-		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone())); // But for activity we need to do the Clone() here
-		// Messy, right? :/
-
-		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LuaMan::Update() const {
 		lua_gc(m_MasterState, LUA_GCSTEP, 1);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::DescribeLuaStack() {
+		int indexOfTopOfStack = lua_gettop(m_MasterState);
+		if (indexOfTopOfStack == 0) {
+			return "The Lua stack is empty.";
+		}
+		std::stringstream stackDescription;
+		stackDescription << "The Lua stack contains " + std::to_string(indexOfTopOfStack) + " elements. From top to bottom, they are:\n";
+
+		for (int i = indexOfTopOfStack; i > 0; --i) {
+			switch (int type = lua_type(m_MasterState, i)) {
+				case LUA_TBOOLEAN:
+					stackDescription << (lua_toboolean(m_MasterState, i) ? "true" : "false");
+					break;
+				case LUA_TNUMBER:
+					stackDescription << std::to_string(lua_tonumber(m_MasterState, i));
+					break;
+				case LUA_TSTRING:
+					stackDescription << lua_tostring(m_MasterState, i);
+					break;
+				default:
+					stackDescription << lua_typename(m_MasterState, type);
+					break;
+			}
+			if (i - 1 > 0) { stackDescription << "\n"; }
+		}
+		return stackDescription.str();
 	}
 }

@@ -54,8 +54,7 @@ namespace RTE {
 				const Entity* preset = g_PresetMan.GetEntityPreset(className, refName, reader.GetReadModuleID());
 				if (preset) {
 					preset->Clone(this);
-				}
-				else {
+				} else {
 					reader.ReportError("Couldn't find the preset \"" + refName + "\" of type \"" + className + "\" when trying to do CopyOf.");
 				}
 			}

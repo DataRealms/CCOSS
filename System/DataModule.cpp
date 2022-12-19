@@ -10,6 +10,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::Clear() {
+		m_IsUserdata = false;
 		m_FileName.clear();
 		m_FriendlyName.clear();
 		m_Author.clear();
@@ -51,7 +52,7 @@ namespace RTE {
 		if (reader.Create(indexPath, true, progressCallback) >= 0) {
 			int result = Serializable::Create(reader);
 
-			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && moduleName != "Scenes.rte" && moduleName != "Metagames.rte" && moduleName != "Saves.rte" && m_SupportedGameVersion != c_GameVersion) {
+			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && !m_IsUserdata && m_SupportedGameVersion != c_GameVersion) {
 				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 			}
@@ -64,6 +65,24 @@ namespace RTE {
 			return result;
 		}
 		return -1;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool DataModule::CreateOnDiskAsUserdata(const std::string &moduleName, const std::string_view &friendlyName, bool ignoreMissingItems, bool scanFolderContents) {
+		std::string moduleNameWithPackageExtension = moduleName + ((moduleName.find(System::GetModulePackageExtension()) == moduleName.length() - System::GetModulePackageExtension().length()) ? "" : System::GetModulePackageExtension());
+		if (Writer writer(moduleNameWithPackageExtension + "/Index.ini", false, true); writer.WriterOK()) {
+			DataModule newModule;
+			newModule.m_IsUserdata = true;
+			newModule.m_FriendlyName = friendlyName;
+			newModule.m_IgnoreMissingItems = ignoreMissingItems;
+			newModule.m_ScanFolderContents = scanFolderContents;
+			newModule.Save(writer);
+			writer.EndWrite();
+		} else {
+			return false;
+		}
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,16 +195,22 @@ namespace RTE {
 		Serializable::Save(writer);
 
 		writer.NewPropertyWithValue("ModuleName", m_FriendlyName);
-		writer.NewPropertyWithValue("Author", m_Author);
-		writer.NewPropertyWithValue("Description", m_Description);
-		writer.NewPropertyWithValue("IsFaction", m_IsFaction);
-		writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion);
-		writer.NewPropertyWithValue("Version", m_Version);
-		writer.NewPropertyWithValue("IconFile", m_IconFile);
 
-		// TODO: Write out all the different entity instances, each having their own relative location within the data module stored
-		// Will need the writer to be able to open different files and append to them as needed, probably done in NewEntity()
-		// writer.NewEntity()
+		if (!m_IsUserdata) {
+			writer.NewPropertyWithValue("Author", m_Author);
+			writer.NewPropertyWithValue("Description", m_Description);
+			writer.NewPropertyWithValue("IsFaction", m_IsFaction);
+			writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion);
+			writer.NewPropertyWithValue("Version", m_Version);
+			writer.NewPropertyWithValue("IconFile", m_IconFile);
+
+			// TODO: Write out all the different entity instances, each having their own relative location within the data module stored
+			// Will need the writer to be able to open different files and append to them as needed, probably done in NewEntity()
+			// writer.NewEntity()
+		} else {
+			writer.NewPropertyWithValue("ScanFolderContents", m_ScanFolderContents);
+			writer.NewPropertyWithValue("IgnoreMissingItems", m_IgnoreMissingItems);
+		}
 
 		return 0;
 	}

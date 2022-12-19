@@ -16,6 +16,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Clear() {
+		m_Width = 0;
+		m_Height = 0;
 		m_LayerToDraw = LayerType::ForegroundLayer;
 		m_FGColorLayer = nullptr;
 		m_BGColorLayer = nullptr;
@@ -31,6 +33,9 @@ namespace RTE {
 	int SLTerrain::Create() {
 		SceneLayer::Create();
 
+		m_Width = m_BitmapFile.GetImageWidth();
+		m_Height = m_BitmapFile.GetImageHeight();
+
 		if (!m_FGColorLayer.get()) { m_FGColorLayer = std::make_unique<SceneLayer>(); }
 		if (!m_BGColorLayer.get()) { m_BGColorLayer = std::make_unique<SceneLayer>(); }
 
@@ -41,6 +46,9 @@ namespace RTE {
 
 	int SLTerrain::Create(const SLTerrain &reference) {
 		SceneLayer::Create(reference);
+
+		m_Width = reference.m_Width;
+		m_Height = reference.m_Height;
 
 		// Copy the layers but not the layer BITMAPs because they will be loaded later by LoadData.
 		m_FGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_FGColorLayer->Clone()));
@@ -416,7 +424,9 @@ namespace RTE {
 
 						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
 						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
-						
+#ifndef RELEASE_BUILD
+						terrainPixel->SetDescription("Dislodged Terrain Pixel from Material " + std::to_string(sceneMat->GetIndex()));
+#endif
 						terrainPixel->SetToHitMOs(false);
 						dislodgedMOPixels.emplace_back(terrainPixel.release());
 					}

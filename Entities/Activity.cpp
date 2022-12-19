@@ -274,7 +274,11 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
+		if (m_ActivityState != ActivityState::Editing) {
+			m_ActivityState = ActivityState::Running;
+		}
 		m_Paused = false;
+		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
 		if (!g_FrameMan.IsInMultiplayerMode()) {
@@ -308,11 +312,9 @@ void Activity::Clear() {
 
 			m_MessageTimer[player].Reset();
 
-			// Set our brains if they already exist
-			// For now, this does so in an arbritrary manner - TODO, we should save information on which brain is for which player in the scene!
+			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {
-				Actor* brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player));
-				if (brain) {
+				if (Actor *brain = g_MovableMan.GetUnassignedBrain(GetTeamOfPlayer(player))) {
 					SetPlayerBrain(brain, player);
 				}
 			}
@@ -764,7 +766,7 @@ void Activity::Clear() {
 		float nativeCostMult = 0.9F;
 		int orbitedCraftTeam = orbitedCraft->GetTeam();
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
-		
+
 		if (g_MetaMan.GameInProgress()) {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				if (GetTeamOfPlayer(static_cast<Players>(player)) == orbitedCraftTeam) {
@@ -861,74 +863,4 @@ void Activity::Clear() {
 			if (m_IsActive[player]) { m_PlayerController[player].Update(); }
 		}
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		writer.NewProperty("GenericSavedStrings");
-		writer << m_SavedStrings;
-		writer.NewProperty("GenericSavedNumbers");
-		writer << m_SavedNumbers;
-
-		return 0;
-	}
-
-	int GenericSavedData::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "GenericSavedStrings") {
-			reader >> m_SavedStrings;
-		} else if (propName == "GenericSavedNumbers") {
-			reader >> m_SavedNumbers;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedStrings::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		for (const auto& pair : m_Data) {
-			if (pair.second.empty()) {
-				continue;
-			}
-
-			writer.NewProperty(pair.first);
-			writer << pair.second;
-		}
-
-		return 0;
-	}
-
-	int GenericSavedData::GenericSavedStrings::ReadProperty(const std::string_view &propName, Reader &reader) {
-		std::string value;
-		reader >> value;
-		m_Data[std::string(propName)] = value; // until we get P0919R2
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedNumbers::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		for (const auto& pair : m_Data) {
-			writer.NewProperty(pair.first);
-			writer << pair.second;
-		}
-
-		return 0;
-	}
-
-	int GenericSavedData::GenericSavedNumbers::ReadProperty(const std::string_view &propName, Reader &reader) {
-		float value;
-		reader >> value;
-		m_Data[std::string(propName)] = value; // until we get P0919R2
-		return 0;
-	}
-
 }

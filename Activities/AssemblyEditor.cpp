@@ -174,8 +174,6 @@ int AssemblyEditor::Start()
     if (pRootBox)
         pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-    m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
-
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pLoadDialogBox)
     {
@@ -185,6 +183,10 @@ int AssemblyEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
+	m_pModuleCombo->SetDropHeight(std::min(m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + (std::max(m_pLoadNameCombo->GetDropHeight(), m_pModuleCombo->GetDropHeight()))); // Make sure the dropdowns can fit, no matter how tall they are.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
 
@@ -355,7 +357,7 @@ void AssemblyEditor::Update()
 						m_ModuleSpaceID = g_PresetMan.GetModuleID(m_pModuleCombo->GetSelectedItem()->m_Name);
                         RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
-						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
+						if (m_ModuleSpaceID == g_PresetMan.GetModuleID(c_UserScenesModuleName))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, -1);
 						else
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
@@ -622,7 +624,7 @@ bool AssemblyEditor::SaveAssembly(std::string saveAsName, bool forceOverwrite)
 {
 	BunkerAssembly *pBA = BuildAssembly(saveAsName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
         std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
@@ -746,11 +748,11 @@ void AssemblyEditor::UpdateLoadDialog()
 			// If metascenes are visible then allow to save assemblies to Base.rte
 			if (g_SettingsMan.ShowMetascenes())
 			{
-				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 												&& g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			} else {
-				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			}
@@ -771,13 +773,14 @@ void AssemblyEditor::UpdateLoadDialog()
 				}
 				else
 				{
-					if (g_PresetMan.GetDataModule(module)->GetFileName() == "Scenes.rte")
+					if (g_PresetMan.GetDataModule(module)->GetFileName() == c_UserScenesModuleName)
 						scenesIndex = m_pModuleCombo->GetCount() - 1;
 				}
 			}
 		}
 
-        // Select the "Scenes.rte" module
+		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2 }));
+        // Select the user scenes module
         m_pModuleCombo->SetSelectedIndex(scenesIndex);
     }
 
@@ -794,7 +797,7 @@ void AssemblyEditor::UpdateLoadDialog()
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsScriptSave() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 

@@ -274,7 +274,7 @@ void AEmitter::Destroy(bool notInherited)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
+// Description:     Reset the timers of all emissions so they will start/stop at the
 //                  correct relative offsets from now.
 
 void AEmitter::ResetEmissionTimers()
@@ -316,7 +316,7 @@ float AEmitter::EstimateImpulse(bool burst)
     {
         float impulse = 0;
         float velMin, velMax, velRange, spread;
-        
+
         // Go through all emissions and emit them according to their respective rates
         for (std::list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
         {
@@ -324,8 +324,9 @@ float AEmitter::EstimateImpulse(bool burst)
             if ((*eItr)->PushesEmitter())
             {
                 double emissions = (*eItr)->GetRate() * g_TimerMan.GetDeltaTimeSecs() / 60.0f;
-                if (burst)
+                if (burst) {
                     emissions *= (*eItr)->GetBurstSize();
+                }
                 
                 velMin = std::min((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
                 velMax = std::max((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
@@ -348,8 +349,28 @@ float AEmitter::EstimateImpulse(bool burst)
 	float throttleFactor = GetThrottleFactor();
     // Apply the throttle factor to the emission rate per update
 	if (burst) { return m_AvgBurstImpulse * throttleFactor; }
-    
+
 	return m_AvgImpulse * throttleFactor;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float AEmitter::GetTotalParticlesPerMinute() const {
+	float totalPPM = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalPPM += emission->m_PPM;
+	}
+	return totalPPM;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int AEmitter::GetTotalBurstSize() const {
+	int totalBurstSize = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalBurstSize += emission->m_BurstSize;
+	}
+	return totalBurstSize;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

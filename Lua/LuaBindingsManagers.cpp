@@ -1,5 +1,4 @@
 #include "LuaBindingRegisterDefinitions.h"
-#include "LuaAdapters.h"
 
 namespace RTE {
 
@@ -20,7 +19,9 @@ namespace RTE {
 		.def("PauseActivity", &ActivityMan::PauseActivity)
 		.def("EndActivity", &ActivityMan::EndActivity)
 		.def("ActivityRunning", &ActivityMan::ActivityRunning)
-		.def("ActivityPaused", &ActivityMan::ActivityPaused);
+		.def("ActivityPaused", &ActivityMan::ActivityPaused)
+		.def("SaveGame", &ActivityMan::SaveCurrentGame)
+		.def("LoadGame", &ActivityMan::LoadAndLaunchGame);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,10 +153,10 @@ namespace RTE {
 		.def("EnableParticleSettling", &MovableMan::EnableParticleSettling)
 		.def("IsMOSubtractionEnabled", &MovableMan::IsMOSubtractionEnabled)
 
-		.def("AddMO", &AddMO, luabind::adopt(_2))
-		.def("AddActor", &AddActor, luabind::adopt(_2))
-		.def("AddItem", &AddItem, luabind::adopt(_2))
-		.def("AddParticle", &AddParticle, luabind::adopt(_2));
+		.def("AddMO", &LuaAdaptersMovableMan::AddMO, luabind::adopt(_2))
+		.def("AddActor", &LuaAdaptersMovableMan::AddActor, luabind::adopt(_2))
+		.def("AddItem", &LuaAdaptersMovableMan::AddItem, luabind::adopt(_2))
+		.def("AddParticle", &LuaAdaptersMovableMan::AddParticle, luabind::adopt(_2));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +174,7 @@ namespace RTE {
 
 		.def_readwrite("Modules", &PresetMan::m_pDataModules, luabind::return_stl_iterator)
 
-		.def("LoadDataModule", (bool (PresetMan::*)(std::string))&PresetMan::LoadDataModule)
+		.def("LoadDataModule", (bool (PresetMan::*)(const std::string &))&PresetMan::LoadDataModule)
 		.def("GetDataModule", &PresetMan::GetDataModule)
 		.def("GetModuleID", &PresetMan::GetModuleID)
 		.def("GetModuleIDFromPath", &PresetMan::GetModuleIDFromPath)
@@ -188,8 +189,8 @@ namespace RTE {
 		.def("GetRandomOfGroupInModuleSpace", &PresetMan::GetRandomOfGroupInModuleSpace)
 		.def("GetEntityDataLocation", &PresetMan::GetEntityDataLocation)
 		.def("ReadReflectedPreset", &PresetMan::ReadReflectedPreset)
-		.def("ReloadEntityPreset", ReloadEntityPreset1)
-		.def("ReloadEntityPreset", ReloadEntityPreset2)
+		.def("ReloadEntityPreset", &LuaAdaptersPresetMan::ReloadEntityPreset1)
+		.def("ReloadEntityPreset", &LuaAdaptersPresetMan::ReloadEntityPreset2)
 		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts);
 	}
 
@@ -331,14 +332,14 @@ namespace RTE {
 
 		.property("TimeScale", &TimerMan::GetTimeScale, &TimerMan::SetTimeScale)
 		.property("RealToSimCap", &TimerMan::GetRealToSimCap, &TimerMan::SetRealToSimCap)
-		.property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
+		.property("DeltaTimeTicks", &LuaAdaptersTimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 		.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 		.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
 		.property("AIDeltaTimeSecs", &TimerMan::GetAIDeltaTimeSecs)
 		.property("AIDeltaTimeMS", &TimerMan::GetAIDeltaTimeMS)
 		.property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
 
-		.property("TicksPerSecond", &GetTicksPerSecond)
+		.property("TicksPerSecond", &LuaAdaptersTimerMan::GetTicksPerSecond)
 
 		.def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
 		.def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate);
@@ -391,8 +392,8 @@ namespace RTE {
 		.def("AnyPress", &UInputMan::AnyPress)
 		.def("AnyStartPress", &UInputMan::AnyStartPress)
 
-		.def("MouseButtonPressed", &MouseButtonPressed)
-		.def("MouseButtonReleased", &MouseButtonReleased)
-		.def("MouseButtonHeld", &MouseButtonHeld);
+		.def("MouseButtonPressed", &LuaAdaptersUInputMan::MouseButtonPressed)
+		.def("MouseButtonReleased", &LuaAdaptersUInputMan::MouseButtonReleased)
+		.def("MouseButtonHeld", &LuaAdaptersUInputMan::MouseButtonHeld);
 	}
 }

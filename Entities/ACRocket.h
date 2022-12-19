@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "ACraft.h"
-#include "LimbPath.h"
 
 namespace RTE
 {

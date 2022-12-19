@@ -19,6 +19,8 @@
 #include "ConsoleMan.h"
 #include "AudioMan.h"
 #include "SettingsMan.h"
+#include "MetaMan.h"
+#include "NetworkClient.h"
 #include "AHuman.h"
 #include "ACrab.h"
 #include "ACraft.h"
@@ -204,6 +206,47 @@ int GAScripted::ReloadScripts() {
     return error;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool GAScripted::ActivityCanBeSaved() const {
+	if (const Scene *scene = g_SceneMan.GetScene(); (scene && scene->IsMetagameInternal()) || g_MetaMan.GameInProgress()) {
+		return false;
+	}
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return false;
+	}
+	//TODO this method is complicated and manually parsing lua like this sucks. It should be replaceable with a simple check if the function exists in Lua, but it wasn't working when I tried so I just copied this from SceneIsCompatible.
+	std::ifstream scriptInputFileStream(m_ScriptPath);
+	if (scriptInputFileStream.good()) {
+		std::string::size_type commentPos;
+		bool inBlockComment = false;
+		while (!scriptInputFileStream.eof()) {
+			char rawLine[512];
+			scriptInputFileStream.getline(rawLine, 512);
+			std::string currentLine(rawLine);
+
+			if (!inBlockComment) {
+				commentPos = currentLine.find("--[[", 0);
+				inBlockComment = commentPos != std::string::npos;
+			}
+			if (inBlockComment) {
+				commentPos = currentLine.find("]]", commentPos == std::string::npos ? 0 : commentPos);
+				inBlockComment = commentPos != std::string::npos;
+			}
+			if (!inBlockComment) {
+				commentPos = currentLine.find("--", 0);
+				std::string::size_type foundTextPos = currentLine.find("OnSave");
+				if (foundTextPos != std::string::npos && foundTextPos < commentPos) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible
@@ -259,7 +302,7 @@ void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
     GameActivity::HandleCraftEnteringOrbit(orbitedCraft);
 
     if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
-        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
+        g_LuaMan.RunScriptFunctionString(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
         for (const GlobalScript *globalScript : m_GlobalScriptsList) {
             if (globalScript->IsActive()) { globalScript->HandleCraftEnteringOrbit(orbitedCraft); }
         }
@@ -275,6 +318,8 @@ void GAScripted::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {
 //                  the activity.
 
 int GAScripted::Start() {
+	ActivityState initialActivityState = m_ActivityState;
+
     int error = GameActivity::Start();
     if (error < 0) {
         return error;
@@ -291,7 +336,7 @@ int GAScripted::Start() {
     }
 
     // Call the defined function, but only after first checking if it exists
-    if ((error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity(); end")) < 0) {
+    if ((error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity( " + (initialActivityState == ActivityState::NotStarted ? "true" : "false") + "); end")) < 0) {
         return error;
     }
 

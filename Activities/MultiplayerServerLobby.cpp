@@ -1024,7 +1024,7 @@ namespace RTE {
 		{
 			pScene = dynamic_cast<Scene *>(*pItr);
 			// Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-			if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+			if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
 				filteredScenes.push_back(pScene);
 		}
 

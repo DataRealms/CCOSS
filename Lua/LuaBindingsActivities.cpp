@@ -55,6 +55,10 @@ namespace RTE {
 		.def("SwitchToPrevActor", &Activity::SwitchToPrevActor)
 		.def("IsHumanTeam", &Activity::IsHumanTeam)
 		.def("ResetMessageTimer", &Activity::ResetMessageTimer)
+		.def("SaveString", &Activity::SaveString)
+		.def("LoadString", &Activity::LoadString)
+		.def("SaveNumber", &Activity::SaveNumber)
+		.def("LoadNumber", &Activity::LoadNumber)
 
 		.enum_("Players")[
 			luabind::value("PLAYER_NONE", Players::NoPlayer),

@@ -29,10 +29,15 @@
 #include "BunkerAssembly.h"
 #include "SLBackground.h"
 
+#include "AEmitter.h"
 #include "ADoor.h"
 #include "AHuman.h"
-#include "Arm.h"
-#include "HeldDevice.h"
+#include "ACrab.h"
+#include "Turret.h"
+#include "ACRocket.h"
+#include "ACDropShip.h"
+#include "HDFirearm.h"
+#include "Magazine.h"
 
 namespace RTE {
 
@@ -469,6 +474,7 @@ void Scene::Clear()
 	m_pPreviewBitmap = 0;
 	m_MetasceneParent.clear();
 	m_IsMetagameInternal = false;
+    m_IsSavedGameInternal = false;
 }
 
 /*
@@ -556,7 +562,7 @@ int Scene::Create(const Scene &reference)
         m_AreaList.push_back(*aItr);
 
     m_GlobalAcc = reference.m_GlobalAcc;
-	
+
 	// Deep copy of the bitmap
     if (reference.m_pPreviewBitmap)
     {
@@ -572,6 +578,7 @@ int Scene::Create(const Scene &reference)
 
 	m_MetasceneParent = reference.m_MetasceneParent;
 	m_IsMetagameInternal = reference.m_IsMetagameInternal;
+    m_IsSavedGameInternal = reference.m_IsSavedGameInternal;
     return 0;
 }
 
@@ -645,7 +652,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		// Lists of found brain deployment locations used to place brain
 		std::vector<Vector> brainLocations[Activity::MaxTeamCount];
 
-        
+
 		//for (list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr) // I'm using this to dump AI plans with ctrl+w
         for (list<SceneObject *>::iterator oItr = m_PlacedObjects[PLACEONLOAD].begin(); oItr != m_PlacedObjects[PLACEONLOAD].end(); ++oItr)
 		{
@@ -654,22 +661,18 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
             if (pMO)
             {
                 // PASSING OWNERSHIP INTO the Add* ones - we are clearing out this list!
-                if (pMO->IsActor())
-				{
-					// Skip playable actors if we're told to not place actors
-					if (!placeUnits)
-					{
-						if (dynamic_cast<ADoor *>(pMO))
-							g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
-						else
-						{
-							//Just delete the object
-							delete pMO;
-							pMO = 0;
-						}
+				if (Actor *actor = dynamic_cast<Actor *>(pMO)) {
+                    bool shouldPlace = placeUnits || dynamic_cast<ADoor *>(actor);
+
+                    // Because we don't save/load all data yet and do a bit of a hack with scene loading, we can potentially save a dead actor that still technically exists.
+                    // If we find one of these, just skip them!
+                    //shouldPlace = shouldPlace && dynamic_cast<Actor*>(pMO)->GetHealth() > 0.0F;
+
+					if (shouldPlace) {
+                        g_MovableMan.AddActor(dynamic_cast<Actor*>(pMO));
 					} else {
-						// Place units as usual if we're told to place units
-						g_MovableMan.AddActor(dynamic_cast<Actor *>(pMO));
+                        delete pMO;
+                        pMO = nullptr;
 					}
 				} else {
 					g_MovableMan.AddMO(pMO);
@@ -712,7 +715,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 						// Ignore brain hideouts, they are used only by metagame when applying build budget
 						if (pDep->GetPresetName() == "Brain Hideout")
 							toIgnore = true;
-						
+
 						if (!toIgnore)
 						{
 							// Ownership IS transferred here; pass it along into the MovableMan
@@ -815,7 +818,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					if (!pTO)
 						pTO = dynamic_cast<TerrainObject *>(*oItr);
 
-					// Add deployments placed by bunker assemblies, but not in metagame, 
+					// Add deployments placed by bunker assemblies, but not in metagame,
 					// as they are spawned and placed during ApplyBuildBudget
 					if (placeUnits && !g_MetaMan.GameInProgress())
 					{
@@ -926,7 +929,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		unsigned int numberOfBlocksToAllocate = 4000;
 
         for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
+            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
         }
         ResetPathFinding();
     }
@@ -940,8 +943,8 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ExpandAIPlanAssemblySchemes
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     
-//                  
+// Description:
+//
 
 int Scene::ExpandAIPlanAssemblySchemes()
 {
@@ -983,7 +986,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 				pBA->SetPlacedByPlayer(pBAS->GetPlacedByPlayer());
 
 				newAIPlan.push_back(pBA);
-				
+
 				std::vector<Deployment *>pDeployments = pBA->GetDeployments();
 				for (std::vector<Deployment *>::iterator itr = pDeployments.begin(); itr != pDeployments.end() ; ++itr)
 				{
@@ -1185,6 +1188,8 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_MetasceneParent;
     else if (propName == "MetagameInternal")
         reader >> m_IsMetagameInternal;
+     else if (propName == "ScriptSave")
+        reader >> m_IsSavedGameInternal;
     else if (propName == "OwnedByTeam")
         reader >> m_OwnedByTeam;
     else if (propName == "RoundIncome")
@@ -1316,225 +1321,85 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
     return 0;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves the complete state of this Scene with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int Scene::Save(Writer &writer) const
-{
+int Scene::Save(Writer &writer) const {
     Entity::Save(writer);
-    writer.NewProperty("LocationOnPlanet");
-    writer << m_Location;
-    writer.NewProperty("MetagamePlayable");
-    writer << m_MetagamePlayable;
+    writer.NewPropertyWithValue("LocationOnPlanet", m_Location);
+    writer.NewPropertyWithValue("MetagamePlayable", m_MetagamePlayable);
 	//Do not save preview if it's path is empty, for example in metagame
-	if (m_PreviewBitmapFile.GetDataPath().length() > 0 && m_MetasceneParent.length() == 0)
-	{
-		writer.NewProperty("PreviewBitmapFile");
-		writer << m_PreviewBitmapFile;
+	if (m_PreviewBitmapFile.GetDataPath().length() > 0 && m_MetasceneParent.length() == 0) {
+		writer.NewPropertyWithValue("PreviewBitmapFile", m_PreviewBitmapFile);
 	}
-	if (m_MetasceneParent.length() > 0)
-	{
-		writer.NewProperty("MetasceneParent");
-		writer << m_MetasceneParent;
+	if (m_MetasceneParent.length() > 0) {
+		writer.NewPropertyWithValue("MetasceneParent", m_MetasceneParent);
 	}
-    writer.NewProperty("MetagameInternal");
-    writer << m_IsMetagameInternal;
-    writer.NewProperty("Revealed");
-    writer << m_Revealed;
-    writer.NewProperty("OwnedByTeam");
-    writer << m_OwnedByTeam;
-    writer.NewProperty("RoundIncome");
-    writer << m_RoundIncome;
-    // Write out the brains and the minimal info needed to place them in the scene
-    char str[64];
-    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
-    {
-        if (m_ResidentBrains[player])
-        {
-            std::snprintf(str, sizeof(str), "P%dResidentBrain", player + 1);
-            writer.NewProperty(str);
-            writer.ObjectStart(m_ResidentBrains[player]->GetClassName());
-            writer.NewProperty("CopyOf");
-            writer << m_ResidentBrains[player]->GetModuleAndPresetName();
-            writer.NewProperty("Position");
-            writer << m_ResidentBrains[player]->GetPos();
-            writer.NewProperty("HFlipped");
-            writer << m_ResidentBrains[player]->IsHFlipped();
-            writer.NewProperty("Team");
-            writer << m_ResidentBrains[player]->GetTeam();
-			
-			//Write out brain's inventory if it is Actor
-			Actor *pActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
-            if (pActor)
-            {
-                const deque<MovableObject *> *pInventory = pActor->GetInventory();
-                for (deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
-                {
-                    writer.NewProperty("AddInventory");
-                    writer.ObjectStart((*iitr)->GetClassName());
+    writer.NewPropertyWithValue("MetagameInternal", m_IsMetagameInternal);
+    writer.NewPropertyWithValue("ScriptSave", m_IsSavedGameInternal);
+    writer.NewPropertyWithValue("Revealed", m_Revealed);
+    writer.NewPropertyWithValue("OwnedByTeam", m_OwnedByTeam);
+    writer.NewPropertyWithValue("RoundIncome", m_RoundIncome);
 
-                    writer.NewProperty("CopyOf");
-                    writer << (*iitr)->GetModuleAndPresetName();
-                    
-                    writer.ObjectEnd();
-                }
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		std::string playerNumberString = "P" + std::to_string(player + 1);
+		writer.NewPropertyWithValue(playerNumberString + "BuildBudget", m_BuildBudget[player]);
+		writer.NewPropertyWithValue(playerNumberString + "BuildBudgetRatio", m_BuildBudgetRatio[player]);
+		if (m_ResidentBrains[player]) {
+			writer.NewProperty(playerNumberString + "ResidentBrain");
+			SaveSceneObject(writer, m_ResidentBrains[player], false);
+		}
+	}
+	writer.NewPropertyWithValue("AutoDesigned", m_AutoDesigned);
+	writer.NewPropertyWithValue("TotalInvestment", m_TotalInvestment);
+	writer.NewPropertyWithValue("Terrain", m_pTerrain);
 
-                // Also put whatever was held in the hand into inventory
-                AHuman *pAHuman = dynamic_cast<AHuman *>(m_ResidentBrains[player]);
-                if (pAHuman && dynamic_cast<Arm *>(pAHuman->GetFGArm()) && dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice())
-                {
-                    writer.NewProperty("AddInventory");
-                    writer.ObjectStart(dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice()->GetClassName());
+	writer.NewProperty("P1BuildBudget");
+	writer << m_BuildBudget[Players::PlayerOne];
+	writer.NewProperty("P2BuildBudget");
+	writer << m_BuildBudget[Players::PlayerTwo];
+	writer.NewProperty("P3BuildBudget");
+	writer << m_BuildBudget[Players::PlayerThree];
+	writer.NewProperty("P4BuildBudget");
+	writer << m_BuildBudget[Players::PlayerFour];
+	writer.NewProperty("P1BuildBudgetRatio");
+	writer << m_BuildBudgetRatio[Players::PlayerOne];
+	writer.NewProperty("P2BuildBudgetRatio");
+	writer << m_BuildBudgetRatio[Players::PlayerTwo];
+	writer.NewProperty("P3BuildBudgetRatio");
+	writer << m_BuildBudgetRatio[Players::PlayerThree];
+	writer.NewProperty("P4BuildBudgetRatio");
+	writer << m_BuildBudgetRatio[Players::PlayerFour];
+	writer.NewProperty("AutoDesigned");
+	writer << m_AutoDesigned;
+	writer.NewProperty("TotalInvestment");
+	writer << m_TotalInvestment;
+	writer.NewProperty("Terrain");
+	writer << m_pTerrain;
 
-                    writer.NewProperty("CopyOf");
-                    writer << dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice()->GetModuleAndPresetName();
-
-                    writer.ObjectEnd();                            
-                }
-            }
-
-            writer.ObjectEnd();
-        }
-    }
-    writer.NewProperty("P1BuildBudget");
-    writer << m_BuildBudget[Players::PlayerOne];
-    writer.NewProperty("P2BuildBudget");
-    writer << m_BuildBudget[Players::PlayerTwo];
-    writer.NewProperty("P3BuildBudget");
-    writer << m_BuildBudget[Players::PlayerThree];
-    writer.NewProperty("P4BuildBudget");
-    writer << m_BuildBudget[Players::PlayerFour];
-    writer.NewProperty("P1BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Players::PlayerOne];
-    writer.NewProperty("P2BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Players::PlayerTwo];
-    writer.NewProperty("P3BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Players::PlayerThree];
-    writer.NewProperty("P4BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Players::PlayerFour];
-    writer.NewProperty("AutoDesigned");
-    writer << m_AutoDesigned;
-    writer.NewProperty("TotalInvestment");
-    writer << m_TotalInvestment;
-    writer.NewProperty("Terrain");
-    writer << m_pTerrain;
-
-    for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
-    {
-        for (list<SceneObject *>::const_iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
-        {
-            if (set == PLACEONLOAD)
-                writer.NewProperty("PlaceSceneObject");
-            else if (set == BLUEPRINT)
-                writer.NewProperty("BlueprintObject");
-            else if (set == AIPLAN)
-                writer.NewProperty("PlaceAIPlanObject");
-
-    //        writer << (*oItr);
-            writer.ObjectStart((*oItr)->GetClassName());
-
-            writer.NewProperty("CopyOf");
-            writer << (*oItr)->GetModuleAndPresetName();
-
-            writer.NewProperty("Position");
-            writer << (*oItr)->GetPos();
-
-            if ((*oItr)->GetPlacedByPlayer() != Players::NoPlayer)
-            {
-                writer.NewProperty("PlacedByPlayer");
-                writer << (*oItr)->GetPlacedByPlayer();
-            }
-
-			// Save deployment's and assemblies teams if we're saving default scene set
-			// because they can spawn actors and other deployments
-			if (set == PLACEONLOAD)
-			{
-				if (dynamic_cast<Deployment *>(*oItr) || dynamic_cast<BunkerAssembly *>(*oItr) || dynamic_cast<BunkerAssemblyScheme *>(*oItr))
-				{
-					writer.NewProperty("Team");
-					writer << (*oItr)->GetTeam();
-				}
+    for (int set = PlacedObjectSets::PLACEONLOAD; set < PlacedObjectSets::PLACEDSETSCOUNT; ++set) {
+		for (const SceneObject *placedObject : m_PlacedObjects[set]) {
+			if (placedObject->GetPresetName().empty() || placedObject->GetPresetName() == "None") {
+				// We have no info about what we're placing. This is probably because it's some particle that was kicked off the terrain
+				// In future, we'll save all the data (uncomment out //writer << placedObject;), and will be able to save/load that stuff
+				// But for now, until we have a more effective writer that can remove redundant properties, we just skip this
+				continue;
 			}
 
-            // Only write certain properties if they are applicable to the type of SceneObject being written
-            MOSRotating *pSpriteObj = dynamic_cast<MOSRotating *>(*oItr);
-            if (pSpriteObj)
-            {
-                writer.NewProperty("HFlipped");
-                writer << pSpriteObj->IsHFlipped();
-                Actor *pActor = dynamic_cast<Actor *>(pSpriteObj);
-                if (pActor)
-                {
-                    writer.NewProperty("Team");
-                    writer << pActor->GetTeam();
-                    // Rotation of doors is important
-                    ADoor *pDoor = dynamic_cast<ADoor *>(pActor);
-                    if (pDoor)
-                    {
-                        writer.NewProperty("Rotation");
-                        writer << pDoor->GetRotMatrix();
-                    }
-                    // Inventory is important to preserve too
-                    Actor *pActor = dynamic_cast<Actor *>(*oItr);
-                    if (pActor)
-                    {
-                        writer.NewProperty("Health");
-                        writer << pActor->GetHealth();
-                        writer.NewProperty("MaxHealth");
-                        writer << pActor->GetMaxHealth();
-						if (pActor->GetDeploymentID())
-						{
-							writer.NewProperty("DeploymentID");
-							writer << pActor->GetDeploymentID();
-						}
+			if (set == PlacedObjectSets::PLACEONLOAD) {
+				writer.NewProperty("PlaceSceneObject");
+			} else if (set == PlacedObjectSets::BLUEPRINT) {
+				writer.NewProperty("BlueprintObject");
+			} else if (set == PlacedObjectSets::AIPLAN) {
+				writer.NewProperty("PlaceAIPlanObject");
+			}
 
-                        const deque<MovableObject *> *pInventory = pActor->GetInventory();
-                        for (deque<MovableObject *>::const_iterator iitr = pInventory->begin(); iitr != pInventory->end(); ++iitr)
-                        {
-                            writer.NewProperty("AddInventory");
-                            writer.ObjectStart((*iitr)->GetClassName());
-
-                            writer.NewProperty("CopyOf");
-                            writer << (*iitr)->GetModuleAndPresetName();
-                            
-                            writer.ObjectEnd();
-                        }
-
-                        // Also put whatever was held in the hand into inventory
-                        AHuman *pAHuman = dynamic_cast<AHuman *>(*oItr);
-                        if (pAHuman && dynamic_cast<Arm *>(pAHuman->GetFGArm()) && dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice())
-                        {
-                            writer.NewProperty("AddInventory");
-                            writer.ObjectStart(dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice()->GetClassName());
-
-                            writer.NewProperty("CopyOf");
-                            writer << dynamic_cast<Arm *>(pAHuman->GetFGArm())->GetHeldDevice()->GetModuleAndPresetName();
-
-                            writer.ObjectEnd();                            
-                        }
-                    }
-                }
-            }
-            TerrainObject *pTObject = dynamic_cast<TerrainObject *>(*oItr);
-            if (pTObject && !pTObject->GetChildObjects().empty())
-            {
-                writer.NewProperty("Team");
-                writer << pTObject->GetTeam();
-            }
-            Deployment *pDeployment = dynamic_cast<Deployment *>(*oItr);
-            if (pDeployment && pDeployment->GetID())
-            {
-                writer.NewProperty("ID");
-                writer << pDeployment->GetID();
-				writer.NewProperty("HFlipped");
-				writer << pDeployment->IsHFlipped();
-            }
-            writer.ObjectEnd();
-        }
+			//writer << placedObject;
+			SaveSceneObject(writer, placedObject, false);
+		}
     }
 
     for (list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
@@ -1617,6 +1482,170 @@ int Scene::Save(Writer &writer) const
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const {
+	auto WriteHardcodedAttachableOrNone = [this, &writer](const std::string &propertyName, const Attachable *harcodedAttachable) {
+		if (harcodedAttachable) {
+			writer.NewProperty(propertyName);
+			SaveSceneObject(writer, harcodedAttachable, true);
+		} else {
+			writer.NewPropertyWithValue(propertyName, "None");
+		}
+	};
+
+	writer.ObjectStart(sceneObjectToSave->GetClassName());
+	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
+
+	if (!isChildAttachable) {
+		writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
+		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
+		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
+	}
+
+	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
+		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
+	}
+
+	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
+		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
+		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
+		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
+	}
+
+	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("HFlipped", moSpriteToSave->IsHFlipped());
+		writer.NewPropertyWithValue("Rotation", moSpriteToSave->GetRotMatrix());
+		writer.NewPropertyWithValue("AngularVel", moSpriteToSave->GetAngularVel());
+	}
+
+	if (const MOSRotating *mosRotatingToSave = dynamic_cast<const MOSRotating *>(sceneObjectToSave)) {
+		const std::list<Attachable *> &attachablesToSave = mosRotatingToSave->GetAttachableList();
+
+		// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
+		// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
+		if (!attachablesToSave.empty()) {
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
+		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
+		}
+
+		for (const Attachable *attachable : attachablesToSave) {
+			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
+				writer.NewProperty("Add" + attachable->GetClassName());
+				SaveSceneObject(writer, attachable, true);
+			}
+		}
+		for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
+			writer.NewProperty("SpecialBehaviour_AddWound");
+			SaveSceneObject(writer, wound, true);
+		}
+	}
+
+	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
+		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
+		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
+		writer.NewPropertyWithValue("JointStrength", attachableToSave->GetJointStrength());
+		writer.NewPropertyWithValue("JointStiffness", attachableToSave->GetJointStiffness());
+		writer.NewPropertyWithValue("JointOffset", attachableToSave->GetJointOffset());
+		writer.NewPropertyWithValue("InheritsHFlipped", attachableToSave->InheritsHFlipped());
+		writer.NewPropertyWithValue("InheritsRotAngle", attachableToSave->InheritsRotAngle());
+		writer.NewPropertyWithValue("InheritedRotAngleOffset", attachableToSave->GetInheritedRotAngleOffset());
+		writer.NewPropertyWithValue("InheritsFrame", attachableToSave->InheritsFrame());
+		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", attachableToSave->GetCollidesWithTerrainWhileAttached());
+
+		if (const AEmitter *aemitterToSave = dynamic_cast<const AEmitter *>(sceneObjectToSave)) {
+			writer.NewPropertyWithValue("EmissionEnabled", aemitterToSave->IsEmitting());
+			writer.NewPropertyWithValue("EmissionCount", aemitterToSave->GetEmitCount());
+			writer.NewPropertyWithValue("EmissionCountLimit", aemitterToSave->GetEmitCountLimit());
+			writer.NewPropertyWithValue("NegativeThrottleMultiplier", aemitterToSave->GetNegativeThrottleMultiplier());
+			writer.NewPropertyWithValue("PositiveThrottleMultiplier", aemitterToSave->GetPositiveThrottleMultiplier());
+			writer.NewPropertyWithValue("Throttle", aemitterToSave->GetThrottle());
+			writer.NewPropertyWithValue("BurstScale", aemitterToSave->GetBurstScale());
+			writer.NewPropertyWithValue("BurstDamage", aemitterToSave->GetBurstDamage());
+			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());
+			writer.NewPropertyWithValue("BurstSpacing", aemitterToSave->GetBurstSpacing());
+			writer.NewPropertyWithValue("BurstTriggered", aemitterToSave->IsSetToBurst());
+			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngle());
+			writer.NewPropertyWithValue("EmissionOffset", aemitterToSave->GetEmitOffset());
+			writer.NewPropertyWithValue("EmissionDamage", aemitterToSave->GetEmitDamage());
+			WriteHardcodedAttachableOrNone("Flash", aemitterToSave->GetFlash());
+		}
+
+		if (const Arm *armToSave = dynamic_cast<const Arm *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("HeldDevice", armToSave->GetHeldDevice());
+		}
+
+		if (const Leg *legToSave = dynamic_cast<const Leg *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("Foot", legToSave->GetFoot());
+		}
+
+		if (const Turret *turretToSave = dynamic_cast<const Turret *>(sceneObjectToSave)) {
+			for (const HeldDevice *heldDeviceToSave : turretToSave->GetMountedDevices()) {
+				WriteHardcodedAttachableOrNone("AddMountedDevice", heldDeviceToSave);
+			}
+		}
+
+		if (const HDFirearm *hdFirearmToSave = dynamic_cast<const HDFirearm *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("Magazine", hdFirearmToSave->GetMagazine());
+			WriteHardcodedAttachableOrNone("Flash", hdFirearmToSave->GetFlash());
+		}
+
+		if (const Magazine *magazineToSave = dynamic_cast<const Magazine *>(sceneObjectToSave)) {
+			writer.NewPropertyWithValue("RoundCount", magazineToSave->GetRoundCount());
+		}
+	}
+
+	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
+		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
+		if (actorToSave->GetDeploymentID()) {
+			writer.NewPropertyWithValue("DeploymentID", actorToSave->GetDeploymentID());
+		}
+
+		for (const MovableObject *inventoryItem : *actorToSave->GetInventory()) {
+			writer.NewProperty("AddInventory");
+			SaveSceneObject(writer, inventoryItem, true);
+		}
+
+		if (const ADoor *aDoorToSave = dynamic_cast<const ADoor *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("Door", aDoorToSave->GetDoor());
+		} else if (const AHuman *aHumanToSave = dynamic_cast<const AHuman *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("Head", aHumanToSave->GetHead());
+			WriteHardcodedAttachableOrNone("Jetpack", aHumanToSave->GetJetpack());
+			WriteHardcodedAttachableOrNone("FGArm", aHumanToSave->GetFGArm());
+			WriteHardcodedAttachableOrNone("BGArm", aHumanToSave->GetBGArm());
+			WriteHardcodedAttachableOrNone("FGLeg", aHumanToSave->GetFGLeg());
+			WriteHardcodedAttachableOrNone("BGLeg", aHumanToSave->GetBGLeg());
+		} else if (const ACrab *aCrabToSave = dynamic_cast<const ACrab *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("Turret", aCrabToSave->GetTurret());
+			WriteHardcodedAttachableOrNone("Jetpack", aCrabToSave->GetJetpack());
+			WriteHardcodedAttachableOrNone("LeftFGLeg", aCrabToSave->GetLeftFGLeg());
+			WriteHardcodedAttachableOrNone("LeftBGLeg", aCrabToSave->GetLeftBGLeg());
+			WriteHardcodedAttachableOrNone("RightFGLeg", aCrabToSave->GetRightFGLeg());
+			WriteHardcodedAttachableOrNone("RightBGLeg", aCrabToSave->GetRightBGLeg());
+		} else if (const ACRocket *acRocketToSave = dynamic_cast<const ACRocket *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("RightLeg", acRocketToSave->GetRightLeg());
+			WriteHardcodedAttachableOrNone("LeftLeg", acRocketToSave->GetLeftLeg());
+			WriteHardcodedAttachableOrNone("MainThruster", acRocketToSave->GetMainThruster());
+			WriteHardcodedAttachableOrNone("RightThruster", acRocketToSave->GetRightThruster());
+			WriteHardcodedAttachableOrNone("LeftThruster", acRocketToSave->GetLeftThruster());
+			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetURightThruster());
+			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetULeftThruster());
+		} else if (const ACDropShip *acDropShipToSave = dynamic_cast<const ACDropShip *>(sceneObjectToSave)) {
+			WriteHardcodedAttachableOrNone("RightThruster", acDropShipToSave->GetRightThruster());
+			WriteHardcodedAttachableOrNone("LeftThruster", acDropShipToSave->GetLeftThruster());
+			WriteHardcodedAttachableOrNone("UpRightThruster", acDropShipToSave->GetURightThruster());
+			WriteHardcodedAttachableOrNone("UpLeftThruster", acDropShipToSave->GetULeftThruster());
+			WriteHardcodedAttachableOrNone("RightHatchDoor", acDropShipToSave->GetRightHatch());
+			WriteHardcodedAttachableOrNone("LeftHatchDoor", acDropShipToSave->GetLeftHatch());
+		}
+	}
+	writer.ObjectEnd();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -1856,7 +1885,7 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
         putpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY, g_MaskColor);
         m_CleanedPixels[team].push_back(Vector(posX, posY));
         return true;
-    }    
+    }
 
     return false;
 }
@@ -2002,26 +2031,19 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
     return found;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveActorsAndDevices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
-//                  puts them into this' list of objects to place on next load.
-//                  Should be done AFTER RetrieveResidentBrains!
-
-int Scene::RetrieveActorsAndDevices(int onlyTeam, bool noBrains)
-{
+int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBrains) {
     int found = 0;
-    
-    // Suck out all the Actors from the MovableMan - TAKING OVER ownership
-    found += g_MovableMan.EjectAllActors(m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
-    // Suck out all the Items from the MovableMan - TAKING OVER ownership
-    found += g_MovableMan.EjectAllItems(m_PlacedObjects[PLACEONLOAD]);
+
+    found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD], onlyTeam, noBrains);
+    found += g_MovableMan.GetAllItems(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD]);
+    found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD]);
 
     return found;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddPlacedObject
@@ -2180,17 +2202,16 @@ void Scene::UpdatePlacedObjects(int whichSet)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all entries in a specific set of placed Objects.
 
-int Scene::ClearPlacedObjectSet(int whichSet)
+int Scene::ClearPlacedObjectSet(int whichSet, bool weHaveOwnership)
 {
-    int count = 0;
-    for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
-    {
-        delete *itr;
-        (*itr) = 0;
-        ++count;
+    if (weHaveOwnership) {
+        for (list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr) {
+            delete *itr;
+        }
     }
-    m_PlacedObjects[whichSet].clear();
 
+    int count = m_PlacedObjects[whichSet].size();
+    m_PlacedObjects[whichSet].clear();
     return count;
 }
 
@@ -2420,7 +2441,7 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
             for (list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
             {
                 // Skip objects on the first pass that aren't placed by this player
-                // Skip objects on the second pass that WERE placed by this player.. because we already counted them 
+                // Skip objects on the second pass that WERE placed by this player.. because we already counted them
                 if ((pass == 0 && (*bpItr)->GetPlacedByPlayer() != player) ||
                     (pass == 1 && (*bpItr)->GetPlacedByPlayer() == player))
                     continue;
@@ -2916,8 +2937,8 @@ void Scene::UpdatePathFinding()
     if (updated) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-            if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) { 
-                continue; 
+            if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) {
+                continue;
             }
 
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
@@ -2983,7 +3004,7 @@ int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool moveP
             }
         }
     }
-    
+
     return pathSize;
 }
 
@@ -3053,7 +3074,7 @@ void Scene::Update()
 	}
 
     // Only update the pathfinding on occasion, as it's a costly operation
-    if (m_PartialPathUpdateTimer.IsPastRealMS(10000)) 
+    if (m_PartialPathUpdateTimer.IsPastRealMS(10000))
     {
         UpdatePathFinding();
     }

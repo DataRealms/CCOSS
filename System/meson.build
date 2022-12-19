@@ -4,6 +4,7 @@ sources += files(
 'Atom.cpp',
 'ContentFile.cpp',
 'Controller.cpp',
+'GenericSavedData.cpp',
 'GraphicalPrimitive.cpp',
 'Writer.cpp',
 'Box.cpp',

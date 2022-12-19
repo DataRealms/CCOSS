@@ -143,7 +143,7 @@ int Arm::Save(Writer &writer) const
     writer << m_GripStrength;
     writer.NewProperty("ThrowStrength");
     writer << m_ThrowStrength;
-    writer.NewProperty("HandGroup");
+    writer.NewProperty("Hand");
     writer << m_HandFile;
     writer.NewProperty("MaxLength");
     writer << m_MaxLength;

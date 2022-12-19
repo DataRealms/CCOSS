@@ -410,6 +410,19 @@ ClassInfoGetters;
 	/// </summary>
 	void ApplyImpulses() override;
 
+	/// <summary>
+	/// Gets the list of Attachables on this MOSRotating.
+	/// </summary>
+	/// <returns>The list of Attachables on this MOSRotating.</returns>
+	const std::list<Attachable *> & GetAttachables() const { return m_Attachables; }
+
+	/// <summary>
+	/// Gets whether or not the given Attachable is a hardcoded Attachable (e.g. an Arm, Leg, Turret, etc.)
+	/// </summary>
+	/// <param name="attachableToCheck">The Attachable to check.</param>
+	/// <returns>Whether or not the Attachable is hardcoded.</returns>
+	bool AttachableIsHardcoded(const Attachable *attachableToCheck) const;
+
     /// <summary>
     /// Adds the passed in Attachable the list of Attachables and sets its parent to this MOSRotating.
     /// </summary>
@@ -647,7 +660,7 @@ ClassInfoGetters;
 	/// </summary>
 	/// <returns>Whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.</returns>
 	bool GetGibAtEndOfLifetime() const { return m_GibAtEndOfLifetime; }
-	
+
 	/// <summary>
 	/// Sets whether this MOSRotating should gib at the end of its lifetime instead of just being deleted.
 	/// </summary>
@@ -665,6 +678,18 @@ ClassInfoGetters;
     /// </summary>
     /// <param name="newGibBlastStrength">The new gib blast strength to use.</param>
     void SetGibBlastStrength(float newGibBlastStrength) { m_GibBlastStrength = newGibBlastStrength; }
+
+	/// <summary>
+	/// Gets a const reference to the list of Attachables on this MOSRotating.
+	/// </summary>
+	/// <returns>A const reference to the list of Attachables on this MOSRotating.</returns>
+	const std::list<Attachable *> & GetAttachableList() const { return m_Attachables; }
+
+	/// <summary>
+	/// Gets a const reference to the list of wounds on this MOSRotating.
+	/// </summary>
+	/// <returns>A const reference to the list of wounds on this MOSRotating.</returns>
+	const std::list<AEmitter *> & GetWoundList() const { return m_Wounds; }
 
     /// <summary>
     /// Gets the number of wounds attached to this MOSRotating.

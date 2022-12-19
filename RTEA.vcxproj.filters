@@ -549,6 +549,9 @@
     <ClInclude Include="System\SpatialPartitionGrid.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\GenericSavedData.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1061,6 +1064,9 @@
     </ClCompile>
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GenericSavedData.cpp">
+      <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\SpatialPartitionGrid.cpp">
       <Filter>System</Filter>

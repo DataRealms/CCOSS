@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
- 
+
 #include "Attachable.h"
 #include "Emission.h"
 
@@ -109,7 +109,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
+// Description:     Reset the timers of all emissions so they will start/stop at the
 //                  correct relative offsets from now.
 // Arguments:       None.
 // Return value:    None.
@@ -136,29 +136,17 @@ ClassInfoGetters;
 
     float EstimateImpulse(bool burst = false);
 
+	/// <summary>
+	/// Gets the rate at which all of the Emissions of this AEmitter, combined, emit their particles.
+	/// </summary>
+	/// <returns>The combined particles per minute of all Emissions in this AEmitter.</returns>
+	float GetTotalParticlesPerMinute() const;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetEmitRate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the rate at which this AEmitter emits its particles.
-// Arguments:       None.
-// Return value:    A float with the rate in #/min.
-
-    float GetEmitRate() const { return m_PPM; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBurstCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of particles that will be emitted in one shot upon
-//                  a triggered burst of this AEmitter.
-// Arguments:       None.
-// Return value:    The number of emitted particles a burst should have. 0 means burst
-//                  are disabled.
-
-    int GetBurstCount() const { return m_BurstSize; }
-*/
+	/// <summary>
+	/// Gets the number of particles that will be emitted by all the Emissions of this AEmitter combined, in one shot when a burst is triggered.
+	/// </summary>
+	/// <returns>The combined burst size of all Emissions in this AEmitter.</returns>
+	int GetTotalBurstSize() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBurstScale
@@ -180,6 +168,18 @@ ClassInfoGetters;
 
     float GetEmitAngle() const { return m_EmitAngle.GetRadAngle(); }
 
+	/// <summary>
+	/// Gets the offset of the emission point from this' sprite center, which gets rotated with this.
+	/// </summary>
+	/// <returns>The emission offset.</returns>
+	Vector GetEmitOffset() const { return m_EmissionOffset; }
+
+	/// <summary>
+	/// Sets the offset of the emission point from this' sprite center, which gets rotated with this.
+	/// </summary>
+	/// <param name="newOffset">The new emission offset.</param>
+	void SetEmitOffset(const Vector &newOffset) { m_EmissionOffset = newOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEmitVector
@@ -195,7 +195,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRecoilVector
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A vector in the opposite direction, including the rotation of the 
+// Description:     A vector in the opposite direction, including the rotation of the
 //                  emitter, that the emitted particles will be shot at.
 // Arguments:       None.
 // Return value:    A unit vector.
@@ -572,6 +572,13 @@ ClassInfoGetters;
 // Return value:    Returns true if this emitter deals damage.
 
 	bool IsDamaging() { return (m_EmitDamage > 0 || m_BurstDamage > 0) && m_EmitterDamageMultiplier > 0; }
+
+	/// <summary>
+	/// Gets the number of emissions emitted since emission was last enabled.
+	/// </summary>
+	/// <returns>The number of emissions emitted since emission was last enabled.</returns>
+	long GetEmitCount() const { return m_EmitCount; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetEmitCountLimit

@@ -146,6 +146,12 @@ ClassInfoGetters;
 
 	const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
+	/// <summary>
+	/// Gets whether or not this GAScripted can be saved. For this to be true, the GAScripted's Lua script must have an OnSave function, and the Scene must not be MetagameInternal.
+	/// </summary>
+	/// <returns>Whether or not this GAScripted can be saved.</returns>
+	bool ActivityCanBeSaved() const override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible
@@ -263,13 +269,11 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  InitAIs
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Goes through all Actor:s currently in the MovableMan and sets each
-//                  one not controlled by a player to be AI controlled and AIMode setting
-//                  based on team and CPU team.
+// Description:     Does nothing - we do this in script! Just overrides the base behaviour.
 // Arguments:       None.
 // Return value:    None.
 
-	void InitAIs() override;
+	void InitAIs() override {};
 
 
     // Member variables

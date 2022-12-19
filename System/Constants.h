@@ -16,6 +16,12 @@ namespace RTE {
 	static const version::Semver200_version c_GameVersion = version::Semver200_version(c_VersionString);
 #pragma endregion
 
+#pragma region Userdata Constants
+	static const std::string c_UserScenesModuleName = "UserScenes.rte"; //!< Module name where user created Scenes are saved.
+	static const std::string c_UserScriptedSavesModuleName = "UserSavedGames.rte"; //!< Module name where user scripted Activity saves are saved.
+	static const std::string c_UserConquestSavesModuleName = "UserSavesConquest.rte"; //!< Module name where user conquest saves are saved.
+#pragma endregion
+
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.

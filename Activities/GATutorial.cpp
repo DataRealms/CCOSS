@@ -260,7 +260,9 @@ int GATutorial::Start()
         if (team == m_CPUTeam && !m_pCPUBrain)
         {
 // TODO: Make special CPU brain actor which will only appear in CPU brain fights, and have to be placed in the scenes
-            if (!(m_pCPUBrain = g_MovableMan.GetUnassignedBrain(m_CPUTeam)))
+            m_pCPUBrain = g_MovableMan.GetUnassignedBrain(team);
+            m_pCPUBrain = m_pCPUBrain ? m_pCPUBrain : g_MovableMan.GetFirstBrainActor(team); // Try getting our assigned brain
+            if (!m_pCPUBrain)
             {
                 // Couldn't find an available brain in the scene, so make one and place it
                 m_pCPUBrain = dynamic_cast<Actor *>(g_PresetMan.GetEntityPreset("Actor", "Brain Case")->Clone());
@@ -312,7 +314,7 @@ int GATutorial::Start()
         SetBrainLZWidth(player, 0);
 
         // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-        if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+        if (!m_Brain[player])
         {
             g_ConsoleMan.PrintString("ERROR: Can't find brain for tutorial game mode!");
         }
@@ -320,11 +322,6 @@ int GATutorial::Start()
         else
         {
             m_TutorialPlayer = player;
-            SwitchToActor(m_Brain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_Brain[player]->GetPos();
-            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
-            // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
         if (m_ActivityState == ActivityState::Editing)

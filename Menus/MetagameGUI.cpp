@@ -2955,7 +2955,7 @@ void MetagameGUI::CompletedActivity()
             }
             // Suck up all the remaining Actors and Items left in the world and put them into the list to place next load
             // However, don't suck up actors of any non-winning team, and don't save the brains if we autoresolved, because that took care of placing the resident brains already
-            pAlteredScene->RetrieveActorsAndDevices(winningTeam, autoResolved);
+            pAlteredScene->RetrieveSceneObjects(true, winningTeam, autoResolved);
             // Save out the altered scene before clearing out its data from memory
             pAlteredScene->SaveData(METASAVEPATH + string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over

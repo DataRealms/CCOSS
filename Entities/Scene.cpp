@@ -652,7 +652,6 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		// Lists of found brain deployment locations used to place brain
 		std::vector<Vector> brainLocations[Activity::MaxTeamCount];
 
-        
 		//for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr) // I'm using this to dump AI plans with ctrl+w
         for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects[PLACEONLOAD].begin(); oItr != m_PlacedObjects[PLACEONLOAD].end(); ++oItr)
 		{

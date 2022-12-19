@@ -324,7 +324,7 @@ float AEmitter::EstimateImpulse(bool burst)
             if ((*eItr)->PushesEmitter())
             {
                 double emissions = (*eItr)->GetRate() * g_TimerMan.GetDeltaTimeSecs() / 60.0f;
-                if (burst)
+                if (burst) {
                     emissions *= (*eItr)->GetBurstSize();
                 
                 velMin = std::min((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());

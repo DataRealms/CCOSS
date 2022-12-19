@@ -1085,14 +1085,10 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
 //                  associated with them. This shuold only be used for testing, as it will
 //                  crash the app if validation fails.
 
-bool MovableMan::ValidateMOIDs()
-{
+bool MovableMan::ValidateMOIDs() {
 #ifdef DEBUG_BUILD
-    float test;
-    for (vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
-    {
-        if (*itr)
-            test = (*itr)->GetGoldValue();
+    for (const MovableObject *mo : m_MOIDIndex) {
+        RTEAssert(mo, "Null MO found!");
     }
 #endif
     return true;

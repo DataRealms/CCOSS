@@ -230,24 +230,42 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
     void SetDeactivationDelay(int delay) { m_DeactivationDelay = delay; };
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetReloadTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the reload time in ms.
-// Arguments:       None.
-// Return value:    An int in ms.
 
-    int GetReloadTime() const { return m_ReloadTime; };
+	/// <summary>
+	/// Gets how long this HDFirearm takes to reload. Used for HDFirearms.
+	/// </summary>
+	/// <returns>How long this HeldDevice takes to reload.</returns>
+	float GetReloadTime() const { return m_ReloadTmr.GetSimTimeLimitMS() <= 0 ? m_ReloadTime : m_ReloadTmr.GetSimTimeLimitMS(); };
 
+    /// <summary>
+    /// Sets how long this HDFirearm takes to reload.
+    /// </summary>
+    /// <param name="delay">How long this HDFirearm should take to reload.</param>
+    void SetReloadTime(int newReloadTime) { m_ReloadTime = newReloadTime; };
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetReloadTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the reload time in ms.
-// Arguments:       An int in ms.
-// Return value:    None.
+	/// <summary>
+	/// Gets whether or not this HDFirearm allows dual-reload, i.e. if it's one-handed and dual-wieldable, it can reload at the same time as another weapon that also allows dual-reload.
+	/// </summary>
+	/// <returns>Whether or not this HDFirearm allows dual-reload.</returns>
+	bool IsDualReloadable() const { return m_DualReloadable; }
 
-    void SetReloadTime(int delay) { m_ReloadTime = delay; };
+	/// <summary>
+	/// Sets whether or not this HDFirearm allows dual-reloading.
+	/// </summary>
+	/// <param name="newDualReloadable">The new value for whether or not this HDFirearm should allow dual-reloading.</param>
+	void SetDualReloadable(bool newDualReloadable) { m_DualReloadable = newDualReloadable; }
+
+	/// <summary>
+	/// Gets the multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.
+	/// </summary>
+	/// <returns>The multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</returns>
+	float GetOneHandedReloadTimeMultiplier() const { return m_OneHandedReloadTimeMultiplier; }
+
+	/// <summary>
+	/// Sets the multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.
+	/// </summary>
+	/// <param name="newDualReloadTimeMultiplier">The new multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</param>
+	void SetOneHandedReloadTimeMultiplier(float newOneHandedReloadTimeMultiplier) { m_OneHandedReloadTimeMultiplier = newOneHandedReloadTimeMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -567,7 +585,7 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// Gets this HDFirearm's reload progress as a scalar from 0 to 1.
 	/// </summary>
 	/// <returns>The reload progress as a scalar from 0 to 1.</returns>
-	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? std::min(static_cast<float>(m_ReloadTmr.GetElapsedSimTimeMS() / m_ReloadTime), 1.0F) : 1.0F; }
+	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? static_cast<float>(m_ReloadTmr.SimTimeLimitProgress()) : 1.0F; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RestDetection
@@ -618,10 +636,10 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Throws out the currently used Magazine, if any, and puts in a new one
 //                  after the reload delay is up.
-// Arguments:       None.
+// Arguments:       Whether or not this is being reloaded one-handed.
 // Return value:    None.
 
-	void Reload() override;
+	void Reload(bool isBeingReloadedOneHanded) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -852,6 +870,8 @@ protected:
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
 	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
+	float m_OneHandedReloadTimeMultiplier; //!< The multiplier for how long this weapon takes to reload when being used one-handed. Only relevant for one-handed weapons.
+	bool m_DualReloadable; //!< Whether or not this weapon can be dual-reloaded, i.e. both guns can reload at once instead of having to wait til the other dual-wielded gun isn't being reloaded. Only relevant for one-handed weapons.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

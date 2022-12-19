@@ -461,10 +461,10 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Throws out the currently used Magazine, if any, and puts in a new one
 //                  after the reload delay is up.
-// Arguments:       None.
+// Arguments:       Whether or not this is being reloaded one-handed.
 // Return value:    None.
 
-    virtual void Reload() {}
+    virtual void Reload(bool isBeingReloadedOneHanded = false) {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

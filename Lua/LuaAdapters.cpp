@@ -194,6 +194,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AEmitter, SoundContainer, SetBurstSound);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AEmitter, SoundContainer, SetEndSound);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ADoor, Attachable, SetDoor);
+	LuaPropertyOwnershipSafetyFakerFunctionDefinition(Arm, HeldDevice, SetHeldDevice);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(Leg, Attachable, SetFoot);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(Actor, PieMenu, SetPieMenu);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(Actor, SoundContainer, SetBodyHitSound);
@@ -253,6 +254,12 @@ namespace RTE {
 
 	void LuaAdaptersEntity::SetPresetName(Entity *luaSelfObject, const std::string &presetName) {
 		luaSelfObject->SetPresetName(presetName, true);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
+		luaSelfObject->ReloadFirearms(false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

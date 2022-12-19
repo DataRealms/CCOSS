@@ -135,6 +135,7 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -186,6 +187,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -234,6 +236,7 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -285,6 +288,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -339,6 +343,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -400,6 +405,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -455,6 +461,7 @@
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -514,6 +521,7 @@
       <ConformanceMode>true</ConformanceMode>
       <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>

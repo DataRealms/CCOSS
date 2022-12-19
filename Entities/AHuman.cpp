@@ -4093,9 +4093,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
     // Draw the AI paths
-    list<Vector>::iterator last = m_MovePath.begin();
+    std::list<Vector>::iterator last = m_MovePath.begin();
     Vector waypoint, lastPoint, lineVec;
-    for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
+    for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
     {
         lastPoint = (*last) - targetPos;
         waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
@@ -4108,7 +4108,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
     lastPoint = m_DigTunnelEndPos - targetPos;
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    // Raidus
+    // Radius
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
 #endif

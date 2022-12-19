@@ -34,8 +34,8 @@ namespace RTE
 
 #define DEFAULTGAMENAME "NewGame"
 #define AUTOSAVENAME "AutoSave"
-#define METASAVEPATH "Metagames.rte/"
-#define METASAVEMODULENAME "Metagames.rte"
+#define METASAVEPATH c_UserConquestSavesModuleName + "/"
+#define METASAVEMODULENAME c_UserConquestSavesModuleName
 
 class MetagameGUI;
 class MetaSave;

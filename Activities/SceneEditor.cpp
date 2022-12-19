@@ -206,6 +206,8 @@ int SceneEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + m_pLoadNameCombo->GetDropHeight()); // Make sure the dropdown can fit, no matter how tall it is.
     m_pLoadToNewButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadToNewButton"));
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
@@ -273,7 +275,7 @@ void SceneEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }
@@ -447,7 +449,7 @@ void SceneEditor::Update()
 
                     // Reset the rest of the editor GUI
                     m_pEditorGUI->Destroy();
-					if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
+					if (m_ModuleSpaceID == g_PresetMan.GetModuleID(c_UserScenesModuleName))
 	                    m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, -1);
 					else
 	                    m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
@@ -486,7 +488,7 @@ void SceneEditor::Update()
                         m_ModuleSpaceID = g_SceneMan.GetScene()->GetModuleID();
                         RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
-						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
+						if (m_ModuleSpaceID == g_PresetMan.GetModuleID(c_UserScenesModuleName))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, -1);
 						else
 							m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
@@ -646,7 +648,7 @@ void SceneEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int wh
 
 void SceneEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 {
-    EditorActivity::Draw(pTargetBitmap, targetPos);    
+    EditorActivity::Draw(pTargetBitmap, targetPos);
 }
 
 
@@ -661,7 +663,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
     // Set the name of the current scene in effect
     g_SceneMan.GetScene()->SetPresetName(saveAsName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
 		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
@@ -749,7 +751,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 void SceneEditor::UpdateNewDialog()
 {
     int scenesIndex = 0;
-	
+
 	// Only refill modules if empty
     if (m_pNewModuleCombo->GetCount() <= 0)
     {
@@ -757,11 +759,11 @@ void SceneEditor::UpdateNewDialog()
 		{
             m_pNewModuleCombo->AddItem(g_PresetMan.GetDataModule(module)->GetFileName());
 
-			if (g_PresetMan.GetDataModule(module)->GetFileName() == "Scenes.rte")
+			if (g_PresetMan.GetDataModule(module)->GetFileName() == c_UserScenesModuleName)
 				scenesIndex = m_pNewModuleCombo->GetCount() - 1;
 		}
 
-        // Select the "Scenes.rte" module
+        // Select the user scenes module
         m_pNewModuleCombo->SetSelectedIndex(scenesIndex);
     }
 
@@ -842,7 +844,7 @@ void SceneEditor::UpdateLoadDialog()
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-		if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+		if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 
@@ -860,7 +862,7 @@ void SceneEditor::UpdateSaveDialog()
 {
     m_pSaveNameBox->SetText((g_SceneMan.GetScene()->GetPresetName() == "None" || !m_HasEverBeenSaved) ? "New Scene" : g_SceneMan.GetScene()->GetPresetName());
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 		m_pSaveModuleLabel->SetText("Will save in " + g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/");
 	else
 		m_pSaveModuleLabel->SetText("Will save in " + g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes");
@@ -877,7 +879,7 @@ void SceneEditor::UpdateChangesDialog()
     if (m_HasEverBeenSaved)
     {
         dynamic_cast<GUILabel *>(m_pGUIController->GetControl("ChangesExpLabel"))->SetText("Do you want to save your changes to:");
-		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	        m_pChangesNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + g_SceneMan.GetScene()->GetPresetName());
 		else
 	        m_pChangesNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + g_SceneMan.GetScene()->GetPresetName());
@@ -897,7 +899,7 @@ void SceneEditor::UpdateChangesDialog()
 
 void SceneEditor::UpdateOverwriteDialog()
 {
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	    m_pOverwriteNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + g_SceneMan.GetScene()->GetPresetName());
 	else
 	    m_pOverwriteNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + g_SceneMan.GetScene()->GetPresetName());

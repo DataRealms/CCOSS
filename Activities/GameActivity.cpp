@@ -998,8 +998,11 @@ int GameActivity::Start()
         // Resetting the banner repeat counter
         m_BannerRepeats[player] = 0;
 
-        // Draw GO! game start notification
-        m_pBannerYellow[player]->ShowText("GO!", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetPlayerFrameBufferWidth(player), g_FrameMan.GetPlayerFrameBufferHeight(player)), 0.5, 1500, 500);
+        // Draw GO! game start notification, if it's a new game
+        if (m_ActivityState == ActivityState::NotStarted) {
+            m_pBannerYellow[player]->ShowText("GO!", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetPlayerFrameBufferWidth(player), g_FrameMan.GetPlayerFrameBufferHeight(player)), 0.5, 1500, 500);
+            g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
+        }
 
         m_ActorCursor[player].Reset();
         m_LandingZone[player].Reset();
@@ -1014,8 +1017,6 @@ int GameActivity::Start()
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
             m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
-
-        g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
     }
 
     // Set up the AI controllers for everyone

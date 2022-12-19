@@ -927,7 +927,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    A const pointer to the inventory deque of this. OWNERSHIP IS NOT TRANSFERRED!
 
-	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
+	const std::deque<MovableObject *> * GetInventory() const { return &m_Inventory; }
 
 	/// <summary>
 	/// Returns the maximum total mass this Actor can carry in its inventory.

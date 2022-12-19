@@ -209,6 +209,18 @@ public:
 
 	const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
 
+	/// <summary>
+	/// Gets whether objects are placed when the Scene is initially started. Used for saving/loading games.
+	/// </summary>
+	/// <returns>Whether objects are placed when the Scene is initially started.</returns>
+	bool GetPlaceObjectsOnLoad() const { return m_PlaceObjects; }
+
+	/// <summary>
+	/// Gets whether units are placed when the Scene is initially started. Used for saving/loading games.
+	/// </summary>
+	/// <returns>Whether units are placed when the Scene is initially started.</returns>
+	bool GetPlaceUnitsOnLoad() const { return m_PlaceUnits; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  LoadScene
@@ -468,8 +480,8 @@ public:
 // Return value:    A float describing the Oz/Kg ratio.
 
     float GetOzPerKg() const { return 35.27396; }
-        
-    
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetKgPerOz
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -549,7 +561,7 @@ public:
 // Arguments:       The center coordinates and a radius around it of the new area on the
 //                  MOID layer to clear upon the end of this sim update.
 // Return value:    None.
-  
+
     void RegisterMOIDDrawing(const Vector &center, float radius);
 
 
@@ -625,7 +637,7 @@ public:
 //                  hit, the terrain pixel will be knocked loose an turned into an MO.
 //                  The velocity of the the point hitting the terrain here.
 //                  A float reference screen will be set to the factor with screen to
-//                  multiply the collision velocity to get the resulting retardation 
+//                  multiply the collision velocity to get the resulting retardation
 //                  (negative acceleration) that occurs when a penetration happens.
 //                  The normalized probability ratio between 0.0 and 1.0 that determines
 //                  the chance of a penetration to remove a pixel from the scene and
@@ -653,7 +665,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RemoveOrphans
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the area of an orphaned region at specified coordinates. 
+// Description:     Returns the area of an orphaned region at specified coordinates.
 // Arguments:       Coordinates to check for region, whether the orphaned region should be converted into MOPixels and region removed.
 //					Area of orphaned object calculated during recursve function call to check if we're out of limits
 //					Size of the are to look for orphaned objects
@@ -667,7 +679,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RemoveOrphans
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the area of an orphaned region at specified coordinates. 
+// Description:     Returns the area of an orphaned region at specified coordinates.
 // Arguments:       Coordinates to check for region, whether the orphaned region should be converted into MOPixels and region removed.
 //					Coordinates of initial terrain penetration to check, which serves as a center of orphaned object detection.
 //					Area of orphaned object calculated during recursve function call to check if we're out of limits
@@ -808,7 +820,7 @@ public:
 //                  The vector to trace along.
 //                  A Vector that will be set to the position of where the sight ray was
 //                  terminated. If it reached the end, it will be set to the end of the ray.
-//                  The material strength limit where 
+//                  The material strength limit where
 //                  For every pixel checked along the line, how many to skip between them
 //                  for optimization reasons. 0 = every pixel is checked.
 //					Whether the ray should reveal or restore unseen layer
@@ -828,7 +840,7 @@ public:
 //                  The vector to trace along.
 //                  A Vector that will be set to the position of where the sight ray was
 //                  terminated. If it reached the end, it will be set to the end of the ray.
-//                  The material strength limit where 
+//                  The material strength limit where
 //                  For every pixel checked along the line, how many to skip between them
 //                  for optimization reasons. 0 = every pixel is checked.
 // Return value:    Whether any unseen pixels were revealed as a result of this seeing.
@@ -846,7 +858,7 @@ public:
 //                  The vector to trace along.
 //                  A Vector that will be set to the position of where the sight ray was
 //                  terminated. If it reached the end, it will be set to the end of the ray.
-//                  The material strength limit where 
+//                  The material strength limit where
 //                  For every pixel checked along the line, how many to skip between them
 //                  for optimization reasons. 0 = every pixel is checked.
 // Return value:    Whether any unseen pixels were revealed as a result of this seeing.
@@ -960,6 +972,19 @@ public:
     // We use two accessors instead of default parameters, for lua compat
     float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
     float CastMaxStrengthRay(const Vector &start, const Vector &end, int skip) { return CastMaxStrengthRay(start, end, skip, g_MaterialDoor); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          CastMaxStrengthRayMaterial
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Traces along a vector and returns the strongest of all encountered pixels' materials
+//                  This will take wrapping into account.
+// Arguments:       The starting position.
+//                  The ending position.
+//                  For every pixel checked along the line, how many to skip between them
+//                  for optimization reasons. 0 = every pixel is checked.
+//                  A material ID to ignore, IN ADDITION to Air.
+// Return value:    The strongest material encountered
+    const Material * CastMaxStrengthRayMaterial(const Vector &start, const Vector &end, int skip, unsigned char ignoreMaterial);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1127,7 +1152,7 @@ public:
 // Description:     Returns whether the integer coordinates passed in are within the
 //                  bounds of the current Scene, considering its wrapping.
 // Arguments:       Int coordinates.
-//                  A margin 
+//                  A margin
 // Return value:    Whether within bounds or not, considering wrapping.
 
     bool IsWithinBounds(const int pixelX, const int pixelY, const int margin = 0);
@@ -1382,8 +1407,8 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMaterialCopy
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a copy of passed material and stores it into internal vector 
-//					to make sure there's only one material owner		
+// Description:     Creates a copy of passed material and stores it into internal vector
+//					to make sure there's only one material owner
 // Arguments:       Material to add.
 // Return value:    Pointer to stored material.
 
@@ -1394,8 +1419,8 @@ public:
 // Method:          RegisterTerrainChange
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Registers terrain change event for the network server to be then sent to clients.
-// Arguments:       x,y - scene coordinates of change, w,h - size of the changed region, 
-//					color - changed color for one-pixel events, 
+// Arguments:       x,y - scene coordinates of change, w,h - size of the changed region,
+//					color - changed color for one-pixel events,
 //					back - if true, then background bitmap was changed if false then foreground.
 // Return value:    None.
 
@@ -1491,7 +1516,7 @@ public:
     // Second pass is where structurally unsound areas of the Terrain are turned into
     // MovableObject:s.
     bool m_SecondStructPass;
-        
+
     // The Timer that keeps track of how much time there is left for
     // structural calculations each frame.
     Timer m_CalcTimer;
@@ -1518,7 +1543,7 @@ private:
 // Return value:    None.
 
     void Clear();
-    
+
     // Disallow the use of some implicit methods.
 	SceneMan(const SceneMan &reference) = delete;
 	SceneMan & operator=(const SceneMan &rhs) = delete;

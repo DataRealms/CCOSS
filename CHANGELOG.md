@@ -481,6 +481,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
+- Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
+
 </details>
 
 <details><summary><b>Removed</b></summary>
@@ -856,7 +858,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
+	In place of these functions, you can get all wounds with `GetWounds`, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.

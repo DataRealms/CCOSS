@@ -907,6 +907,8 @@ namespace RTE {
 		.def("GetGibWoundLimit", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetGibWoundLimit)
 		.def("GetWoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.def("GetWoundCount", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetWoundCount)
+		.def("GetWounds", &LuaAdaptersMOSRotating::GetWounds1)
+		.def("GetWounds", &LuaAdaptersMOSRotating::GetWounds2)
 		.def("AddWound", &MOSRotating::AddWound, luabind::adopt(_2))
 		.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove)) &MOSRotating::RemoveWounds)
 		.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove, bool positiveDamage, bool negativeDamage, bool noDamage)) &MOSRotating::RemoveWounds)

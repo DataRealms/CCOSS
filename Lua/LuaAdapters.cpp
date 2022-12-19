@@ -316,6 +316,46 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	const std::vector<AEmitter *> & LuaAdaptersMOSRotating::GetWounds1(const MOSRotating *luaSelfObject) {
+		return GetWounds2(luaSelfObject, true, false, false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<AEmitter *> & LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, 
+	                                                                  bool includePositiveDamageAttachables,
+	                                                                  bool includeNegativeDamageAttachables, 
+	                                                                  bool includeNoDamageAttachables) {
+		static std::vector<AEmitter *> wounds;
+		wounds.clear();
+
+		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+		return wounds;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMOSRotating::GetWoundsImpl(const MOSRotating *luaSelfObject, 
+	                                           bool includePositiveDamageAttachables, 
+	                                           bool includeNegativeDamageAttachables, 
+	                                           bool includeNoDamageAttachables,
+	                                           std::vector<AEmitter *> &wounds) {
+		wounds.insert(wounds.end(), luaSelfObject->GetWoundList().begin(), luaSelfObject->GetWoundList().end());
+		if (includePositiveDamageAttachables || includeNegativeDamageAttachables || includeNoDamageAttachables) {
+			for (const Attachable *attachable : luaSelfObject->GetAttachables()) {
+				bool attachableSatisfiesConditions = (includePositiveDamageAttachables && attachable->GetDamageMultiplier() > 0) ||
+				                                     (includeNegativeDamageAttachables && attachable->GetDamageMultiplier() < 0) ||
+				                                     (includeNoDamageAttachables && attachable->GetDamageMultiplier() == 0);
+
+				if (attachableSatisfiesConditions) {
+					GetWoundsImpl(attachable, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+				}
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	Attachable * LuaAdaptersAttachable::RemoveFromParent1(Attachable *luaSelfObject) {
 		if (luaSelfObject->IsAttached()) {
 			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);

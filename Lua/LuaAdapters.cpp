@@ -341,7 +341,7 @@ namespace RTE {
 				                                     (includeNoDamageAttachables && attachable->GetDamageMultiplier() == 0);
 
 				if (attachableSatisfiesConditions) {
-					GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+					GetWoundsImpl(attachable, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
 				}
 			}
 		}

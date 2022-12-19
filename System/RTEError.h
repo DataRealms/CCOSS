@@ -15,7 +15,7 @@
 #ifndef RELEASE_BUILD
 #define AbortAction DebuggerBreak
 #else
-#define AbortAction
+#define AbortAction std::exit(EXIT_FAILURE)
 #endif
 
 namespace RTE {

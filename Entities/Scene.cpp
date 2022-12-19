@@ -3081,7 +3081,7 @@ void Scene::Update()
 		}
 	}
 
-    // Occassionaly update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
+    // Occasionally update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
     if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {
         UpdatePathFinding();
     }

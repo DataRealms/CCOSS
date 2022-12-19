@@ -38,7 +38,7 @@ namespace RTE {
 		m_GridWidth = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
 		m_GridHeight = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
-		m_WrapsX = g_SceneMan.SceneWrapsX();
+		m_WrapsX = g_SceneMan.SceneWrapsX();;
 		m_WrapsY = g_SceneMan.SceneWrapsY();
 
 		// Create and assign scene coordinate positions for all nodes
@@ -61,7 +61,8 @@ namespace RTE {
 				}
 
 				// Add the newly created node to the column
-				m_NodeGrid.push_back(PathNode(nodePos));
+				// Note, we must emplace_back(), not push back, as we want this to be constructed in-place so the Up/Right/Down etc references are all correct
+				m_NodeGrid.emplace_back(nodePos);
 
 				// Move current position right for the next node in the row
 				nodePos.m_X += nodeDimension;
@@ -126,7 +127,7 @@ namespace RTE {
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve(static_cast<void *>(&m_NodeGrid[GetNodeIdForCoords(startNodeX, startNodeY)]), static_cast<void*>(&m_NodeGrid[GetNodeIdForCoords(endNodeX, endNodeY)]), &statePath, &totalCostResult);
+		int result = m_Pather->Solve(static_cast<void *>(GetNodeForCoords(startNodeX, startNodeY)), static_cast<void*>(GetNodeForCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
 
 		// We got something back
 		if (!statePath.empty()) {
@@ -280,8 +281,8 @@ namespace RTE {
 
 	float PathFinder::GetMaterialTransitionCost(const Material &material) const {
 		float strength = material.GetIntegrity();
-		// Always treat doors as diggable.
-		if (strength > m_DigStrength && material.GetIndex() != g_MaterialDoor) {
+		// Always treat doors as diggable
+		if (strength > m_DigStrength && material.GetIndex() != MaterialColorKeys::g_MaterialDoor) {
 			strength *= 1000.0F;
 		}
 		return strength;
@@ -445,7 +446,7 @@ namespace RTE {
 			return nullptr;
 		}
 
-		return &m_NodeGrid[(y * m_GridWidth) + x];
+		return &(m_NodeGrid[(y * m_GridWidth) + x]);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -134,12 +134,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSpreadMode">The new spread mode of this Gib. See the SpreadMode enumeration.</param>
 		void SetSpreadMode(SpreadMode newSpreadMode) { m_SpreadMode = (newSpreadMode < SpreadMode::SpreadRandom || newSpreadMode > SpreadMode::SpreadSpiral) ? SpreadMode::SpreadRandom : newSpreadMode; }
-    
-    	/// <summary>
-		/// Gets the amount of screenshake this gib will cause.
-		/// </summary>
-		/// <returns>The amount of screenshake this gib will cause. If -1, this is calculated automatically.</returns>
-		float GetScreenShakeAmount() const { return m_ScreenShakeAmount; }
 #pragma endregion
 
 	protected:
@@ -154,7 +148,6 @@ namespace RTE {
 		bool m_InheritsVel; //!< Whether this Gib should inherit the velocity of the exploding parent or not.
 		bool m_IgnoresTeamHits; //!< Whether this Gib should ignore hits with the team of the exploding parent or not.
 		SpreadMode m_SpreadMode; //!< Determines what kind of logic is used when applying velocity to the GibParticle objects.
-		float m_ScreenShakeAmount; //!< Determines how much screenshake this gib causes.
 
 	private:
 

@@ -474,7 +474,7 @@ void Scene::Clear()
 	m_pPreviewBitmap = 0;
 	m_MetasceneParent.clear();
 	m_IsMetagameInternal = false;
-    m_IsScriptSave = false;
+    m_IsSavedGameInternal = false;
 }
 
 /*
@@ -562,7 +562,7 @@ int Scene::Create(const Scene &reference)
         m_AreaList.push_back(*aItr);
 
     m_GlobalAcc = reference.m_GlobalAcc;
-	
+
 	// Deep copy of the bitmap
     if (reference.m_pPreviewBitmap)
     {
@@ -578,7 +578,7 @@ int Scene::Create(const Scene &reference)
 
 	m_MetasceneParent = reference.m_MetasceneParent;
 	m_IsMetagameInternal = reference.m_IsMetagameInternal;
-    m_IsScriptSave = reference.m_IsScriptSave;
+    m_IsSavedGameInternal = reference.m_IsSavedGameInternal;
     return 0;
 }
 
@@ -715,7 +715,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 						// Ignore brain hideouts, they are used only by metagame when applying build budget
 						if (pDep->GetPresetName() == "Brain Hideout")
 							toIgnore = true;
-						
+
 						if (!toIgnore)
 						{
 							// Ownership IS transferred here; pass it along into the MovableMan
@@ -818,7 +818,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					if (!pTO)
 						pTO = dynamic_cast<TerrainObject *>(*oItr);
 
-					// Add deployments placed by bunker assemblies, but not in metagame, 
+					// Add deployments placed by bunker assemblies, but not in metagame,
 					// as they are spawned and placed during ApplyBuildBudget
 					if (placeUnits && !g_MetaMan.GameInProgress())
 					{
@@ -928,10 +928,11 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
-		for (int i = 0; i < m_pPathFinders.size(); ++i) {
-			m_pPathFinders[i] = std::make_unique<PathFinder>(this, pathFinderGridNodeSize, numberOfBlocksToAllocate);
-		}
-	}
+        for (int i = 0; i < m_pPathFinders.size(); ++i) {
+            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+        }
+        ResetPathFinding();
+    }
 
     return 0;
 }
@@ -942,8 +943,8 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ExpandAIPlanAssemblySchemes
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     
-//                  
+// Description:
+//
 
 int Scene::ExpandAIPlanAssemblySchemes()
 {
@@ -985,7 +986,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 				pBA->SetPlacedByPlayer(pBAS->GetPlacedByPlayer());
 
 				newAIPlan.push_back(pBA);
-				
+
 				std::vector<Deployment *>pDeployments = pBA->GetDeployments();
 				for (std::vector<Deployment *>::iterator itr = pDeployments.begin(); itr != pDeployments.end() ; ++itr)
 				{
@@ -1188,7 +1189,7 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
     else if (propName == "MetagameInternal")
         reader >> m_IsMetagameInternal;
      else if (propName == "ScriptSave")
-        reader >> m_IsScriptSave;
+        reader >> m_IsSavedGameInternal;
     else if (propName == "OwnedByTeam")
         reader >> m_OwnedByTeam;
     else if (propName == "RoundIncome")
@@ -1338,7 +1339,7 @@ int Scene::Save(Writer &writer) const {
 		writer.NewPropertyWithValue("MetasceneParent", m_MetasceneParent);
 	}
     writer.NewPropertyWithValue("MetagameInternal", m_IsMetagameInternal);
-    writer.NewPropertyWithValue("ScriptSave", m_IsScriptSave);
+    writer.NewPropertyWithValue("ScriptSave", m_IsSavedGameInternal);
     writer.NewPropertyWithValue("Revealed", m_Revealed);
     writer.NewPropertyWithValue("OwnedByTeam", m_OwnedByTeam);
     writer.NewPropertyWithValue("RoundIncome", m_RoundIncome);
@@ -1379,7 +1380,7 @@ int Scene::Save(Writer &writer) const {
 	writer.NewProperty("Terrain");
 	writer << m_pTerrain;
 
-    for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set) {
+    for (int set = PlacedObjectSets::PLACEONLOAD; set < PlacedObjectSets::PLACEDSETSCOUNT; ++set) {
 		for (const SceneObject *placedObject : m_PlacedObjects[set]) {
 			if (placedObject->GetPresetName().empty() || placedObject->GetPresetName() == "None") {
 				// We have no info about what we're placing. This is probably because it's some particle that was kicked off the terrain
@@ -1388,14 +1389,14 @@ int Scene::Save(Writer &writer) const {
 				continue;
 			}
 
-			if (set == PLACEONLOAD) {
+			if (set == PlacedObjectSets::PLACEONLOAD) {
 				writer.NewProperty("PlaceSceneObject");
-			} else if (set == BLUEPRINT) {
+			} else if (set == PlacedObjectSets::BLUEPRINT) {
 				writer.NewProperty("BlueprintObject");
-			} else if (set == AIPLAN) {
+			} else if (set == PlacedObjectSets::AIPLAN) {
 				writer.NewProperty("PlaceAIPlanObject");
 			}
-			
+
 			//writer << placedObject;
 			SaveSceneObject(writer, placedObject, false);
 		}
@@ -1508,6 +1509,8 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
+		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
+		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
 	}
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
@@ -1522,14 +1525,14 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
 		// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
 		if (!attachablesToSave.empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachablesAndWounds", true);
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
 		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviourClearAllAttachablesAndWounds", true);
+			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
 		}
 
 		for (const Attachable *attachable : attachablesToSave) {
 			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
-				writer.NewProperty("AddAttachable");
+				writer.NewProperty("Add" + attachable->GetClassName());
 				SaveSceneObject(writer, attachable, true);
 			}
 		}
@@ -1556,11 +1559,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmissionEnabled", aemitterToSave->IsEmitting());
 			writer.NewPropertyWithValue("EmissionCount", aemitterToSave->GetEmitCount());
 			writer.NewPropertyWithValue("EmissionCountLimit", aemitterToSave->GetEmitCountLimit());
-			writer.NewPropertyWithValue("ParticlesPerMinute", aemitterToSave->GetParticlesPerMinute());
 			writer.NewPropertyWithValue("NegativeThrottleMultiplier", aemitterToSave->GetNegativeThrottleMultiplier());
 			writer.NewPropertyWithValue("PositiveThrottleMultiplier", aemitterToSave->GetPositiveThrottleMultiplier());
 			writer.NewPropertyWithValue("Throttle", aemitterToSave->GetThrottle());
-			writer.NewPropertyWithValue("BurstSize", aemitterToSave->GetBurstSize());
 			writer.NewPropertyWithValue("BurstScale", aemitterToSave->GetBurstScale());
 			writer.NewPropertyWithValue("BurstDamage", aemitterToSave->GetBurstDamage());
 			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());
@@ -1581,7 +1582,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		}
 
 		if (const Turret *turretToSave = dynamic_cast<const Turret *>(sceneObjectToSave)) {
-			for (HeldDevice *heldDeviceToSave : turretToSave->GetMountedDevices()) {
+			for (const HeldDevice *heldDeviceToSave : turretToSave->GetMountedDevices()) {
 				WriteHardcodedAttachableOrNone("AddMountedDevice", heldDeviceToSave);
 			}
 		}
@@ -1884,7 +1885,7 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
         putpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY, g_MaskColor);
         m_CleanedPixels[team].push_back(Vector(posX, posY));
         return true;
-    }    
+    }
 
     return false;
 }
@@ -2034,10 +2035,10 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 
 int Scene::RetrieveSceneObjects(bool transferOwnership, int onlyTeam, bool noBrains) {
     int found = 0;
-    
-    found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PLACEONLOAD], onlyTeam, noBrains);
-    found += g_MovableMan.GetAllItems(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
-    found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PLACEONLOAD]);
+
+    found += g_MovableMan.GetAllActors(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD], onlyTeam, noBrains);
+    found += g_MovableMan.GetAllItems(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD]);
+    found += g_MovableMan.GetAllParticles(transferOwnership, m_PlacedObjects[PlacedObjectSets::PLACEONLOAD]);
 
     return found;
 }
@@ -2440,7 +2441,7 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
             for (std::list<SceneObject *>::const_iterator bpItr = m_PlacedObjects[set].begin(); bpItr != m_PlacedObjects[set].end(); ++bpItr)
             {
                 // Skip objects on the first pass that aren't placed by this player
-                // Skip objects on the second pass that WERE placed by this player.. because we already counted them 
+                // Skip objects on the second pass that WERE placed by this player.. because we already counted them
                 if ((pass == 0 && (*bpItr)->GetPlacedByPlayer() != player) ||
                     (pass == 1 && (*bpItr)->GetPlacedByPlayer() == player))
                     continue;
@@ -2945,8 +2946,8 @@ void Scene::UpdatePathFinding()
     if (!updatedNodes.empty()) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-            if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) { 
-                continue; 
+            if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) {
+                continue;
             }
 
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
@@ -3011,7 +3012,7 @@ int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool moveP
             }
         }
     }
-    
+
     return pathSize;
 }
 
@@ -3080,7 +3081,7 @@ void Scene::Update()
 		}
 	}
 
-    // Ocassionaly update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
+    // Occassionaly update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
     if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {
         UpdatePathFinding();
     }

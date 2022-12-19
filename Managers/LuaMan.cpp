@@ -2,18 +2,9 @@
 #include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
 
-#include "Reader.h"
-#include "Writer.h"
-
-#include "ActivityMan.h"
-#include "GAScripted.h"
-#include "Scene.h"
-#include "SceneMan.h"
-
 namespace RTE {
 
 	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
-	const std::string LuaMan::c_SavedGameModuleName = "Saves.rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,13 +57,13 @@ namespace RTE {
 			luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
 				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
+				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
+				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
 				.def("FileOpen", &LuaMan::FileOpen)
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
-				.def("FileEOF", &LuaMan::FileEOF)
-				.def("SaveGame", &LuaMan::SaveCurrentGame)
-				.def("LoadGame", &LuaMan::LoadAndLaunchGame),
+				.def("FileEOF", &LuaMan::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
@@ -459,6 +450,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_directory()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::FileList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_regular_file()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
 		if (c_FileAccessModes.find(accessMode) == c_FileAccessModes.end()) {
 			g_ConsoleMan.PrintString("ERROR: Cannot open file, invalid file access mode specified.");
@@ -574,101 +587,6 @@ namespace RTE {
 		}
 		g_ConsoleMan.PrintString("ERROR: Tried to check EOF for an invalid or closed file.");
 		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int LuaMan::SaveCurrentGame(const std::string &fileName) {
-		Scene *scene = g_SceneMan.GetScene();
-		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
-
-		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
-			return 1;
-		}
-		
-		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			return 2;
-		}
-
-		// Save the scene bitmaps, or spit out an error if we can't.
-		if (scene->SaveData(c_SavedGameModuleName + "/" + fileName) < 0) {
-			return 4;
-		}
-
-		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
-		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));
-
-		// Delete any existing objects from our scene - we don't want to replace broken doors or repair any stuff when we load.
-		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
-
-		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
-		modifiableScene->RetrieveSceneObjects(false);
-
-		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
-		modifiableScene->SetPresetName(fileName);
-		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_SavedGameModuleName));
-		modifiableScene->SetScriptSave(true);
-
-		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_SavedGameModuleName + "/" + fileName + ".ini"));
-		writer->NewPropertyWithValue("Activity", activity);
-		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
-		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjects());
-		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnits());
-		writer->NewPropertyWithValue("Scene", modifiableScene.get());
-
-		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
-			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
-			writerToSave->EndWrite();
-		};
-
-		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
-		std::thread saveThread(saveWriterData, std::move(writer));
-		saveThread.detach();
-
-		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
-		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool LuaMan::LoadAndLaunchGame(const std::string &fileName) {
-		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
-		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
-
- 		Reader reader(c_SavedGameModuleName + "/" + fileName + ".ini", true, nullptr, true);
-		if (!reader.ReaderOK()) {
-			return false;
-		}
-
-		std::string originalScenePresetName = fileName;
-		bool placeObjectsIfSceneIsRestarted = true;
-		bool placeUnitsIfSceneIsRestarted = true;
-		while (reader.NextProperty()) {
-			std::string propName = reader.ReadPropName();
-			if (propName == "Activity") {
-				reader >> activity.get();
-			} else if (propName == "OriginalScenePresetName") {
-				reader >> originalScenePresetName;
-			} else if (propName == "PlaceObjectsIfSceneIsRestarted") {
-				reader >> placeObjectsIfSceneIsRestarted;
-			} else if (propName == "PlaceUnitsIfSceneIsRestarted") {
-				reader >> placeUnitsIfSceneIsRestarted;
-			} else if (propName == "Scene") {
-				reader >> scene.get();
-			}
-    	}
-
-		// SetSceneToLoad() doesn't Clone(), but when the Activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally.
-		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
-		// For starting Activity, we need to directly clone the Activity we want to start.
-		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
-		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
-		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
-
-		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -275,7 +275,9 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
-		m_ActivityState = ActivityState::Running;
+		if (m_ActivityState != ActivityState::Editing) {
+			m_ActivityState = ActivityState::Running;
+		}
 		m_Paused = false;
 		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
@@ -765,7 +767,7 @@ void Activity::Clear() {
 		float nativeCostMult = 0.9F;
 		int orbitedCraftTeam = orbitedCraft->GetTeam();
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
-		
+
 		if (g_MetaMan.GameInProgress()) {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				if (GetTeamOfPlayer(static_cast<Players>(player)) == orbitedCraftTeam) {
@@ -861,74 +863,5 @@ void Activity::Clear() {
 			if (m_MessageTimer[player].IsPastSimMS(5000)) { g_FrameMan.ClearScreenText(ScreenOfPlayer(player)); }
 			if (m_IsActive[player]) { m_PlayerController[player].Update(); }
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "GenericSavedStrings") {
-			reader >> m_SavedStrings;
-		} else if (propName == "GenericSavedNumbers") {
-			reader >> m_SavedNumbers;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		writer.NewPropertyWithValue("GenericSavedStrings", m_SavedStrings);
-		writer.NewPropertyWithValue("GenericSavedNumbers", m_SavedNumbers);
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedStrings::ReadProperty(const std::string_view &propName, Reader &reader) {
-		std::string value;
-		reader >> value;
-		m_Data[std::string(propName)] = value; // until we get P0919R2
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedStrings::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		for (const auto &[key, value]: m_Data) {
-			if (!value.empty()) {
-				writer.NewPropertyWithValue(key, value);
-			}
-		}
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedNumbers::ReadProperty(const std::string_view &propName, Reader &reader) {
-		float value;
-		reader >> value;
-		m_Data[std::string(propName)] = value; // until we get P0919R2
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GenericSavedData::GenericSavedNumbers::Save(Writer &writer) const {
-		Entity::Save(writer);
-
-		for (const auto &[key, value] : m_Data) {
-			writer.NewPropertyWithValue(key, value);
-		}
-
-		return 0;
 	}
 }

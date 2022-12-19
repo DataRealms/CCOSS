@@ -49,7 +49,7 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
-		/// Gets whether or not the currently active Activity allows saving. 
+		/// Gets whether or not the currently active Activity allows saving.
 		/// </summary>
 		/// <returns>Whether or not the currently active Activity allows saving.</returns>
 		bool GetActivityAllowsSaving() const { return m_Activity && m_ActivityAllowsSaving; }
@@ -152,6 +152,22 @@ namespace RTE {
 		void SetEditorToLaunch(const std::string_view &editorName) { if (!editorName.empty()) { m_EditorToLaunch = editorName; m_LaunchIntoEditor = true; } }
 #pragma endregion
 
+#pragma region Saving and Loading
+		/// <summary>
+		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether the game was successfully saved.</returns>
+		bool SaveCurrentGame(const std::string &fileName) const;
+
+		/// <summary>
+		/// Loads a saved game, and launches its Scene and Activity.
+		/// </summary>
+		/// <param name="fileName">Path to the file.</param>
+		/// <returns>Whether or not the saved game was successfully loaded.</returns>
+		bool LoadAndLaunchGame(const std::string &fileName) const;
+#pragma endregion
+
 #pragma region Activity Start Handling
 		// TODO: Fix crappy naming. None of these actually start anything. Maybe "...ActivityToStart" instead of "...StartActivity".
 
@@ -246,7 +262,7 @@ namespace RTE {
 		void Update() const { if (m_Activity) { m_Activity->Update(); } }
 #pragma endregion
 
-	protected:
+	private:
 
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
@@ -266,8 +282,6 @@ namespace RTE {
 		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default Activity instead.
 		bool m_LaunchIntoEditor; //!< Whether to skip the intro and main menu and launch directly into the set editor Activity instead.
 		std::string_view m_EditorToLaunch; //!< The name of the editor Activity to launch directly into.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this ActivityMan, effectively resetting the members of this abstraction level only.

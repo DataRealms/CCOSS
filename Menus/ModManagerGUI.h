@@ -114,8 +114,6 @@ namespace RTE {
 		void ToggleScript();
 #pragma endregion
 
-		static constexpr int c_NumberOfModulesToIgnoreWhenPopulatingKnownMods = 3; //!< The number of modules to ignore when populating the list of mods. This hack lets us ignore Metagames.rte, Saves.rte and Scenes.rte even though they're not treated as official modules by PresetMan.
-
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
 
 		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.

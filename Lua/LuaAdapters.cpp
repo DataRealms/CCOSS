@@ -140,7 +140,7 @@ namespace RTE {
 	static const bool EntityToLuabindObjectCastMapAutoInserterForType##TYPE = []() { \
 		LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.try_emplace(std::string(#TYPE), &LuaAdaptersEntityCast::ToLuabindObject##TYPE); \
 		return true; \
-	}();
+	}()
 
 	LuaEntityCastFunctionsDefinitionsForType(Entity);
 	LuaEntityCastFunctionsDefinitionsForType(SoundContainer);

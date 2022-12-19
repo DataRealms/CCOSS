@@ -857,11 +857,9 @@ namespace RTE {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(SDLK_s)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-				g_ConsoleMan.PrintString("SYSTEM: Screen saved to ScreenDump.png");
 			// Ctrl+W to save a WorldDump
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldToPNG("WorldDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full level saved to WorldDump.png");
 			// Ctrl+M to cycle draw modes
 			} else if (KeyPressed(SDLK_m)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
@@ -873,6 +871,8 @@ namespace RTE {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
+			} else if (KeyPressed(KEY_F9)) {
+				g_ActivityMan.LoadAndLaunchGame("AutoSave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(KEY_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
@@ -889,7 +889,6 @@ namespace RTE {
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
-				g_ConsoleMan.PrintString("SYSTEM: Full level preview saved to ScenePreviewDump.png");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyPressed(KEY_P)) {
 					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
@@ -899,41 +898,18 @@ namespace RTE {
 			// PrntScren to save a single ScreenDump
 			if (KeyPressed(SDLK_PRINTSCREEN)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-				g_ConsoleMan.PrintString("SYSTEM: Screen saved to ScreenDump.png");
 			} else if (KeyPressed(SDLK_F1)) {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.ReloadAllScripts();
-				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded");
 			} else if (KeyPressed(SDLK_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
-				g_ConsoleMan.PrintString("SYSTEM: Console text saved to Console.dump.log");
 			} else if (KeyPressed(SDLK_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
-				g_ConsoleMan.PrintString("SYSTEM: Console input saved to Console.input.log");
 			} else if (KeyPressed(SDLK_F5)) {
-				switch (g_LuaMan.SaveCurrentGame("Quicksave")) {
-					case 0:
-						g_ConsoleMan.PrintString("SYSTEM: Game quick-saved");
-						break;
-					case 1:
-						g_ConsoleMan.PrintString("ERROR: Cannot quick-save when there's no game running, or the game is finished!");
-						break;
-					case 2:
-						g_ConsoleMan.PrintString("ERROR: This activity does not support quick-saving! Make sure it's a scripted activity, and that it has an OnSave function.");
-						break;
-					case 3:
-						g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while quick-saving!");
-						break;
-					default:
-						RTEAbort("An unexpected error occured while quick-saving!");
-				}
+				g_ActivityMan.SaveCurrentGame("QuickSave");
 			} else if (KeyPressed(SDLK_F9)) {
-				if (g_LuaMan.LoadAndLaunchGame("Quicksave")) {
-					g_ConsoleMan.PrintString("SYSTEM: Game quick-loaded");
-				} else {
-					g_ConsoleMan.PrintString("ERROR: Quick-loading failed! Make sure you have a saved game called Quicksave.");
-				}
+				g_ActivityMan.LoadAndLaunchGame("QuickSave");
 			} else if (KeyPressed(SDLK_F10)) {
 				g_ConsoleMan.ClearLog();
 			}

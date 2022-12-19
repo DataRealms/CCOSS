@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
- 
+
 #include "Attachable.h"
 #include "Emission.h"
 
@@ -109,7 +109,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
+// Description:     Reset the timers of all emissions so they will start/stop at the
 //                  correct relative offsets from now.
 // Arguments:       None.
 // Return value:    None.
@@ -140,13 +140,13 @@ ClassInfoGetters;
 	/// Gets the rate at which all of the Emissions of this AEmitter, combined, emit their particles.
 	/// </summary>
 	/// <returns>The combined particles per minute of all Emissions in this AEmitter.</returns>
-	float GetParticlesPerMinute() const { float totalPPM = 0; for (const Emission *emission : m_EmissionList) { totalPPM += emission->m_PPM; } return totalPPM; }
+	float GetTotalParticlesPerMinute() const;
 
 	/// <summary>
 	/// Gets the number of particles that will be emitted by all the Emissions of this AEmitter combined, in one shot when a burst is triggered.
 	/// </summary>
 	/// <returns>The combined burst size of all Emissions in this AEmitter.</returns>
-	int GetBurstSize() const { float totalBurstSize = 0; for (const Emission *emission : m_EmissionList) { totalBurstSize += emission->m_BurstSize; } return totalBurstSize; }
+	int GetTotalBurstSize() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBurstScale
@@ -174,6 +174,12 @@ ClassInfoGetters;
 	/// <returns>The emission offset.</returns>
 	Vector GetEmitOffset() const { return m_EmissionOffset; }
 
+	/// <summary>
+	/// Sets the offset of the emission point from this' sprite center, which gets rotated with this.
+	/// </summary>
+	/// <param name="newOffset">The new emission offset.</param>
+	void SetEmitOffset(const Vector &newOffset) { m_EmissionOffset = newOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEmitVector
@@ -189,7 +195,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRecoilVector
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A vector in the opposite direction, including the rotation of the 
+// Description:     A vector in the opposite direction, including the rotation of the
 //                  emitter, that the emitted particles will be shot at.
 // Arguments:       None.
 // Return value:    A unit vector.

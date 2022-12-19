@@ -84,20 +84,20 @@ namespace RTE {
 	class LuabindObjectWrapper;
 
 #pragma region Entity Lua Adapter Macros
-	/// <summary>
-	/// Convenience macro to generate preset clone-create adapter functions that will return the exact pre-cast types, so we don't have to do: myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
-	/// But can instead do: myNewActor = CreateActor("Soldier Light", "All");
-	/// Or even: myNewActor = CreateActor("Soldier Light");
-	/// Or for a randomly selected Preset within a group: myNewActor = RandomActor("Light Troops");
-	/// </summary>
-	#define LuaEntityCreateFunctionsDeclarationsForType(TYPE)								\
-		static TYPE * Create##TYPE(std::string preseName, std::string moduleName);			\
-		static TYPE * Create##TYPE(std::string preset);										\
-		static TYPE * Random##TYPE(std::string groupName, int moduleSpaceID);				\
-		static TYPE * Random##TYPE(std::string groupName, std::string dataModuleName);		\
-		static TYPE * Random##TYPE(std::string groupName)
-
 	struct LuaAdaptersEntityCreate {
+		/// <summary>
+		/// Convenience macro to generate preset clone-create adapter functions that will return the exact pre-cast types, so we don't have to do: myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
+		/// But can instead do: myNewActor = CreateActor("Soldier Light", "All");
+		/// Or even: myNewActor = CreateActor("Soldier Light");
+		/// Or for a randomly selected Preset within a group: myNewActor = RandomActor("Light Troops");
+		/// </summary>
+		#define LuaEntityCreateFunctionsDeclarationsForType(TYPE)								\
+			static TYPE * Create##TYPE(std::string preseName, std::string moduleName);			\
+			static TYPE * Create##TYPE(std::string preset);										\
+			static TYPE * Random##TYPE(std::string groupName, int moduleSpaceID);				\
+			static TYPE * Random##TYPE(std::string groupName, std::string dataModuleName);		\
+			static TYPE * Random##TYPE(std::string groupName)
+
 		LuaEntityCreateFunctionsDeclarationsForType(SoundContainer);
 		LuaEntityCreateFunctionsDeclarationsForType(Attachable);
 		LuaEntityCreateFunctionsDeclarationsForType(Arm);
@@ -127,13 +127,13 @@ namespace RTE {
 		LuaEntityCreateFunctionsDeclarationsForType(PieMenu);
 	};
 
-	/// <summary>
-	/// Convenience macro to generate a preset clone adapter function for a type.
-	/// </summary>
-	#define LuaEntityCloneFunctionDeclarationForType(TYPE) \
-		static TYPE * Clone##TYPE(const TYPE *thisEntity)
-
 	struct LuaAdaptersEntityClone {
+		/// <summary>
+		/// Convenience macro to generate a preset clone adapter function for a type.
+		/// </summary>
+		#define LuaEntityCloneFunctionDeclarationForType(TYPE) \
+			static TYPE * Clone##TYPE(const TYPE *thisEntity)
+
 		LuaEntityCloneFunctionDeclarationForType(Entity);
 		LuaEntityCloneFunctionDeclarationForType(SoundContainer);
 		LuaEntityCloneFunctionDeclarationForType(SceneObject);
@@ -167,16 +167,16 @@ namespace RTE {
 		LuaEntityCloneFunctionDeclarationForType(PieMenu);
 	};
 
-	/// <summary>
-	/// Convenience macro to generate type casting adapter functions for a type.
-	/// </summary>
-	#define LuaEntityCastFunctionsDeclarationsForType(TYPE)													\
-		static TYPE * To##TYPE(Entity *entity);																\
-		static const TYPE * ToConst##TYPE(const Entity *entity);											\
-		static bool Is##TYPE(Entity *entity);																\
-		static LuabindObjectWrapper * ToLuabindObject##TYPE(Entity *entity, lua_State *luaState)
-
 	struct LuaAdaptersEntityCast {
+		/// <summary>
+		/// Convenience macro to generate type casting adapter functions for a type.
+		/// </summary>
+		#define LuaEntityCastFunctionsDeclarationsForType(TYPE)													\
+			static TYPE * To##TYPE(Entity *entity);																\
+			static const TYPE * ToConst##TYPE(const Entity *entity);											\
+			static bool Is##TYPE(Entity *entity);																\
+			static LuabindObjectWrapper * ToLuabindObject##TYPE(Entity *entity, lua_State *luaState)
+
 		static std::unordered_map<std::string, std::function<LuabindObjectWrapper * (Entity *, lua_State *)>> s_EntityToLuabindObjectCastFunctions; //!< Map of preset names to casting methods for ensuring objects are downcast properly when passed into Lua.
 
 		LuaEntityCastFunctionsDeclarationsForType(Entity);
@@ -217,14 +217,14 @@ namespace RTE {
 		LuaEntityCastFunctionsDeclarationsForType(PieMenu);
 	};
 
-	/// <summary>
-	/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
-	/// This handling avoids that, and is a bit safer since there's no actual ownership transfer from Lua to C++.
-	/// </summary>
-	#define LuaPropertyOwnershipSafetyFakerFunctionDeclaration(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
-		static void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet);
-
 	struct LuaAdaptersPropertyOwnershipSafetyFaker {
+		/// <summary>
+		/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
+		/// This handling avoids that, and is a bit safer since there's no actual ownership transfer from Lua to C++.
+		/// </summary>
+		#define LuaPropertyOwnershipSafetyFakerFunctionDeclaration(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
+			static void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet)
+
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(MOSRotating, SoundContainer, SetGibSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Attachable, AEmitter, SetBreakWound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Attachable, AEmitter, SetParentBreakWound);

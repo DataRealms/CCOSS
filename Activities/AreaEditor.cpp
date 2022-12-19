@@ -610,7 +610,7 @@ bool AreaEditor::SaveScene(std::string saveAsName, bool forceOverwrite)
     // Set the name of the current scene in effect
     g_SceneMan.GetScene()->SetPresetName(saveAsName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
         std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
         std::string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
@@ -723,7 +723,7 @@ void AreaEditor::UpdateLoadDialog()
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsScriptSave() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 
@@ -740,7 +740,7 @@ void AreaEditor::UpdateLoadDialog()
 void AreaEditor::UpdateSaveDialog()
 {
     m_pSaveNameBox->SetText((g_SceneMan.GetScene()->GetPresetName() == "None" || !m_HasEverBeenSaved) ? "New Scene" : g_SceneMan.GetScene()->GetPresetName());
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 		m_pSaveModuleLabel->SetText("Will save in " + g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/");
 	else
 		m_pSaveModuleLabel->SetText("Will save in " + g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes");
@@ -757,7 +757,7 @@ void AreaEditor::UpdateChangesDialog()
     if (m_HasEverBeenSaved)
     {
         dynamic_cast<GUILabel *>(m_pGUIController->GetControl("ChangesExpLabel"))->SetText("Do you want to save your changes to:");
-		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 			m_pChangesNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + g_SceneMan.GetScene()->GetPresetName());
 		else
 			m_pChangesNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + g_SceneMan.GetScene()->GetPresetName());
@@ -777,7 +777,7 @@ void AreaEditor::UpdateChangesDialog()
 
 void AreaEditor::UpdateOverwriteDialog()
 {
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 		m_pOverwriteNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + g_SceneMan.GetScene()->GetPresetName());
 	else
 		m_pOverwriteNameLabel->SetText(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + g_SceneMan.GetScene()->GetPresetName());

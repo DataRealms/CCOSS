@@ -49,6 +49,7 @@
     <OutDir>..\Cortex-Command-Community-Project-Data\</OutDir>
     <GenerateManifest>true</GenerateManifest>
     <EmbedManifest>true</EmbedManifest>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -78,39 +79,55 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'" Label="Configuration">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Cortex Command.debug.full</TargetName>
+    <TargetName>Cortex Command.debug.full.x86</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'" Label="Configuration">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Cortex Command.debug.full.x64</TargetName>
+    <TargetName>Cortex Command.debug.full</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'" Label="Configuration">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Cortex Command.debug.minimal</TargetName>
+    <TargetName>Cortex Command.debug.minimal.x86</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'" Label="Configuration">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Cortex Command.debug.minimal.x64</TargetName>
+    <TargetName>Cortex Command.debug.minimal</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'" Label="Configuration">
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Cortex Command.debug.release</TargetName>
+    <TargetName>Cortex Command.debug.release.x86</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'" Label="Configuration">
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Cortex Command.debug.release.x64</TargetName>
+    <TargetName>Cortex Command.debug.release</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Cortex Command</TargetName>
+    <TargetName>Cortex Command x86</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'" Label="Configuration">
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Cortex Command x64</TargetName>
+    <TargetName>Cortex Command</TargetName>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
     <ClCompile>
@@ -135,6 +152,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -184,8 +203,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -234,6 +253,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -283,8 +304,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -339,6 +360,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -398,8 +421,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
-      <IncludeInUnityFile>true</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -455,6 +478,8 @@
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51.lib;luabind-release.lib;RakNet_Release_Win32.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -512,8 +537,8 @@
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
+      <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg.lib;loadpng.lib;liblz4_release_static.lib;lua51-64.lib;luabind-release.lib;RakNet_Release_x64.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -722,19 +747,6 @@
     <ClInclude Include="Menus\SceneEditorGUI.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Entities\Activity.cpp" />
-    <ClCompile Include="Entities\ADSensor.cpp" />
-    <ClCompile Include="Entities\Emission.cpp" />
-    <ClCompile Include="Entities\Gib.cpp" />
-    <ClCompile Include="Entities\MetaSave.cpp" />
-    <ClCompile Include="Entities\PEmitter.cpp" />
-    <ClCompile Include="Entities\Round.cpp" />
-    <ClCompile Include="Entities\SLBackground.cpp" />
-    <ClCompile Include="Entities\SoundSet.cpp" />
-    <ClCompile Include="Entities\TerrainFrosting.cpp" />
-    <ClCompile Include="GUI\GUIReader.cpp" />
-    <ClCompile Include="GUI\GUISound.cpp" />
-    <ClCompile Include="GUI\GUIWriter.cpp" />
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
@@ -879,6 +891,37 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Managers\LuaMan.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Entities\Activity.cpp" />
+    <ClCompile Include="Entities\ADSensor.cpp" />
+    <ClCompile Include="Entities\Emission.cpp" />
+    <ClCompile Include="Entities\Gib.cpp" />
+    <ClCompile Include="Entities\MetaSave.cpp" />
+    <ClCompile Include="Entities\PEmitter.cpp" />
+    <ClCompile Include="Entities\Round.cpp" />
+    <ClCompile Include="Entities\SLBackground.cpp" />
+    <ClCompile Include="Entities\SoundSet.cpp" />
+    <ClCompile Include="Entities\TerrainFrosting.cpp" />
+    <ClCompile Include="GUI\GUIReader.cpp" />
+    <ClCompile Include="GUI\GUISound.cpp" />
+    <ClCompile Include="GUI\GUIWriter.cpp" />
     <ClCompile Include="Managers\CameraMan.cpp" />
     <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
@@ -1034,25 +1077,7 @@
     <ClCompile Include="Managers\ActivityMan.cpp" />
     <ClCompile Include="Managers\AudioMan.cpp" />
     <ClCompile Include="Managers\ConsoleMan.cpp" />
-    <ClCompile Include="managers\FrameMan.cpp" />
-    <ClCompile Include="Managers\LuaMan.cpp">
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Managers\FrameMan.cpp" />
     <ClCompile Include="Managers\MetaMan.cpp" />
     <ClCompile Include="Managers\MovableMan.cpp" />
     <ClCompile Include="Managers\PresetMan.cpp" />

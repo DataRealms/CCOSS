@@ -91,7 +91,7 @@ ClassInfoGetters;
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int Create(string loadoutName, const Icon &icon, float spawnRadius);
+	int Create(std::string loadoutName, const Icon &icon, float spawnRadius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +363,7 @@ protected:
     static Entity::ClassInfo m_sClass;
 
     // Name of the Loadout that shuold be placed at this' location in the Scene.
-    string m_LoadoutName;
+	std::string m_LoadoutName;
     // The Icon that graphically represents this
     Icon m_Icon;
     // The radius around this deployment that gets checked if another actor/item of the same type and name already exists and will block re-spawning a new one by this

@@ -81,7 +81,7 @@ namespace RTE {
 	{
 		MOSParticle::Create(reference);
 
-		for (list<Emission>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr)
+		for (std::list<Emission>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr)
 			m_EmissionList.push_back(*itr);
 
 		m_EmissionSound = reference.m_EmissionSound;
@@ -140,7 +140,7 @@ namespace RTE {
 			float ppm;
 			reader >> ppm;
 			// Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_PPM = ppm / m_EmissionList.size();
 		}
 		else if (propName == "NegativeThrottleMultiplier")
@@ -156,7 +156,7 @@ namespace RTE {
 			int burstSize;
 			reader >> burstSize;
 			// Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_BurstSize = std::ceil((float)burstSize / (float)m_EmissionList.size());
 		}
 		else if (propName == "BurstScale")
@@ -194,7 +194,7 @@ namespace RTE {
 	{
 		MOSParticle::Save(writer);
 
-		for (list<Emission>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
+		for (std::list<Emission>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
 		{
 			writer.NewProperty("AddEmission");
 			writer << *itr;
@@ -275,7 +275,7 @@ namespace RTE {
 	void PEmitter::ResetEmissionTimers()
 	{
 		m_LastEmitTmr.Reset();
-		for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+		for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 			(*eItr).ResetEmissionTimers();
 	}
 
@@ -313,7 +313,7 @@ namespace RTE {
 			float velMin, velMax, velRange, spread;
 
 			// Go through all emissions and emit them according to their respective rates
-			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 			{
 				// Only check emissions that push the emitter
 				if (eItr->PushesEmitter())
@@ -322,10 +322,10 @@ namespace RTE {
 					if (burst)
 						emissions *= eItr->GetBurstSize();
 
-					velMin = min(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
-					velMax = max(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
+					velMin = std::min(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
+					velMax = std::max(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
 					velRange = (velMax - velMin) * 0.5;
-					spread = max(static_cast<float>(c_PI)-eItr->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
+					spread = std::max(static_cast<float>(c_PI)-eItr->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
 
 					// Add to accumulative recoil impulse generated, F = m * a.
 					impulse += (velMin + velRange) * spread * eItr->m_pEmission->GetMass() * emissions;
@@ -381,7 +381,7 @@ namespace RTE {
 				m_EmissionSound.Play(m_Pos);
 
 				// Reset the timers of all emissions so they will start/stop at the correct relative offsets from now
-				for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+				for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 					(*eItr).ResetEmissionTimers();
 			}
 			// Update the distance attenuation
@@ -413,7 +413,7 @@ namespace RTE {
 			MovableObject *pParticle = 0;
 			Vector parentVel, emitVel, pushImpulses;
 			// Go through all emissions and emit them according to their respective rates
-			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 			{
 				// Make sure the emissions only happen between the start time and end time
 				if (eItr->IsEmissionTime())

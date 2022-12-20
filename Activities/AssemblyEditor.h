@@ -219,7 +219,7 @@ protected:
 // Arguments:       New assembly name.
 // Return value:    Built BunkerAssembly
 
-    BunkerAssembly *BuildAssembly(string saveAsName);
+    BunkerAssembly *BuildAssembly(std::string saveAsName);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

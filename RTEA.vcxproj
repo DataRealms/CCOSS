@@ -136,6 +136,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -185,7 +186,6 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
@@ -236,6 +236,7 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
@@ -286,7 +287,6 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
       <IncludeInUnityFile>false</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
@@ -343,6 +343,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
@@ -403,8 +404,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
-      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
@@ -461,6 +461,7 @@
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
@@ -519,8 +520,7 @@
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <ConformanceMode>true</ConformanceMode>
-      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
-      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>

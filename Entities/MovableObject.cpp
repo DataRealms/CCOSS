@@ -802,7 +802,7 @@ void MovableObject::ApplyForces()
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
     // Apply the translational effects of all the forces accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
+    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
@@ -833,7 +833,7 @@ void MovableObject::ApplyImpulses()
 //    float totalImpulses.
 
     // Apply the translational effects of all the impulses accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
+    for (auto iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
         m_Vel += (*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F);
@@ -982,7 +982,7 @@ int MovableObject::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' and its childrens MOID status. Supposed to be done every frame.
 
-void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
+void MovableObject::UpdateMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
 {
     // Register the own MOID
     RegMOID(MOIDIndex, rootMOID, makeNewMOID);
@@ -1015,7 +1015,7 @@ void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 //                  itself and its children for this frame.
 //                  BITMAP of choice.
 
-void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+void MovableObject::RegMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
     if (!makeNewMOID && GetParent()) {
         m_MOID = GetParent()->GetID();
     } else {

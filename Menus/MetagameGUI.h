@@ -82,7 +82,7 @@ public:
         float m_FundsAmount;
         float m_FundsTarget;
         Vector m_PlanetPoint;
-        string m_SiteName;
+        std::string m_SiteName;
         // NOT owned here
         const Scene *m_pScene;
         int m_Color;
@@ -96,7 +96,7 @@ public:
                  float startMeterAt,
                  float meterAmount,
                  const Vector &planetPoint,
-                 string siteName,
+                 std::string siteName,
                  // Ownership NOT passed in
                  const Scene *pScene,
                  int color,
@@ -767,7 +767,7 @@ protected:
 //                  How high above the location to show the text, adjustment from a good default.
 // Return value:    None.
 
-    void UpdateSiteNameLabel(bool visible, string text = "", const Vector &location = Vector(), float height = 1.0);
+    void UpdateSiteNameLabel(bool visible, std::string text = "", const Vector &location = Vector(), float height = 1.0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

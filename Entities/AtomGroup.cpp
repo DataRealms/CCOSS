@@ -623,7 +623,7 @@ namespace RTE {
 					hitData.MomInertia[HITOR] = m_MomentOfInertia;
 					hitData.ImpulseFactor[HITOR] = 1.0F / static_cast<float>(atomsHitMOsCount);
 
-					for (const map<MOID, std::list<Atom *>>::value_type &MOAtomMapEntry : hitMOAtoms) {
+					for (auto &MOAtomMapEntry : hitMOAtoms) {
 						// The denominator that the MovableObject being hit should divide its mass with for each Atom of this AtomGroup that is colliding with it during this step.
 						hitData.ImpulseFactor[HITEE] = 1.0F / static_cast<float>(MOAtomMapEntry.second.size());
 
@@ -1027,7 +1027,7 @@ namespace RTE {
 								hitData.Body[HITEE]->CollideAtPoint(hitData);
 
 								// Save the impulse force resulting from the MO collision response calculation.
-								impulseForces.push_back(make_pair(hitData.ResImpulse[HITOR], atomOffset));
+								impulseForces.push_back(std::make_pair(hitData.ResImpulse[HITOR], atomOffset));
 							}
 						}
 					}

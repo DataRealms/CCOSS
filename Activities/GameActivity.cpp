@@ -67,6 +67,7 @@ void GameActivity::Clear()
         m_LandingZone[player].Reset();
         m_AIReturnCraft[player] = true;
 		m_StrategicModePieMenu.at(player) = nullptr;
+		m_LZCursorWidth[player] = 0;
         m_InventoryMenuGUI[player] = nullptr;
         m_pBuyGUI[player] = 0;
         m_pEditorGUI[player] = 0;
@@ -298,7 +299,7 @@ void GameActivity::Destroy(bool notInherited)
 
     for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
-        for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
             delete itr->pCraft;
         m_Deliveries[team].clear();
     }
@@ -457,7 +458,7 @@ void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Created an objective point for one of the teams to show until cleared.
 
-void GameActivity::AddObjectivePoint(string description, Vector objPos, int whichTeam, ObjectiveArrowDir arrowDir)
+void GameActivity::AddObjectivePoint(std::string description, Vector objPos, int whichTeam, ObjectiveArrowDir arrowDir)
 {
     m_Objectives.push_back(ObjectivePoint(description, objPos, whichTeam, arrowDir));
 }
@@ -507,7 +508,7 @@ int GameActivity::AddOverridePurchase(const SceneObject *pPurchase, int player)
 
 		// Calculate the total list cost for this player
 		int totalListCost = 0;
-		for (list<const SceneObject *>::iterator itr = m_PurchaseOverride[player].begin(); itr != m_PurchaseOverride[player].end(); ++itr)
+		for (std::list<const SceneObject *>::iterator itr = m_PurchaseOverride[player].begin(); itr != m_PurchaseOverride[player].end(); ++itr)
 			totalListCost += (*itr)->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
 
 		return totalListCost;
@@ -560,8 +561,8 @@ int GameActivity::SetOverridePurchaseList(const Loadout *pLoadout, int player)
     finalListCost = AddOverridePurchase(pCraftPreset, player);
 
     // Add the rest of the cargo list
-    list<const SceneObject *> *pCargoList = const_cast<Loadout *>(pLoadout)->GetCargoList();
-    for (list<const SceneObject *>::iterator itr = pCargoList->begin(); itr != pCargoList->end(); ++itr)
+    std::list<const SceneObject *> *pCargoList = const_cast<Loadout *>(pLoadout)->GetCargoList();
+    for (std::list<const SceneObject *>::iterator itr = pCargoList->begin(); itr != pCargoList->end(); ++itr)
         finalListCost = AddOverridePurchase(*itr, player);
 
     return finalListCost;
@@ -574,7 +575,7 @@ int GameActivity::SetOverridePurchaseList(const Loadout *pLoadout, int player)
 // Description:     First clears and then adds all the stuff in a Loadout to the override
 //                  purchase list.
 
-int GameActivity::SetOverridePurchaseList(string loadoutName, int player)
+int GameActivity::SetOverridePurchaseList(std::string loadoutName, int player)
 {
     // Find out the native module of this player
     int nativeModule = 0;
@@ -607,14 +608,14 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 
     // Prepare the Craft, stuff everything into it and add it to the queue
     // Retrieve the ordered craft and its inventory
-    list<const SceneObject *> purchaseList;
+    std::list<const SceneObject *> purchaseList;
 
     ACraft *pDeliveryCraft = 0;
     // If we have a list to purchase that overrides the buy GUI, then use it and clear it
     if (!m_PurchaseOverride[player].empty())
     {
         const ACraft *pCraftPreset = 0;
-        for (list<const SceneObject *>::iterator itr = m_PurchaseOverride[player].begin(); itr != m_PurchaseOverride[player].end(); ++itr)
+        for (std::list<const SceneObject *>::iterator itr = m_PurchaseOverride[player].begin(); itr != m_PurchaseOverride[player].end(); ++itr)
         {
             // Find the first craft to use as the delivery craft
             pCraftPreset = dynamic_cast<const ACraft *>(*itr);
@@ -671,9 +672,9 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         MovableObject *pInventoryObject = 0;
 		Actor *pPassenger = 0;
 		Actor *pLastPassenger = 0;
-        list<MovableObject *> cargoItems;
+        std::list<MovableObject *> cargoItems;
 
-        for (list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
+        for (std::list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
         {
 			bool purchaseItem = true;
 
@@ -706,12 +707,12 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 					if (dynamic_cast<AHuman *>(pPassenger)) {
 						// If this is the first passenger, then give him all the shit found in the list before him
 						if (!pLastPassenger) {
-							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+							for (std::list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
 								pPassenger->AddInventoryItem(*iItr);
 						}
 						// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
 						else {
-							for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+							for (std::list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
 								pLastPassenger->AddInventoryItem(*iItr);
 						}
 
@@ -754,13 +755,13 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         // If there was a last passenger and things after him, stuff all the items into his inventory
         if (pLastPassenger)
         {
-            for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+            for (std::list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                 pLastPassenger->AddInventoryItem(*iItr);
         }
         // Otherwise, stuff it all stuff directly into the craft instead
         else
         {
-            for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+            for (std::list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                 pDeliveryCraft->AddInventoryItem(*iItr);
         }
 
@@ -867,7 +868,7 @@ int GameActivity::Start()
         m_Deliveries[team].clear();
 
         // Clear delivery queues
-        for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
             delete itr->pCraft;
         m_Deliveries[team].clear();
 /* This is taken care of by the individual Activity logic
@@ -995,8 +996,11 @@ int GameActivity::Start()
         // Resetting the banner repeat counter
         m_BannerRepeats[player] = 0;
 
-        // Draw GO! game start notification
-        m_pBannerYellow[player]->ShowText("GO!", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetPlayerFrameBufferWidth(player), g_FrameMan.GetPlayerFrameBufferHeight(player)), 0.5, 1500, 500);
+        // Draw GO! game start notification, if it's a new game
+        if (m_ActivityState == ActivityState::NotStarted) {
+            m_pBannerYellow[player]->ShowText("GO!", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetPlayerFrameBufferWidth(player), g_FrameMan.GetPlayerFrameBufferHeight(player)), 0.5, 1500, 500);
+            g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
+        }
 
         m_ActorCursor[player].Reset();
         m_LandingZone[player].Reset();
@@ -1011,8 +1015,6 @@ int GameActivity::Start()
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
             m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
-
-        g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
     }
 
     // Set up the AI controllers for everyone
@@ -1099,7 +1101,7 @@ void GameActivity::End()
     {
         if (!m_TeamActive[team])
             continue;
-        for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
             delete itr->pCraft;
         m_Deliveries[team].clear();
     }
@@ -1544,8 +1546,13 @@ void GameActivity::Update()
             Actor *pTargetActor = 0;
 			Vector distance;
 			if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]); pTargetActor && pTargetActor->GetPieMenu()) {
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
 				pTargetActor->GetPieMenu()->FreezeAtRadius(15);
 				m_pLastMarkedActor[player] = pTargetActor;
+			} else if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+				m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
 			}
 
             // Set the view to the cursor pos
@@ -1570,6 +1577,9 @@ void GameActivity::Update()
                 m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
             }
             // Player set a new waypoint
             else if (m_ControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1583,6 +1593,9 @@ void GameActivity::Update()
                     m_ControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
                 // Update the player's move path now to the first waypoint set
                 m_ControlledActor[player]->UpdateMovePath();
+				if (m_pLastMarkedActor[player] && m_pLastMarkedActor[player]->GetPieMenu()) {
+					m_pLastMarkedActor[player]->GetPieMenu()->SetAnimationModeToNormal();
+				}
             }
         }
         else if (m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -1927,6 +1940,7 @@ void GameActivity::Update()
         // Start LZ picking mode if a purchase was made
         if (m_pBuyGUI[player]->PurchaseMade())
         {
+			m_LZCursorWidth[player] = std::min(m_pBuyGUI[player]->GetDeliveryWidth(), g_FrameMan.GetPlayerScreenWidth() - 24);
             m_pBuyGUI[player]->SetEnabled(false);
 //            SwitchToPrevActor(player, team, m_Brain[player]);
             // Start selecting the landing zone
@@ -1956,7 +1970,7 @@ void GameActivity::Update()
         ///////////////////////////////////
         // Enable/disable controlled actors' AI as appropriate when in menus
 
-        if (m_ControlledActor[player])
+        if (m_ControlledActor[player] && m_ControlledActor[player]->GetController()->GetPlayerRaw() == player)
         {
             // Don't disable when pie menu is active; it is done inside the Controller Update
             if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe) {
@@ -2015,7 +2029,7 @@ void GameActivity::Update()
         // Pause deliveries if game hasn't started yet
         if (m_ActivityState == ActivityState::PreGame)
         {
-            for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+            for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
                 (*itr).timer.Reset();
         }
 
@@ -2125,7 +2139,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
         if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            int halfWidth = 36;
+			int halfWidth = std::max(m_LZCursorWidth[player]/2, 36);
             team = m_Team[player];
             if (team == Teams::NoTeam)
                 continue;
@@ -2161,7 +2175,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             continue;
         char str[64];
 		cursor = team;
-        for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
         {
             int halfWidth = 24;
             landZone = itr->landingZone - targetPos;
@@ -2208,7 +2222,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         return;
 
     // Get all possible wrapped boxes of the screen
-    list<Box> wrappedBoxes;
+    std::list<Box> wrappedBoxes;
     g_SceneMan.WrapBox(screenBox, wrappedBoxes);
     Vector wrappingOffset, objScenePos, onScreenEdgePos;
     float distance, shortestDist;
@@ -2223,7 +2237,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     float rightStackY = leftStackY;
 
     // Draw the objective points this player should care about
-    for (list<ObjectivePoint>::iterator itr = m_Objectives.begin(); itr != m_Objectives.end(); ++itr)
+    for (std::list<ObjectivePoint>::iterator itr = m_Objectives.begin(); itr != m_Objectives.end(); ++itr)
     {
         // Only draw objectives of the same team as the current player
         if (itr->m_Team == team)
@@ -2231,9 +2245,9 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             // Iterate through the wrapped screen boxes - will only be one if there's no wrapping
             // Try to the find one that contains the objective point
             bool withinAny = false;
-            list<Box>::iterator nearestBoxItr = wrappedBoxes.begin();
+            std::list<Box>::iterator nearestBoxItr = wrappedBoxes.begin();
             shortestDist = 1000000.0;
-            for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+            for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
             {
                 // See if we found the point to be within the screen or not
                 if (wItr->IsWithinBox((*itr).m_ScenePos))
@@ -2525,7 +2539,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
         if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            int halfWidth = 36;
+			int halfWidth = std::max(m_LZCursorWidth[player] / 2, 36);
             int team = m_Team[player];
             if (team == Teams::NoTeam)
                 continue;
@@ -2559,7 +2573,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
         if (!m_TeamActive[team])
             continue;
         char str[64];
-        for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
         {
             int halfWidth = 24;
             landZone = itr->landingZone - targetPos;

@@ -89,8 +89,8 @@ void OpenQueue::Push( PathNode* pNode )
 #endif
 	
 	// Add sorted. Lowest to highest cost path. Note that the sentinel has
-	// a value of FLT_MAX, so it should always be sorted in.
-	MPASSERT( pNode->totalCost < FLT_MAX );
+	// a value of std::numeric_limits<float>::max(), so it should always be sorted in.
+	MPASSERT( pNode->totalCost < std::numeric_limits<float>::max() );
 	PathNode* iter = sentinel->next;
 	while ( true )
 	{
@@ -615,7 +615,7 @@ void MicroPather::GetNodeNeighbors( PathNode* node, MP_VECTOR< NodeCost >* pNode
 			for( unsigned i=0; i<stateCostVecSize; ++i ) {
 				void* state = stateCostVecPtr[i].state;
 				pNodeCostPtr[i].cost = stateCostVecPtr[i].cost;
-				pNodeCostPtr[i].node = pathNodePool.GetPathNode( frame, state, FLT_MAX, FLT_MAX, 0 );
+				pNodeCostPtr[i].node = pathNodePool.GetPathNode( frame, state, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 0 );
 			}
 
 			// Can this be cached?
@@ -636,7 +636,7 @@ void MicroPather::GetNodeNeighbors( PathNode* node, MP_VECTOR< NodeCost >* pNode
 		for( int i=0; i<node->numAdjacent; ++i ) {
 			PathNode* pNode = pNodeCostPtr[i].node;
 			if ( pNode->frame != frame ) {
-				pNode->Init( frame, pNode->state, FLT_MAX, FLT_MAX, 0 );
+				pNode->Init( frame, pNode->state, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 0 );
 			}
 		}
 	}
@@ -738,7 +738,7 @@ void PathCache::AddNoSolution( void* end, void* states[], int count )
 	}
 
 	for( int i=0; i<count; ++i ) {
-		Item item = { states[i], end, 0, FLT_MAX };
+		Item item = { states[i], end, 0, std::numeric_limits<float>::max() };
 		AddItem( item );
 	}
 }
@@ -748,7 +748,7 @@ int PathCache::Solve( void* start, void* end, MP_VECTOR< void* >* path, float* t
 {
 	const Item* item = Find( start, end );
 	if ( item ) {
-		if ( item->cost == FLT_MAX ) {
+		if ( item->cost == std::numeric_limits<float>::max() ) {
 			++hit;
 			return MicroPather::NO_SOLUTION;
 		}
@@ -906,7 +906,7 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 			for( int i=0; i<node->numAdjacent; ++i )
 			{
 				// Not actually a neighbor, but useful. Filter out infinite cost.
-				if ( nodeCostVec[i].cost == FLT_MAX ) {
+				if ( nodeCostVec[i].cost == std::numeric_limits<float>::max() ) {
 					continue;
 				}
 				PathNode* child = nodeCostVec[i].node;
@@ -987,7 +987,7 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 
 	PathNode closedSentinel;
 	closedSentinel.Clear();
-	closedSentinel.Init( frame, 0, FLT_MAX, FLT_MAX, 0 );
+	closedSentinel.Init( frame, 0, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 0 );
 	closedSentinel.next = closedSentinel.prev = &closedSentinel;
 
 	PathNode* newPathNode = pathNodePool.GetPathNode( frame, startState, 0, 0, 0 );
@@ -1006,7 +1006,7 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 
 		for( int i=0; i<node->numAdjacent; ++i )
 		{
-			MPASSERT( node->costFromStart < FLT_MAX );
+			MPASSERT( node->costFromStart < std::numeric_limits<float>::max() );
 			float newCost = node->costFromStart + nodeCostVec[i].cost;
 
 			PathNode* inOpen   = nodeCostVec[i].node->inOpen ? nodeCostVec[i].node : 0;

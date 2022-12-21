@@ -214,14 +214,19 @@ namespace RTE {
 		PrintString("CTRL + W - Make a screenshot of the entire level");
 		PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		PrintString("CTRL + P - Show performance stats");
+		PrintString("ALT  + P - Show advanced performance stats (Only while performance stats are visible)");
 		PrintString("CTRL + R - Reset activity");
 		PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
 		PrintString("CTRL + O - Toggle one sim update per frame");
 		PrintString("----------------");
 		PrintString("F2 - Reload all Lua scripts");
+		PrintString("CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset");
 		PrintString("F3 - Save console log");
 		PrintString("F4 - Save console user input log");
-		PrintString("F5 - Clear console log ");
+		PrintString("F5 - Quick save");
+		PrintString("F9 - Load latest quick-save");
+		PrintString("CTRL + F9 - Load latest auto-save");
+		PrintString("F10 - Clear Console log");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

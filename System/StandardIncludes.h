@@ -80,18 +80,4 @@
 
 #include "glad/gl.h"
 
-// TODO: Get rid of these once alias qualifiers are added.
-using std::string;
-using std::list;
-using std::pair;
-using std::deque;
-using std::map;
-using std::set;
-using std::vector;
-using std::ios_base;
-using std::array;
-using std::make_pair;
-using std::min;
-using std::max;
-
 #endif

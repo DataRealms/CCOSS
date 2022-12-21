@@ -247,7 +247,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Symmetric scheme name.
 
-	string GetSymmetricSchemeName() const { return m_SymmetricScheme; }
+	std::string GetSymmetricSchemeName() const { return m_SymmetricScheme; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAssemblyGroup
@@ -256,7 +256,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Assembly group name.
 
-	string GetAssemblyGroup() const { return m_AssemblyGroup; }
+	std::string GetAssemblyGroup() const { return m_AssemblyGroup; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -307,9 +307,9 @@ protected:
 	// How many deployments should be selected during placement
 	int m_MaxDeployments;
 	// Scheme symmetric to this one
-	string m_SymmetricScheme;
+	std::string m_SymmetricScheme;
 	// To which group we should add assemblies linked to this scheme
-	string m_AssemblyGroup;
+	std::string m_AssemblyGroup;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

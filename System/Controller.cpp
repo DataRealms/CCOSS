@@ -1,6 +1,8 @@
 #include "Controller.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
+#include "SettingsMan.h"
+#include "MovableMan.h"
 #include "Actor.h"
 
 namespace RTE {
@@ -151,37 +153,63 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Update() {
+		if (IsDisabled()) {
+			return;
+		}
+
+		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+
+		switch (m_InputMode) {
+			case InputMode::CIM_PLAYER:
+				GetInputFromPlayer();
+				break;
+			case InputMode::CIM_AI:
+				GetInputFromAI();
+				break;
+			default:
+				ResetCommandState();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Controller::ResetCommandState() {
 		// Reset all command states.
 		m_ControlStates.fill(false);
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
 		m_MouseMovement.Reset();
+	}
 
-		// Update team indicator
-		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Player Input Mode
-		if (m_InputMode == InputMode::CIM_PLAYER) {
-			// Disable player input if the console is open but isn't in read-only mode, or the controller is disabled or has no player
-			if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Disabled || m_Player < 0) {
-				return;
-			}
-			// Update all the player input
-			UpdatePlayerInput();
+	void Controller::GetInputFromPlayer() {
+		ResetCommandState();
 
-		// AI Input Mode
-		} else if (m_InputMode == InputMode::CIM_AI) {
-			// Disabled won't get updates, or when the activity isn't going
-			if (m_Disabled || !g_ActivityMan.ActivityRunning()) {
-				return;
-			}
+		if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Player < 0) {
+			return;
+		}
 
-			// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
-			if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
-				// If we can't, fall back on the legacy C++ implementation
-				m_ControlledActor->UpdateAI();
-			}
+		UpdatePlayerInput();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Controller::GetInputFromAI() {
+		// Throttle the AI to only update every X sim updates.
+		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check their contiguous ID against the frame number.
+		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();
+		if (m_ControlledActor && g_MovableMan.GetContiguousActorID(m_ControlledActor) % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
+			// Don't reset our command state, so we give the same input as last frame.
+			return;
+		}
+
+		ResetCommandState();
+
+		// Try to run the scripted AI for the controlled Actor. If it doesn't work, fall back on the legacy C++ implementation.
+		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
+			m_ControlledActor->UpdateAI();
 		}
 	}
 
@@ -249,82 +277,81 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Controller::UpdatePlayerPieMenuInput() {
+	void Controller::UpdatePlayerPieMenuInput() {		
+		// Holding of the switch buttons disables aiming later
+		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_NEXT)) {
+			m_ControlStates[ControlState::ACTOR_NEXT_PREP] = true;
+			m_ReleaseTimer.Reset();
+		} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PREV)) {
+			m_ControlStates[ControlState::ACTOR_PREV_PREP] = true;
+			m_ReleaseTimer.Reset();
+		// No actions can be performed while switching actors, and short time thereafter
+		} else if (m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
+			m_ControlStates[ControlState::WEAPON_FIRE] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_FIRE);
+			m_ControlStates[ControlState::AIM_SHARP] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM);
+			m_ControlStates[ControlState::BODY_JUMPSTART] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_JUMP);
+			m_ControlStates[ControlState::BODY_JUMP] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_JUMP);
+			m_ControlStates[ControlState::BODY_CROUCH] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_CROUCH);
+
+			// MOVEMENT LEFT/RIGHT
+			if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_RIGHT)) {
+				m_ControlStates[ControlState::MOVE_RIGHT] = true;
+			} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_LEFT)) {
+				m_ControlStates[ControlState::MOVE_LEFT] = true;
+			} else {
+				m_ControlStates[ControlState::MOVE_IDLE] = true;
+			}
+
+			// AIM LEFT AND RIGHT DIGITALLY - not really used as aiming, so convert into movement input
+			if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_LEFT)) {
+				m_ControlStates[ControlState::MOVE_LEFT] = true;
+			} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_RIGHT)) {
+				m_ControlStates[ControlState::MOVE_RIGHT] = true;
+			}
+
+			// AIM AND MOVE UP AND DOWN
+			if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_UP) || g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_UP)) {
+				m_ControlStates[ControlState::MOVE_UP] = true;
+			} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_DOWN) || g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_DOWN)) {
+				m_ControlStates[ControlState::MOVE_DOWN] = true;
+			}
+
+			// AIM UP AND DOWN DIGITALLY
+			if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_UP)) {
+				m_ControlStates[ControlState::AIM_UP] = true;
+			} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_DOWN)) {
+				m_ControlStates[ControlState::AIM_DOWN] = true;
+			}
+
+			m_ControlStates[ControlState::PRESS_FACEBUTTON] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_FIRE) || g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_AIM);
+
+			if (!m_WeaponChangeNextIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_CHANGE_NEXT)) {
+				m_ControlStates[ControlState::WEAPON_CHANGE_NEXT] = true;
+				m_WeaponChangeNextIgnore = true;
+			}
+			if (!m_WeaponChangePrevIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_CHANGE_PREV)) {
+				m_ControlStates[ControlState::WEAPON_CHANGE_PREV] = true;
+				m_WeaponChangePrevIgnore = true;
+			}
+			if (!m_WeaponPickupIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_PICKUP)) {
+				m_ControlStates[ControlState::WEAPON_PICKUP] = true;
+				m_WeaponPickupIgnore = true;
+			}
+			if (!m_WeaponDropIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_DROP)) {
+				m_ControlStates[ControlState::WEAPON_DROP] = true;
+				m_WeaponDropIgnore = true;
+			}
+			if (!m_WeaponReloadIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_RELOAD)) {
+				m_ControlStates[ControlState::WEAPON_RELOAD] = true;
+				m_WeaponReloadIgnore = true;
+			}
+		}
+
 		// PIE MENU ACTIVE
 		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
 			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
-			m_ControlStates[ControlState::MOVE_IDLE] = true;
-			m_ReleaseTimer.Reset();
-		} else {
-			// Holding of the switch buttons disables aiming later
-			if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_NEXT)) {
-				m_ControlStates[ControlState::ACTOR_NEXT_PREP] = true;
-				m_ReleaseTimer.Reset();
-			} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PREV)) {
-				m_ControlStates[ControlState::ACTOR_PREV_PREP] = true;
-				m_ReleaseTimer.Reset();
-			// No actions can be performed while switching actors or pie menu, and short time thereafter
-			} else if (m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
-				m_ControlStates[ControlState::WEAPON_FIRE] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_FIRE);
-				m_ControlStates[ControlState::AIM_SHARP] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM);
-				m_ControlStates[ControlState::BODY_JUMPSTART] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_JUMP);
-				m_ControlStates[ControlState::BODY_JUMP] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_JUMP);
-				m_ControlStates[ControlState::BODY_CROUCH] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_CROUCH);
-
-				// MOVEMENT LEFT/RIGHT
-				if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_RIGHT)) {
-					m_ControlStates[ControlState::MOVE_RIGHT] = true;
-				} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_LEFT)) {
-					m_ControlStates[ControlState::MOVE_LEFT] = true;
-				} else {
-					m_ControlStates[ControlState::MOVE_IDLE] = true;
-				}
-
-				// AIM LEFT AND RIGHT DIGITALLY - not really used as aiming, so convert into movement input
-				if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_LEFT)) {
-					m_ControlStates[ControlState::MOVE_LEFT] = true;
-				} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_RIGHT)) {
-					m_ControlStates[ControlState::MOVE_RIGHT] = true;
-				}
-
-				// AIM AND MOVE UP AND DOWN
-				if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_UP) || g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_UP)) {
-					m_ControlStates[ControlState::MOVE_UP] = true;
-				} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_L_DOWN) || g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_DOWN)) {
-					m_ControlStates[ControlState::MOVE_DOWN] = true;
-				}
-
-				// AIM UP AND DOWN DIGITALLY
-				if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_UP)) {
-					m_ControlStates[ControlState::AIM_UP] = true;
-				} else if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_AIM_DOWN)) {
-					m_ControlStates[ControlState::AIM_DOWN] = true;
-				}
-
-				m_ControlStates[ControlState::PRESS_FACEBUTTON] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_FIRE) || g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_AIM);
-
-				if (!m_WeaponChangeNextIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_CHANGE_NEXT)) {
-					m_ControlStates[ControlState::WEAPON_CHANGE_NEXT] = true;
-					m_WeaponChangeNextIgnore = true;
-				}
-				if (!m_WeaponChangePrevIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_CHANGE_PREV)) {
-					m_ControlStates[ControlState::WEAPON_CHANGE_PREV] = true;
-					m_WeaponChangePrevIgnore = true;
-				}
-				if (!m_WeaponPickupIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_PICKUP)) {
-					m_ControlStates[ControlState::WEAPON_PICKUP] = true;
-					m_WeaponPickupIgnore = true;
-				}
-				if (!m_WeaponDropIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_DROP)) {
-					m_ControlStates[ControlState::WEAPON_DROP] = true;
-					m_WeaponDropIgnore = true;
-				}
-				if (!m_WeaponReloadIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_RELOAD)) {
-					m_ControlStates[ControlState::WEAPON_RELOAD] = true;
-					m_WeaponReloadIgnore = true;
-				}
-			}
-		}
+			m_ControlStates[ControlState::WEAPON_FIRE] = false; // Pie menu steals clicks, so we don't shoot our gun when we select a pie option
+		} 
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

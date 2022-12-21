@@ -108,6 +108,32 @@ namespace RTE {
 		static std::string GetPathFromHash(size_t hash) { return (s_PathHashes.find(hash) == s_PathHashes.end()) ? "" : s_PathHashes[hash]; }
 #pragma endregion
 
+#pragma region Image Info Getters
+		/// <summary>
+		/// Gets whether the data file at this ContentFile's path is a supported image format.
+		/// </summary>
+		/// <returns>Whether the data file at this ContentFile's path is a supported image format.</returns>
+		bool DataPathIsImageFile() const { return m_DataPathIsImageFile; }
+
+		/// <summary>
+		/// Gets the bit depth of the image file at this ContentFile's path.
+		/// </summary>
+		/// <returns>The bit depth of the image file at this ContentFile's path, or -1 if the file is not an image format.</returns>
+		int GetImageBitDepth() { return m_DataPathIsImageFile ? GetImageFileInfo(ImageFileInfoType::ImageBitDepth) : -1; }
+
+		/// <summary>
+		/// Gets the width of the image file at this ContentFile's path.
+		/// </summary>
+		/// <returns>The width of the image file at this ContentFile's path, in pixels, or -1 if the file is not an image format.</returns>
+		int GetImageWidth() { return m_DataPathIsImageFile ? GetImageFileInfo(ImageFileInfoType::ImageWidth) : -1; }
+
+		/// <summary>
+		/// Gets the height of the image file at this ContentFile's path.
+		/// </summary>
+		/// <returns>The height of the image file at this ContentFile's path, in pixels, or -1 if the file is not an image format.</returns>
+		int GetImageHeight() { return m_DataPathIsImageFile ? GetImageFileInfo(ImageFileInfoType::ImageHeight) : -1; }
+#pragma endregion
+
 #pragma region Data Handling
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
@@ -145,12 +171,19 @@ namespace RTE {
 		FMOD::Sound * GetAsSound(bool abortGameForInvalidSound = true, bool asyncLoading = true);
 #pragma endregion
 
-	protected:
+	private:
 
 		/// <summary>
 		/// Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on this definition.
 		/// </summary>
 		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
+
+		/// <summary>
+		/// Enumeration for the image file information types that can be stored.
+		/// </summary>
+		enum ImageFileInfoType { ImageBitDepth, ImageWidth, ImageHeight, ImageInfoTypeCount };
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		static std::unordered_map<size_t, std::string> s_PathHashes; //!< Static map containing the hash values of paths of all loaded data files.
 		static std::array<std::unordered_map<std::string, BITMAP *>, BitDepths::BitDepthCount> s_LoadedBitmaps; //!< Static map containing all the already loaded BITMAPs and their paths for each bit depth.
@@ -160,14 +193,34 @@ namespace RTE {
 		std::string m_DataPathExtension; //!< The extension of the data file of this ContentFile's path.
 		std::string m_DataPathWithoutExtension; //!< The path to this ContentFile's data file without the file's extension.
 
+		bool m_DataPathIsImageFile; //!< Whether the data file at this ContentFile's path is a supported image format.
+		std::array<int, ImageFileInfoType::ImageInfoTypeCount> m_ImageFileInfo; //!< Array that holds image file information read directly from the data file on disk.
+
 		std::string m_FormattedReaderPosition; //!< A string containing the currently read file path and the line being read. Formatted to be used for logging.
 		std::string m_DataPathAndReaderPosition; //!< The path to this ContentFile's data file combined with the ini file and line it is being read from. This is used for logging.
 
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 
-	private:
+#pragma region Image Info Getters
+		/// <summary>
+		/// Gets the specified image info from this ContentFile's data file on disk.
+		/// </summary>
+		/// <param name="infoTypeToGet">The image info type to get. See ImageFileInfoType enumeration.</param>
+		/// <returns>An integer value with the requested image info.</returns>
+		int GetImageFileInfo(ImageFileInfoType infoTypeToGet);
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
+		/// <summary>
+		/// Reads a PNG file from disk and stores the relevant information without actually loading the whole file into memory.
+		/// </summary>
+		/// <param name="imageFile">Pointer to the file stream to read.</param>
+		void ReadAndStorePNGFileInfo(FILE *imageFile);
+
+		/// <summary>
+		/// Reads a BMP file from disk and stores the relevant information without actually loading the whole file into memory.
+		/// </summary>
+		/// <param name="imageFile">Pointer to the file stream to read.</param>
+		void ReadAndStoreBMPFileInfo(FILE *imageFile);
+#pragma endregion
 
 #pragma region Data Handling
 		/// <summary>

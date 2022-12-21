@@ -58,7 +58,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `sdl2`
 * `flac`
 * `luajit`
-* `lua5.2`
+* `lua`
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
@@ -104,11 +104,15 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`
 
 **Arch Linux:**  
+<<<<<<< HEAD
 `sudo pacman -S allegro4 sdl2 boost flac luajit lua52 minizip lz4 libpng meson ninja base-devel`  
 
 **Ubuntu >=20.04:**  
 `sudo apt-get install build-essential liballegro4-dev libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev ninja-build python-pip`  
 `sudo python -m pip install meson`
+
+**Fedora:**  
+`# dnf install allegro-loadpng-devel allegro-devel libsdl2-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel lua-devel gcc gcc-c++`  
 
 ## Troubleshooting
 

@@ -157,7 +157,7 @@ int BunkerAssembly::Create(const BunkerAssembly &reference)
 {
     TerrainObject::Create(reference);
 
-    for (list<SceneObject *>::const_iterator oItr = reference.m_PlacedObjects.begin(); oItr != reference.m_PlacedObjects.end(); ++oItr)
+    for (std::list<SceneObject *>::const_iterator oItr = reference.m_PlacedObjects.begin(); oItr != reference.m_PlacedObjects.end(); ++oItr)
         m_PlacedObjects.push_back(dynamic_cast<SceneObject *>((*oItr)->Clone()));
 
 	m_ParentAssemblyScheme = reference.m_ParentAssemblyScheme;
@@ -211,7 +211,7 @@ int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reade
     else if (propName == "ParentScheme")
     {
 		//Add to group like Entity::ReadProperty does
-        string parentScheme;
+        std::string parentScheme;
         reader >> parentScheme;
         AddToGroup(parentScheme);
         g_PresetMan.RegisterGroup(parentScheme, reader.GetReadModuleID());
@@ -279,7 +279,7 @@ int BunkerAssembly::Save(Writer &writer) const
 	SceneObject::Save(writer);
 
     // Groups are essential for BunkerAssemblies so save them, because entity seem to ignore them
-	for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
+	for (std::list<std::string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
     {
 		if ((*itr) != m_ParentAssemblyScheme && (*itr) != m_ParentSchemeGroup)
 		{
@@ -298,7 +298,7 @@ int BunkerAssembly::Save(Writer &writer) const
 		writer << m_ParentAssemblyScheme;
 	}
 
-    for (list<SceneObject *>::const_iterator oItr = m_PlacedObjects.begin(); oItr != m_PlacedObjects.end(); ++oItr)
+    for (std::list<SceneObject *>::const_iterator oItr = m_PlacedObjects.begin(); oItr != m_PlacedObjects.end(); ++oItr)
     {
 		writer.NewProperty("PlaceObject");
         writer.ObjectStart((*oItr)->GetClassName());
@@ -356,7 +356,7 @@ int BunkerAssembly::Save(Writer &writer) const
 
 void BunkerAssembly::Destroy(bool notInherited)
 {
-    for (list<SceneObject *>::iterator oItr = m_PlacedObjects.begin(); oItr != m_PlacedObjects.end(); ++oItr)
+    for (std::list<SceneObject *>::iterator oItr = m_PlacedObjects.begin(); oItr != m_PlacedObjects.end(); ++oItr)
     {
         delete (*oItr);
         *oItr = 0;
@@ -463,7 +463,7 @@ void BunkerAssembly::SetTeam(int team)
     TerrainObject::SetTeam(team);
 
     // Make sure all the objects to be placed will be of the same team
-    for (list<SceneObject *>::iterator itr = m_PlacedObjects.begin(); itr != m_PlacedObjects.end(); ++itr)
+    for (std::list<SceneObject *>::iterator itr = m_PlacedObjects.begin(); itr != m_PlacedObjects.end(); ++itr)
         (*itr)->SetTeam(team);
 }
 

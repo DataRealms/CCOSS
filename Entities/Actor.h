@@ -143,14 +143,6 @@ ClassInfoGetters;
     void Destroy(bool notInherited = false) override;
 
     /// <summary>
-    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to load.</param>
-    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false) override;
-
-    /// <summary>
     /// Gets the mass of this Actor's inventory. Does not include any equipped item (for actor subtypes that have that).
     /// </summary>
     /// <returns>The mass of this Actor's inventory.</returns>
@@ -842,7 +834,7 @@ ClassInfoGetters;
 // Arguments:       Preset name of an item to remove.
 // Return value:    None.
 
-	void RemoveInventoryItem(string presetName);
+	void RemoveInventoryItem(std::string presetName);
 
     /// <summary>
     /// Removes and returns the inventory item at the given index. Ownership IS transferred.
@@ -935,7 +927,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    A const pointer to the inventory deque of this. OWNERSHIP IS NOT TRANSFERRED!
 
-	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
+	const std::deque<MovableObject *> * GetInventory() const { return &m_Inventory; }
 
 	/// <summary>
 	/// Returns the maximum total mass this Actor can carry in its inventory.
@@ -1085,6 +1077,24 @@ ClassInfoGetters;
 //                  frame.
 
     virtual bool UpdateMovePath();
+
+    /// <summary>
+    /// Estimates what material strength this actor can penetrate.
+    /// </summary>
+	/// <returns>The actor's dig strength.</returns>
+    virtual float EstimateDigStrength();
+
+    /// <summary>
+    /// Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
+	/// <returns>The actors base dig strength.</returns>
+    float GetAIBaseDigStrength() const { return m_AIBaseDigStrength; }
+
+    /// <summary>
+    /// Sets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.
+    /// </summary>
+	/// <param name="newAIBaseDigStrength">The new base dig strength for this Actor.</param>
+    void SetAIBaseDigStrength(float newAIBaseDigStrength) { m_AIBaseDigStrength = newAIBaseDigStrength; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1459,13 +1469,12 @@ protected:
     int m_FlashWhiteMS;
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
-    // What material strength this actor is capable of digging trough.
-    float m_DigStrength;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
     // How many passenger slots this actor will take in a craft
     int m_PassengerSlots;
-
+    // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
+    float m_AIBaseDigStrength;
 
     ////////////////////
     // AI States
@@ -1503,8 +1512,6 @@ protected:
     static std::vector<BITMAP *> m_apAlarmExclamation;
     // Whether the static icons have been loaded yet or not
     static bool m_sIconsLoaded;
-    // Whether a Lua update AI function was provided in this' script file
-    bool m_ScriptedAIUpdate;
     // The current mode the AI is set to perform as
     AIMode m_AIMode;
     // The list of waypoints remaining between which the paths are made. If this is empty, the last path is in teh MovePath

@@ -174,8 +174,6 @@ int AssemblyEditor::Start()
     if (pRootBox)
         pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-    m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
-
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pLoadDialogBox)
     {
@@ -185,6 +183,10 @@ int AssemblyEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
+	m_pModuleCombo->SetDropHeight(std::min(m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + (std::max(m_pLoadNameCombo->GetDropHeight(), m_pModuleCombo->GetDropHeight()))); // Make sure the dropdowns can fit, no matter how tall they are.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
 
@@ -355,7 +357,7 @@ void AssemblyEditor::Update()
 						m_ModuleSpaceID = g_PresetMan.GetModuleID(m_pModuleCombo->GetSelectedItem()->m_Name);
                         RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
-						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
+						if (m_ModuleSpaceID == g_PresetMan.GetModuleID(c_UserScenesModuleName))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, -1);
 						else
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
@@ -524,7 +526,7 @@ void AssemblyEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 // Description:     Creates and builds assembly which fits currently selected scheme and returns
 //					it's pointer. Owhership IS transfered.
 
-BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
+BunkerAssembly * AssemblyEditor::BuildAssembly(std::string saveAsName)
 {
 	// Create new bunker assembly to save
 	BunkerAssembly *pBA = new BunkerAssembly();
@@ -542,7 +544,7 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
 
     const std::list<SceneObject *> *pSceneObjectList = 0;
 	pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
-    for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
+    for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
     {
 		//Check if object fits the assembly box
 		bool skip = true;
@@ -618,13 +620,13 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
 // Description:     Saves the current scene to an appropriate ini file, and asks user if
 //                  they want to overwrite first if scene of this name exists.
 
-bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
+bool AssemblyEditor::SaveAssembly(std::string saveAsName, bool forceOverwrite)
 {
 	BunkerAssembly *pBA = BuildAssembly(saveAsName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
+	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
-		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
+        std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
 			// Does ini already exist? If yes, then no need to add it to a scenes.ini etc
@@ -648,7 +650,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 	}
 	else
 	{
-		string sceneFilePath;
+        std::string sceneFilePath;
 
 		// Try to save to the data module
 		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
@@ -675,7 +677,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 			if (!sceneFileExisted)
 			{
 				// First find/create a .rte/Scenes.ini file to include the new .ini into
-				string scenesFilePath;
+                std::string scenesFilePath;
 
 				if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
 					scenesFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/Objects/Bunkers/BunkerAssemblies/BunkerAssemblies.ini";
@@ -691,7 +693,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 				// If it's already included, it doens't matter, the definitions will just bounce the second time
 				if (!scenesFileExisted)
 				{
-					string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini"); 
+                    std::string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
 					Writer indexWriter(indexFilePath.c_str(), true);
 					// Add extra tab since the DataModule has everything indented
 					indexWriter.NewProperty("\tIncludeFile");
@@ -746,11 +748,11 @@ void AssemblyEditor::UpdateLoadDialog()
 			// If metascenes are visible then allow to save assemblies to Base.rte
 			if (g_SettingsMan.ShowMetascenes())
 			{
-				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 												&& g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			} else {
-				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
+				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
 						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			}
@@ -771,13 +773,14 @@ void AssemblyEditor::UpdateLoadDialog()
 				}
 				else
 				{
-					if (g_PresetMan.GetDataModule(module)->GetFileName() == "Scenes.rte")
+					if (g_PresetMan.GetDataModule(module)->GetFileName() == c_UserScenesModuleName)
 						scenesIndex = m_pModuleCombo->GetCount() - 1;
 				}
 			}
 		}
 
-        // Select the "Scenes.rte" module
+		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2 }));
+        // Select the user scenes module
         m_pModuleCombo->SetSelectedIndex(scenesIndex);
     }
 
@@ -785,16 +788,16 @@ void AssemblyEditor::UpdateLoadDialog()
     m_pLoadNameCombo->ClearList();
 
     // Get the list of all read in scenes
-    list<Entity *> sceneList;
+    std::list<Entity *> sceneList;
     g_PresetMan.GetAllOfType(sceneList, "Scene");
 
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
     {
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
         // Don't add the special "Editor Scene" or metascenes, users shouldn't be messing with them
-        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+        if (pScene->GetPresetName() != "Editor Scene" && !pScene->IsMetagameInternal() && !pScene->IsSavedGameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
             m_pLoadNameCombo->AddItem(pScene->GetPresetName());
     }
 
@@ -810,7 +813,7 @@ void AssemblyEditor::UpdateLoadDialog()
 
 void AssemblyEditor::UpdateSaveDialog()
 {
-	string defaultName = "";
+    std::string defaultName = "";
 
 	BunkerAssemblyScheme *pScheme = m_pEditorGUI->GetCurrentAssemblyScheme();
 	if (pScheme)

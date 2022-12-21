@@ -308,7 +308,7 @@ void AssemblyEditorGUI::Update()
     // Update the user controller
 //    m_pController->Update();
 
-	string selectedAssembly = "\nSelected scheme: ";
+    std::string selectedAssembly = "\nSelected scheme: ";
 
 	if (m_pCurrentScheme)
 	{
@@ -709,7 +709,7 @@ void AssemblyEditorGUI::Update()
 
 				// Look through available assemblies and set the name appropriately
 				int number = 1;
-				list<Entity *> assemblies;
+                std::list<Entity *> assemblies;
 				g_PresetMan.GetAllOfGroup(assemblies, pBAS->GetPresetName(), "BunkerAssembly", -1);
 				for (int i = 1; i < 256; i++)
 				{	
@@ -718,7 +718,7 @@ void AssemblyEditorGUI::Update()
 
 					std::snprintf(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), 1);
 
-					for (list<Entity *>::iterator itr = assemblies.begin(); itr != assemblies.end(); itr++)
+					for (std::list<Entity *>::iterator itr = assemblies.begin(); itr != assemblies.end(); itr++)
 					{
 						std::snprintf(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), number);
 						if ((*itr)->GetPresetName() == currentName)
@@ -758,7 +758,7 @@ void AssemblyEditorGUI::Update()
 				//Place objects inlcuded in bunker assembly
 				const std::list<SceneObject *> *objects = pBA->GetPlacedObjects();
 				
-		        for (list<SceneObject *>::const_iterator oItr = objects->begin(); oItr != objects->end(); ++oItr)
+		        for (std::list<SceneObject *>::const_iterator oItr = objects->begin(); oItr != objects->end(); ++oItr)
 				{
 					SceneObject *pSO = dynamic_cast<SceneObject *>((*oItr)->Clone());
 
@@ -977,7 +977,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
         int i = 0;
         Actor *pActor = 0;
 //        HeldDevice *pDevice = 0;
-        for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
+        for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
         {
             // Draw the currently held object into the order of the list if it is to be placed inside
             if (m_pCurrentObject && m_DrawCurrentObject && i == m_ObjectListOrder)
@@ -1052,14 +1052,14 @@ bool AssemblyEditorGUI::UpdateBrainPath()
     // First see if we have a brain in hand
     if (m_pCurrentObject && m_pCurrentObject->IsInGroup("Brains"))
     {
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
+        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath, c_PathFindingDefaultDigStrength, static_cast<Activity::Teams>(m_pController->GetTeam()));
         return true;
     }
 
     // If not, then do we have a resident?
     SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
     if (pBrain)
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath);
+        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath, c_PathFindingDefaultDigStrength, static_cast<Activity::Teams>(m_pController->GetTeam()));
     else
     {
         m_BrainSkyPath.clear();

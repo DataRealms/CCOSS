@@ -435,7 +435,7 @@ public:
 //                  represent.
 // Return value:    The new total value of what's in the override purchase list.
 
-    int SetOverridePurchaseList(string loadoutName, int player);
+    int SetOverridePurchaseList(std::string loadoutName, int player);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1081,6 +1081,7 @@ protected:
 
     // The cursor animations for the LZ indicators
     std::vector<BITMAP *> m_aLZCursor[4];
+	std::array<int, Players::MaxPlayerCount> m_LZCursorWidth; //!< The width of each players' LZ cursor.
     // The cursor animations for the objective indications
     std::vector<BITMAP *> m_aObjCursor[4];
 

@@ -1,8 +1,6 @@
 #include "LuaMan.h"
-
+#include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
-#include "LuaAdapters.h"
-#include "LuaAdaptersEntities.h"
 
 namespace RTE {
 
@@ -14,8 +12,6 @@ namespace RTE {
 		m_MasterState = nullptr;
 		m_DisableLuaJIT = false;
 		m_LastError.clear();
-		m_NextPresetID = 0;
-		m_NextObjectID = 0;
 		m_TempEntity = nullptr;
 		m_TempEntityVector.clear();
 
@@ -58,109 +54,112 @@ namespace RTE {
 
 		// Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
 		luabind::module(m_MasterState)[luabind::class_<LuaMan>("LuaManager")
-		                                   .property("TempEntity", &LuaMan::GetTempEntity)
-		                                   .def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
-		                                   .def("FileOpen", &LuaMan::FileOpen)
-		                                   .def("FileClose", &LuaMan::FileClose)
-		                                   .def("FileReadLine", &LuaMan::FileReadLine)
-		                                   .def("FileWriteLine", &LuaMan::FileWriteLine)
-		                                   .def("FileEOF", &LuaMan::FileEOF),
+				.property("TempEntity", &LuaMan::GetTempEntity)
+				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
+				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
+				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
+				.def("FileOpen", &LuaMan::FileOpen)
+				.def("FileClose", &LuaMan::FileClose)
+				.def("FileReadLine", &LuaMan::FileReadLine)
+				.def("FileWriteLine", &LuaMan::FileWriteLine)
+				.def("FileEOF", &LuaMan::FileEOF),
 
-		    luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-		    luabind::def("RangeRand", (double (*)(double, double)) & RandomNum),
-		    luabind::def("PosRand", &PosRand),
-		    luabind::def("NormalRand", &NormalRand),
-		    luabind::def("SelectRand", (int (*)(int, int)) & RandomNum),
-		    luabind::def("LERP", &LERP),
-		    luabind::def("EaseIn", &EaseIn),
-		    luabind::def("EaseOut", &EaseOut),
-		    luabind::def("EaseInOut", &EaseInOut),
-		    luabind::def("Clamp", &Limit),
-		    luabind::def("NormalizeAngleBetween0And2PI", &NormalizeAngleBetween0And2PI),
-		    luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
-		    luabind::def("AngleWithinRange", &AngleWithinRange),
-		    luabind::def("ClampAngle", &ClampAngle),
-		    luabind::def("GetPPM", &GetPPM),
-		    luabind::def("GetMPP", &GetMPP),
-		    luabind::def("GetPPL", &GetPPL),
-		    luabind::def("GetLPP", &GetLPP),
-		    luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
+			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
+			luabind::def("RangeRand", (double (*)(double, double)) & RandomNum),
+			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
+			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
+			luabind::def("SelectRand", (int (*)(int, int)) & RandomNum),
+			luabind::def("LERP", &LERP),
+			luabind::def("EaseIn", &EaseIn),
+			luabind::def("EaseOut", &EaseOut),
+			luabind::def("EaseInOut", &EaseInOut),
+			luabind::def("Clamp", &Limit),
+			luabind::def("NormalizeAngleBetween0And2PI", &NormalizeAngleBetween0And2PI),
+			luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
+			luabind::def("AngleWithinRange", &AngleWithinRange),
+			luabind::def("ClampAngle", &ClampAngle),
+			luabind::def("GetPPM", &GetPPM),
+			luabind::def("GetMPP", &GetMPP),
+			luabind::def("GetPPL", &GetPPL),
+			luabind::def("GetLPP", &GetLPP),
+			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
-		    RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
-		    RegisterLuaBindingsOfType(SystemLuaBindings, Box),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, Entity),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, SoundContainer),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, SoundSet),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, LimbPath),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, SceneObject),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MovableObject),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, Material),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOPixel),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TerrainObject),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MOSprite),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSParticle),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSRotating),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Attachable),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Emission),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEmitter),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PEmitter),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Actor),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ADoor),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Arm),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Leg),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AHuman),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACrab),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Turret),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, ACraft),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACDropShip),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACRocket),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HeldDevice),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Magazine),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Round),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HDFirearm),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ThrownDevice),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
-		    RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
-		    RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
-		    RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, SceneArea),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, SceneLayer),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, SLBackground),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Deployment),
-		    RegisterLuaBindingsOfType(SystemLuaBindings, DataModule),
-		    RegisterLuaBindingsOfType(ActivityLuaBindings, Activity),
-		    RegisterLuaBindingsOfAbstractType(ActivityLuaBindings, GameActivity),
-		    RegisterLuaBindingsOfAbstractType(EntityLuaBindings, GlobalScript),
-		    RegisterLuaBindingsOfType(EntityLuaBindings, MetaPlayer),
-		    RegisterLuaBindingsOfType(GUILuaBindings, GUIBanner),
-		    RegisterLuaBindingsOfType(GUILuaBindings, BuyMenuGUI),
-		    RegisterLuaBindingsOfType(GUILuaBindings, SceneEditorGUI),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, ActivityMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, AudioMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, ConsoleMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, FrameMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, MetaMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, MovableMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, PostProcessMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, PresetMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, PrimitiveMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, SceneMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, SettingsMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, TimerMan),
-		    RegisterLuaBindingsOfType(ManagerLuaBindings, UInputMan),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, InputDevice),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-		    RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
-		    RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Keycode),
-		    RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Scancode),
-		    RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerButton),
-		    RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis)
+			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
+			RegisterLuaBindingsOfType(SystemLuaBindings, Box),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Entity),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, SoundContainer),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SoundSet),
+			RegisterLuaBindingsOfType(EntityLuaBindings, LimbPath),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, SceneObject),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MovableObject),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Material),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOPixel),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TerrainObject),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MOSprite),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSParticle),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSRotating),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Attachable),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Emission),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEmitter),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PEmitter),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Actor),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ADoor),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Arm),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Leg),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AHuman),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACrab),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Turret),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, ACraft),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACDropShip),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACRocket),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HeldDevice),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Magazine),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Round),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HDFirearm),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ThrownDevice),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieSlice),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PieMenu),
+			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
+			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
+			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SceneArea),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SceneLayer),
+			RegisterLuaBindingsOfType(EntityLuaBindings, SLBackground),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Deployment),
+			RegisterLuaBindingsOfType(SystemLuaBindings, DataModule),
+			RegisterLuaBindingsOfType(ActivityLuaBindings, Activity),
+			RegisterLuaBindingsOfAbstractType(ActivityLuaBindings, GameActivity),
+			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, GlobalScript),
+			RegisterLuaBindingsOfType(EntityLuaBindings, MetaPlayer),
+			RegisterLuaBindingsOfType(GUILuaBindings, GUIBanner),
+			RegisterLuaBindingsOfType(GUILuaBindings, BuyMenuGUI),
+			RegisterLuaBindingsOfType(GUILuaBindings, SceneEditorGUI),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, ActivityMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, AudioMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, ConsoleMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, FrameMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, MetaMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, MovableMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, PostProcessMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, PresetMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, PrimitiveMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, SceneMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, SettingsMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, TimerMan),
+			RegisterLuaBindingsOfType(ManagerLuaBindings, UInputMan),
+			RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
+			RegisterLuaBindingsOfType(MiscLuaBindings, InputDevice),
+			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
+			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
+			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
+			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Keycode),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Scancode),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerButton),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis)
 		];
 
 		// Assign the manager instances to globals in the lua master state
@@ -208,26 +207,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string LuaMan::GetNewPresetID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
-
-		m_NextPresetID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::string LuaMan::GetNewObjectID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
-
-		m_NextObjectID++;
-		return std::string(newID);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LuaMan::SetTempEntityVector(const std::vector<const Entity *> &entityVector) {
 		m_TempEntityVector.reserve(entityVector.size());
 		for (const Entity *entity : entityVector) {
@@ -237,7 +216,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+	int LuaMan::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
 			scriptString << "if ";
@@ -304,6 +283,52 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int LuaMan::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+		int status = 0;
+
+		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
+		functionObject->GetLuabindObject()->push(m_MasterState);
+
+		int argumentCount = functionEntityArguments.size() + functionLiteralArguments.size();
+		if (!selfGlobalTableName.empty() && TableEntryIsDefined(selfGlobalTableName, selfGlobalTableKey)) {
+			lua_getglobal(m_MasterState, selfGlobalTableName.c_str());
+			lua_getfield(m_MasterState, -1, selfGlobalTableKey.c_str());
+			lua_remove(m_MasterState, -2);
+			argumentCount++;
+		}
+
+		for (const Entity *functionEntityArgument : functionEntityArguments) {
+			std::unique_ptr<LuabindObjectWrapper> downCastEntityAsLuabindObjectWrapper(LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.at(functionEntityArgument->GetClassName())(const_cast<Entity *>(functionEntityArgument), m_MasterState));
+			downCastEntityAsLuabindObjectWrapper->GetLuabindObject()->push(m_MasterState);
+		}
+
+		for (const std::string_view &functionLiteralArgument : functionLiteralArguments) {
+			char *stringToDoubleConversionFailed = nullptr;
+			if (functionLiteralArgument == "nil") {
+				lua_pushnil(m_MasterState);
+			} else if (functionLiteralArgument == "true" || functionLiteralArgument == "false") {
+				lua_pushboolean(m_MasterState, functionLiteralArgument == "true" ? 1 : 0);
+			} else if (double argumentAsNumber = std::strtod(functionLiteralArgument.data(), &stringToDoubleConversionFailed); !*stringToDoubleConversionFailed) {
+				lua_pushnumber(m_MasterState, argumentAsNumber);
+			} else {
+				lua_pushlstring(m_MasterState, functionLiteralArgument.data(), functionLiteralArgument.size());
+			}
+		}
+
+		if (lua_pcall(m_MasterState, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
+			m_LastError = lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+			status = -1;
+		}
+		lua_pop(m_MasterState, 1);
+
+		return status;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
 		if (filePath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
@@ -336,6 +361,24 @@ namespace RTE {
 		lua_pop(m_MasterState, 1);
 
 		return error;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaMan::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
+		if (int error = RunScriptFile(filePath); error < 0) {
+			return error;
+		}
+
+		for (const std::string &functionName : functionNamesToLookFor) {
+			luabind::object functionObject = luabind::globals(m_MasterState)[functionName];
+			if (luabind::type(functionObject) == LUA_TFUNCTION) {
+				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
+				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+			}
+		}
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +447,28 @@ namespace RTE {
 		lua_pop(m_MasterState, 2);
 
 		return isDefined;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::DirectoryList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_directory()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::vector<std::string> & LuaMan::FileList(const std::string &filePath) {
+		m_FileOrDirectoryPaths.clear();
+
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + filePath)) {
+			if (directoryEntry.is_regular_file()) { m_FileOrDirectoryPaths.emplace_back(directoryEntry.path().filename().generic_string()); }
+		}
+		return m_FileOrDirectoryPaths;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -529,5 +594,35 @@ namespace RTE {
 
 	void LuaMan::Update() const {
 		lua_gc(m_MasterState, LUA_GCSTEP, 1);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::DescribeLuaStack() {
+		int indexOfTopOfStack = lua_gettop(m_MasterState);
+		if (indexOfTopOfStack == 0) {
+			return "The Lua stack is empty.";
+		}
+		std::stringstream stackDescription;
+		stackDescription << "The Lua stack contains " + std::to_string(indexOfTopOfStack) + " elements. From top to bottom, they are:\n";
+
+		for (int i = indexOfTopOfStack; i > 0; --i) {
+			switch (int type = lua_type(m_MasterState, i)) {
+				case LUA_TBOOLEAN:
+					stackDescription << (lua_toboolean(m_MasterState, i) ? "true" : "false");
+					break;
+				case LUA_TNUMBER:
+					stackDescription << std::to_string(lua_tonumber(m_MasterState, i));
+					break;
+				case LUA_TSTRING:
+					stackDescription << lua_tostring(m_MasterState, i);
+					break;
+				default:
+					stackDescription << lua_typename(m_MasterState, type);
+					break;
+			}
+			if (i - 1 > 0) { stackDescription << "\n"; }
+		}
+		return stackDescription.str();
 	}
 }

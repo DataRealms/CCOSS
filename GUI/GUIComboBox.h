@@ -281,6 +281,12 @@ public:
 
     void SetDropHeight(int Drop);
 
+	/// <summary>
+	/// Gets the drop height of the list.
+	/// </summary>
+	/// <returns>The drop height of the list.</returns>
+	int GetDropHeight() const { return m_DropHeight; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          StoreProperties

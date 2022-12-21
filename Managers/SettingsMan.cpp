@@ -44,6 +44,8 @@ namespace RTE {
 		m_SimplifiedCollisionDetection = false;
 		m_SceneBackgroundAutoScaleMode = 1;
 		m_DisableFactionBuyMenuThemes = false;
+		m_PathFinderGridNodeSize = c_PPM;
+		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
@@ -179,6 +181,10 @@ namespace RTE {
 			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "DisableFactionBuyMenuThemes") {
 			reader >> m_DisableFactionBuyMenuThemes;
+		} else if (propName == "PathFinderGridNodeSize") {
+			reader >> m_PathFinderGridNodeSize;
+		} else if (propName == "AIUpdateInterval") {
+			reader >> m_AIUpdateInterval;
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -249,6 +255,8 @@ namespace RTE {
 			reader >> g_NetworkServer.m_UseHighCompression;
 		} else if (propName == "ServerUseFastCompression") {
 			reader >> g_NetworkServer.m_UseFastCompression;
+		} else if (propName == "ServerUseDeltaCompression") {
+			reader >> g_NetworkServer.m_UseDeltaCompression;
 		} else if (propName == "ServerHighCompressionLevel") {
 			reader >> g_NetworkServer.m_HighCompressionLevel;
 		} else if (propName == "ServerFastAccelerationFactor") {
@@ -356,6 +364,8 @@ namespace RTE {
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
 		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
 		writer.NewPropertyWithValue("DisableFactionBuyMenuThemes", m_DisableFactionBuyMenuThemes);
+		writer.NewPropertyWithValue("PathFinderGridNodeSize", m_PathFinderGridNodeSize);
+		writer.NewPropertyWithValue("AIUpdateInterval", m_AIUpdateInterval);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
@@ -416,6 +426,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ServerBoxHeight", g_NetworkServer.m_BoxHeight);
 		writer.NewPropertyWithValue("ServerUseHighCompression", g_NetworkServer.m_UseHighCompression);
 		writer.NewPropertyWithValue("ServerUseFastCompression", g_NetworkServer.m_UseFastCompression);
+		writer.NewPropertyWithValue("ServerUseDeltaCompression", g_NetworkServer.m_UseDeltaCompression);
 		writer.NewPropertyWithValue("ServerHighCompressionLevel", g_NetworkServer.m_HighCompressionLevel);
 		writer.NewPropertyWithValue("ServerFastAccelerationFactor", g_NetworkServer.m_FastAccelerationFactor);
 		writer.NewPropertyWithValue("ServerUseInterlacing", g_NetworkServer.m_UseInterlacing);

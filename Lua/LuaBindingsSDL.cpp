@@ -239,15 +239,7 @@ namespace RTE {
 			luabind::value("KBDILLUMDOWN", SDLK_KBDILLUMDOWN),
 			luabind::value("KBDILLUMUP", SDLK_KBDILLUMUP),
 			luabind::value("EJECT", SDLK_EJECT),
-			luabind::value("SLEEP", SDLK_SLEEP),
-			luabind::value("APP1", SDLK_APP1),
-			luabind::value("APP2", SDLK_APP2),
-			luabind::value("AUDIOREWIND", SDLK_AUDIOREWIND),
-			luabind::value("AUDIOFASTFORWARD", SDLK_AUDIOFASTFORWARD),
-			luabind::value("SOFTLEFT", SDLK_SOFTLEFT),
-			luabind::value("SOFTRIGHT", SDLK_SOFTRIGHT),
-			luabind::value("CALL", SDLK_CALL),
-			luabind::value("ENDCALL", SDLK_ENDCALL)];
+			luabind::value("SLEEP", SDLK_SLEEP)];
 	}
 
 	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_Scancode) {
@@ -497,10 +489,6 @@ namespace RTE {
 			luabind::value("APP2", SDL_SCANCODE_APP2),
 			luabind::value("AUDIOREWIND", SDL_SCANCODE_AUDIOREWIND),
 			luabind::value("AUDIOFASTFORWARD", SDL_SCANCODE_AUDIOFASTFORWARD),
-			luabind::value("SOFTLEFT", SDL_SCANCODE_SOFTLEFT),
-			luabind::value("SOFTRIGHT", SDL_SCANCODE_SOFTRIGHT),
-			luabind::value("CALL", SDL_SCANCODE_CALL),
-			luabind::value("ENDCALL", SDL_SCANCODE_ENDCALL),
 			luabind::value("ODES", SDL_NUM_SCANCODES)];
 	}
 
@@ -523,12 +511,6 @@ namespace RTE {
 			luabind::value("DPAD_DOWN", SDL_CONTROLLER_BUTTON_DPAD_DOWN),
 			luabind::value("DPAD_LEFT", SDL_CONTROLLER_BUTTON_DPAD_LEFT),
 			luabind::value("DPAD_RIGHT", SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
-			luabind::value("MISC1", SDL_CONTROLLER_BUTTON_MISC1),
-			luabind::value("PADDLE1", SDL_CONTROLLER_BUTTON_PADDLE1),
-			luabind::value("PADDLE2", SDL_CONTROLLER_BUTTON_PADDLE2),
-			luabind::value("PADDLE3", SDL_CONTROLLER_BUTTON_PADDLE3),
-			luabind::value("PADDLE4", SDL_CONTROLLER_BUTTON_PADDLE4),
-			luabind::value("TOUCHPAD", SDL_CONTROLLER_BUTTON_TOUCHPAD),
 			luabind::value("MAX", SDL_CONTROLLER_BUTTON_MAX)];
 	}
 

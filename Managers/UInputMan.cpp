@@ -378,7 +378,7 @@ namespace RTE {
 
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+		if (m_GameHasAnyFocus && !m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			int limitX = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_X), x, x + width);
 			int limitY = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_Y), y, y + height);
 			SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), limitX, limitY);
@@ -971,7 +971,7 @@ namespace RTE {
 
 			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
-				if (m_TrapMousePos) {
+				if (m_TrapMousePos && m_GameHasAnyFocus) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
 					SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
 				} else if (g_ActivityMan.IsInActivity()) {

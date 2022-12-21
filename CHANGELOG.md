@@ -320,6 +320,26 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
+	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+
+	New `Settings.ini` screen-shake properties:  
+	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
+	`ScreenShakeDecay` - how quickly screen shake falls off.  
+	`MaxScreenShakeTime` - the maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.  
+	`DefaultShakePerUnitOfGibEnergy` - how much the screen should shake per unit of energy from gibbing (i.e explosions), when the screen shake amount is auto-calculated.  
+	`DefaultShakePerUnitOfRecoilEnergy` - how much the screen should shake per unit of energy for recoil, when the screen shake amount is auto-calculated.  
+	`DefaultShakeFromRecoilMaximum` - the maximum amount of screen shake recoil can cause, when the screen shake amount is auto-calculated. This is ignored by per-firearm shake settings.
+
+- Added new Lua manager `CameraMan`, to handle camera movement.
+	New Lua functions on CameraMan:
+	```lua
+	AddScreenShake(screenShakeAmount, screen); -- Can be used to shake a particular screen.
+	AddScreenShake(screenShakeAmount, position); -- Applies screenshake at a position in the game world. All screens looking near this position will have their screen shaked.
+	```
+	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -467,6 +487,19 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
 
+- Deprecated the following `SceneMan` functions:
+	```lua
+	SetOffset(offsetVector, screenId);
+	GetScreenOcclusion(screenId);
+	SetScreenOcclusion(occlusionVector, screenId);
+	SetScrollTarget(targetPosition, screenId);
+	GetScrollTarget(screenId);
+	TargetDistanceScalar(point);
+	CheckOffset(screenId);
+	SetScroll(center, screenId);
+	```
+	These have all been moved to `CameraMan`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -499,7 +532,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
 
+- Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
+
 - Removed `InputMapping::GetStick` as there is no more stick mapping.
+
 </details>
 
 ***

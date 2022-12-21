@@ -2,7 +2,7 @@
 namespace RTE {
 
 	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_Keycode) {
-		return luabind::class_<sdl_scancodes>("Key")
+		return luabind::class_<sdl_keycodes>("Key")
 
 		.enum_("Key")[luabind::value("UNKNOWN", SDLK_UNKNOWN),
 			luabind::value("RETURN", SDLK_RETURN),

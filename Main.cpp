@@ -199,15 +199,14 @@ namespace RTE {
 
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
-		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
-			long long updateStartTime = 0;
-			long long updateTotalTime = 0;
-			long long updateEndAndDrawStartTime = 0;
-			long long drawStartTime = 0;
-			long long drawTotalTime = 0;
+		long long updateStartTime = 0;
+		long long updateTotalTime = 0;
+		long long updateEndAndDrawStartTime = 0;
+		long long drawStartTime = 0;
+		long long drawTotalTime = 0;
 
 		while (!System::IsSetToQuit()) {
+			g_FrameMan.ClearFrame();
 			bool serverUpdated = false;
 
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
@@ -344,7 +343,9 @@ int main(int argc, char **argv) {
 		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-	if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+	if (!g_ActivityMan.Initialize()) {
+		RunMenuLoop();
+	}
 	RunGameLoop();
 
 	DestroyManagers();
@@ -353,7 +354,6 @@ int main(int argc, char **argv) {
 	SDL_Quit();
 	return 0;
 }
-
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }
 #endif

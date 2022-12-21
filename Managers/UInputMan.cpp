@@ -871,14 +871,14 @@ namespace RTE {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
-			} else if (KeyPressed(KEY_F9)) {
+			} else if (KeyPressed(SDLK_F9)) {
 				g_ActivityMan.LoadAndLaunchGame("AutoSave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
-				if (KeyHeld(KEY_1)) {
+				if (KeyHeld(SDLK_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
-				} else if (KeyHeld(KEY_3)) {
+				} else if (KeyHeld(SDLK_3)) {
 					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
-				} else if (KeyHeld(KEY_5)) {
+				} else if (KeyHeld(SDLK_5)) {
 					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
 				}
 			}
@@ -890,7 +890,7 @@ namespace RTE {
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
-				if (KeyPressed(KEY_P)) {
+				if (KeyPressed(SDLK_p)) {
 					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
 				}
 			}

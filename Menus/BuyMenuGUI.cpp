@@ -343,25 +343,8 @@ void BuyMenuGUI::ClearCartList()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::AddCartItem(const std::string &name, const std::string &rightText, GUIBitmap *pBitmap, const Entity *pEntity, const int extraIndex) {
-    // If we're owned by an actor, nest it as a child object    
-    bool shouldBeNested = false;
-    const int ownedDeviceOffsetX = 8;
-
-    // Non-equipment cannot be owned and as such is never nested.
-    if (const HeldDevice *heldDevice = dynamic_cast<const HeldDevice *>(pEntity); heldDevice && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
-        // Check to see if an human is above us
-        for (auto itr = m_pCartList->GetItemList()->rbegin(), itr_end = m_pCartList->GetItemList()->rend(); itr < itr_end; ++itr) {
-            if ((*itr)->m_pEntity->GetClassName() == "AHuman") {
-                shouldBeNested = true;
-                break;
-            } else if (!dynamic_cast<const HeldDevice *>((*itr)->m_pEntity)) {
-                // Interrupted by a non-held device, we're not part of anyone's inventory
-                break;
-            }
-        }
-    }
-
-    m_pCartList->AddItem(name, rightText, pBitmap, pEntity, extraIndex, shouldBeNested ? ownedDeviceOffsetX : 0);
+    m_pCartList->AddItem(name, rightText, pBitmap, pEntity, extraIndex);
+    UpdateItemNestingLevels();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -843,6 +826,28 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
         m_FocusChange = 1;
         g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::UpdateItemNestingLevels() {
+    const int ownedDeviceOffsetX = 8;
+
+    int isOwned = false;
+    for (auto itr = m_pCartList->GetItemList()->begin(), itr_end = m_pCartList->GetItemList()->end(); itr < itr_end; ++itr) {
+        if ((*itr)->m_pEntity->GetClassName() == "AHuman") {
+            // We're a human, we can carry stuff
+            isOwned = true;
+        } else if (!dynamic_cast<const HeldDevice *>((*itr)->m_pEntity)) {
+            // Interrupted by a non-held device, we're not part of anyone's inventory
+            isOwned = false;
+        } else {
+            (*itr)->m_OffsetX = isOwned ? ownedDeviceOffsetX : 0;
+        }
+    }
+
+    // Force an immediate refresh of the bitmap
+    m_pCartList->BuildBitmap(false, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1556,9 +1561,10 @@ void BuyMenuGUI::Update()
             }
 
             UpdateTotalCostLabel(m_pController->GetTeam());
-
 			UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 			UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
+
+            UpdateItemNestingLevels();
 
             g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
         }
@@ -1879,11 +1885,6 @@ void BuyMenuGUI::Update()
                             m_MenuFocus = ORDER;
                         }
 
-                        UpdateTotalCostLabel(m_pController->GetTeam());
-
-						UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
-						UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
-
                         g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
                     // Undo the click deselection if nothing was selected
@@ -1891,9 +1892,9 @@ void BuyMenuGUI::Update()
 //                        m_pCartList->SetSelectedIndex(m_SelectedObjectIndex);
 
                     UpdateTotalCostLabel(m_pController->GetTeam());
-
 					UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 					UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
+                    UpdateItemNestingLevels();
 				}
                 // Mouse moved over the panel, show the popup with item description
                 else if(anEvent.GetMsg() == GUIListBox::MouseMove)

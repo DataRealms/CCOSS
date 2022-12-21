@@ -337,6 +337,11 @@ public:
 	/// <param name="enabled">Whether or not equipment selection mode should be enabled.</param>
     void EnableEquipmentSelection(bool enabled);
 
+    /// <summary>
+    /// Updates the nesting level for each item
+    /// </summary>
+    void UpdateItemNestingLevels();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update

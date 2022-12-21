@@ -308,10 +308,10 @@ namespace RTE {
 						std::string serverName;
 						int port;
 
-						string::size_type portPos = string::npos;
+						std::string::size_type portPos = std::string::npos;
 
 						portPos = m_pServerNameTextBox->GetText().find(":");
-						if (portPos != string::npos)
+						if (portPos != std::string::npos)
 						{
 							serverName = m_pServerNameTextBox->GetText().substr(0, portPos);
 							std::string portStr = m_pServerNameTextBox->GetText().substr(portPos + 1, m_pServerNameTextBox->GetText().length() - 2);
@@ -360,10 +360,10 @@ namespace RTE {
 						std::string serverName;
 						int port;
 
-						string::size_type portPos = string::npos;
+						std::string::size_type portPos = std::string::npos;
 
 						portPos = m_pNATServiceServerNameTextBox->GetText().find(":");
-						if (portPos != string::npos)
+						if (portPos != std::string::npos)
 						{
 							serverName = m_pNATServiceServerNameTextBox->GetText().substr(0, portPos);
 							std::string portStr = m_pNATServiceServerNameTextBox->GetText().substr(portPos + 1, m_pNATServiceServerNameTextBox->GetText().length() - 2);

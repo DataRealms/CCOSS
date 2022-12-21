@@ -230,7 +230,7 @@ public:
 //                  The spacing between the flying characters, in pixels.
 // Return value:    None.
 
-    void ShowText(const std::string text, AnimMode mode, long duration, Vector targetSize, float yOnTarget, int flySpeed = 1500, int flySpacing = 100);
+    void ShowText(const std::string &text, AnimMode mode, long duration, Vector targetSize, float yOnTarget, int flySpeed = 1500, int flySpacing = 100);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

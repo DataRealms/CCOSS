@@ -118,7 +118,7 @@ void GibEditorGUI::Destroy()
 
     destroy_bitmap(m_pZoomSource);
 
-    for (list<MovableObject *>::iterator gItr = m_PlacedGibs.begin(); gItr != m_PlacedGibs.end(); ++gItr)
+    for (std::list<MovableObject *>::iterator gItr = m_PlacedGibs.begin(); gItr != m_PlacedGibs.end(); ++gItr)
          delete (*gItr);
 
     delete m_pCurrentGib;
@@ -702,7 +702,7 @@ void GibEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
     // Draw all already placed Objects, and the currently held one in the order it is about to be placed in the scene
     int i = 0;
-    for (list<MovableObject *>::const_iterator itr = m_PlacedGibs.begin(); itr != m_PlacedGibs.end(); ++itr, ++i)
+    for (std::list<MovableObject *>::const_iterator itr = m_PlacedGibs.begin(); itr != m_PlacedGibs.end(); ++itr, ++i)
     {
         // Draw the currently held object into the order of the list if it is to be placed inside
         if (m_pCurrentGib && m_DrawCurrentGib && i == m_GibListOrder)
@@ -811,7 +811,7 @@ void GibEditorGUI::AddPlacedObject(MovableObject *pObjectToAdd, int listOrder)
     else
     {
         // Find the spot
-        list<MovableObject *>::iterator itr = m_PlacedGibs.begin();
+        std::list<MovableObject *>::iterator itr = m_PlacedGibs.begin();
         for (int i = 0; i != listOrder && itr != m_PlacedGibs.end(); ++i, ++itr)
             ;
 
@@ -839,7 +839,7 @@ void GibEditorGUI::RemovePlacedObject(int whichToRemove)
     else
     {
         // Find the spot
-        list<MovableObject *>::iterator itr = m_PlacedGibs.begin();
+        std::list<MovableObject *>::iterator itr = m_PlacedGibs.begin();
         for (int i = 0; i != whichToRemove && itr != m_PlacedGibs.end(); ++i, ++itr)
             ;
 
@@ -859,7 +859,7 @@ const MovableObject * GibEditorGUI::PickPlacedObject(Vector &scenePoint, int *pL
 {
     // REVERSE!
     int i = m_PlacedGibs.size() - 1;
-    for (list<MovableObject *>::const_reverse_iterator itr = m_PlacedGibs.rbegin(); itr != m_PlacedGibs.rend(); ++itr, --i)
+    for (std::list<MovableObject *>::const_reverse_iterator itr = m_PlacedGibs.rbegin(); itr != m_PlacedGibs.rend(); ++itr, --i)
     {
         if ((*itr)->IsOnScenePoint(scenePoint))
         {
@@ -883,7 +883,7 @@ const MovableObject * GibEditorGUI::PickPlacedObject(Vector &scenePoint, int *pL
 
 void GibEditorGUI::UpdatePlacedObjects()
 {
-    for (list<MovableObject *>::iterator itr = m_PlacedGibs.begin(); itr != m_PlacedGibs.end(); ++itr)
+    for (std::list<MovableObject *>::iterator itr = m_PlacedGibs.begin(); itr != m_PlacedGibs.end(); ++itr)
     {
         (*itr)->Update();
     }

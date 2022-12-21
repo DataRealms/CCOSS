@@ -255,7 +255,7 @@ int BaseEditor::Start()
 
     // The get a list of all the placed objects in the Scene and set them to not kick around
     const std::list<SceneObject *> *pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::BLUEPRINT);
-    for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
+    for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
     {
         Actor *pActor = dynamic_cast<Actor *>(*itr);
         if (pActor)
@@ -367,7 +367,7 @@ void BaseEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 // Description:     Saves the current scene to an appropriate ini file, and asks user if
 //                  they want to overwrite first if scene of this name exists.
 
-bool BaseEditor::SaveScene(string saveAsName, bool forceOverwrite)
+bool BaseEditor::SaveScene(std::string saveAsName, bool forceOverwrite)
 {
 /*
     // Set the name of the current scene in effect

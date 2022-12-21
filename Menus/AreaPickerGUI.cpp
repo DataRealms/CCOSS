@@ -70,7 +70,7 @@ void AreaPickerGUI::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the AreaPickerGUI area ready for use.
 
-int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
+int AreaPickerGUI::Create(Controller *pController, std::string onlyOfType)
 {
     RTEAssert(pController, "No controller sent to AreaPickerGUI on creation!");
     m_pController = pController;
@@ -265,7 +265,7 @@ Scene::Area * AreaPickerGUI::GetPrevArea()
 // Description:     Adds all areas of a specific type already defined in PresetMan
 //                  to the current Areas list
 
-void AreaPickerGUI::UpdateAreasList(string selectAreaName)
+void AreaPickerGUI::UpdateAreasList(std::string selectAreaName)
 {
     m_pAreasList->ClearList();
 
@@ -274,7 +274,7 @@ void AreaPickerGUI::UpdateAreasList(string selectAreaName)
         Scene *pScene = g_SceneMan.GetScene();
         int indexToSelect = 0;
         // Add all the current Scene's Area:s to the list!
-        for (list<Scene::Area>::iterator itr = pScene->m_AreaList.begin(); itr != pScene->m_AreaList.end(); ++itr)
+        for (std::list<Scene::Area>::iterator itr = pScene->m_AreaList.begin(); itr != pScene->m_AreaList.end(); ++itr)
         {
             m_pAreasList->AddItem((*itr).GetName());
             // If an Area's name matches the one we're supposed to leave selected after update, then save teh index

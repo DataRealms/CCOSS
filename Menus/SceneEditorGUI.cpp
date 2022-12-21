@@ -117,7 +117,7 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     // Cursor init
     m_CursorPos = g_SceneMan.GetSceneDim() / 2;
 
-    // Set initial focus, category list, and label settings
+    // Set initial focus, category std::list, and label settings
     m_EditorGUIMode = PICKINGOBJECT;
     m_ModeChanged = true;
     m_pCurrentObject = 0;
@@ -532,7 +532,7 @@ void SceneEditorGUI::Update()
             // Set the team
             if (m_FeatureSet != ONLOADEDIT)
                 m_pCurrentObject->SetTeam(m_pController->GetTeam());
-            // Set the list order to be at the end so new objects are added there
+            // Set the std::list order to be at the end so new objects are added there
             m_ObjectListOrder = -1;
             // Update the object
             m_pCurrentObject->Update();
@@ -610,7 +610,7 @@ void SceneEditorGUI::Update()
         Vector snappedPos = g_SceneMan.SnapPosition(m_CursorPos, m_GridSnapping);
         m_CursorInAir = g_SceneMan.GetTerrMatter(snappedPos.GetFloorIntX(), snappedPos.GetFloorIntY()) == g_MaterialAir;
 
-        // Mousewheel is used as shortcut for getting next and prev items in teh picker's object list
+        // Mousewheel is used as shortcut for getting next and prev items in teh picker's object std::list
         if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(ControlState::ACTOR_NEXT))
         {
             // Assign a copy of the next picked object to be the currently held one.
@@ -741,12 +741,12 @@ void SceneEditorGUI::Update()
         if (!m_BrainSkyPath.empty())
         {
             // Smash all airborne waypoints down to just above the ground, except for when it makes the path intersect terrain or it is the final destination
-            list<Vector>::iterator finalItr = m_BrainSkyPath.end();
+            std::list<Vector>::iterator finalItr = m_BrainSkyPath.end();
             finalItr--;
             Vector smashedPoint;
             Vector previousPoint = *(m_BrainSkyPath.begin());
-            list<Vector>::iterator nextItr = m_BrainSkyPath.begin();
-            for (list<Vector>::iterator lItr = m_BrainSkyPath.begin(); lItr != finalItr; ++lItr)
+            std::list<Vector>::iterator nextItr = m_BrainSkyPath.begin();
+            for (std::list<Vector>::iterator lItr = m_BrainSkyPath.begin(); lItr != finalItr; ++lItr)
             {
                 nextItr++;
                 smashedPoint = g_SceneMan.MovePointToGround((*lItr), 20, 10);
@@ -940,7 +940,7 @@ void SceneEditorGUI::Update()
             // Non-brain thing is being placed
             else
             {
-                // If we're not editing in-game, then just add to the placed objects list
+                // If we're not editing in-game, then just add to the placed objects std::list
                 if (m_FeatureSet != INGAMEEDIT)
                 {
 					//If true we need to place object in the end, if false, then it was already given to an actor
@@ -1019,7 +1019,7 @@ void SceneEditorGUI::Update()
 					if (toPlace)
 					{
 						g_SceneMan.GetScene()->AddPlacedObject(editedSet, dynamic_cast<SceneObject *>(m_pCurrentObject->Clone()), m_ObjectListOrder);
-						// Increment the list order so we place over last placed item
+						// Increment the std::list order so we place over last placed item
 						if (m_ObjectListOrder >= 0)
 							m_ObjectListOrder++;
 						g_GUISound.PlacementThud()->Play(m_pController->GetPlayer());
@@ -1322,7 +1322,7 @@ void SceneEditorGUI::Update()
             {
                 if (g_SceneMan.GetScene()->PickPlacedObject(editedSet, m_CursorPos, &m_ObjectListOrder))
                 {
-                    // Adjust the next list order to be in front if applicable (it's automatically behind if same order index)
+                    // Adjust the next std::list order to be in front if applicable (it's automatically behind if same order index)
                     if (m_EditorGUIMode == PLACEINFRONT)
                         m_ObjectListOrder++;
 
@@ -1398,7 +1398,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     if (m_EditorGUIMode == DONEEDITING)
         return;
 
-    // The get a list of the currently edited set of placed objects in the Scene
+    // The get a std::list of the currently edited set of placed objects in the Scene
     const std::list<SceneObject *> *pSceneObjectList = 0;
     if (m_FeatureSet == ONLOADEDIT)
         pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
@@ -1407,7 +1407,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::BLUEPRINT);
         // Draw the 'original' set of placed scene objects as solid before the blueprints
         const std::list<SceneObject *> *pOriginalsList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
-        for (list<SceneObject *>::const_iterator itr = pOriginalsList->begin(); itr != pOriginalsList->end(); ++itr)
+        for (std::list<SceneObject *>::const_iterator itr = pOriginalsList->begin(); itr != pOriginalsList->end(); ++itr)
         {
             (*itr)->Draw(pTargetBitmap, targetPos);
             // Draw basic HUD if an actor
@@ -1421,7 +1421,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::AIPLAN);
         // Draw the 'original' set of placed scene objects as solid before the planned base
         const std::list<SceneObject *> *pOriginalsList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
-        for (list<SceneObject *>::const_iterator itr = pOriginalsList->begin(); itr != pOriginalsList->end(); ++itr)
+        for (std::list<SceneObject *>::const_iterator itr = pOriginalsList->begin(); itr != pOriginalsList->end(); ++itr)
         {
             (*itr)->Draw(pTargetBitmap, targetPos);
             // Draw basic HUD if an actor
@@ -1438,9 +1438,9 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         int i = 0;
         Actor *pActor = 0;
 //        HeldDevice *pDevice = 0;
-        for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
+        for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
         {
-            // Draw the currently held object into the order of the list if it is to be placed inside
+            // Draw the currently held object into the order of the std::list if it is to be placed inside
             if (m_pCurrentObject && m_DrawCurrentObject && i == m_ObjectListOrder)
             {
                 g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
@@ -1511,8 +1511,8 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     if (m_RequireClearPathToOrbit && !m_BrainSkyPath.empty())
     {
         int skipPhase = 0;
-        list<Vector>::const_reverse_iterator lLast = m_BrainSkyPath.rbegin();
-        list<Vector>::const_reverse_iterator lItr = m_BrainSkyPath.rbegin();
+        std::list<Vector>::const_reverse_iterator lLast = m_BrainSkyPath.rbegin();
+        std::list<Vector>::const_reverse_iterator lItr = m_BrainSkyPath.rbegin();
         for (; lItr != m_BrainSkyPath.rend(); ++lItr)
         {
             // Draw these backwards so the skip phase works
@@ -1545,7 +1545,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         vline(pTargetBitmap, center.m_X, center.m_Y - 5, center.m_Y - 2, g_YellowGlowColor);
         vline(pTargetBitmap, center.m_X, center.m_Y + 5, center.m_Y + 2, g_YellowGlowColor);
     }
-    // If the held object will be placed at the end of the list, draw it last to the scene, transperent blinking
+    // If the held object will be placed at the end of the std::list, draw it last to the scene, transperent blinking
 	else if (m_pCurrentObject && (m_ObjectListOrder < 0 || (pSceneObjectList &&  m_ObjectListOrder == pSceneObjectList->size())))
     {
         g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);

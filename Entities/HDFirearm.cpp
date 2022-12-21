@@ -424,7 +424,7 @@ std::string HDFirearm::GetNextMagazineName() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool HDFirearm::SetNextMagazineName(string magName)
+bool HDFirearm::SetNextMagazineName(std::string magName)
 {
     const Magazine * pNewMag = dynamic_cast<const Magazine *>(g_PresetMan.GetEntityPreset("Magazine", magName));
     if (pNewMag)
@@ -570,7 +570,7 @@ float HDFirearm::CompareTrajectories(HDFirearm * pWeapon)
         if (LifeTime2 == 0 || LifeTime2 > 1000)
             LifeTime2 = 1000;
 
-        float time = max(min(LifeTime1, LifeTime2) / 1000.0f, 0.5f);
+        float time = std::max(std::min(LifeTime1, LifeTime2) / 1000.0f, 0.5f);
         Vector Vel1 = Vector(GetAIFireVel(), 0);
         Vector Vel2 = Vector(pWeapon->GetAIFireVel(), 0);
 

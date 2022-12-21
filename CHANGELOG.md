@@ -311,6 +311,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Buy Menu Quality-of-Life improvements.
+	Shift-clicking an item in the cart will now empty the entire cart.
+	When Smart Buy Menu Navigation is enabled, items will be indented to signify what actor's inventory they belong to.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

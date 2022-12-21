@@ -313,6 +313,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
 
+- `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -450,8 +452,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
 
 - The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
-
-- `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
 
 </details>
 

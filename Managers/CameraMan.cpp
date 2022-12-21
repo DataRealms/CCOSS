@@ -55,9 +55,14 @@ namespace RTE {
         screen.m_ScreenShakeMagnitude -= screenShakeDecay * screen.m_ScrollTimer.GetElapsedRealTimeS();
         screen.m_ScreenShakeMagnitude = std::max(screen.m_ScreenShakeMagnitude, 0.0F);
 
+        // Feedback was that the best screenshake strength was between 25% and 40% of default
+        // As such, we want the default setting to reflect that, instead the default setting being 30%
+        // So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything)
+        const float screenShakeScale = 0.3f;
+
         Vector screenShakeOffset(1.0f, 0.0f);
         screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
-        screenShakeOffset *= screen.m_ScreenShakeMagnitude * g_SettingsMan.GetScreenShakeStrength();
+        screenShakeOffset *= screen.m_ScreenShakeMagnitude * g_SettingsMan.GetScreenShakeStrength() * screenShakeScale;
 
         if (g_TimerMan.DrawnSimUpdate()) {
             // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.

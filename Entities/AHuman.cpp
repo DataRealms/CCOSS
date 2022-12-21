@@ -3835,9 +3835,9 @@ void AHuman::Update()
 					float armMovementRateToUse = m_ArmSwingRate;
 					if (HeldDevice *heldDevice = arm->GetHeldDevice()) {
 						// For device sway, the Leg doesn't matter, but both HeldDevices (if there are 2) need to use the same Arm or it looks silly!
-						if (arm == m_pBGArm) {
-							std::swap(legToSwingWith, otherLeg);
-						}
+						//if (arm == m_pBGArm) {
+						//	std::swap(legToSwingWith, otherLeg);
+						//}
 						armMovementRateToUse = m_DeviceArmSwayRate * (heldDevice->IsOneHanded() ? 0.5F : 1.0F);
 					}
 					float angleToSwingTo = std::sin(legToSwingWith->GetRotAngle() + (c_HalfPI * GetFlipFactor()));

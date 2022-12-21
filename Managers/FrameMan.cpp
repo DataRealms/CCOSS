@@ -82,6 +82,7 @@ namespace RTE {
 		m_ScreenTexture = 0;
 		m_ScreenVBO = 0;
 		m_ScreenVAO = 0;
+		m_EnableVsync = -1;
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
@@ -337,7 +338,7 @@ namespace RTE {
 			RTEAbort("Failed to load OpenGL");
 		}
 
-		SDL_GL_SetSwapInterval(0);
+		SDL_GL_SetSwapInterval(m_EnableVsync);
 
 		m_ScreenShader = std::make_unique<ScreenShader>();
 		glGenTextures(1, &m_ScreenTexture);

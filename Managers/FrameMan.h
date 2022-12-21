@@ -599,6 +599,7 @@ namespace RTE {
 		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
 		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
 
+		int m_EnableVsync; //!< Whether to enable Vsync, -1 enables adaptive sync;
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.

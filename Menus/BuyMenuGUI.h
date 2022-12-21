@@ -33,6 +33,7 @@ class GUITab;
 class GUIListBox;
 class GUITextBox;
 class GUIButton;
+class GUIBitmap;
 class GUILabel;
 class SceneObject;
 class MovableObject;
@@ -528,6 +529,11 @@ public:
 // Return value:    None.
 
 	void ClearCartList();
+
+    /// <summary>
+    /// Adds an item to the cart
+    /// </summary>
+    void AddCartItem(const std::string &name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			LoadDefaultLoadoutToCart

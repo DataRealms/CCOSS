@@ -965,8 +965,8 @@ namespace RTE {
 		int mousePlayer = MouseUsedByPlayer();
 		if (mousePlayer != Players::NoPlayer) {
 			// Multiplying by 30 for sensitivity. TODO: Make sensitivity slider 1-50;
-			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 30;
-			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 30;
+			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
+			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
 			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
 
 			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window

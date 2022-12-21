@@ -53,8 +53,7 @@ namespace RTE {
 		//set_pcall_callback(&AddFileAndLineToError); // NOTE: this seems to do nothing because retrieving the error from the lua stack wasn't done correctly. The current error handling works just fine but might look into doing this properly sometime later.
 
 		// Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
-		luabind::module(m_MasterState)[
-			luabind::class_<LuaMan>("LuaManager")
+		luabind::module(m_MasterState)[luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
 				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
 				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
@@ -66,10 +65,10 @@ namespace RTE {
 				.def("FileEOF", &LuaMan::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
+			luabind::def("RangeRand", (double (*)(double, double)) & RandomNum),
 			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
 			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
-			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
+			luabind::def("SelectRand", (int (*)(int, int)) & RandomNum),
 			luabind::def("LERP", &LERP),
 			luabind::def("EaseIn", &EaseIn),
 			luabind::def("EaseOut", &EaseOut),
@@ -157,7 +156,11 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Keycode),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Scancode),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerButton),
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis)
 		];
 
 		// Assign the manager instances to globals in the lua master state

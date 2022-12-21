@@ -4,6 +4,10 @@
 #include "LuabindDefinitions.h"
 #include "LuaAdapterDefinitions.h"
 
+#include "SDL2/SDL_scancode.h"
+#include "SDL2/SDL_keycode.h"
+#include "SDL2/SDL_gamecontroller.h"
+
 namespace RTE {
 
 #pragma region Lua Binding Registration Macros
@@ -171,5 +175,13 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
 		LuaBindingRegisterFunctionDeclarationForType(Directions);
 	};
+
+	struct SDLLuaBindings {
+		LuaBindingRegisterFunctionDeclarationForType(SDL_Scancode);
+		LuaBindingRegisterFunctionDeclarationForType(SDL_Keycode);
+		LuaBindingRegisterFunctionDeclarationForType(SDL_GameControllerButton);
+		LuaBindingRegisterFunctionDeclarationForType(SDL_GameControllerAxis);
+	};
+
 }
 #endif

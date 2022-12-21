@@ -15,7 +15,7 @@ namespace RTE {
 
 	void TimerMan::Clear() {
 		m_StartTime = std::chrono::steady_clock::now();
-		m_TicksPerSecond = 1;
+		m_TicksPerSecond = 1000000;
 		m_RealTimeTicks = 0;
 		m_RealToSimCap = 0.0F;
 		m_SimTimeTicks = 0;
@@ -36,6 +36,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	TimerMan::TimerMan() {
+		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void TimerMan::Initialize() {
 		// Get the frequency of ticks/s for this machine
 		m_TicksPerSecond = 1000000;
@@ -48,7 +53,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	long long TimerMan::GetAbsoluteTime() const {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +99,6 @@ namespace RTE {
 	void TimerMan::Update() {
 		long long prevTime = m_RealTimeTicks;
 		m_RealTimeTicks = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
-		// Figure the increase in real time
 		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
 		// Cap it if too long (as when the app went out of focus).
 		if (timeIncrease > m_RealToSimCap) { timeIncrease = m_RealToSimCap; }

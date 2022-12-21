@@ -844,6 +844,7 @@ namespace RTE {
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
 				g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(SDLK_r) || AnyBackPress());
+				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDLK_r)) || AnyBackPress());
 			}
 			if (g_ActivityMan.ActivitySetToRestart()) {
 				return;
@@ -902,6 +903,7 @@ namespace RTE {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.ReloadAllScripts();
+				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 			} else if (KeyPressed(SDLK_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
 			} else if (KeyPressed(SDLK_F4)) {

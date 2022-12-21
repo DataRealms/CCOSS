@@ -333,21 +333,39 @@ void BuyMenuGUI::SetLogoImage(const std::string &imagePath) {
 	m_Logo->SetDrawType(GUICollectionBox::Image);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ClearCartList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clear the cart out of items selected for purchase
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::ClearCartList()
 {
 	m_pCartList->ClearList();
+    m_ListItemIndex = 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  LoadAllLoadoutsFromFile
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads or re-loads all the loadout presets from the appropriate files
-//                  on disk. This will first clear out all current loadout presets!
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::AddCartItem(const std::string &name, const std::string &rightText, GUIBitmap *pBitmap, const Entity *pEntity, const int extraIndex) {
+    // If we're owned by an actor, nest it as a child object    
+    bool shouldBeNested = false;
+    const int ownedDeviceOffsetX = 8;
+
+    // Non-equipment cannot be owned and as such is never nested.
+    if (const HeldDevice *heldDevice = dynamic_cast<const HeldDevice *>(pEntity); heldDevice && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
+        // Check to see if an human is above us
+        for (auto itr = m_pCartList->GetItemList()->rbegin(), itr_end = m_pCartList->GetItemList()->rend(); itr < itr_end; ++itr) {
+            if ((*itr)->m_pEntity->GetClassName() == "AHuman") {
+                shouldBeNested = true;
+                break;
+            } else if (!dynamic_cast<const HeldDevice *>((*itr)->m_pEntity)) {
+                // Interrupted by a non-held device, we're not part of anyone's inventory
+                break;
+            }
+        }
+    }
+
+    m_pCartList->AddItem(name, rightText, pBitmap, pEntity, extraIndex, shouldBeNested ? ownedDeviceOffsetX : 0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool BuyMenuGUI::LoadAllLoadoutsFromFile()
 {
@@ -1414,7 +1432,7 @@ void BuyMenuGUI::Update()
                 {
                     // Gotto make a copy of the bitmap to pass it to the next list
                     GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(pItem->m_pBitmap)->GetBitmap());
-                    m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+                    AddCartItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
                     // If I just selected an AHuman, enable equipment selection mode
                     if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
                     {
@@ -1513,7 +1531,7 @@ void BuyMenuGUI::Update()
         }
 
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(PRESS_FACEBUTTON)) {
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {            
             if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                 for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
@@ -1528,14 +1546,15 @@ void BuyMenuGUI::Update()
             }
             m_pCartList->DeleteItem(m_ListItemIndex);
             // If we're not at the bottom, then select the item in the same place as the one just deleted
-            if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
+            if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
             // If we're not at the top, then move selection up one
-            else if (m_ListItemIndex > 0)
+            } else if (m_ListItemIndex > 0) {
                 m_pCartList->SetSelectedIndex(--m_ListItemIndex);
             // Shift focus back to the item list
-            else
+            } else {
                 m_MenuFocus = ORDER;
+            }
 
             UpdateTotalCostLabel(m_pController->GetTeam());
 
@@ -1740,24 +1759,24 @@ void BuyMenuGUI::Update()
 							{
 								if (GetOwnedItemsAmount(pItem->m_pEntity->GetModuleAndPresetName()) > 0)
 								{
-									m_pCartList->AddItem(pItem->m_Name, "1 pc", pItemBitmap, pItem->m_pEntity);
+									AddCartItem(pItem->m_Name, "1 pc", pItemBitmap, pItem->m_pEntity);
 								}
 								else
 								{
 									if (m_OnlyShowOwnedItems)
 									{
 										if (IsAlwaysAllowedItem(pItem->m_Name))
-											m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+											AddCartItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
 									else
 									{
-										m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+										AddCartItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 									}
 								}
 							}
 							else
 							{
-								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+								AddCartItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
 
                             // If I just selected an AHuman, enable equipment selection mode
@@ -1829,6 +1848,14 @@ void BuyMenuGUI::Update()
                         m_ListItemIndex = m_pCartList->GetSelectedIndex();
                         m_pCartList->ScrollToSelected();
 
+                        // We want to allow the user to shift-click to clear the entire cart
+                        // In future it would be nice to add the concept of a modifier key to the controller,
+                        // So we can do this for gamepad inputs too
+                        if (g_UInputMan.FlagShiftState()) {
+                            ClearCartList();
+                            pItem = nullptr;
+                        }
+
                         if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                             int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                             for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
@@ -1843,14 +1870,15 @@ void BuyMenuGUI::Update()
                         }
                         m_pCartList->DeleteItem(m_ListItemIndex);
                         // If we're not at the bottom, then select the item in the same place as the one just deleted
-                        if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
+                        if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
                             m_pCartList->SetSelectedIndex(m_ListItemIndex);
                         // If we're not at the top, then move selection up one
-                        else if (m_ListItemIndex > 0)
+                        } else if (m_ListItemIndex > 0) {
                             m_pCartList->SetSelectedIndex(--m_ListItemIndex);
                         // Shift focus back to the item list
-                        else
+                        } else {
                             m_MenuFocus = ORDER;
+                        }
 
                         UpdateTotalCostLabel(m_pController->GetTeam());
 
@@ -2191,7 +2219,7 @@ bool BuyMenuGUI::DeployLoadout(int index)
 			{
 				canAdd = false;
 				// Add manually with pcs counter
-				m_pCartList->AddItem((*cItr)->GetPresetName(), "1 pc", pItemBitmap, *cItr);
+				AddCartItem((*cItr)->GetPresetName(), "1 pc", pItemBitmap, *cItr);
 			}
 			else
 				canAdd = false;
@@ -2201,7 +2229,7 @@ bool BuyMenuGUI::DeployLoadout(int index)
 			canAdd = true;
 
 		if (canAdd)
-			m_pCartList->AddItem((*cItr)->GetPresetName(), (*cItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *cItr);
+			AddCartItem((*cItr)->GetPresetName(), (*cItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *cItr);
     }
     // Now set the craft to what the loadout specifies, if anything
     if (m_Loadouts[index].GetDeliveryCraft())

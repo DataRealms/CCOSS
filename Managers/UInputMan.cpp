@@ -713,7 +713,7 @@ namespace RTE {
 				}
 			}
 			if (e.type == SDL_MOUSEMOTION) {
-				m_RawMouseMovement.SetXY(e.motion.xrel, e.motion.yrel);
+				m_RawMouseMovement += Vector(e.motion.xrel, e.motion.yrel);
 				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
 				if (g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					int x{0};

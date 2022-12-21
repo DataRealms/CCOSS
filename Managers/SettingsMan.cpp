@@ -111,6 +111,8 @@ namespace RTE {
 			reader >> g_FrameMan.m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
 			reader >> g_FrameMan.m_ResMultiplier;
+		} else if (propName == "EnableVsync") {
+			reader >> g_FrameMan.m_EnableVsync;
 		} else if (propName == "DisableMultiScreenResolutionValidation") {
 			reader >> g_FrameMan.m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "ForceVirtualFullScreenGfxDriver") {
@@ -321,6 +323,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_ResX);
 		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
+		writer.NewPropertyWithValue("EnableVsync", g_FrameMan.m_EnableVsync);
 		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
 		writer.NewPropertyWithValue("ForceVirtualFullScreenGfxDriver", g_FrameMan.m_ForceVirtualFullScreenGfxDriver);
 		writer.NewPropertyWithValue("ForceDedicatedFullScreenGfxDriver", g_FrameMan.m_ForceDedicatedFullScreenGfxDriver);

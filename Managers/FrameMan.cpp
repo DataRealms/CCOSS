@@ -338,7 +338,11 @@ namespace RTE {
 			RTEAbort("Failed to load OpenGL");
 		}
 
-		SDL_GL_SetSwapInterval(m_EnableVsync);
+		if (SDL_GL_SetSwapInterval(m_EnableVsync)) {
+			g_ConsoleMan.PrintString("Unsupported Vsync value, falling back to basic Vsync.");
+			m_EnableVsync = 1;
+			SDL_GL_SetSwapInterval(1);
+		}
 
 		m_ScreenShader = std::make_unique<ScreenShader>();
 		glGenTextures(1, &m_ScreenTexture);

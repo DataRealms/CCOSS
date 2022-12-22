@@ -18,3 +18,5 @@ compile_commands.json
 /Documentation/Doxygen/Output
 MemCleanupInfo.txt
 RTEA.vcxproj.user
+.DS_Store
+.vscode

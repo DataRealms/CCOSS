@@ -320,6 +320,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
+
+- `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
+
 - Buy Menu Quality-of-Life improvements.
 	Shift-clicking an item in the cart will now empty the entire cart.
 	When Smart Buy Menu Navigation is enabled, items will be indented to signify what actor's inventory they belong to.
@@ -347,6 +351,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
 
@@ -518,7 +524,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
+- Fix fire weapons causing extreme lag.
 
 </details>
 

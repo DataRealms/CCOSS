@@ -9,13 +9,13 @@
 #ifdef _WIN32
 #define DebuggerBreak __debugbreak()
 #else
-#define DebuggerBreak std::exit(EXIT_FAILURE)
+#define DebuggerBreak std::abort()
 #endif
 
 #ifndef RELEASE_BUILD
 #define AbortAction DebuggerBreak
 #else
-#define AbortAction std::exit(EXIT_FAILURE)
+#define AbortAction std::abort()
 #endif
 
 namespace RTE {

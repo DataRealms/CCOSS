@@ -74,7 +74,7 @@ int PresetMan::Save(Writer &writer) const
 
 void PresetMan::Destroy()
 {
-    for (vector<DataModule *>::iterator dmItr = m_pDataModules.begin(); dmItr != m_pDataModules.end(); ++dmItr)
+    for (std::vector<DataModule *>::iterator dmItr = m_pDataModules.begin(); dmItr != m_pDataModules.end(); ++dmItr)
     {
         delete (*dmItr);
     }
@@ -232,20 +232,20 @@ const std::string PresetMan::GetDataModuleName(int whichModule)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the ID of a loaded DataModule.
 
-int PresetMan::GetModuleID(string moduleName)
+int PresetMan::GetModuleID(std::string moduleName)
 {
     // Lower-case search name so we can match up against the already-lowercase names in m_DataModuleIDs
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), ::tolower);
 
     // First pass
-    map<string, size_t>::iterator itr = m_DataModuleIDs.find(moduleName);
+    std::map<std::string, size_t>::iterator itr = m_DataModuleIDs.find(moduleName);
     if (itr != m_DataModuleIDs.end())
         return (*itr).second;
 
     // Try with or without the .rte on the end before giving up
     int dotPos = moduleName.find_last_of('.');
     // Wasnt, so try adding it
-    if (dotPos == string::npos)
+    if (dotPos == std::string::npos)
         moduleName = moduleName + System::GetModulePackageExtension();
     // There was ".rte", so try to shave it off the name
     else
@@ -294,7 +294,7 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
         return -1;
 
     int slashPos = dataPath.find_first_of('/');
-    if (slashPos == string::npos)
+    if (slashPos == std::string::npos)
         slashPos = dataPath.find_first_of('\\');
 
     return GetModuleID(dataPath.substr(0, slashPos));
@@ -309,7 +309,7 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 //                  If there already is an instance defined, nothing happens. If there
 //                  is not, a clone is made of the passed-in Entity and added to the library.
 
-bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwriteSame, string readFromFile)
+bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwriteSame, std::string readFromFile)
 {
     RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
@@ -321,7 +321,7 @@ bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwri
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a previously read in (defined) Entity, by type and instance name.
 
-const Entity * PresetMan::GetEntityPreset(string type, string preset, int whichModule)
+const Entity * PresetMan::GetEntityPreset(std::string type, std::string preset, int whichModule)
 {
     RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
@@ -329,7 +329,7 @@ const Entity * PresetMan::GetEntityPreset(string type, string preset, int whichM
 
     // Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
     int slashPos = preset.find_first_of('/');
-    if (slashPos != string::npos)
+    if (slashPos != std::string::npos)
     {
         // Get the module ID and cut off the module specifier in the string
         whichModule = GetModuleID(preset.substr(0, slashPos));
@@ -380,7 +380,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
     int whichModule = reader.GetReadModuleID();
     RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
 
-    string ClassName;
+    std::string ClassName;
     const Entity::ClassInfo *pClass = 0;
     Entity *pNewInstance = 0;
     const Entity *pReturnPreset = 0;
@@ -394,7 +394,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 		pNewInstance = pClass->NewInstance();
 
 		// Get this before reading entity, since if it's the last one in its datafile, the stream will show the parent file instead
-		string entityFilePath = reader.GetCurrentFilePath();
+        std::string entityFilePath = reader.GetCurrentFilePath();
 
 		// Try to read in the preset instance's data from the reader
 		if (pNewInstance && pNewInstance->Create(reader, false) < 0)
@@ -441,7 +441,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
     int whichModule = reader.GetReadModuleID();
     RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
 
-    string ClassName;
+    std::string ClassName;
     const Entity::ClassInfo *pClass = 0;
     Entity *pNewInstance = 0;
     // Load class name and then preset instance
@@ -454,7 +454,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
         pNewInstance = pClass->NewInstance();
 
         // Get this before reading entity, since if it's the last one in its datafile, the stream will show the parent file instead
-        string entityFilePath = reader.GetCurrentFilePath();
+        std::string entityFilePath = reader.GetCurrentFilePath();
 
         // Try to read in the preset instance's data from the reader
         if (pNewInstance && pNewInstance->Create(reader, false) < 0)
@@ -480,7 +480,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds to a list all previously read in (defined) Entitys, by type.
 
-bool PresetMan::GetAllOfType(list<Entity *> &entityList, string type, int whichModule)
+bool PresetMan::GetAllOfType(std::list<Entity *> &entityList, std::string type, int whichModule)
 {
     if (type.empty())
         return false;
@@ -581,13 +581,13 @@ bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::ve
 // Description:     Returns a previously read in (defined) Entity which is randomly
 //                  selected from a specific group.
 
-Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
+Entity * PresetMan::GetRandomOfGroup(std::string group, std::string type, int whichModule)
 {
     RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
-    list<Entity *> entityList;
+    std::list<Entity *> entityList;
 
     // All modules
     if (whichModule < 0)
@@ -611,7 +611,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
     // Pick one and return it
     int current = 0;
     int selection = RandomNum<int>(0, entityList.size() - 1);
-    for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
             return (*itr);
@@ -629,14 +629,14 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 // Description:     Returns a previously read in (defined) Entity which is randomly
 //                  selected from a specific group.
 
-Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, int whichModule)
+Entity * PresetMan::GetRandomBuyableOfGroupFromTech(std::string group, std::string type, int whichModule)
 {
     RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
-    list<Entity *> entityList;
-    list<Entity *> tempList;
+    std::list<Entity *> entityList;
+    std::list<Entity *> tempList;
 
 	// All modules
 	if (whichModule < 0) {
@@ -655,7 +655,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		if (group == "Brains")
 		{
 			foundAny = false;
-			for (list<Entity *>::iterator oItr = tempList.begin(); oItr != tempList.end(); ++oItr)
+			for (std::list<Entity *>::iterator oItr = tempList.begin(); oItr != tempList.end(); ++oItr)
 			{
 				entityList.push_back(*oItr);
 				foundAny = true;
@@ -664,7 +664,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		else
 		{
 			foundAny = false;
-			for (list<Entity *>::iterator oItr = tempList.begin(); oItr != tempList.end(); ++oItr)
+			for (std::list<Entity *>::iterator oItr = tempList.begin(); oItr != tempList.end(); ++oItr)
 			{
 				SceneObject * pSObject = dynamic_cast<SceneObject *>(*oItr);
 				// Buyable and not brain?
@@ -686,7 +686,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
     int selection = RandomNum<int>(0, entityList.size() - 1);
 
 	int totalWeight = 0;
-	for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
+	for (std::list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		totalWeight += (*itr)->GetRandomWeight();
 
 	// Use random weights if looking in specific modules
@@ -697,7 +697,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 
 		selection = RandomNum(0, totalWeight - 1);
 
-		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
+		for (std::list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
 			bool found = false;
 			int bucketCounter = 0;
@@ -723,7 +723,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 	}
 	else
 	{
-		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
+		for (std::list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
 			if (current == selection)
 				return (*itr);
@@ -743,7 +743,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 //                  associated with a specific group, and only exist in a specific module
 //                  space.
 
-bool PresetMan::GetAllOfGroupInModuleSpace(list<Entity *> &entityList, string group, string type, int whichModuleSpace)
+bool PresetMan::GetAllOfGroupInModuleSpace(std::list<Entity *> &entityList, std::string group, std::string type, int whichModuleSpace)
 {
     RTEAssert(!group.empty(), "Looking for empty group!");
 
@@ -774,13 +774,13 @@ bool PresetMan::GetAllOfGroupInModuleSpace(list<Entity *> &entityList, string gr
 //                  a specific group, randomly selected and only exist in a specific module
 //                  space.
 
-Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int whichModuleSpace)
+Entity * PresetMan::GetRandomOfGroupInModuleSpace(std::string group, std::string type, int whichModuleSpace)
 {
     RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
-    list<Entity *> entityList;
+    std::list<Entity *> entityList;
 
     // All modules
     if (whichModuleSpace < 0)
@@ -803,7 +803,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
     // Pick one and return it
     int current = 0;
     int selection = RandomNum<int>(0, entityList.size() - 1);
-    for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
             return (*itr);
@@ -820,11 +820,11 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:    Gets the data file path of a previously read in (defined) Entity.
 
-string PresetMan::GetEntityDataLocation(string type, string preset, int whichModule)
+std::string PresetMan::GetEntityDataLocation(std::string type, std::string preset, int whichModule)
 {
     RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
-    string pRetPath = "";
+    std::string pRetPath = "";
 
     // All modules
     if (whichModule < 0)
@@ -965,7 +965,7 @@ void PresetMan::RegisterGroup(std::string newGroup, int whichModule)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the list of all groups registered in a specific module.
 
-bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withType) const
+bool PresetMan::GetGroups(std::list<std::string> &groupList, int whichModule, std::string withType) const
 {
     RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
@@ -977,7 +977,7 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
         // Get all applicable groups
         if (withType == "All" || withType.empty())
         {
-            for (list<string>::const_iterator gItr = m_TotalGroupRegister.begin(); gItr != m_TotalGroupRegister.end(); ++gItr)
+            for (std::list<std::string>::const_iterator gItr = m_TotalGroupRegister.begin(); gItr != m_TotalGroupRegister.end(); ++gItr)
                 groupList.push_back(*gItr);
 
             foundAny = !m_TotalGroupRegister.empty();
@@ -995,8 +995,8 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
         // Get ALL groups of that module
         if (withType == "All" || withType.empty())
         {
-            const list<string> *pGroupList = m_pDataModules[whichModule]->GetGroupRegister();
-            for (list<string>::const_iterator gItr = pGroupList->begin(); gItr != pGroupList->end(); ++gItr)
+            const std::list<std::string> *pGroupList = m_pDataModules[whichModule]->GetGroupRegister();
+            for (std::list<std::string>::const_iterator gItr = pGroupList->begin(); gItr != pGroupList->end(); ++gItr)
                 groupList.push_back(*gItr);
 
             foundAny = !pGroupList->empty();
@@ -1016,7 +1016,7 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
 // Description:     Fills out a list with all groups registered in all official, PLUS a
 //                  a specific non-official module as well.
 
-bool PresetMan::GetModuleSpaceGroups(list<string> &groupList, int whichModule, string withType) const
+bool PresetMan::GetModuleSpaceGroups(std::list<std::string> &groupList, int whichModule, std::string withType) const
 {
     RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
@@ -1028,7 +1028,7 @@ bool PresetMan::GetModuleSpaceGroups(list<string> &groupList, int whichModule, s
         // Just get all groups ever registered
         if (withType == "All" || withType.empty())
         {
-            for (list<string>::const_iterator gItr = m_TotalGroupRegister.begin(); gItr != m_TotalGroupRegister.end(); ++gItr)
+            for (std::list<std::string>::const_iterator gItr = m_TotalGroupRegister.begin(); gItr != m_TotalGroupRegister.end(); ++gItr)
                 groupList.push_back(*gItr);
 
             foundAny = !m_TotalGroupRegister.empty();

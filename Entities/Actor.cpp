@@ -459,7 +459,7 @@ int Actor::Save(Writer &writer) const
     writer.NewProperty("HolsterOffset");
     writer << m_HolsterOffset;
 	writer.NewPropertyWithValue("ReloadOffset", m_ReloadOffset);
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         writer.NewProperty("AddInventory");
         writer << **itr;
@@ -492,7 +492,7 @@ void Actor::Destroy(bool notInherited)
 	delete m_DeathSound;
 	delete m_AlarmSound;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);
 
     if (!notInherited)
@@ -536,7 +536,7 @@ float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult
     totalValue += GetGoldCarried();
 
     MOSprite *pItem = 0;
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pItem = dynamic_cast<MOSprite *>(*itr);
         if (pItem)
@@ -552,12 +552,12 @@ float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult
 // Description:     Shows whether this carries a specifically named object in its inventory.
 //                  Also looks through the inventories of potential passengers, as applicable.
 
-bool Actor::HasObject(string objectName) const
+bool Actor::HasObject(std::string objectName) const
 {
     if (MOSRotating::HasObject(objectName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObject(objectName))
             return true;
@@ -579,7 +579,7 @@ bool Actor::HasObjectInGroup(std::string groupName) const
     if (MOSRotating::HasObjectInGroup(groupName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObjectInGroup(groupName))
             return true;
@@ -605,7 +605,7 @@ void Actor::SetTeam(int team)
 
     // Also set all actors in the inventory
     Actor *pActor = 0;
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pActor = dynamic_cast<Actor *>(*itr);
         if (pActor)
@@ -734,7 +734,7 @@ void Actor::RestDetection()
 void Actor::AddAIMOWaypoint(const MovableObject *pMOWaypoint)
 {
     if (g_MovableMan.ValidMO(pMOWaypoint))
-        m_Waypoints.push_back(pair<Vector, const MovableObject *>(pMOWaypoint->GetPos(), pMOWaypoint));
+        m_Waypoints.push_back(std::pair<Vector, const MovableObject *>(pMOWaypoint->GetPos(), pMOWaypoint));
 }
 
 
@@ -774,13 +774,13 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.
 
-void Actor::RemoveInventoryItem(string presetName)
+void Actor::RemoveInventoryItem(std::string presetName)
 {
 	if (!IsInventoryEmpty())
 	{
 		//while(HasObject(presetName))
 		//{
-			for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+			for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
 			{
 				if ((*gItr) && (*gItr)->GetPresetName() == presetName)
 				{
@@ -877,7 +877,7 @@ void Actor::DropAllInventory()
     Actor *pPassenger = 0;
     float velMin, velMax, angularVel;
     Vector gibROffset, gibVel;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+    for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
         // Get handy handle to the object we're putting
         pObject = *gItr;
@@ -994,7 +994,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
     Actor *pPassenger = 0;
     float velMin, velRange, angularVel;
     Vector gibROffset, gibVel;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+    for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
         // Get handy handle to the object we're putting
         pObject = *gItr;
@@ -1334,8 +1334,8 @@ void Actor::UpdateAI()
         }
 
         // Weedle out any MO's we have waypoints to that aren't valid anymore
-        list<pair<Vector, const MovableObject *> >::iterator eraseItr;
-        for (list<pair<Vector, const MovableObject *> >::iterator itr = m_Waypoints.begin(); itr != m_Waypoints.end();)
+        std::list<std::pair<Vector, const MovableObject *> >::iterator eraseItr;
+        for (auto itr = m_Waypoints.begin(); itr != m_Waypoints.end();)
         {
             // Check to see that an MO we're going after still exists
             if ((*itr).second && !g_MovableMan.ValidMO((*itr).second))
@@ -1425,7 +1425,7 @@ void Actor::Update()
 		Vector notUsed;
         // See if we are close enough to the next move target that we should grab the next in the path that is out of proximity range
         Vector pathPointVec;
-        for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
+        for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
         {
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
             // Make sure we are within range AND have a clear sight to the path point we're about to eliminate, or it might be around a corner
@@ -1879,8 +1879,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         // Draw the AI paths, from the ultimate destination back up to the actor's position.
         // We do this backwards so the lines won't crawl and the dots can be evenly spaced throughout
         Vector waypoint;
-        list<pair<Vector, const MovableObject *> >::reverse_iterator vLast, vItr;
-        list<Vector>::reverse_iterator lLast, lItr;
+        std::list<std::pair<Vector, const MovableObject *> >::reverse_iterator vLast, vItr;
+        std::list<Vector>::reverse_iterator lLast, lItr;
         int skipPhase = 0;
 
         // Draw the line between the end of the movepath and the first waypoint after that, if any
@@ -1958,21 +1958,21 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
         Actor *pPrevAdj = 0;
         Actor *pNextAdj = 0;
-        list<Actor *> *pRoster = g_MovableMan.GetTeamRoster(m_Team);
+        std::list<Actor *> *pRoster = g_MovableMan.GetTeamRoster(m_Team);
 
         if (pRoster->size() > 1)
         {
             // Find this in the list, both ways
-            list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
+            std::list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
             RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
-            list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
+            std::list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
             RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
 
             // Find the adjacent actors
             if (selfItr != pRoster->end())
             {
                 // Get the previous available actor in the list (not controlled by another player)
-                list<Actor *>::reverse_iterator prevItr = selfRItr;
+                std::list<Actor *>::reverse_iterator prevItr = selfRItr;
                 do
                 {
                     if (++prevItr == pRoster->rend())
@@ -1984,7 +1984,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 // Get the next actor in the list (not controlled by another player)
-                list<Actor *>::iterator nextItr = selfItr;
+                std::list<Actor *>::iterator nextItr = selfItr;
                 do
                 {
                     if (++nextItr == pRoster->end())

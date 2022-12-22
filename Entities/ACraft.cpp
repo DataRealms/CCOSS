@@ -29,7 +29,7 @@
 namespace RTE {
 
 AbstractClassInfo(ACraft, Actor);
-const string ACraft::Exit::c_ClassName = "Exit";
+const std::string ACraft::Exit::c_ClassName = "Exit";
 
 bool ACraft::s_CrabBombInEffect = false;
 
@@ -327,9 +327,9 @@ int ACraft::Create(const ACraft &reference)
 	} else if (reference.m_HatchOpenSound) {
 		m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone());
 	}
-	for (deque<MovableObject *>::const_iterator niItr = reference.m_CollectedInventory.begin(); niItr != reference.m_CollectedInventory.end(); ++niItr)
+	for (std::deque<MovableObject *>::const_iterator niItr = reference.m_CollectedInventory.begin(); niItr != reference.m_CollectedInventory.end(); ++niItr)
         m_CollectedInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
-    for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
+    for (std::list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
         m_Exits.push_back(*eItr);
     m_CurrentExit = m_Exits.begin();
     m_ExitInterval = reference.m_ExitInterval;
@@ -412,7 +412,7 @@ int ACraft::Save(Writer &writer) const
     writer << m_HatchOpenSound;
     writer.NewProperty("HatchCloseSound");
     writer << m_HatchCloseSound;
-    for (list<Exit>::const_iterator itr = m_Exits.begin(); itr != m_Exits.end(); ++itr)
+    for (std::list<Exit>::const_iterator itr = m_Exits.begin(); itr != m_Exits.end(); ++itr)
     {
         writer.NewProperty("AddExit");
         writer << (*itr);
@@ -466,7 +466,7 @@ float ACraft::GetTotalValue(int nativeModule, float foreignMult, float nativeMul
     float totalValue = Actor::GetTotalValue(nativeModule, foreignMult, nativeMult);
 
     MOSprite *pItem = 0;
-    for (deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
     {
         pItem = dynamic_cast<MOSprite *>(*itr);
         if (pItem)
@@ -483,12 +483,12 @@ float ACraft::GetTotalValue(int nativeModule, float foreignMult, float nativeMul
 // Description:     Shows whether this carries a specifically named object in its inventory.
 //                  Also looks through the inventories of potential passengers, as applicable.
 
-bool ACraft::HasObject(string objectName) const
+bool ACraft::HasObject(std::string objectName) const
 {
     if (Actor::HasObject(objectName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObject(objectName))
             return true;
@@ -510,7 +510,7 @@ bool ACraft::HasObjectInGroup(std::string groupName) const
     if (Actor::HasObjectInGroup(groupName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObjectInGroup(groupName))
             return true;
@@ -531,7 +531,7 @@ void ACraft::SetTeam(int team)
 
     // Also set all actors in the new inventory
     Actor *pActor = 0;
-    for (deque<MovableObject *>::iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_CollectedInventory.begin(); itr != m_CollectedInventory.end(); ++itr)
     {
         pActor = dynamic_cast<Actor *>(*itr);
         if (pActor)
@@ -601,8 +601,9 @@ void ACraft::CloseHatch()
         m_HatchTimer.Reset();
 
         // When closing, move all newly added inventory to the regular inventory list so it'll be ejected next time doors open
-        for (std::deque<MovableObject *>::const_iterator niItr = m_CollectedInventory.begin(); niItr != m_CollectedInventory.end(); ++niItr)
+        for (std::deque<MovableObject *>::const_iterator niItr = m_CollectedInventory.begin(); niItr != m_CollectedInventory.end(); ++niItr) {
             AddToInventoryBack(*niItr);
+        }
 
         // Clear the new inventory hold, it's all been moved to the regular inventory
         m_CollectedInventory.clear();
@@ -652,7 +653,7 @@ void ACraft::DropAllInventory()
             return;
 
         bool exitExists = false;
-        list<Exit>::iterator exit = m_Exits.begin();
+        std::list<Exit>::iterator exit = m_Exits.begin();
         // Check which exits are clear of the terrain, if any
         for (; exit != m_Exits.end(); ++exit)
         {
@@ -672,7 +673,7 @@ void ACraft::DropAllInventory()
         float antiGravBoost = 0;
         Actor *pPassenger = 0;
         bool droppedSomething = false;
-        for (deque<MovableObject *>::iterator exitee = m_Inventory.begin(); exitee != m_Inventory.end(); ++exitee)
+        for (std::deque<MovableObject *>::iterator exitee = m_Inventory.begin(); exitee != m_Inventory.end(); ++exitee)
         {
             // Select next clear exit
             do
@@ -890,7 +891,7 @@ void ACraft::Update()
         else if (m_Status == STABLE && m_ExitTimer.IsPastSimMS(EXITSUCKDELAYMS))
         {
             // See if any of the exits have sucked in an MO
-            for (list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit)
+            for (std::list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit)
             {
                 // If exit sucked in an MO, add it to invetory
                 MOSRotating *pNewObject = exit->SuckInMOs(this);
@@ -1033,7 +1034,7 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         Vector exitCorner;
         Vector arrowVec;
         // Draw the actual dotted lines
-        for (list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit)
+        for (std::list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit)
         {
             if (exit->CheckIfClear(m_Pos, m_Rotation, 18))
             {

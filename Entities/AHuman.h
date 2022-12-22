@@ -474,7 +474,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 //                  or just report that it's there or not.
 // Return value:    Whether a firearm was successfully switched to, or already held.
 
-    bool EquipDeviceInGroup(string group, bool doEquip = true);
+    bool EquipDeviceInGroup(std::string group, bool doEquip = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -489,7 +489,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 //                  or just report that it's there or not.
 // Return value:    Whether a firearm was successfully switched to, or already held.
 
-    bool EquipLoadedFirearmInGroup(string group, string exludeGroup, bool doEquip = true);
+    bool EquipLoadedFirearmInGroup(std::string group, std::string exludeGroup, bool doEquip = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -503,7 +503,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 //                  or just report that it's there or not.
 // Return value:    Whether a device was successfully switched to, or already held.
 
-    bool EquipNamedDevice(const string name, bool doEquip);
+    bool EquipNamedDevice(const std::string name, bool doEquip);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

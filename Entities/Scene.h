@@ -992,7 +992,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    Name of a parent scene.
 
-	string GetMetasceneParent() const { return m_MetasceneParent; }
+	std::string GetMetasceneParent() const { return m_MetasceneParent; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1386,7 +1386,7 @@ protected:
 	// Name of a scene which can be replaced by this scene in MetaGame
 	// Scenes with m_MetaSceneParent field set will be invisible for editors and activities unless
 	// ShowMetaScenes flag in settings.ini is set
-	string m_MetasceneParent;
+    std::string m_MetasceneParent;
 
 	// Whether this scene must be shown anywhere in UIs
 	bool m_IsMetagameInternal;

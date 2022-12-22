@@ -653,13 +653,13 @@ void BuyMenuGUI::SetModuleExpanded(int whichModule, bool expanded)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return the list of things currently in the purchase order list box.
 
-bool BuyMenuGUI::GetOrderList(list<const SceneObject *> &listToFill)
+bool BuyMenuGUI::GetOrderList(std::list<const SceneObject *> &listToFill)
 {
     if (m_pCartList->GetItemList()->empty())
         return false;
 
     const SceneObject *pSObject = 0;
-    for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+    for (std::vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
     {
         if (pSObject = dynamic_cast<const SceneObject *>((*itr)->m_pEntity))
             listToFill.push_back(pSObject);
@@ -668,7 +668,7 @@ bool BuyMenuGUI::GetOrderList(list<const SceneObject *> &listToFill)
     return true;
 }
 
-bool BuyMenuGUI::CommitPurchase(string presetName)
+bool BuyMenuGUI::CommitPurchase(std::string presetName)
 {
 	if (m_OwnedItems.size() > 0)
 	{
@@ -694,12 +694,12 @@ float BuyMenuGUI::GetTotalOrderCost()
 
 	if (m_OwnedItems.size() > 0)
 	{
-		map<string, int> orderedItems;
+        std::map<std::string, int> orderedItems;
 
-		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+		for (std::vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 		{
 			bool needsToBePaid = true;
-			string presetName = (*itr)->m_pEntity->GetModuleAndPresetName();
+            std::string presetName = (*itr)->m_pEntity->GetModuleAndPresetName();
 
 			if (orderedItems.find(presetName) != orderedItems.end())
 				orderedItems[presetName] = 1;
@@ -718,7 +718,7 @@ float BuyMenuGUI::GetTotalOrderCost()
 		if (m_pSelectedCraft)
 		{
 			bool needsToBePaid = true;
-			string presetName = m_pSelectedCraft->GetModuleAndPresetName();
+            std::string presetName = m_pSelectedCraft->GetModuleAndPresetName();
 
 			if (orderedItems.find(presetName) != orderedItems.end())
 				orderedItems[presetName] = 1;
@@ -736,7 +736,7 @@ float BuyMenuGUI::GetTotalOrderCost()
 	}
 	else
 	{
-		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+		for (std::vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 			totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
 
 		// Add the delivery craft's cost
@@ -790,7 +790,7 @@ float BuyMenuGUI::GetCraftMass() {
 
 int BuyMenuGUI::GetTotalOrderPassengers() const {
 	int passengers = 0;
-	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+	for (std::vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 	{
         const Actor* passenger = dynamic_cast<const Actor*>((*itr)->m_pEntity);
         if (passenger)
@@ -2050,7 +2050,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     SceneObject *pSObject = 0;
     const DataModule *pModule = 0;
     GUIBitmap *pItemBitmap = 0;
-    list<SceneObject *> tempList;
+    std::list<SceneObject *> tempList;
     for (int moduleID = 0; moduleID < catalogList.size(); ++moduleID)
     {
         // Don't add an empty module grouping
@@ -2059,7 +2059,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
             tempList.clear();
 
             // Move all valid/desired entities from the module list to the intermediate list
-            for (list<Entity *>::iterator oItr = catalogList[moduleID].begin(); oItr != catalogList[moduleID].end(); ++oItr)
+            for (std::list<Entity *>::iterator oItr = catalogList[moduleID].begin(); oItr != catalogList[moduleID].end(); ++oItr)
             {
                 pSObject = dynamic_cast<SceneObject *>(*oItr);
                 // Only add buyable and non-brain items, unless they are explicitly set to be available.
@@ -2076,7 +2076,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                 {
                     pItemBitmap = pModule->GetIcon() ? new AllegroBitmap(pModule->GetIcon()) : 0;
                     // Passing in ownership of the bitmap, making uppercase the name
-                    string name = pModule->GetFriendlyName();
+                    std::string name = pModule->GetFriendlyName();
                     transform(name.begin(), name.end(), name.begin(), ::toupper);
                     m_pShopList->AddItem(name, m_aExpandedModules[moduleID] ? "-" : "+", pItemBitmap, 0, moduleID);
                 }
@@ -2085,7 +2085,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                 if (moduleID == 0 || m_aExpandedModules[moduleID])
                 {
                     // Transfer from the temp intermediate list to the real gui list
-                    for (list<SceneObject *>::iterator tItr = tempList.begin(); tItr != tempList.end(); ++tItr)
+                    for (std::list<SceneObject *>::iterator tItr = tempList.begin(); tItr != tempList.end(); ++tItr)
                     {
                         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
                         pItemBitmap = new AllegroBitmap((*tItr)->GetGraphicalIcon());
@@ -2094,8 +2094,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
 						{
 							if (GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName()) > 0)
 							{
-								string amount = std::to_string(GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName())) + " pcs";
-
+                                std::string amount = std::to_string(GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName())) + " pcs";
 								m_pShopList->AddItem((*tItr)->GetPresetName(), amount , pItemBitmap, *tItr);
 							}
 							else
@@ -2199,9 +2198,9 @@ bool BuyMenuGUI::DeployLoadout(int index)
 	}
 
     // Get and add all the stuff in the selected loadout
-    list<const SceneObject *> *pCargo = m_Loadouts[index].GetCargoList();
+    std::list<const SceneObject *> *pCargo = m_Loadouts[index].GetCargoList();
     AllegroBitmap *pItemBitmap = 0;
-    for (list<const SceneObject *>::iterator cItr = pCargo->begin(); cItr != pCargo->end(); ++cItr)
+    for (std::list<const SceneObject *>::iterator cItr = pCargo->begin(); cItr != pCargo->end(); ++cItr)
     {
         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
         pItemBitmap = new AllegroBitmap(const_cast<SceneObject *>(*cItr)->GetGraphicalIcon());
@@ -2277,9 +2276,9 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 	{
 		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
 		{
-			list<Entity *> toRemove;
+            std::list<Entity *> toRemove;
 
-			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			for (std::list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
 			{
 				bool allowed = false;
 
@@ -2294,7 +2293,7 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 			}
 
 			// Remove items from the list
-			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+			for (std::list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
 				moduleList[moduleID].remove((*itr));
 		}
 	}
@@ -2304,9 +2303,9 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 	{
 		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
 		{
-			list<Entity *> toRemove;
+            std::list<Entity *> toRemove;
 
-			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			for (std::list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
 			{
 				bool allowed = true;
 
@@ -2321,7 +2320,7 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 			}
 
 			// Remove items from the list
-			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+			for (std::list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
 				moduleList[moduleID].remove((*itr));
 		}
 	}
@@ -2331,13 +2330,13 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 	{
 		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
 		{
-			list<Entity *> toRemove;
+            std::list<Entity *> toRemove;
 
-			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			for (std::list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
 			{
 				bool allowed = false;
 
-				for (map<string, int>::iterator itrA = m_OwnedItems.begin(); itrA != m_OwnedItems.end(); ++itrA)
+				for (std::map<std::string, int>::iterator itrA = m_OwnedItems.begin(); itrA != m_OwnedItems.end(); ++itrA)
 				{
 					if ((*itr)->GetModuleAndPresetName() == (*itrA).first && (*itrA).second > 0)
 						allowed = true;
@@ -2351,7 +2350,7 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 			}
 
 			// Remove items from the list
-			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+			for (std::list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
 				moduleList[moduleID].remove((*itr));
 		}
 	}
@@ -2366,13 +2365,13 @@ void BuyMenuGUI::AddObjectsToItemList(std::vector<std::list<Entity *>> &moduleLi
 void BuyMenuGUI::AddPresetsToItemList()
 {
     GUIBitmap *pItemBitmap = 0;
-    string loadoutLabel;
+    std::string loadoutLabel;
     float loadoutCost;
     const Actor *pPassenger = 0;
     char costString[256];
 
     // Go through all the presets, making intelligible list items from then for the GUI item list
-    for (vector<Loadout>::iterator lItr = m_Loadouts.begin(); lItr != m_Loadouts.end(); ++lItr)
+    for (std::vector<Loadout>::iterator lItr = m_Loadouts.begin(); lItr != m_Loadouts.end(); ++lItr)
     {
         loadoutLabel.clear();
         loadoutCost = 0;
@@ -2384,7 +2383,7 @@ void BuyMenuGUI::AddPresetsToItemList()
 			loadoutLabel = (*lItr).GetPresetName() + ":\n";
 
         // Go through the cargo setup of each loadout and encode a meaningful label for the list item
-        for (list<const SceneObject *>::iterator cItr = (*lItr).GetCargoList()->begin(); cItr != (*lItr).GetCargoList()->end(); ++cItr)
+        for (std::list<const SceneObject *>::iterator cItr = (*lItr).GetCargoList()->begin(); cItr != (*lItr).GetCargoList()->end(); ++cItr)
         {
             // If not the first one, add a comma separator to the label
             if (cItr != (*lItr).GetCargoList()->begin())

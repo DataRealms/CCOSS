@@ -713,29 +713,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSloMoThreshold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of new MO:s that need to be added in a single update
-//                  to trigger the slo motion effect.
-// Arguments:       None.
-// Return value:    The number of MO's needed to be added to the MovableMan in a single
-//                  update to trigger the slo-mo effect
-
-    int GetSloMoThreshold() { return m_SloMoThreshold; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSloMoDuration
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time, in ms, that the slow-motion effect is active
-//                  once it's triggered.
-// Arguments:       None.
-// Return value:    The amount of time the slow-motion effect runs for, in ms sim time.
-
-    int GetSloMoDuration() { return m_SloMoDuration; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsParticleSettlingEnabled
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows whetehr particles are set to get copied to the terrain upon
@@ -951,13 +928,6 @@ protected:
     float m_SplashRatio;
     // The maximum number of loose items allowed.
     int m_MaxDroppedItems;
-
-    // Timer for measuring periods of slo-mo effects
-    Timer m_SloMoTimer;
-    // The threshold for how many new MOs in one frame will trigger the slo-mo effect
-    int m_SloMoThreshold;
-    // The amount of time, in ms, that the slo-mo effect should be in effect when it is triggered
-    int m_SloMoDuration;
 
     // Whether settling of particles is enabled or not
     bool m_SettlingEnabled;

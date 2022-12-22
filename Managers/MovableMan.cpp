@@ -67,9 +67,6 @@ void MovableMan::Clear()
     m_MOIDIndex.clear();
     m_SplashRatio = 0.75;
     m_MaxDroppedItems = 25;
-    m_SloMoTimer.Reset();
-    m_SloMoThreshold = 100;
-    m_SloMoDuration = 1000;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
 }
@@ -84,10 +81,6 @@ int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();
-
-    // Set the time limit to 0 so it will report as being past it from the get go
-    m_SloMoTimer.SetSimTimeLimitMS(0);
-    m_SloMoTimer.SetRealTimeLimitMS(0);
 
     return 0;
 }
@@ -288,11 +281,6 @@ void MovableMan::PurgeAllMOs()
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
-
-    // Set the time limit to 0 so it will report as being past it from the start of simulation
-    m_SloMoTimer.SetRealTimeLimitMS(0);
-    m_SloMoTimer.SetSimTimeLimitMS(0);
-
 	m_KnownObjects.clear();
 }
 
@@ -1710,16 +1698,6 @@ void MovableMan::Update()
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
 
     g_SceneMan.ClearAllMOIDDrawings();
-
-    ///////////////////////////////////////////////////
-    // Determine whether we should go into a brief period of slo-mo for when the sim gets hit heavily all of a sudden
-
-    if (m_AddedActors.size() + m_AddedActors.size() + m_AddedParticles.size() > m_SloMoThreshold)
-    {
-        m_SloMoTimer.SetSimTimeLimitMS(m_SloMoDuration);
-        m_SloMoTimer.Reset();
-    }
-    g_TimerMan.SetOneSimUpdatePerFrame(!m_SloMoTimer.IsPastSimTimeLimit());
 
     //////////////////////////////////////////////////////////////////////
     // TRANSFER ALL MOs ADDED THIS FRAME

@@ -156,10 +156,6 @@ namespace RTE {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
 			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
-		} else if (propName == "SloMoThreshold") {
-			reader >> g_MovableMan.m_SloMoThreshold;
-		} else if (propName == "SloMoDurationMS") {
-			reader >> g_MovableMan.m_SloMoDuration;
 		} else if (propName == "EndlessMode") {
 			reader >> m_EndlessMetaGameMode;
 		} else if (propName == "EnableCrabBombs") {
@@ -357,8 +353,6 @@ namespace RTE {
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
 		writer.NewPropertyWithValue("UnheldItemsHUDDisplayRange", m_UnheldItemsHUDDisplayRange);
 		writer.NewPropertyWithValue("AlwaysDisplayUnheldItemsInStrategicMode", m_AlwaysDisplayUnheldItemsInStrategicMode);
-		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
-		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);

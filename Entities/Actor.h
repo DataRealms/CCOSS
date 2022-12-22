@@ -835,7 +835,7 @@ ClassInfoGetters;
 // Arguments:       An pointer to the new item to add. Ownership IS TRANSFERRED!
 // Return value:    None..
 
-    virtual void AddInventoryItem(MovableObject *pItemToAdd) { if (pItemToAdd) { m_Inventory.emplace_back(pItemToAdd); } }
+    virtual void AddInventoryItem(MovableObject *pItemToAdd) { AddToInventoryBack(pItemToAdd); }
 
 
 
@@ -946,6 +946,18 @@ ClassInfoGetters;
 	/// </summary>
 	/// <returns>The maximum carriable mass of this Actor.</returns>
 	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
+
+    /// <summary>
+	/// Attempts to add an item to the front of our inventory.
+	/// </summary>
+	/// <returns>Whether we succeeded in adding the item. We may fail if the object doesn't exist or is set to delete.</returns>
+	bool AddToInventoryFront(MovableObject *itemToAdd);
+
+    /// <summary>
+	/// Attempts to add an item to the back of our inventory.
+	/// </summary>
+	/// <returns>Whether we succeeded in adding the item. We may fail if the object doesn't exist or is set to delete.</returns>
+	bool AddToInventoryBack(MovableObject *itemToAdd);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

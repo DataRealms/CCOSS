@@ -231,10 +231,9 @@ int Actor::Create(const Actor &reference)
     m_HolsterOffset = reference.m_HolsterOffset;
 	m_ReloadOffset = reference.m_ReloadOffset;
 
-    for (deque<MovableObject *>::const_iterator itr = reference.m_Inventory.begin();
-         itr != reference.m_Inventory.end();
-         ++itr)
-        m_Inventory.push_back(dynamic_cast<MovableObject *>((*itr)->Clone()));
+    for (std::deque<MovableObject*>::const_iterator itr = reference.m_Inventory.begin(); itr != reference.m_Inventory.end(); ++itr) {
+        m_Inventory.push_back(dynamic_cast<MovableObject*>((*itr)->Clone()));
+    }
 
     m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
@@ -377,7 +376,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
 		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
-        m_Inventory.push_back(pInvMO);
+        AddToInventoryBack(pInvMO);
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
@@ -759,7 +758,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     if (pSwapIn)
     {
 		pSwapIn->SetAsNoID();
-        m_Inventory.push_back(pSwapIn);
+        AddToInventoryBack(pSwapIn);
         playSound = true;
     }
 
@@ -825,7 +824,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     if (pSwapIn)
     {
 		pSwapIn->SetAsNoID();
-        m_Inventory.push_front(pSwapIn);
+        AddToInventoryFront(pSwapIn);
         playSound = true;
     }
 
@@ -855,7 +854,7 @@ MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, 
 	newInventoryItem->SetAsNoID();
 
     if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
-        m_Inventory.emplace_back(newInventoryItem);
+        AddToInventoryBack(newInventoryItem);
         return nullptr;
     }
     MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
@@ -947,6 +946,33 @@ void Actor::DropAllInventory()
     m_Inventory.clear();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryFront(MovableObject *itemToAdd)
+{
+    // This function is called often to add stuff we just removed from our hands, which may be set to delete
+    // So we need to guard against that lest we crash
+    if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+        return false;
+    }
+
+    m_Inventory.push_front(itemToAdd);
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryBack(MovableObject *itemToAdd)
+{
+    // This function is called often to add stuff we just removed from our hands, which may be set to delete
+    // So we need to guard against that lest we crash
+    if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+        return false;
+    }
+
+    m_Inventory.push_back(itemToAdd);
+    return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GibThis

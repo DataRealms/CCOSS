@@ -705,7 +705,7 @@ void AHuman::ChunkGold()
     if (m_GoldCarried >= 24) {
         pGoldMO = dynamic_cast<MovableObject *>(
             g_PresetMan.GetEntityPreset("MOSParticle", "24 oz Gold Brick")->Clone());
-        m_Inventory.push_front(pGoldMO);
+        AddToInventoryFront(pGoldMO);
         m_GoldCarried -= 24;
         m_GoldInInventoryChunk = 24;
     }
@@ -713,7 +713,7 @@ void AHuman::ChunkGold()
         pGoldMO = dynamic_cast<MovableObject *>(
 //            g_PresetMan.GetEntityPreset("MOSRotating", "10 Gold Brick")->Clone());
             g_PresetMan.GetEntityPreset("MOSParticle", "10 oz Gold Brick")->Clone());
-        m_Inventory.push_front(pGoldMO);
+        AddToInventoryFront(pGoldMO);
         m_GoldCarried -= 10;
         m_GoldInInventoryChunk = 10;
     }
@@ -721,7 +721,7 @@ void AHuman::ChunkGold()
     else if (m_GoldCarried >= 1) {
         pGoldMO = dynamic_cast<MovableObject *>(
             g_PresetMan.GetEntityPreset("MOPixel", "Gold Particle")->Clone());
-        m_Inventory.push_front(pGoldMO);
+        AddToInventoryFront(pGoldMO);
         m_GoldCarried -= 1;
         m_GoldInInventoryChunk = 1;
     }
@@ -872,7 +872,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 // Put back into the inventory what we had in our hands, if anything
                 if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice()) {
                     heldDevice->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -930,10 +930,18 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 {
                     heldDevice->Deactivate();
                     MovableObject *previouslyHeldItem = m_pFGArm->RemoveAttachable(heldDevice);
-                    // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
-                    // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
-                    if (previouslyHeldItem->GetsHitByMOs()) { previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
-                    m_Inventory.emplace_back(previouslyHeldItem);
+                    if (previouslyHeldItem) {
+                        // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
+                        // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
+                        if (previouslyHeldItem->GetsHitByMOs()) {
+#ifdef DRAW_MOID_LAYER
+                            previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true);
+#else
+                            previouslyHeldItem->SetTraveling(true);
+#endif
+                        }
+                        AddToInventoryBack(previouslyHeldItem);
+                    }
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -990,7 +998,7 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
                     m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -1047,7 +1055,7 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
                     heldDevice->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -1105,7 +1113,7 @@ bool AHuman::EquipThrowable(bool doEquip)
                 if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
                     heldDevice->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -1162,7 +1170,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
                 {
                     heldDevice->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -1249,7 +1257,7 @@ bool AHuman::EquipShield()
             if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
             {
                 heldDevice->Deactivate();
-                m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+                AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
             }
 
             // Now put the device we were looking for and found into the hand
@@ -1288,7 +1296,7 @@ bool AHuman::EquipShieldInBGArm()
 		// If we're holding a shield, but aren't supposed to, because we need to support the FG hand's two-handed device, then let go of the shield and put it back in inventory.
 		if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded()) {
 			m_pBGArm->GetHeldDevice()->Deactivate();
-			m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
+			AddToInventoryBack(m_pBGArm->RemoveAttachable(heldDevice));
 			return false;
 		}
 		return true;
@@ -1314,7 +1322,7 @@ bool AHuman::EquipShieldInBGArm()
             if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice())
             {
                 heldDevice->Deactivate();
-                m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
+                AddToInventoryBack(m_pBGArm->RemoveAttachable(heldDevice));
             }
 
             // Now put the device we were looking for and found into the hand
@@ -1337,7 +1345,7 @@ bool AHuman::UnequipFGArm() {
 	if (m_pFGArm) {
 		if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice()) {
 			heldDevice->Deactivate();
-			m_Inventory.push_back(m_pFGArm->RemoveAttachable(heldDevice));
+			AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
 			m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 			return true;
 		}
@@ -1351,7 +1359,7 @@ bool AHuman::UnequipBGArm() {
 	if (m_pBGArm) {
 		if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice()) {
 			heldDevice->Deactivate();
-			m_Inventory.push_back(m_pBGArm->RemoveAttachable(heldDevice));
+			AddToInventoryBack(m_pBGArm->RemoveAttachable(heldDevice));
 			m_pBGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 			return true;
 		}
@@ -3508,7 +3516,7 @@ void AHuman::Update()
 	if (m_pItemInReach && (m_pFGArm || m_pBGArm) && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
         Attachable *pMO = armToUse->RemoveAttachable(armToUse->GetHeldDevice());
-		if (pMO) { m_Inventory.push_back(pMO); }
+		AddToInventoryBack(pMO);
 		armToUse->SetHeldDevice(m_pItemInReach);
 		armToUse->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 		m_pItemInReach = nullptr;
@@ -3829,7 +3837,7 @@ void AHuman::Update()
 					float armMovementRateToUse = m_ArmSwingRate;
 					if (HeldDevice *heldDevice = arm->GetHeldDevice()) {
 						// For device sway, the Leg doesn't matter, but both HeldDevices (if there are 2) need to use the same Arm or it looks silly!
-						if (arm == m_pBGArm) {
+						if (arm == m_pBGArm && otherLeg) {
 							std::swap(legToSwingWith, otherLeg);
 						}
 						armMovementRateToUse = m_DeviceArmSwayRate * (heldDevice->IsOneHanded() ? 0.5F : 1.0F);

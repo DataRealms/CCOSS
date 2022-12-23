@@ -941,7 +941,6 @@
     <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="GUI\GUIWriter.cpp" />
->>>>>>>>> Temporary merge branch 2
     <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />

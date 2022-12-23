@@ -88,8 +88,6 @@ namespace RTE {
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
-		m_ForceVirtualFullScreenGfxDriver = false;
-		m_ForceDedicatedFullScreenGfxDriver = false;
 		m_DisableMultiScreenResolutionValidation = false;
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = m_PrimaryScreenResX = 0;
@@ -149,12 +147,6 @@ namespace RTE {
 				m_TempNetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::SetInitialGraphicsDriver() {
-		m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY) || m_ForceVirtualFullScreenGfxDriver || m_ForceDedicatedFullScreenGfxDriver;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +270,6 @@ namespace RTE {
 		}
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
-		SetInitialGraphicsDriver();
 
 		int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (m_Fullscreen) {
@@ -346,7 +337,6 @@ namespace RTE {
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
-		SetInitialGraphicsDriver();
 		set_color_depth(m_BPP);
 
 		int windowW = m_ResX * m_ResMultiplier;
@@ -356,10 +346,10 @@ namespace RTE {
 		}
 		glViewport(0, 0, windowW, windowH);
 
-		m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
+		m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+		m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 		m_WindowTransforms[0] = glm::mat4(1.0f);
-		m_WindowViewport[0] = glm::vec4(0,0, windowW, windowH);
-
+		
 		glEnable(GL_DEPTH_TEST);
 
 		if (m_NumScreens > 1 && m_Fullscreen) {
@@ -462,13 +452,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	glm::vec4 FrameMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
-		float aspectRatio = resX/static_cast<float>(resY);
+		float aspectRatio = resX / static_cast<float>(resY);
 		int width = windowW;
 		int height = width / aspectRatio + 0.5f;
 
 		if (height > windowH) {
 			height = windowH;
-			width = height/aspectRatio +0.5f;
+			width = height * aspectRatio +0.5f;
 		}
 
 		int offsetX = (windowW / 2) - (width / 2);
@@ -672,12 +662,12 @@ namespace RTE {
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
 		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
+			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
-			m_WindowViewport[0] = GetViewportLetterbox(m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowW, windowH);
 		}
 		set_palette(m_Palette);
-		RecreateBackBuffers();
+		// RecreateBackBuffers();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
@@ -732,9 +722,9 @@ namespace RTE {
 		int windowH = m_ResY * m_ResMultiplier;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowView[0] = glm::ortho<float>(0.0f, m_ResX * m_ResMultiplier, 0.0f, m_ResY * m_ResMultiplier, -1.0f, 1.0f);
+			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
-			m_WindowViewport[0] = GetViewportLetterbox(m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowW, windowH);
 		}
 		glViewport(0, 0, windowW, windowH);
 

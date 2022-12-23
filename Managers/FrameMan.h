@@ -604,9 +604,6 @@ namespace RTE {
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
-		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
-		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
-
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
 		int m_NumScreens; //!< Number of physical screens.
@@ -708,11 +705,6 @@ namespace RTE {
 
 
 #pragma region Create Breakdown
-		/// <summary>
-		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
-		/// </summary>
-		void SetInitialGraphicsDriver();
-
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>

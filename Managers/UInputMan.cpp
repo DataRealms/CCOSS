@@ -370,6 +370,7 @@ namespace RTE {
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_TrapMousePos = trap;
+			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(trap));
 		}
 		m_TrapMousePosPerPlayer[whichPlayer] = trap;
 	}
@@ -974,7 +975,7 @@ namespace RTE {
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos && m_GameHasAnyFocus) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					// SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);

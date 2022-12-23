@@ -1634,7 +1634,7 @@ bool AHuman::Look(float FOVSpread, float range)
     Vector aimPos = m_Pos;
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached())
+    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
     {
         aimPos = m_pFGArm->GetHeldDevice()->GetPos();
         aimDistance += m_pFGArm->GetHeldDevice()->GetSharpLength();

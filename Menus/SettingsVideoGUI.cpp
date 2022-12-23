@@ -27,10 +27,8 @@ namespace RTE {
 		m_VideoSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxVideoSettings"));
 
 		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
-		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Borderless] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
-		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledBorderless] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
-		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Dedicated] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
-		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledDedicated] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
+		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledFullscreen] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
 
 		m_TwoPlayerSplitscreenHSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenHoriz"));
 		m_TwoPlayerSplitscreenVSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenVert"));
@@ -100,8 +98,8 @@ namespace RTE {
 		m_CustomResolutionUpscaledCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxCustomUpscaled"));
 		m_CustomResolutionUpscaledCheckbox->SetCheck(m_NewResUpscaled);
 
-		m_CustomResolutionBorderlessRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioBorderlessDriver"));
-		m_CustomResolutionDedicatedRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioDedicatedDriver"));
+		m_CustomResolutionBorderlessRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioWindowedDriver"));
+		m_CustomResolutionDedicatedRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioFullscreenDriver"));
 		m_CustomResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyCustomResolution"));
 		m_CustomResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelCustomResolutionValidation"));
 		m_CustomResolutionMessageLabel->SetVisible(false);
@@ -230,15 +228,13 @@ namespace RTE {
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
 				break;
-			case ResolutionQuickChangeType::Borderless:
-			case ResolutionQuickChangeType::Dedicated:
+			case ResolutionQuickChangeType::Fullscreen:
 				m_NewFullscreen = true;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX();
 				m_NewResY = g_FrameMan.GetMaxResY();
 				break;
-			case ResolutionQuickChangeType::UpscaledBorderless:
-			case ResolutionQuickChangeType::UpscaledDedicated:
+			case ResolutionQuickChangeType::UpscaledFullscreen:
 				m_NewFullscreen = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = true;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
@@ -262,7 +258,7 @@ namespace RTE {
 			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
-			m_NewFullscreen = false;
+			m_NewFullscreen = (m_NewResX * newResMultiplier == g_FrameMan.GetMaxResX() && m_NewResY * newResMultiplier == g_FrameMan.GetMaxResY());
 
 			g_GUISound.ButtonPressSound()->Play();
 			ApplyNewResolution();
@@ -306,14 +302,10 @@ namespace RTE {
 			if (guiEvent.GetMsg() == GUIButton::Pushed) {
 				if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Windowed);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Borderless]) {
-					ApplyQuickChangeResolution(ResolutionQuickChangeType::Borderless);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledBorderless]) {
-					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledBorderless);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Dedicated]) {
-					ApplyQuickChangeResolution(ResolutionQuickChangeType::Dedicated);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledDedicated]) {
-					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledDedicated);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen]) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::Fullscreen);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledFullscreen]) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledFullscreen);
 				} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton) {
 					ApplyPresetResolution();
 				} else if (guiEvent.GetControl() == m_CustomResolutionApplyButton) {

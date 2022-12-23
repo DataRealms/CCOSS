@@ -62,10 +62,8 @@ namespace RTE {
 		/// </summary>
 		enum ResolutionQuickChangeType {
 			Windowed,
-			Borderless,
-			UpscaledBorderless,
-			Dedicated,
-			UpscaledDedicated,
+			Fullscreen,
+			UpscaledFullscreen,
 			QuickChangeTypeCount
 		};
 

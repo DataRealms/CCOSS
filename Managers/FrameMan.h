@@ -591,6 +591,7 @@ namespace RTE {
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
 		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
 		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
+		std::vector<glm::vec4> m_WindowViewport; //!< The viewports for all windows, to allow for preserved aspect ratios.
 		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
 		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
 		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
@@ -759,6 +760,23 @@ namespace RTE {
 		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
 		/// </summary>
 		void RecreateBackBuffers();
+
+		/// <summary>
+		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
+		/// </summary>
+		/// <param name="resX">
+		/// Desired horizontal resolution.
+		/// </param>
+		/// <param name="resY">
+		/// Desired vertical resolution.
+		/// </param>
+		/// <param name="windowW">
+		/// Window horizontal resolution.
+		/// </param>
+		/// <param name="windowH">
+		/// Window vertical resolution.
+		/// </param>
+		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
 #pragma region Draw Breakdown

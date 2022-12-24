@@ -68,6 +68,8 @@ void BuyMenuGUI::Clear()
     m_MenuCategory = CRAFT;
     m_MenuSpeed = 8.0;
     m_ListItemIndex = 0;
+    m_DraggedItemIndex = -1;
+    m_IsDragging = false;
     m_LastHoveredMouseIndex = 0;
     m_BlinkTimer.Reset();
     m_BlinkMode = NOBLINK;
@@ -1511,28 +1513,50 @@ void BuyMenuGUI::Update()
             m_FocusChange = 0;
         }
 
+        bool itemsChanged = false;
+
         int listSize = m_pCartList->GetItemList()->size();
-        if (pressDown) {
-            m_ListItemIndex++;
-            if (m_ListItemIndex >= listSize) {
-                m_ListItemIndex = listSize - 1;
-                // If at the end of the list and the player presses down, then switch focus to the BUY button
-                m_FocusChange = 1;
-                m_MenuFocus = OK;
-            } else {
-                // Only do list change logic if we actually did change
+        if (m_DraggedItemIndex != -1) {
+            if (pressDown && m_DraggedItemIndex < listSize - 1) {
+                m_IsDragging = true;
+                itemsChanged = true;
+                std::swap((*m_pCartList->GetItemList())[m_DraggedItemIndex], (*m_pCartList->GetItemList())[m_DraggedItemIndex + 1]);
+                std::swap((*m_pCartList->GetItemList())[m_DraggedItemIndex + 1]->m_ID, (*m_pCartList->GetItemList())[m_DraggedItemIndex]->m_ID);
+                m_ListItemIndex = ++m_DraggedItemIndex;
+                m_pCartList->SetSelectedIndex(m_ListItemIndex);
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+            } else if (pressUp && m_DraggedItemIndex > 0) {
+                m_IsDragging = true;
+                itemsChanged = true;
+                std::swap((*m_pCartList->GetItemList())[m_DraggedItemIndex], (*m_pCartList->GetItemList())[m_DraggedItemIndex - 1]);
+                std::swap((*m_pCartList->GetItemList())[m_DraggedItemIndex - 1]->m_ID, (*m_pCartList->GetItemList())[m_DraggedItemIndex]->m_ID);
+                m_ListItemIndex = --m_DraggedItemIndex;
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
-        } else if (pressUp) {
-            m_ListItemIndex--;
-            if (m_ListItemIndex < 0) {
-                m_ListItemIndex = 0;
-                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            } else {
-                // Only do list change logic if we actually did change
-                m_pCartList->SetSelectedIndex(m_ListItemIndex);
-                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+        } else {
+            if (pressDown) {
+                m_ListItemIndex++;
+                if (m_ListItemIndex >= listSize) {
+                    m_ListItemIndex = listSize - 1;
+                    // If at the end of the list and the player presses down, then switch focus to the BUY button
+                    m_FocusChange = 1;
+                    m_MenuFocus = OK;
+                } else {
+                    // Only do list change logic if we actually did change
+                    m_pCartList->SetSelectedIndex(m_ListItemIndex);
+                    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+                }
+            } else if (pressUp) {
+                m_ListItemIndex--;
+                if (m_ListItemIndex < 0) {
+                    m_ListItemIndex = 0;
+                    g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+                } else {
+                    // Only do list change logic if we actually did change
+                    m_pCartList->SetSelectedIndex(m_ListItemIndex);
+                    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+                }
             }
         }
 
@@ -1574,10 +1598,8 @@ void BuyMenuGUI::Update()
             m_pPopupBox->Resize(m_pPopupBox->GetWidth(), newHeight + 10);
         }
 
-        bool itemsChanged  = false;
-
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(PRESS_FACEBUTTON)) {        
+        if (m_pController->IsState(RELEASE_PRIMARY) && !m_IsDragging) {        
             itemsChanged = true;
             if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
@@ -1602,10 +1624,17 @@ void BuyMenuGUI::Update()
             } else {
                 m_MenuFocus = ORDER;
             }
-        } else if (m_pController->IsState(WEAPON_RELOAD)) {
+        } else if (m_pController->IsState(WEAPON_PICKUP)) {
             itemsChanged = true;
             DuplicateCartItem(m_ListItemIndex);
         }
+
+        if (m_pController->IsState(PRESS_PRIMARY)) {
+            m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
+        } else if (m_pController->IsState(RELEASE_PRIMARY)) {
+            m_DraggedItemIndex = -1;
+            m_IsDragging = false;
+        } 
 
         if (itemsChanged) {
             UpdateTotalCostLabel(m_pController->GetTeam());
@@ -1871,18 +1900,11 @@ void BuyMenuGUI::Update()
             // Events on the Cart List
 
             else if (anEvent.GetControl() == m_pCartList)
-            {
-                if (anEvent.GetMsg() == GUIListBox::MouseDown)
-                {
-                    m_pCartList->SetFocus();
-                    m_MenuFocus = ORDER;
-
+            {                
+                if (anEvent.GetMsg() == GUIListBox::MouseUp && !m_IsDragging) {
                     GUIListPanel::Item *pItem = m_pCartList->GetSelected();
                     if (pItem)
                     {
-                        m_ListItemIndex = m_pCartList->GetSelectedIndex();
-                        m_pCartList->ScrollToSelected();
-
                         if (anEvent.GetData() & GUIListBox::MOUSE_LEFT) {
                             // We want to allow the user to shift-click to clear the entire cart
                             // In future it would be nice to add the concept of a modifier key to the controller,
@@ -1940,18 +1962,48 @@ void BuyMenuGUI::Update()
                     {
                         // Don't let mouse movement change the index if it's still hovering inside the same item.
                         // This is to avoid erratic selection curosr if using both mouse and keyboard to work the menu
-                        if (m_LastHoveredMouseIndex != pItem->m_ID)
-                        {
-                            m_LastHoveredMouseIndex = pItem->m_ID;
+                        if (m_LastHoveredMouseIndex != pItem->m_ID) {
+                            if (m_DraggedItemIndex != -1 && m_DraggedItemIndex != pItem->m_ID) {
+                                m_IsDragging = true;
+                                int start = std::min(m_DraggedItemIndex, pItem->m_ID);
+                                int end = std::max(m_DraggedItemIndex, pItem->m_ID);
+                                int direction = pItem->m_ID > m_DraggedItemIndex ? 1 : -1;
+                                for (int i = start; i < end; i++) {
+                                    int oldIndex = m_DraggedItemIndex;
+                                    if (oldIndex + direction < 0 || oldIndex + direction >= m_pCartList->GetItemList()->size()) {
+                                        break;
+                                    }
 
+                                    m_DraggedItemIndex = oldIndex + direction;
+                                    std::swap((*m_pCartList->GetItemList())[oldIndex], (*m_pCartList->GetItemList())[oldIndex + direction]);
+                                    std::swap((*m_pCartList->GetItemList())[oldIndex + direction]->m_ID, (*m_pCartList->GetItemList())[oldIndex]->m_ID);
+                                }
+                            }
+
+                            m_LastHoveredMouseIndex = pItem->m_ID;
                             // Play select sound if new index
-                            if (m_ListItemIndex != pItem->m_ID)
+                            if (m_ListItemIndex != pItem->m_ID) {
                                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
-                            // Update the seleciton in both the GUI control and our menu
+                            }
+
+                            // Update the selection in both the GUI control and our menu
                             m_pCartList->SetSelectedIndex(m_ListItemIndex = pItem->m_ID);
                         }
                     }
                 }
+
+                if (anEvent.GetMsg() == GUIListBox::MouseDown) {
+                    m_pCartList->SetFocus();
+                    m_MenuFocus = ORDER;
+                    m_ListItemIndex = m_pCartList->GetSelectedIndex();
+                    m_pCartList->ScrollToSelected();
+                    if (anEvent.GetData() & GUIListBox::MOUSE_LEFT) {
+                        m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
+                    }
+                } else if (anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
+                    m_DraggedItemIndex = -1;
+                    m_IsDragging = false;
+                } 
             }
         }
     }

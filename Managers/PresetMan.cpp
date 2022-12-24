@@ -44,6 +44,7 @@ void PresetMan::Clear()
     m_OfficialModuleCount = 0;
     m_TotalGroupRegister.clear();
 	m_LastReloadedEntityPresetInfo.fill("");
+	m_ReloadEntityPresetCalledThisUpdate = false;
 }
 
 /*
@@ -895,6 +896,8 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 		}
 	}
 
+	m_ReloadEntityPresetCalledThisUpdate = true;
+
 	Reader reader(presetDataLocation.c_str(), true);
 	while (reader.NextProperty()) {
 		reader.ReadPropName();
@@ -907,8 +910,6 @@ bool PresetMan::ReloadEntityPreset(const std::string &presetName, const std::str
 		m_LastReloadedEntityPresetInfo[1] = className;
 		m_LastReloadedEntityPresetInfo[2] = moduleName == "" ? actualDataModuleOfPreset : moduleName; // If there was a module name, store it as-is so that if there's a data location warning, it persists on every quick reload.
 	}
-
-	m_ReloadEntityPresetCalledThisUpdate = true;
 	return true;
 }
 

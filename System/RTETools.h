@@ -12,38 +12,6 @@ namespace RTE {
 
 	extern std::mt19937 g_RNG; //!< The random number generator used for all random functions.
 
-#pragma region Physics Constants Getters
-	/// <summary>
-	/// Gets the ratio between the physics engine's meters and on-screen pixels.
-	/// </summary>
-	/// <returns>A float describing the current MPP ratio.</returns>
-	inline float GetMPP() { return c_MPP; }
-
-	/// <summary>
-	/// Gets the ratio between on-screen pixels and the physics engine's meters.
-	/// </summary>
-	/// <returns>A float describing the current PPM ratio.</returns>
-	inline float GetPPM() { return c_PPM; }
-
-	/// <summary>
-	/// Gets the ratio between the physics engine's Liters and on-screen pixels.
-	/// </summary>
-	/// <returns>A float describing the current LPP ratio.</returns>
-	inline float GetLPP() { return c_LPP; }
-
-	/// <summary>
-	/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
-	/// </summary>
-	/// <returns>A float describing the current PPL ratio.</returns>
-	inline float GetPPL() { return c_PPL; }
-
-	/// <summary>
-	/// Gets the default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
-	/// </summary>
-	/// <returns>A float describing the default pathfinder penetration value.</returns>
-	inline float GetPathFindingDefaultDigStrength() { return c_PathFindingDefaultDigStrength; }
-#pragma endregion
-
 #pragma region Random Numbers
 	/// <summary>
 	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.

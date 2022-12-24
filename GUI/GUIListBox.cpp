@@ -124,6 +124,8 @@ void GUIListBox::ReceiveSignal(GUIPanel *Source, int Code, int Data) {
 			AddEvent(GUIEvent::Notification, Select, 0);
 		} else if (Code == GUIListPanel::MouseDown) {
 			AddEvent(GUIEvent::Notification, MouseDown, Data);
+		} else if (Code == GUIListPanel::MouseUp) {
+			AddEvent(GUIEvent::Notification, MouseUp, Data);
 		} else if (Code == GUIListPanel::DoubleClick) {
 			AddEvent(GUIEvent::Notification, DoubleClick, 0);
 		} else if (Code == GUIListPanel::KeyDown) {

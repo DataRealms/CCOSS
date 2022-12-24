@@ -764,6 +764,10 @@ protected:
     float m_MenuSpeed;
     // Which item in the currently focused list box we have selected
     int m_ListItemIndex;
+    // Which item we're dragging
+    int m_DraggedItemIndex;
+    // Whether we're currently dragging
+    bool m_IsDragging;
     // Which object was last hovered over by the mouse, to avoid repeatedly selecting hte same item over and over when mose only moves a pixel
     int m_LastHoveredMouseIndex;
     // Which item in each of the categories was last selected, so the scrolling doesn't have to be redone each time user flips back and forth

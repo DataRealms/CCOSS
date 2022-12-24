@@ -349,6 +349,45 @@ void BuyMenuGUI::AddCartItem(const std::string &name, const std::string &rightTe
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
+    std::vector<GUIListPanel::Item*> addedItems;
+
+    auto addDuplicateItemAtEnd = [&](const GUIListPanel::Item *itemToCopy) {
+        GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(itemToCopy->m_pBitmap)->GetBitmap());
+        m_pCartList->AddItem(itemToCopy->m_Name, itemToCopy->m_RightText, pItemBitmap, itemToCopy->m_pEntity, itemToCopy->m_ExtraIndex);
+        return m_pCartList->GetItem(m_pCartList->GetItemList()->size() - 1);
+    };
+
+    bool copyingActorWithInventory = m_pCartList->GetItem(itemIndex)->m_pEntity->GetClassName() == "AHuman";
+
+    int currentIndex = itemIndex;
+    do {
+        GUIListPanel::Item *new_item = addDuplicateItemAtEnd(*(m_pCartList->GetItemList()->begin() + currentIndex));
+        new_item->m_ID = currentIndex;
+        addedItems.push_back(new_item);
+
+        currentIndex++;
+    } while (copyingActorWithInventory && 
+        currentIndex < m_pCartList->GetItemList()->size() - addedItems.size() && 
+        dynamic_cast<const HeldDevice *>(m_pCartList->GetItem(currentIndex)->m_pEntity));
+
+    // Fix up the IDs of the items we're about to shift
+    for (auto itr = m_pCartList->GetItemList()->begin() + itemIndex, itr_end = m_pCartList->GetItemList()->end() - addedItems.size(); itr < itr_end; ++itr) {
+        (*itr)->m_ID += addedItems.size();
+    }
+
+    // Now shift all items up to make space
+    std::copy(m_pCartList->GetItemList()->begin() + itemIndex, m_pCartList->GetItemList()->end() - addedItems.size(), m_pCartList->GetItemList()->begin() + itemIndex + addedItems.size());
+    
+    // And copy our new items into place
+    std::copy(addedItems.begin(), addedItems.end(), m_pCartList->GetItemList()->begin() + itemIndex);
+
+    // Reselect the item, so our selection doesn't move
+    m_pCartList->SetSelectedIndex(itemIndex);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool BuyMenuGUI::LoadAllLoadoutsFromFile()
 {
     // First clear out all loadouts
@@ -1534,8 +1573,11 @@ void BuyMenuGUI::Update()
             m_pPopupBox->Resize(m_pPopupBox->GetWidth(), newHeight + 10);
         }
 
+        bool itemsChanged  = false;
+
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(PRESS_FACEBUTTON)) {            
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {        
+            itemsChanged = true;
             if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                 for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
@@ -1559,7 +1601,12 @@ void BuyMenuGUI::Update()
             } else {
                 m_MenuFocus = ORDER;
             }
+        } else if (m_pController->IsState(WEAPON_RELOAD)) {
+            itemsChanged = true;
+            DuplicateCartItem(m_ListItemIndex);
+        }
 
+        if (itemsChanged) {
             UpdateTotalCostLabel(m_pController->GetTeam());
 			UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 			UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
@@ -1697,16 +1744,7 @@ void BuyMenuGUI::Update()
 
 			if(anEvent.GetControl() == m_pShopList)
             {
-/*
-                // Somehting was just selected, so update the selection index to the new selected index
-                if(anEvent.GetMsg() == GUIListBox::Select)
-                {
-                    if (m_ListItemIndex != m_pShopList->GetSelectedIndex())
-                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
-                    m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex = m_pShopList->GetSelectedIndex();
-                }
-                // Mouse down, added something to cart!
-                else*/ if(anEvent.GetMsg() == GUIListBox::MouseDown)
+                if (anEvent.GetMsg() == GUIListBox::MouseDown && (anEvent.GetData() & GUIListBox::MOUSE_LEFT))
                 {
                     m_pShopList->SetFocus();
                     m_MenuFocus = ITEMS;
@@ -1833,16 +1871,7 @@ void BuyMenuGUI::Update()
 
             else if (anEvent.GetControl() == m_pCartList)
             {
-/*
-                // Somehting was just selected, so update the selection index to the new selected index
-                if(anEvent.GetMsg() == GUIListBox::Select)
-                {
-                    if (m_ListItemIndex != m_pCartList->GetSelectedIndex())
-                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
-                    m_ListItemIndex = m_pCartList->GetSelectedIndex();
-                }
-                // Somehting was clicked upon, therefore should be removed
-                else*/ if(anEvent.GetMsg() == GUIListBox::MouseDown)
+                if (anEvent.GetMsg() == GUIListBox::MouseDown)
                 {
                     m_pCartList->SetFocus();
                     m_MenuFocus = ORDER;
@@ -1853,48 +1882,49 @@ void BuyMenuGUI::Update()
                         m_ListItemIndex = m_pCartList->GetSelectedIndex();
                         m_pCartList->ScrollToSelected();
 
-                        // We want to allow the user to shift-click to clear the entire cart
-                        // In future it would be nice to add the concept of a modifier key to the controller,
-                        // So we can do this for gamepad inputs too
-                        if (g_UInputMan.FlagShiftState()) {
-                            ClearCartList();
-                            pItem = nullptr;
+                        if (anEvent.GetData() & GUIListBox::MOUSE_LEFT) {
+                            // We want to allow the user to shift-click to clear the entire cart
+                            // In future it would be nice to add the concept of a modifier key to the controller,
+                            // So we can do this for gamepad inputs too
+                            if (g_UInputMan.FlagShiftState()) {
+                                ClearCartList();
+                                pItem = nullptr;
+                            }
+
+                            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
+                                int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+                                for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
+                                    GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
+                                    if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+                                        lastItemToDelete = i - 1;
+                                        break;
+                                    }
+                                } for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
+                                    m_pCartList->DeleteItem(i);
+                                }
+                            }
+                            m_pCartList->DeleteItem(m_ListItemIndex);
+                            // If we're not at the bottom, then select the item in the same place as the one just deleted
+                            if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
+                                m_pCartList->SetSelectedIndex(m_ListItemIndex);
+                            // If we're not at the top, then move selection up one
+                            } else if (m_ListItemIndex > 0) {
+                                m_pCartList->SetSelectedIndex(--m_ListItemIndex);
+                            // Shift focus back to the item list
+                            } else {
+                                m_MenuFocus = ORDER;
+                            }
+                        } else if (anEvent.GetData() & GUIListBox::MOUSE_MIDDLE) {
+                            DuplicateCartItem(m_ListItemIndex);
                         }
 
-                        if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
-                            int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
-                            for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
-                                GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
-                                if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
-                                    lastItemToDelete = i - 1;
-                                    break;
-                                }
-                            } for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
-                                m_pCartList->DeleteItem(i);
-                            }
-                        }
-                        m_pCartList->DeleteItem(m_ListItemIndex);
-                        // If we're not at the bottom, then select the item in the same place as the one just deleted
-                        if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
-                            m_pCartList->SetSelectedIndex(m_ListItemIndex);
-                        // If we're not at the top, then move selection up one
-                        } else if (m_ListItemIndex > 0) {
-                            m_pCartList->SetSelectedIndex(--m_ListItemIndex);
-                        // Shift focus back to the item list
-                        } else {
-                            m_MenuFocus = ORDER;
-                        }
+                        UpdateTotalCostLabel(m_pController->GetTeam());
+                        UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
+                        UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
+                        UpdateItemNestingLevels();
 
                         g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
-                    // Undo the click deselection if nothing was selected
-//                    else
-//                        m_pCartList->SetSelectedIndex(m_SelectedObjectIndex);
-
-                    UpdateTotalCostLabel(m_pController->GetTeam());
-					UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
-					UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
-                    UpdateItemNestingLevels();
 				}
                 // Mouse moved over the panel, show the popup with item description
                 else if(anEvent.GetMsg() == GUIListBox::MouseMove)

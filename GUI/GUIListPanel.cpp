@@ -429,7 +429,7 @@ void GUIListPanel::OnMouseDown(int X, int Y, int Buttons, int Modifier) {
 	// Give this panel focus
 	SetFocus();
 
-	if ((Buttons & MOUSE_LEFT) && PointInside(X, Y)) {
+	if (PointInside(X, Y)) {
 		SelectItem(X, Y, Modifier);
 		SendSignal(MouseDown, Buttons);
 	} else {

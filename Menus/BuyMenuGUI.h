@@ -540,6 +540,11 @@ public:
     /// </summary>
     void AddCartItem(const std::string &name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
 
+    /// <summary>
+    /// Duplicates an item in the cart
+    /// </summary>
+    void DuplicateCartItem(const int itemIndex);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			LoadDefaultLoadoutToCart
 //////////////////////////////////////////////////////////////////////////////////////////

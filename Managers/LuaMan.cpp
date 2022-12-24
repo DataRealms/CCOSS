@@ -83,6 +83,7 @@ namespace RTE {
 			luabind::def("GetMPP", &GetMPP),
 			luabind::def("GetPPL", &GetPPL),
 			luabind::def("GetLPP", &GetLPP),
+			luabind::def("GetPathFindingDefaultDigStrength", &GetPathFindingDefaultDigStrength),
 			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),

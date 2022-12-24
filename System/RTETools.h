@@ -36,6 +36,12 @@ namespace RTE {
 	/// </summary>
 	/// <returns>A float describing the current PPL ratio.</returns>
 	inline float GetPPL() { return c_PPL; }
+
+	/// <summary>
+	/// Gets the default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
+	/// </summary>
+	/// <returns>A float describing the default pathfinder penetration value.</returns>
+	inline float GetPathFindingDefaultDigStrength() { return c_PathFindingDefaultDigStrength; }
 #pragma endregion
 
 #pragma region Random Numbers

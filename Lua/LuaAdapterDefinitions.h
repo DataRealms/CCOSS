@@ -440,6 +440,36 @@ namespace RTE {
 #pragma region Utility Lua Adapters
 	struct LuaAdaptersUtility {
 		/// <summary>
+		/// Gets the ratio between the physics engine's meters and on-screen pixels.
+		/// </summary>
+		/// <returns>A float describing the current MPP ratio.</returns>
+		static float GetMPP();
+
+		/// <summary>
+		/// Gets the ratio between on-screen pixels and the physics engine's meters.
+		/// </summary>
+		/// <returns>A float describing the current PPM ratio.</returns>
+		static float GetPPM();
+
+		/// <summary>
+		/// Gets the ratio between the physics engine's Liters and on-screen pixels.
+		/// </summary>
+		/// <returns>A float describing the current LPP ratio.</returns>
+		static float GetLPP();
+
+		/// <summary>
+		/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
+		/// </summary>
+		/// <returns>A float describing the current PPL ratio.</returns>
+		static float GetPPL();
+
+		/// <summary>
+		/// Gets the default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
+		/// </summary>
+		/// <returns>A float describing the default pathfinder penetration value.</returns>
+		static float GetPathFindingDefaultDigStrength();
+
+		/// <summary>
 		/// Gets a random number between -1 and 1.
 		/// </summary>
 		/// <returns>A random number between -1 and 1.</returns>

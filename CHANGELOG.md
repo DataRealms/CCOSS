@@ -439,6 +439,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Indentation in INI with space characters in multiples of 4 will no longer crash during loading and instead create a warning entry with the file name and line in the non-fatal loading error log.  
+	Space characters **not** in multiples of 4 will crash with a more informative message.
+
 - Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
 	The `MSPF` measurement now displays 3 values:  
 	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  

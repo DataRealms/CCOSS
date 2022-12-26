@@ -435,7 +435,7 @@ public:
 //                  represent.
 // Return value:    The new total value of what's in the override purchase list.
 
-    int SetOverridePurchaseList(string loadoutName, int player);
+    int SetOverridePurchaseList(std::string loadoutName, int player);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

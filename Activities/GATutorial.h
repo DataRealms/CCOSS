@@ -271,7 +271,7 @@ protected:
         // The duration of one frame
         int m_FrameDuration;
 
-        TutStep(std::string text, int stepDuration, string screensPath = "", int frameCount = 1, int frameDuration = 250);
+        TutStep(std::string text, int stepDuration, std::string screensPath = "", int frameCount = 1, int frameDuration = 250);
     };
 
     // Member variables

@@ -16,8 +16,8 @@
 
 namespace RTE {
 
-map<string, GUIBanner::FontChar *> GUIBanner::m_sFontCache;
-map<string, int> GUIBanner::m_sCharCapCache;
+std::map<std::string, GUIBanner::FontChar *> GUIBanner::m_sFontCache;
+std::map<std::string, int> GUIBanner::m_sCharCapCache;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -59,12 +59,12 @@ GUIBanner::GUIBanner()
 bool GUIBanner::Create(const std::string fontFilePath, const std::string fontBlurFilePath, int bitDepth)
 {
     // Package the font bitmap paths o they are more easily processed below
-    string filePaths[2] = {fontFilePath, fontBlurFilePath};
+    std::string filePaths[2] = {fontFilePath, fontBlurFilePath};
 
     // Now process them and extract the character data from each
     ContentFile fontFile;
-    map<string, FontChar *>::iterator fontItr;
-    map<string, int>::iterator indexItr;
+    std::map<std::string, FontChar *>::iterator fontItr;
+    std::map<std::string, int>::iterator indexItr;
     int y, dotColor;
     for (int mode = REGULAR; mode < FONTMODECOUNT; ++mode)
     {
@@ -182,14 +182,14 @@ bool GUIBanner::Create(const std::string fontFilePath, const std::string fontBlu
 
         // Add the calculated charIndexcap to the cache so we can use it in other banner instances
         // that use the same font bitmap files.
-        m_sCharCapCache.insert(pair<string, int>(filePaths[mode], m_CharIndexCap));
+        m_sCharCapCache.insert(std::pair<std::string, int>(filePaths[mode], m_CharIndexCap));
         // Also add the now calculated font char data to the cache
         // Allocate a dynamic array to throw into the map.. probably until app close
         FontChar *aNewCache = new FontChar[MAXBANNERFONTCHARS];
         // Copy the font data into the cache
         memcpy(aNewCache, m_aaFontChars[mode], sizeof(FontChar) * MAXBANNERFONTCHARS);
         // Now put it into the cache map
-        m_sFontCache.insert(pair<string, FontChar *>(filePaths[mode], aNewCache));
+        m_sFontCache.insert(std::pair<std::string, FontChar *>(filePaths[mode], aNewCache));
     }
 
     return true;
@@ -228,7 +228,7 @@ int GUIBanner::SpaceBetween(const FlyingChar &first, FontMode firstMode, const F
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Starts the display animation of a text string in this banner's font.
 
-void GUIBanner::ShowText(const string text, AnimMode mode, long duration, Vector targetSize, float yOnTarget, int flySpeed, int flySpacing)
+void GUIBanner::ShowText(const std::string &text, AnimMode mode, long duration, Vector targetSize, float yOnTarget, int flySpeed, int flySpacing)
 {
     m_BannerText = text;
     m_AnimMode = mode;
@@ -249,7 +249,7 @@ void GUIBanner::ShowText(const string text, AnimMode mode, long duration, Vector
     // The showing position for the first character
     int showPosX = (m_TargetSize.m_X / 2) - (CalculateWidth(text, REGULAR) / 2);
     int whichChar = 0;
-    for (string::const_iterator tItr = text.begin(); tItr != text.end(); ++tItr)
+    for (std::string::const_iterator tItr = text.begin(); tItr != text.end(); ++tItr)
     {
         whichChar++;
         // Create the flying character entry
@@ -323,8 +323,8 @@ void GUIBanner::Update()
     int flyDirection = m_AnimMode == FLYBYLEFTWARD ? -1 : 1;
     int whichChar = 0;
     // Go through every character, updating their positions and states
-    list<FlyingChar>::iterator prevItr = m_BannerChars.end();
-    for (list<FlyingChar>::iterator cItr = m_BannerChars.begin(); cItr != m_BannerChars.end(); ++cItr)
+    std::list<FlyingChar>::iterator prevItr = m_BannerChars.end();
+    for (std::list<FlyingChar>::iterator cItr = m_BannerChars.begin(); cItr != m_BannerChars.end(); ++cItr)
     {
         whichChar++;
         // Start off each character's motion at the appropriate order and timing
@@ -418,7 +418,7 @@ void GUIBanner::Draw(BITMAP *pTargetBitmap)
     // Go through every character in the banner, drawing the ones that are showing
     unsigned char c;
     int mode, charWidth, offX, offY;
-    for (list<FlyingChar>::iterator cItr = m_BannerChars.begin(); cItr != m_BannerChars.end(); ++cItr)
+    for (std::list<FlyingChar>::iterator cItr = m_BannerChars.begin(); cItr != m_BannerChars.end(); ++cItr)
     {
         // Only draw anything if the character is even visible
         if ((*cItr).m_MoveState >= SHOWING && (*cItr).m_MoveState <= HIDING)

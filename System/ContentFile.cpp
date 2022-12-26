@@ -117,7 +117,8 @@ namespace RTE {
 			}
 		}
 		if (fetchFileInfo) {
-			FILE *imageFile = fopen(m_DataPath.c_str(), "rb");
+			std::string altDataPath = g_PresetMan.FullModulePath(m_DataPath);
+			FILE *imageFile = fopen(altDataPath.c_str(), "rb");
 			RTEAssert(imageFile, "Failed to open file prior to reading info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may not exist or be corrupt.");
 
 			if (m_DataPathExtension == ".png") {

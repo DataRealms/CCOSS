@@ -586,6 +586,14 @@ public:
 
     bool IsOfActor(MOID checkMOID);
 
+    /// <summary>
+    /// Gives a unique, contiguous id per-actor. This is regenerated every frame.
+    /// </summary>
+    /// <param name="actor">The actor to get a contiguous id for.</param>
+    /// <returns>A contiguous id for the actor. Returns -1 if the actor doesn't exist in MovableMan.</returns>
+    /// <remarks>This function is used for AI throttling.</remarks>
+    int GetContiguousActorID(const Actor *actor) const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRootMOID
@@ -611,11 +619,11 @@ public:
 
     bool RemoveMO(MovableObject *pMOToRem);
 
-    /// <summary>
-    /// Kills and destroys all Actors of a specific Team.
-    /// </summary>
-    /// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
-    /// <returns>How many Actors were killed.</returns>
+	/// <summary>
+	/// Kills and destroys all Actors of a specific Team.
+	/// </summary>
+	/// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
+	/// <returns>How many Actors were killed.</returns>
     int KillAllTeamActors(int teamToKill) const;
 
 	/// <summary>
@@ -625,43 +633,42 @@ public:
 	/// <returns>How many Actors were killed.</returns>
 	int KillAllEnemyActors(int teamNotToKill = Activity::NoTeam) const;
 
+    /// <summary>
+    /// Adds all Actors in MovableMan to the given list.
+    /// </summary>
+    /// <param name="transferOwnership">Whether or not ownership of the Actors should be transferred from MovableMan to the list.</param>
+    /// <param name="actorList">The list to be filled with Actors.</param>
+    /// <param name="onlyTeam">The team to get Actors of. If NoTeam, then all teams will be used.</param>
+    /// <param name="noBrains">Whether or not to get brain Actors.</param>
+	/// <returns>The number of Actors added to the list.</returns>
+    int GetAllActors(bool transferOwnership, std::list<SceneObject *> &actorList, int onlyTeam = -1, bool noBrains = false);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Actors in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-// Arguments:       The list of Actors to put the evacuated Actor instances in.
-//                  The team to only eject Actors of. If NoTeam, then all will be grabbed.
-//                  Whether to not grab any brains at all.
-// Return value:    How many Actors was transferred to the list.
-
-    int EjectAllActors(std::list<SceneObject *> &actorList, int onlyTeam = -1, bool noBrains = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EjectAllItems
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds to a list ALL Items in the world and removes them from the
-//                  MovableMan. Ownership IS transferred!
-// Arguments:       The list of MovableObject:s to put the evacuated MovableObject instances
-//                  in.
-// Return value:    How many Items were transferred to the list.
-
-    int EjectAllItems(std::list<SceneObject *> &itemList);
+    /// </summary>
+    /// <param name="transferOwnership">Whether or not ownershp of the items shoudl be transferred from MovableMan to the list.</param>
+    /// <param name="itemList">The list to be filled with items.</param>
+	/// <returns>The number of items added to the list.</returns>
+    int GetAllItems(bool transferOwnership, std::list<SceneObject *> &itemList);
 
     /// <summary>
-    /// Opens all doors and keeps them open until this is called again with false.
+    /// Adds all particles in MovableMan to the given list.
     /// </summary>
-    /// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
-    /// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
+    /// <param name="transferOwnership">Whether or not ownership of the particles should be transferred from MovableMan to the list.</param>
+    /// <param name="particleList">The list to be filled with particles.</param>
+    /// <returns>The number of particles added to the list.</returns>
+    int GetAllParticles(bool transferOwnership, std::list<SceneObject *> &particleList);
+
+	/// <summary>
+	/// Opens all doors and keeps them open until this is called again with false.
+	/// </summary>
+	/// <param name="open">Whether to open all doors (true), or close all doors (false).</param>
+	/// <param name="team">Which team to open doors for. NoTeam means all teams.</param>
     void OpenAllDoors(bool open = true, int team = Activity::NoTeam) const;
 
-    /// <summary>
-    /// Temporarily erases or redraws any material door representations of a specific team.
+	/// <summary>
+	/// Temporarily erases or redraws any material door representations of a specific team.
 	/// Used to make pathfinding work better, allowing Actors to navigate through firendly bases despite the door material layer.
-    /// </summary>
-    /// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
+	/// </summary>
+	/// <param name="eraseDoorMaterial">Whether to erase door material, thereby overriding it, or redraw it and undo the override.</param>
     /// <param name="team">Which team to do this for, NoTeam means all teams.</param>
     void OverrideMaterialDoors(bool eraseDoorMaterial, int team = Activity::NoTeam) const;
 
@@ -880,6 +887,8 @@ protected:
 
     // All actors in the scene
     std::deque<Actor *> m_Actors;
+    // A map to give a unique contiguous identifier per-actor. This is re-created per frame.
+    std::unordered_map<const Actor *, int> m_ContiguousActorIDs;
     // List of items that are pickup-able by actors
     std::deque<MovableObject *> m_Items;
     // List of free, dead particles flying around
@@ -911,6 +920,7 @@ protected:
 
     // The list created each frame to register all the current MO's
     std::vector<MovableObject *> m_MOIDIndex;
+
     // The ration of terrain pixels to be converted into MOPixel:s upon
     // deep impact of MO.
     float m_SplashRatio;

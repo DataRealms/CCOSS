@@ -36,6 +36,7 @@
 #include "PerformanceMan.h"
 #include "MetaMan.h"
 #include "NetworkServer.h"
+#include "NetworkClient.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -84,6 +85,7 @@ namespace RTE {
 		g_NetworkClient.Destroy();
 		g_NetworkServer.Destroy();
 		g_MetaMan.Destroy();
+		g_PerformanceMan.Destroy();
 		g_MovableMan.Destroy();
 		g_SceneMan.Destroy();
 		g_ActivityMan.Destroy();
@@ -189,21 +191,28 @@ namespace RTE {
 		if (System::IsSetToQuit()) {
 			return;
 		}
-		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
-		while (!System::IsSetToQuit()) {
-			g_TimerMan.Update();
+		long long updateStartTime = 0;
+		long long updateTotalTime = 0;
+		long long updateEndAndDrawStartTime = 0;
+		long long drawStartTime = 0;
+		long long drawTotalTime = 0;
 
+		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
+
+			updateStartTime = g_TimerMan.GetAbsoluteTime();
+			g_TimerMan.Update();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
-				g_PerformanceMan.NewPerformanceSample();
 
+				g_PerformanceMan.NewPerformanceSample();
+				g_PerformanceMan.UpdateMSPSU();
 				g_TimerMan.UpdateSim();
 
 				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
@@ -228,7 +237,7 @@ namespace RTE {
 				// This is to support hot reloading entities in SceneEditorGUI. It's a bit hacky to put it in Main like this, but PresetMan has no update in which to clear the value, and I didn't want to set up a listener for the job.
 				// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
 				g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
-				
+
 				g_ConsoleMan.Update();
 				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
@@ -252,7 +261,8 @@ namespace RTE {
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {
 					g_ActivityMan.ResumeActivity();
-					g_PerformanceMan.ResetFrameTimer();
+					g_PerformanceMan.ResetSimUpdateTimer();
+					updateStartTime = g_TimerMan.GetAbsoluteTime();
 				}
 			}
 
@@ -271,8 +281,15 @@ namespace RTE {
 					}
 				}
 			}
+			updateEndAndDrawStartTime = g_TimerMan.GetAbsoluteTime();
+			updateTotalTime = updateEndAndDrawStartTime - updateStartTime;
+			drawStartTime = updateEndAndDrawStartTime;
+
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();
+
+			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
+			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);
 		}
 	}
 }
@@ -300,7 +317,7 @@ int main(int argc, char **argv) {
 	g_UInputMan.LoadDeviceIcons();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
-		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");
+		g_ConsoleMan.PrintString("WARNING: Encountered non-fatal errors during module loading!\nSee \"LogLoadingWarning.txt\" for information.");
 		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
 		// Open the console so the user is aware there are loading warnings.
 		g_ConsoleMan.SetEnabled(true);

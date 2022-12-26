@@ -439,7 +439,7 @@ float AHuman::GetTotalValue(int nativeModule, float foreignMult, float nativeMul
 // Description:     Shows whether this carries a specifically named object in its inventory.
 //                  Also looks through the inventories of potential passengers, as applicable.
 
-bool AHuman::HasObject(string objectName) const
+bool AHuman::HasObject(std::string objectName) const
 {
     bool found = Actor::HasObject(objectName);
 
@@ -828,7 +828,7 @@ bool AHuman::EquipFirearm(bool doEquip)
 	}
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pWeapon = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -874,7 +874,7 @@ bool AHuman::EquipFirearm(bool doEquip)
 //                  of the specified group in the inventory. If the held device already 
 //                  is of that group, or no device is in inventory, nothing happens.
 
-bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
+bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
 {
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
@@ -890,7 +890,7 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -940,7 +940,7 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
 //                  of the specified group in the inventory. If no such weapon is in the 
 //                  inventory, nothing happens.
 
-bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool doEquip)
+bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGroup, bool doEquip)
 {
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
@@ -956,7 +956,7 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pFirearm = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1002,7 +1002,7 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
 //                  of with the specified preset name in the inventory. If the held device already 
 //                  is of that preset name, or no device is in inventory, nothing happens.
 
-bool AHuman::EquipNamedDevice(const string name, bool doEquip)
+bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
 {
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
@@ -1018,7 +1018,7 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1081,7 +1081,7 @@ bool AHuman::EquipThrowable(bool doEquip)
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pThrown = dynamic_cast<ThrownDevice *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1144,7 +1144,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1184,34 +1184,38 @@ bool AHuman::EquipDiggingTool(bool doEquip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrenght
+// Method:          EstimateDigStrength
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength this actor can move through.
 
-float AHuman::EstimateDigStrenght()
+float AHuman::EstimateDigStrength()
 {
-    float maxPenetration = 1;
+    float maxPenetration = Actor::EstimateDigStrength();
     
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return maxPenetration;
     
-    HDFirearm *pTool = 0;
+    HDFirearm *pTool = nullptr;
 
     // Check if the currently held device is already the desired type
     if (m_pFGArm->HoldsSomething())
     {
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
-            return pTool->EstimateDigStrenght();
+        {
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+        }
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
         if (pTool && pTool->IsInGroup("Tools - Diggers"))
-            maxPenetration = max(pTool->EstimateDigStrenght(), maxPenetration);
+        {
+            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+        }
     }
     
     return maxPenetration;
@@ -1241,7 +1245,7 @@ bool AHuman::EquipShield()
     }
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pShield = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1314,7 +1318,7 @@ bool AHuman::EquipShieldInBGArm()
         return false;
 
     // Go through the inventory looking for the proper device
-    for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pShield = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
@@ -1709,10 +1713,7 @@ void AHuman::ResetAllTimers()
 // Description:     Updates the path to move along to the currently set movetarget.
 
 bool AHuman::UpdateMovePath()
-{
-    // Estimate how much material this actor can dig through
-    m_DigStrength = EstimateDigStrenght();
-    
+{    
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())
         return false;
@@ -1721,22 +1722,21 @@ bool AHuman::UpdateMovePath()
     if (!m_MovePath.empty())
     {
         // Smash all airborne waypoints down to just above the ground, except for when it makes the path intersect terrain or it is the final destination
-        list<Vector>::iterator finalItr = m_MovePath.end();
+        std::list<Vector>::iterator finalItr = m_MovePath.end();
         finalItr--;
         Vector smashedPoint;
         Vector previousPoint = *(m_MovePath.begin());
-        list<Vector>::iterator nextItr = m_MovePath.begin();
-        for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != finalItr; ++lItr)
+        std::list<Vector>::iterator nextItr = m_MovePath.begin();
+        for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != finalItr; ++lItr)
         {
             nextItr++;
             smashedPoint = g_SceneMan.MovePointToGround((*lItr), m_CharHeight*0.2, 7);
-
-            Vector notUsed;
 
             // Only smash if the new location doesn't cause the path to intersect hard terrain ahead or behind of it
             // Try three times to halve the height to see if that won't intersect
             for (int i = 0; i < 3; i++)
             {
+                Vector notUsed;
                 if (!g_SceneMan.CastStrengthRay(previousPoint, smashedPoint - previousPoint, 5, notUsed, 3, g_MaterialDoor) &&
                     nextItr != m_MovePath.end() && !g_SceneMan.CastStrengthRay(smashedPoint, (*nextItr) - smashedPoint, 5, notUsed, 3, g_MaterialDoor))
                 {
@@ -1750,6 +1750,7 @@ bool AHuman::UpdateMovePath()
             previousPoint = (*lItr);
         }
     }
+
     return true;
 }
 
@@ -1803,7 +1804,7 @@ void AHuman::UpdateAI()
     ///////////////////////////////////////////////
     // React to relevant AlarmEvents
 
-	const list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
+	const std::list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
 	if (!events.empty()) {
 		Vector alarmVec;
 		Vector sensorPos = GetEyePos();
@@ -1905,7 +1906,7 @@ void AHuman::UpdateAI()
 			Vector notUsed;
             Vector pathPointVec;
             // See if we are close enough to the next move target that we should grab the next in the path that is out of proximity range
-            for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
+            for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
             {
                 pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
                 // Make sure we are within range AND have a clear sight to the waypoint we're about to eliminate, or it might be around a corner
@@ -2691,8 +2692,8 @@ void AHuman::UpdateAI()
         // FORWARD JUMP TRIGGERINGS if it's a good time to jump over a chasm; gotto be close to an edge
         else if (m_MovePath.size() > 2 && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.25)))
         {
-            list<Vector>::iterator pItr = m_MovePath.begin();
-            list<Vector>::iterator prevItr = m_MovePath.begin();
+            std::list<Vector>::iterator pItr = m_MovePath.begin();
+            std::list<Vector>::iterator prevItr = m_MovePath.begin();
             // Start by looking at the dip between last checked waypoint and the next
 // TODO: not wrap safe!
             int dip = m_MoveTarget.GetFloorIntY() - m_PrevPathTarget.GetFloorIntY();
@@ -2737,7 +2738,7 @@ void AHuman::UpdateAI()
                     m_DeviceState = POINTING;
                     m_PointingTarget = *pItr;
                     // Remove the waypoints we're about to jump over
-                    list<Vector>::iterator pRemItr = m_MovePath.begin();
+                    std::list<Vector>::iterator pRemItr = m_MovePath.begin();
                     while (pRemItr != m_MovePath.end())
                     {
                         pRemItr++;
@@ -3149,9 +3150,10 @@ void AHuman::Update()
                 m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
                 m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
             }
-
-            // Walk backwards if the aiming is already focused in the opposite direction of travel.
-            if (analogAim.MagnitudeIsGreaterThan(analogDeadzone) || isSharpAiming) {
+			
+			// Walk backwards if the aiming is already focused in the opposite direction of travel.
+			// Note that we check against zero here rather than the deadzone, because using the deadzone makes jetpacking mouse players unable to fly one way and aim the other.
+            if (!analogAim.IsZero() || isSharpAiming) {
                 m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
                 m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
             } else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
@@ -3961,7 +3963,7 @@ void AHuman::Update()
 		float rotDiff = rotTarget - rot;
 		if (!m_DeathTmr.IsPastSimMS(125) && std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
 			// TODO: finetune this for situations like low gravity!
-			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY * m_GlobalAccScalar) / GetPPM();
+			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY() * m_GlobalAccScalar) / c_PPM;
 			m_AngularVel += rotDiff * velScalar;
 			m_Vel.m_X += (rotTarget > 0 ? -std::abs(rotDiff) : std::abs(rotDiff)) * velScalar * 0.5F;
 		} else {
@@ -4091,9 +4093,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
     // Draw the AI paths
-    list<Vector>::iterator last = m_MovePath.begin();
+    std::list<Vector>::iterator last = m_MovePath.begin();
     Vector waypoint, lastPoint, lineVec;
-    for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
+    for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
     {
         lastPoint = (*last) - targetPos;
         waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
@@ -4106,7 +4108,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
     lastPoint = m_DigTunnelEndPos - targetPos;
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    // Raidus
+    // Radius
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
 #endif
@@ -4173,7 +4175,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             // Display normal jet icons
             else
             {
-                float acceleration = m_pJetpack->EstimateImpulse(false) / max(GetMass(), 0.1F);
+                float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
 				if (acceleration > 0.47F) {
 					str[0] = -31;
 				} else {

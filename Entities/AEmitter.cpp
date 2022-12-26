@@ -28,7 +28,7 @@ ConcreteClassInfo(AEmitter, Attachable, 100);
 
 void AEmitter::Clear()
 {
-	for (list<Emission *>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
+	for (std::list<Emission *>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
 		delete (*itr);
     m_EmissionList.clear();
     m_EmissionSound = nullptr;
@@ -193,7 +193,7 @@ int AEmitter::Save(Writer &writer) const
 {
     Attachable::Save(writer);
 
-    for (list<Emission *>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
+    for (std::list<Emission *>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
     {
         writer.NewProperty("AddEmission");
         writer << *itr;
@@ -274,13 +274,13 @@ void AEmitter::Destroy(bool notInherited)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
+// Description:     Reset the timers of all emissions so they will start/stop at the
 //                  correct relative offsets from now.
 
 void AEmitter::ResetEmissionTimers()
 {
     m_LastEmitTmr.Reset();
-    for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+    for (std::list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
         (*eItr)->ResetEmissionTimers();
 }
 
@@ -316,21 +316,22 @@ float AEmitter::EstimateImpulse(bool burst)
     {
         float impulse = 0;
         float velMin, velMax, velRange, spread;
-        
+
         // Go through all emissions and emit them according to their respective rates
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+        for (std::list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
         {
             // Only check emissions that push the emitter
             if ((*eItr)->PushesEmitter())
             {
                 double emissions = (*eItr)->GetRate() * g_TimerMan.GetDeltaTimeSecs() / 60.0f;
-                if (burst)
+                if (burst) {
                     emissions *= (*eItr)->GetBurstSize();
+                }
                 
-                velMin = min((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
-                velMax = max((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
+                velMin = std::min((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
+                velMax = std::max((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
                 velRange = (velMax - velMin) * 0.5;
-                spread = max(static_cast<float>(c_PI) - (*eItr)->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
+                spread = std::max(static_cast<float>(c_PI) - (*eItr)->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
 
                 // Add to accumulative recoil impulse generated, F = m * a.
                 impulse += (velMin + velRange) * spread * (*eItr)->m_pEmission->GetMass() * emissions;
@@ -348,8 +349,28 @@ float AEmitter::EstimateImpulse(bool burst)
 	float throttleFactor = GetThrottleFactor();
     // Apply the throttle factor to the emission rate per update
 	if (burst) { return m_AvgBurstImpulse * throttleFactor; }
-    
+
 	return m_AvgImpulse * throttleFactor;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float AEmitter::GetTotalParticlesPerMinute() const {
+	float totalPPM = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalPPM += emission->m_PPM;
+	}
+	return totalPPM;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int AEmitter::GetTotalBurstSize() const {
+	int totalBurstSize = 0;
+	for (const Emission *emission : m_EmissionList) {
+		totalBurstSize += emission->m_BurstSize;
+	}
+	return totalBurstSize;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,7 +437,7 @@ void AEmitter::Update()
 			if (m_EmissionSound) { m_EmissionSound->Play(m_Pos); }
 
             // Reset the timers of all emissions so they will start/stop at the correct relative offsets from now
-            for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+            for (std::list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
                 (*eItr)->ResetEmissionTimers();
         }
         // Update the distance attenuation
@@ -447,7 +468,7 @@ void AEmitter::Update()
         MovableObject *pParticle = 0;
         Vector parentVel, emitVel, pushImpulses;
         // Go through all emissions and emit them according to their respective rates
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+        for (std::list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
         {
             // Make sure the emissions only happen between the start time and end time
             if ((*eItr)->IsEmissionTime())

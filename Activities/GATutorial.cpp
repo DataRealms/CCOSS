@@ -38,7 +38,7 @@ namespace RTE {
 ConcreteClassInfo(GATutorial, GameActivity, 0);
 
 
-GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, int frameCount, int frameDuration)
+GATutorial::TutStep::TutStep(std::string text, int stepDuration, std::string screensPath, int frameCount, int frameDuration)
 {
     m_Text = text;
     m_Duration = stepDuration;
@@ -260,7 +260,9 @@ int GATutorial::Start()
         if (team == m_CPUTeam && !m_pCPUBrain)
         {
 // TODO: Make special CPU brain actor which will only appear in CPU brain fights, and have to be placed in the scenes
-            if (!(m_pCPUBrain = g_MovableMan.GetUnassignedBrain(m_CPUTeam)))
+            m_pCPUBrain = g_MovableMan.GetUnassignedBrain(team);
+            m_pCPUBrain = m_pCPUBrain ? m_pCPUBrain : g_MovableMan.GetFirstBrainActor(team); // Try getting our assigned brain
+            if (!m_pCPUBrain)
             {
                 // Couldn't find an available brain in the scene, so make one and place it
                 m_pCPUBrain = dynamic_cast<Actor *>(g_PresetMan.GetEntityPreset("Actor", "Brain Case")->Clone());
@@ -312,7 +314,7 @@ int GATutorial::Start()
         SetBrainLZWidth(player, 0);
 
         // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-        if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+        if (!m_Brain[player])
         {
             g_ConsoleMan.PrintString("ERROR: Can't find brain for tutorial game mode!");
         }
@@ -320,11 +322,6 @@ int GATutorial::Start()
         else
         {
             m_TutorialPlayer = player;
-            SwitchToActor(m_Brain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_Brain[player]->GetPos();
-            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
-            // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
         if (m_ActivityState == ActivityState::Editing)
@@ -841,7 +838,7 @@ void GATutorial::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
         float revealed = m_StepTimer.GetElapsedRealTimeMS() / revealPeriod;
         if (revealed > 1.0)
             revealed = 1.0;
-        string revealText = m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text.substr(0, (m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text.size() + 3) * revealed);
+        std::string revealText = m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text.substr(0, (m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text.size() + 3) * revealed);
         // Dot blinking logic
         if (revealed == 1.0)
         {
@@ -925,8 +922,8 @@ void GATutorial::SetupAreas()
     int preset = g_UInputMan.GetControlScheme(m_TutorialPlayer)->GetPreset();
 
     // Adjust for special commands when using the keyboard-only setup
-    string JumpName = MAPNAME(INPUT_L_UP);
-    string CrouchName = MAPNAME(INPUT_L_DOWN);
+    std::string JumpName = MAPNAME(INPUT_L_UP);
+    std::string CrouchName = MAPNAME(INPUT_L_DOWN);
     if (device == DEVICE_KEYB_ONLY)
     {
         JumpName = MAPNAME(INPUT_JUMP);
@@ -934,8 +931,8 @@ void GATutorial::SetupAreas()
     }
 
     // If no preset, adjust the pie menu and fire names when using the defaults on a gamepad.. otherwise it'll show up as an unhelpful "Joystick"
-    string PieName = MAPNAME(INPUT_PIEMENU);
-    string FireName = MAPNAME(INPUT_FIRE);
+    std::string PieName = MAPNAME(INPUT_PIEMENU);
+    std::string FireName = MAPNAME(INPUT_FIRE);
     if (device >= DEVICE_GAMEPAD_1 && preset == InputScheme::InputPreset::NoPreset)
     {
         PieName = "Pie Menu Trigger";

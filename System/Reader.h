@@ -128,6 +128,11 @@ namespace RTE {
 		bool NextProperty();
 
 		/// <summary>
+		/// Notifies the reader that we're starting reading a new object, by making it expect another level of indentation.
+		/// </summary>
+		void StartObject() { --m_ObjectEndings; }
+
+		/// <summary>
 		/// Takes out whitespace from the beginning and the end of a string.
 		/// </summary>
 		/// <param name="stringToTrim">String to remove whitespace from.</param>
@@ -193,6 +198,8 @@ namespace RTE {
 			int CurrentLine; //!< The line number the stream is on.
 			int PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
+
+		static constexpr int c_TabSizeInSpaces = 4; //!< The number of space characters to treat as one tab character during reading, to preserve indentation structure.
 
 		std::unique_ptr<std::ifstream> m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::stack<StreamInfo> m_StreamStack; //!< Stack of open streams in this Reader, each one representing a file opened to read from within another.

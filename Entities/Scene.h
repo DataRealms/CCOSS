@@ -17,6 +17,7 @@
 #include "Entity.h"
 #include "Box.h"
 #include "Activity.h"
+#include "PathFinder.h"
 
 namespace RTE
 {
@@ -370,7 +371,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ExpandAIPlanAssemblySchemes
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replace all assembly shemes by corresponding bunker assemblies in 
+// Description:     Replace all assembly shemes by corresponding bunker assemblies in
 //					AI plan objects set.
 // Arguments:       None.
 // Return value:    None.
@@ -685,34 +686,23 @@ EntityAllocation(Scene)
     bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDimensions
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-// Arguments:       None.
-// Return value:    A Vector describing the scene dimensions.
+	/// <summary>
+	/// Gets the total dimensions (width and height) of the scene, in pixels.
+	/// </summary>
+	/// <returns>A Vector describing the scene dimensions.</returns>
+	Vector GetDimensions() const;
 
-    Vector GetDimensions() const;
+	/// <summary>
+	/// Gets the total width of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene width.</returns>
+	int GetWidth() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetWidth() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
-    int GetHeight() const;
+	/// <summary>
+	/// Gets the total height of the scene, in pixels.
+	/// </summary>
+	/// <returns>An int describing the scene height.</returns>
+	int GetHeight() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -771,16 +761,15 @@ EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RetrieveActorsAndDevices
+// Method:          RetrieveSceneObjects
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sucks up all the Actors and Devices currently active in MovableMan and
+// Description:     Sucks up all the Actors, Items and Particles currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
-//                  Should be done AFTER RetrieveResidentBrains!
 // Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
-    int RetrieveActorsAndDevices(int onlyTeam = -1, bool noBrains = false);
+    int RetrieveSceneObjects(bool transferOwnership, int onlyTeam = -1, bool noBrains = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -866,9 +855,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all entries in a specific set of placed Objects.
 // Arguments:       Which set of placed objects to clear. See the PlacedObjectSets enum.
+//                  Whether or not we have ownership of these items, and should delete them.
 // Return value:    How many things were removed in teh process of clearing that set.
 
-    int ClearPlacedObjectSet(int whichSet);
+    int ClearPlacedObjectSet(int whichSet, bool weHaveOwnership = true);
 
 
 
@@ -1002,7 +992,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    Name of a parent scene.
 
-	string GetMetasceneParent() const { return m_MetasceneParent; }
+	std::string GetMetasceneParent() const { return m_MetasceneParent; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1191,12 +1181,15 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Calculates and returns the least difficult path between two points on
 //                  the current scene. Takes both distance and materials into account.
+//                  When pathing using the NoTeam pathFinder, no doors are considered passable.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  A list which will be filled out with waypoints between the start and end.
+//                  The maximum material strength any actor traveling along the path can dig through.
+//                  The team we're pathing for (doors for this team will be considered passable)
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght = 1);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1.0F, Activity::Teams team = Activity::Teams::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1208,11 +1201,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //                  For exposing CalculatePath to Lua.
 // Arguments:       Start and end positions on the scene to find the path between.
 //                  If the path should be moved to the ground or not.
-//                  The maximum material strength any actor traveling along the paht can
-//                  dig through.
+//                  The maximum material strength any actor traveling along the path can dig through.
 // Return value:    The number of waypoints from start to goal, or -1 if no path.
 
-    int CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength = 1);
+    int CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength = 1.0F);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1276,7 +1268,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this scene is a temprorary metagame scene and should 
+// Description:     Whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       None.
 // Return value:    Whether scene belongs to metagame or not.
@@ -1287,12 +1279,25 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetMetagameInternal
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this scene is a temprorary metagame scene and should 
+// Description:     Sets whether this scene is a temprorary metagame scene and should
 //					not be used anywhere except in metagame.
 // Arguments:       New value.
 // Return value:    None.
 
 	void SetMetagameInternal(bool newValue) { m_IsMetagameInternal = newValue; }
+
+
+	/// <summary>
+	/// Gets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <returns>Whether this Scene is a saved game Scene copy.</returns>
+	bool IsSavedGameInternal() const { return m_IsSavedGameInternal; }
+
+	/// <summary>
+	/// Sets whether this Scene is a saved game Scene copy and should not be used anywhere except for game saving and loading.
+	/// </summary>
+	/// <param name="newValue">Whether this Scene is a saved game Scene copy.</param>
+	void SetSavedGameInternal(bool newValue) { m_IsSavedGameInternal = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1340,13 +1345,15 @@ protected:
     float m_TotalInvestment;
     // Terrain definition
     SLTerrain *m_pTerrain;
+
     // Pathfinding graph and logic. Owned by this
-    PathFinder *m_pPathFinder;
+    // The array of PathFinders for each team. Because we also have a shared pathfinder using index 0, we need to use MaxTeamCount + 1 to handle all the Teams' PathFinders.
+    std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
-    // Timers for when to do an update of all or only part of the pathfinding data
-    Timer m_FullPathUpdateTimer;
+    // Timer for when to do an update of the pathfinding data
     Timer m_PartialPathUpdateTimer;
+
     // SceneObject:s to be placed in the scene, divided up by different sets - OWNED HERE
     std::list<SceneObject *> m_PlacedObjects[PLACEDSETSCOUNT];
     // List of background layers, first is the closest to the terrain, last is closest to the back
@@ -1379,9 +1386,11 @@ protected:
 	// Name of a scene which can be replaced by this scene in MetaGame
 	// Scenes with m_MetaSceneParent field set will be invisible for editors and activities unless
 	// ShowMetaScenes flag in settings.ini is set
-	string m_MetasceneParent;
+    std::string m_MetasceneParent;
+
 	// Whether this scene must be shown anywhere in UIs
 	bool m_IsMetagameInternal;
+    bool m_IsSavedGameInternal;
 
 	std::list<Deployment *>m_Deployments;
 
@@ -1389,6 +1398,21 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	/// <summary>
+	/// Gets the pathfinder for a given team.
+	/// </summary>
+	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+	/// <returns>A pointer to the pathfinder for the given team.</returns>
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
+
+	/// <summary>
+	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties.
+	/// </summary>
+	/// <param name="writer">The Writer being used for serialization.</param>
+	/// <param name="sceneObjectToSave">The SceneObject to save.</param>
+	/// <param name="isChildAttachable">Convenience flag for whether or not this SceneObject is a child Attachable, and certain properties shouldn't be saved.</param>
+	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -1399,7 +1423,6 @@ private:
 // Return value:    None.
 
     void Clear();
-
 
     // Disallow the use of some implicit methods.
     Scene(const Scene &reference) = delete;

@@ -107,6 +107,15 @@ namespace RTE {
 
 			FMOD_RESULT status = FMOD_OK;
 
+			float globalPitch = 1.0F;
+			if (g_TimerMan.IsOneSimUpdatePerFrame()) {
+				float simSpeed = g_TimerMan.GetSimSpeed();
+				// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio.
+				// TODO: This coefficient should probably move to SettingsMan and be loaded from ini. That way this effect can be lessened or even turned off entirely by users. 0.35 is a good default value though.
+				globalPitch = simSpeed + (1.0F - simSpeed) * 0.35F;
+			}
+			SetGlobalPitch(globalPitch);
+
 			if (!g_ActivityMan.ActivityPaused()) {
 				const Activity *currentActivity = g_ActivityMan.GetActivity();
 				int currentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
@@ -118,7 +127,7 @@ namespace RTE {
 					if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
 						int screen = currentActivity->ScreenOfPlayer(player);
 						Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
-						if (IsInMultiplayerMode()) { humanPlayerPosition += (Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
+						if (IsInMultiplayerMode()) { humanPlayerPosition += (Vector(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screen)), static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screen))) / 2); }
 						m_CurrentActivityHumanPlayerPositions.push_back(std::make_unique<const RTE::Vector>(humanPlayerPosition));
 					}
 				}
@@ -327,7 +336,7 @@ namespace RTE {
 					g_ConsoleMan.PrintString("ERROR: Could invalid silence specification when trying to play next stream.");
 				}
 			} else {
-				PlayMusic(nextString.c_str(), m_MusicPlayList.empty() ? -1 : 0); 
+				PlayMusic(nextString.c_str(), m_MusicPlayList.empty() ? -1 : 0);
 			}
 		}
 	}
@@ -662,7 +671,7 @@ namespace RTE {
 
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
-		
+
 		const std::unordered_set<int> *channels = soundContainer->GetPlayingChannels();
 		for (std::unordered_set<int>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
@@ -864,7 +873,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	Vector AudioMan::GetAsVector(FMOD_VECTOR fmodVector) const {
 		Vector sceneDimensions = g_SceneMan.GetScene() ? g_SceneMan.GetSceneDim() : Vector();
 		return sceneDimensions.IsZero() ? Vector() : Vector(fmodVector.x, sceneDimensions.m_Y - fmodVector.y);

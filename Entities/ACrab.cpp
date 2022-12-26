@@ -273,6 +273,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
+        delete m_BackupLFGFootGroup;
+        delete m_BackupLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
         m_pLBGFootGroup = new AtomGroup();
         reader >> m_pLFGFootGroup;
@@ -285,6 +287,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
+        delete m_BackupRFGFootGroup;
+        delete m_BackupRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
         m_pRBGFootGroup = new AtomGroup();
         reader >> m_pRFGFootGroup;
@@ -294,6 +298,38 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
+    } else if (propName == "LFGFootGroup" || propName == "LeftFGFootGroup") {
+        delete m_pLFGFootGroup;
+        delete m_BackupLFGFootGroup;
+        m_pLFGFootGroup = new AtomGroup();
+        reader >> m_pLFGFootGroup;
+        m_pLFGFootGroup->SetOwner(this);
+        m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
+        m_BackupLFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "LBGFootGroup" || propName == "LeftBGFootGroup") {
+        delete m_pLBGFootGroup;
+        delete m_BackupLBGFootGroup;
+        m_pLBGFootGroup = new AtomGroup();
+        reader >> m_pLBGFootGroup;
+        m_pLBGFootGroup->SetOwner(this);
+        m_BackupLBGFootGroup = new AtomGroup(*m_pLBGFootGroup);
+        m_BackupLBGFootGroup->RemoveAllAtoms();
+    } else if (propName == "RFGFootGroup" || propName == "RightFGFootGroup") {
+        delete m_pRFGFootGroup;
+        delete m_BackupRFGFootGroup;
+        m_pRFGFootGroup = new AtomGroup();
+        reader >> m_pRFGFootGroup;
+        m_pRFGFootGroup->SetOwner(this);
+        m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
+        m_BackupRFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "RBGFootGroup" || propName == "RightBGFootGroup") {
+        delete m_pRBGFootGroup;
+        delete m_BackupRBGFootGroup;
+        m_pRBGFootGroup = new AtomGroup();
+        reader >> m_pRBGFootGroup;
+        m_pRBGFootGroup->SetOwner(this);
+        m_BackupRBGFootGroup = new AtomGroup(*m_pRBGFootGroup);
+        m_BackupRBGFootGroup->RemoveAllAtoms();
     } else if (propName == "StrideSound") {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
@@ -942,12 +978,12 @@ bool ACrab::UpdateMovePath()
     if (!m_MovePath.empty())
     {
         // Smash all airborne waypoints down to just above the ground, except for when it makes the path intersect terrain or it is the final destination
-        list<Vector>::iterator finalItr = m_MovePath.end();
+        std::list<Vector>::iterator finalItr = m_MovePath.end();
         finalItr--;
         Vector smashedPoint;
         Vector previousPoint = *(m_MovePath.begin());
-        list<Vector>::iterator nextItr = m_MovePath.begin();
-        for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != finalItr; ++lItr)
+        std::list<Vector>::iterator nextItr = m_MovePath.begin();
+        for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != finalItr; ++lItr)
         {
             nextItr++;
             smashedPoint = g_SceneMan.MovePointToGround((*lItr), m_CharHeight*0.2, 7);
@@ -957,7 +993,6 @@ bool ACrab::UpdateMovePath()
             for (int i = 0; i < 3; i++)
             {
 				Vector notUsed;
-				
                 if (!g_SceneMan.CastStrengthRay(previousPoint, smashedPoint - previousPoint, 5, notUsed, 3, g_MaterialDoor) &&
                     nextItr != m_MovePath.end() && !g_SceneMan.CastStrengthRay(smashedPoint, (*nextItr) - smashedPoint, 5, notUsed, 3, g_MaterialDoor))
                 {
@@ -993,12 +1028,12 @@ void ACrab::UpdateAI()
     ///////////////////////////////////////////////
     // React to relevant AlarmEvents
 
-    const list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
+    const std::list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
     if (!events.empty())
     {
         Vector alarmVec;
         Vector sensorPos = GetEyePos();
-        for (list<AlarmEvent>::const_iterator aeItr = events.begin(); aeItr != events.end(); ++aeItr)
+        for (std::list<AlarmEvent>::const_iterator aeItr = events.begin(); aeItr != events.end(); ++aeItr)
         {
             // Caused by some other team's activites - alarming!
             if (aeItr->m_Team != m_Team)
@@ -1104,7 +1139,7 @@ void ACrab::UpdateAI()
 			Vector notUsed;
             Vector pathPointVec;
             // See if we are close enough to the next move target that we should grab the next in the path that is out of proximity range
-            for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
+            for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
             {
                 pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
                 // Make sure we are within range AND have a clear sight to the waypoint we're about to eliminate, or it might be around a corner
@@ -1760,8 +1795,8 @@ void ACrab::UpdateAI()
         // FORWARD JUMP TRIGGERINGS if it's a good time to jump over a chasm; gotto be close to an edge
         else if (m_MovePath.size() > 2 && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.25)))
         {
-            list<Vector>::iterator pItr = m_MovePath.begin();
-            list<Vector>::iterator prevItr = m_MovePath.begin();
+            std::list<Vector>::iterator pItr = m_MovePath.begin();
+            std::list<Vector>::iterator prevItr = m_MovePath.begin();
             // Start by looking at the dip between last checked waypoint and the next
 // TODO: not wrap safe!
             int dip = m_MoveTarget.m_Y - m_PrevPathTarget.m_Y;
@@ -1806,7 +1841,7 @@ void ACrab::UpdateAI()
                     m_DeviceState = POINTING;
                     m_PointingTarget = *pItr;
                     // Remove the waypoints we're about to jump over
-                    list<Vector>::iterator pRemItr = m_MovePath.begin();
+                    std::list<Vector>::iterator pRemItr = m_MovePath.begin();
                     while (pRemItr != m_MovePath.end())
                     {
                         pRemItr++;

@@ -207,7 +207,7 @@ int EditorActivity::Start()
     g_UInputMan.DisableMouseMoving(true);
     g_UInputMan.DisableMouseMoving(false);
 
-    m_ActivityState = ActivityState::Editing;
+	m_ActivityState = ActivityState::Editing;
     m_Paused = true;
 //    g_TimerMan.PauseSim(true);
     m_ModeChange = true;

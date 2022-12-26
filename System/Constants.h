@@ -13,6 +13,12 @@ namespace RTE {
 	static constexpr const char *c_GameVersion = "Pre-Release 4.0";
 #pragma endregion
 
+#pragma region Userdata Constants
+	static const std::string c_UserScenesModuleName = "UserScenes.rte"; //!< Module name where user created Scenes are saved.
+	static const std::string c_UserScriptedSavesModuleName = "UserSavedGames.rte"; //!< Module name where user scripted Activity saves are saved.
+	static const std::string c_UserConquestSavesModuleName = "UserSavesConquest.rte"; //!< Module name where user conquest saves are saved.
+#pragma endregion
+
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.
@@ -20,6 +26,15 @@ namespace RTE {
 	static constexpr float c_LPP = 1.0F / c_PPL; //!< Liters per Pixel constant.
 
 	static constexpr int c_DefaultAtomGroupResolution = 5; //!< The global default AtomGroup resolution setting.
+#pragma endregion
+
+#pragma region Time Constants
+	static constexpr float c_DefaultDeltaTimeS = 0.0166666F; //!< The default simulation update step size, in seconds.
+	static constexpr float c_DefaultRealToSimCap = 0.0333333F; //!< The default cap of number of ticks that the real time can add to the tick accumulator each update.
+#pragma endregion
+
+#pragma region AI Constants
+    static constexpr float c_PathFindingDefaultDigStrength = 35.0F; //!< A default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
 #pragma endregion
 
 #pragma region Graphics Constants
@@ -42,6 +57,7 @@ namespace RTE {
 		g_BlackColor = 245,
 		g_WhiteColor = 254,
 		g_RedColor = 13,
+		g_GreenColor = 147,
 		g_YellowGlowColor = 117,
 		g_NoMOID = 255
 	};
@@ -114,9 +130,15 @@ namespace RTE {
 
 #pragma region Network Constants
 	static constexpr unsigned short c_MaxClients = 4;
-	static constexpr unsigned short c_FramesToRemember = 3;
-	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;
+	static constexpr unsigned short c_FramesToRemember = 2;
+	static constexpr unsigned short c_MaxLayersStoredForNetwork = 5;
 	static constexpr unsigned short c_MaxPixelLineBufferSize = 8192;
+
+	// Defaults are picked so that if the box can't be compressed it should somewhat fit into one UDP packet.
+	// Reducing box area introduces slight overhead due to more messages and hence more headers being sent.
+	// Box area must be divisible by 8 bytes for copying reasons.
+	static constexpr int c_ServerDefaultBoxWidth = 32;
+	static constexpr int c_ServerDefaultBoxHeight = 44;
 #pragma endregion
 
 #pragma region Input Constants

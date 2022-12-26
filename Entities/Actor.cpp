@@ -111,7 +111,6 @@ void Actor::Clear() {
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
-    m_ScriptedAIUpdate = false;
     m_AIMode = AIMODE_NONE;
     m_Waypoints.clear();
     m_DrawWaypoints = false;
@@ -131,7 +130,7 @@ void Actor::Clear() {
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrength = 1.0F;
+    m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
 
@@ -230,10 +229,9 @@ int Actor::Create(const Actor &reference)
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
 
-    for (deque<MovableObject *>::const_iterator itr = reference.m_Inventory.begin();
-         itr != reference.m_Inventory.end();
-         ++itr)
-        m_Inventory.push_back(dynamic_cast<MovableObject *>((*itr)->Clone()));
+    for (std::deque<MovableObject*>::const_iterator itr = reference.m_Inventory.begin(); itr != reference.m_Inventory.end(); ++itr) {
+        m_Inventory.push_back(dynamic_cast<MovableObject*>((*itr)->Clone()));
+    }
 
     m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
@@ -274,7 +272,6 @@ int Actor::Create(const Actor &reference)
 	m_DeploymentID = reference.m_DeploymentID;
     m_PassengerSlots = reference.m_PassengerSlots;
 
-    m_ScriptedAIUpdate = reference.m_ScriptedAIUpdate;
     m_AIMode = reference.m_AIMode;
 //    m_Waypoints = reference.m_Waypoints;
     m_DrawWaypoints = reference.m_DrawWaypoints;
@@ -384,16 +381,19 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         int mode;
         reader >> mode;
         m_AIMode = static_cast<AIMode>(mode);
-	} else if (propName == "Organic") {
-		reader >> m_Organic;
-	} else if (propName == "Mechanical") {
-		reader >> m_Mechanical;
 	} else if (propName == "PieMenu") {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
 		m_PieMenu->Create(this);
-	} else
+    } else if (propName == "Organic") {
+        reader >> m_Organic;
+    } else if (propName == "Mechanical") {
+        reader >> m_Mechanical;
+    } else if (propName == "AIBaseDigStrength") {
+        reader >> m_AIBaseDigStrength;
+    } else {
         return MOSRotating::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -454,7 +454,7 @@ int Actor::Save(Writer &writer) const
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
     writer << m_HolsterOffset;
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         writer.NewProperty("AddInventory");
         writer << **itr;
@@ -467,7 +467,8 @@ int Actor::Save(Writer &writer) const
     writer << m_PieMenu.get();
 
 	writer.NewPropertyWithValue("Organic", m_Organic);
-	writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("Mechanical", m_Mechanical);
+    writer.NewPropertyWithValue("AIBaseDigStrength", m_AIBaseDigStrength);
 
     return 0;
 }
@@ -486,26 +487,12 @@ void Actor::Destroy(bool notInherited)
 	delete m_DeathSound;
 	delete m_AlarmSound;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);
 
     if (!notInherited)
         MOSRotating::Destroy();
     Clear();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
-    int status = MOSRotating::LoadScript(scriptPath, loadAsEnabledScript);
-    if (status < 0) {
-        return status;
-    }
-
-    // If UpdateAI existed it'll be in the lua global namespace, so we can check that to know whether or not to use Lua AI
-    m_ScriptedAIUpdate = m_ScriptedAIUpdate || g_LuaMan.GlobalIsDefined("UpdateAI");
-
-    return status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -544,7 +531,7 @@ float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult
     totalValue += GetGoldCarried();
 
     MOSprite *pItem = 0;
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pItem = dynamic_cast<MOSprite *>(*itr);
         if (pItem)
@@ -560,12 +547,12 @@ float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult
 // Description:     Shows whether this carries a specifically named object in its inventory.
 //                  Also looks through the inventories of potential passengers, as applicable.
 
-bool Actor::HasObject(string objectName) const
+bool Actor::HasObject(std::string objectName) const
 {
     if (MOSRotating::HasObject(objectName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObject(objectName))
             return true;
@@ -587,7 +574,7 @@ bool Actor::HasObjectInGroup(std::string groupName) const
     if (MOSRotating::HasObjectInGroup(groupName))
         return true;
 
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         if ((*itr) && (*itr)->HasObjectInGroup(groupName))
             return true;
@@ -613,7 +600,7 @@ void Actor::SetTeam(int team)
 
     // Also set all actors in the inventory
     Actor *pActor = 0;
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         pActor = dynamic_cast<Actor *>(*itr);
         if (pActor)
@@ -742,7 +729,7 @@ void Actor::RestDetection()
 void Actor::AddAIMOWaypoint(const MovableObject *pMOWaypoint)
 {
     if (g_MovableMan.ValidMO(pMOWaypoint))
-        m_Waypoints.push_back(pair<Vector, const MovableObject *>(pMOWaypoint->GetPos(), pMOWaypoint));
+        m_Waypoints.push_back(std::pair<Vector, const MovableObject *>(pMOWaypoint->GetPos(), pMOWaypoint));
 }
 
 
@@ -781,13 +768,13 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.
 
-void Actor::RemoveInventoryItem(string presetName)
+void Actor::RemoveInventoryItem(std::string presetName)
 {
 	if (!IsInventoryEmpty())
 	{
 		//while(HasObject(presetName))
 		//{
-			for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+			for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
 			{
 				if ((*gItr) && (*gItr)->GetPresetName() == presetName)
 				{
@@ -882,7 +869,7 @@ void Actor::DropAllInventory()
     Actor *pPassenger = 0;
     float velMin, velMax, angularVel;
     Vector gibROffset, gibVel;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+    for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
         // Get handy handle to the object we're putting
         pObject = *gItr;
@@ -972,7 +959,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
     Actor *pPassenger = 0;
     float velMin, velRange, angularVel;
     Vector gibROffset, gibVel;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
+    for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
         // Get handy handle to the object we're putting
         pObject = *gItr;
@@ -1179,15 +1166,12 @@ bool Actor::UpdateMovePath()
 {
     // TODO: Do throttling of calls for this function over time??
 
-
-    // Remove the material representation of all doors of this guy's team so he can navigate through them (they'll open for him)
-    g_MovableMan.OverrideMaterialDoors(true, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
+    // Estimate how much material this actor can dig through
+    float digStrength = EstimateDigStrength();
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength);
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1197,7 +1181,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1208,17 +1192,12 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength);
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
     }
-
-    // Place back the material representation of all doors of this guy's team so they are as we found them
-    g_MovableMan.OverrideMaterialDoors(false, m_Team);
-    // Update the pathfinding with any changes to doors' material representations
-    g_SceneMan.GetScene()->UpdatePathFinding();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())
@@ -1255,16 +1234,26 @@ bool Actor::UpdateMovePath()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+float Actor::EstimateDigStrength() {
+    return m_AIBaseDigStrength;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Actor::UpdateAIScripted() {
-    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.at("UpdateAI").empty()) {
         return false;
     }
 
-    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
-    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	int status = 0;
+	if (!ObjectScriptsInitialized()) {
+		status = InitializeObjectScripts();
+	}
+	if (status >= 0) {
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+		status = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
+	}
 
     return status >= 0;
 }
@@ -1310,8 +1299,8 @@ void Actor::UpdateAI()
         }
 
         // Weedle out any MO's we have waypoints to that aren't valid anymore
-        list<pair<Vector, const MovableObject *> >::iterator eraseItr;
-        for (list<pair<Vector, const MovableObject *> >::iterator itr = m_Waypoints.begin(); itr != m_Waypoints.end();)
+        std::list<std::pair<Vector, const MovableObject *> >::iterator eraseItr;
+        for (auto itr = m_Waypoints.begin(); itr != m_Waypoints.end();)
         {
             // Check to see that an MO we're going after still exists
             if ((*itr).second && !g_MovableMan.ValidMO((*itr).second))
@@ -1401,7 +1390,7 @@ void Actor::Update()
 		Vector notUsed;
         // See if we are close enough to the next move target that we should grab the next in the path that is out of proximity range
         Vector pathPointVec;
-        for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
+        for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
         {
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
             // Make sure we are within range AND have a clear sight to the path point we're about to eliminate, or it might be around a corner
@@ -1855,8 +1844,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         // Draw the AI paths, from the ultimate destination back up to the actor's position.
         // We do this backwards so the lines won't crawl and the dots can be evenly spaced throughout
         Vector waypoint;
-        list<pair<Vector, const MovableObject *> >::reverse_iterator vLast, vItr;
-        list<Vector>::reverse_iterator lLast, lItr;
+        std::list<std::pair<Vector, const MovableObject *> >::reverse_iterator vLast, vItr;
+        std::list<Vector>::reverse_iterator lLast, lItr;
         int skipPhase = 0;
 
         // Draw the line between the end of the movepath and the first waypoint after that, if any
@@ -1934,21 +1923,21 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
         Actor *pPrevAdj = 0;
         Actor *pNextAdj = 0;
-        list<Actor *> *pRoster = g_MovableMan.GetTeamRoster(m_Team);
+        std::list<Actor *> *pRoster = g_MovableMan.GetTeamRoster(m_Team);
 
         if (pRoster->size() > 1)
         {
             // Find this in the list, both ways
-            list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
+            std::list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
             RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
-            list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
+            std::list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
             RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
 
             // Find the adjacent actors
             if (selfItr != pRoster->end())
             {
                 // Get the previous available actor in the list (not controlled by another player)
-                list<Actor *>::reverse_iterator prevItr = selfRItr;
+                std::list<Actor *>::reverse_iterator prevItr = selfRItr;
                 do
                 {
                     if (++prevItr == pRoster->rend())
@@ -1960,7 +1949,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 // Get the next actor in the list (not controlled by another player)
-                list<Actor *>::iterator nextItr = selfItr;
+                std::list<Actor *>::iterator nextItr = selfItr;
                 do
                 {
                     if (++nextItr == pRoster->end())

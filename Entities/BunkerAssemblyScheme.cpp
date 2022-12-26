@@ -69,7 +69,7 @@ int BunkerAssemblyScheme::Create(const BunkerAssemblyScheme &reference)
     m_pPresentationBitmap = reference.m_pPresentationBitmap;
 	m_pIconBitmap = reference.m_pIconBitmap;
 
-    for (list<SOPlacer>::const_iterator itr = reference.m_ChildObjects.begin(); itr != reference.m_ChildObjects.end(); ++itr)
+    for (std::list<SOPlacer>::const_iterator itr = reference.m_ChildObjects.begin(); itr != reference.m_ChildObjects.end(); ++itr)
         m_ChildObjects.push_back(*itr);
 
 	m_BitmapOffset = reference.m_BitmapOffset;
@@ -258,7 +258,7 @@ int BunkerAssemblyScheme::Save(Writer &writer) const
 
     writer.NewProperty("BitmapFile");
     writer << m_BitmapFile;
-    for (list<SOPlacer>::const_iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
+    for (std::list<SOPlacer>::const_iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
     {
         writer.NewProperty("AddChildObject");
         writer << (*itr);
@@ -336,7 +336,7 @@ void BunkerAssemblyScheme::SetTeam(int team)
     SceneObject::SetTeam(team);
 
     // Make sure all the objects to be placed will be of the same team
-    for (list<SOPlacer>::iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
+    for (std::list<SOPlacer>::iterator itr = m_ChildObjects.begin(); itr != m_ChildObjects.end(); ++itr)
         (*itr).SetTeam(team);
 }
 

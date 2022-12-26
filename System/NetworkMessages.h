@@ -1,7 +1,8 @@
 #ifndef _RTENETWORKMSG_
 #define _RTENETWORKMSG_
 
-#include "MessageIdentifiers.h"
+#include "Constants.h"
+#include "RakNet/MessageIdentifiers.h"
 
 namespace RTE {
 
@@ -20,7 +21,10 @@ namespace RTE {
 		ID_SRV_ACCEPTED,
 		ID_SRV_FRAME_SETUP,
 		ID_SRV_FRAME_LINE,
-		ID_SRV_FRAME_BOX,
+		ID_SRV_FRAME_BOX_MO,
+		ID_SRV_FRAME_BOX_UI,
+		ID_SRV_FRAME_BOX_MO_DELTA,
+		ID_SRV_FRAME_BOX_UI_DELTA,
 		ID_SRV_SCENE_SETUP,
 		ID_CLT_SCENE_SETUP_ACCEPTED,
 		ID_SRV_SCENE,
@@ -39,7 +43,7 @@ namespace RTE {
 	// TODO: Figure out all these and add comments.
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgRegisterServer {
 		unsigned char Id;
@@ -50,14 +54,14 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgRegisterServerAccepted {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgGetServerRequest {
 		unsigned char Id;
@@ -67,7 +71,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgGetServerAnswer {
 		unsigned char Id;
@@ -76,14 +80,14 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgGetServerNoAnswer {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgRegister {
 		unsigned char Id;
@@ -95,11 +99,17 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgFrameSetup {
 		unsigned char Id;
 		unsigned char FrameNumber;
+
+		bool Interlaced;
+		bool DeltaCompressed;
+
+		unsigned short int BoxWidth;
+		unsigned short int BoxHeight;
 
 		short int TargetPosX;
 		short int TargetPosY;
@@ -109,7 +119,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgFrameLine {
 		unsigned char Id;
@@ -122,37 +132,33 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgFrameBox {
 		unsigned char Id;
-		unsigned char FrameNumber;
 
-		unsigned char Layer;
-		unsigned short int BoxX;
-		unsigned short int BoxY;
-		unsigned char BoxWidth;
-		unsigned char BoxHeight;
+		unsigned char BoxX;
+		unsigned char BoxY;
+
 		unsigned short int DataSize;
-		unsigned short int UncompressedSize;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgDisconnect {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgAccepted {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct LightweightSceneLayer {
 		size_t BitmapHash;
@@ -180,7 +186,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgSceneSetup {
 		unsigned char Id;
@@ -194,7 +200,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgSceneLine {
 		unsigned char Id;
@@ -208,21 +214,21 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgSceneEnd {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgSceneAccepted {
 		unsigned char Id;
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgTerrainChange {
 		unsigned char Id;
@@ -239,7 +245,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct PostEffectNetworkData {
 		short int X;
@@ -250,7 +256,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgPostEffects {
 		unsigned char Id;
@@ -259,7 +265,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgSoundEvents {
 		unsigned char Id;
@@ -268,7 +274,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgMusicEvents {
 		unsigned char Id;
@@ -277,7 +283,7 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	struct MsgInput {
 		unsigned char Id;

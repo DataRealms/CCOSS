@@ -72,7 +72,7 @@ int Magazine::Create()
                 // Also get FireVel on emitters from sharpness to assure backwards compability with mods
                 const AEmitter * pEmitter = dynamic_cast<const AEmitter *>(pBullet);
                 if (pEmitter)
-                    m_AIAimVel = max(m_AIAimVel, pEmitter->GetSharpness());
+                    m_AIAimVel = std::max(m_AIAimVel, pEmitter->GetSharpness());
             }
         }
     }
@@ -221,11 +221,11 @@ Round * Magazine::PopNextRound()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  EstimateDigStrenght
+// Method:  EstimateDigStrength
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength the rounds in the magazine can destroy. 
 
-float Magazine::EstimateDigStrenght()
+float Magazine::EstimateDigStrength()
 {
     float maxPenetration = 1;
     if (m_pTracerRound)
@@ -235,9 +235,9 @@ float Magazine::EstimateDigStrenght()
         if (pBullet)
         {
             if (m_pTracerRound->GetAIFireVel() > 0)
-                maxPenetration = max(maxPenetration, m_pTracerRound->GetAIFireVel() * abs(pBullet->GetMass()) * max(pBullet->GetSharpness(), 0.0f));
+                maxPenetration = std::max(maxPenetration, m_pTracerRound->GetAIFireVel() * abs(pBullet->GetMass()) * std::max(pBullet->GetSharpness(), 0.0f));
             else
-                maxPenetration = max(maxPenetration, m_pTracerRound->GetFireVel() * abs(pBullet->GetMass()) * max(pBullet->GetSharpness(), 0.0f));
+                maxPenetration = std::max(maxPenetration, m_pTracerRound->GetFireVel() * abs(pBullet->GetMass()) * std::max(pBullet->GetSharpness(), 0.0f));
         }
     }
     
@@ -248,9 +248,9 @@ float Magazine::EstimateDigStrenght()
         if (pBullet)
         {
             if (m_pRegularRound->GetAIFireVel() > 0)
-                maxPenetration = max(maxPenetration, m_pRegularRound->GetAIFireVel() * abs(pBullet->GetMass()) * max(pBullet->GetSharpness(), 0.0f));
+                maxPenetration = std::max(maxPenetration, m_pRegularRound->GetAIFireVel() * abs(pBullet->GetMass()) * std::max(pBullet->GetSharpness(), 0.0f));
             else
-                maxPenetration = max(maxPenetration, m_pRegularRound->GetFireVel() * abs(pBullet->GetMass()) * max(pBullet->GetSharpness(), 0.0f));
+                maxPenetration = std::max(maxPenetration, m_pRegularRound->GetFireVel() * abs(pBullet->GetMass()) * std::max(pBullet->GetSharpness(), 0.0f));
         }
     }
     

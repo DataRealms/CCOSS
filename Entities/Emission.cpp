@@ -121,13 +121,13 @@ int Emission::ReadProperty(const std::string_view &propName, Reader &reader)
 	}
 	else if (propName == "StartTimeMS")
 	{
-		int startTime;
+		double startTime;
 		reader >> startTime;
 		m_StartTimer.SetSimTimeLimitMS(startTime);
 	}
 	else if (propName == "StopTimeMS")
 	{
-		int stopTime;
+		double stopTime;
 		reader >> stopTime;
 		m_StopTimer.SetSimTimeLimitMS(stopTime);
 	}
@@ -156,9 +156,9 @@ int Emission::Save(Writer &writer) const
 	writer << m_BurstSize;
 	writer.NewProperty("Spread");
 	writer << m_Spread;
-	writer.NewProperty("MaxVelocity");
-	writer << m_MinVelocity;
 	writer.NewProperty("MinVelocity");
+	writer << m_MinVelocity;
+	writer.NewProperty("MaxVelocity");
 	writer << m_MaxVelocity;
 	writer.NewProperty("LifeVariation");
 	writer << m_LifeVariation;

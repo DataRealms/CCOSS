@@ -563,7 +563,6 @@ namespace RTE {
 		delete m_LargeFont;
 		delete m_SmallFont;
 
-		m_ScreenShader->Destroy();
 		glDeleteTextures(1, &m_ScreenTexture);
 		glDeleteVertexArrays(1, &m_ScreenVAO);
 		glDeleteBuffers(1, &m_ScreenVBO);

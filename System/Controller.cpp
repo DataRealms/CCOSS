@@ -324,6 +324,7 @@ namespace RTE {
 			}
 
 			m_ControlStates[ControlState::PRESS_FACEBUTTON] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_FIRE) || g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_AIM);
+			m_ControlStates[ControlState::RELEASE_FACEBUTTON] = g_UInputMan.ElementReleased(m_Player, InputElements::INPUT_FIRE) || g_UInputMan.ElementReleased(m_Player, InputElements::INPUT_AIM);
 
 			if (!m_WeaponChangeNextIgnore && g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_WEAPON_CHANGE_NEXT)) {
 				m_ControlStates[ControlState::WEAPON_CHANGE_NEXT] = true;

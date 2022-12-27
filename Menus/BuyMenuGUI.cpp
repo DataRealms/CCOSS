@@ -1598,7 +1598,7 @@ void BuyMenuGUI::Update()
         }
 
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(RELEASE_PRIMARY) && !m_IsDragging) {        
+        if (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging) {        
             itemsChanged = true;
             if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
@@ -1628,9 +1628,9 @@ void BuyMenuGUI::Update()
             DuplicateCartItem(m_ListItemIndex);
         }
 
-        if (m_pController->IsState(PRESS_PRIMARY)) {
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {
             m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
-        } else if (m_pController->IsState(RELEASE_PRIMARY)) {
+        } else if (m_pController->IsState(RELEASE_FACEBUTTON)) {
             m_DraggedItemIndex = -1;
             m_IsDragging = false;
         } 

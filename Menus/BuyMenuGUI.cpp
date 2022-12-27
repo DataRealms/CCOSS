@@ -364,9 +364,9 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
 
     int currentIndex = itemIndex;
     do {
-        GUIListPanel::Item *new_item = addDuplicateItemAtEnd(*(m_pCartList->GetItemList()->begin() + currentIndex));
+        GUIListPanel::Item *newItem = addDuplicateItemAtEnd(*(m_pCartList->GetItemList()->begin() + currentIndex));
         new_item->m_ID = currentIndex;
-        addedItems.push_back(new_item);
+        addedItems.push_back(newItem);
 
         currentIndex++;
     } while (copyingActorWithInventory && 
@@ -880,8 +880,8 @@ void BuyMenuGUI::UpdateItemNestingLevels() {
 			nextHeldDeviceBelongsToAHuman = true;
 		} else if (!dynamic_cast<const HeldDevice*>(cartItem->m_pEntity)) {
 			nextHeldDeviceBelongsToAHuman = false;
-		} else if (nextHeldDeviceBelongsToAHuman) {
-			cartItem->m_OffsetX = ownedDeviceOffsetX;
+		} else {
+			cartItem->m_OffsetX = nextHeldDeviceBelongsToAHuman ? ownedDeviceOffsetX : 0;
 		}
 	}
 

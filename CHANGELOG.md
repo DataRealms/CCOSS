@@ -317,6 +317,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
 	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
 
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON` 
+
 </details>
 
 <details><summary><b>Changed</b></summary>

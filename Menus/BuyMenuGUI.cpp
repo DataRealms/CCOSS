@@ -365,7 +365,7 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
     int currentIndex = itemIndex;
     do {
         GUIListPanel::Item *newItem = addDuplicateItemAtEnd(*(m_pCartList->GetItemList()->begin() + currentIndex));
-        new_item->m_ID = currentIndex;
+        newItem->m_ID = currentIndex;
         addedItems.push_back(newItem);
 
         currentIndex++;

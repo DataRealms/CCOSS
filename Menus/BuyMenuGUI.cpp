@@ -1973,6 +1973,7 @@ void BuyMenuGUI::Update()
                                     std::swap((*m_pCartList->GetItemList())[oldIndex], (*m_pCartList->GetItemList())[oldIndex + direction]);
                                     std::swap((*m_pCartList->GetItemList())[oldIndex + direction]->m_ID, (*m_pCartList->GetItemList())[oldIndex]->m_ID);
                                 }
+                                UpdateItemNestingLevels();
                             }
 
                             m_LastHoveredMouseIndex = pItem->m_ID;

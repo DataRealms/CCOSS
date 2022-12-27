@@ -351,9 +351,8 @@ namespace RTE {
 		// PIE MENU ACTIVE
 		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
 			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
-			m_ControlStates[ControlState::WEAPON_FIRE] = false; // Pie menu steals clicks, so we don't shoot our gun when we select a pie option
-
-			// Make sure that pressing up/down to select pie options doesn't also make us look up/dowm
+			// Make sure that firing and aiming are ignored while the pie menu is open, since it consumes those inputs.
+			m_ControlStates[ControlState::WEAPON_FIRE] = false;
 			m_ControlStates[ControlState::AIM_UP] = false;
 			m_ControlStates[ControlState::AIM_DOWN] = false;
 		} 

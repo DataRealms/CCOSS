@@ -327,6 +327,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Buy Menu Quality-of-Life improvements.
 	Shift-clicking an item in the cart will now empty the entire cart.
 	When Smart Buy Menu Navigation is enabled, items will be indented to signify what actor's inventory they belong to.
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
+
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON` 
 
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  

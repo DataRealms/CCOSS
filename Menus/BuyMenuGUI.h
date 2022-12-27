@@ -338,7 +338,7 @@ public:
     void EnableEquipmentSelection(bool enabled);
 
     /// <summary>
-    /// Updates the nesting level for each item
+    /// Updates the nesting level for every item in the cart.
     /// </summary>
     void UpdateItemNestingLevels();
 
@@ -536,13 +536,19 @@ public:
 	void ClearCartList();
 
     /// <summary>
-    /// Adds an item to the cart
+    /// Adds an item to the cart.
     /// </summary>
+    /// <param name="name">The name shown for the item.</param>
+    /// <param name="rightText">The text that is shown right-aligned on the item (typically the cost of the item).</param>
+    /// <param name="pBitmap">The sprite image rendered for the item. This takes ownership!</param>
+    /// <param name="pEntity">The entity that this item refers to and will create when bought.</param>
+    /// <param name="extraIndex">Extra index for special indexing or reference that the item is associated with. Menu-specific.</param>
     void AddCartItem(const std::string &name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
 
     /// <summary>
-    /// Duplicates an item in the cart
+    /// Duplicates an item in the cart.
     /// </summary>
+    /// <param name="itemIndex">The index of the item to duplicate.</param>
     void DuplicateCartItem(const int itemIndex);
 
 //////////////////////////////////////////////////////////////////////////////////////////

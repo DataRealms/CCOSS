@@ -338,7 +338,7 @@ public:
     void EnableEquipmentSelection(bool enabled);
 
     /// <summary>
-    /// Updates the nesting level for each item
+    /// Updates the nesting level for every item in the cart.
     /// </summary>
     void UpdateItemNestingLevels();
 
@@ -536,12 +536,12 @@ public:
 	void ClearCartList();
 
     /// <summary>
-    /// Adds an item to the cart
+    /// Adds an item to the cart.
     /// </summary>
     void AddCartItem(const std::string &name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
 
     /// <summary>
-    /// Duplicates an item in the cart
+    /// Duplicates an item in the cart.
     /// </summary>
     void DuplicateCartItem(const int itemIndex);
 

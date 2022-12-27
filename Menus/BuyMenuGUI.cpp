@@ -373,18 +373,18 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
         currentIndex < m_pCartList->GetItemList()->size() - addedItems.size() && 
         dynamic_cast<const HeldDevice *>(m_pCartList->GetItem(currentIndex)->m_pEntity));
 
-    // Fix up the IDs of the items we're about to shift
+    // Fix up the IDs of the items we're about to shift.
     for (auto itr = m_pCartList->GetItemList()->begin() + itemIndex, itr_end = m_pCartList->GetItemList()->end() - addedItems.size(); itr < itr_end; ++itr) {
         (*itr)->m_ID += addedItems.size();
     }
 
-    // Now shift all items up to make space
+    // Now shift all items up to make space.
     std::copy(m_pCartList->GetItemList()->begin() + itemIndex, m_pCartList->GetItemList()->end() - addedItems.size(), m_pCartList->GetItemList()->begin() + itemIndex + addedItems.size());
     
-    // And copy our new items into place
+    // And copy our new items into place.
     std::copy(addedItems.begin(), addedItems.end(), m_pCartList->GetItemList()->begin() + itemIndex);
 
-    // Reselect the item, so our selection doesn't move
+    // Reselect the item, so our selection doesn't move.
     m_pCartList->SetSelectedIndex(itemIndex);
 }
 
@@ -874,20 +874,17 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
 void BuyMenuGUI::UpdateItemNestingLevels() {
     const int ownedDeviceOffsetX = 8;
 
-    int isOwned = false;
-    for (auto itr = m_pCartList->GetItemList()->begin(), itr_end = m_pCartList->GetItemList()->end(); itr < itr_end; ++itr) {
-        if ((*itr)->m_pEntity->GetClassName() == "AHuman") {
-            // We're a human, we can carry stuff
-            isOwned = true;
-        } else if (!dynamic_cast<const HeldDevice *>((*itr)->m_pEntity)) {
-            // Interrupted by a non-held device, we're not part of anyone's inventory
-            isOwned = false;
-        } else {
-            (*itr)->m_OffsetX = isOwned ? ownedDeviceOffsetX : 0;
-        }
-    }
+    int nextHeldDeviceBelongsToAHuman = false;
+	for (GUIListPanel::Item *cartItem : (*m_pCartList->GetItemList())) {
+		if (dynamic_cast<const AHuman*>(cartItem->m_pEntity)) {
+			nextHeldDeviceBelongsToAHuman = true;
+		} else if (!dynamic_cast<const HeldDevice*>(cartItem->m_pEntity)) {
+			nextHeldDeviceBelongsToAHuman = false;
+		} else if (nextHeldDeviceBelongsToAHuman) {
+			cartItem->m_OffsetX = ownedDeviceOffsetX;
+		}
+	}
 
-    // Force an immediate refresh of the bitmap
     m_pCartList->BuildBitmap(false, true);
 }
 
@@ -1538,11 +1535,11 @@ void BuyMenuGUI::Update()
                 m_ListItemIndex++;
                 if (m_ListItemIndex >= listSize) {
                     m_ListItemIndex = listSize - 1;
-                    // If at the end of the list and the player presses down, then switch focus to the BUY button
+                    // If at the end of the list and the player presses down, then switch focus to the BUY button.
                     m_FocusChange = 1;
                     m_MenuFocus = OK;
                 } else {
-                    // Only do list change logic if we actually did change
+                    // Only do list change logic if we actually did change.
                     m_pCartList->SetSelectedIndex(m_ListItemIndex);
                     g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                 }
@@ -1552,7 +1549,7 @@ void BuyMenuGUI::Update()
                     m_ListItemIndex = 0;
                     g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
                 } else {
-                    // Only do list change logic if we actually did change
+                    // Only do list change logic if we actually did change.
                     m_pCartList->SetSelectedIndex(m_ListItemIndex);
                     g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                 }
@@ -1905,10 +1902,8 @@ void BuyMenuGUI::Update()
                     if (pItem)
                     {
                         if (anEvent.GetData() & GUIListBox::MOUSE_LEFT) {
-                            // We want to allow the user to shift-click to clear the entire cart
-                            // In future it would be nice to add the concept of a modifier key to the controller,
-                            // So we can do this for gamepad inputs too
-                            if (g_UInputMan.FlagShiftState()) {
+                            //TODO in future it would be nice to add the concept of a modifier key to Controller, so we can do this for gamepad inputs as well.
+							if (g_UInputMan.FlagShiftState()) {
                                 ClearCartList();
                                 pItem = nullptr;
                             }

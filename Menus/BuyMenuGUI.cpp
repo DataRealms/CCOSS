@@ -366,7 +366,7 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
     int currentIndex = itemIndex;
     do {
         GUIListPanel::Item *newItem = addDuplicateItemAtEnd(*(m_pCartList->GetItemList()->begin() + currentIndex));
-        new_item->m_ID = currentIndex;
+        newItem->m_ID = currentIndex;
         addedItems.push_back(newItem);
 
         currentIndex++;
@@ -1995,11 +1995,14 @@ void BuyMenuGUI::Update()
                     if (anEvent.GetData() & GUIListBox::MOUSE_LEFT) {
                         m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
                     }
-                } else if (anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
-                    m_DraggedItemIndex = -1;
-                    m_IsDragging = false;
-                } 
+                }
             }
+
+            // We do this down here, outside the m_pCartList control, because if we have a mouse-up event even outside the cart, we should stop dragging.
+            if (anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
+                m_DraggedItemIndex = -1;
+                m_IsDragging = false;
+            } 
         }
     }
 }

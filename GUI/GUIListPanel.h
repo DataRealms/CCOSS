@@ -33,22 +33,22 @@ public:
     // Item structure
     struct Item
     {
-        int                	m_ID = 0;
-        std::string        	m_Name;
+        int m_ID = 0;
+        std::string m_Name;
         // Extra text field displayed right-justified in the item
-        std::string        	m_RightText;
+        std::string m_RightText;
         // Extra index for special indexing or reference that the item is associated with. Menu-specific
-        int                 m_ExtraIndex = 0;
-        bool            	m_Selected = false;
+        int m_ExtraIndex = 0;
+        bool m_Selected = false;
         // Can contain a bitmap to display in the list
         // This is OWNED
-        GUIBitmap       	*m_pBitmap = nullptr;
+        GUIBitmap *m_pBitmap = nullptr;
         // Extra data associated with the item
         // This is NOT OWNED
-        const Entity        *m_pEntity = nullptr;
-        int             	m_Height = 0;
+        const Entity *m_pEntity = nullptr;
+        int m_Height = 0;
 		// An x offset to apply to the item (to allow nesting)
-		int					m_OffsetX = 0;
+		int m_OffsetX = 0;
 
         Item() { }
         ~Item() { delete m_pBitmap; m_pBitmap = 0; }

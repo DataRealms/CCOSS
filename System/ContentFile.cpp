@@ -217,7 +217,7 @@ namespace RTE {
 				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
 				if (System::PathExistsCaseSensitive(dataPathWithoutExtension + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					dataPathToLoad = dataPathWithoutExtension + altFileExtension;
 				} else {
@@ -249,7 +249,7 @@ namespace RTE {
 				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
 					SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
 				} else if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + "000" + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
 				}
 			}
@@ -315,7 +315,7 @@ namespace RTE {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
 				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					foundAltExtension = true;
 					break;

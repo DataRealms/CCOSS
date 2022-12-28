@@ -81,6 +81,8 @@ namespace RTE {
 		m_WindowView[0] = glm::mat4(1);
 		m_WindowTransforms.resize(1);
 		m_WindowTransforms[0] = glm::mat4(1);
+		m_WindowViewport.resize(1);
+		m_WindowViewport[0] = glm::vec4(1);
 		m_ScreenTexture = 0;
 		m_ScreenVBO = 0;
 		m_ScreenVAO = 0;
@@ -88,8 +90,6 @@ namespace RTE {
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
-		m_ForceVirtualFullScreenGfxDriver = false;
-		m_ForceDedicatedFullScreenGfxDriver = false;
 		m_DisableMultiScreenResolutionValidation = false;
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = m_PrimaryScreenResX = 0;
@@ -153,12 +153,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetInitialGraphicsDriver() {
-		m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY) || m_ForceVirtualFullScreenGfxDriver || m_ForceDedicatedFullScreenGfxDriver;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void FrameMan::PrintForcedGfxDriverMessage() const {
 		if (!m_GfxDriverMessage.empty()) { g_ConsoleMan.PrintString(m_GfxDriverMessage); }
 	}
@@ -174,26 +168,7 @@ namespace RTE {
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 
-		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
-			settingsNeedOverwrite = true;
-			resX = 1360 / resMultiplier;
-			resY = 768 / resMultiplier;
-			const char *invalidResolutionMessage = {
-				"Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\n"
-				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
-			};
-			ShowMessageBox(invalidResolutionMessage);
-		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
-			settingsNeedOverwrite = true;
-			resX = static_cast<int>(std::floor(static_cast<float>(resX) / 4.0F) * 4.0F);
-			std::string invalidResolutionMessage = {
-				"Resolution width that is not divisible by 4 is not supported in windowed or borderless mode!\nOverriding to closest valid width!\n"
-				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
-			};
-			ShowMessageBox(invalidResolutionMessage);
-
 		}
-
 		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
@@ -297,7 +272,6 @@ namespace RTE {
 		}
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
-		SetInitialGraphicsDriver();
 
 		int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (m_Fullscreen) {
@@ -365,7 +339,6 @@ namespace RTE {
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
-		SetInitialGraphicsDriver();
 		set_color_depth(m_BPP);
 
 		int windowW = m_ResX * m_ResMultiplier;
@@ -375,9 +348,10 @@ namespace RTE {
 		}
 		glViewport(0, 0, windowW, windowH);
 
-		m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
+		m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+		m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 		m_WindowTransforms[0] = glm::mat4(1.0f);
-
+		
 		glEnable(GL_DEPTH_TEST);
 
 		if (m_NumScreens > 1 && m_Fullscreen) {
@@ -479,6 +453,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	glm::vec4 FrameMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
+		float aspectRatio = resX / static_cast<float>(resY);
+		int width = windowW;
+		int height = width / aspectRatio + 0.5f;
+
+		if (height > windowH) {
+			height = windowH;
+			width = height * aspectRatio +0.5f;
+		}
+
+		int offsetX = (windowW / 2) - (width / 2);
+		int offsetY = (windowH / 2) - (height / 2);
+		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
+	}
+
 	bool FrameMan::CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier) {
 		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumScreens);
 		for (int i = 0; i < m_NumScreens; ++i) {
@@ -533,9 +522,11 @@ namespace RTE {
 
 				m_WindowView.emplace_back(projection);
 				m_WindowTransforms.emplace_back(uvTransform);
+				m_WindowViewport.emplace_back(glm::vec4(0.0f,0.0f,displayBounds[index].second.w, displayBounds[index].second.h));
 			} else {
 				m_WindowView[0] = projection;
 				m_WindowTransforms[0] = uvTransform;
+				m_WindowViewport[0] = glm::vec4(0.0f, 0.0f, displayBounds[index].second.w, displayBounds[index].second.h);
 			}
 			index++;
 		}
@@ -574,7 +565,6 @@ namespace RTE {
 		delete m_LargeFont;
 		delete m_SmallFont;
 
-		m_ScreenShader->Destroy();
 		glDeleteTextures(1, &m_ScreenTexture);
 		glDeleteVertexArrays(1, &m_ScreenVAO);
 		glDeleteBuffers(1, &m_ScreenVBO);
@@ -626,24 +616,15 @@ namespace RTE {
 		}
 #endif
 
-		// TEMP
-		SDL_DisplayMode desktop;
-		SDL_DisplayMode current;
-		SDL_GetDesktopDisplayMode(0, &desktop);
-		SDL_GetCurrentDisplayMode(0, &current);
-		if (memcmp(&desktop, &current, sizeof(desktop)) != 0) {
-			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
-			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
-			RTEAbort("Current and Desktop display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
-		}
-		// TEMP end
-
 		if (m_ResX > m_MaxResX / newMultiplier || m_ResY > m_MaxResY / newMultiplier) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
 
 		m_MultiWindows.clear();
+		m_WindowView.resize(1);
+		m_WindowTransforms.resize(1);
+		m_WindowViewport.resize(1);
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
 		if (m_Fullscreen) {
@@ -682,11 +663,12 @@ namespace RTE {
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		glViewport(0, 0, windowW, windowH);
 		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
+			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
 		set_palette(m_Palette);
-		RecreateBackBuffers();
+		// RecreateBackBuffers();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
@@ -700,25 +682,14 @@ namespace RTE {
 	void FrameMan::ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen) {
 		int newResMultiplier = upscaled ? 2 : 1;
 
-		// TEMP
-		SDL_DisplayMode desktop;
-		SDL_DisplayMode current;
-		SDL_GetDesktopDisplayMode(0, &desktop);
-		SDL_GetCurrentDisplayMode(0, &current);
-		if (memcmp(&desktop, &current, sizeof(desktop)) != 0) {
-			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
-			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
-			RTEAbort("Current and Desktop display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
-		}
-		// TEMP end
-
-
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_Fullscreen == newFullscreen) {
 			return;
 		}
 		m_MultiWindows.clear();
-		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
-		// m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
+		m_WindowView.resize(1);
+		m_WindowTransforms.resize(1);
+		m_WindowViewport.resize(1);
+
 		if (!newFullscreen) {
 			SDL_RestoreWindow(m_Window.get());
 		}
@@ -734,7 +705,6 @@ namespace RTE {
 				RTEAbort("Unable to set back to previous resolution because: " + std::string(SDL_GetError()) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
-			m_ForceDedicatedFullScreenGfxDriver = prevForceDedicatedDriver;
 			set_palette(m_Palette);
 			return;
 		} else if (!newFullscreen) {
@@ -749,21 +719,12 @@ namespace RTE {
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
 
-		// TEMP
-		SDL_GetDesktopDisplayMode(0, &desktop);
-		SDL_GetCurrentDisplayMode(0, &current);
-		if (memcmp(&desktop, &current, sizeof(desktop)) != 0) {
-			std::string desktopMode = "driverdata: " + std::to_string((long)desktop.driverdata) + "\nformat" + std::to_string(desktop.format) + "\nres" + std::to_string(desktop.w) + "x" + std::to_string(desktop.h) + "@ " + std::to_string(desktop.refresh_rate) + "Hz";
-			std::string currentMode = "driverdata: " + std::to_string((long)current.driverdata) + "\nformat" + std::to_string(current.format) + "\nres" + std::to_string(current.w) + "x" + std::to_string(current.h) + "@ " + std::to_string(current.refresh_rate) + "Hz";
-			RTEAbort("Fullscreen display mode mismatch!\ndesktop:\n" + desktopMode + "\n-------\ncurrent:\n" + currentMode);
-		}
-		// TEMP end
-
 		int windowW = m_ResX * m_ResMultiplier;
 		int windowH = m_ResY * m_ResMultiplier;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
+			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
+			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
 			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
 		glViewport(0, 0, windowW, windowH);
@@ -787,12 +748,19 @@ namespace RTE {
 		m_ResX = newResX / m_ResMultiplier;
 		m_ResY = newResY / m_ResMultiplier;
 
+		if ( newResX < 640 || newResY < 480) {
+			SDL_SetWindowSize(m_Window.get(), 640, 480);
+			m_ResX = 640 / m_ResMultiplier;
+			m_ResY = 480 / m_ResMultiplier;
+		}
+
 		int windowW;
 		int windowH;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 
 		m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
 		m_WindowTransforms[0] = glm::mat4(1.0f);
+		m_WindowViewport[0] = glm::vec4(0, 0, windowW, windowH);
 		glViewport(0, 0, windowW, windowH);
 
 		set_palette(m_Palette);
@@ -963,17 +931,14 @@ namespace RTE {
 		glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_BackBuffer32->w, m_BackBuffer32->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_BackBuffer32->line[0]);
 
-		int windowW = 0;
-		int windowH = 0;
 		glm::mat4 preScaleProjection(1.0f);
 		if (m_MultiWindows.size() > 0) {
 			for (int i = 0; i < m_MultiWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiWindows[i].get(), m_GLContext.get());
-				SDL_GL_GetDrawableSize(m_MultiWindows[i].get(), &windowW, &windowH);
-				glViewport(0, 0, windowW, windowH);
+				glViewport(m_WindowViewport[i+1].x, m_WindowViewport[i+1].y, m_WindowViewport[i+1].z, m_WindowViewport[i+1].w);
 
-				preScaleProjection = glm::translate(m_WindowView[i + 1], {windowW / 2, windowH / 2, 0.0f});
-				preScaleProjection = glm::scale<float>(preScaleProjection, {windowW / 2, windowH / 2, 1.0f});
+				preScaleProjection = glm::translate(m_WindowView[i + 1], {m_WindowViewport[i+1].z / 2, m_WindowViewport[i+1].w / 2, 0.0f});
+				preScaleProjection = glm::scale<float>(preScaleProjection, {m_WindowViewport[i+1].z / 2,m_WindowViewport[i+1].w / 2, 1.0f});
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
@@ -988,15 +953,12 @@ namespace RTE {
 				SDL_GL_SwapWindow(m_MultiWindows[i].get());
 			}
 			SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
-			SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-			glViewport(0, 0, windowW, windowH);
 		}
 
-		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-		glViewport(0, 0, windowW, windowH);
+		glViewport(m_WindowViewport[0].x, m_WindowViewport[0].y, m_WindowViewport[0].z, m_WindowViewport[0].w);
 		preScaleProjection = m_WindowView[0];
-		preScaleProjection = glm::translate<float>(preScaleProjection, {windowW / 2, windowH / 2, 0.0f});
-		preScaleProjection = glm::scale<float>(preScaleProjection, {windowW / 2, windowH / 2, 1.0f});
+		preScaleProjection = glm::translate(m_WindowView[0], {m_WindowViewport[0].z / 2, m_WindowViewport[0].w / 2, 0.0f});
+		preScaleProjection = glm::scale<float>(preScaleProjection, {m_WindowViewport[0].z / 2, m_WindowViewport[0].w / 2, 1.0f});
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);

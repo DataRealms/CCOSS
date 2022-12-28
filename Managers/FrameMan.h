@@ -591,6 +591,7 @@ namespace RTE {
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
 		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
 		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
+		std::vector<glm::vec4> m_WindowViewport; //!< The viewports for all windows, to allow for preserved aspect ratios.
 		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
 		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
 		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
@@ -603,9 +604,6 @@ namespace RTE {
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
-		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
-		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
-
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
 		int m_NumScreens; //!< Number of physical screens.
@@ -708,11 +706,6 @@ namespace RTE {
 
 #pragma region Create Breakdown
 		/// <summary>
-		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
-		/// </summary>
-		void SetInitialGraphicsDriver();
-
-		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
@@ -759,6 +752,23 @@ namespace RTE {
 		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
 		/// </summary>
 		void RecreateBackBuffers();
+
+		/// <summary>
+		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
+		/// </summary>
+		/// <param name="resX">
+		/// Desired horizontal resolution.
+		/// </param>
+		/// <param name="resY">
+		/// Desired vertical resolution.
+		/// </param>
+		/// <param name="windowW">
+		/// Window horizontal resolution.
+		/// </param>
+		/// <param name="windowH">
+		/// Window vertical resolution.
+		/// </param>
+		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
 #pragma region Draw Breakdown

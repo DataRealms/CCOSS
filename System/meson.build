@@ -25,4 +25,5 @@ sources += files(
 'ScreenShader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
+'GLCheck.cpp',
 )

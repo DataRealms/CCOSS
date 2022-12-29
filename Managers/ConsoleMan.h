@@ -99,12 +99,19 @@ namespace RTE {
 		bool LoadWarningsExist() const { return !m_LoadWarningLog.empty(); }
 
 		/// <summary>
-		/// Adds a new entry to the loading warning log.
+		/// Adds a new indentation format mismatch entry to the loading warning log.
+		/// </summary>
+		/// <param name="readerPosition">The file and line currently being loaded.</param>
+		/// <param name="numSpaces">The number of space characters encountered.</param>
+		void AddLoadWarningLogIndentationFormatEntry(const std::string &readerPosition, int numSpaces);
+
+		/// <summary>
+		/// Adds a new file extension mismatch entry to the loading warning log.
 		/// </summary>
 		/// <param name="pathToLog">The path that produced the warning.</param>
 		/// <param name="readerPosition">The file and line currently being loaded.</param>
 		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
-		void AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition = "", const std::string &altFileExtension = "" );
+		void AddLoadWarningLogExtensionMismatchEntry(const std::string &pathToLog, const std::string &readerPosition = "", const std::string &altFileExtension = "" );
 
 		/// <summary>
 		/// Writes the entire loading warning log to a file.

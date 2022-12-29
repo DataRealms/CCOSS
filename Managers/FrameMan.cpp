@@ -73,9 +73,6 @@ namespace RTE {
 			1.0f, -1.0f, 1.0f, 1.0f,
 			-1.0f, 1.0f, 0.0f, 0.0f,
 			-1.0f, -1.0f, 0.0f, 1.0f,};
-		m_Window.reset();
-		m_MultiWindows.clear();
-		m_GLContext.reset();
 		m_ScreenShader.reset();
 		m_WindowView.resize(1);
 		m_WindowView[0] = glm::mat4(1);
@@ -87,6 +84,11 @@ namespace RTE {
 		m_ScreenVBO = 0;
 		m_ScreenVAO = 0;
 		m_EnableVsync = -1;
+
+		// GL Context needs to be destroyed after all GL objects and before the main window.
+		m_GLContext.reset();
+		m_Window.reset();
+		m_MultiWindows.clear();
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
@@ -427,6 +429,10 @@ namespace RTE {
 		}
 
 		m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
+
+		glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_BackBuffer32->w, m_BackBuffer32->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		return 0;
 	}
@@ -929,7 +935,7 @@ namespace RTE {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_ScreenTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_BackBuffer32->w, m_BackBuffer32->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_BackBuffer32->line[0]);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, GL_RGBA, GL_UNSIGNED_BYTE, m_BackBuffer32->line[0]);
 
 		glm::mat4 preScaleProjection(1.0f);
 		if (m_MultiWindows.size() > 0) {

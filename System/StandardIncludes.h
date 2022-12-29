@@ -79,5 +79,6 @@
 #include <filesystem>
 
 #include "glad/gl.h"
+#include "GLCheck.h"
 
 #endif

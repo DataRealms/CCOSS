@@ -26,4 +26,5 @@ sources += files(
 'Serializable.cpp',
 'PieQuadrant.cpp',
 'SpatialPartitionGrid.cpp',
+'GLCheck.cpp',
 )

@@ -177,7 +177,6 @@ namespace RTE {
 		Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		Reader & operator>>(char * var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 

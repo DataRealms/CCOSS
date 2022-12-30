@@ -314,13 +314,13 @@ void GUIListPanel::BuildDrawBitmap() {
 		int itemY = y;
 
 		int itemWidth = m_Width - itemX;
-		int thirdWidth = itemWidth / 3;
+		int thirdWidth = m_Width / 3;
 
 		// Alternate drawing mode
 		// TODO: REMOVE MORE H-CODING
 		if (m_AlternateDrawMode) {
 			int rightTextWidth = I->m_RightText.empty() ? 0 : RIGHTTEXTWIDTH;//thirdWidth / 2;
-			int mainTextWidth = (thirdWidth * 2) - rightTextWidth;
+			int mainTextWidth = ((thirdWidth * 2) - rightTextWidth) - I->m_OffsetX;
 			int bitmapWidth = I->m_pBitmap ? I->m_pBitmap->GetWidth() : 0;
 			int bitmapHeight = I->m_pBitmap ? I->m_pBitmap->GetHeight() : 0;
 			if (!I->m_Name.empty() && !I->m_RightText.empty() && bitmapWidth > thirdWidth) {
@@ -330,7 +330,7 @@ void GUIListPanel::BuildDrawBitmap() {
 
 			int textHeight = m_Font->CalculateHeight(I->m_Name, mainTextWidth);
 			int itemHeight = std::max(bitmapHeight + 4, textHeight + 2);
-			int textX = thirdWidth - itemX;
+			int textX = thirdWidth + 6 - itemX;
 			int textY = itemY + (itemHeight / 2) + 1;
 			int bitmapY = itemY + (itemHeight / 2) - (bitmapHeight / 2) + 1;
 

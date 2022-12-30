@@ -189,6 +189,10 @@ namespace RTE {
 			m_AngularVel = 0.0F;
 		}
 
+		if (m_HeldDeviceThisArmIsTryingToSupport && !m_HeldDeviceThisArmIsTryingToSupport->IsSupportable()) {
+			m_HeldDeviceThisArmIsTryingToSupport = nullptr;
+		}
+
 		bool heldDeviceIsAThrownDevice = m_HeldDevice && dynamic_cast<ThrownDevice *>(m_HeldDevice);
 
 		// If there's no HeldDevice, or it's a ThrownDevice, the Arm should rotate to match the hand's current offset for visuals/aiming (instead of using the AHuman's aim angle).
@@ -256,17 +260,18 @@ namespace RTE {
 			m_HandCurrentOffset.ClampMagnitude(m_MaxLength / 2.0F, m_MaxLength);
 
 			bool handIsCloseToTargetOffset = HandIsCloseToTargetOffset(targetOffset);
-			if (handIsCloseToTargetOffset && !m_HandHasReachedCurrentTarget && !m_HandTargets.empty()) {
-				m_HandMovementDelayTimer.SetSimTimeLimitMS(m_HandTargets.front().DelayAtTarget);
-				m_HandMovementDelayTimer.Reset();
-			}
-			m_HandHasReachedCurrentTarget = handIsCloseToTargetOffset;
-
-			if (m_HandHasReachedCurrentTarget && m_HandMovementDelayTimer.IsPastSimTimeLimit()) {
-				if (!m_HandTargets.empty()) {
-					m_HandTargets.pop();
+			if (!m_HandTargets.empty()) {
+				if (handIsCloseToTargetOffset && !m_HandHasReachedCurrentTarget) {
+					m_HandMovementDelayTimer.SetSimTimeLimitMS(m_HandTargets.front().DelayAtTarget);
+					m_HandMovementDelayTimer.Reset();
+					m_HandHasReachedCurrentTarget = true;
 				}
-				m_HandHasReachedCurrentTarget = false;
+				if (m_HandHasReachedCurrentTarget && m_HandMovementDelayTimer.IsPastSimTimeLimit()) {
+					m_HandTargets.pop();
+					m_HandHasReachedCurrentTarget = false;
+				}
+			} else {
+				m_HandHasReachedCurrentTarget = handIsCloseToTargetOffset;
 			}
 		} else {
 			m_HandCurrentOffset.SetXY(m_MaxLength * 0.65F, 0);

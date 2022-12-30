@@ -248,23 +248,29 @@ ClassInfoGetters;
 
     void SetSharpLength(float newLength) { m_MaxSharpLength = newLength; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice can be supported when held.
+	/// </summary>
+	/// <returns>Whether this HeldDevice can be supported when held.</returns>
+	bool IsSupportable() const { return m_Supportable; }
 
 	/// <summary>
-	/// Gets whether this HeldDevice is currently supported by a second hand.
+	/// Sets whether this HeldDevice can be supported when held.
 	/// </summary>
-	/// <returns>Whether the device is supported or not.</returns>
-	bool GetSupported() const { return m_Supported; }
+	/// <param name="shouldBeSupportable">Whether this HeldDevice can be supported when held.</param>
+	void SetSupportable(bool shouldBeSupportable) { m_Supportable = shouldBeSupportable; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice is currently supported by a second Arm.
+	/// </summary>
+	/// <returns>Whether this HeldDevice is supported or not.</returns>
+	bool GetSupported() const { return m_Supportable && m_Supported; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSupported
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this HeldDevice is currently supported by a second hand
-//                  or not.
-// Arguments:       If it should be supported or not.
-// Return value:    None.
-
-    void SetSupported(bool supported) { m_Supported = supported; }
+    /// <summary>
+    /// Sets whether this HeldDevice is currently supported by a second Arm.
+    /// </summary>
+	/// <param name="supported">Whether this HeldDevice is being supported.</param>
+    void SetSupported(bool supported) { m_Supported = m_Supportable && supported; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -624,6 +630,7 @@ protected:
     float m_SharpAim;
     // How much farther the player can see when aiming this sharply.
     float m_MaxSharpLength;
+	bool m_Supportable; //!< Whether or not this HeldDevice can be supported.
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
     bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.

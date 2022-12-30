@@ -3796,14 +3796,14 @@ void AHuman::Update()
 				} else if (heldDevice) {
 					if (HeldDevice *bgDevice = GetEquippedBGItem(); bgDevice && !heldDevice->IsOneHanded()) {
 						UnequipBGArm();
-					} else if (!bgDevice && !heldDevice->IsReloading()) {
+					} else if (!bgDevice && !heldDevice->IsReloading() && heldDevice->IsSupportable()) {
 						m_pBGArm->SetHeldDeviceThisArmIsTryingToSupport(heldDevice);
 
-						if (m_pBGArm->GetHandHasReachedCurrentTarget()) {
+						if (!m_pBGArm->HasAnyHandTargets() && m_pBGArm->GetHandHasReachedCurrentTarget()) {
 							heldDevice->SetSupported(true);
 							m_pBGArm->SetRecoil(heldDevice->GetRecoilForce(), heldDevice->GetRecoilOffset(), heldDevice->IsRecoiled());
 						} else {
-							// BGArm did not reach to support the device. Count device as supported anyway, if crouching.
+							// BGArm did not reach to support the device. Count device as supported anyway, if crouching or prone.
 							heldDevice->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
 							m_pBGArm->SetRecoil(Vector(), Vector(), false);
 						}

@@ -893,7 +893,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= RandomNum() && velocity.MagnitudeIsGreaterThan(0.5F)) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());

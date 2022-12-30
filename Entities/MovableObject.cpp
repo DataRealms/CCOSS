@@ -915,7 +915,7 @@ void MovableObject::PostTravel()
     }
 
     // Check for stupid positions
-    if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 100)) {
+    if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 1000)) {
         m_ToDelete = true;
     }
 

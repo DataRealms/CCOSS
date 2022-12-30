@@ -898,9 +898,11 @@ void MovableObject::PostTravel()
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
             m_IsTraveling = false;
+#ifdef DRAW_MOID_LAYER
 			if (!g_SettingsMan.SimplifiedCollisionDetection()) {
                 Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
 			}
+#endif
 		}
 		m_AlreadyHitBy.clear();
 	}

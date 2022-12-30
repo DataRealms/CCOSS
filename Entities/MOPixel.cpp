@@ -248,7 +248,7 @@ namespace RTE {
 				break;
 		}
 
-#ifdef DRAW_MOID_LAYER
+#ifndef DRAW_MOID_LAYER
 		if (mode != g_DrawMOID)
 #endif
 		{

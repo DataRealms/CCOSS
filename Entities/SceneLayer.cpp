@@ -267,7 +267,7 @@ namespace RTE {
 		}
 		_putpixel(m_MainBitmap, pixelX, pixelY, materialID);
 
-		//RegisterDrawing(pixelX, pixelY, pixelX, pixelY);
+		RegisterDrawing(pixelX, pixelY, pixelX, pixelY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

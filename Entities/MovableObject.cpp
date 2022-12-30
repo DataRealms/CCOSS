@@ -892,8 +892,9 @@ void MovableObject::Travel()
 void MovableObject::PostTravel()
 {
     // Toggle whether this gets hit by other AtomGroup MOs depending on whether it's going slower than a set threshold
-    if (m_IgnoresAGHitsWhenSlowerThan > 0)
-        m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
+    if (m_IgnoresAGHitsWhenSlowerThan > 0) {
+        m_IgnoresAtomGroupHits = m_Vel.MagnitudeIsLessThan(m_IgnoresAGHitsWhenSlowerThan);
+    }
 
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
@@ -909,19 +910,22 @@ void MovableObject::PostTravel()
 	m_IsUpdated = true;
 
     // Check for age expiration
-    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime)
+    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) {
         m_ToDelete = true;
+    }
 
-    // Check for stupid positions and velocities, but critical stuff can't go too fast
-    if (!g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 100))
+    // Check for stupid positions
+    if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 100)) {
         m_ToDelete = true;
+    }
 
     // Fix speeds that are too high
     FixTooFast();
 
     // Never let mission critical stuff settle or delete
-    if (m_MissionCritical)
+    if (m_MissionCritical) {
         m_ToSettle = false;
+    }
 
     // Reset the terrain intersection warning
     m_CheckTerrIntersection = false;

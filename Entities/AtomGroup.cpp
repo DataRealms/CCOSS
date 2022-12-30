@@ -1417,7 +1417,7 @@ namespace RTE {
 					intersectedMO = tempMO;
 #ifdef DRAW_MOID_LAYER
 					intersectedMO->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-#end
+#endif
 					break;
 				}
 			}

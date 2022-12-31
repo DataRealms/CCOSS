@@ -175,7 +175,9 @@ namespace RTE {
 		Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		// Yeah, this is dumb - read as double and cast. 
+		// This is because, for whatever fucking reason, iostream can save out floats at a precision that it's then unable to read...
+		Reader & operator>>(float &var) { DiscardEmptySpace(); double var2; *m_Stream >> var2; var = static_cast<float>(var2); return *this; }
 		Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion

@@ -326,6 +326,8 @@ namespace RTE {
 	                                                                  bool includePositiveDamageAttachables,
 	                                                                  bool includeNegativeDamageAttachables, 
 	                                                                  bool includeNoDamageAttachables) {
+		// We use a static vector because we need to return a reference to work with Luabind.
+		// This requires a static memory location, so we use this vector here as a buffer.
 		static std::vector<AEmitter *> wounds;
 		wounds.clear();
 

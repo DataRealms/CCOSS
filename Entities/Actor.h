@@ -75,7 +75,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnControllerSwitch");
+AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnControllerInputModeChange");
 SerializableOverrideMethods;
 ClassInfoGetters;
 

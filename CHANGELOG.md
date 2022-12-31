@@ -308,10 +308,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.  
 
-- Added a new Lua scripted function for `Actor`s: `OnControllerSwitch(self, previousControllerMode, previousControllingPlayer)` that triggers when an `Actor`'s `Controller` state changes (between AI/Player/Network control etc). This provides a script hook that fires when a player starts/stops controlling an `Actor`.
+- Added a new Lua scripted function for `Actor`s: `OnControllerInputModeChange(self, previousControllerMode, previousControllingPlayer)` that triggers when an `Actor`'s `Controller`'s input state changes (between AI/Player/Network control etc). This provides a script hook that fires when a player starts/stops controlling an `Actor`.
 
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
-	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.  
+	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
 </details>
 

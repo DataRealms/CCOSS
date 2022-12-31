@@ -3,6 +3,7 @@
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "PresetMan.h"
+#include "SettingsMan.h"
 
 #include "AHuman.h"
 #include "ContentFile.h"
@@ -61,7 +62,7 @@ namespace RTE {
 		m_EnableDisableAnimationTimer.Reset();
 		m_HoverTimer.Reset();
 		m_SubPieMenuHoverOpenTimer.Reset();
-		m_SubPieMenuHoverOpenTimer.SetRealTimeLimitMS(c_PieSliceWithSubPieMenuHoverOpenInterval);
+		m_SubPieMenuHoverOpenTimer.SetRealTimeLimitMS(g_SettingsMan.GetSubPieMenuHoverOpenDelay());
 
 		m_IconSeparatorMode = IconSeparatorMode::Line;
 		m_FullInnerRadius = c_DefaultFullRadius;
@@ -755,7 +756,7 @@ namespace RTE {
 		}
 
 		if (IsEnabled()) {
-			if ((m_ActivatedPieSlice && m_ActivatedPieSlice->GetSubPieMenu() != nullptr) || (m_HoveredPieSlice->GetSubPieMenu() && m_SubPieMenuHoverOpenTimer.IsPastRealMS(c_PieSliceWithSubPieMenuHoverOpenInterval))) {
+			if ((m_ActivatedPieSlice && m_ActivatedPieSlice->GetSubPieMenu() != nullptr) || (m_HoveredPieSlice->GetSubPieMenu() && m_SubPieMenuHoverOpenTimer.IsPastRealTimeLimit())) {
 				PreparePieSliceSubPieMenuForUse(m_ActivatedPieSlice ? m_ActivatedPieSlice : m_HoveredPieSlice);
 				m_ActiveSubPieMenu = m_ActivatedPieSlice ? m_ActivatedPieSlice->GetSubPieMenu() : m_HoveredPieSlice->GetSubPieMenu();
 				if (m_Owner) {

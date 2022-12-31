@@ -290,6 +290,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
 
+- New `Settings.ini` property `SubPieMenuHoverOpenDelay` that determines how long, in milliseconds,a `PieSlice` with a sub-`PieMenu` must be hovered over for the sub-`PieMenu` to automatically open. Default is 1000 milliseconds.
+
 - Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
 
 - Added key combinations for resetting time scales to defaults while performance stats are visible.  

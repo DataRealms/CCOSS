@@ -6,6 +6,8 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
+#include "GameVersion.h"
+
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "AllegroInput.h"

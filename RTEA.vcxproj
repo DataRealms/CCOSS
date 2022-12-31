@@ -609,6 +609,7 @@
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
+    <ClInclude Include="System\GameVersion.h" />
     <ClInclude Include="System\GenericSavedData.h" />
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />

@@ -2,6 +2,8 @@
 #include "PresetMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
+#include "GameVersion.h"
+
 
 namespace RTE {
 

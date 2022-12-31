@@ -558,6 +558,9 @@
     <ClInclude Include="System\Semver200\version.h">
       <Filter>System\Semver200</Filter>
     </ClInclude>
+    <ClInclude Include="System\GameVersion.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">

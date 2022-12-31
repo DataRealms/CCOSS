@@ -1,7 +1,6 @@
 #ifndef _RTECONSTANTS_
 #define _RTECONSTANTS_
 
-#include "System/Semver200/semver200.h"
 
 namespace RTE {
 
@@ -13,7 +12,6 @@ namespace RTE {
 
 #pragma region Game Version
 	static constexpr const char *c_VersionString = "4.0.0";
-	static const version::Semver200_version c_GameVersion = version::Semver200_version(c_VersionString);
 #pragma endregion
 
 #pragma region Userdata Constants

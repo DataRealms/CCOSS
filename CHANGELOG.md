@@ -315,7 +315,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 </details>
 
-<details open><summary><b>Changed</b></summary>
+<details><summary><b>Changed</b></summary>
 
 - Greatly reduce online multiplayer bandwidth usage.
 

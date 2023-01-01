@@ -188,16 +188,12 @@ public:
 	/// <returns>True if the module is a listed user data module, otherwise false.</returns>
 	bool IsModuleUserdata(std::string moduleName);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FullModulePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the Full path to the module including Data/ or Mods/.
-// Arguments:       The Path to be completed.
-// Return value:    The complete path to the file, including Data/ or Mods/ whether or not it's part of an official module.
-
+    /// <summary>
+    /// Returns the Full path to the module including Data/, Userdata/ or Mods/.
+    /// </summary>
+    /// <param name="modulePath">The Path to be completed.</param>
+    /// <returns>The complete path to the file, including Data/, Userdata/ or Mods/ based on whether or not it's part of an official module or userdata.</returns>
     std::string FullModulePath(std::string modulePath);
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalModuleCount

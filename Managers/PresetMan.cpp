@@ -342,17 +342,12 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) {
 	return userdataModuleItr != userdataModules.end();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FullModulePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the Full path to the module including Data/ or Mods/.
-// Arguments:       The Path to be completed.
-// Return value:    The complete path to the file, including Data/ or Mods/ based on whether or not it's part of an official module.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string PresetMan::FullModulePath(std::string modulePath)
 {
     const std::string moduleName = GetModuleNameFromPath(modulePath);
-    const std::string moduleFolder = IsModuleOfficial(moduleName) ? "Data/" : "Mods/";
+    const std::string moduleFolder = IsModuleOfficial(moduleName) ? "Data/" : IsModuleUserdata(moduleName) ? "Userdata/" : "Mods/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {
         return modulePath;

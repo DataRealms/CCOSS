@@ -18,3 +18,4 @@ compile_commands.json
 /NATPunchServer/Server/NATCompleteServer/Release
 /Documentation/Doxygen/Output
 MemCleanupInfo.txt
+.vscode

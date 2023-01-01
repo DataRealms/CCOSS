@@ -15,7 +15,7 @@ namespace RTE {
 	std::filesystem::file_time_type System::s_ProgramStartTime = std::filesystem::file_time_type::clock::now();
 	bool System::s_CaseSensitive = true;
 	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
-	const std::string System::s_ModDirectory = "_Mods";
+	const std::string System::s_ModDirectory = "Mods";
 	const std::string System::s_ModulePackageExtension = ".rte";
 	const std::string System::s_ZippedModulePackageExtension = ".rte.zip";
 	const std::unordered_set<std::string> System::s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
@@ -27,7 +27,7 @@ namespace RTE {
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
 		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
-		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
+		if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

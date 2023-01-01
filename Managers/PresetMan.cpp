@@ -159,14 +159,14 @@ bool PresetMan::LoadAllDataModules() {
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
-	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
+	if (!m_SingleModuleToLoad.empty() && !IsModuleOfficial(m_SingleModuleToLoad)) {
 		if (!LoadDataModule(m_SingleModuleToLoad, false, false, LoadingScreen::LoadingSplashProgressReport)) {
 			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
 			return false;
 		}
 	} else {
 		std::vector<std::filesystem::directory_entry> modDirectoryFolders;
-		const std::string modDirectory = System::GetWorkingDirectory() + "Mods/";
+		const std::string modDirectory = System::GetWorkingDirectory() + System::GetModDirectory() + "/";
 		std::copy_if(std::filesystem::directory_iterator(modDirectory), std::filesystem::directory_iterator(), std::back_inserter(modDirectoryFolders),
 			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
 		);
@@ -347,7 +347,7 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) {
 std::string PresetMan::FullModulePath(std::string modulePath)
 {
     const std::string moduleName = GetModuleNameFromPath(modulePath);
-    const std::string moduleFolder = IsModuleOfficial(moduleName) ? "Data/" : IsModuleUserdata(moduleName) ? "Userdata/" : "Mods/";
+    const std::string moduleFolder = (IsModuleOfficial(moduleName) ? "Data" : IsModuleUserdata(moduleName) ? System::GetUserdataDirectory() : System::GetModDirectory()) + "/";
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {
         return modulePath;

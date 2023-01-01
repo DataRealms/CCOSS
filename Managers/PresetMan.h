@@ -179,6 +179,15 @@ public:
 	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
 	/// <returns>True if the module is an official data module, otherwise false.</returns>
     bool IsModuleOfficial(std::string moduleName);
+  
+
+	/// <summary>
+	/// Returns whether or not the module is vanilla.
+	/// </summary>
+	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
+	/// <returns>True if the module is a listed user data module, otherwise false.</returns>
+	bool IsModuleUserdata(std::string moduleName);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FullModulePath

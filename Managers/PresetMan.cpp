@@ -29,9 +29,16 @@
 #include "LoadingScreen.h"
 #include "SettingsMan.h"
 
-static const std::array<std::string, 12> allOfficialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte", "Scenes.rte", "Metagames.rte" };
+
 
 namespace RTE {
+
+	static const std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	static const std::array<std::pair<std::string, std::string>, 3> userdataModules = { {
+		{c_UserScenesModuleName, "User Scenes"},
+		{c_UserConquestSavesModuleName, "Conquest Saves"},
+		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
+	} };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -144,13 +151,6 @@ bool PresetMan::LoadAllDataModules() {
 
 	FindAndExtractZippedModules();
 
-	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
-	std::array<std::pair<std::string, std::string>, 3> userdataModules = {{
-		{c_UserScenesModuleName, "User Scenes"},
-		{c_UserConquestSavesModuleName, "Conquest Saves"},
-		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
-	}};
-
 	// Load all the official modules first!
 	for (const std::string &officialModule : officialModules) {
 		if (!LoadDataModule(officialModule, true, false, LoadingScreen::LoadingSplashProgressReport)) {
@@ -176,9 +176,8 @@ bool PresetMan::LoadAllDataModules() {
 			std::string directoryEntryPath = directoryEntry.path().generic_string();
 			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
-				if (!g_SettingsMan.IsModDisabled(moduleName) && std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end()) {
-					auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModulesEntry) { return userdataModulesEntry.first == moduleName; });
-					if (userdataModuleItr == userdataModules.end()) {
+				if (!g_SettingsMan.IsModDisabled(moduleName) && !IsModuleOfficial(moduleName)) {
+					if (!IsModuleUserdata(moduleName)) {
 						int moduleID = GetModuleID(moduleName);
 						// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
 						if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, LoadingScreen::LoadingSplashProgressReport); }
@@ -329,14 +328,18 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
     return GetModuleID(moduleName);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsModuleOfficial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns wether or not the module is vanilla.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::IsModuleOfficial(std::string moduleName)
 {
-	return std::find(allOfficialModules.begin(), allOfficialModules.end(), moduleName) != allOfficialModules.end();
+	return std::find(officialModules.begin(), officialModules.end(), moduleName) != officialModules.end();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::IsModuleUserdata(std::string moduleName) {
+	auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModulesEntry) { return userdataModulesEntry.first == moduleName; });
+	return userdataModuleItr != userdataModules.end();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -530,6 +530,8 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		}
 	}
 
+	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
+
 	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 	if (g_LuaMan.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
 		return -5;
@@ -539,8 +541,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
 	g_LuaMan.RunScriptString(luaClearSupportedFunctionsString);
-
-	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
 	if (ObjectScriptsInitialized()) {
 		RunFunctionOfScript(scriptPath, "Create");
@@ -569,7 +569,10 @@ int MovableObject::ReloadScripts() {
 	m_FunctionsAndScripts.clear();
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
-		if (status < 0) {
+		// If the script fails to load because of an error in its Lua, we need to manually add the script path so it's not lost forever.
+		if (status == -5) {
+			m_AllLoadedScripts.try_emplace(scriptPath, scriptEnabled);
+		} else if (status < 0) {
 			break;
 		}
 	}

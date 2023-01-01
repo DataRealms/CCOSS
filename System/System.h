@@ -156,6 +156,7 @@ namespace RTE {
 		static bool s_CaseSensitive; //!< Whether case sensitivity is enforced when checking for file existence.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
+		static const std::string s_UserdataDirectory; //!< String containing the folder name of the userdata directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
 		static const std::string s_ZippedModulePackageExtension; //!< The extension that determines a file is a zipped RTE module.
 

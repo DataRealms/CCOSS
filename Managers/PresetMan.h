@@ -155,13 +155,11 @@ public:
 
     int GetModuleID(std::string moduleName);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleNameFromPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Name of a loaded DataModule, from a full data file path.
-// Arguments:       The full path to a data file inside the data module id you want to get.
-// Return value:    The requested Name. If no module of the name was found, "" will be returned.
-
+    /// <summary>
+    ///  Gets the Name of a loaded DataModule, from a full data file path.
+    /// </summary>
+    /// <param name="dataPath">The full path to a data file inside the data module id you want to get.</param>
+    /// <returns>The requested Name. If no module of the name was found, "" will be returned.</returns>
     std::string GetModuleNameFromPath(std::string dataPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////

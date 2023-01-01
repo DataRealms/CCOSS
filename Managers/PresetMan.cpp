@@ -285,10 +285,8 @@ int PresetMan::GetModuleID(std::string moduleName)
     return -1;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleNameFromPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Name of a loaded DataModule, from a full data file path.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
 {
     if (dataPath.empty()) {
@@ -300,8 +298,9 @@ std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
         slashPos = dataPath.find_first_of( '\\' );
     }
     std::string moduleName = dataPath.substr( 0, slashPos );
-    // check if path starts with Data/ or Mods/ and remove that part to get to the actual module name
-    if (moduleName == "Data" || moduleName == "Mods") {
+
+    // Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
+    if (moduleName == "Data" || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
         std::string shortenPath = dataPath.substr( slashPos + 1 );
         slashPos = shortenPath.find_first_of( '/' );
         if (slashPos == std::string::npos) {

@@ -365,32 +365,42 @@ namespace RTE {
 		Vector move = g_UInputMan.AnalogMoveValues(m_Player);
 		Vector aim = g_UInputMan.AnalogAimValues(m_Player);
 
-		bool pieMenuActive = m_ControlStates.at(ControlState::PIE_MENU_ACTIVE);
+		bool pieMenuActive = m_ControlStates[ControlState::PIE_MENU_ACTIVE];
 
 		// Only change aim and move if not holding actor switch buttons - don't want to mess up AI's aim
-		if (!pieMenuActive && !m_ControlStates[ControlState::ACTOR_PREV_PREP] && !m_ControlStates[ControlState::ACTOR_NEXT_PREP] && m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
+		if (!m_ControlStates[ControlState::ACTOR_PREV_PREP] && !m_ControlStates[ControlState::ACTOR_NEXT_PREP] && m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
 			m_AnalogMove = move;
+		} 
+		
+		if (pieMenuActive) {
 			m_AnalogAim = aim;
 		} else {
-			m_AnalogCursor = move.GetLargest() > aim.GetLargest() ? move : aim;
+			m_AnalogCursor = aim;
 			if (m_AnalogCursorAngleLimits.second) {
 				m_AnalogCursor.SetAbsRadAngle(ClampAngle(m_AnalogCursor.GetAbsRadAngle(), m_AnalogCursorAngleLimits.first.first, m_AnalogCursorAngleLimits.first.second));
 			}
 		}
 
 		// If the joystick-controlled analog cursor is less than at the edge of input range, don't accelerate
-		if (GetAnalogCursor().MagnitudeIsLessThan(0.85F)) { m_JoyAccelTimer.Reset(); }
+		if (GetAnalogCursor().MagnitudeIsLessThan(0.85F)) { 
+			m_JoyAccelTimer.Reset(); 
+		}
+		
 		// If the keyboard inputs for cursor movements is initially pressed, reset the acceleration timer
 		if (IsState(ControlState::ACTOR_NEXT) || IsState(ControlState::ACTOR_PREV) || (IsState(ControlState::PRESS_LEFT) || IsState(ControlState::PRESS_RIGHT) || IsState(ControlState::PRESS_UP) || IsState(ControlState::PRESS_DOWN))) {
 			m_KeyAccelTimer.Reset();
 		}
 
 		// Translate analog aim input into sharp aim control state
-		if (m_AnalogAim.MagnitudeIsGreaterThan(0.1F) && !m_ControlStates[ControlState::PIE_MENU_ACTIVE]) { m_ControlStates[ControlState::AIM_SHARP] = true; }
+		if (m_AnalogAim.MagnitudeIsGreaterThan(0.1F) && !pieMenuActive) { 
+			m_ControlStates[ControlState::AIM_SHARP] = true; 
+		}
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates[ControlState::BODY_JUMP] || (pieMenuActive && !m_ControlStates[ControlState::SECONDARY_ACTION])) {
-			if (IsMouseControlled()) { g_UInputMan.SetMouseValueMagnitude(0.1F); }
+			if (IsMouseControlled()) { 
+				g_UInputMan.SetMouseValueMagnitude(0.1F); 
+			}
 			m_ControlStates[ControlState::AIM_SHARP] = false;
 		}
 

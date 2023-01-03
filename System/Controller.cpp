@@ -372,7 +372,7 @@ namespace RTE {
 			m_AnalogMove = move;
 		} 
 		
-		if (pieMenuActive) {
+		if (!pieMenuActive) {
 			m_AnalogAim = aim;
 		} else {
 			m_AnalogCursor = aim;

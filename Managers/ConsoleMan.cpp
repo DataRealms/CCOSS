@@ -204,11 +204,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::PrintString(const std::string &stringToPrint) {
-		static std::mutex printStringMutex;
-		std::scoped_lock<std::mutex> printStringLock(printStringMutex);
+		static std::mutex mut;
+		std::lock_guard<std::mutex> guard(mut);
 
 		m_OutputLog.emplace_back("\n" + stringToPrint);
-		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
+		if (System::IsLoggingToCLI()) { 
+			System::PrintToCLI(stringToPrint); 
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

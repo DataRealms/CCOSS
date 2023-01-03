@@ -134,6 +134,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void * Atom::GetPoolMemory() {
+		static std::mutex mut;
+		std::lock_guard<std::mutex> guard(mut);
+
 		// If the pool is empty, then fill it up again with as many instances as we are set to
 		if (s_AllocatedPool.empty()) { FillPool((s_PoolAllocBlockCount > 0) ? s_PoolAllocBlockCount : 10); }
 

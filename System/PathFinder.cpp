@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "SceneMan.h"
 
+#include <atomic>
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,13 +98,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PathFinder::Destroy() {
-		delete m_Pather;
 		Clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
+		// Todo, store a pather per-thread. Add a thread_local<> class type, use here and in LuaMan.
+		static std::mutex mut;
+		std::lock_guard<std::mutex> guard(mut);
+
 		RTEAssert(m_Pather, "No pather exists, can't calculate the path!");
 
 		// Make sure start and end are within scene bounds.

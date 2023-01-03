@@ -273,6 +273,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void * Entity::ClassInfo::GetPoolMemory() {
+		static std::mutex mut;
+		std::lock_guard<std::mutex> guard(mut);
+
 		RTEAssert(IsConcrete(), "Trying to get pool memory of an abstract Entity class!");
 
 		// If the pool is empty, then fill it up again with as many instances as we are set to

@@ -6,9 +6,18 @@
 
 #define g_LuaMan LuaMan::Instance()
 
-struct lua_State;
+class lua_State;
 
 namespace RTE {
+
+	struct LuaStateWrapper {
+		LuaStateWrapper();
+		~LuaStateWrapper();
+		lua_State *m_State;
+		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
+		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
+		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
+	};
 
 	class LuabindObjectWrapper;
 
@@ -17,6 +26,7 @@ namespace RTE {
 	/// </summary>
 	class LuaMan : public Singleton<LuaMan> {
 		friend class SettingsMan;
+		friend class LuaStateWrapper;
 
 	public:
 
@@ -54,13 +64,13 @@ namespace RTE {
 		/// Gets a temporary Entity that can be accessed in the Lua state.
 		/// </summary>
 		/// <returns>The temporary entity. Ownership is NOT transferred!</returns>
-		Entity * GetTempEntity() const { return m_TempEntity; }
+		Entity * GetTempEntity() const;
 
 		/// <summary>
 		/// Sets a temporary Entity that can be accessed in the Lua state.
 		/// </summary>
 		/// <param name="entity">The temporary entity. Ownership is NOT transferred!</param>
-		void SetTempEntity(Entity *entity) { m_TempEntity = entity; }
+		void SetTempEntity(Entity *entity);
 
 		/// <summary>
 		/// Sets a temporary vector of Entities that can be accessed in the Lua state. These Entities are const_cast so they're non-const, for ease-of-use in Lua.
@@ -163,18 +173,18 @@ namespace RTE {
 		/// Tells whether there are any errors reported waiting to be read.
 		/// </summary>
 		/// <returns>Whether errors exist.</returns>
-		bool ErrorExists() const { return !m_LastError.empty(); }
+		bool ErrorExists() const;
 
 		/// <summary>
 		/// Returns the last error message from executing scripts.
 		/// </summary>
 		/// <returns>The error string with hopefully meaningful info about what went wrong.</returns>
-		std::string GetLastError() const { return m_LastError; }
+		std::string GetLastError() const;
 
 		/// <summary>
 		/// Clears the last error message, so the Lua state will not be considered to have any errors until the next time there's a script error.
 		/// </summary>
-		void ClearErrors() { m_LastError.clear(); }
+		void ClearErrors();
 #pragma endregion
 
 #pragma region File I/O Handling
@@ -248,14 +258,7 @@ namespace RTE {
 		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
 		static const std::unordered_set<std::string> c_FileAccessModes; //!< Valid file access modes when opening files with FileOpen.
 
-		lua_State *m_MasterState; //!< The master parent script state.
-
 		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()' seems to have no visible effect.
-
-		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
-
-		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
-		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 

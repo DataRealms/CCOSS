@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "MovableMan.h"
+
+#include "PrimitiveMan.h"
 #include "PostProcessMan.h"
 #include "PerformanceMan.h"
 #include "PresetMan.h"
@@ -25,7 +27,8 @@
 #include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
-#include "Scene.h"
+
+#include <execution>
 
 namespace RTE {
 
@@ -78,9 +81,6 @@ void MovableMan::Clear()
 
 int MovableMan::Initialize()
 {
-// TODO: Increase this number, or maybe only for certain classes?
-    Entity::ClassInfo::FillAllPools();
-
     return 0;
 }
 
@@ -1675,11 +1675,15 @@ void MovableMan::Update()
         // Actors
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
-            for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-            {
-				(*aIt)->Update();
-                (*aIt)->UpdateScripts();
-                (*aIt)->ApplyImpulses();
+            std::for_each(std::execution::par, m_Actors.begin(), m_Actors.end(), 
+                [](Actor *actor) {
+                    actor->GetController()->Update();
+                }); 
+
+            for (Actor *actor : m_Actors) {
+                actor->Update();
+                actor->UpdateScripts();
+                actor->ApplyImpulses();
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);

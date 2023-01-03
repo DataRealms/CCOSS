@@ -1408,10 +1408,6 @@ void Actor::VerifyMOIDs()
 
 void Actor::Update()
 {
-    //TODO This should be after MOSRotating::Update call. It's here because this lets Attachable scripts affect their parent's control states, but this is a bad, hacky solution.
-	//See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/commit/ea20b6d790cd4cbb41eb923057b3db9982f6545d
-    m_Controller.Update();
-
     /////////////////////////////////
     // Hit Body update and handling
     MOSRotating::Update();

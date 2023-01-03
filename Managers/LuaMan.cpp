@@ -221,8 +221,6 @@ namespace RTE {
 
 	void LuaMan::Clear() {
 		m_DisableLuaJIT = false;
-		s_ThreadStates.m_LastError.clear();
-
 		m_OpenedFiles.fill(nullptr);
 	}
 

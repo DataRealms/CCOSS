@@ -23,6 +23,7 @@ namespace RTE {
 		m_BlipOnRevealUnseen = true;
 		m_UnheldItemsHUDDisplayRange = 25 * c_PPM;
 		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
+		m_SubPieMenuHoverOpenDelay = 1000;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
@@ -147,6 +148,8 @@ namespace RTE {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
 			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
+    } else if (propName == "SubPieMenuHoverOpenDelay") {
+			reader >> m_SubPieMenuHoverOpenDelay;
 		} else if (propName == "EndlessMode") {
 			reader >> m_EndlessMetaGameMode;
 		} else if (propName == "EnableCrabBombs") {
@@ -316,7 +319,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("SoundPanningEffectStrength", g_AudioMan.m_SoundPanningEffectStrength);
 
 		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking.
 		writer.NewPropertyWithValue("ListenerZOffset", g_AudioMan.m_ListenerZOffset);
 		writer.NewPropertyWithValue("MinimumDistanceForPanning", g_AudioMan.m_MinimumDistanceForPanning);
 		//////////////////////////////////////////////////
@@ -331,6 +334,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
 		writer.NewPropertyWithValue("UnheldItemsHUDDisplayRange", m_UnheldItemsHUDDisplayRange);
 		writer.NewPropertyWithValue("AlwaysDisplayUnheldItemsInStrategicMode", m_AlwaysDisplayUnheldItemsInStrategicMode);
+		writer.NewPropertyWithValue("SubPieMenuHoverOpenDelay", m_SubPieMenuHoverOpenDelay);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);

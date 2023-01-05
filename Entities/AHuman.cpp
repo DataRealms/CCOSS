@@ -1008,7 +1008,7 @@ bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGro
 //                  of with the specified preset name in the inventory. If the held device already 
 //                  is of that preset name, or no device is in inventory, nothing happens.
 
-bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
+bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &presetName, bool doEquip)
 {
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
@@ -1019,7 +1019,7 @@ bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
     if (m_pFGArm->HoldsSomething())
     {
         pDevice = dynamic_cast<HeldDevice *>(m_pFGArm->GetHeldMO());
-        if (pDevice && pDevice->GetPresetName() == name)
+        if (pDevice && (moduleName.empty() || pDevice->GetModuleName() == moduleName) && pDevice->GetPresetName() == presetName)
             return true;
     }
 
@@ -1028,7 +1028,7 @@ bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
     {
         pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pDevice && pDevice->GetPresetName() == name)
+        if (pDevice && (moduleName.empty() || pDevice->GetModuleName() == moduleName) && pDevice->GetPresetName() == presetName)
         {
             if (doEquip)
             {
@@ -3969,7 +3969,7 @@ void AHuman::Update()
 		float rotDiff = rotTarget - rot;
 		if (!m_DeathTmr.IsPastSimMS(125) && std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
 			// TODO: finetune this for situations like low gravity!
-			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY * m_GlobalAccScalar) / GetPPM();
+			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY() * m_GlobalAccScalar) / c_PPM;
 			m_AngularVel += rotDiff * velScalar;
 			m_Vel.m_X += (rotTarget > 0 ? -std::abs(rotDiff) : std::abs(rotDiff)) * velScalar * 0.5F;
 		} else {

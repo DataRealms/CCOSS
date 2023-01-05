@@ -290,6 +290,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `ServerUseDeltaCompression = 0/1` to enable delta compression in dedicated server mode which reduces bandwidth usage. Enabled by default.
 
+- New `Settings.ini` property `SubPieMenuHoverOpenDelay` that determines how long, in milliseconds,a `PieSlice` with a sub-`PieMenu` must be hovered over for the sub-`PieMenu` to automatically open. Default is 1000 milliseconds.
+
 - Added `PieSlice` Lua function `ReloadScripts()`. Works the same as the `MovableObject` function, but for `PieSlice`s.
 
 - Added key combinations for resetting time scales to defaults while performance stats are visible.  
@@ -317,7 +319,13 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
 	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
 
-- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON` 
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
+
+- Added alternative `Actor` Lua function `RemoveInventoryItem(moduleName, presetName)`, that lets you specify the module and preset name of the inventory item, instead of just the preset name.
+
+- Added alternative `AHuman` Lua function `EquipNamedDevice(moduleName, presetName, doEquip)`, that lets you specify the module and preset name of the `HeldDevice` to equip, instead of just the preset name.
+
+- Added Lua access (R/W) to `Attachable` property `DeleteWhenRemovedFromParent`, which determines whether the given `Attachable` should delete itself when it's removed from its current parent.
 
 </details>
 
@@ -445,6 +453,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
+- Indentation in INI with space characters in multiples of 4 will no longer crash during loading and instead create a warning entry with the file name and line in the non-fatal loading error log.  
+	Space characters **not** in multiples of 4 will crash with a more informative message.
+
 - Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
 	The `MSPF` measurement now displays 3 values:  
 	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
@@ -470,6 +481,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
 - Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
 
 </details>
 

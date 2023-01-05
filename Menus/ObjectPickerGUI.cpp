@@ -157,6 +157,11 @@ namespace RTE {
 						if (!techBuyMenuTheme.SkinFilePath.empty()) {
 							// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
 							m_GUIControlManager->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+
+							// Popup box text is GUILabel so we need to override the "Label" section font with the "DescriptionBoxText" section font so we can use a different font without screwing with all the other labels.
+							std::string themeDescriptionBoxTextFont;
+							m_GUIControlManager->GetSkin()->GetValue("DescriptionBoxText", "Font", &themeDescriptionBoxTextFont);
+							m_PopupText->SetFont(m_GUIControlManager->GetSkin()->GetFont(themeDescriptionBoxTextFont));
 						}
 						if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_ParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
 					}

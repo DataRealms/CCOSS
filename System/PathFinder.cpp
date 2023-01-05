@@ -1,10 +1,11 @@
 #include "PathFinder.h"
 
-#include <execution>
-
 #include "Material.h"
 #include "Scene.h"
 #include "SceneMan.h"
+
+#include <atomic>
+#include <execution>
 
 namespace RTE {
 

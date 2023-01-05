@@ -172,6 +172,7 @@ namespace RTE {
 
 		// Update all the costs going out from each node
 		std::for_each(
+			std::execution::par_unseq,
 			m_NodeGrid.begin(),
 			m_NodeGrid.end(),
 			[this](PathNode &node) {
@@ -181,6 +182,7 @@ namespace RTE {
 
 		// Fix up the left-and-up connections
 		std::for_each(
+			std::execution::par_unseq,
 			m_NodeGrid.begin(),
 			m_NodeGrid.end(),
 			[](PathNode &node) {
@@ -409,6 +411,7 @@ namespace RTE {
 
 		// Update all the costs going out from each node
 		std::for_each(
+			std::execution::par_unseq,
 			nodeVec.begin(),
 			nodeVec.end(),
 			[this, &anyChange](int nodeId) {
@@ -422,6 +425,7 @@ namespace RTE {
 		if (anyChange) {
 			// Fix up the left-and-up connections
 			std::for_each(
+				std::execution::par_unseq,
 				nodeVec.begin(),
 				nodeVec.end(),
 				[this](int nodeId) {

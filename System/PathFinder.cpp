@@ -91,7 +91,7 @@ namespace RTE {
 		}
 
 		// Create and allocate the pather class which will do the work
-		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, true);
+		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, false);
 
 		// Set up all the costs between all nodes
 		RecalculateAllCosts();
@@ -124,6 +124,13 @@ namespace RTE {
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
 
+		if (m_DigStrength != digStrength) {
+			// Unfortunately, digstrength-aware pathing means that we're adjusting node transition costs, so we need to reset our path cache on every call.
+			// In future we'll potentially store a different pather for different mobility bands, and reuse pathing costs. 
+			// But then again it's probably more fruitful to optimize the graph node to make searches faster, instead.
+			m_Pather->Reset();
+		}
+
 		// Actors capable of digging can use m_DigStrength to modify the node adjacency cost
 		m_DigStrength = digStrength;
 
@@ -148,8 +155,8 @@ namespace RTE {
 				pathResult.pop_back();
 				pathResult.push_back(end);
 			}
-			// Empty path, give exact start and end
 		} else {
+			// Empty path, give exact start and end
 			pathResult.push_back(start);
 			pathResult.push_back(end);
 		}

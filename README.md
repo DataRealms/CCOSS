@@ -38,7 +38,7 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 
 * Use `Debug Full` for debugging with all visual elements enabled (builds fast, runs very slow).
 * Use `Debug Minimal` for debugging with all visual elements disabled (builds fast, runs slightly faster).
-* Use `Debug Release` for a debugger-enabled release build (builds slow, runs almost as fast as Final).
+* Use `Debug Release` for a debugger-enabled release build (builds slow, runs almost as fast as Final. **Debugging may be unreliable due to compiler optimizations**).
 * Use `Final` to build release executable.
 
 The first build will take a while, but future ones should be quicker.

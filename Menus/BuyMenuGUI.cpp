@@ -615,6 +615,11 @@ void BuyMenuGUI::SetNativeTechModule(int whichModule) {
 				if (!techBuyMenuTheme.SkinFilePath.empty()) {
 					// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
 					m_pGUIController->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+
+					// Popup box text is GUILabel so we need to override the "Label" section font with the "DescriptionBoxText" section font so we can use a different font without screwing with all the other labels.
+					std::string themeDescriptionBoxTextFont;
+					m_pGUIController->GetSkin()->GetValue("DescriptionBoxText", "Font", &themeDescriptionBoxTextFont);
+					m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont(themeDescriptionBoxTextFont));
 				}
 				if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_pParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
 				SetBannerImage(techBuyMenuTheme.BannerImagePath);

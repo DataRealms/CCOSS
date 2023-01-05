@@ -66,10 +66,10 @@ namespace RTE {
 				.def("FileEOF", &LuaMan::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
+			luabind::def("SelectRand", (int(*)(int, int)) & RandomNum),
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
 			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
 			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
-			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
 			luabind::def("LERP", &LERP),
 			luabind::def("EaseIn", &EaseIn),
 			luabind::def("EaseOut", &EaseOut),
@@ -79,10 +79,11 @@ namespace RTE {
 			luabind::def("NormalizeAngleBetweenNegativePIAndPI", &NormalizeAngleBetweenNegativePIAndPI),
 			luabind::def("AngleWithinRange", &AngleWithinRange),
 			luabind::def("ClampAngle", &ClampAngle),
-			luabind::def("GetPPM", &GetPPM),
-			luabind::def("GetMPP", &GetMPP),
-			luabind::def("GetPPL", &GetPPL),
-			luabind::def("GetLPP", &GetLPP),
+			luabind::def("GetPPM", &LuaAdaptersUtility::GetPPM),
+			luabind::def("GetMPP", &LuaAdaptersUtility::GetMPP),
+			luabind::def("GetPPL", &LuaAdaptersUtility::GetPPL),
+			luabind::def("GetLPP", &LuaAdaptersUtility::GetLPP),
+			luabind::def("GetPathFindingDefaultDigStrength", &LuaAdaptersUtility::GetPathFindingDefaultDigStrength),
 			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
@@ -178,12 +179,17 @@ namespace RTE {
 		luabind::globals(m_MasterState)["SettingsMan"] = &g_SettingsMan;
 
 		luaL_dostring(m_MasterState,
-			// Override print() in the lua state to output to the console.
-			"print = function(toPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(toPrint)); end;\n"
-			// Add cls() as a shortcut to ConsoleMan:Clear().
-			"cls = function() ConsoleMan:Clear(); end;"
 			// Add package path to the defaults.
-			"package.path = package.path .. \";Base.rte/?.lua\";\n"
+			"package.path = package.path .. \";Base.rte/?.lua\";"
+			"\n"
+			// Add cls() as a shortcut to ConsoleMan:Clear().
+			"cls = function() ConsoleMan:Clear(); end"
+			"\n"
+			// Override "print" in the lua state to output to the console.
+			"print = function(stringToPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(stringToPrint)); end"
+			"\n"
+			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
+			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return SelectRand(lower, upper); elseif lower ~= nil then return SelectRand(1, lower); else return PosRand(); end end"
 		);
 	}
 

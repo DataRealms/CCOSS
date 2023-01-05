@@ -306,7 +306,7 @@ public:
 // Arguments:       None.
 // Return value:    Name of currently edited assembly.
 
-	string GetCurrentAssemblyName() { return m_CurrentAssemblyName; }
+    std::string GetCurrentAssemblyName() { return m_CurrentAssemblyName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -316,7 +316,7 @@ public:
 // Arguments:       New name for assembly.
 // Return value:    None.
 
-	void SetCurrentAssemblyName(string newName) { m_CurrentAssemblyName = newName; }
+	void SetCurrentAssemblyName(std::string newName) { m_CurrentAssemblyName = newName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -421,7 +421,7 @@ protected:
 	//Edited scheme type
 	BunkerAssemblyScheme *m_pCurrentScheme;
 	//Edited assembly name
-	string m_CurrentAssemblyName;
+    std::string m_CurrentAssemblyName;
 
 
 

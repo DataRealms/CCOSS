@@ -28,7 +28,7 @@
 
 namespace RTE {
 
-const string MetaMan::c_ClassName = "MetaMan";
+const std::string MetaMan::c_ClassName = "MetaMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,11 +90,11 @@ int MetaMan::Initialize()
 int MetaMan::NewGame(int gameSize)
 {
     // Grab a random selection of Scene presets from all available
-    list<Scene *> scenePresets;
+    std::list<Scene *> scenePresets;
     SelectScenePresets(gameSize, &scenePresets);
 
     // Destroy and clear any pre-existing scenes from previous games
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         delete *sItr;
         *sItr = 0;
@@ -102,19 +102,19 @@ int MetaMan::NewGame(int gameSize)
     m_Scenes.clear();
 
     // Make deep copies of the selected Scene presets for use in the actual game about to start
-    for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
+    for (std::list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
     {
 		// List for found metascenes to choose from
-		vector<Scene *> metascenesList;
+        std::vector<Scene *> metascenesList;
 		// Add our actual scene to the list as it should always be there to be selected later
 		metascenesList.push_back(*pItr);
 
 		// Look for additional metascenes which can be used instead of this scene
-		list<Entity *> sceneList;
+		std::list<Entity *> sceneList;
 		g_PresetMan.GetAllOfType(sceneList, "Scene");
 
 		// Go through the list and add all compatible metascenes to the list
-		for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
+		for (std::list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
 		{
 			Scene * pScene = dynamic_cast<Scene *>(*itr);
 			if (pScene)
@@ -192,7 +192,7 @@ int MetaMan::EndGame()
 	m_pMetaGUI->SetToStartNewGame();
 
     // Destroy and clear any pre-existing scenes from previous games
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         delete *sItr;
         *sItr = 0;
@@ -237,10 +237,10 @@ int MetaMan::Load(const MetaSave *pSave)
 
     // Clear off players, scenes, and offensive activiies before filling up on new ones read from disk
     m_Players.clear();
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
         delete (*sItr);
     m_Scenes.clear();
-    for (vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
+    for (std::vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
         delete (*aItr);
     m_RoundOffensives.clear();
 
@@ -395,9 +395,9 @@ int MetaMan::Save(Writer &writer) const {
 // Description:     Saves the bitmap data of all Scenes of this Metagame that are currently
 //                  loaded.
 
-int MetaMan::SaveSceneData(string pathBase)
+int MetaMan::SaveSceneData(std::string pathBase)
 {
-    for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         // Only save the data of revealed scenes that have already had their layers built and saved into files
         if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsLoadedFromDisk())
@@ -419,7 +419,7 @@ int MetaMan::SaveSceneData(string pathBase)
 
 int MetaMan::LoadSceneData()
 {
-    for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Only load the data of revealed scenes that have already had their layers built and saved into files
         if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsLoadedFromDisk())
@@ -441,7 +441,7 @@ int MetaMan::LoadSceneData()
 
 int MetaMan::ClearSceneData()
 {
-    for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         if ((*sItr)->ClearData() < 0)
             return -1;
@@ -459,9 +459,9 @@ void MetaMan::Destroy()
 {
     delete m_pMetaGUI;
 
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
         delete (*sItr);
-    for (vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
+    for (std::vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
         delete (*aItr);
 
     Clear();
@@ -494,7 +494,7 @@ int MetaMan::GetPlayerTurn() const
 
 MetaPlayer * MetaMan::GetMetaPlayerOfInGamePlayer(int inGamePlayer)
 {
-    for (vector<MetaPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    for (std::vector<MetaPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         if ((*itr).GetInGamePlayer() == inGamePlayer)
             return &(*itr);
@@ -522,7 +522,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
 
     // Search for the next scene owned by the currently animated player
     int scenesSearched = 0;
-    for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Don't search beyond what has been revealed already
         if (scenesSearched >= std::floor(m_RevealedScenes))
@@ -566,7 +566,7 @@ int MetaMan::GetTotalBrainCountOfPlayer(int metaPlayer, bool countPoolsOnly) con
 
     if (!countPoolsOnly)
     {
-        for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
         {
             // Add up any brains installed as resident on any sites
             if ((*sItr)->IsRevealed() && (*sItr)->GetTeamOwnership() == GetTeamOfPlayer(metaPlayer) && (*sItr)->GetResidentBrain(m_Players[metaPlayer].GetInGamePlayer()))
@@ -612,7 +612,7 @@ int MetaMan::GetSceneCountOfTeam(int team) const
 
     // Go through all scenes and add up all the ones owned by this team
     int sceneCount = 0;
-    for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         // Add up any brains installed as resident on any sites
         if ((*sItr)->IsRevealed() && (*sItr)->GetTeamOwnership() == team)
@@ -747,7 +747,7 @@ int MetaMan::WhichTeamLeft()
 bool MetaMan::NoBrainsLeftInAnyPool()
 {
     // Go through all players and check each for any brains in any pool
-    for (vector<MetaPlayer>::iterator mpItr = m_Players.begin(); mpItr != m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = m_Players.begin(); mpItr != m_Players.end(); ++mpItr)
     {
         if ((*mpItr).GetBrainPoolCount() > 0)
             return false;
@@ -835,7 +835,7 @@ float MetaMan::GetSceneIncomeOfPlayer(int metaPlayer) const
 {
     float totalIncome = 0;
 
-    for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Add up all the generated income for this player this round
         if ((*sItr)->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
@@ -857,7 +857,7 @@ float MetaMan::GetBudgetedRatioOfPlayer(int metaPlayer, const Scene *pException,
     // Counting defensive allocations
     if (includeDefensive)
     {
-        for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             // Add up all the allocated funds so far this round, first of bases we're building
             if ((*sItr)->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && *sItr != pException)
@@ -902,7 +902,7 @@ void MetaMan::SetSuspend(bool suspend)
 int MetaMan::WhichTeamOwnsAllSites()
 {
     int owner = Activity::NoTeam;
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         if ((*sItr)->IsRevealed())
         {
@@ -958,19 +958,19 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
 {
     int totalCount = 0;
     // Get the list of ALL read-in Scene presets
-    list<Entity *> allScenePresets;
+    std::list<Entity *> allScenePresets;
     g_PresetMan.GetAllOfType(allScenePresets, "Scene");
     Scene *pScenePreset = 0;
 
     // Temporary list of planet locations already being used
-    list<Vector> usedLocations;
+    std::list<Vector> usedLocations;
     bool locationOK = true;
 
     if (pScenes)
         pScenes->clear();
 
     // Go through the preset list and count/copy over all eligible ones
-    for (list<Entity *>::iterator sItr = allScenePresets.begin(); sItr != allScenePresets.end(); ++sItr)
+    for (std::list<Entity *>::iterator sItr = allScenePresets.begin(); sItr != allScenePresets.end(); ++sItr)
     {
         pScenePreset = dynamic_cast<Scene *>(*sItr);
         // Filter out editor or special scenes, or ones that don't have locations defined.
@@ -978,7 +978,7 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
         {
             // Make sure this exact site location on the planet isn't occupied already
             locationOK = true;
-            for (list<Vector>::iterator vItr = usedLocations.begin(); vItr != usedLocations.end(); ++vItr)
+            for (std::list<Vector>::iterator vItr = usedLocations.begin(); vItr != usedLocations.end(); ++vItr)
             {
                 if (pScenePreset->GetLocation() == *vItr)
                 {
@@ -1009,10 +1009,10 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
 
-int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
+int MetaMan::SelectScenePresets(int gameSize, std::list<Scene *> *pSelected)
 {
     // Get the list of ALL eligible read-in Scene presets
-    list<Scene *> scenePresets;
+    std::list<Scene *> scenePresets;
     TotalScenePresets(&scenePresets);
 
     // If we need to actually fill the list, do so
@@ -1026,7 +1026,7 @@ int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
 			randomIndex = RandomNum<int>(0, scenePresets.size() - 1);
-            for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
+            for (std::list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)
                 {
@@ -1055,7 +1055,7 @@ int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
 
 void MetaMan::ClearActivities()
 {
-    for (vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
+    for (std::vector<GAScripted *>::iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
         delete (*aItr);
     m_RoundOffensives.clear();
     m_CurrentOffensive = 0;
@@ -1085,14 +1085,14 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
     // Tally up all the scenes according to who owns them
     int sceneCount = 0;
     int revealedScenes = std::floor(m_RevealedScenes);
-    vector<Scene *> ownedScenes;
-    vector<Scene *> enemyScenes;
-    vector<Scene *> unclaimedScenes;
+    std::vector<Scene *> ownedScenes;
+    std::vector<Scene *> enemyScenes;
+    std::vector<Scene *> unclaimedScenes;
 
 	float sceneMark = 0;
 	Scene * pBestAttackCandidateScene = 0;
 
-    for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
 		float currentMark = 0;
 
@@ -1191,7 +1191,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
     // Spread out the defensive budgets on the owned sites
     float totalDefenseBudget = pThisPlayer->GetFunds() * defenseRatio;
     int player = pThisPlayer->GetInGamePlayer();
-    for (vector<Scene *>::iterator sItr = ownedScenes.begin(); sItr != ownedScenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = ownedScenes.begin(); sItr != ownedScenes.end(); ++sItr)
     {
         // Evenly, for now.. later, might want to prioritize sites with established bases, or opposite?
         (*sItr)->SetBuildBudget(player, totalDefenseBudget / ownedScenes.size());

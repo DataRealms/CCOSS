@@ -658,15 +658,15 @@ void SceneEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 // Description:     Saves the current scene to an appropriate ini file, and asks user if
 //                  they want to overwrite first if scene of this name exists.
 
-bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
+bool SceneEditor::SaveScene(std::string saveAsName, bool forceOverwrite)
 {
     // Set the name of the current scene in effect
     g_SceneMan.GetScene()->SetPresetName(saveAsName);
 
 	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
-		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
+        std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
+        std::string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
 			// Save preview
@@ -692,8 +692,8 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 	else
 	{
 		// Try to save to the data module
-		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.png");
+        std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".ini");
+        std::string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
             // Save preview
@@ -711,7 +711,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
             if (!sceneFileExisted)
             {
                 // First find/create a .rte/Scenes.ini file to include the new .ini into
-                string scenesFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
+                std::string scenesFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
                 bool scenesFileExisted = exists(scenesFilePath.c_str());
                 Writer scenesWriter(scenesFilePath.c_str(), true);
                 scenesWriter.NewProperty("\nIncludeFile");
@@ -721,7 +721,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
                 // If it's already included, it doens't matter, the definitions will just bounce the second time
                 if (!scenesFileExisted)
                 {
-                    string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
+                    std::string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
                     Writer indexWriter(indexFilePath.c_str(), true);
                     // Add extra tab since the DataModule has everything indented
                     indexWriter.NewProperty("\tIncludeFile");
@@ -776,10 +776,10 @@ void SceneEditor::UpdateNewDialog()
     // Refill Terrains
     m_pNewTerrainCombo->ClearList();
     // Get the list of all read in terrains
-    list<Entity *> terrainList;
+    std::list<Entity *> terrainList;
     g_PresetMan.GetAllOfTypeInModuleSpace(terrainList, "SLTerrain", selectedModuleID);
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = terrainList.begin(); itr != terrainList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = terrainList.begin(); itr != terrainList.end(); ++itr)
 	{
 		if ((*itr)->GetPresetName() != "Editor Terrain" &&
 			(*itr)->GetPresetName() != "Physics Test Terrain")
@@ -797,24 +797,24 @@ void SceneEditor::UpdateNewDialog()
     m_pNewBG3Combo->ClearList();
 
     // Get the list of all read in NEAR background layers
-    list<Entity *> bgList;
+    std::list<Entity *> bgList;
     g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Near Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG1Combo->AddItem((*itr)->GetPresetName());
 
     // Get the list of all read in MID background layers
     bgList.clear();
     g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Mid Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG2Combo->AddItem((*itr)->GetPresetName());
 
     // Get the list of all read in FAR background layers
     bgList.clear();
     g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Far Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG3Combo->AddItem((*itr)->GetPresetName());
 
     // Select the first one for each
@@ -835,11 +835,11 @@ void SceneEditor::UpdateLoadDialog()
     m_pLoadNameCombo->ClearList();
 
     // Get the list of all read in scenes
-    list<Entity *> sceneList;
+    std::list<Entity *> sceneList;
     g_PresetMan.GetAllOfType(sceneList, "Scene");
 
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
     {
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)

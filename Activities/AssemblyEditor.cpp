@@ -526,7 +526,7 @@ void AssemblyEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 // Description:     Creates and builds assembly which fits currently selected scheme and returns
 //					it's pointer. Owhership IS transfered.
 
-BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
+BunkerAssembly * AssemblyEditor::BuildAssembly(std::string saveAsName)
 {
 	// Create new bunker assembly to save
 	BunkerAssembly *pBA = new BunkerAssembly();
@@ -544,7 +544,7 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
 
     const std::list<SceneObject *> *pSceneObjectList = 0;
 	pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
-    for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
+    for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr)
     {
 		//Check if object fits the assembly box
 		bool skip = true;
@@ -620,13 +620,13 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(string saveAsName)
 // Description:     Saves the current scene to an appropriate ini file, and asks user if
 //                  they want to overwrite first if scene of this name exists.
 
-bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
+bool AssemblyEditor::SaveAssembly(std::string saveAsName, bool forceOverwrite)
 {
 	BunkerAssembly *pBA = BuildAssembly(saveAsName);
 
 	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
 	{
-		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
+        std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
 			// Does ini already exist? If yes, then no need to add it to a scenes.ini etc
@@ -650,7 +650,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 	}
 	else
 	{
-		string sceneFilePath;
+        std::string sceneFilePath;
 
 		// Try to save to the data module
 		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
@@ -677,7 +677,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 			if (!sceneFileExisted)
 			{
 				// First find/create a .rte/Scenes.ini file to include the new .ini into
-				string scenesFilePath;
+                std::string scenesFilePath;
 
 				if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
 					scenesFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/Objects/Bunkers/BunkerAssemblies/BunkerAssemblies.ini";
@@ -693,7 +693,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 				// If it's already included, it doens't matter, the definitions will just bounce the second time
 				if (!scenesFileExisted)
 				{
-					string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini"); 
+                    std::string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
 					Writer indexWriter(indexFilePath.c_str(), true);
 					// Add extra tab since the DataModule has everything indented
 					indexWriter.NewProperty("\tIncludeFile");
@@ -788,11 +788,11 @@ void AssemblyEditor::UpdateLoadDialog()
     m_pLoadNameCombo->ClearList();
 
     // Get the list of all read in scenes
-    list<Entity *> sceneList;
+    std::list<Entity *> sceneList;
     g_PresetMan.GetAllOfType(sceneList, "Scene");
 
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
+    for (std::list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
     {
 		Scene * pScene = dynamic_cast<Scene *>(*itr);
 		if (pScene)
@@ -813,7 +813,7 @@ void AssemblyEditor::UpdateLoadDialog()
 
 void AssemblyEditor::UpdateSaveDialog()
 {
-	string defaultName = "";
+    std::string defaultName = "";
 
 	BunkerAssemblyScheme *pScheme = m_pEditorGUI->GetCurrentAssemblyScheme();
 	if (pScheme)

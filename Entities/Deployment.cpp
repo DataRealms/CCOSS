@@ -76,7 +76,7 @@ int Deployment::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the Deployment object ready for use.
 
-int Deployment::Create(string loadoutName, const Icon &icon, float spawnRadius)
+int Deployment::Create(std::string loadoutName, const Icon &icon, float spawnRadius)
 {
     m_LoadoutName = loadoutName;
     m_Icon = icon;
@@ -355,7 +355,7 @@ SceneObject * Deployment::CreateDeployedObject(int player, float &costTally)
 //                  by an already exiting object in the a list being positioned within the
 //                  spawn radius of this.
 
-bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existingObjects)
+bool Deployment::DeploymentBlocked(int player, const std::list<SceneObject *> &existingObjects)
 {
     bool blocked = false;
 
@@ -375,7 +375,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
     // Go through all already-placed things in the Scene to see if there's anything with matching spawn ID
 	if (m_ID)
 	{
-		for (list<SceneObject *>::const_iterator existingItr = existingObjects.begin(); existingItr != existingObjects.end(); ++existingItr)
+		for (std::list<SceneObject *>::const_iterator existingItr = existingObjects.begin(); existingItr != existingObjects.end(); ++existingItr)
 		{
 			Actor *pActor = dynamic_cast<Actor *>(*existingItr);
 			if (pActor && pActor->GetDeploymentID() == m_ID)
@@ -405,14 +405,14 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
     if (pLoadout)
     {
         // Now go through the Loadout list of items and tally the cost of all devices that would go into inventory of the first Actor found in the list
-        const list<const SceneObject *> *pMOList = pLoadout->GetCargoList();
+        const std::list<const SceneObject *> *pMOList = pLoadout->GetCargoList();
         if (pMOList && !pMOList->empty())
         {
             // Go through the list of things ordered, and give any actors all the items that is present after them,
             // until the next actor. Also, the first actor gets all stuff in the list above him.
             const MovableObject *pInventoryObject = 0;
             const Actor *pActor = 0;
-            for (list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
+            for (std::list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
             {
                 // Save pointer of the preset in the list
                 pInventoryObject = dynamic_cast<const MovableObject *>(*itr);
@@ -440,7 +440,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
             if (!pSpawnObject)
             {
                 // Find the first non-actor
-                for (list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
+                for (std::list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
                 {
                     // If not an Actor, then we should count it and then stop
                     if (!dynamic_cast<const Actor *>(*itr))
@@ -462,7 +462,7 @@ bool Deployment::DeploymentBlocked(int player, const list<SceneObject *> &existi
     if (pSpawnObject)
     {
         // Go through all already-placed things in the Scene to see if there's anything similar/same
-        for (list<SceneObject *>::const_iterator existingItr = existingObjects.begin(); existingItr != existingObjects.end(); ++existingItr)
+        for (std::list<SceneObject *>::const_iterator existingItr = existingObjects.begin(); existingItr != existingObjects.end(); ++existingItr)
         {
             if (((*existingItr)->GetClassName() == pSpawnObject->GetClassName()) && ((*existingItr)->GetPresetName() == pSpawnObject->GetPresetName()))
             {
@@ -499,15 +499,15 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
     if (pLoadout)
     {
         // Now go through the Loadout list of items and tally the cost ofall devices that would go into inventory of the first Actor found in the list
-        const list<const SceneObject *> *pMOList = pLoadout->GetCargoList();
+        const std::list<const SceneObject *> *pMOList = pLoadout->GetCargoList();
         if (pMOList && !pMOList->empty())
         {
             // Go through the list of things ordered, and give any actors all the items that is present after them,
             // until the next actor. Also, the first actor gets all stuff in the list above him.
             const MovableObject *pInventoryObject = 0;
             const Actor *pActor = 0;
-            list<const MovableObject *> cargoItems;
-            for (list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
+            std::list<const MovableObject *> cargoItems;
+            for (std::list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
             {
                 // Save pointer of the preset in the list
                 pInventoryObject = dynamic_cast<const MovableObject *>(*itr);
@@ -521,13 +521,13 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
                     // If this is the first passenger, then give him all the shit found in the list before him
                     if (!pFirstActor)
                     {
-                        for (list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+                        for (std::list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                             totalValue += (*iItr)->GetTotalValue(nativeModule, foreignMult);
                     }
                     // This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
                     else
                     {
-                        for (list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+                        for (std::list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                             totalValue += (*iItr)->GetTotalValue(nativeModule, foreignMult);
 
                         // Also stop going through the list; we only need to count the value of ONE actor and his stuff
@@ -549,7 +549,7 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
             if (pFirstActor)
             {
                 // Passing ownership
-                for (list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+                for (std::list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                     totalValue += (*iItr)->GetTotalValue(nativeModule, foreignMult);
                 cargoItems.clear();
             }
@@ -561,7 +561,7 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
                 // Add the cost of the ship
                 totalValue += pFirstActor->GetGoldValue(nativeModule, foreignMult);
                 // Count the stuff it would be filled with, passing ownership
-                for (list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+                for (std::list<const MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
                     totalValue += (*iItr)->GetTotalValue(nativeModule, foreignMult);
                 cargoItems.clear();
             }
@@ -571,7 +571,7 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
             {
                 // Start over the count; we might have only had items/devices in the Loadout list, but no Actors yet
                 totalValue = 0;
-                for (list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
+                for (std::list<const SceneObject *>::const_iterator itr = pMOList->begin(); itr != pMOList->end(); ++itr)
                 {
                     // If not an Actor, then we should count it and then stop
                     if (!dynamic_cast<const Actor *>(*itr))

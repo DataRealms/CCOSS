@@ -530,6 +530,8 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		}
 	}
 
+	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
+
 	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 	if (g_LuaMan.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
 		return -5;
@@ -539,8 +541,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
 	g_LuaMan.RunScriptString(luaClearSupportedFunctionsString);
-
-	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
 	if (ObjectScriptsInitialized()) {
 		RunFunctionOfScript(scriptPath, "Create");
@@ -569,7 +569,10 @@ int MovableObject::ReloadScripts() {
 	m_FunctionsAndScripts.clear();
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
-		if (status < 0) {
+		// If the script fails to load because of an error in its Lua, we need to manually add the script path so it's not lost forever.
+		if (status == -5) {
+			m_AllLoadedScripts.try_emplace(scriptPath, scriptEnabled);
+		} else if (status < 0) {
 			break;
 		}
 	}
@@ -799,7 +802,7 @@ void MovableObject::ApplyForces()
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
     // Apply the translational effects of all the forces accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
+    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
@@ -830,7 +833,7 @@ void MovableObject::ApplyImpulses()
 //    float totalImpulses.
 
     // Apply the translational effects of all the impulses accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
+    for (auto iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
         m_Vel += (*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F);
@@ -979,7 +982,7 @@ int MovableObject::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' and its childrens MOID status. Supposed to be done every frame.
 
-void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
+void MovableObject::UpdateMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
 {
     // Register the own MOID
     RegMOID(MOIDIndex, rootMOID, makeNewMOID);
@@ -1012,7 +1015,7 @@ void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 //                  itself and its children for this frame.
 //                  BITMAP of choice.
 
-void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+void MovableObject::RegMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
     if (!makeNewMOID && GetParent()) {
         m_MOID = GetParent()->GetID();
     } else {

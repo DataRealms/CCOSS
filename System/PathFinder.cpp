@@ -411,7 +411,7 @@ namespace RTE {
 
 		// Update all the costs going out from each node
 		std::for_each(
-			std::execution::par,
+			std::execution::par_unseq,
 			nodeVec.begin(),
 			nodeVec.end(),
 			[this, &anyChange](int nodeId) {

@@ -491,19 +491,24 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
     bool EquipLoadedFirearmInGroup(std::string group, std::string exludeGroup, bool doEquip = true);
 
+	/// <summary>
+	/// Switches the equipped HeldDevice (if any) to the first found device with the specified preset name in the inventory.
+	/// If the equipped HeldDevice is of that module and preset name, nothing happens.
+	/// </summary>
+	/// <param name="presetName">The preset name of the HeldDevice to equip.</param>
+	/// <param name="doEquip">Whether to actually equip any matching item found in the inventory, or just report whether or not it's there.</param>
+	/// <returns>Whether a matching HeldDevice was successfully found/switched -o, or already held.</returns>
+	bool EquipNamedDevice(const std::string &presetName, bool doEquip) { return EquipNamedDevice("", presetName, doEquip); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EquipNamedDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Switches the currently held device (if any) to the first found device
-//                  of with the specified preset name in the inventory. If the held device already
-//                  is of that preset name, or no device is in inventory, nothing happens.
-// Arguments:       The preset name the device must have.
-//                  Whether to actually equip any matching item found in the inventory,
-//                  or just report that it's there or not.
-// Return value:    Whether a device was successfully switched to, or already held.
-
-    bool EquipNamedDevice(const std::string name, bool doEquip);
+	/// <summary>
+	/// Switches the equipped HeldDevice (if any) to the first found device with the specified module and preset name in the inventory.
+	/// If the equipped HeldDevice is of that module and preset name, nothing happens.
+	/// </summary>
+	/// <param name="moduleName">The module name of the HeldDevice to equip.</param>
+	/// <param name="presetName">The preset name of the HeldDevice to equip.</param>
+	/// <param name="doEquip">Whether to actually equip any matching item found in the inventory, or just report whether or not it's there.</param>
+	/// <returns>Whether a matching HeldDevice was successfully found/switched -o, or already held.</returns>
+	bool EquipNamedDevice(const std::string &moduleName, const std::string &presetName, bool doEquip);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

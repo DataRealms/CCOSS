@@ -94,10 +94,13 @@ namespace RTE {
 
 #pragma region Logging
 		/// <summary>
-		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// Abstract base to allow reader to set our reader position. However, because we're often used as a parent for basic types
+		/// (i.e, Vector, Matrix, Color: types where we don't want to spend any time doing string construction)
+		/// we don't actually store this data here. This just provides an interface.
 		/// </summary>
-		/// <returns>A string containing the currently read file path and the line being read.</returns>
-		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }
+		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
+		virtual void SetFormattedReaderPosition(const std::string &newPosition) { }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -143,8 +146,6 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
-		std::string m_FormattedReaderPosition; //!< A string containing the currently read file path and the line being read. Formatted to be used for logging.
 
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.

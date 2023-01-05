@@ -518,21 +518,23 @@ public:
     bool SceneIsLocked() const;
 
     /// <summary>
-    /// Registers an area to be drawn upon, so they can be tracked and cleared later.
+    /// Registers an area to be drawn upon, so it can be tracked and cleared later.
     /// </summary>
-    /// <param name="mode">The drawing mode.</param>
-    /// <param name="left"></param>
-    /// <param name="top"></param>
-    /// <param name="right"></param>
-    /// <param name="bottom"></param>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The moid, if we're drawing MOIDs.</param>
+    /// <param name="left">The left boundary of the draw area.</param>
+    /// <param name="top">The top boundary of the drawn area.</param>
+    /// <param name="right">The right boundary of the draw area.</param>
+    /// <param name="bottom">The bottom boundary of the draw area.</param>
     void RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom);
 
     /// <summary>
-    /// Registers an area of to be drawn upon, so they can be tracked and cleared later.
+    /// Registers an area of to be drawn upon, so it can be tracked and cleared later.
     /// </summary>
-    /// <param name="mode">The drawing mode.</param>
-    /// <param name="center"></param>
-    /// <param name="radius"></param>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The moid, if we're drawing MOIDs.</param>
+    /// <param name="center">The centre position of the drawn area.</param>
+    /// <param name="radius">The radius of the drawn area.</param>
     void RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius);
 
 

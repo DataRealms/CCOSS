@@ -1002,7 +1002,7 @@ bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGro
 //                  of with the specified preset name in the inventory. If the held device already 
 //                  is of that preset name, or no device is in inventory, nothing happens.
 
-bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
+bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &presetName, bool doEquip)
 {
     if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
@@ -1013,7 +1013,7 @@ bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
     if (m_pFGArm->HoldsSomething())
     {
         pDevice = dynamic_cast<HeldDevice *>(m_pFGArm->GetHeldMO());
-        if (pDevice && pDevice->GetPresetName() == name)
+        if (pDevice && (moduleName.empty() || pDevice->GetModuleName() == moduleName) && pDevice->GetPresetName() == presetName)
             return true;
     }
 
@@ -1022,7 +1022,7 @@ bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
     {
         pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pDevice && pDevice->GetPresetName() == name)
+        if (pDevice && (moduleName.empty() || pDevice->GetModuleName() == moduleName) && pDevice->GetPresetName() == presetName)
         {
             if (doEquip)
             {

@@ -2,7 +2,7 @@
 
 c = meson.get_compiler('c')
 allegro_defines = []
-if host_machine.system() in ['linux', 'darwin']
+if (not allegro_dep.found() or not loadpng_dep.found()) and host_machine.system() in ['linux', 'darwin']
   allegro_defines += 'ALLEGRO_UNIX'
   aluconfig = configuration_data()
   # aluconfig.set10('ALLEGRO_NO_ASM', true)
@@ -15,7 +15,7 @@ if host_machine.system() in ['linux', 'darwin']
 
 
   aluconfig.set('ALLEGRO_UNIX', true)
-  aluconfig.set('ALLEGRO_HAVE_LIBPTHREAD', c.find_library('pthread').found())
+  aluconfig.set('ALLEGRO_HAVE_LIBPTHREAD', c.find_library('pthread', required:false).found())
   aluconfig.set('ALLEGRO_HAVE_STDINT_H', c.has_header('stdint.h'))
   aluconfig.set('ALLEGRO_HAVE_INTTYPES_H', c.has_header('inttypes.h'))
   aluconfig.set('ALLEGRO_HAVE_SYS_TIME_H', c.has_header('sys/time.h'))

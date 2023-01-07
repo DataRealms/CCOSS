@@ -763,28 +763,15 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     return pRetDev;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  RemoveInventoryItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Removes a specified item from the actor's inventory. Only one item is removed at a time.
-
-void Actor::RemoveInventoryItem(std::string presetName)
-{
-	if (!IsInventoryEmpty())
-	{
-		//while(HasObject(presetName))
-		//{
-			for (std::deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
-			{
-				if ((*gItr) && (*gItr)->GetPresetName() == presetName)
-				{
-					delete (*gItr);
-					m_Inventory.erase(gItr);
-					break;
-				}
-			}
-		//}
+void Actor::RemoveInventoryItem(const std::string &moduleName, const std::string &presetName) {
+	for (std::deque<MovableObject*>::iterator inventoryIterator = m_Inventory.begin(); inventoryIterator != m_Inventory.end(); ++inventoryIterator) {
+		if ((moduleName.empty() || (*inventoryIterator)->GetModuleName() == moduleName) && (*inventoryIterator)->GetPresetName() == presetName) {
+			delete (*inventoryIterator);
+			m_Inventory.erase(inventoryIterator);
+			break;
+		}
 	}
 }
 

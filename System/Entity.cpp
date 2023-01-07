@@ -152,7 +152,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Entity::GetModuleName() const {
-		if (m_DefinedInModule > 0) {
+		if (m_DefinedInModule >= 0) {
 			if (const DataModule *dataModule = g_PresetMan.GetDataModule(m_DefinedInModule)) {
 				return dataModule->GetFileName();
 			}

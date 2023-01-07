@@ -908,7 +908,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	void FrameMan::ClearFrame() const {
+	void FrameMan::ClearFrame() {
 		GL_CHECK(glClearColor(0.0, 0.0, 0.0, 1.0););
 		GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT););
 		for (auto &window: m_MultiWindows) {
@@ -919,18 +919,22 @@ namespace RTE {
 		SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
 	}
 
-	void FrameMan::SwapWindow() const {
+	void FrameMan::SwapWindow(){
 		SDL_GL_SwapWindow(m_Window.get());
 		for (const std::unique_ptr<SDL_Window, SdlWindowDeleter> &window: m_MultiWindows) {
 			SDL_GL_SwapWindow(window.get());
 		}
 	}
 
-	void FrameMan::FlipFrameBuffers() const {
+	void FrameMan::FlipFrameBuffers() {
 		if (m_DisableFrameBufferFlip) {
 			return;
 		}
 
+		if(m_WantScreenDump) {
+			SaveBitmap(ScreenDump, m_ScreenDumpName);
+			m_WantScreenDump = false;
+		}
 		GL_CHECK(glActiveTexture(GL_TEXTURE0););
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
 		GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, GL_RGBA, GL_UNSIGNED_BYTE, m_BackBuffer32->line[0]););
@@ -1033,11 +1037,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave) {
+	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const std::string& nameBase, BITMAP *bitmapToSave) {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
-		if (nameBase == nullptr || strlen(nameBase) <= 0) {
+		if (nameBase.empty() || nameBase.size() <= 0) {
 			return -1;
 		}
 
@@ -1047,7 +1051,7 @@ namespace RTE {
 
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.png; if it exists, try 002, etc.
-			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase, fileNumber++, ".png");
+			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase.c_str(), fileNumber++, ".png");
 			if (!std::filesystem::exists(fullFileName)) {
 				break;
 			}
@@ -1057,26 +1061,24 @@ namespace RTE {
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave && save_png(nameBase, bitmapToSave, m_Palette) == 0) {
+				if (bitmapToSave && save_png(nameBase.c_str(), bitmapToSave, m_Palette) == 0) {
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(nameBase));
 					saveSuccess = true;
 				}
 				break;
 			case ScreenDump:
-#if 0
-				if (screen) {
-					if (m_ScreenDumpBuffer->w != screen->w || m_ScreenDumpBuffer->h != screen->h) {
+				if (m_BackBuffer32) {
+					if (!m_ScreenDumpBuffer) {
 						destroy_bitmap(m_ScreenDumpBuffer);
-						m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h);
+						m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
 					}
-					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
+					blit(m_BackBuffer32, m_ScreenDumpBuffer, 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
 					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
 						saveSuccess = true;
 					}
 				}
-#endif
 				break;
 			case ScenePreviewDump:
 			case WorldDump:

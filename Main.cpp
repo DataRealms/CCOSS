@@ -206,6 +206,8 @@ namespace RTE {
 		long long drawTotalTime = 0;
 
 		while (!System::IsSetToQuit()) {
+
+			g_UInputMan.Update();
 			g_FrameMan.ClearFrame();
 			bool serverUpdated = false;
 

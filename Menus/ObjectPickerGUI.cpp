@@ -157,6 +157,11 @@ namespace RTE {
 						if (!techBuyMenuTheme.SkinFilePath.empty()) {
 							// Not specifying the skin file directory allows us to load image files from the whole working directory in the skin file instead of just the specified directory.
 							m_GUIControlManager->ChangeSkin("", techBuyMenuTheme.SkinFilePath);
+
+							// Popup box text is GUILabel so we need to override the "Label" section font with the "DescriptionBoxText" section font so we can use a different font without screwing with all the other labels.
+							std::string themeDescriptionBoxTextFont;
+							m_GUIControlManager->GetSkin()->GetValue("DescriptionBoxText", "Font", &themeDescriptionBoxTextFont);
+							m_PopupText->SetFont(m_GUIControlManager->GetSkin()->GetFont(themeDescriptionBoxTextFont));
 						}
 						if (techBuyMenuTheme.BackgroundColorIndex >= 0) { m_ParentBox->SetDrawColor(std::clamp(techBuyMenuTheme.BackgroundColorIndex, 0, 255)); }
 					}
@@ -249,7 +254,7 @@ namespace RTE {
 				if (!dynamic_cast<BunkerAssemblyScheme *>(objectListEntry)) { onlyAssemblySchemesInGroup = false; }
 
 				const SceneObject *sceneObject = dynamic_cast<SceneObject *>(objectListEntry);
-				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly()) {
+				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly() && !sceneObject->IsBuyableInScriptOnly()) {
 					hasObjectsToShow = true;
 					break;
 				}
@@ -391,7 +396,7 @@ namespace RTE {
 			std::list<SceneObject *> objectList;
 			for (Entity *moduleListEntryEntity : moduleList.at(moduleID)) {
 				SceneObject *sceneObject = dynamic_cast<SceneObject *>(moduleListEntryEntity);
-				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly()) { objectList.emplace_back(sceneObject); }
+				if (sceneObject && sceneObject->IsBuyable() && !sceneObject->IsBuyableInBuyMenuOnly() && !sceneObject->IsBuyableInScriptOnly()) { objectList.emplace_back(sceneObject); }
 			}
 			if (!objectList.empty()) {
 				if (moduleID != 0) { AddObjectsListModuleGroup(moduleID); }

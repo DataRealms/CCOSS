@@ -1104,8 +1104,8 @@ namespace RTE {
 		g_PostProcessMan.ClearScreenPostEffects();
 
 		// These accumulate the effects for each player's screen area, and are then transferred to the post-processing lists with the player screen offset applied
-		list<PostEffect> screenRelativeEffects;
-		list<Box> screenRelativeGlowBoxes;
+		std::list<PostEffect> screenRelativeEffects;
+		std::list<Box> screenRelativeGlowBoxes;
 
 		const Activity *pActivity = g_ActivityMan.GetActivity();
 

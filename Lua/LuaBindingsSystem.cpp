@@ -151,6 +151,7 @@ namespace RTE {
 		.def("LeftTillRealMS", &Timer::LeftTillRealMS)
 		.def("IsPastRealMS", &Timer::IsPastRealMS)
 		.def("AlternateReal", &Timer::AlternateReal)
+		.def("GetSimTimeLimitMS", &Timer::GetSimTimeLimitMS)
 		.def("SetSimTimeLimitMS", &Timer::SetSimTimeLimitMS)
 		.def("SetSimTimeLimitS", &Timer::SetSimTimeLimitS)
 		.def("IsPastSimTimeLimit", &Timer::IsPastSimTimeLimit)

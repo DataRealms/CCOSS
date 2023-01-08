@@ -140,7 +140,7 @@ namespace RTE {
 	static const bool EntityToLuabindObjectCastMapAutoInserterForType##TYPE = []() { \
 		LuaAdaptersEntityCast::s_EntityToLuabindObjectCastFunctions.try_emplace(std::string(#TYPE), &LuaAdaptersEntityCast::ToLuabindObject##TYPE); \
 		return true; \
-	}();
+	}()
 
 	LuaEntityCastFunctionsDefinitionsForType(Entity);
 	LuaEntityCastFunctionsDefinitionsForType(SoundContainer);
@@ -477,6 +477,36 @@ namespace RTE {
 
 	void LuaAdaptersPrimitiveMan::DrawPrimitivesWithBlendingPerChannel(PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable) {
 		primitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmountR, blendAmountG, blendAmountB, blendAmountA, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float LuaAdaptersUtility::GetMPP() {
+		return c_MPP;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float LuaAdaptersUtility::GetPPM() {
+		return c_PPM;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float LuaAdaptersUtility::GetLPP() {
+		return c_LPP;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float LuaAdaptersUtility::GetPPL() {
+		return c_PPL;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float LuaAdaptersUtility::GetPathFindingDefaultDigStrength() {
+		return c_PathFindingDefaultDigStrength;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

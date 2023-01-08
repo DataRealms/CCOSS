@@ -834,7 +834,14 @@ ClassInfoGetters;
 // Arguments:       Preset name of an item to remove.
 // Return value:    None.
 
-	void RemoveInventoryItem(string presetName);
+	void RemoveInventoryItem(const std::string &presetName) { RemoveInventoryItem("", presetName); }
+
+	/// <summary>
+	/// Removes the first inventory item with the given module name and preset name.
+	/// </summary>
+	/// <param name="moduleName">The module name of the item to remove.</param>
+	/// <param name="presetName">The preset name of the item to remove.</param>
+	void RemoveInventoryItem(const std::string &moduleName, const std::string &presetName);
 
     /// <summary>
     /// Removes and returns the inventory item at the given index. Ownership IS transferred.
@@ -927,7 +934,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    A const pointer to the inventory deque of this. OWNERSHIP IS NOT TRANSFERRED!
 
-	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
+	const std::deque<MovableObject *> * GetInventory() const { return &m_Inventory; }
 
 	/// <summary>
 	/// Returns the maximum total mass this Actor can carry in its inventory.

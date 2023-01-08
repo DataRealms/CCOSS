@@ -313,7 +313,15 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DeepCheck;
     else if (propName == "OrientToVel")
         reader >> m_OrientToVel;
-    else if (propName == "AddEmitter")
+	else if (propName == "SpecialBehaviour_ClearAllAttachables") {
+		// This special property is used to make Attachables work with our limited serialization system, when saving the game. Note that we discard the property value here, because all that matters is whether or not we have the property.
+		reader.ReadPropValue();
+		for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+			Attachable *attachable = *attachableIterator;
+			++attachableIterator;
+			delete RemoveAttachable(attachable);
+		}
+	} else if (propName == "AddAEmitter" || propName == "AddEmitter")
     {
         AEmitter *pEmitter = new AEmitter;
         reader >> pEmitter;
@@ -324,7 +332,11 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         Attachable *pAttachable = new Attachable;
         reader >> pAttachable;
         m_Attachables.push_back(pAttachable);
-    }
+	} else if (propName == "SpecialBehaviour_AddWound") {
+		AEmitter *wound = new AEmitter;
+		reader >> wound;
+		m_Wounds.push_back(wound);
+	}
     else if (propName == "AddGib")
     {
         Gib gib;
@@ -403,18 +415,18 @@ int MOSRotating::Save(Writer &writer) const
     writer.NewProperty("OrientToVel");
     writer << m_OrientToVel;
 
-    for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
+    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
     {
         writer.NewProperty("AddEmitter");
         writer << (*itr);
     }
-    for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
+    for (std::list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
     {
         writer.NewProperty("AddAttachable");
         writer << (*aItr);
     }
 */
-    for (list<Gib>::const_iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
+    for (std::list<Gib>::const_iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
     {
         writer.NewProperty("AddGib");
         writer << (*gItr);
@@ -582,8 +594,8 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
+    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
+    for (std::list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
         if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
             delete (*aItr);
         }
@@ -840,7 +852,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 
         // Get the un-rotated direction and max possible
         // travel length of the particle.
-        Vector dir(max(bounds[X], bounds[Y]), 0);
+        Vector dir(std::max(bounds[X], bounds[Y]), 0);
         dir.AbsRotateTo(hd.HitVel[HITOR] / m_Rotation);
         dir = dir.GetXFlipped(m_HFlipped);
 
@@ -1213,10 +1225,10 @@ void MOSRotating::ResetAllTimers()
 {
     MovableObject::ResetAllTimers();
 
-    for (list<AEmitter *>::iterator emitter = m_Wounds.begin(); emitter != m_Wounds.end(); ++emitter)
+    for (std::list<AEmitter *>::iterator emitter = m_Wounds.begin(); emitter != m_Wounds.end(); ++emitter)
         (*emitter)->ResetAllTimers();
 
-    for (list<Attachable *>::iterator attachable = m_Attachables.begin(); attachable != m_Attachables.end(); ++attachable)
+    for (std::list<Attachable *>::iterator attachable = m_Attachables.begin(); attachable != m_Attachables.end(); ++attachable)
         (*attachable)->ResetAllTimers();
 }
 
@@ -1314,7 +1326,7 @@ void MOSRotating::EraseFromTerrain()
         pivot.m_X = m_pFlipBitmap->w + m_SpriteOffset.m_X;
     }
 
-    deque<MOPixel *> pixels = g_SceneMan.GetTerrain()->EraseSilhouette(m_HFlipped ? m_pFlipBitmap : m_aSprite[m_Frame], m_Pos, pivot, m_Rotation, m_Scale, false);
+    std::deque<MOPixel *> pixels = g_SceneMan.GetTerrain()->EraseSilhouette(m_HFlipped ? m_pFlipBitmap : m_aSprite[m_Frame], m_Pos, pivot, m_Rotation, m_Scale, false);
 }
 
 
@@ -1359,9 +1371,9 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
         {
             // Particle generation
             // Erase the silhouette and get all the pixels that were created as a result
-            deque<MOPixel *> pixels = g_SceneMan.GetTerrain()->EraseSilhouette(m_HFlipped ? m_pFlipBitmap : m_aSprite[m_Frame], m_Pos, pivot, m_Rotation, m_Scale, makeMOPs, skipMOP, maxMOPs);
+            std::deque<MOPixel *> pixels = g_SceneMan.GetTerrain()->EraseSilhouette(m_HFlipped ? m_pFlipBitmap : m_aSprite[m_Frame], m_Pos, pivot, m_Rotation, m_Scale, makeMOPs, skipMOP, maxMOPs);
 
-            for (deque<MOPixel *>::iterator itr = pixels.begin(); itr != pixels.end(); ++itr)
+            for (std::deque<MOPixel *>::iterator itr = pixels.begin(); itr != pixels.end(); ++itr)
             {
                 tally += splashRatio;
                 if (tally >= 1.0)
@@ -1599,13 +1611,24 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //TODO This should just be defined in MOSR instead of having an empty definition in MO. MOSR would need to override UpdateMOID accordingly, but this would clean things up a little.
-void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+void MOSRotating::UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 
     for (Attachable *attachable : m_Attachables) {
         // Anything that doesn't get hit by MOs doesn't need an ID, since that's only actually used for collision stuff.
         if (attachable->GetsHitByMOs()) { attachable->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID); }
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MOSRotating::AttachableIsHardcoded(const Attachable *attachableToCheck) const {
+	if (attachableToCheck->GetParent() != this) {
+		return false;
+	}
+
+	unsigned long attachableUniqueID = attachableToCheck->GetUniqueID();
+	return m_HardcodedAttachableUniqueIDsAndRemovers.find(attachableUniqueID) != m_HardcodedAttachableUniqueIDsAndRemovers.end() || m_HardcodedAttachableUniqueIDsAndSetters.find(attachableUniqueID) != m_HardcodedAttachableUniqueIDsAndSetters.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

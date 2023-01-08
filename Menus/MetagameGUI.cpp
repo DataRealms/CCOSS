@@ -65,7 +65,7 @@ using namespace RTE;
 #define BRAINOVERLAP 2
 
 
-const string MetagameGUI::c_ClassName = "MetagameGUI";
+const std::string MetagameGUI::c_ClassName = "MetagameGUI";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ int MetagameGUI::Create(Controller *pController)
     if (GUIButton *pMenuButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("OpenMenuButton")))
     {
         std::snprintf(str, sizeof(str), "%c", -22);
-        pMenuButton->SetText(string(str));
+        pMenuButton->SetText(std::string(str));
     }
 
     // Planet mouseover scene label
@@ -585,13 +585,13 @@ int MetagameGUI::Create(Controller *pController)
     std::snprintf(str, sizeof(str), "%c", -48);
     for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +5", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +3", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +1", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +-", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " -1", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " -3", "", 0, 0, -1);
-        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " -5", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " +5", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " +3", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " +1", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " +-", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " -1", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " -3", "", 0, 0, -1);
+        m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(std::string(str) + " -5", "", 0, 0, -1);
 
         // Preselect the 0 handicap
         m_apPlayerHandicap[metaPlayer]->SetSelectedIndex(3);
@@ -644,7 +644,7 @@ int MetagameGUI::Create(Controller *pController)
 void MetagameGUI::MoveLocationsIntoTheScreen()
 {
 	//Clear offsets
-    for (vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
+    for (std::vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
 		(*pItr)->SetLocationOffset(Vector(0,0));
 
 	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet
@@ -655,7 +655,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 		planetCenter = m_PlanetCenter;
 
 	//Move out-of-screen scenes closer to the middle of the planet if we have planet info
-	for (vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
+	for (std::vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
 	{
 		float y = planetCenter.GetY() + (*pItr)->GetLocation().GetY();
 
@@ -671,7 +671,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 	}
 
 	// Add offsets to reveal overlapping scenes if any
-    for (vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
+    for (std::vector<Scene *>::iterator pItr = g_MetaMan.m_Scenes.begin(); pItr != g_MetaMan.m_Scenes.end(); ++pItr)
     {
 		bool isOverlapped = false;
 
@@ -680,7 +680,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 			isOverlapped = false;
 
 			// Find overlapping scene dot
-			for (vector<Scene *>::iterator pItr2 = g_MetaMan.m_Scenes.begin(); pItr2 != g_MetaMan.m_Scenes.end(); ++pItr2)
+			for (std::vector<Scene *>::iterator pItr2 = g_MetaMan.m_Scenes.begin(); pItr2 != g_MetaMan.m_Scenes.end(); ++pItr2)
 			{
 				if ((*pItr) != (*pItr2))
 				{
@@ -839,10 +839,10 @@ void MetagameGUI::SetEnabled(bool enable)
 		}
 	}
 
-	list<Entity *> flagList;
+    std::list<Entity *> flagList;
 	g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
 	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-		for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
+		for (std::list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
 			if (const Icon *pIcon = dynamic_cast<Icon *>(*itr)) { m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon); }
 		}
 	}
@@ -906,7 +906,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
 
 bool MetagameGUI::SelectScene(std::string sceneName)
 {
-    for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+    for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Only allow selection if the Scene is revealed yet!
         if ((*sItr)->GetPresetName() == sceneName && (*sItr)->IsRevealed())
@@ -948,7 +948,7 @@ void MetagameGUI::SwitchToScreen(int newScreen)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes a round number into a nice friendly text string. "ONE" for 1 etc
 
-string MetagameGUI::GetRoundName(int roundNumber)
+std::string MetagameGUI::GetRoundName(int roundNumber)
 {
     if (roundNumber < 12)
     {
@@ -979,7 +979,7 @@ string MetagameGUI::GetRoundName(int roundNumber)
     }
     char numStr[8];
     std::snprintf(numStr, sizeof(numStr), "%d", roundNumber + 1);
-    return string(numStr);
+    return std::string(numStr);
 }
 
 
@@ -1242,7 +1242,7 @@ bool MetagameGUI::LoadGame()
 // Description:     Attempts to save a Metagame to disk using the settings set in the
 //                  Save Game dialog box.
 
-bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneData)
+bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resaveSceneData)
 {
     // If specified, first load all bitmap data of all Scenes in the current Metagame that have once saved em, so we can re-save them to the new files
     if (resaveSceneData)
@@ -1273,14 +1273,14 @@ bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneDat
     newSave.SetPresetName(saveName);
 
     // Now add or update the actual Preset
-    g_PresetMan.AddEntityPreset(&newSave, g_PresetMan.GetModuleID(METASAVEMODULENAME), true, string(METASAVEPATH) + string("Index.ini"));
+    g_PresetMan.AddEntityPreset(&newSave, g_PresetMan.GetModuleID(METASAVEMODULENAME), true, std::string(METASAVEPATH) + "Index.ini");
 
     // Now write out the index file of all MetaSaves so the new save is found on next runtime
-    Writer indexWriter((string(METASAVEPATH) + string("Index.ini")).c_str());
+    Writer indexWriter((std::string(METASAVEPATH) + "Index.ini").c_str());
     indexWriter.ObjectStart("DataModule");
     indexWriter.NewPropertyWithValue("ModuleName", "Metagame Saves");
     // Get the current list of all MetaSave Preset:s, including the new one we just saved
-    list<Entity *> saveList;
+    std::list<Entity *> saveList;
     g_PresetMan.GetAllOfType(saveList, "MetaSave");
     // Go through the list and add their names to the combo box
 	for (const Entity *saveListEntry : saveList) {
@@ -1303,8 +1303,8 @@ bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneDat
 
 bool MetagameGUI::SaveGameFromDialog()
 {
-    string saveName;
-    string savePath;
+    std::string saveName;
+    std::string savePath;
 
     // Determine whether we have a new save file or one chosen from the list to overwrite
     // User wrote in a new save file/folder to use, so go ahead and create it
@@ -1418,13 +1418,13 @@ void MetagameGUI::Update()
             // Clear out the loadable save list control so we can repopulate it
             m_pSavesToLoadCombo->ClearList();
             // Get the list of all read in MetaSave:s
-            list<Entity *> saveList;
+            std::list<Entity *> saveList;
             g_PresetMan.GetAllOfType(saveList, "MetaSave");
             // Go through the list and add their names to the combo box
             int i = 0;
             int autoSaveIndex = -1;
             MetaSave *pAutoSave = 0;
-            for (list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
+            for (std::list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
             {
                 m_pSavesToLoadCombo->AddItem((*itr)->GetPresetName(), "", 0, *itr);
                 // Take note of the autosave, if it is in here
@@ -1481,10 +1481,10 @@ void MetagameGUI::Update()
             // Clear out the overwrite save list control so we can repopulate it
             m_pSavesToOverwriteCombo->ClearList();
             // Get the list of all read in MetaSave:s
-            list<Entity *> saveList;
+            std::list<Entity *> saveList;
             g_PresetMan.GetAllOfType(saveList, "MetaSave");
             // Go through the list and add their names to the combo box
-            for (list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
+            for (std::list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
                 m_pSavesToOverwriteCombo->AddItem((*itr)->GetPresetName(), "", 0, *itr);
             // Select the first one - don't, let the player select one if they want to overwrite
 //            m_pSavesToOverwriteCombo->SetSelectedIndex(0);
@@ -1542,11 +1542,11 @@ void MetagameGUI::Update()
         m_pSelectedScene = 0;
         m_ActivePlayerIncomeLines = -1;
         // Go through all lines and make them fully visible
-        for (vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
+        for (std::vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
             (*slItr).m_OnlyFirstSegments = (*slItr).m_OnlyLastSegments = -1;
         for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
         {
-            for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
+            for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
                 (*slItr).m_OnlyFirstSegments = (*slItr).m_OnlyLastSegments = -1;
         }
     }
@@ -1735,9 +1735,9 @@ void MetagameGUI::Update()
             {
 
                 // Find out who was on this winning team so we can name them by name
-                string winnerNames = "";
+                std::string winnerNames = "";
                 bool plural = false;
-                for (vector<MetaPlayer>::iterator pItr = g_MetaMan.m_Players.begin(); pItr != g_MetaMan.m_Players.end(); ++pItr)
+                for (std::vector<MetaPlayer>::iterator pItr = g_MetaMan.m_Players.begin(); pItr != g_MetaMan.m_Players.end(); ++pItr)
                 {
                     // WINRAR
                     if ((*pItr).GetTeam() == winnerTeam)
@@ -1811,8 +1811,8 @@ void MetagameGUI::Update()
             // If unlocked, detect any Scene close to the mouse and highlight it
             bool foundAnyHover = false;
             bool foundNewHover = false;
-            vector<Scene *>::iterator sItr;
-            vector<Scene *>::iterator newCandidateItr = g_MetaMan.m_Scenes.end();
+            std::vector<Scene *>::iterator sItr;
+            std::vector<Scene *>::iterator newCandidateItr = g_MetaMan.m_Scenes.end();
 
             float sqrShortestDist = std::numeric_limits<float>::infinity();
             for (sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
@@ -1934,7 +1934,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         // Draw the scene location dots
         Vector screenLocation;
         BITMAP *pIcon = 0;
-        for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             // Only draw Scenes that are revealed yet
             if (!(*sItr)->IsRevealed())
@@ -2019,14 +2019,14 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         // Draw the new site location crosshairs when revealing them
         if (g_MetaMan.m_GameState == MetaMan::REVEALSCENES && !g_MetaMan.m_StateChanged)
         {
-            for (vector<SiteTarget>::iterator stItr = m_NewSiteIndicators.begin(); stItr != m_NewSiteIndicators.end(); ++stItr)
+            for (std::vector<SiteTarget>::iterator stItr = m_NewSiteIndicators.begin(); stItr != m_NewSiteIndicators.end(); ++stItr)
                 (*stItr).Draw(drawBitmap);
         }
 
         // Draw any site ownership change animations
 //        if (g_MetaMan.m_GameState == MetaMan::REVEALSCENES && !g_MetaMan.m_StateChanged)
         {
-            for (vector<SiteTarget>::iterator stItr = m_SiteSwitchIndicators.begin(); stItr != m_SiteSwitchIndicators.end(); ++stItr)
+            for (std::vector<SiteTarget>::iterator stItr = m_SiteSwitchIndicators.begin(); stItr != m_SiteSwitchIndicators.end(); ++stItr)
                 (*stItr).Draw(drawBitmap);
         }
 
@@ -2955,9 +2955,9 @@ void MetagameGUI::CompletedActivity()
             }
             // Suck up all the remaining Actors and Items left in the world and put them into the list to place next load
             // However, don't suck up actors of any non-winning team, and don't save the brains if we autoresolved, because that took care of placing the resident brains already
-            pAlteredScene->RetrieveActorsAndDevices(winningTeam, autoResolved);
+            pAlteredScene->RetrieveSceneObjects(true, winningTeam, autoResolved);
             // Save out the altered scene before clearing out its data from memory
-            pAlteredScene->SaveData(METASAVEPATH + string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
+            pAlteredScene->SaveData(METASAVEPATH + std::string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over
             pAlteredScene->ClearData();
             // Deep copy over all the edits made to the newly played Scene
@@ -3340,7 +3340,7 @@ void MetagameGUI::UpdateSiteChangeAnim()
     // Continue animating the existing markers
     double animInterval = 600;
     double animTime = 0;
-    for (vector<SiteTarget>::iterator itr = m_SiteSwitchIndicators.begin(); itr != m_SiteSwitchIndicators.end(); ++itr)
+    for (std::vector<SiteTarget>::iterator itr = m_SiteSwitchIndicators.begin(); itr != m_SiteSwitchIndicators.end(); ++itr)
     {
         // How long have we been animating this one?
         animTime = (*itr).m_AnimTimer.GetElapsedRealTimeMS();
@@ -3353,7 +3353,7 @@ void MetagameGUI::UpdateSiteChangeAnim()
     }
 
     // Remove the markers that are done animating
-    for (vector<SiteTarget>::iterator itr = m_SiteSwitchIndicators.begin(); itr != m_SiteSwitchIndicators.end();)
+    for (std::vector<SiteTarget>::iterator itr = m_SiteSwitchIndicators.begin(); itr != m_SiteSwitchIndicators.end();)
     {
         if ((*itr).m_AnimTimer.GetElapsedRealTimeMS() > animInterval)//(*itr).m_AnimProgress >= 1.0)
         {
@@ -3378,7 +3378,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
     if (g_MetaMan.m_StateChanged || initOverride)
     {
         // Make note of all funds from previous round
-        for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+        for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
             (*mpItr).m_PhaseStartFunds = (*mpItr).m_Funds;
 
         // If this is the very first round and no Scenes are owned yet, then we should just skip this
@@ -3788,7 +3788,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
                 m_AnimSegment--;
                 m_AnimTimer1.Reset();
                 // Go through all lines and animate away the ones belonging to this player
-                for (vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
+                for (std::vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
                 {
                     if ((*slItr).m_Player == m_AnimMetaPlayer)
                     {
@@ -3816,7 +3816,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
     {
         // Set all lines' fund amounts to their targets and reset their segment animations so we can see them
         int lineIndex = 0;
-        for (vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
+        for (std::vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
         {
             (*slItr).m_FundsAmount = (*slItr).m_FundsTarget;
             (*slItr).m_OnlyFirstSegments = -1;
@@ -3872,7 +3872,7 @@ void MetagameGUI::UpdateHumanPlayerTurn(int metaPlayer)
         g_MetaMan.m_Players[metaPlayer].SetOffensiveBudget(0);
         g_MetaMan.m_Players[metaPlayer].SetOffensiveTargetName("");
         // Re-set up all build budgets in oz to match what the player spent on this site last round, proportionally
-        for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             // Only mess with Scenes we can see and that are owned by this player, and he spent something on last turn
             if ((*sItr)->IsRevealed() && (*sItr)->GetTeamOwnership() == g_MetaMan.m_Players[metaPlayer].GetTeam() && (*sItr)->GetBuildBudgetRatio(player) > 0)
@@ -3884,7 +3884,7 @@ void MetagameGUI::UpdateHumanPlayerTurn(int metaPlayer)
     if (m_ContinuePhase)
     {
         // Save all the base building budget ratios sowe can re-set the gold values next turn, for player convenience
-        for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             // Only mess with Scenes we can see and that are owned by this player, and he spent something on last turn
             if ((*sItr)->IsRevealed() && (*sItr)->GetTeamOwnership() == g_MetaMan.m_Players[metaPlayer].GetTeam() && g_MetaMan.m_Players[metaPlayer].GetFunds() > 0)
@@ -3921,7 +3921,7 @@ void MetagameGUI::UpdateBaseBuilding()
             UpdatePlayerActionLines(metaPlayer);
 
             // Hide all lines so we only see their meters
-            for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
+            for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
             {
                 (*slItr).m_OnlyFirstSegments = 1;
                 (*slItr).m_OnlyLastSegments = -1;
@@ -3932,7 +3932,7 @@ void MetagameGUI::UpdateBaseBuilding()
             if (g_MetaMan.m_Players[metaPlayer].IsHuman())
             {
                 // Go through all scenes and check if they're owned by this, and if so, whether their defenses should be automatically designed by canned AI plan
-                for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+                for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
                 {
                     // Move building pieces from the Scene's AI plan queue to the actual blueprints, but only approximately as much as can afford, so the entire AI pre-built base plan isn't revealed
                     if ((*sItr)->GetTeamOwnership() == g_MetaMan.m_Players[metaPlayer].GetTeam() && (*sItr)->GetAutoDesigned())
@@ -3957,7 +3957,7 @@ void MetagameGUI::UpdateBaseBuilding()
         if (m_AnimActionLine == 0)
         {
             // Hide all but the meters of all lines
-            for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[m_AnimMetaPlayer].begin(); slItr != m_ActionSiteLines[m_AnimMetaPlayer].end(); ++slItr)
+            for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[m_AnimMetaPlayer].begin(); slItr != m_ActionSiteLines[m_AnimMetaPlayer].end(); ++slItr)
             {
                 (*slItr).m_OnlyFirstSegments = 1;
                 (*slItr).m_OnlyLastSegments = -1;
@@ -4152,7 +4152,7 @@ void MetagameGUI::UpdateBaseBuilding()
             g_MetaMan.m_Players[metaPlayer].m_Funds = g_MetaMan.m_Players[metaPlayer].m_PhaseStartFunds;
 
             // Go through the sitelines and make sure all the things that need to be done are done before moving onto next phase
-            for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
+            for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
             {
                 // APPLY all the defense budget allocations to actually building, but not before subtracting their values from the pre funds
                 if ((*slItr).m_Color == c_GUIColorGreen)
@@ -4178,7 +4178,7 @@ void MetagameGUI::UpdateBaseBuilding()
             }
 
             // Make all scene build budgets set to 0; they will be re-set to their previous turns' budget ratios on the next player turns
-            for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+            for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
             {
                 // Only mess with Scenes we can see and that are owned by this player's team
                 if ((*sItr)->IsRevealed() && (*sItr)->GetTeamOwnership() == g_MetaMan.m_Players[metaPlayer].GetTeam())
@@ -4203,7 +4203,7 @@ void MetagameGUI::SetupOffensives()
     g_MetaMan.ClearActivities();
 
     // Go through all players' offensive actions and create the unique activities
-    string targetName;
+    std::string targetName;
     float offensiveBudget;
     bool playerDone = false;
     int team = Activity::NoTeam;
@@ -4217,12 +4217,12 @@ void MetagameGUI::SetupOffensives()
         offensiveBudget = g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget();
         if (!targetName.empty() && offensiveBudget > 0)
         {
-            for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); !playerDone && sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+            for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); !playerDone && sItr != g_MetaMan.m_Scenes.end(); ++sItr)
             {
                 if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == targetName)
                 {
                     // Now check that we haven't already created an offensive action at this site
-                    for (vector<GAScripted *>::iterator aItr = g_MetaMan.m_RoundOffensives.begin(); aItr != g_MetaMan.m_RoundOffensives.end(); ++aItr)
+                    for (std::vector<GAScripted *>::iterator aItr = g_MetaMan.m_RoundOffensives.begin(); aItr != g_MetaMan.m_RoundOffensives.end(); ++aItr)
                     {
                         if ((*aItr)->GetSceneName() == targetName)
                         {
@@ -4315,7 +4315,7 @@ void MetagameGUI::UpdateOffensives()
             SetupOffensives();
 
         // Hide all income lines so they don't flash once on phase start
-        for (vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
+        for (std::vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
             (*slItr).m_OnlyFirstSegments = (*slItr).m_OnlyLastSegments = 0;
 
         // Set the battle info display to the start of its animation.
@@ -4359,7 +4359,7 @@ void MetagameGUI::UpdateOffensives()
         m_pPhaseLabel->SetText(str);
 
         // Find the scene being attacked in this offensive Activity
-        for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->GetSceneName())
                 m_pAnimScene = (*sItr);
@@ -4388,7 +4388,7 @@ void MetagameGUI::UpdateOffensives()
                 m_aBrainIconPos[mp].Reset();
 
                 // What is this player attacking?
-                string targetName = g_MetaMan.m_Players[mp].GetOffensiveTargetName();
+                std::string targetName = g_MetaMan.m_Players[mp].GetOffensiveTargetName();
                 float offensiveBudget = g_MetaMan.m_Players[mp].GetOffensiveBudget();
                 // If attacking anything, see if it's the current site that's getting hit
                 if (!targetName.empty() && offensiveBudget > 0)
@@ -4429,7 +4429,7 @@ void MetagameGUI::UpdateOffensives()
                 }
 
                 // Hide all action lines except for their bars
-                for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                 {
                     (*slItr).m_OnlyFirstSegments = 1;
                     (*slItr).m_OnlyLastSegments = -1;
@@ -4440,7 +4440,7 @@ void MetagameGUI::UpdateOffensives()
             }
             // If player not involved in the fight then hide all lines of this player
             {
-                for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                 {
                     (*slItr).m_OnlyFirstSegments = 0;
                     (*slItr).m_OnlyLastSegments = -1;
@@ -4510,7 +4510,7 @@ void MetagameGUI::UpdateOffensives()
                         g_MetaMan.m_Players[mp].ChangeBrainsInTransit(1);
 
                     // Find their offensive funds site lines
-                    for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                    for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are red; set them up to have their meters visible
                         if ((*slItr).m_Color == c_GUIColorRed)
@@ -4543,7 +4543,7 @@ void MetagameGUI::UpdateOffensives()
 //                    if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                     {
                         // Find their offensive funds site lines
-                        for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                        for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow all of em
                             if ((*slItr).m_Color == c_GUIColorRed)
@@ -4629,7 +4629,7 @@ void MetagameGUI::UpdateOffensives()
                     m_pAnimScene->GetResidentBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                 {
                     // Find their defensive funds site lines
-                    for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                    for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are green; unallocated funds are white - attach all of them
                         if ((*slItr).m_Color != c_GUIColorRed)
@@ -4661,7 +4661,7 @@ void MetagameGUI::UpdateOffensives()
                     if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                     {
                         // Find their defensive-related funds site lines
-                        for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                        for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow the defensive ones relevant to this scene
                             if ((*slItr).m_Color != c_GUIColorRed && m_pAnimScene->GetPresetName() == (*slItr).m_SiteName &&
@@ -4737,7 +4737,7 @@ void MetagameGUI::UpdateOffensives()
                 if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                 {
                     // Find their site lines that are connected to the site
-                    for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                    for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Only lines that are connected are relevant
                         if ((*slItr).m_OnlyFirstSegments > 1 || (*slItr).m_OnlyLastSegments > 1)
@@ -4783,7 +4783,7 @@ void MetagameGUI::UpdateOffensives()
                 }
 
                 // Find their site lines that are connected to the site
-                for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                 {
                     // Only lines that are connected are relevant
                     if ((*slItr).m_OnlyFirstSegments > 1 || (*slItr).m_OnlyLastSegments > 1)
@@ -4979,7 +4979,7 @@ void MetagameGUI::UpdateOffensives()
             // Only care of this player is involved in this particular battle
             if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
             {
-                for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
+                for (std::vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                 {
                     // Only show lines that are going to the site we're battling on
                     if ((*slItr).m_SiteName == m_pAnimScene->GetPresetName())
@@ -5121,7 +5121,7 @@ bool MetagameGUI::FinalizeOffensive()
     g_MetaMan.m_CurrentOffensive++;
 
     // AUTO-SAVE THE GAME AFTER EACH PLAYED BATTLE
-    SaveGame(AUTOSAVENAME, METASAVEPATH + string(AUTOSAVENAME) + ".ini", false);
+    SaveGame(AUTOSAVENAME, METASAVEPATH + std::string(AUTOSAVENAME) + ".ini", false);
 
     // If we're out of offensives, then move onto the next phase
     if (g_MetaMan.m_CurrentOffensive >= g_MetaMan.m_RoundOffensives.size())
@@ -5143,7 +5143,7 @@ bool MetagameGUI::FinalizeOffensive()
 void MetagameGUI::ResetBattleInfo()
 {
     int mp = 0;
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Init and hide everything initially
         if (!m_apPlayerTeamActionBox[mp]->GetDrawImage())
@@ -5180,7 +5180,7 @@ void MetagameGUI::UpdateBattleQuads(Vector targetPos)
 
     // Go through all players, assigning the quads depending on how the player bars are positioned in relation to each other
     int mp = 0;
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Select which quadrant makes most sense for this player, based on his floating bar's position relative to the site
         int initialQuad = 0;
@@ -5245,7 +5245,7 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
     UpdateBattleQuads(siteScreenPos);
     
     // Go through all attacking players for this activity
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Player active and ATTACKING in current battle, so display his team flag and place it according to the animation progress
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive((*mpItr).GetInGamePlayer()) &&
@@ -5399,7 +5399,7 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
     UpdateBattleQuads(siteScreenPos);
     
     // Go through all players for this activity
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Player active and DEFENDING in current battle, so display his team flag and place it according to the animation progress
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive((*mpItr).GetInGamePlayer()) &&
@@ -5539,7 +5539,7 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
     UpdateBattleQuads(siteScreenPos);
     
     // Go through all players for this activity
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Player active and EVACUATION/RETREATING in current battle, so display his team flag and place it according to the animation progress
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain((*mpItr).GetInGamePlayer()) &&
@@ -5694,7 +5694,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
     UpdateBattleQuads(siteScreenPos);
     
     // Go through all players for this activity
-    for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+    for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
         // Player active in the past battle, so display his team flag and place it according to the animation progress
         // Also player who didn't evacuate - they are handled by UpdatePostBattleRetreaters
@@ -5926,11 +5926,11 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
     }
 
     // If we have a selected offensive target, find it and create its line as well
-    string targetName = g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName();
+    std::string targetName = g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName();
     float offensiveBudget = g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget();
     if (!targetName.empty() && offensiveBudget > 0)
     {
-        for (vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
+        for (std::vector<Scene *>::iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
         {
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == targetName)
             {
@@ -5958,7 +5958,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         char str[256];
         // Set the close button to have that fancy X
         std::snprintf(str, sizeof(str), "%c", -36);
-        m_pSceneCloseButton->SetText(string(str));
+        m_pSceneCloseButton->SetText(std::string(str));
 
         // Set the currently selected scene's texts
         m_pSceneInfoPopup->SetVisible(true);
@@ -5973,7 +5973,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             m_pSceneOwnerTeam->SetDrawImage(new AllegroBitmap(g_MetaMan.m_TeamIcons[m_pSelectedScene->GetTeamOwnership()].GetBitmaps32()[0]));
             // Show how many resident brains there are hanging out here
             std::snprintf(str, sizeof(str), "%c", -26);
-            string brainString = "";
+            std::string brainString = "";
             int brainCount = m_pSelectedScene->GetResidentBrainCount();
             for (int i = 0; i < brainCount; ++i)
                 brainString += str;
@@ -6092,7 +6092,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_apMetaButton[SCANLATER]->SetVisible(false);
                         m_pScanInfoLabel->SetVisible(true);
                         std::snprintf(str, sizeof(str), "%d", SCANCOST);
-                        m_pScanInfoLabel->SetText("Need " + string(str) + " oz left to Scan!");
+                        m_pScanInfoLabel->SetText("Need " + std::string(str) + " oz left to Scan!");
                     }
                     // Site can be scheduled to be scanned
                     else
@@ -6104,7 +6104,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_apMetaButton[DESIGNBASE]->SetVisible(false);
                         m_apMetaButton[SCENEACTION]->SetVisible(true);
                         std::snprintf(str, sizeof(str), "%d", SCANCOST);
-                        m_apMetaButton[SCENEACTION]->SetText("Scan Site (" + string(str) + " oz)");
+                        m_apMetaButton[SCENEACTION]->SetText("Scan Site (" + std::string(str) + " oz)");
                         m_apMetaButton[SCENEACTION]->SetToolTip("Performs an orbital scan of this site, which will show everything that is on the surface, but will not be able to penetrate far into the ground.");
                     }
                     // Hide the auto check box
@@ -6240,7 +6240,7 @@ void MetagameGUI::UpdatePlayerSetup()
     int humanPlayers = 0;
     int totalPlayers = 0;
     const Icon *pTeamIcon = 0;
-    list<const Icon *> teamList;
+    std::list<const Icon *> teamList;
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (m_apPlayerControlButton[player]->GetText() == "None")
@@ -6280,7 +6280,7 @@ void MetagameGUI::UpdatePlayerSetup()
             {
                 // See if the player is designated to a new team or one that has already been found
                 bool newTeam = true;
-                for (list<const Icon *>::iterator itr = teamList.begin(); itr != teamList.end(); ++itr)
+                for (std::list<const Icon *>::iterator itr = teamList.begin(); itr != teamList.end(); ++itr)
                 {
                     // Found existing team!
                     if (pTeamIcon->GetPresetName() == (*itr)->GetPresetName())
@@ -6326,7 +6326,7 @@ void MetagameGUI::UpdatePlayerBars()
     {
         int metaPlayer = 0;
         char str[256];
-        for (vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
+        for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
         {
 //            m_apPlayerBox[metaPlayer];
 //            m_apPlayerTeamBox[metaPlayer];
@@ -6361,7 +6361,7 @@ void MetagameGUI::UpdatePlayerBars()
                 else
                     str[0] = 0;
 
-                m_apPlayerBarLabel[metaPlayer]->SetText(string(str) + (*mpItr).GetName());
+                m_apPlayerBarLabel[metaPlayer]->SetText(std::string(str) + (*mpItr).GetName());
                 m_apPlayerBarLabel[metaPlayer]->SetHAlignment(GUIFont::Left);
                 m_apPlayerBarLabel[metaPlayer]->SetToolTip("");
             }
@@ -6460,7 +6460,7 @@ void MetagameGUI::UpdatePlayerBars()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the floating label over a planet site.
 
-void MetagameGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &location, float height)
+void MetagameGUI::UpdateSiteNameLabel(bool visible, std::string text, const Vector &location, float height)
 {
     // Set up the hover label to appear over any hovered scene location
     m_pScenePlanetLabel->SetVisible(visible);
@@ -6491,7 +6491,7 @@ void MetagameGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &l
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Starts an animation of a label showing a text string over a player bar
 
-void MetagameGUI::PlayerTextIndication(int metaPlayer, string text, const Vector &screenPos, double animLengthMS)
+void MetagameGUI::PlayerTextIndication(int metaPlayer, std::string text, const Vector &screenPos, double animLengthMS)
 {
     m_apFundsChangeLabel[metaPlayer]->SetText(text);
     m_apFundsChangeLabel[metaPlayer]->SetHAlignment(GUIFont::Centre);
@@ -6561,14 +6561,14 @@ void MetagameGUI::BrainsChangeIndication(int metaPlayer, int change, const Vecto
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes a specific index siteline out of a vector.
 
-bool MetagameGUI::RemoveSiteLine(vector<SiteLine> &lineList, int removeIndex)
+bool MetagameGUI::RemoveSiteLine(std::vector<SiteLine> &lineList, int removeIndex)
 {
     if (lineList.empty())
         return false;
 
     int index = 0;
     bool removed = false;
-    for (vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr, ++index)
+    for (std::vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr, ++index)
     {        
         if (index == removeIndex)
         {
@@ -6585,14 +6585,14 @@ bool MetagameGUI::RemoveSiteLine(vector<SiteLine> &lineList, int removeIndex)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total funds of all visible lines of a specific player.
 
-float MetagameGUI::GetPlayerLineFunds(vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible)
+float MetagameGUI::GetPlayerLineFunds(std::vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible)
 {
     if (metaPlayer < Players::PlayerOne || metaPlayer >= g_MetaMan.m_Players.size())
         return 0;
 
     // Figure out the total visible meter funds of this player
     float totalFunds = 0;
-    for (vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr)
+    for (std::vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr)
         if ((*slItr).m_Player == metaPlayer && (!onlyVisible || IsSiteLineVisible(*slItr)))
             totalFunds += (*slItr).m_FundsAmount;
 
@@ -6606,7 +6606,7 @@ float MetagameGUI::GetPlayerLineFunds(vector<SiteLine> &lineList, int metaPlayer
 // Description:     Updates the site line meter ratios of a player based on their fund
 //                  amounts and visibilty.
 
-void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible, float total)
+void MetagameGUI::UpdatePlayerLineRatios(std::vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible, float total)
 {
     if (metaPlayer < Players::PlayerOne || metaPlayer >= g_MetaMan.m_Players.size())
         return;
@@ -6616,7 +6616,7 @@ void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPla
 
     // Now go through the visible ones and set their meter ratios appropriately
     float meterStart = 0;
-    for (vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr)
+    for (std::vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr)
     {
         if ((*slItr).m_Player == metaPlayer && (!onlyVisible || IsSiteLineVisible(*slItr)))
         {

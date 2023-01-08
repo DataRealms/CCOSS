@@ -20,7 +20,7 @@
 namespace RTE {
 
 AbstractClassInfo(SceneObject, Entity);
-const string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
+const std::string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -306,8 +306,8 @@ int SceneObject::Save(Writer &writer) const
     writer << m_OzValue;
     writer.NewProperty("Buyable");
     writer << m_Buyable;
-	writer.NewProperty("BuyableMode");
-	writer << m_BuyableMode;
+    writer.NewProperty("BuyableMode");
+    writer << static_cast<int>(m_BuyableMode);
     writer.NewProperty("Team");
     writer << m_Team;
     writer.NewProperty("PlacedByPlayer");
@@ -349,7 +349,7 @@ float SceneObject::GetGoldValue(int nativeModule, float foreignMult, float nativ
 // Description:     Gets a descriptive string describing the cost to purchase this item,
 //                  in oz's of gold.
 
-string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, float nativeMult) const
+std::string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, float nativeMult) const
 {
     float subjValue = GetGoldValue(nativeModule, foreignMult, nativeMult);
 

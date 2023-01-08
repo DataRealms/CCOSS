@@ -181,7 +181,7 @@ void AreaEditorGUI::SetCurrentArea(Scene::Area *pArea)
 // Description:     Updates the list that the GUI's Area picker has, from the current
 //                  scene state.
 
-void AreaEditorGUI::UpdatePickerList(string selectAreaName)
+void AreaEditorGUI::UpdatePickerList(std::string selectAreaName)
 {
     m_pPicker->UpdateAreasList(selectAreaName);
 }
@@ -583,7 +583,7 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         return;
 
     // List to capture scene-wrapped boxes
-    list<Box> wrappedBoxes;
+    std::list<Box> wrappedBoxes;
 
     // First draw all the objects placed in the scene by the Scene Editor
     const std::list<SceneObject *> *pSceneObjectList = g_SceneMan.GetScene()->GetPlacedObjects(Scene::PLACEONLOAD);
@@ -591,7 +591,7 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     {
         // Draw all already placed Objects, and the currently held one in the order it is about to be placed in the scene
         int i = 0;
-        for (list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
+        for (std::list<SceneObject *>::const_iterator itr = pSceneObjectList->begin(); itr != pSceneObjectList->end(); ++itr, ++i)
         {
            (*itr)->Draw(pTargetBitmap, targetPos);
             // Draw basic HUD if an actor
@@ -612,14 +612,14 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
 
         // Draw all already placed Box:es, and the currently edited one
-        for (vector<Box>::const_iterator bItr = pBoxList->begin(); bItr != pBoxList->end(); ++bItr)
+        for (std::vector<Box>::const_iterator bItr = pBoxList->begin(); bItr != pBoxList->end(); ++bItr)
         {
             // Handle wrapped boxes properly
             wrappedBoxes.clear();
             g_SceneMan.WrapBox(*bItr, wrappedBoxes);
 
             // Iterate through the wrapped boxes - will only be one if there's no wrapping
-            for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+            for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
             {
                 // Draw the rectangle of each Box, adjusted for the offet of the target bitmap in the scene
                 adjCorner = (*wItr).GetCorner() - targetPos;
@@ -637,7 +637,7 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         g_SceneMan.WrapBox(m_EditedBox, wrappedBoxes);
 
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
-        for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+        for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             adjCorner = (*wItr).GetCorner() - targetPos;
             // Special 'X' drawing when deleting

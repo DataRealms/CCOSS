@@ -3,6 +3,7 @@
 #include "LuaMan.h"
 #include "UInputMan.h"
 #include "FrameMan.h"
+#include "PresetMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
@@ -139,11 +140,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
+	void ConsoleMan::AddLoadWarningLogIndentationFormatEntry(const std::string &readerPosition, int numSpaces) {
+		std::string newEntry = "Encountered " + std::to_string(numSpaces) + " space characters used for indentation in file " + readerPosition + ". Treated as " + std::to_string(numSpaces / 4) + " tabs to preserve preset structure.";
+		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+			PrintString(newEntry);
+		} else {
+			std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+			m_LoadWarningLog.emplace(newEntry);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::AddLoadWarningLogExtensionMismatchEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
 		const std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
 		std::string newEntry = pathAndAccessLocation + (!altFileExtension.empty() ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");
-		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
-		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
+		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+			PrintString(newEntry);
+		} else {
+			std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+			if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.emplace(newEntry); }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +240,10 @@ namespace RTE {
 		PrintString("CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset");
 		PrintString("F3 - Save console log");
 		PrintString("F4 - Save console user input log");
-		PrintString("F5 - Clear console log ");
+		PrintString("F5 - Quick save");
+		PrintString("F9 - Load latest quick-save");
+		PrintString("CTRL + F9 - Load latest auto-save");
+		PrintString("F10 - Clear Console log");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

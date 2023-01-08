@@ -285,7 +285,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	{
 		reader >> m_AirResistance;
 		// Backwards compatibility after we made this value scaled over time
-		m_AirResistance /= 0.01666;
+		m_AirResistance /= 0.01666F;
 	}
 	else if (propName == "AirThreshold")
 		reader >> m_AirThreshold;
@@ -295,7 +295,11 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_RestThreshold;
 	else if (propName == "LifeTime")
 		reader >> m_Lifetime;
-	else if (propName == "Sharpness")
+	else if (propName == "Age") {
+		double age;
+		reader >> age;
+		m_AgeTimer.SetElapsedSimTimeMS(age);
+	} else if (propName == "Sharpness")
 		reader >> m_Sharpness;
 	else if (propName == "HitsMOs")
 		reader >> m_HitsMOs;
@@ -329,7 +333,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_HUDVisible;
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
-        switch (LoadScript(CorrectBackslashesInPath(scriptPath))) {
+        switch (LoadScript(scriptPath)) {
             case 0:
                 break;
             case -1:
@@ -413,7 +417,9 @@ int MovableObject::Save(Writer &writer) const
 {
     SceneObject::Save(writer);
 // TODO: Make proper save system that knows not to save redundant data!
-/*
+// Note - this function isn't even called when saving a scene. Turns out that scene special-cases this stuff, see Scene::Save()
+// In future, perhaps we ought to not do that. Who knows?
+
     writer.NewProperty("Mass");
     writer << m_Mass;
     writer.NewProperty("Velocity");
@@ -423,7 +429,7 @@ int MovableObject::Save(Writer &writer) const
     writer.NewProperty("GlobalAccScalar");
     writer << m_GlobalAccScalar;
     writer.NewProperty("AirResistance");
-    writer << m_AirResistance;
+    writer << (m_AirResistance * 0.01666F); // Backwards compatibility after we made this value scaled over time
     writer.NewProperty("AirThreshold");
     writer << m_AirThreshold;
     writer.NewProperty("PinStrength");
@@ -450,10 +456,11 @@ int MovableObject::Save(Writer &writer) const
     writer << m_CanBeSquished;
     writer.NewProperty("HUDVisible");
     writer << m_HUDVisible;
-    if (!m_ScriptPath.empty())
-    {
-        writer.NewProperty("ScriptPath");
-        writer << m_ScriptPath;
+    for (const auto &[scriptPath, scriptEnabled] : m_AllLoadedScripts) {
+        if (!scriptPath.empty()) {
+            writer.NewProperty("ScriptPath");
+            writer << scriptPath;
+        }
     }
     writer.NewProperty("ScreenEffect");
     writer << m_ScreenEffectFile;
@@ -467,7 +474,21 @@ int MovableObject::Save(Writer &writer) const
     writer << (float)m_EffectStopStrength / 255.0f;
     writer.NewProperty("EffectAlwaysShows");
     writer << m_EffectAlwaysShows;
-*/
+    writer.NewProperty("DamageOnCollision");
+    writer << m_DamageOnCollision;
+    writer.NewProperty("DamageOnPenetration");
+    writer << m_DamageOnPenetration;
+    writer.NewProperty("WoundDamageMultiplier");
+    writer << m_WoundDamageMultiplier;
+    writer.NewProperty("ApplyWoundDamageOnCollision");
+    writer << m_ApplyWoundDamageOnCollision;
+    writer.NewProperty("ApplyWoundBurstDamageOnCollision");
+    writer << m_ApplyWoundBurstDamageOnCollision;
+    writer.NewProperty("IgnoreTerrain");
+    writer << m_IgnoreTerrain;
+    writer.NewProperty("SimUpdatesBetweenScriptedUpdates");
+    writer << m_SimUpdatesBetweenScriptedUpdates;
+    
     return 0;
 }
 
@@ -509,6 +530,8 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		}
 	}
 
+	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
+
 	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 	if (g_LuaMan.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
 		return -5;
@@ -518,8 +541,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
 	g_LuaMan.RunScriptString(luaClearSupportedFunctionsString);
-
-	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
 	if (ObjectScriptsInitialized()) {
 		RunFunctionOfScript(scriptPath, "Create");
@@ -548,7 +569,10 @@ int MovableObject::ReloadScripts() {
 	m_FunctionsAndScripts.clear();
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
-		if (status < 0) {
+		// If the script fails to load because of an error in its Lua, we need to manually add the script path so it's not lost forever.
+		if (status == -5) {
+			m_AllLoadedScripts.try_emplace(scriptPath, scriptEnabled);
+		} else if (status < 0) {
 			break;
 		}
 	}
@@ -778,7 +802,7 @@ void MovableObject::ApplyForces()
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
     // Apply the translational effects of all the forces accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
+    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
@@ -809,7 +833,7 @@ void MovableObject::ApplyImpulses()
 //    float totalImpulses.
 
     // Apply the translational effects of all the impulses accumulated during the Update()
-    for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
+    for (auto iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
         m_Vel += (*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F);
@@ -958,7 +982,7 @@ int MovableObject::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' and its childrens MOID status. Supposed to be done every frame.
 
-void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
+void MovableObject::UpdateMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
 {
     // Register the own MOID
     RegMOID(MOIDIndex, rootMOID, makeNewMOID);
@@ -991,7 +1015,7 @@ void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 //                  itself and its children for this frame.
 //                  BITMAP of choice.
 
-void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+void MovableObject::RegMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
     if (!makeNewMOID && GetParent()) {
         m_MOID = GetParent()->GetID();
     } else {

@@ -513,11 +513,11 @@ void GibEditor::Update()
                     m_pEditedObject->Update();
 
                     // Make proxy copies of the loaded objects' gib reference instances and place them in the list to be edited
-                    list<Gib> *pLoadedGibList = m_pEditedObject->GetGibList();
-                    list<MovableObject *> *pEditedGibList = m_pEditorGUI->GetPlacedGibs();
+                    std::list<Gib> *pLoadedGibList = m_pEditedObject->GetGibList();
+                    std::list<MovableObject *> *pEditedGibList = m_pEditorGUI->GetPlacedGibs();
                     MovableObject *pGibCopy = 0;
 
-                    for (list<Gib>::iterator gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
+                    for (std::list<Gib>::iterator gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
                     {
                         pGibCopy = dynamic_cast<MovableObject *>((*gItr).GetParticlePreset()->Clone());
                         if (pGibCopy)
@@ -714,7 +714,7 @@ void GibEditor::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 // Description:     Saves the current object to an appropriate ini file, and asks user if
 //                  they want to overwrite first if object of this name exists.
 
-bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
+bool GibEditor::SaveObject(std::string saveAsName, bool forceOverwrite)
 {
     if (!m_pEditedObject)
         return false;
@@ -727,7 +727,7 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
 
 // TODO: do proper overwriting looking at the files etc
     // Try to add to the isntance man
-    string objectFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData/" + saveAsName + ".ini");
+    std::string objectFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData/" + saveAsName + ".ini");
 
 	// Check if file exists
 	bool newDataFileExisted = exists(objectFilePath.c_str());
@@ -809,12 +809,12 @@ void GibEditor::StuffEditedGibs(MOSRotating *pEditedObject)
         return;
 
     // Replace the gibs of the object with the proxies that have been edited in the gui
-    list<Gib> *pObjectGibList = pEditedObject->GetGibList();
+    std::list<Gib> *pObjectGibList = pEditedObject->GetGibList();
     pObjectGibList->clear();
 
     // Take each proxy object and stuff it into a Gib instance which then gets stuffed into the object to be saved
-    list<MovableObject *> *pProxyGibList = m_pEditorGUI->GetPlacedGibs();
-    for (list<MovableObject *>::iterator gItr = pProxyGibList->begin(); gItr != pProxyGibList->end(); ++gItr)
+    std::list<MovableObject *> *pProxyGibList = m_pEditorGUI->GetPlacedGibs();
+    for (std::list<MovableObject *>::iterator gItr = pProxyGibList->begin(); gItr != pProxyGibList->end(); ++gItr)
     {
         Gib newGib;
         // Only set the refernce instance directly from the isntanceman. OWNERSHIP IS NOT TRANSFERRED!

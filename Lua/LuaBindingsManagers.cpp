@@ -21,7 +21,9 @@ namespace RTE {
 		.def("PauseActivity", &ActivityMan::PauseActivity)
 		.def("EndActivity", &ActivityMan::EndActivity)
 		.def("ActivityRunning", &ActivityMan::ActivityRunning)
-		.def("ActivityPaused", &ActivityMan::ActivityPaused);
+		.def("ActivityPaused", &ActivityMan::ActivityPaused)
+		.def("SaveGame", &ActivityMan::SaveCurrentGame)
+		.def("LoadGame", &ActivityMan::LoadAndLaunchGame);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +176,7 @@ namespace RTE {
 
 		.def_readwrite("Modules", &PresetMan::m_pDataModules, luabind::return_stl_iterator)
 
-		.def("LoadDataModule", (bool (PresetMan::*)(std::string))&PresetMan::LoadDataModule)
+		.def("LoadDataModule", (bool (PresetMan::*)(const std::string &))&PresetMan::LoadDataModule)
 		.def("GetDataModule", &PresetMan::GetDataModule)
 		.def("GetModuleID", &PresetMan::GetModuleID)
 		.def("GetModuleIDFromPath", &PresetMan::GetModuleIDFromPath)

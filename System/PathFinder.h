@@ -9,6 +9,7 @@ using namespace micropather;
 namespace RTE {
 
 	class Scene;
+	class Material;
 
 	/// <summary>
 	/// Contains everything related to a node on the path grid used by PathFinder.
@@ -24,7 +25,6 @@ namespace RTE {
 		/// Pointers to all adjacent nodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
 		std::array<PathNode *, c_MaxAdjacentNodeCount> AdjacentNodes;
-
 		PathNode *&Up = AdjacentNodes[0];
 		PathNode *&UpRight = AdjacentNodes[1];
 		PathNode *&Right = AdjacentNodes[2];
@@ -35,25 +35,23 @@ namespace RTE {
 		PathNode *&LeftUp = AdjacentNodes[7];
 
 		/// <summary>
-		/// Costs to get to each of the adjacent nodes, in clockwise order with top first.
+		/// The strongest material between us and our adjacent nodes, in clockwise order with top first.
 		/// </summary>
-		std::array<float, c_MaxAdjacentNodeCount> AdjacentNodeCosts;
+		std::array<const Material *, c_MaxAdjacentNodeCount> AdjacentNodeBlockingMaterials;
+		const Material *&UpMaterial = AdjacentNodeBlockingMaterials[0];
+		const Material *&UpRightMaterial = AdjacentNodeBlockingMaterials[1];
+		const Material *&RightMaterial = AdjacentNodeBlockingMaterials[2];
+		const Material *&RightDownMaterial = AdjacentNodeBlockingMaterials[3];
+		const Material *&DownMaterial = AdjacentNodeBlockingMaterials[4];
+		const Material *&DownLeftMaterial = AdjacentNodeBlockingMaterials[5];
+		const Material *&LeftMaterial = AdjacentNodeBlockingMaterials[6];
+		const Material *&LeftUpMaterial = AdjacentNodeBlockingMaterials[7];
 
-		float &UpCost = AdjacentNodeCosts[0];
-		float &UpRightCost = AdjacentNodeCosts[1];
-		float &RightCost = AdjacentNodeCosts[2];
-		float &RightDownCost = AdjacentNodeCosts[3];
-		float &DownCost = AdjacentNodeCosts[4];
-		float &DownLeftCost = AdjacentNodeCosts[5];
-		float &LeftCost = AdjacentNodeCosts[6];
-		float &LeftUpCost = AdjacentNodeCosts[7];
-
-		explicit PathNode(const Vector &pos) : Pos(pos) {
-			for (int i = 0; i < c_MaxAdjacentNodeCount; i++) {
-				AdjacentNodes[i] = nullptr;
-				AdjacentNodeCosts[i] = std::numeric_limits<float>::max(); // Costs are infinite unless recalculated as otherwise.
-			}
-		}
+		/// <summary>
+		/// Constructor method used to instantiate a PathNode object in system memory and make it ready for use.
+		/// </summary>
+		/// <param name="pos">Absolute position of the center of the node in the scene.</param>
+		explicit PathNode(const Vector &pos);
 	};
 
 	/// <summary>
@@ -67,19 +65,17 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a PathFinder object.
 		/// </summary>
-		/// <param name="pScene">The scene to be pathing within.</param>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
-		PathFinder(Scene *scene, int nodeDimension, unsigned int allocate) { Clear(); Create(scene, nodeDimension, allocate); }
+		PathFinder(int nodeDimension, unsigned int allocate) { Clear(); Create(nodeDimension, allocate); }
 
 		/// <summary>
 		/// Makes the PathFinder object ready for use.
 		/// </summary>
-		/// <param name="pScene">The scene to be pathing within.</param>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Scene *scene, int nodeDimension, unsigned int allocate);
+		int Create(int nodeDimension, unsigned int allocate);
 #pragma endregion
 
 #pragma region Destruction
@@ -162,14 +158,12 @@ namespace RTE {
 
 #pragma region Path Cost Updates
 		/// <summary>
-		/// Helper function for calculating the real actual cost of going in a straight line between any two points on the scene.
-		/// It takes into account distance traveled, as well as the strength of the materials the line has to pass through.
-		/// UPDATE: newer version also goes through parallel lines offset to each side from the main one.
+		/// Helper function for getting the strongest material we need to path though between nodes.
 		/// </summary>
 		/// <param name="start">Origin point.</param>
 		/// <param name="end">Destination point.</param>
-		/// <returns>The cost value.</returns>
-		float CostAlongLine(const Vector &start, const Vector &end);
+		/// <returns>The strongest material.</returns>
+		const Material * StrongestMaterialAlongLine(const Vector &start, const Vector &end) const;
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges going out from a specific node.
@@ -186,6 +180,13 @@ namespace RTE {
 		/// <param name="box">The Box of which all edges it touches should be recalculated.</param>
 		/// <returns>Whether any node costs changed.</returns>
 		bool UpdateNodeCostsInBox(Box &box);
+
+		/// <summary>
+		/// Gets the cost for transitioning through this material
+		/// </summary>
+		/// <param name="material">The material to get the transition cost for.</param>
+		/// <returns>The transition cost.</returns>
+		float GetMaterialTransitionCost(const Material *material) const ;
 
 		/// <summary>
 		/// Gets the average cost for all transitions out of this node, ignoring infinities/unpathable transitions

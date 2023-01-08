@@ -208,6 +208,157 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
 	Original bindings with no thickness argument are untouched and can be called as they were.
 
+- Added rotation option to Text primitives.  
+	New bindings with argument for rotation are:  
+	`PrimitiveMan:DrawTextPrimitive(pos, text, bool useSmallFont, alignment, rotAngleInRadians)`  
+	`PrimitiveMan:DrawTextPrimitive(player, pos, text, bool useSmallFont, alignment, rotAngleInRadians)`  
+	Original bindings with no rotation argument are untouched and can be called as they were.
+
+- Added option to draw bitmap from file instead of from `MOSPrite` based object to Bitmap primitives.  
+	New bindings with argument for file path are:  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, filePath, rotAngleInRadians)`  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, filePath, rotAngleInRadians, hFlipped, vFlipped)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, filePath, rotAngleInRadians)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, filePath, rotAngleInRadians, hFlipped, vFlipped)`  
+	Note that the `frame` argument does not exist in these bindings.  
+	Original bindings with no filepath argument are untouched and can be called as they were.
+
+- Added new primitive drawing functions to `PrimitiveMan`:  
+	```lua
+	-- Polygon
+	PrimitiveMan:DrawPolygonPrimitive(Vector startPos, color, { Vector vertexRelPos, ... })
+	PrimitiveMan:DrawPolygonPrimitive(player, Vector startPos, { Vector vertexRelPos, ... })
+
+	PrimitiveMan:DrawPolygonFillPrimitive(Vector startPos, color, { Vector vertexRelPos, ... })
+	PrimitiveMan:DrawPolygonFillPrimitive(player, Vector startPos, { Vector vertexRelPos, ... })
+	```
+	The vertices table contains `Vector`s with the position of each vertex of the polygon **RELATIVE** to the starting position. The starting position will be automatically added to each vertex position, doing so manually will lead to unexpected results.  
+	A minimum of 2 vertices (which would result in a line) are required to draw a polygon primitive. A console error will be printed and drawing will be skipped if less are provided.  
+	There may be a limit for the number of vertices in `PolygonFillPrimitive` because it has different handling but it was not reached during testing.
+
+	The order of vertices is of high importance. Bad ordering will lead to unexpected results.  
+	For example: `{ Vector(10, 0), Vector(10, 10), Vector(0, 10), Vector(0, 0) }` will result in a square, while `{ Vector(10, 0), Vector(0, 10), Vector(10, 10), Vector(0, 0) }` will result in an hourglass shape.  
+	Note that **all** vertices of the shape must be specified, as the last vertex will be connected to the first vertex and not to the starting position (whether it is used as center or as a corner) to complete the shape.  
+	Omitting the last `Vector(0, 0)` in the above example would result in a right angle triangle.
+
+	**The `Vector`s in the vertices table are single use! They will be deleted after being drawn, so they cannot be re-used!**
+
+	Usage example:
+	```lua
+	local myVertices = {
+		Vector(10, 0),
+		Vector(10, 10),
+		Vector(0, 10),
+		Vector(0, 0)
+	};
+	PrimitiveMan:DrawPolygonPrimitive(self.Pos, 13, myVertices);
+
+	-- myVertices no longer contains valid Vectors for this call, they were deleted after being drawn by the previous call.
+	PrimitiveMan:DrawPolygonFillPrimitive(self.Pos, 13, {
+		Vector(10, 0),
+		Vector(10, 10),
+		Vector(0, 10),
+		Vector(0, 0)
+	});
+	```
+
+- Added blended drawing functions to `PrimitiveMan`:  
+	There are 10 blending modes available to produce different color and transparency effects for both true primitives and bitmap based primitives.  
+	Blended drawing effects are not the same as post-processing (glows), as they are all drawn in indexed color mode and will produce widely different results.
+
+	**Note that blended drawing is very expensive and chugs FPS like no tomorrow. It should not be abused!**
+
+	There are 3 blended drawing function overloads:
+
+	* `PrimitiveMan:DrawPrimitives(blendMode, blendAmountR, blendAmountG, blendAmountB, blendAmountA, { primitiveObj, ... })`  
+	This is the fully fledged blended drawing function which allows individual control over each color channel blend amount.  
+	Blend amounts are in percentages, where 0 means no blending and 100 means full blending (e.g. `blendAmountA = 100` will result in a fully transparent primitive, as if it was not drawn at all).  
+	The blend mode and amounts will be applied to all the primitives in the primitive table.  
+	Note that blend amounts are internally rounded to multiples of 5 (e.g. 32 will round to 30, 33 will round to 35) to reduce memory usage and because smaller steps are hardly noticeable.
+	
+	* `PrimitiveMan:DrawPrimitives(blendMode, blendAmountRGBA, { primitiveObj, ... })`  
+	This overload allows selecting a blend mode and applies the blend amount to all color channels at once.  
+	This overload is for convenience when using certain modes (e.g. `Invert` and `Dissolve`). See blend mode specifics further below.
+	
+	* `PrimitiveMan:DrawPrimitives(transBlendAmount, { primitiveObj, ... })`  
+	This overload uses the transparency blending mode and applies the blend amount to all color channels at once.  
+	Transparency blending is likely to be the most commonly used mode so this exists for convenience.
+
+	The blending modes are defined in the new `DrawBlendMode` enum as follows:
+	```
+	(0)  NoBlend
+	(1)  Burn
+	(2)  Color
+	(3)  Difference
+	(4)  Dissolve
+	(5)  Dodge
+	(6)  Invert
+	(7)  Luminance
+	(8)  Multiply
+	(9)  Saturation
+	(10) Screen
+	(11) Transparency
+	(12) BlendModeCount
+	```
+	The blending modes are common and information on what the result of each is can be found with a quick search.
+
+	Some blend mode specifics:
+	* `Invert` and `Dissolve` modes only use alpha channel blend amount. RGB channels blend amounts are ignored in these modes.  
+	* `Transparency` mode ignores alpha channel blend amount. Only RGB channels blend amounts are used in this mode.  
+	* Some trial and error is expected to produce desired results in other modes.
+
+	The primitives table must be filled with `GraphicalPrimitive` objects. For this the constructors for all the supported primitives have been exposed:
+	```lua
+	LinePrimitive(player, startPos, endPos, color)
+	ArcPrimitive(player, centerPos, startAngle, endAngle, radius, thickness, color)
+	SplinePrimitive(player, startPos, guideA, guideB, endPos, color)
+	BoxPrimitive(player, topLeftPos, bottomRightPos, color)
+	BoxFillPrimitive(player, topLeftPos, bottomRightPos, color)
+	RoundedBoxPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)
+	RoundedBoxFillPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)
+	CirclePrimitive(player, centerPos, radius, color)
+	CircleFillPrimitive(player, centerPos, radius, color)
+	EllipsePrimitive(player, centerPos, horizRadius, vertRadius, color)
+	EllipseFillPrimitive(player, centerPos, horizRadius, vertRadius, color)
+	TrianglePrimitive(player, pointA, pointB, pointC, color)
+	TriangleFillPrimitive(player, pointA, pointB, pointC, color)
+	TextPrimitive(player, pos, text, useSmallFont, alignment, rotAngle)
+	BitmapPrimitive(player, centerPos, moSprite, rotAngle, frame, hFlipped, vFlipped)
+	BitmapPrimitive(player, centerPos, filePath, rotAngle, hFlipped, vFlipped)
+	```
+	Note that `PolygonPrimitive`, `IconPrimitive` and `LinePrimitive` with thickness do not support blended drawing.
+
+	**The `GraphicalPrimitive`s in the primitives table are single use! They will be deleted after being drawn, so they cannot be re-used!**
+
+	Usage example:
+	```lua
+	local myPrimitives = {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, 0), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, 0), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	};
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.Screen, 50, 0, 50, 0, myPrimitives);
+
+	-- myPrimitives no longer contains valid primitives for this call, they were deleted after being drawn by the previous call.
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.Dissolve, 50, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -100), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -100), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+
+	PrimitiveMan:DrawPrimitives(50, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -200), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -200), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+
+	-- NoBlend will draw the primitives without any blending mode (solid mode). Any color channel blend amounts are ignored.
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.NoBlend, 0, 0, 0, 0, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -300), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -300), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+	-- It is equivalent to calling the individual draw functions like so:
+	-- PrimitiveMan:DrawCircleFillPrimitive(-1, self.Pos + Vector(-100, -200), 20, 13);
+	-- PrimitiveMan:DrawBitmapPrimitive(-1, self.Pos + Vector(100, -200), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false);
+	```
+
 - New `Vector` Lua (R/O) property `SqrMagnitude` which returns the squared magnitude of the `Vector`.  
 	Should be used for more efficient comparison with `vector.SqrMagnitude > (floatValue * floatValue)` over `vector.Magnitude > floatValue`.
 
@@ -308,7 +459,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
 
-- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
+- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.  
+
+- Added a new Lua scripted function for `Actor`s: `OnControllerInputModeChange(self, previousControllerMode, previousControllingPlayer)` that triggers when an `Actor`'s `Controller`'s input state changes (between AI/Player/Network control etc). This provides a script hook that fires when a player starts/stops controlling an `Actor`.
 
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
@@ -318,6 +471,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added alternative `AHuman` Lua function `EquipNamedDevice(moduleName, presetName, doEquip)`, that lets you specify the module and preset name of the `HeldDevice` to equip, instead of just the preset name.
 
 - Added Lua access (R/W) to `Attachable` property `DeleteWhenRemovedFromParent`, which determines whether the given `Attachable` should delete itself when it's removed from its current parent.
+
+- Added Lua convenience function `RoundToNearestMultiple(num, multiple)` which returns a number rounded to the nearest specified multiple.  
+	Note that this operates on integers, so fractional parts will be truncated towards zero by type conversion.
 
 </details>
 
@@ -457,6 +613,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
 
 - The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
+
+- `BitmapPrimitive` drawing functions now accept `MOSprite` instead of `Entity` for the object they get the bitmap to draw from.  
+	This changes nothing regarding the bindings, but will now print an error to the console when attempting to draw a non-`MOSprite` based object (e.g. `MOPixel`), instead of silently skipping it.
 
 </details>
 

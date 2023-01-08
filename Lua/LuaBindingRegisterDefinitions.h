@@ -169,6 +169,29 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(JoyButtons);
 		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
 		LuaBindingRegisterFunctionDeclarationForType(Directions);
+		LuaBindingRegisterFunctionDeclarationForType(DrawBlendMode);
+	};
+
+	/// <summary>
+	/// Struct that contains Lua binding registration functions for GraphicalPrimitive classes.
+	/// </summary>
+	struct PrimitiveLuaBindings {
+		LuaBindingRegisterFunctionDeclarationForType(GraphicalPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(LinePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(ArcPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(SplinePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BoxPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BoxFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(RoundedBoxPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(RoundedBoxFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(CirclePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(CircleFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(EllipsePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(EllipseFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TrianglePrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TriangleFillPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(TextPrimitive);
+		LuaBindingRegisterFunctionDeclarationForType(BitmapPrimitive);
 	};
 }
 #endif

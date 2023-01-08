@@ -24,7 +24,22 @@
 
 namespace RTE {
 
-	bool FrameMan::m_DisableFrameBufferFlip = false;
+	bool FrameMan::s_DisableFrameBufferFlip = false;
+
+	const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> FrameMan::c_BlenderSetterFunctions = {
+		nullptr, // NoBlend obviously has no blender, but we want to keep the indices matching with the enum.
+		&set_burn_blender,
+		&set_color_blender,
+		&set_difference_blender,
+		&set_dissolve_blender,
+		&set_dodge_blender,
+		&set_invert_blender,
+		&set_luminance_blender,
+		&set_multiply_blender,
+		&set_saturation_blender,
+		&set_screen_blender,
+		nullptr // Transparency does not rely on the blender setting, it creates a map with the dedicated function instead of with the generic one.
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +47,7 @@ namespace RTE {
 		g_UInputMan.DisableMouseMoving(true);
 
 #ifdef _WIN32
-		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = true; }
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { s_DisableFrameBufferFlip = true; }
 #endif
 
 #ifdef __unix__
@@ -47,7 +62,7 @@ namespace RTE {
 		g_UInputMan.DisableMouseMoving(false);
 
 #ifdef _WIN32
-		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { m_DisableFrameBufferFlip = false; }
+		if (get_display_switch_mode() == SWITCH_BACKAMNESIA) { s_DisableFrameBufferFlip = false; }
 #endif
 	}
 
@@ -93,6 +108,7 @@ namespace RTE {
 		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
+		m_ColorTablePruneTimer.Reset();
 		m_GUIScreen = nullptr;
 		m_LargeFont = nullptr;
 		m_SmallFont = nullptr;
@@ -305,15 +321,11 @@ namespace RTE {
 
 		LoadPalette(m_PaletteFile.GetDataPath());
 
-		// Create transparency color table
-		PALETTE ccPalette;
-		get_palette(ccPalette);
-		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, nullptr);
-		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, nullptr);
-		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, nullptr);
-		// Set the one Allegro currently uses
-		color_map = &m_HalfTransTable;
+		// Store the default palette for re-use when creating new color tables for different blend modes because the palette can be changed via scripts, and handling per-palette per-mode color tables is too much headache.
+		get_palette(m_DefaultPalette);
 
+		CreatePresetColorTables();
+		SetTransTableFromPreset(TransparencyPreset::HalfTrans);
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
@@ -370,6 +382,26 @@ namespace RTE {
 		m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h);
 
 		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::CreatePresetColorTables() {
+		// Create RGB lookup table that supposedly speeds up calculation of other color tables.
+		create_rgb_table(&m_RGBTable, m_DefaultPalette, nullptr);
+		rgb_map = &m_RGBTable;
+
+		// Create transparency color tables. Tables for other blend modes will be created on demand.
+		int transparencyPresetCount = BlendAmountLimits::MaxBlend / c_BlendAmountStep;
+		for (int index = 0; index <= transparencyPresetCount; ++index) {
+			int presetBlendAmount = index * c_BlendAmountStep;
+			std::array<int, 4> colorChannelBlendAmounts = { presetBlendAmount, presetBlendAmount, presetBlendAmount, BlendAmountLimits::MinBlend };
+			int adjustedBlendAmount = 255 - (static_cast<int>(255.0F * (1.0F / static_cast<float>(transparencyPresetCount) * static_cast<float>(index))));
+
+			m_ColorTables.at(DrawBlendMode::BlendTransparency).try_emplace(colorChannelBlendAmounts);
+			create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first, m_DefaultPalette, adjustedBlendAmount, adjustedBlendAmount, adjustedBlendAmount, nullptr);
+			m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).second = -1;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -445,6 +477,26 @@ namespace RTE {
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
+
+		// Prune unused color tables every 5 real minutes to prevent ridiculous memory usage over time.
+		if (m_ColorTablePruneTimer.IsPastRealMS(300000)) {
+			long long currentTime = g_TimerMan.GetAbsoluteTime() / 10000;
+			for (std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>> &colorTableMap : m_ColorTables) {
+				if (colorTableMap.size() >= 100) {
+					std::vector<std::array<int, 4>> markedForDelete;
+					markedForDelete.reserve(colorTableMap.size());
+					for (const auto &[tableKey, tableData] : colorTableMap) {
+						long long lastAccessTime = tableData.second;
+						// Mark tables that haven't been accessed in the last minute for deletion. Avoid marking the transparency table presets, those will have lastAccessTime set to -1.
+						if (lastAccessTime != -1 && (currentTime - lastAccessTime > 60)) { markedForDelete.emplace_back(tableKey); }
+					}
+					for (const std::array<int, 4> &keyToDelete : markedForDelete) {
+						colorTableMap.erase(keyToDelete);
+					}
+				}
+			}
+			m_ColorTablePruneTimer.Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -622,7 +674,7 @@ namespace RTE {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				int height = GetResY();
 				for (int i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) { 
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) {
 						height = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
 					}
 				}
@@ -675,7 +727,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() const {
-		if (m_DisableFrameBufferFlip) {
+		if (s_DisableFrameBufferFlip) {
 			return;
 		}
 
@@ -688,19 +740,64 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetTransTable(TransparencyPreset transSetting) {
-		switch (transSetting) {
-			case LessTrans:
-				color_map = &m_LessTransTable;
+	void FrameMan::SetColorTable(DrawBlendMode blendMode, std::array<int, 4> colorChannelBlendAmounts) {
+		RTEAssert(blendMode > DrawBlendMode::NoBlend && blendMode < DrawBlendMode::BlendModeCount, "Invalid DrawBlendMode or DrawBlendMode::NoBlend passed into FrameMan::SetColorTable. See DrawBlendMode enumeration for defined values.");
+
+		for (int &colorChannelBlendAmount : colorChannelBlendAmounts) {
+			colorChannelBlendAmount = RoundToNearestMultiple(std::clamp(colorChannelBlendAmount, static_cast<int>(BlendAmountLimits::MinBlend), static_cast<int>(BlendAmountLimits::MaxBlend)), c_BlendAmountStep);
+		}
+
+		bool usedPresetTransparencyTable = false;
+
+		switch (blendMode) {
+			case DrawBlendMode::NoBlend:
+				RTEAbort("Somehow ended up attempting to set a color table for DrawBlendMode::NoBlend in FrameMan::SetColorTable! This should never happen!");
+				return;
+			case DrawBlendMode::BlendInvert:
+			case DrawBlendMode::BlendDissolve:
+				// Invert and Dissolve do nothing with the RGB channels values, so set all channels to Alpha channel value to avoid creating pointless variants.
+				colorChannelBlendAmounts.fill(colorChannelBlendAmounts[3]);
 				break;
-			case MoreTrans:
-				color_map = &m_MoreTransTable;
-				break;
-			case HalfTrans:
-				color_map = &m_HalfTransTable;
+			case DrawBlendMode::BlendTransparency:
+				// Indexed transparency has dedicated maps that don't use alpha, so min it to attempt to load one of the presets, and in case there isn't one avoid creating a variant for each alpha value.
+				colorChannelBlendAmounts[3] = BlendAmountLimits::MinBlend;
+				usedPresetTransparencyTable = (colorChannelBlendAmounts[0] == colorChannelBlendAmounts[1]) && (colorChannelBlendAmounts[0] == colorChannelBlendAmounts[2]);
 				break;
 			default:
-				RTEAbort("Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+				break;
+		}
+
+		// New color tables will be created using the default palette loaded at FrameMan initialization because handling per-palette per-mode color tables is too much headache, even if it may possibly produce better blending results.
+		if (m_ColorTables[blendMode].find(colorChannelBlendAmounts) == m_ColorTables[blendMode].end()) {
+			m_ColorTables[blendMode].try_emplace(colorChannelBlendAmounts);
+
+			std::array<int, 4> adjustedColorChannelBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend };
+			for (int index = 0; index < adjustedColorChannelBlendAmounts.size(); ++index) {
+				adjustedColorChannelBlendAmounts[index] = 255 - (static_cast<int>(255.0F * 0.01F * static_cast<float>(colorChannelBlendAmounts[index])));
+			}
+
+			if (blendMode == DrawBlendMode::BlendTransparency) {
+				// Paletted transparency has dedicated tables so better create one instead of generic for best result. Alpha is ignored here.
+				create_trans_table(&m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first, m_DefaultPalette, adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], nullptr);
+			} else {
+				c_BlenderSetterFunctions[blendMode](adjustedColorChannelBlendAmounts[0], adjustedColorChannelBlendAmounts[1], adjustedColorChannelBlendAmounts[2], adjustedColorChannelBlendAmounts[3]);
+				create_blender_table(&m_ColorTables[blendMode].at(colorChannelBlendAmounts).first, m_DefaultPalette, nullptr);
+				// Reset the blender to avoid potentially screwing some true-color draw operation. Hopefully.
+				c_BlenderSetterFunctions[blendMode](255, 255, 255, 255);
+			}
+		}
+		color_map = &m_ColorTables[blendMode].at(colorChannelBlendAmounts).first;
+		m_ColorTables[blendMode].at(colorChannelBlendAmounts).second = usedPresetTransparencyTable ? -1 : (g_TimerMan.GetAbsoluteTime() / 10000);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::SetTransTableFromPreset(TransparencyPreset transPreset) {
+		RTEAssert(transPreset == TransparencyPreset::LessTrans || transPreset == TransparencyPreset::HalfTrans || transPreset == TransparencyPreset::MoreTrans, "Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
+		std::array<int, 4> colorChannelBlendAmounts = { transPreset, transPreset, transPreset, BlendAmountLimits::MinBlend };
+		if (m_ColorTables[DrawBlendMode::BlendTransparency].find(colorChannelBlendAmounts) != m_ColorTables[DrawBlendMode::BlendTransparency].end()) {
+			color_map = &m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).first;
+			m_ColorTables[DrawBlendMode::BlendTransparency].at(colorChannelBlendAmounts).second = -1;
 		}
 	}
 
@@ -1078,7 +1175,7 @@ namespace RTE {
 			set_clip_state(drawScreen, 1);
 
 			DrawScreenText(playerScreen, playerGUIBitmap);
-			
+
 			// The position of the current draw screen on the backbuffer
 			Vector screenOffset;
 
@@ -1086,11 +1183,11 @@ namespace RTE {
 			if (screenCount > 1) { UpdateScreenOffsetForSplitScreen(playerScreen, screenOffset); }
 
 			DrawScreenFlash(playerScreen, drawScreenGUI);
-			
-			if (!IsInMultiplayerMode()) { 
+
+			if (!IsInMultiplayerMode()) {
 				// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
 				blit(drawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), drawScreen->w, drawScreen->h);
-		
+
 				g_PostProcessMan.AdjustEffectsPosToPlayerScreen(playerScreen, drawScreen, screenOffset, screenRelativeEffects, screenRelativeGlowBoxes);
 			}
 		}

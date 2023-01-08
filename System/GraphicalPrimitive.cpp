@@ -8,6 +8,25 @@
 
 namespace RTE {
 
+	const GraphicalPrimitive::PrimitiveType GraphicalPrimitive::c_PrimitiveType = PrimitiveType::None;
+	const GraphicalPrimitive::PrimitiveType LinePrimitive::c_PrimitiveType = PrimitiveType::Line;
+	const GraphicalPrimitive::PrimitiveType ArcPrimitive::c_PrimitiveType = PrimitiveType::Arc;
+	const GraphicalPrimitive::PrimitiveType SplinePrimitive::c_PrimitiveType = PrimitiveType::Spline;
+	const GraphicalPrimitive::PrimitiveType BoxPrimitive::c_PrimitiveType = PrimitiveType::Box;
+	const GraphicalPrimitive::PrimitiveType BoxFillPrimitive::c_PrimitiveType = PrimitiveType::BoxFill;
+	const GraphicalPrimitive::PrimitiveType RoundedBoxPrimitive::c_PrimitiveType = PrimitiveType::RoundedBox;
+	const GraphicalPrimitive::PrimitiveType RoundedBoxFillPrimitive::c_PrimitiveType = PrimitiveType::RoundedBoxFill;
+	const GraphicalPrimitive::PrimitiveType CirclePrimitive::c_PrimitiveType = PrimitiveType::Circle;
+	const GraphicalPrimitive::PrimitiveType CircleFillPrimitive::c_PrimitiveType = PrimitiveType::CircleFill;
+	const GraphicalPrimitive::PrimitiveType EllipsePrimitive::c_PrimitiveType = PrimitiveType::Ellipse;
+	const GraphicalPrimitive::PrimitiveType EllipseFillPrimitive::c_PrimitiveType = PrimitiveType::EllipseFill;
+	const GraphicalPrimitive::PrimitiveType TrianglePrimitive::c_PrimitiveType = PrimitiveType::Triangle;
+	const GraphicalPrimitive::PrimitiveType TriangleFillPrimitive::c_PrimitiveType = PrimitiveType::TriangleFill;
+	const GraphicalPrimitive::PrimitiveType PolygonPrimitive::c_PrimitiveType = PrimitiveType::Polygon;
+	const GraphicalPrimitive::PrimitiveType PolygonFillPrimitive::c_PrimitiveType = PrimitiveType::PolygonFill;
+	const GraphicalPrimitive::PrimitiveType TextPrimitive::c_PrimitiveType = PrimitiveType::Text;
+	const GraphicalPrimitive::PrimitiveType BitmapPrimitive::c_PrimitiveType = PrimitiveType::Bitmap;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void GraphicalPrimitive::TranslateCoordinates(Vector targetPos, const Vector &scenePos, Vector &drawLeftPos, Vector &drawRightPos) const {
@@ -373,15 +392,93 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TextPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+	void PolygonPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart;
+			Vector drawEnd;
+			for (int i = 0; i < m_Vertices.size(); ++i) {
+				drawStart = m_StartPos - targetPos + (*m_Vertices[i]);
+				drawEnd = m_StartPos - targetPos + ((i + 1 < m_Vertices.size()) ? *m_Vertices[i + 1] : *m_Vertices[0]);
+				line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
+			}
+		} else {
+			Vector drawStartLeft;
+			Vector drawStartRight;
+			Vector drawEndLeft;
+			Vector drawEndRight;
+			for (int i = 0; i < m_Vertices.size(); ++i) {
+				TranslateCoordinates(targetPos, m_StartPos + (*m_Vertices[i]), drawStartLeft, drawStartRight);
+				TranslateCoordinates(targetPos, m_StartPos + ((i + 1 < m_Vertices.size()) ? *m_Vertices[i + 1] : *m_Vertices[0]), drawEndLeft, drawEndRight);
+
+				line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
+				line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PolygonFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		size_t drawPointsSize = m_Vertices.size() * 2;
+
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			AllegroBitmap playerGUIBitmap(drawScreen);
 
-			if (m_IsSmall) {
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+			std::vector<int> drawPoints = {};
+			drawPoints.reserve(drawPointsSize);
+
+			for (const Vector *vertice : m_Vertices) {
+				drawPoints.insert(drawPoints.end(), { drawStart.GetFloorIntX() + vertice->GetFloorIntX(), drawStart.GetFloorIntY() + vertice->GetFloorIntY() });
+			}
+			polygon(drawScreen, m_Vertices.size(), drawPoints.data(), m_Color);
+		} else {
+			std::vector<int> drawPointsLeft = {};
+			drawPointsLeft.reserve(drawPointsSize);
+
+			std::vector<int> drawPointsRight = {};
+			drawPointsRight.reserve(drawPointsSize);
+
+			Vector drawPointLeft;
+			Vector drawPointRight;
+			for (const Vector *vertice : m_Vertices) {
+				TranslateCoordinates(targetPos, m_StartPos + (*vertice), drawPointLeft, drawPointRight);
+
+				drawPointsLeft.insert(drawPointsLeft.end(), { drawPointLeft.GetFloorIntX(), drawPointLeft.GetFloorIntY() });
+				drawPointsRight.insert(drawPointsRight.end(), { drawPointRight.GetFloorIntX(), drawPointRight.GetFloorIntY() });
+			}
+			polygon(drawScreen, m_Vertices.size(), drawPointsLeft.data(), m_Color);
+			polygon(drawScreen, m_Vertices.size(), drawPointsRight.data(), m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TextPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		if (m_Text.empty()) {
+			return;
+		}
+
+		AllegroBitmap playerGUIBitmap(drawScreen);
+		GUIFont *font = m_IsSmall ? g_FrameMan.GetSmallFont() : g_FrameMan.GetLargeFont();
+		Matrix rotation = Matrix(m_RotAngle);
+
+		BITMAP *tempDrawBitmap = nullptr;
+		if (m_BlendMode > DrawBlendMode::NoBlend || m_RotAngle != 0) {
+			tempDrawBitmap = create_bitmap_ex(8, font->CalculateWidth(m_Text), font->CalculateHeight(m_Text));
+			clear_to_color(tempDrawBitmap, ColorKeys::g_MaskColor);
+			AllegroBitmap tempDrawAllegroBitmap(tempDrawBitmap);
+			font->DrawAligned(&tempDrawAllegroBitmap, 0, 0, m_Text, m_Alignment);
+		}
+
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+
+			if (m_BlendMode > DrawBlendMode::NoBlend && m_RotAngle != 0) {
+				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+			} else if (m_RotAngle != 0) {
+				rotate_sprite(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
 			} else {
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
 			}
 		} else {
 			Vector drawStartLeft;
@@ -389,15 +486,18 @@ namespace RTE {
 
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
-			AllegroBitmap playerGUIBitmap(drawScreen);
-			if (m_IsSmall) {
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
-				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+			if (m_BlendMode > DrawBlendMode::NoBlend && m_RotAngle != 0) {
+				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+			} else if (m_RotAngle != 0) {
+				rotate_sprite(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				rotate_sprite(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
 			} else {
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
-				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
+				font->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
 			}
 		}
+		if (tempDrawBitmap) { destroy_bitmap(tempDrawBitmap); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,12 +508,12 @@ namespace RTE {
 		}
 
 		BITMAP *bitmapToDraw = create_bitmap_ex(8, m_Bitmap->w, m_Bitmap->h);
-		clear_to_color(bitmapToDraw, 0);
+		clear_to_color(bitmapToDraw, ColorKeys::g_MaskColor);
 		draw_sprite(bitmapToDraw, m_Bitmap, 0, 0);
 
 		if (m_HFlipped || m_VFlipped) {
 			BITMAP *flipBitmap = create_bitmap_ex(8, bitmapToDraw->w, bitmapToDraw->h);
-			clear_to_color(flipBitmap, 0);
+			clear_to_color(flipBitmap, ColorKeys::g_MaskColor);
 
 			if (m_HFlipped && !m_VFlipped) {
 				draw_sprite_h_flip(flipBitmap, bitmapToDraw, 0, 0);
@@ -431,7 +531,11 @@ namespace RTE {
 
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			} else {
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			}
 		} else {
 			Vector drawStartLeft;
 			Vector drawStartRight;
@@ -439,10 +543,14 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
 			// Take into account the h-flipped pivot point
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
-			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+				pivot_scaled_sprite_trans(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			} else {
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+				pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			}
 		}
-
 		destroy_bitmap(bitmapToDraw);
 	}
 }

@@ -616,8 +616,15 @@ void Actor::SetTeam(int team)
 
 void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 {
+
+	Controller::InputMode previousControllerMode = m_Controller.GetInputMode();
+	int previousControllingPlayer = m_Controller.GetPlayer();
+
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
+
+	RunScriptedFunctionInAppropriateScripts("OnControllerInputModeChange", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
+
 
     // So the AI doesn't jerk around
     m_StuckTimer.Reset();
@@ -635,13 +642,7 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, int newPlayer)
 {
     Controller::InputMode returnMode = m_Controller.GetInputMode();
-    m_Controller.SetInputMode(newMode);
-    m_Controller.SetPlayer(newPlayer);
-
-    // So the AI doesn't jerk around
-    m_StuckTimer.Reset();
-
-    m_NewControlTmr.Reset();
+	SetControllerMode(newMode, newPlayer);
     return returnMode;
 }
 

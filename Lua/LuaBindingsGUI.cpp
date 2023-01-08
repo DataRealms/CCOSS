@@ -1,3 +1,5 @@
+// Make sure that binding definition files are always set to NOT use pre-compiled headers and conformance mode (/permissive) otherwise everything will be on fire!
+
 #include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {

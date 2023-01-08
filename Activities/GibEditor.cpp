@@ -685,7 +685,7 @@ void GibEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         // Draw ghost outline of edited object to place gibs upon
         if (m_pEditedObject)
         {
-            g_FrameMan.SetTransTable(MoreTrans);
+            g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
             // Draw only the MOSRotating since that's all we are adding gibs for; any attachables have to be edited separately
             m_pEditedObject->MOSRotating::Draw(pTargetBitmap, targetPos, g_DrawTrans, true);
         }

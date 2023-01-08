@@ -27,10 +27,21 @@
 #include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
+//#include "Entity.h"
+#include "FrameMan.h"
+#include "SceneMan.h"
+//#include "LuaMan.h"
 
 #include <execution>
 
 namespace RTE {
+
+AlarmEvent::AlarmEvent(const Vector &pos, int team, float range)
+{
+    m_ScenePos = pos;
+    m_Team = (Activity::Teams)team;
+    m_Range = range * g_FrameMan.GetPlayerScreenWidth() * 0.51F;
+}
 
 const std::string MovableMan::c_ClassName = "MovableMan";
 
@@ -244,20 +255,14 @@ void MovableMan::UnregisterObject(MovableObject * mo)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const {
-    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
-    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly));
-    return vectorForLua;
+const std::vector<MovableObject *> &MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const
+{
+    return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); 
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const {
-    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
-    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, getsHitByMOsOnly));
-    return vectorForLua;
+const std::vector<MovableObject *> &MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const
+{
+    return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1675,10 +1680,12 @@ void MovableMan::Update()
         // Actors
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
             std::for_each(std::execution::par, m_Actors.begin(), m_Actors.end(), 
                 [](Actor *actor) {
                     actor->GetController()->Update();
-                }); 
+                });
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
             for (Actor *actor : m_Actors) {
                 actor->Update();

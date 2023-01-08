@@ -1,5 +1,7 @@
 #include "PrimitiveMan.h"
-#include "ConsoleMan.h"
+
+#include "SceneMan.h"
+#include "Entity.h"
 #include "MOSprite.h"
 
 namespace RTE {

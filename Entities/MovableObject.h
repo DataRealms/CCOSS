@@ -21,7 +21,6 @@
 #include "LuabindObjectWrapper.h"
 #include "Material.h"
 #include "MovableMan.h"
-#include "FrameMan.h"
 
 struct BITMAP;
 
@@ -45,6 +44,7 @@ struct HitData;
 class MOSRotating;
 class PieMenu;
 class SLTerrain;
+class LuaStateWrapper;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -1071,8 +1071,7 @@ enum MOType
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-    void AddAbsForce(const Vector &force, const Vector &absPos)
-        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP)); }
+    void AddAbsForce(const Vector &force, const Vector &absPos);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,14 +1107,7 @@ enum MOType
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
-
-#ifndef RELEASE_BUILD
-		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-#endif
-
-		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
-	}
+	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1730,7 +1722,7 @@ enum MOType
 // Return value:    The ID of the non-ignored MO, if any, that this object's Atom or AtomGroup is now
 //                  intersecting because of the last Travel taken.
 
-	MOID HitWhatMOID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_MOIDHit; else return g_NoMOID; }
+	MOID HitWhatMOID() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1743,7 +1735,7 @@ enum MOType
 //                  intersecting because of the last Travel taken.
 // Return value:    None.
 
-	void SetHitWhatMOID(MOID id) { m_MOIDHit = id;  m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatMOID(MOID id);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1753,7 +1745,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    Unique ID of the particle hit at the previously taken Travel
 
-	long int HitWhatParticleUniqueID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_ParticleUniqueIDHit; else return 0; }
+	long int HitWhatParticleUniqueID() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1763,7 +1755,7 @@ enum MOType
 // Arguments:       Unique ID of the particle hit at the previously taken Travel.
 // Return value:    None.
 
-	void SetHitWhatParticleUniqueID(long int id) { m_ParticleUniqueIDHit = id; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatParticleUniqueID(long int id);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1774,7 +1766,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    The ID of the material, if any, that this MO hit during the last Travel.
 
-	unsigned char HitWhatTerrMaterial() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_TerrainMatHit; else return g_MaterialAir; }
+	unsigned char HitWhatTerrMaterial() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1955,6 +1947,7 @@ protected:
 
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
+    LuaStateWrapper *m_OwningState; //!< The lua state that owns us.
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.

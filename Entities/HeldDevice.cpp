@@ -25,6 +25,7 @@
 #include "AllegroBitmap.h"
 
 #include "SettingsMan.h"
+#include "FrameMan.h"
 
 namespace RTE {
 

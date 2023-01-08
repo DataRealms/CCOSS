@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "ACraft.h"
+
 #include "AtomGroup.h"
 #include "Leg.h"
 #include "Controller.h"
@@ -22,6 +23,7 @@
 #include "SceneMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "FrameMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"

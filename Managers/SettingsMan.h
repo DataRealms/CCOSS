@@ -58,6 +58,12 @@ namespace RTE {
 
 #pragma region Engine Settings
 		/// <summary>
+		/// Returns whether LuaJit is disabled or not.
+		/// </summary>
+		/// <returns>Whether LuaJIT is disabled or not.</returns>
+		bool DisableLuaJIT() const { return m_DisableLuaJIT; }
+
+		/// <summary>
 		/// Returns the recommended MOID count. If this amount is exceeded then some units may be removed at the start of the activity.
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
@@ -529,6 +535,7 @@ namespace RTE {
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
+		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()' seems to have no visible effect.
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
 		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.

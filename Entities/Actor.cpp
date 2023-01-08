@@ -12,9 +12,11 @@
 // Inclusions of header files
 
 #include "Actor.h"
+
 #include "UInputMan.h"
 #include "ActivityMan.h"
 #include "CameraMan.h"
+#include "Singleton.h"
 #include "GameActivity.h"
 #include "ACrab.h"
 #include "ACraft.h"
@@ -29,6 +31,7 @@
 #include "MOPixel.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "FrameMan.h"
 #include "PerformanceMan.h"
 
 #include "GUI.h"
@@ -1310,9 +1313,7 @@ bool Actor::UpdateAIScripted() {
 		status = InitializeObjectScripts();
 	}
 	if (status >= 0) {
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 		status = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true);
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 	}
 
     return status >= 0;

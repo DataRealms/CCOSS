@@ -10,53 +10,39 @@ class lua_State;
 
 namespace RTE {
 
-	struct LuaStateWrapper {
-		LuaStateWrapper();
-		~LuaStateWrapper();
-		lua_State *m_State;
-		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
-		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
-		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
-	};
-
 	class LuabindObjectWrapper;
 
-	/// <summary>
-	/// The singleton manager of the master Lua script state.
-	/// </summary>
-	class LuaMan : public Singleton<LuaMan> {
-		friend class SettingsMan;
-		friend class LuaStateWrapper;
-
+	class LuaStateWrapper {
 	public:
-
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a LuaMan object in system memory. Initialize() should be called before using the object.
+		/// Constructor method used to instantiate a LuaStateWrapper object in system memory. Initialize() should be called before using the object.
 		/// </summary>
-		LuaMan() { Clear(); }
+		LuaStateWrapper() { Clear(); }
 
 		/// <summary>
-		/// Makes the LuaMan object ready for use.
+		/// Makes the LuaStateWrapper object ready for use.
 		/// </summary>
 		void Initialize();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a LuaMan object before deletion from system memory.
+		/// Destructor method used to clean up a LuaStateWrapper object before deletion from system memory.
 		/// </summary>
-		~LuaMan() { Destroy(); }
+		~LuaStateWrapper() { Destroy(); }
 
 		/// <summary>
-		/// Destroys and resets (through Clear()) the LuaMan object.
+		/// Destroys and resets (through Clear()) the LuaStateWrapper object.
 		/// </summary>
 		void Destroy();
+#pragma endregion
 
+#pragma region Thread-Safety
 		/// <summary>
-		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
+		/// Get the mutex for this Lua State
 		/// </summary>
-		void ClearUserModuleCache();
+		std::recursive_mutex & GetMutex();
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -71,6 +57,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="entity">The temporary entity. Ownership is NOT transferred!</param>
 		void SetTempEntity(Entity *entity);
+
+		/// <summary>
+		/// Gets the temporary vector of Entities that can be accessed in the Lua state.
+		/// </summary>
+		/// <returns>The temporary vector of entities. Ownership is NOT transferred!</returns>
+		const std::vector<Entity *> & GetTempEntityVector() const;
 
 		/// <summary>
 		/// Sets a temporary vector of Entities that can be accessed in the Lua state. These Entities are const_cast so they're non-const, for ease-of-use in Lua.
@@ -99,7 +91,7 @@ namespace RTE {
 		int RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck = std::vector<std::string_view>(), const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 		/// <summary>
-		/// Takes a string containing a script snippet and runs it on the master state.
+		/// Takes a string containing a script snippet and runs it on the state.
 		/// </summary>
 		/// <param name="scriptString">The string with the script snippet.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
@@ -119,7 +111,7 @@ namespace RTE {
 		int RunScriptFunctionObject(const LuabindObjectWrapper *functionObjectWrapper, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 		/// <summary>
-		/// Opens and loads a file containing a script and runs it on the master state.
+		/// Opens and loads a file containing a script and runs it on the state.
 		/// </summary>
 		/// <param name="filePath">The path to the file to load and run.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
@@ -127,13 +119,20 @@ namespace RTE {
 		int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
 
 		/// <summary>
-		/// Opens and loads a file containing a script and runs it on the master state, then retrieves all of the specified functions that exist into the output map.
+		/// Opens and loads a file containing a script and runs it on the state, then retrieves all of the specified functions that exist into the output map.
 		/// </summary>
 		/// <param name="filePath">The path to the file to load and run.</param>
 		/// <param name="functionNamesToLookFor">The vector of strings defining the function names to be retrieved.</param>
 		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// Updates this Lua state.
+		/// </summary>
+		void Update();
 #pragma endregion
 
 #pragma region
@@ -166,6 +165,11 @@ namespace RTE {
 		/// <param name="indexName">The name of the index to check inside that table.</param>
 		/// <returns>Whether that table var has been defined yet in the Lua state.</returns>
 		bool TableEntryIsDefined(const std::string &tableName, const std::string &indexName);
+
+		/// <summary>
+		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
+		/// </summary>
+		void ClearUserModuleCache();
 #pragma endregion
 
 #pragma region Error Handling
@@ -185,6 +189,74 @@ namespace RTE {
 		/// Clears the last error message, so the Lua state will not be considered to have any errors until the next time there's a script error.
 		/// </summary>
 		void ClearErrors();
+#pragma endregion
+
+	private:
+		/// <summary>
+		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
+		/// </summary>
+		/// <returns>A string that describes the current state of the Lua stack.</returns>
+		std::string DescribeLuaStack();
+
+		/// <summary>
+		/// Clears all the member variables of this LuaStateWrapper, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		lua_State *m_State;
+		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
+		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
+		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
+		std::recursive_mutex m_Mutex; //!< Mutex to enxure that updates to this lua state are done safely.
+	};
+
+	static constexpr int c_NumThreadedLuaStates = 16;
+	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
+
+	/// <summary>
+	/// The singleton manager of the master Lua script state.
+	/// </summary>
+	class LuaMan : public Singleton<LuaMan> {
+		friend class SettingsMan;
+		friend class LuaStateWrapper;
+
+	public:
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a LuaMan object in system memory. Initialize() should be called before using the object.
+		/// </summary>
+		LuaMan() { Clear(); }
+
+		/// <summary>
+		/// Makes the LuaMan object ready for use.
+		/// </summary>
+		void Initialize();
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a LuaMan object before deletion from system memory.
+		/// </summary>
+		~LuaMan() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the LuaMan object.
+		/// </summary>
+		void Destroy();
+#pragma endregion
+
+#pragma region Lua State Handling
+		LuaStateWrapper & GetMasterScriptState();
+
+		LuaStateWrapper & GetRandomThreadedScriptState();
+
+		LuaStatesArray & GetThreadedScriptStates();
+
+		/// <summary>
+		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
+		/// </summary>
+		void ClearUserModuleCache();
 #pragma endregion
 
 #pragma region File I/O Handling
@@ -250,7 +322,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this LuaMan.
 		/// </summary>
-		void Update() const;
+		void Update();
 #pragma endregion
 
 	private:
@@ -258,17 +330,10 @@ namespace RTE {
 		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
 		static const std::unordered_set<std::string> c_FileAccessModes; //!< Valid file access modes when opening files with FileOpen.
 
-		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()' seems to have no visible effect.
-
 		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
-		std::vector<std::string> m_FileOrDirectoryPaths; //!< Vector of file or directory paths, that gets filled by the DirectorList and FileList methods for use in Lua.
-
-		/// <summary>
-		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
-		/// </summary>
-		/// <returns>A string that describes the current state of the Lua stack.</returns>
-		std::string DescribeLuaStack();
+		LuaStateWrapper m_MasterScriptState;
+		LuaStatesArray m_ScriptStates;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

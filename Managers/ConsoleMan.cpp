@@ -360,11 +360,11 @@ namespace RTE {
 
 			if (!feedEmptyString) {
 				if (!line.empty() && line != "\r") {
-					g_LuaMan.ClearErrors();
+					g_LuaMan.GetMasterScriptState().ClearErrors();
 					m_OutputLog.emplace_back("\n" + line);
-					g_LuaMan.RunScriptString(line, false);
+					g_LuaMan.GetMasterScriptState().RunScriptString(line, false);
 
-					if (g_LuaMan.ErrorExists()) { m_OutputLog.emplace_back("\nERROR: " + g_LuaMan.GetLastError()); }
+					if (g_LuaMan.GetMasterScriptState().ErrorExists()) { m_OutputLog.emplace_back("\nERROR: " + g_LuaMan.GetMasterScriptState().GetLastError()); }
 					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
 
 					m_InputLogPosition = m_InputLog.begin();

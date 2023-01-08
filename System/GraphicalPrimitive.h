@@ -22,10 +22,10 @@ namespace RTE {
 			void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 
 		/// <summary>
-		///
+		/// Enumeration of the different primitive types derived from GraphicalPrimitive.
 		/// </summary>
 		enum class PrimitiveType {
-			None,
+			None, // Not derived (base GraphicalPrimitive).
 			Line,
 			Arc,
 			Spline,
@@ -45,8 +45,8 @@ namespace RTE {
 			Bitmap
 		};
 
-		Vector m_StartPos = Vector(); //!< Start position of the primitive.
-		Vector m_EndPos = Vector(); //!< End position of the primitive.
+		Vector m_StartPos; //!< Start position of the primitive.
+		Vector m_EndPos; //!< End position of the primitive.
 		unsigned char m_Color = 0; //!< Color to draw this primitive with.
 		int m_Player = -1; //!< Player screen to draw this primitive on.
 		DrawBlendMode m_BlendMode = DrawBlendMode::NoBlend; //!< The blending mode that will be used when drawing this primitive.
@@ -171,8 +171,8 @@ namespace RTE {
 
 		GraphicalPrimitiveOverrideMethods;
 
-		Vector m_GuidePointAPos = Vector(); //!< A guide point that controls the curve of the spline.
-		Vector m_GuidePointBPos = Vector(); //!< A guide point that controls the curve of the spline.
+		Vector m_GuidePointAPos; //!< A guide point that controls the curve of the spline.
+		Vector m_GuidePointBPos; //!< A guide point that controls the curve of the spline.
 
 		/// <summary>
 		/// Constructor method for SplinePrimitive object.
@@ -473,9 +473,9 @@ namespace RTE {
 
 		GraphicalPrimitiveOverrideMethods;
 
-		Vector m_PointAPos = Vector(); //!< First point of the triangle.
-		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
-		Vector m_PointCPos = Vector(); //!< Third point of the triangle.
+		Vector m_PointAPos; //!< First point of the triangle.
+		Vector m_PointBPos; //!< Second point of the triangle.
+		Vector m_PointCPos; //!< Third point of the triangle.
 
 		/// <summary>
 		/// Constructor method for TrianglePrimitive object.
@@ -508,9 +508,9 @@ namespace RTE {
 
 		GraphicalPrimitiveOverrideMethods;
 
-		Vector m_PointAPos = Vector(); //!< First point of the triangle.
-		Vector m_PointBPos = Vector(); //!< Second point of the triangle.
-		Vector m_PointCPos = Vector(); //!< Third point of the triangle.
+		Vector m_PointAPos; //!< First point of the triangle.
+		Vector m_PointBPos; //!< Second point of the triangle.
+		Vector m_PointCPos; //!< Third point of the triangle.
 
 		/// <summary>
 		/// Constructor method for TriangleFillPrimitive object.

@@ -105,7 +105,7 @@ namespace RTE {
 		if (m_ScheduledPrimitives.empty()) {
 			return;
 		}
-		int lastDrawMode = NULL;
+		int lastDrawMode = DRAW_MODE_SOLID;
 		DrawBlendMode lastBlendMode = DrawBlendMode::NoBlend;
 		std::array<int, 4> lastBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend };
 

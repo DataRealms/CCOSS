@@ -26,7 +26,7 @@ namespace RTE {
 	bool FrameMan::s_DisableFrameBufferFlip = false;
 
 	const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> FrameMan::c_BlenderSetterFunctions = {
-		nullptr, // NoBlend obviously has no blender, but we want to keep the indexes matching with the enum.
+		nullptr, // NoBlend obviously has no blender, but we want to keep the indices matching with the enum.
 		&set_burn_blender,
 		&set_color_blender,
 		&set_difference_blender,
@@ -482,7 +482,7 @@ namespace RTE {
 			long long currentTime = g_TimerMan.GetAbsoluteTime() / 10000;
 			for (std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>> &colorTableMap : m_ColorTables) {
 				if (colorTableMap.size() >= 100) {
-					std::vector<std::array<int, 4>> markedForDelete = {};
+					std::vector<std::array<int, 4>> markedForDelete;
 					markedForDelete.reserve(colorTableMap.size());
 					for (const auto &[tableKey, tableData] : colorTableMap) {
 						long long lastAccessTime = tableData.second;
@@ -766,6 +766,7 @@ namespace RTE {
 				break;
 		}
 
+		// New color tables will be created using the default palette loaded at FrameMan initialization because handling per-palette per-mode color tables is too much headache, even if it may possibly produce better blending results.
 		if (m_ColorTables[blendMode].find(colorChannelBlendAmounts) == m_ColorTables[blendMode].end()) {
 			m_ColorTables[blendMode].try_emplace(colorChannelBlendAmounts);
 

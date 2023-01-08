@@ -157,6 +157,7 @@ namespace RTE {
 
 	/// <summary>
 	/// Rounds an integer to the specified nearest multiple.
+	/// For example, if the arguments are 63 and 5, the returned value will be 65.
 	/// </summary>
 	/// <param name="num">The number to round to the nearest multiple.</param>
 	/// <param name="multiple">The multiple to round to.</param>
@@ -269,22 +270,5 @@ namespace RTE {
 		return outputVector;
 	}
 #pragma endregion
-}
-
-namespace std {
-
-	/// <summary>
-	/// Custom std::hash specialization to allow using std::array as key in hash table based containers.
-	/// </summary>
-	template <typename Type, size_t Size> struct hash<array<Type, Size>> {
-		size_t operator()(const array<Type, Size> &arr) const {
-			hash<Type> hasher;
-			size_t outHash = 0;
-			for (size_t i = 0; i < Size; ++i) {
-				outHash = outHash * 31 + hasher(arr[i]);
-			}
-			return outHash;
-		}
-	};
 }
 #endif

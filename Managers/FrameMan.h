@@ -321,7 +321,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="blendMode">The blending mode that will be used in drawing.</param>
 		/// <param name="colorChannelBlendAmounts">The color channel blend amounts that will be used to select or create the correct table in the specified blending mode.</param>
-		/// <remarks>New color tables will be created using the default palette loaded at initialization because handling per-palette per-mode color tables is too much headache, even if it may possibly produce better blending results.</remarks>
 		void SetColorTable(DrawBlendMode blendMode, std::array<int, 4> colorChannelBlendAmounts);
 
 		/// <summary>
@@ -567,7 +566,11 @@ namespace RTE {
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
-		std::array<std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>>, DrawBlendMode::BlendModeCount> m_ColorTables; //!< Color tables for blended drawing in indexed color mode.
+		/// <summary>
+		/// Color tables for blended drawing in indexed color mode.
+		/// The key is an array of the RGBA values. The value is a pair of the color table itself and a time stamp of when it was last accessed for use during color table pruning.
+		/// </summary>
+		std::array<std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>>, DrawBlendMode::BlendModeCount> m_ColorTables;
 		Timer m_ColorTablePruneTimer; //!< Timer for pruning unused color tables to prevent ridiculous memory usage.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.

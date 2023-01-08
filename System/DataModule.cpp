@@ -407,7 +407,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int DataModule::LoadScripts() const {
-		return m_ScriptPath.empty() ? 0 : g_LuaMan.RunScriptFile(m_ScriptPath);
+		if (m_ScriptPath.empty()) {
+			return 0;
+		}
+		
+		g_LuaMan.GetMasterScriptState().RunScriptFile(m_ScriptPath);
+		for (LuaStateWrapper &luaState : g_LuaMan.GetThreadedScriptStates()) {
+			luaState.RunScriptFile(m_ScriptPath);
+		}
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

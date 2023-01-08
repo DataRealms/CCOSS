@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "Scene.h"
+
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "MetaMan.h"

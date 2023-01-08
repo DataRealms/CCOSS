@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "ActorEditor.h"
+
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "CameraMan.h"
 #include "UInputMan.h"
 //#include "AHuman.h"

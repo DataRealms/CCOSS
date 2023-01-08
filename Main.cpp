@@ -36,6 +36,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "PerformanceMan.h"
+#include "FrameMan.h"
 #include "MetaMan.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"

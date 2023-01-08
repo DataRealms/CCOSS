@@ -1,4 +1,6 @@
 #include "PrimitiveMan.h"
+
+#include "SceneMan.h"
 #include "Entity.h"
 #include "MOSprite.h"
 

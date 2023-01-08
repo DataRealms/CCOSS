@@ -14,6 +14,7 @@
 #include "UInputMan.h"
 #include "TimerMan.h"
 #include "AudioMan.h"
+#include "FrameMan.h"
 
 #include "RakNetStatistics.h"
 #include "RakSleep.h"

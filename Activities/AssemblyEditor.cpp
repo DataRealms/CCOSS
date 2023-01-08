@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "AssemblyEditor.h"
+
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
 #include "SLTerrain.h"

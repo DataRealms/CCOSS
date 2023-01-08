@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "ACrab.h"
+
 #include "AtomGroup.h"
 #include "Attachable.h"
 #include "ThrownDevice.h"
@@ -24,6 +25,7 @@
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "PresetMan.h"
+#include "FrameMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"

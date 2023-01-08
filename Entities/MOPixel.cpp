@@ -2,6 +2,7 @@
 
 #include "Atom.h"
 #include "PostProcessMan.h"
+#include "FrameMan.h"
 
 namespace RTE {
 

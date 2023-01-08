@@ -78,11 +78,11 @@ namespace RTE {
 		int error = 0;
 
 		if (!m_ScriptPath.empty()) {
-			if (!g_LuaMan.GlobalIsDefined(m_LuaClassName)) {
-				g_LuaMan.SetTempEntity(this);
-				error = g_LuaMan.RunScriptString(m_LuaClassName + " = ToGlobalScript(LuaMan.TempEntity);");
+			if (!g_LuaMan.GetMasterScriptState().GlobalIsDefined(m_LuaClassName)) {
+				g_LuaMan.GetMasterScriptState().SetTempEntity(this);
+				error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGlobalScript(LuaMan.TempEntity);");
 			}
-			if (error == 0) { g_LuaMan.RunScriptFile(m_ScriptPath); }
+			if (error == 0) { g_LuaMan.GetMasterScriptState().RunScriptFile(m_ScriptPath); }
 		}
 
 		return error;
@@ -92,7 +92,7 @@ namespace RTE {
 
 	int GlobalScript::Start() {
 		int error = ReloadScripts();
-		if (error == 0) { error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".StartScript then " + m_LuaClassName + ":StartScript(); end"); }
+		if (error == 0) { error = g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".StartScript then " + m_LuaClassName + ":StartScript(); end"); }
 		m_IsActive = error == 0;
 
 		return error;
@@ -101,27 +101,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GlobalScript::Pause(bool pause) const {
-		return g_LuaMan.RunScriptString("if " + m_LuaClassName + ".PauseScript then " + m_LuaClassName + ":PauseScript(" + (pause ? "true" : "false") + "); end");
+		return g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".PauseScript then " + m_LuaClassName + ":PauseScript(" + (pause ? "true" : "false") + "); end");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GlobalScript::End() const {
-		return g_LuaMan.RunScriptString("if " + m_LuaClassName + ".EndScript then " + m_LuaClassName + ":EndScript(); end");
+		return g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".EndScript then " + m_LuaClassName + ":EndScript(); end");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void GlobalScript::HandleCraftEnteringOrbit(const ACraft *orbitedCraft) const {
 		if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
-			g_LuaMan.RunScriptFunctionString(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, { m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit" }, { orbitedCraft });
+			g_LuaMan.GetMasterScriptState().RunScriptFunctionString(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, { m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit" }, { orbitedCraft });
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void GlobalScript::Update() {
-		int error = g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateScript then " + m_LuaClassName + ":UpdateScript(); end");
+		int error = g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".UpdateScript then " + m_LuaClassName + ":UpdateScript(); end");
 		if (error) { SetActive(false); }
 	}
 }

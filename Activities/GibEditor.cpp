@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "GibEditor.h"
+
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "UInputMan.h"
 //#include "AHuman.h"
 //#include "MOPixel.h"

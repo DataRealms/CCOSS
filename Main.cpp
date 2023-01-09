@@ -285,12 +285,14 @@ namespace RTE {
 			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
 		}
 
+		g_TimerMan.SetTimeScale(99999.9F);
+
 		std::thread simThread([]() {
 			while (!System::IsSetToQuit()) {
 				bool serverUpdated = false;
 
 				// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
-				while (true /*g_TimerMan.TimeForSimUpdate()*/) {
+				while (g_TimerMan.TimeForSimUpdate()) {
 					long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 					serverUpdated = false;
 

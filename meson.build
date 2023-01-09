@@ -4,6 +4,24 @@ project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'extern
 
 compiler = meson.get_compiler('cpp')
 deps=[]
+if host_machine.system() in ['linux','darwin']
+  deps = [
+    dependency('sdl2'),
+    dependency('flac'),
+    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
+    dependency('luajit'),
+    dependency('threads'),
+    dependency('liblz4'),
+    dependency('libpng'),
+    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
+    dependency(['tbb']),
+  ]
+  allegro_dep = dependency('allegro', required: false)
+  loadpng_dep = dependency('loadpng', required: false)
+  if (allegro_dep.found() and loadpng_dep.found())
+    deps += [allegro_dep, loadpng_dep]
+  endif
+endif
 
 elfname = 'CortexCommand'
 build_rpath = ''

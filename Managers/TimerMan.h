@@ -196,7 +196,7 @@ namespace RTE {
 		long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
-		long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
+		volatile long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 
 		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.

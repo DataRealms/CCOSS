@@ -142,11 +142,17 @@ namespace RTE {
 		void ResetSimUpdateTimer() const { m_SimUpdateTimer->Reset(); }
 
 		/// <summary>
-		/// Updates the frame time measurements and recalculates the averages. Supposed to be done every game loop iteration.
+		/// Updates the draw time measurements and recalculates the averages. Supposed to be done every draw iteration.
 		/// </summary>
 		/// <param name="measuredUpdateTime">The total sim update time measured in the game loop iteration.</param>
 		/// <param name="measuredDrawTime">The total draw time measured in the game loop iteration.</param>
-		void UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime);
+		void UpdateMSPD(long long measuredDrawTime);
+
+		/// <summary>
+		/// Updates the sim time measurements and recalculates the averages. Supposed to be done every simulation update.
+		/// </summary>
+		/// <param name="measuredUpdateTime">The total sim update time measured in the game loop iteration.</param>
+		void UpdateMSPU(long long measuredUpdateTime);
 
 		/// <summary>
 		/// Updates the individual sim update time measurements and recalculates the average. Supposed to be done every sim update.
@@ -200,6 +206,9 @@ namespace RTE {
 		float m_MSPFAverage; //!< The average of the MSPF reading buffer, calculated each game loop iteration.
 		float m_MSPUAverage; //!< The average of the MSPU reading buffer, calculated each game loop iteration.
 		float m_MSPDAverage; //!< The average of the MSPD reading buffer, calculated each game loop iteration.
+
+		long long m_LastDrawTime; //!< How long the last draw took.
+		long long m_LastUpdateTime; //!< How long the last update took.
 
 		int m_CurrentPing; //!< Current ping value to display on screen.
 

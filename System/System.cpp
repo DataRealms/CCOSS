@@ -17,7 +17,7 @@
 #endif
 namespace RTE {
 
-	bool System::s_Quit = false;
+	volatile bool System::s_Quit = false;
 	bool System::s_LogToCLI = false;
 	bool System::s_ExternalModuleValidation = false;
 	std::string System::s_ThisExePathAndName = "";

@@ -94,6 +94,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::CalculateTimeAverage(std::deque<float> &timeMeasurements, float &avgResult, float newTimeMeasurement) const {
+		static std::mutex mut;
+		std::lock_guard<std::mutex> lock(mut);
+
 		timeMeasurements.emplace_back(newTimeMeasurement);
 		while (timeMeasurements.size() > c_MSPAverageSampleSize) {
 			timeMeasurements.pop_front();
@@ -107,10 +110,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::UpdateMSPF(long long measuredUpdateTime, long long measuredDrawTime) {
+	void PerformanceMan::UpdateMSPU(long long measuredUpdateTime) {
+		m_LastUpdateTime = measuredUpdateTime;
 		CalculateTimeAverage(m_MSPUs, m_MSPUAverage, static_cast<float>(measuredUpdateTime / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(measuredUpdateTime, m_LastDrawTime) / 1000));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::UpdateMSPD(long long measuredDrawTime) {
+		m_LastDrawTime = measuredDrawTime;
 		CalculateTimeAverage(m_MSPDs, m_MSPDAverage, static_cast<float>(measuredDrawTime / 1000));
-		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>((measuredUpdateTime + measuredDrawTime) / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(m_LastUpdateTime, measuredDrawTime) / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

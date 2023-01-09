@@ -371,6 +371,17 @@ public:
 
     BITMAP * GetMOColorBitmap() const;
 
+    /// <summary>
+    /// Gets the back MO color bitmap, which has finished being drawn to and can safely be displayed on screen
+    /// </summary>
+    /// <returns>The back MO color bitmap.</returns>
+    BITMAP * GetMOColorBitmapBack() const;
+
+    /// <summary>
+    /// Swaps what MO bitmap we're drawing to, for double-buffering
+    /// </summary>
+    void SwapMOColorBitmap();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDebugBitmap
@@ -1446,6 +1457,8 @@ public:
     Scene *m_pCurrentScene;
     // Color MO layer
     SceneLayerTracked *m_pMOColorLayer;
+    // Back color MO layer (for double buffering)
+    SceneLayerTracked *m_pMOColorLayerBack;
     // MovableObject ID layer
     SceneLayerTracked *m_pMOIDLayer;
     // A spatial partitioning grid of MOIDs, used to optimize collision and distance queries

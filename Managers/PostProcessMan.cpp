@@ -440,11 +440,12 @@ namespace RTE {
 
 		m_PostProcessShader->Use();
 
-		DrawDotGlowEffects();
-		DrawPostScreenEffects();
+		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
+		//DrawDotGlowEffects();
+		//DrawPostScreenEffects();
 
 		// Clear the effects list for this frame
-		m_PostScreenEffects.clear();
+		//m_PostScreenEffects.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

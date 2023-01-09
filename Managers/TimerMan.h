@@ -134,10 +134,22 @@ namespace RTE {
 		void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = static_cast<float>(m_DeltaTime) / static_cast<float>(m_TicksPerSecond); }
 
 		/// <summary>
+		/// Gets how long the last draw took, in seconds
+		/// </summary>
+		/// <returns>How long the last draw took, in seconds.</returns>
+		float GetDrawDeltaTimeSecs() const { return m_DrawDeltaTimeS; }
+
+		/// <summary>
+		/// Gets how long the last draw took, in ms
+		/// </summary>
+		/// <returns>How long the last draw took, in ms.</returns>
+		float GetDrawDeltaTimeMS() const { return m_DrawDeltaTimeS * 1000.0F; }
+
+		/// <summary>
 		/// Gets the current fixed delta time of the simulation updates, in ms.
 		/// </summary>
 		/// <returns>The current fixed delta time that the simulation should be updating with, in ms.</returns>
-		float GetDeltaTimeMS() const { return m_DeltaTimeS * 1000; }
+		float GetDeltaTimeMS() const { return m_DeltaTimeS * 1000.0F; }
 
 		/// <summary>
 		/// Gets the current fixed delta time of the simulation updates, in seconds.
@@ -204,6 +216,7 @@ namespace RTE {
 
 		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
 		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
+		bool m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
 
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.

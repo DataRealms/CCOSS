@@ -101,15 +101,10 @@ namespace RTE {
 
 		RTEAssert(timeIncrease > 0, "It seems your CPU is giving bad timing data to the game, this is known to happen on some multi-core processors. This may be fixed by downloading the latest CPU drivers from AMD or Intel.");
 
-		// If not paused, add the new time difference to the sim accumulator
-		if (!m_SimPaused) {
-			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
-		}
+		m_DrawDeltaTimeS = static_cast<float>(timeIncrease) / 1000.0F;
 
-		float maxPossibleSimSpeed = GetDeltaTimeMS() / std::max(g_PerformanceMan.GetMSPSUAverage(), std::numeric_limits<float>::epsilon());
-
-		// Make sure we don't get runaway behind schedule
-		m_SimAccumulator = std::min(m_SimAccumulator, m_DeltaTime + static_cast<long long>(m_DeltaTime * maxPossibleSimSpeed));
+		// If not paused, add the new time difference to the sim accumulator, scaling by the TimeScale.
+		if (!m_SimPaused) { m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale); }
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 

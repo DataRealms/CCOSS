@@ -524,12 +524,13 @@ namespace RTE {
 		std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
 
 		// Copy game state into our current buffer
+		// TODO_MULTITHREAD: Figure out something faster...
 		m_GameState->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
 		m_GameState->m_Scene.reset(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
 
 		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
 		// Clear the effects list for this frame
-		m_PostScreenEffects.clear();
+		//m_PostScreenEffects.clear();
 
 		// Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
 		m_NewSimFrame = true;
@@ -971,7 +972,7 @@ namespace RTE {
 
 		if (g_ActivityMan.IsInActivity()) {
 			// TODO_MULTITHREAD: add post processing effects to RenderableGameState
-			//g_PostProcessMan.PostProcess(); 
+			g_PostProcessMan.PostProcess(); 
 		}
 
 		// Draw the performance stats and console on top of everything.

@@ -208,6 +208,33 @@ int GameActivity::Create(const GameActivity &reference)
 	m_RequireClearPathToOrbitSwitchEnabled = reference.m_RequireClearPathToOrbitSwitchEnabled;
 	m_BuyMenuEnabled = reference.m_BuyMenuEnabled;
 
+    // Todo, this is really ugly - we shouldn't really by storing this shit here IMO.
+    if (m_aLZCursor[0].empty())
+    {
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
+        cursorFile.GetAsAnimation(m_aLZCursor[0], LZCURSORFRAMECOUNT);
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
+        cursorFile.GetAsAnimation(m_aLZCursor[1], LZCURSORFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
+		cursorFile.GetAsAnimation(m_aLZCursor[2], LZCURSORFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
+		cursorFile.GetAsAnimation(m_aLZCursor[3], LZCURSORFRAMECOUNT);
+    }
+
+    m_LZCursorWidth = reference.m_LZCursorWidth;
+
+    if (m_aObjCursor[0].empty())
+    {
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
+        cursorFile.GetAsAnimation(m_aObjCursor[0], OBJARROWFRAMECOUNT);
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
+        cursorFile.GetAsAnimation(m_aObjCursor[1], OBJARROWFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
+		cursorFile.GetAsAnimation(m_aObjCursor[2], OBJARROWFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
+		cursorFile.GetAsAnimation(m_aObjCursor[3], OBJARROWFRAMECOUNT);
+    }
+
     m_DeliveryDelay = reference.m_DeliveryDelay;
 //    m_CursorTimer = reference.m_CursorTimer;
 //    m_GameTimer = reference.m_GameTimer;

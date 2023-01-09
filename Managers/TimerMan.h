@@ -63,7 +63,7 @@ namespace RTE {
 		bool DrawnSimUpdate() const { return m_DrawnSimUpdate; }
 
 		/// <summary>
-		/// Maeks the draw request as fulfilled, so sim can just continue on without copying data to render unless we're asked for another frame
+		/// Marks the draw request as fulfilled, so sim can just continue on without copying data to render unless we're asked for another frame
 		/// </summary>
 		void FulfillDrawRequest() { m_DrawnSimUpdate = false; }
 

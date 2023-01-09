@@ -350,8 +350,7 @@ namespace RTE {
 
 					if (g_TimerMan.DrawnSimUpdate()) {
 						// Copy over any information that we'll need for our draw
-						//g_FrameMan.NewSimFrameToDraw();
-						g_TimerMan.FulfillDrawRequest();
+						g_FrameMan.NewSimFrameToDraw();
 					}
 				}
 

@@ -51,7 +51,13 @@ namespace RTE {
 		return Vector(screen.Offset.GetX() + static_cast<float>(terrain->GetBitmap()->w * screen.SeamCrossCount[Axes::X]), screen.Offset.GetY() + static_cast<float>(terrain->GetBitmap()->h * screen.SeamCrossCount[Axes::Y]));
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    void CameraMan::Update(int screenId) {
+        Screen& screen = m_Screens[screenId];
+
+        const SLTerrain* terrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+        if (!terrain) {
+            return;
+        }
 
 	void CameraMan::SetScroll(const Vector &center, int screenId) {
 		Screen &screen = m_Screens[screenId];
@@ -107,13 +113,12 @@ namespace RTE {
 			float distance = g_SceneMan.ShortestDistance(point, screen.ScrollTarget).GetMagnitude();
 			float scalar = 0.0F;
 
-			// Check if we're off the screen and then fall off.
-			if (distance > screenRadius) {
-				// Get ratio of how close to the very opposite of the scene the point is.
-				scalar = 0.5F + (0.5F * (distance - screenRadius) / (sceneRadius - screenRadius));
-			} else {
-				scalar = 0.0F;
-			}
+    Vector CameraMan::GetUnwrappedOffset(int screenId) const {
+        const Screen& screen = m_Screens[screenId];
+        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+        return Vector(screen.m_Offset.GetX() + static_cast<float>(pTerrain->GetBitmap()->w * screen.m_SeamCrossCount[X]),
+            screen.m_Offset.GetY() + static_cast<float>(pTerrain->GetBitmap()->h * screen.m_SeamCrossCount[Y]));
+    }
 
 			if (scalar < closestScalar) {
 				closestScalar = scalar;
@@ -192,22 +197,12 @@ namespace RTE {
 			std::list<Box> wrappedBoxes;
 			g_SceneMan.WrapBox(screenBox, wrappedBoxes);
 
-			float closestDistanceFromScreen = std::numeric_limits<float>::max();
-			for (const Box &box : wrappedBoxes) {
-				// Determine how far the position is from the box.
-				Vector closestPointOnBox = box.GetWithinBox(position);
-				Vector distanceFromBoxToPosition = closestPointOnBox - position;
-				closestDistanceFromScreen = std::min(closestDistanceFromScreen, distanceFromBoxToPosition.GetMagnitude());
-			}
+    void CameraMan::CheckOffset(int screenId) {
+        Screen& screen = m_Screens[screenId];
 
-			// Beyond this many screens distance, no shake will be applied.
-			const float screenShakeFalloff = 0.3F;
-
-			float screenDistance = std::max(frameSize.GetX(), frameSize.GetY()) * screenShakeFalloff;
-			float screenShakeMultipler = std::max(1.0F - (closestDistanceFromScreen / screenDistance), 0.0F);
-			screen.ScreenShakeMagnitude += magnitude * screenShakeMultipler;
-		}
-	}
+        // Handy
+        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+        RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

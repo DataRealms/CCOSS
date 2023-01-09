@@ -75,6 +75,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::UpdateSim() {
+		// Override the accumulator and just put one delta time in there so sim updates only once per frame.
+		if (m_OneSimUpdatePerFrame) {
+			// Only let it appear to go slower, not faster, if limited.
+			if (m_SimSpeedLimited && m_SimAccumulator > m_DeltaTime) { m_SimAccumulator = m_DeltaTime; }
+
+			// Reset the counter of sim updates since the last drawn. it will always be 0 since every update results in a drawn frame.
+			m_SimUpdatesSinceDrawn = -1;
+
+			m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPFAverage();
+			if (IsSimSpeedLimited() && m_SimSpeed > 1.0F) { m_SimSpeed = 1.0F; }
+		} else {
+			m_SimSpeed = 1.0F;
+		}
+
 		if (TimeForSimUpdate()) {
 			// Transfer ticks from the accumulator to the sim time ticks.
 			m_SimAccumulator -= m_DeltaTime;
@@ -82,11 +96,6 @@ namespace RTE {
 
 			++m_SimUpdateCount;
 			++m_SimUpdatesSinceDrawn;
-
-			// If after deducting the DeltaTime from the accumulator, there is not enough time for another DeltaTime, then flag this as the last sim update before the frame is drawn.
-			m_DrawnSimUpdate = !TimeForSimUpdate();
-		} else {
-			m_DrawnSimUpdate = true;
 		}
 	}
 
@@ -108,11 +117,10 @@ namespace RTE {
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 
-		// Reset the counter since the last drawn update. Set it negative since we're counting full pure sim updates and this will be incremented to 0 on next SimUpdate.
-		if (m_DrawnSimUpdate) {
-			m_SimUpdatesSinceDrawn = -1; 
-		}
+		// We're starting a new render frame, so request that the sim gives us stuff to draw
+		m_DrawnSimUpdate = true;
 
-		m_SimSpeed = std::min(maxPossibleSimSpeed, GetTimeScale());
+		// Reset the counter since the last drawn update. Set it negative since we're counting full pure sim updates and this will be incremented to 0 on next SimUpdate.
+		m_SimUpdatesSinceDrawn = -1;
 	}
 }

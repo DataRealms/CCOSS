@@ -3,6 +3,8 @@
 
 #include "Singleton.h"
 
+#include <atomic>
+
 #define g_TimerMan TimerMan::Instance()
 
 namespace RTE {
@@ -59,6 +61,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this is the last sim update before a frame with its results will appear.</returns>
 		bool DrawnSimUpdate() const { return m_DrawnSimUpdate; }
+
+		/// <summary>
+		/// Maeks the draw request as fulfilled, so sim can just continue on without copying data to render unless we're asked for another frame
+		/// </summary>
+		void FulfillDrawRequest() { m_DrawnSimUpdate = false; }
 
 		/// <summary>
 		/// Tells how many sim updates have been performed since the last one that ended up being a drawn frame.
@@ -208,20 +215,22 @@ namespace RTE {
 		long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
-		volatile long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
+		std::atomic<long long> m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
 
 		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 
-		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
-		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
+		std::atomic<int> m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
+		std::atomic<bool> m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
 		bool m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
 
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
-		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
+		std::atomic<bool> m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
+		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
+		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
 
 	private:
 

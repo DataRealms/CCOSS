@@ -347,6 +347,12 @@ namespace RTE {
 						g_PerformanceMan.ResetSimUpdateTimer();
 						updateStartTime = g_TimerMan.GetAbsoluteTime();
 					}
+
+					if (g_TimerMan.DrawnSimUpdate()) {
+						// Copy over any information that we'll need for our draw
+						//g_FrameMan.NewSimFrameToDraw();
+						g_TimerMan.FulfillDrawRequest();
+					}
 				}
 
 				long long updateEndTime = g_TimerMan.GetAbsoluteTime();

@@ -7,7 +7,7 @@
 
 // Agh fuck
 #include "Activity.h"
-#include "Scene.h"
+#include "SLTerrain.h"
 
 #include <atomic>
 
@@ -21,7 +21,7 @@ namespace RTE {
 	class ScreenShader;
 
 	struct RenderableGameState {
-		std::unique_ptr<Scene> m_Scene = std::make_unique<Scene>();
+		std::unique_ptr<SLTerrain> m_Terrain = nullptr;
 		std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
 	};
 

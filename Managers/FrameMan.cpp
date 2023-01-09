@@ -524,9 +524,9 @@ namespace RTE {
 		std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
 
 		// Copy game state into our current buffer
-		// TODO_MULTITHREAD: Figure out something faster...
+		// TODO_MULTITHREAD: Figure out something better/faster...
 		m_GameState->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
-		m_GameState->m_Scene.reset(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
+		m_GameState->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
 
 		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
 		// Clear the effects list for this frame

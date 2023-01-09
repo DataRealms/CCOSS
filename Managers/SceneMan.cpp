@@ -2786,23 +2786,13 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Update(int screenId) {
-    if (g_FrameMan.GetDrawableGameState().m_Scene == nullptr) {
+    SLTerrain *terrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
+    if (!terrain) {
 		return;
 	}
 
-	m_LastUpdatedScreen = screenId;
-
-	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screenId == 0) { 
-        g_FrameMan.GetDrawableGameState().m_Scene->Update(); 
-    }
-
+    m_LastUpdatedScreen = screenId;
     g_CameraMan.Update(screenId);
-
-	SLTerrain *terrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
-    if (!terrain) {
-        return;
-    }
 
     const Vector& offset = g_CameraMan.GetOffset(screenId);
 	m_pMOColorLayerBack->SetOffset(offset);
@@ -2837,7 +2827,7 @@ void SceneMan::Update(int screenId) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector &targetPos, bool skipBackgroundLayers, bool skipTerrain) {
-	SLTerrain *terrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+	SLTerrain *terrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
     if (!terrain) {
         return;
     }

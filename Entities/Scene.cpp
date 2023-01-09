@@ -3102,11 +3102,6 @@ void Scene::Unlock()
 // Description:     Updates the state of this Scene. Supposed to be done every frame
 //                  before drawing.
 
-
-void Scene::Update() {
-
-}
-
 void Scene::UpdateSim() {
     m_PathfindingUpdated = false;
 

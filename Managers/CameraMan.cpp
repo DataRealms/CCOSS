@@ -54,20 +54,7 @@ namespace RTE {
     void CameraMan::Update(int screenId) {
         Screen& screen = m_Screens[screenId];
 
-        const SLTerrain* terrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
-        if (!terrain) {
-            return;
-        }
-
-	void CameraMan::SetScroll(const Vector &center, int screenId) {
-		Screen &screen = m_Screens[screenId];
-		if (g_FrameMan.IsInMultiplayerMode()) {
-			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2)));
-		} else {
-			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_WindowMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_WindowMan.GetResY() / 2)));
-		}
-		CheckOffset(screenId);
-	}
+        const float screenShakeDecay = g_SettingsMan.GetScreenShakeDecay();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -80,10 +67,25 @@ namespace RTE {
 	void CameraMan::SetScrollTarget(const Vector &targetCenter, float speed, int screenId) {
 		Screen &screen = m_Screens[screenId];
 
-		// See if it would make sense to automatically wrap.
-		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
-		float targetXWrapped = terrain->WrapsX() && (std::fabs(targetCenter.GetX() - screen.ScrollTarget.GetX()) > static_cast<float>(terrain->GetBitmap()->w / 2));
-		float targetYWrapped = terrain->WrapsY() && (std::fabs(targetCenter.GetY() - screen.ScrollTarget.GetY()) > static_cast<float>(terrain->GetBitmap()->h / 2));
+        if (g_TimerMan.DrawnSimUpdate()) {
+            // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
+            if (screen.m_TargetWrapped) {
+                const SLTerrain* terrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
+                if (terrain->WrapsX()) {
+                    int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
+                    screen.m_Offset.SetX(screen.m_Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
+                    screen.m_SeamCrossCount[X] += wrappingScrollDirection;
+                }
+                if (terrain->WrapsY()) {
+                    int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
+                    screen.m_Offset.SetY(screen.m_Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
+                    screen.m_SeamCrossCount[Y] += wrappingScrollDirection;
+                }
+            }
+            screen.m_TargetWrapped = false;
+        }
+        
+        Vector oldOffset(screen.m_Offset);
 
 		screen.ScrollTarget.SetXY(targetCenter.GetX(), targetCenter.GetY());
 		screen.ScrollSpeed = speed;
@@ -115,7 +117,7 @@ namespace RTE {
 
     Vector CameraMan::GetUnwrappedOffset(int screenId) const {
         const Screen& screen = m_Screens[screenId];
-        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
         return Vector(screen.m_Offset.GetX() + static_cast<float>(pTerrain->GetBitmap()->w * screen.m_SeamCrossCount[X]),
             screen.m_Offset.GetY() + static_cast<float>(pTerrain->GetBitmap()->h * screen.m_SeamCrossCount[Y]));
     }
@@ -201,7 +203,7 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
 
         // Handy
-        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Scene->GetTerrain();
+        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
         RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -193,7 +193,7 @@ namespace RTE {
 		bool m_ShowPerfStats; //!< Whether to show performance stats on screen or not.
 		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
-		int m_Sample; //!< Sample counter.
+		std::atomic<int> m_Sample; //!< Sample counter.
 
 		std::unique_ptr<Timer> m_SimUpdateTimer; //!< Timer for measuring milliseconds per sim update for performance stats readings.
 
@@ -202,13 +202,13 @@ namespace RTE {
 		std::deque<float> m_MSPUs; //!< History log of frame update time measurements in milliseconds, for averaging the results. In milliseconds.
 		std::deque<float> m_MSPDs; //!< History log of frame draw time measurements in milliseconds, for averaging the results.
 
-		float m_MSPSUAverage; //!< The average of the MSPSU reading buffer, calculated each sim update.
-		float m_MSPFAverage; //!< The average of the MSPF reading buffer, calculated each game loop iteration.
-		float m_MSPUAverage; //!< The average of the MSPU reading buffer, calculated each game loop iteration.
-		float m_MSPDAverage; //!< The average of the MSPD reading buffer, calculated each game loop iteration.
+		std::atomic<float> m_MSPSUAverage; //!< The average of the MSPSU reading buffer, calculated each sim update.
+		std::atomic<float> m_MSPFAverage; //!< The average of the MSPF reading buffer, calculated each game loop iteration.
+		std::atomic<float> m_MSPUAverage; //!< The average of the MSPU reading buffer, calculated each game loop iteration.
+		std::atomic<float> m_MSPDAverage; //!< The average of the MSPD reading buffer, calculated each game loop iteration.
 
-		long long m_LastDrawTime; //!< How long the last draw took.
-		long long m_LastUpdateTime; //!< How long the last update took.
+		std::atomic<long long> m_LastDrawTime; //!< How long the last draw took.
+		std::atomic<long long> m_LastUpdateTime; //!< How long the last update took.
 
 		int m_CurrentPing; //!< Current ping value to display on screen.
 
@@ -246,7 +246,7 @@ namespace RTE {
 		/// <param name="timeMeasurements">The deque of time measurements to store the new measurement in and to recalculate the average with.</param>
 		/// <param name="avgResult">The variable the recalculated average should be stored in.</param>
 		/// <param name="newTimeMeasurement">The new time measurement to store.</param>
-		void CalculateTimeAverage(std::deque<float> &timeMeasurements, float &avgResult, float newTimeMeasurement) const;
+		void CalculateTimeAverage(std::deque<float> &timeMeasurements, std::atomic<float> &avgResult, float newTimeMeasurement) const;
 
 		/// <summary>
 		/// Draws the performance graphs to the screen. This will be called by Draw() if advanced performance stats are enabled.

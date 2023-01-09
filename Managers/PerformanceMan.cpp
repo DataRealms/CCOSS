@@ -93,7 +93,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::CalculateTimeAverage(std::deque<float> &timeMeasurements, float &avgResult, float newTimeMeasurement) const {
+	void PerformanceMan::CalculateTimeAverage(std::deque<float> &timeMeasurements, std::atomic<float> &avgResult, float newTimeMeasurement) const {
 		static std::mutex mut;
 		std::lock_guard<std::mutex> lock(mut);
 
@@ -101,11 +101,13 @@ namespace RTE {
 		while (timeMeasurements.size() > c_MSPAverageSampleSize) {
 			timeMeasurements.pop_front();
 		}
-		avgResult = 0;
+		float averageTime = 0;
 		for (const float &timeMeasurement : timeMeasurements) {
-			avgResult += timeMeasurement;
+			averageTime += timeMeasurement;
 		}
-		avgResult /= static_cast<float>(timeMeasurements.size());
+		averageTime /= static_cast<float>(timeMeasurements.size());
+
+		avgResult = averageTime;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +115,7 @@ namespace RTE {
 	void PerformanceMan::UpdateMSPU(long long measuredUpdateTime) {
 		m_LastUpdateTime = measuredUpdateTime;
 		CalculateTimeAverage(m_MSPUs, m_MSPUAverage, static_cast<float>(measuredUpdateTime / 1000));
-		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(measuredUpdateTime, m_LastDrawTime) / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(measuredUpdateTime, m_LastDrawTime.load()) / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +123,7 @@ namespace RTE {
 	void PerformanceMan::UpdateMSPD(long long measuredDrawTime) {
 		m_LastDrawTime = measuredDrawTime;
 		CalculateTimeAverage(m_MSPDs, m_MSPDAverage, static_cast<float>(measuredDrawTime / 1000));
-		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(m_LastUpdateTime, measuredDrawTime) / 1000));
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(m_LastUpdateTime.load(), measuredDrawTime) / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,8 +140,8 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "FPS: %.0f | UPS: %.0f", fps, ups);
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Frame: %.1fms | Update: %.1fms | Draw: %.1fms", m_MSPFAverage, m_MSPUAverage, m_MSPDAverage);
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
+			std::snprintf(str, sizeof(str), "Frame: %.1fms | Update: %.1fms | Draw: %.1fms", m_MSPFAverage.load(), m_MSPUAverage.load(), m_MSPDAverage.load());
+			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Rst) | Sim Speed: x%.2f", g_TimerMan.GetTimeScale(), g_TimerMan.GetSimSpeed());
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);

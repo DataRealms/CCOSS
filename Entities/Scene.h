@@ -1295,6 +1295,8 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Return value:    None.
 
 	void Update();
+    
+	void UpdateSim();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

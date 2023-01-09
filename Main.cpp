@@ -290,7 +290,7 @@ namespace RTE {
 				bool serverUpdated = false;
 
 				// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
-				while (g_TimerMan.TimeForSimUpdate()) {
+				while (true /*g_TimerMan.TimeForSimUpdate()*/) {
 					long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 					serverUpdated = false;
 

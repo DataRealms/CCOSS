@@ -905,8 +905,9 @@ namespace RTE {
 
 			// Get only the scene-relative post effects that affect this player's screen
 			if (pActivity) {
-				g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(playerScreen)));
-				g_PostProcessMan.GetGlowAreasWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeGlowBoxes);
+				// TODO_MULTITHREAD
+				//g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(playerScreen)));
+				//g_PostProcessMan.GetGlowAreasWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeGlowBoxes);
 
 				if (IsInMultiplayerMode()) { g_PostProcessMan.SetNetworkPostEffectsList(playerScreen, screenRelativeEffects); }
 			}
@@ -960,9 +961,14 @@ namespace RTE {
 			}
 		}
 
-		if (IsInMultiplayerMode() && hadNewSimFrame) { PrepareFrameForNetwork(); }
+		if (IsInMultiplayerMode() && hadNewSimFrame) { 
+			PrepareFrameForNetwork(); 
+		}
 
-		if (g_ActivityMan.IsInActivity()) { g_PostProcessMan.PostProcess(); }
+		if (g_ActivityMan.IsInActivity()) {
+			// TODO_MULTITHREAD: add post processing effects to RenderableGameState
+			//g_PostProcessMan.PostProcess(); 
+		}
 
 		// Draw the performance stats and console on top of everything.
 		g_PerformanceMan.Draw(m_BackBuffer32.get());

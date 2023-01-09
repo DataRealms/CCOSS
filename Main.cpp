@@ -288,14 +288,13 @@ namespace RTE {
 		std::thread simThread([]() {
 			while (!System::IsSetToQuit()) {
 				bool serverUpdated = false;
-				long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 
 				// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 				while (g_TimerMan.TimeForSimUpdate()) {
+					long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 					serverUpdated = false;
 
-					g_PerformanceMan.NewPerformanceSample();
-					g_PerformanceMan.UpdateMSPSU();
+					//g_PerformanceMan.UpdateMSPSU();
 					g_TimerMan.UpdateSim();
 
 					g_SceneMan.GetScene()->UpdateSim();
@@ -352,10 +351,12 @@ namespace RTE {
 						// Copy over any information that we'll need for our draw
 						g_FrameMan.NewSimFrameToDraw();
 					}
+
+					long long updateEndTime = g_TimerMan.GetAbsoluteTime();
+					g_PerformanceMan.NewPerformanceSample();
+					g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
 				}
 
-				long long updateEndTime = g_TimerMan.GetAbsoluteTime();
-				g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
 				if (g_NetworkServer.IsServerModeEnabled()) {
 					// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
 					g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
@@ -381,14 +382,13 @@ namespace RTE {
 			g_UInputMan.Update();
 
 			long long drawStartTime = g_TimerMan.GetAbsoluteTime();
-
 			g_FrameMan.ClearFrame();
 			g_FrameMan.Draw();
-			g_WindowMan.DrawPostProcessBuffer();
-			g_WindowMan.UploadFrame();
-
 			long long drawEndTime = g_TimerMan.GetAbsoluteTime();
 			g_PerformanceMan.UpdateMSPD(drawEndTime - drawStartTime);
+
+			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.SwapWindow();
 		}
 	}
 }

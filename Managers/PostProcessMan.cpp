@@ -444,8 +444,11 @@ namespace RTE {
 		//DrawDotGlowEffects();
 		//DrawPostScreenEffects();
 
-		// Clear the effects list for this frame
-		//m_PostScreenEffects.clear();
+		// Reference. Do not remove.
+		//release_bitmap(m_BackBuffer32);
+		//release_bitmap(m_BackBuffer8);
+		// Set blender mode back??
+		//set_trans_blender(128, 128, 128, 128);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

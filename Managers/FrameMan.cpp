@@ -527,6 +527,10 @@ namespace RTE {
 		m_GameState->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
 		m_GameState->m_Scene.reset(dynamic_cast<Scene*>(g_SceneMan.GetScene()->Clone()));
 
+		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
+		// Clear the effects list for this frame
+		m_PostScreenEffects.clear();
+
 		// Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
 		m_NewSimFrame = true;
     }

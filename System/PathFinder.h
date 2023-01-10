@@ -211,7 +211,7 @@ namespace RTE {
 		/// <param name="x">The x coordinate, in PathNodes.</param>
 		/// <param name="y">The y coordinate, in PathNodes.</param>
 		/// <returns>The PathNode at the given coordinates.</returns>
-		PathNode * GetPathNodeAtGridCoords(int x, int y);
+		PathNode * GetPathNodeAtGridCoords(int x, int y) const;
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.

@@ -419,7 +419,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) {
+	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) const {
 		if (m_WrapsX) {
 			x = x % m_GridWidth;
 			x = x < 0 ? x + m_GridWidth : x;

@@ -339,7 +339,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode*> PathFinder::GetNodeIDsInBox(Box box) const {
+	std::vector<PathNode*> PathFinder::GetNodesInBox(Box box) const {
 		std::vector<PathNode*> result;
 		
 		box.Unflip();
@@ -434,6 +434,6 @@ namespace RTE {
 			return nullptr;
 		}
 
-		return m_NodeGrid[(y * m_GridWidth) + x];
+		return &m_NodeGrid[(y * m_GridWidth) + x];
 	}
 }

@@ -116,15 +116,15 @@ namespace RTE {
 		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
 		/// <param name="nodeUpdateLimit">The maximum number of PathNodes we'll try to update this frame. True PathNode update count can be higher if we received a big box, as we always do at least 1 box.</param>
 		/// <returns>The set of PathNodes that were updated.</returns>
-		std::unordered_set<int> RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit);
+		std::vector<int> RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit);
 
 		/// <summary>
 		/// Updates a set of PathNodes, adjusting their transitions.
 		/// This does NOT update the pather, which is required if PathNode costs changed.
 		/// </summary>
-		/// <param name="nodeList">The set of PathNode IDs to update.</param>
+		/// <param name="nodeVec">The set of PathNode IDs to update.</param>
 		/// <returns>Whether any PathNode costs changed.</returns>
-		bool UpdateNodeList(const std::unordered_set<int>& nodeList);
+		bool UpdateNodeList(const std::vector<int> &nodeVec);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.

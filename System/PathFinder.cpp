@@ -164,38 +164,13 @@ namespace RTE {
 
 	void PathFinder::RecalculateAllCosts() {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
-
-		// Update all the costs going out from each node.
-		std::for_each(
-			std::execution::par_unseq,
-			m_NodeGrid.begin(),
-			m_NodeGrid.end(),
-			[this](PathNode &node) {
-				UpdateNodeCosts(&node);
-			}
-		);
-
-		// UpdateNodeCosts only calculates Materials for Right and Down directions, so each PathNode's Up and Left direction Materials need to be matched to the respective neighbour's opposite direction Materials
-		// For example, this PathNode's Left Material is its Left neighbour's Right Material.
-		std::for_each(
-			std::execution::par_unseq,
-			m_NodeGrid.begin(),
-			m_NodeGrid.end(),
-			[](PathNode &node) {
-				if (node.Right) { node.Right->LeftMaterial = node.RightMaterial; }
-				if (node.Down) { node.Down->UpMaterial = node.DownMaterial; }
-				if (node.UpRight) { node.UpRight->DownLeftMaterial = node.UpRightMaterial; }
-				if (node.RightDown) { node.RightDown->LeftUpMaterial = node.RightDownMaterial; }
-			}
-		);
-
-		// Reset the pather when costs change, as per the docs.
+		UpdateNodeList(m_NodeGrid);
 		m_Pather->Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::unordered_set<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
 		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {
@@ -210,12 +185,17 @@ namespace RTE {
 			}
 		}
 
-		// If no PathNode costs were changed, clear the unordered set of IDs to update, so it's empty when it's returned.
-		if (!UpdateNodeList(nodeIDsToUpdate)) {
-			nodeIDsToUpdate.clear();
+		// Note - This copy is necessary because std::for_each with parallel execution doesn't appear to work with std::unordered_set -
+		// Using it will cause nodes to randomly fail to update. This should be rechecked when the codebase upgrades to C++20,
+		// and then UpdateNodeList can be refactored to take a pair of iterators instead of a vector.
+		std::vector<int> nodeVec(nodeIDsToUpdate.begin(), nodeIDsToUpdate.end());
+
+		// If no PathNode costs were changed, clear the set of IDs to update, so it's empty when it's returned.
+		if (!UpdateNodeList(nodeVec)) {
+			nodeVec.clear();
 		}
 
-		return nodeIDsToUpdate;
+		return nodeVec;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -393,15 +373,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::UpdateNodeList(const std::unordered_set<int> &nodeList) {
+	bool PathFinder::UpdateNodeList(const std::vector<int> &nodeVec) {
 		std::atomic<bool> anyChange = false;
-
-		// "Hah!" - I hear you say. "This silly person who wrote this code is doing a pointless copy."
-		std::vector<int> nodeVec(nodeList.begin(), nodeList.end());
-		// In a fair and just world, you would be correct.
-		// I've spent all day debugging this, where nodes were seemingly randomly not updated.
-		// Turns out that, for whatever reason, std::for_each with parallel execution + unordered_set is just not working...
-		// This copy fixes it. Yes, I hate it.
 
 		// Update all the costs going out from each node
 		std::for_each(

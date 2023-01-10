@@ -58,6 +58,9 @@ namespace RTE
 
         /// <summary>
         /// Gets a game state we can safely modify from the simulation thread.
+        /// TODO_MULTITHREAD this isn't actually safe to modify unless we're in TransferSimStateToRenderer.
+        /// Either remove this (ideally some sort of draw queue to this object, and remove all draws from sim)
+        /// Or find a way to synchronize this.
         /// </summary>
         RenderableGameState& GetModifiableGameState() { return *m_GameStateModifiable; };
 

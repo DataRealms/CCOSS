@@ -597,7 +597,7 @@ void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top
 
     // Technically the drawable game state can change too. This is ugly, but it's because the swap can happen mid-draw
     // (render swaps potentially in the middle of a sim update), so...
-    // TOTO_MULTITHREAD fix!
+    // TODO_MULTITHREAD fix!
     if (g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->GetBitmap() == bitmap) { 
         g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
     }  

@@ -74,7 +74,7 @@ void ThreadMan::TransferSimStateToRenderer() {
     // this loses draws earlier in the update loop, we can do draws, with atom travel
     // And yes, that's pretttttty broken.
     // TODO_MULTIHREAD fix
-    g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->ClearBitmap(g_MaskColor);
+    m_GameStateModifiable.m_pMOColorLayer->ClearBitmap(g_MaskColor);
     g_MovableMan.Draw(m_GameStateModifiable->m_pMOColorLayer->GetBitmap());
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render

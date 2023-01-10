@@ -164,7 +164,15 @@ namespace RTE {
 
 	void PathFinder::RecalculateAllCosts() {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
-		UpdateNodeList(m_NodeGrid);
+		
+		// I hate this copy, but fuck it
+		std::vector<PathNode*> pathNodesPtrVec;
+		pathNodesPtrVec.reserve(m_NodeGrid.size());
+		for (PathNode& node : m_NodeGrid) {
+			pathNodesPtrVec.push_back(&node);
+		}
+
+		UpdateNodeList(pathNodesPtrVec);
 		m_Pather->Reset();
 	}
 

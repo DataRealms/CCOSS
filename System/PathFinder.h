@@ -116,7 +116,7 @@ namespace RTE {
 		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
 		/// <param name="nodeUpdateLimit">The maximum number of PathNodes we'll try to update this frame. True PathNode update count can be higher if we received a big box, as we always do at least 1 box.</param>
 		/// <returns>The set of PathNodes that were updated.</returns>
-		std::vector<int> RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit);
+		std::vector<PathNode*> RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit);
 
 		/// <summary>
 		/// Updates a set of PathNodes, adjusting their transitions.
@@ -124,7 +124,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="nodeVec">The set of PathNode IDs to update.</param>
 		/// <returns>Whether any PathNode costs changed.</returns>
-		bool UpdateNodeList(const std::vector<int> &nodeVec);
+		bool UpdateNodeList(const std::vector<PathNode*> &nodeVec);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
@@ -184,11 +184,11 @@ namespace RTE {
 		bool UpdateNodeCosts(PathNode *node) const;
 
 		/// <summary>
-		/// Helper function for getting the IDs of the PathNodes in a Box.
+		/// Helper function for getting the PathNodes in a Box.
 		/// </summary>
 		/// <param name="box">The Box of which all PathNodes it touches should be returned.</param>
-		/// <returns>A list of the PathNodes IDs inside the box.</returns>
-		std::vector<int> GetNodeIDsInBox(Box box) const;
+		/// <returns>A list of the PathNodes inside the box.</returns>
+		std::vector<PathNode*> GetNodesInBox(Box box) const;
 
 		/// <summary>
 		/// Gets the cost for transitioning through this Material.
@@ -212,14 +212,6 @@ namespace RTE {
 		/// <param name="y">The y coordinate, in PathNodes.</param>
 		/// <returns>The PathNode at the given coordinates.</returns>
 		PathNode * GetPathNodeAtGridCoords(int x, int y);
-
-		/// <summary>
-		/// Gets the ID of the PathNode at the given coordinates.
-		/// </summary>
-		/// <param name="x">The x coordinate, in PathNode.</param>
-		/// <param name="y">The y coordinate, in PathNode.</param>
-		/// <returns>The ID of the PathNode at the given coordinates.</returns>
-		int GetPathNodeIDAtGridCoords(int x, int y) const;
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.

@@ -166,9 +166,9 @@ namespace RTE {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
 		
 		// I hate this copy, but fuck it
-		std::vector<PathNode*> pathNodesPtrVec;
+		std::vector<PathNode *> pathNodesPtrVec;
 		pathNodesPtrVec.reserve(m_NodeGrid.size());
-		for (PathNode& node : m_NodeGrid) {
+		for (PathNode &node : m_NodeGrid) {
 			pathNodesPtrVec.push_back(&node);
 		}
 
@@ -178,11 +178,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode*> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
-		std::unordered_set<PathNode*> nodeIDsToUpdate;
+	std::vector<PathNode *> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		std::unordered_set<PathNode *> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {
-			std::vector<PathNode*> nodesInside = GetNodesInBox(boxList.front());
+			std::vector<PathNode *> nodesInside = GetNodesInBox(boxList.front());
 			for (PathNode *node : nodesInside) {
 				nodeIDsToUpdate.insert(node);
 			}
@@ -196,7 +196,7 @@ namespace RTE {
 		// Note - This copy is necessary because std::for_each with parallel execution doesn't appear to work with std::unordered_set -
 		// Using it will cause nodes to randomly fail to update. This should be rechecked when the codebase upgrades to C++20,
 		// and then UpdateNodeList can be refactored to take a pair of iterators instead of a vector.
-		std::vector<PathNode*> nodeVec(nodeIDsToUpdate.begin(), nodeIDsToUpdate.end());
+		std::vector<PathNode *> nodeVec(nodeIDsToUpdate.begin(), nodeIDsToUpdate.end());
 
 		// If no PathNode costs were changed, clear the set of IDs to update, so it's empty when it's returned.
 		if (!UpdateNodeList(nodeVec)) {
@@ -339,8 +339,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode*> PathFinder::GetNodesInBox(Box box) const {
-		std::vector<PathNode*> result;
+	std::vector<PathNode *> PathFinder::GetNodesInBox(Box box) const {
+		std::vector<PathNode *> result;
 		
 		box.Unflip();
 
@@ -381,7 +381,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::UpdateNodeList(const std::vector<PathNode*> &nodeVec) {
+	bool PathFinder::UpdateNodeList(const std::vector<PathNode *> &nodeVec) {
 		std::atomic<bool> anyChange = false;
 
 		// Update all the costs going out from each node

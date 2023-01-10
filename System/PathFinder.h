@@ -188,7 +188,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="box">The Box of which all PathNodes it touches should be returned.</param>
 		/// <returns>A list of the PathNodes inside the box.</returns>
-		std::vector<PathNode *> GetNodesInBox(Box box) const;
+		std::vector<PathNode *> GetNodesInBox(Box box);
 
 		/// <summary>
 		/// Gets the cost for transitioning through this Material.
@@ -211,7 +211,7 @@ namespace RTE {
 		/// <param name="x">The x coordinate, in PathNodes.</param>
 		/// <param name="y">The y coordinate, in PathNodes.</param>
 		/// <returns>The PathNode at the given coordinates.</returns>
-		PathNode * GetPathNodeAtGridCoords(int x, int y) const;
+		PathNode * GetPathNodeAtGridCoords(int x, int y);
 
 		/// <summary>
 		/// Clears all the member variables of this PathFinder, effectively resetting the members of this abstraction level only.

@@ -339,7 +339,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode *> PathFinder::GetNodesInBox(Box box) const {
+	std::vector<PathNode *> PathFinder::GetNodesInBox(Box box) {
 		std::vector<PathNode *> result;
 		
 		box.Unflip();
@@ -403,7 +403,7 @@ namespace RTE {
 				std::execution::par_unseq,
 				nodeVec.begin(),
 				nodeVec.end(),
-				[this](PathNode *node) {
+				[](PathNode *node) {
 					if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
 					if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
 					if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
@@ -419,7 +419,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) const {
+	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) {
 		if (m_WrapsX) {
 			x = x % m_GridWidth;
 			x = x < 0 ? x + m_GridWidth : x;

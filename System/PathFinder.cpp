@@ -440,20 +440,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) {
-		if (m_WrapsX) {
-			x = x % m_GridWidth;
-			x = x < 0 ? x + m_GridWidth : x;
-		}
-		if (m_WrapsY) {
-			y = y % m_GridHeight;
-			y = y < 0 ? y + m_GridHeight : y;
-		}
-
-		if (x < 0 || x >= m_GridWidth || y < 0 || y >= m_GridHeight) {
+		int nodeID = GetPathNodeIDAtGridCoords(x, y);
+		if (nodeID == -1) {
 			return nullptr;
 		}
 
-		return &(m_NodeGrid[(y * m_GridWidth) + x]);
+		return &(m_NodeGrid[nodeID]);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

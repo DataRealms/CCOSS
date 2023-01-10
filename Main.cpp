@@ -38,7 +38,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "PerformanceMan.h"
-#include "FrameMan.h"
+#include "ThreadMan.h"
 #include "MetaMan.h"
 #include "WindowMan.h"
 #include "NetworkServer.h"
@@ -90,6 +90,7 @@ namespace RTE {
 		g_SettingsMan.Initialize();
 		g_WindowMan.Initialize();
 
+		g_ThreadMan.Initialize();
 		g_LuaMan.Initialize();
 		g_NetworkServer.Initialize();
 		g_NetworkClient.Initialize();
@@ -135,7 +136,7 @@ namespace RTE {
 		g_LuaMan.Destroy();
 		ContentFile::FreeAllLoaded();
 		g_ConsoleMan.Destroy();
-		g_WindowMan.Destroy();
+		g_ThreadMan.Destroy();
 
 #ifdef DEBUG_BUILD
 		Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
@@ -354,7 +355,7 @@ namespace RTE {
 
 					if (g_TimerMan.DrawnSimUpdate()) {
 						// Copy over any information that we'll need for our draw
-						g_FrameMan.NewSimFrameToDraw();
+						g_ThreadMan.NewSimFrameToDraw();
 					}
 
 					long long updateEndTime = g_TimerMan.GetAbsoluteTime();
@@ -385,6 +386,7 @@ namespace RTE {
 		while (!System::IsSetToQuit()) {
 			g_TimerMan.Update();
 			g_UInputMan.Update();
+			g_ThreadMan.Update();
 
 			long long drawStartTime = g_TimerMan.GetAbsoluteTime();
 			g_FrameMan.ClearFrame();

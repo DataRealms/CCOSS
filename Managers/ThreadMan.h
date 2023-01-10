@@ -10,130 +10,74 @@
 //                  
 //                  
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "Singleton.h"
+
+#include "Activity.h"
+#include "SLTerrain.h"
+
+#include <atomic>
+
 #define g_ThreadMan ThreadMan::Instance()
 
 #include "BS_thread_pool.hpp"
 
 namespace RTE
 {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           ThreadMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The centralized singleton manager of all threads.
-// Parent(s):       Singleton
-// Class history:   03/29/2014  ThreadMan created.
-
-
-class ThreadMan:
-    public Singleton<ThreadMan>
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     ThreadMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a ThreadMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    ThreadMan() { Clear(); Create(); }
+    struct RenderableGameState {
+        std::unique_ptr<SLTerrain> m_Terrain = nullptr;
+        std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
+    };
 
     /// <summary>
-    /// Makes the TimerMan object ready for use.
+    /// The manager for any long-running background threads (i.e the simulation thread), and managing communication between threads.
     /// </summary>
-    void Initialize() { };
+    class ThreadMan: public Singleton<ThreadMan> {
+    public:
 
+        ThreadMan() { Clear(); }
+        virtual ~ThreadMan() { Destroy(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~ThreadMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a ThreadMan object before deletion
-//                  from system memory.
-// Arguments:       None.
+        virtual int Initialize();
 
-    virtual ~ThreadMan() { Destroy(); }
+        void Destroy();
 
+        /// <summary>
+		/// Updates the state of this ThreadMan. Supposed to be done every render frame.
+		/// </summary>
+		void Update();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ThreadMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
+        /// <summary>
+        /// Notifies us that we have a new sim frame ready to draw.
+        /// </summary>
+        void NewSimFrameToDraw();
 
-    virtual int Create();
+        /// <summary>
+        /// Notifies us that we have a new sim frame ready to draw.
+        /// </summary>
+        const RenderableGameState& GetDrawableGameState() const { return *m_GameStateBack; };
 
+        virtual const std::string & GetClassName() const { return m_ClassName; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire ThreadMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
+    protected:
 
-    virtual void Reset() { Clear(); }
+        // Member variables
+        static const std::string m_ClassName;
 
+    private:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the ThreadMan object.
-// Arguments:       None.
-// Return value:    None.
+		std::unique_ptr<RenderableGameState> m_GameState; //!< Current game state game state that sim can update (owned)
+		std::unique_ptr<RenderableGameState> m_GameStateBack; //!< Stable game state that we are drawing (owned)
+		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
+		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
+		//bool m_IsDrawingNewFrame; //!< Whether we are currently drawing a new render frame..
 
-    void Destroy();
+        void Clear();
 
+        // Disallow the use of some implicit methods.
+        ThreadMan(const ThreadMan &reference);
+        ThreadMan & operator=(const ThreadMan &rhs);
 
-    BS::thread_pool& GetPriorityThreadPool() { return m_PriorityThreadPool; }
-
-    BS::thread_pool& GetBackgroundThreadPool() { return m_BackgroundThreadPool; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this ThreadMan, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-    // Disallow the use of some implicit methods.
-    ThreadMan(const ThreadMan &reference);
-    ThreadMan & operator=(const ThreadMan &rhs);
-
-    // For tasks that we want to be performed ASAP, i.e needs to be complete this frame at some point
-    BS::thread_pool m_PriorityThreadPool;
-
-    // For background tasks that we can just let happen whenever over multiple frames
-    BS::thread_pool m_BackgroundThreadPool;
-};
+    };
 
 } // namespace RTE
 

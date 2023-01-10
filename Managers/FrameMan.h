@@ -5,12 +5,6 @@
 #include "Timer.h"
 #include "Box.h"
 
-// Agh fuck
-#include "Activity.h"
-#include "SLTerrain.h"
-
-#include <atomic>
-
 #define g_FrameMan FrameMan::Instance()
 
 namespace RTE {
@@ -19,11 +13,6 @@ namespace RTE {
 	class AllegroBitmap;
 	class GUIFont;
 	class ScreenShader;
-
-	struct RenderableGameState {
-		std::unique_ptr<SLTerrain> m_Terrain = nullptr;
-		std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
-	};
 
 	struct SdlWindowDeleter {
 		void operator()(SDL_Window *window);
@@ -550,18 +539,6 @@ namespace RTE {
 		void FadeOutPalette(int fadeSpeed = 1) { fade_out(Limit(fadeSpeed, 64, 1)); }
 #pragma endregion
 
-#pragma region Threading
-		/// <summary>
-		/// Notifies us that we have a new sim frame ready to draw.
-		/// </summary>
-		void NewSimFrameToDraw();
-
-		/// <summary>
-		/// Notifies us that we have a new sim frame ready to draw.
-		/// </summary>
-		const RenderableGameState& GetDrawableGameState() const { return *m_GameStateBack; };
-#pragma endregion
-
 #pragma region Screen Capture
 		/// <summary>
 		/// Dumps a bitmap to a 8bpp PNG file.
@@ -594,15 +571,7 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		std::unique_ptr<RenderableGameState> m_GameState; //!< Current game state game state that sim can update (owned)
-		std::unique_ptr<RenderableGameState> m_GameStateBack; //!< Stable game state that we are drawing (owned)
-		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
-		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
-
-		/// <summary>
-		/// Enumeration with different settings for the SaveBitmap() method.
-		/// </summary>
-		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
+		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 

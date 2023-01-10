@@ -10,6 +10,7 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "MovableMan.h"
+#include "ThreadMan.h"
 #include "UInputMan.h"
 
 #include "SLTerrain.h"
@@ -73,10 +74,6 @@ namespace RTE {
 		m_SmallFonts.fill(nullptr);
 		m_TextBlinkTimer.Reset();
 
-		m_GameState.reset();
-		m_GameStateBack.reset();
-		m_NewSimFrame = false;
-
 		m_TempBackBuffer8 = nullptr;
 		m_TempBackBuffer32 = nullptr;
 		m_TempOverlayBitmap32 = nullptr;
@@ -112,9 +109,6 @@ namespace RTE {
 
 		// Store the default palette for re-use when creating new color tables for different blend modes because the palette can be changed via scripts, and handling per-palette per-mode color tables is too much headache.
 		get_palette(m_DefaultPalette);
-
-		m_GameState.reset(new RenderableGameState());
-		m_GameStateBack.reset(new RenderableGameState());
 
 		CreateBackBuffers();
 
@@ -520,30 +514,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void FrameMan::NewSimFrameToDraw()
-    {
-		std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
-
-		// Copy game state into our current buffer
-		// TODO_MULTITHREAD: Figure out something better/faster...
-		// It's especially annoying that the MO draw itself takes place on the simulation thread
-		// Perhaps we can cache draw requests and pass them onto draw?
-		m_GameState->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
-		m_GameState->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
-
-		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
-		// Clear the effects list for this frame
-		//m_PostScreenEffects.clear();
-
-		g_SceneMan.ClearMOColorLayer();
-        g_MovableMan.Draw(g_SceneMan.GetMOColorBitmap());
-
-		// Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
-		m_NewSimFrame = true;
-    }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave) {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
@@ -844,14 +814,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Draw() {
-		bool hadNewSimFrame = m_NewSimFrame;
-		if (m_NewSimFrame) {
-			std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
-			std::swap(m_GameState, m_GameStateBack);
-    		g_SceneMan.SwapMOColorBitmap();
-			m_NewSimFrame = false;
-		}
-
 		// Count how many split screens we'll need
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 		RTEAssert(screenCount <= 1 || m_PlayerScreen, "Splitscreen surface not ready when needed!");
@@ -862,7 +824,7 @@ namespace RTE {
 		std::list<PostEffect> screenRelativeEffects;
 		std::list<Box> screenRelativeGlowBoxes;
 
-		const Activity *pActivity = GetDrawableGameState().m_Activity.get();
+		const Activity *pActivity = g_ThreadMan.GetDrawableGameState().m_Activity.get();
 
 		for (int playerScreen = 0; playerScreen < screenCount; ++playerScreen) {
 			screenRelativeEffects.clear();
@@ -973,7 +935,7 @@ namespace RTE {
 			}
 		}
 
-		if (IsInMultiplayerMode() && hadNewSimFrame) { 
+		if (IsInMultiplayerMode()) { 
 			PrepareFrameForNetwork(); 
 		}
 

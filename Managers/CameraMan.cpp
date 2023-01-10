@@ -5,6 +5,8 @@
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
+#include "SettingsMan.h"
+#include "ThreadMan.h"
 #include "SLTerrain.h"
 #include "NetworkClient.h"
 
@@ -70,7 +72,7 @@ namespace RTE {
         if (g_TimerMan.DrawnSimUpdate()) {
             // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
             if (screen.m_TargetWrapped) {
-                const SLTerrain* terrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
+                const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
                 if (terrain->WrapsX()) {
                     int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
                     screen.m_Offset.SetX(screen.m_Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
@@ -117,7 +119,7 @@ namespace RTE {
 
     Vector CameraMan::GetUnwrappedOffset(int screenId) const {
         const Screen& screen = m_Screens[screenId];
-        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
+        const SLTerrain* pTerrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
         return Vector(screen.m_Offset.GetX() + static_cast<float>(pTerrain->GetBitmap()->w * screen.m_SeamCrossCount[X]),
             screen.m_Offset.GetY() + static_cast<float>(pTerrain->GetBitmap()->h * screen.m_SeamCrossCount[Y]));
     }
@@ -203,7 +205,7 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
 
         // Handy
-        const SLTerrain* pTerrain = g_FrameMan.GetDrawableGameState().m_Terrain.get();
+        const SLTerrain* pTerrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
         RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -69,6 +69,16 @@ namespace RTE
         /// </summary>
         const RenderableGameState& GetDrawableGameState() const { return *m_GameStateDrawable; };
 
+        /// <summary>
+        /// Queue a function that will be ran in the sim thread
+        /// </summary>
+        void QueueInSimulationThread(std::function<void(void)> funcToRun);
+
+        /// <summary>
+        /// Run all queued functions for the sim thread
+        /// </summary>
+        void RunSimulationThreadFunctions();
+
         virtual const std::string & GetClassName() const { return m_ClassName; }
 
     protected:
@@ -83,6 +93,9 @@ namespace RTE
 		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
 		//bool m_IsDrawingNewFrame; //!< Whether we are currently drawing a new render frame..
+
+        std::vector<std::function<void(void)>> m_SimFunctions;
+		std::mutex m_SimFunctionMutex; //!< Mutex to ensure that functions are added to the sim thread safely
 
         void Clear();
 

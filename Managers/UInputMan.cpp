@@ -667,27 +667,11 @@ namespace RTE {
 		}
 	}
 
-	bool UInputMan::GetNetworkMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
-		
-		if (whichPlayer == Players::NoPlayer || whichPlayer >= Players::MaxPlayerCount) {
-			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-				if (GetNetworkMouseButtonState(player, whichButton, whichState)) {
-					return true;
-				}
-			}
-			return false;
-		}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		switch (whichState) {
-			case InputState::Held:
-				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton];
-			case InputState::Pressed:
-				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
-			case InputState::Released:
-				return !m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
-			default:
-				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
-				return false;
+	int UInputMan::GetJoystickAxisCount(int whichJoy) const {
+		if(whichJoy >= 0 && whichJoy < s_PrevJoystickStates.size()) {
+			return s_PrevJoystickStates[whichJoy].m_Axis.size();
 		}
 	}
 
@@ -854,9 +838,9 @@ namespace RTE {
 						UpdateJoystickAxis(device, e.caxis.axis, e.caxis.value);
 					} else if (!SDL_IsGameController(device->m_DeviceIndex)) {
 						UpdateJoystickAxis(device, e.jaxis.axis, e.jaxis.value);
-					}
-				}
-			}
+                    }
+                }
+            }
 			if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP || e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP) {
                 SDL_JoystickID id = e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP ? e.cbutton.which : e.jbutton.which;
                 std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);

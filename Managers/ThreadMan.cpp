@@ -38,6 +38,7 @@ void ThreadMan::Clear() {
 	m_GameStateModifiable.reset();
 	m_GameStateDrawable.reset();
 	m_NewSimFrame = false;
+    m_SimFunctions.clear();
 }
 
 int ThreadMan::Initialize() {
@@ -74,12 +75,36 @@ void ThreadMan::TransferSimStateToRenderer() {
     // this loses draws earlier in the update loop, we can do draws, with atom travel
     // And yes, that's pretttttty broken.
     // TODO_MULTIHREAD fix
-    m_GameStateModifiable.m_pMOColorLayer->ClearBitmap(g_MaskColor);
+    m_GameStateModifiable->m_pMOColorLayer->ClearBitmap(g_MaskColor);
     g_MovableMan.Draw(m_GameStateModifiable->m_pMOColorLayer->GetBitmap());
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
     g_TimerMan.FulfillDrawRequest(); // TODO_MULTITHREAD
     m_NewSimFrame = true;
+}
+
+void ThreadMan::QueueInSimulationThread(std::function<void(void)> funcToRun) {
+    std::lock_guard<std::mutex> lock(m_SimFunctionMutex);
+
+    // If we're already queued, don't bother
+    auto itr = std::find_if(m_SimFunctions.begin(), m_SimFunctions.end(),
+        [&funcToRun](std::function<void(void)> &func) {
+            return funcToRun.target<void(*)(void)>() == func.target<void(*)(void)>();
+        });
+
+    if (itr == m_SimFunctions.end()) {
+        return;
+    }
+
+    m_SimFunctions.push_back(funcToRun);
+}
+
+void ThreadMan::RunSimulationThreadFunctions() {
+    std::lock_guard<std::mutex> lock(m_SimFunctionMutex);
+    for (auto& func : m_SimFunctions) {
+        func();
+    }
+    m_SimFunctions.clear();
 }
 
 void ThreadMan::Destroy() {

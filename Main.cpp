@@ -287,6 +287,9 @@ namespace RTE {
 
 		g_TimerMan.SetTimeScale(99999.9F);
 
+		// TODO_MULTITHREAD have a gameSimMan, that holds this thread and coordinates renderable game state and communication between render/sim
+		// When the UI thread requests a particular breaking operation (i.e, pausing), we can set the sim thread to end/pause and join on it
+		// Also move things like ColorMOLayer into RenderableGameState
 		std::thread simThread([]() {
 			while (!System::IsSetToQuit()) {
 				bool serverUpdated = false;

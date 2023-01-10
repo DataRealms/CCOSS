@@ -92,7 +92,7 @@ void ThreadMan::QueueInSimulationThread(std::function<void(void)> funcToRun) {
             return funcToRun.target<void(*)(void)>() == func.target<void(*)(void)>();
         });
 
-    if (itr == m_SimFunctions.end()) {
+    if (itr != m_SimFunctions.end()) {
         return;
     }
 

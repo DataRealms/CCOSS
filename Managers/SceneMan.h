@@ -359,30 +359,6 @@ public:
 
     SLTerrain * GetTerrain();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOColorBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the bitmap of the intermediary collection SceneLayer that all
-//                  MovableObject:s draw themselves onto before it itself gets drawn onto
-//                  the screen back buffer.
-// Arguments:       None.
-// Return value:    A BITMAP pointer to the MO bitmap. Ownership is NOT transferred!
-
-    BITMAP * GetMOColorBitmap() const;
-
-    /// <summary>
-    /// Gets the back MO color bitmap, which has finished being drawn to and can safely be displayed on screen
-    /// </summary>
-    /// <returns>The back MO color bitmap.</returns>
-    BITMAP * GetMOColorBitmapBack() const;
-
-    /// <summary>
-    /// Swaps what MO bitmap we're drawing to, for double-buffering
-    /// </summary>
-    void SwapMOColorBitmap();
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDebugBitmap
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1371,16 +1347,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOColorLayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the color MO layer. Should be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOColorLayer();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearSeenPixels
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Clears the list of pixels on the unseen map that have been revealed.
@@ -1455,10 +1421,7 @@ public:
 
     // Current scene being used
     Scene *m_pCurrentScene;
-    // Color MO layer
-    SceneLayerTracked *m_pMOColorLayer;
-    // Back color MO layer (for double buffering)
-    SceneLayerTracked *m_pMOColorLayerBack;
+
     // MovableObject ID layer
     SceneLayerTracked *m_pMOIDLayer;
     // A spatial partitioning grid of MOIDs, used to optimize collision and distance queries

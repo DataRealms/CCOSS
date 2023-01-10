@@ -24,8 +24,12 @@
 namespace RTE
 {
     struct RenderableGameState {
+        RenderableGameState();
+        ~RenderableGameState();
+
         std::unique_ptr<SLTerrain> m_Terrain = nullptr;
         std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
+        std::unique_ptr<SceneLayerTracked> m_pMOColorLayer = nullptr;
     };
 
     /// <summary>
@@ -47,14 +51,20 @@ namespace RTE
 		void Update();
 
         /// <summary>
-        /// Notifies us that we have a new sim frame ready to draw.
+        /// Notifies us that the next sim update will be drawn, and transfers the 
+        /// required information from the current simulation update to a drawable format.
         /// </summary>
-        void NewSimFrameToDraw();
+        void TransferSimStateToRenderer();
 
         /// <summary>
-        /// Notifies us that we have a new sim frame ready to draw.
+        /// Gets a game state we can safely modify from the simulation thread.
         /// </summary>
-        const RenderableGameState& GetDrawableGameState() const { return *m_GameStateBack; };
+        RenderableGameState& GetModifiableGameState() { return *m_GameStateModifiable; };
+
+        /// <summary>
+        /// Get a game state we can safely read from the render thread.
+        /// </summary>
+        const RenderableGameState& GetDrawableGameState() const { return *m_GameStateDrawable; };
 
         virtual const std::string & GetClassName() const { return m_ClassName; }
 
@@ -65,8 +75,8 @@ namespace RTE
 
     private:
 
-		std::unique_ptr<RenderableGameState> m_GameState; //!< Current game state game state that sim can update (owned)
-		std::unique_ptr<RenderableGameState> m_GameStateBack; //!< Stable game state that we are drawing (owned)
+		std::unique_ptr<RenderableGameState> m_GameStateModifiable; //!< Current game state game state that sim can update (owned)
+		std::unique_ptr<RenderableGameState> m_GameStateDrawable; //!< Stable game state that we are drawing (owned)
 		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
 		//bool m_IsDrawingNewFrame; //!< Whether we are currently drawing a new render frame..

@@ -2,6 +2,7 @@
 
 #include "SLTerrain.h"
 #include "MovableMan.h"
+#include "ThreadMan.h"
 #include "MovableObject.h"
 #include "MOSRotating.h"
 #include "MOPixel.h"
@@ -676,7 +677,7 @@ namespace RTE {
 
 			// Get trail bitmap and put first pixel.
 			if (m_TrailLength) {
-				trailBitmap = g_SceneMan.GetMOColorBitmap();
+				trailBitmap = g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->GetBitmap();
 				trailPoints.push_back({ intPos[X], intPos[Y] });
 			}
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.

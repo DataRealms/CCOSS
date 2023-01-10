@@ -59,8 +59,6 @@ void SceneMan::Clear()
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
     m_pCurrentScene = 0;
-    m_pMOColorLayer = nullptr;
-    m_pMOColorLayerBack = nullptr;
     m_pMOIDLayer = 0;
     m_MOIDsGrid = SpatialPartitionGrid();
     m_pDebugLayer = nullptr;
@@ -181,21 +179,12 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
 
 //    m_pCurrentScene->GetTerrain()->CleanAir();
 
-    // Re-create the MoveableObject:s color SceneLayer
-    delete m_pMOColorLayer;
-    BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = new SceneLayerTracked();
-    m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
-    pBitmap = nullptr;
-
-    delete m_pMOColorLayerBack;
-    m_pMOColorLayerBack = new SceneLayerTracked();
-    m_pMOColorLayerBack->Create(*m_pMOColorLayer);
+    // Re-initialize our threadman so it sets up our renderable game state properly
+    g_ThreadMan.Initialize();
 
     // Re-create the MoveableObject:s ID SceneLayer
     delete m_pMOIDLayer;
-    pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
+    BITMAP *pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
     m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
@@ -359,8 +348,6 @@ void SceneMan::Destroy()
     delete m_pCurrentScene;
     delete m_pDebugLayer;
     delete m_pMOIDLayer;
-    delete m_pMOColorLayer;
-    delete m_pMOColorLayerBack;
     delete m_pUnseenRevealSound;
 
 	destroy_bitmap(m_pOrphanSearchBitmap);
@@ -456,24 +443,6 @@ SLTerrain * SceneMan::GetTerrain()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BITMAP * SceneMan::GetMOColorBitmap() const {
-    return m_pMOColorLayer->GetBitmap();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-BITMAP * SceneMan::GetMOColorBitmapBack() const {
-    return m_pMOColorLayerBack->GetBitmap();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SwapMOColorBitmap() {
-    std::swap(m_pMOColorLayer, m_pMOColorLayerBack);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 BITMAP *SceneMan::GetDebugBitmap() const {
     RTEAssert(m_pDebugLayer, "Tried to get debug bitmap but debug layer doesn't exist. Note that the debug layer is only created under certain circumstances.");
     return m_pDebugLayer->GetBitmap();
@@ -499,7 +468,6 @@ bool SceneMan::MOIDClearCheck()
             if ((badMOID = _getpixel(pMOIDMap, x, y)) != g_NoMOID)
             {
                 g_FrameMan.SaveBitmapToPNG(pMOIDMap, "MOIDCheck");
-                g_FrameMan.SaveBitmapToPNG(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
                 RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }
@@ -596,7 +564,6 @@ void SceneMan::LockScene()
     if (m_pCurrentScene && !m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Lock();
-        m_pMOColorLayer->LockBitmaps();
         m_pMOIDLayer->LockBitmaps();
     }
 }
@@ -609,7 +576,6 @@ void SceneMan::UnlockScene()
     if (m_pCurrentScene && m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Unlock();
-        m_pMOColorLayer->UnlockBitmaps();
         m_pMOIDLayer->UnlockBitmaps();
     }
 }
@@ -625,9 +591,18 @@ bool SceneMan::SceneIsLocked() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
-    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) {
-        m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-    } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+    if (g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->GetBitmap() == bitmap) { 
+        g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+    }
+
+    // Technically the drawable game state can change too. This is ugly, but it's because the swap can happen mid-draw
+    // (render swaps potentially in the middle of a sim update), so...
+    // TOTO_MULTITHREAD fix!
+    if (g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->GetBitmap() == bitmap) { 
+        g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+    }  
+        
+    if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
 #ifdef DRAW_MOID_LAYER
         m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 #else
@@ -2796,7 +2771,7 @@ void SceneMan::Update(int screenId) {
     g_CameraMan.Update(screenId);
 
     const Vector& offset = g_CameraMan.GetOffset(screenId);
-	m_pMOColorLayerBack->SetOffset(offset);
+	g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
 	if (m_pDebugLayer) {
         m_pDebugLayer->SetOffset(offset);
@@ -2865,7 +2840,7 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->SetLayerToDraw(SLTerrain::LayerType::BackgroundLayer);
 				terrain->Draw(targetBitmap, targetBox);
 			}
-			m_pMOColorLayerBack->Draw(targetBitmap, targetBox);
+			g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->Draw(targetBitmap, targetBox);
 
 			if (!skipTerrain) {
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
@@ -2884,41 +2859,13 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			//g_ThreadMan.GetDrawableGameState().m_Activity->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-#ifdef DRAW_NOGRAV_BOXES
-            if (Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea")) {
-                const std::vector<Box>& boxList = noGravArea->GetBoxes();
-                g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
-                drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-
-                std::list<Box> wrappedBoxes;
-                for (std::vector<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); ++bItr)
-                {
-                    wrappedBoxes.clear();
-                    g_SceneMan.WrapBox(*bItr, wrappedBoxes);
-
-                    for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
-                    {
-                        Vector adjCorner = (*wItr).GetCorner() - targetPos;
-                        rectfill(targetBitmap, adjCorner.m_X, adjCorner.m_Y, adjCorner.m_X + (*wItr).GetWidth(), adjCorner.m_Y + (*wItr).GetHeight(), g_RedColor);
-                    }
-                }
-            }
-#endif
-
-			if (m_pDebugLayer) {
+			if (m_pDebugLayer) { 
                 m_pDebugLayer->Draw(targetBitmap, targetBox);
+                m_pDebugLayer->ClearBitmap(g_MaskColor);
             }
 
 			break;
 	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::ClearMOColorLayer()
-{
-    m_pMOColorLayer->ClearBitmap(g_MaskColor);
-    if (m_pDebugLayer) { m_pDebugLayer->ClearBitmap(g_MaskColor); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

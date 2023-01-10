@@ -118,6 +118,7 @@ namespace RTE {
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 
 		// We're starting a new render frame, so request that the sim gives us stuff to draw
+		// TODO_MULTITHREAD: This needs to be set in the sim thread to be safe!
 		m_DrawnSimUpdate = true;
 
 		// Reset the counter since the last drawn update. Set it negative since we're counting full pure sim updates and this will be incremented to 0 on next SimUpdate.

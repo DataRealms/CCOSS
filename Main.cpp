@@ -264,6 +264,7 @@ namespace RTE {
 				break;
 			}
 			g_ConsoleMan.Update();
+			g_ThreadMan.RunSimulationThreadFunctions();
 
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
@@ -329,28 +330,8 @@ namespace RTE {
 					g_ConsoleMan.Update();
 					g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
-					if (!g_ActivityMan.IsInActivity()) {
-						g_TimerMan.PauseSim(true);
-						if (g_MetaMan.GameInProgress()) {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
-						} else if (!g_ActivityMan.ActivitySetToRestart()) {
-							const Activity *activity = g_ActivityMan.GetActivity();
-							// If we edited something then return to main menu instead of scenario menu.
-							if (activity && activity->GetPresetName() == "None") {
-								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
-							} else {
-								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
-							}
-						}
-						if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }
-					}
 					if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
 						break;
-					}
-					if (g_ActivityMan.ActivitySetToResume()) {
-						g_ActivityMan.ResumeActivity();
-						g_PerformanceMan.ResetSimUpdateTimer();
-						updateStartTime = g_TimerMan.GetAbsoluteTime();
 					}
 
 					if (g_TimerMan.DrawnSimUpdate()) {
@@ -389,6 +370,29 @@ namespace RTE {
 		simThread.detach();
 
 		while (!System::IsSetToQuit()) {
+			if (!g_ActivityMan.IsInActivity()) {
+				g_TimerMan.PauseSim(true);
+				if (g_MetaMan.GameInProgress()) {
+					g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
+				} else if (!g_ActivityMan.ActivitySetToRestart()) {
+					const Activity *activity = g_ActivityMan.GetActivity();
+					// If we edited something then return to main menu instead of scenario menu.
+					if (activity && activity->GetPresetName() == "None") {
+						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+					} else {
+						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+					}
+				}
+				if (!g_ActivityMan.ActivitySetToRestart()) {
+					RunMenuLoop();
+				}
+			} 
+			
+			if (g_ActivityMan.ActivitySetToResume()) {
+				g_ActivityMan.ResumeActivity();
+				g_PerformanceMan.ResetSimUpdateTimer();
+			}
+
 			g_TimerMan.Update();
 			g_UInputMan.Update();
 			g_ThreadMan.Update();

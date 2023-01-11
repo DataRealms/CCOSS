@@ -1345,9 +1345,6 @@ void MOSRotating::EraseFromTerrain()
 
 bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 {
-    // TODO_MULTITHREAD?
-    return false;
-
     // Check for deep penetration of the terrain and
     // generate splash of MOPixels accordingly.
     if (m_pDeepGroup && (m_pDeepGroup->InTerrain() || m_ForceDeepCheck))

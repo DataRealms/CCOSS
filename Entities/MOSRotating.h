@@ -936,26 +936,8 @@ protected:
 
     // Intermediary drawing bitmap used to flip rotating bitmaps. Owned!
     BITMAP *m_pFlipBitmap;
-    BITMAP *m_pFlipBitmapS;
     // Intermediary drawing bitmap used to draw sihouettes and other effects. Not owned; points to the shared static bitmaps
     BITMAP *m_pTempBitmap;
-    // Temp drawing bitmaps shared between all MOSRotatings
-    static BITMAP *m_spTempBitmap16;
-    static BITMAP *m_spTempBitmap32;
-    static BITMAP *m_spTempBitmap64;
-    static BITMAP *m_spTempBitmap128;
-    static BITMAP *m_spTempBitmap256;
-    static BITMAP *m_spTempBitmap512;
-
-    // Intermediary drawing bitmap used to draw MO silhouettes. Not owned; points to the shared static bitmaps
-    BITMAP *m_pTempBitmapS;
-    // Temp drawing bitmaps shared between all MOSRotatings
-    static BITMAP *m_spTempBitmapS16;
-    static BITMAP *m_spTempBitmapS32;
-    static BITMAP *m_spTempBitmapS64;
-    static BITMAP *m_spTempBitmapS128;
-    static BITMAP *m_spTempBitmapS256;
-    static BITMAP *m_spTempBitmapS512;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

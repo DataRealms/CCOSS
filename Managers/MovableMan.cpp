@@ -16,6 +16,7 @@
 #include "PrimitiveMan.h"
 #include "PostProcessMan.h"
 #include "PerformanceMan.h"
+#include "ThreadMan.h"
 #include "PresetMan.h"
 #include "AEmitter.h"
 #include "AHuman.h"
@@ -1816,10 +1817,11 @@ void MovableMan::Update()
     //////////////////////////////////////////////////////////////////////
     // TRANSFER ALL MOs ADDED THIS FRAME
     // All Actors, Items, and Particles added this frame now are officially added
-
     {
-        ZoneScopedN("MO Transfer and Deletion");
+        std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
 
+        // Actors
+        for (aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
         {
             // Actors
             for (aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
@@ -1881,31 +1883,22 @@ void MovableMan::Update()
             aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&Actor::IsDead)));
             amidIt = aIt;
 
-            // Move dead Actor to particles list
-            if (amidIt != m_Actors.end()/* && m_Actors.size() > 1*/)
-            {
-                while (aIt != m_Actors.end())
-                {
-                    // Report the death of the actor to the game
-                    g_ActivityMan.GetActivity()->ReportDeath((*aIt)->GetTeam());
+        // Particles
+        for (parIt = m_AddedParticles.begin(); parIt != m_AddedParticles.end(); ++parIt)
+        {
+            // Delete instead if it's marked for it
+            if (!(*parIt)->IsSetToDelete())
+                m_Particles.push_back(*parIt);
+            else
+                delete (*parIt);
+        }
+        m_AddedParticles.clear();
 
-                    // Add to the particles list
-                    m_Particles.push_back(*aIt);
-                    m_ValidParticles.insert(*aIt);
-                    // Remove from the team roster
+        ////////////////////////////////////////////////////////////////////////////
+        // Copy (Settle) Pass
 
-                    if ((*aIt)->GetTeam() >= 0) {
-                        //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-                        RemoveActorFromTeamRoster(*aIt);
-                    }
-                
-                    m_ValidActors.erase(*aIt);
-                    aIt++;
-                }
-                // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
-                aIt = m_Actors.begin();
-                m_Actors.erase(amidIt, m_Actors.end());
-            }
+        g_SceneMan.UnlockScene();
+        acquire_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 
             // ITEM SETTLE //////////////////////////////////////////////////////////
             // Transfer excess items to particle list - use stable partition, item orde is important
@@ -1993,33 +1986,76 @@ void MovableMan::Update()
 		    parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
 		    midIt = parIt;
 
-		    while (parIt != m_Particles.end()) {
-			    Vector parPos((*parIt)->GetPos());
-			    Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
-			    int piling = (*parIt)->GetMaterial()->GetPiling();
-			    if (piling > 0) {
-				    for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
-					    if ((piling - s) % 2 == 0) {
-						    parPos.m_Y -= 1.0F;
-					    } else {
-						    parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
-					    }
-					    terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
-				    }
-				    (*parIt)->SetPos(parPos.GetFloored());
-			    }
-			    if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
-                m_ValidParticles.erase(*parIt);
-                (*parIt)->DestroyScriptState();
-			    delete (*parIt);
-                parIt++;
-		    }
-		    m_Particles.erase(midIt, m_Particles.end());
-	    }
+        while (aIt != m_Actors.end())
+        {
+			// Set brain to 0 to avoid crasehs due to brain deletion
+			Activity * pActivity = g_ActivityMan.GetActivity();
+			if (pActivity)
+			{
+				if (pActivity->IsAssignedBrain(*aIt))
+					pActivity->SetPlayerBrain(0, pActivity->IsBrainOfWhichPlayer(*aIt));
+
+				pActivity->ReportDeath((*aIt)->GetTeam());
+			}
+
+            // Remove from team rosters
+			if ((*aIt)->GetTeam() >= Activity::TeamOne && (*aIt)->GetTeam() < Activity::MaxTeamCount)
+                //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+				RemoveActorFromTeamRoster(*aIt);
+
+            // Delete
+            delete *aIt;
+            aIt++;
+        }
+        // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
+        aIt = m_Actors.begin();
+        m_Actors.erase(amidIt, m_Actors.end());
+
+        // Items
+        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
+        imidIt = iIt;
+
+        while (iIt != m_Items.end())
+            delete *(iIt++);
+        m_Items.erase(imidIt, m_Items.end());
+
+        // Particles
+        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
+        midIt = parIt;
+
+        while (parIt != m_Particles.end())
+            delete *(parIt++);
+        m_Particles.erase(midIt, m_Particles.end());
+
+        // SETTLE PARTICLES //////////////////////////////////////////////////
+        // Only settle after all updates and deletions are done
+        if (m_SettlingEnabled) {
+            parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
+            midIt = parIt;
+
+            while (parIt != m_Particles.end()) {
+                Vector parPos((*parIt)->GetPos());
+                Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+                int piling = (*parIt)->GetMaterial()->GetPiling();
+                if (piling > 0) {
+                    for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
+                        if ((piling - s) % 2 == 0) {
+                            parPos.m_Y -= 1.0F;
+                        } else {
+                            parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
+                        }
+                        terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+                    }
+                    (*parIt)->SetPos(parPos.GetFloored());
+                }
+                if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
+                delete *(parIt++);
+            }
+            m_Particles.erase(midIt, m_Particles.end());
+        }
     }
 
-    // We've finished stuff that can interact with lua script, so it's the ideal time to start a gc run
-    g_LuaMan.StartAsyncGarbageCollection();
+    release_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
@@ -2295,32 +2331,22 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 
 void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 {
-    ZoneScoped;
+    std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
 
     // Draw objects to accumulation bitmap, in reverse order so actors appear on top.
-
-    {
-        ZoneScopedN("Particles Draw");
-
-        for (std::deque<MovableObject*>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt) {
-            (*parIt)->Draw(pTargetBitmap, targetPos);
-        }
+    for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt) {
+        (*parIt)->UpdateDraw();
+        (*parIt)->Draw(pTargetBitmap, targetPos);
     }
 
-    {
-        ZoneScopedN("Items Draw");
-
-        for (std::deque<MovableObject*>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt) {
-            (*itmIt)->Draw(pTargetBitmap, targetPos);
-        }
+	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt) {
+        (*itmIt)->UpdateDraw();
+        (*itmIt)->Draw(pTargetBitmap, targetPos);
     }
 
-    {
-        ZoneScopedN("Actors Draw");
-
-        for (std::deque<Actor*>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt) {
-            (*aIt)->Draw(pTargetBitmap, targetPos);
-        }
+    for (std::deque<Actor *>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt) {
+        (*aIt)->UpdateDraw();
+        (*aIt)->Draw(pTargetBitmap, targetPos);
     }
 }
 

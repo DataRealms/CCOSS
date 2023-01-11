@@ -1050,7 +1050,8 @@ namespace RTE {
 			Vector targetPos(0, 0);
 
 			// Draw objects
-			draw_sprite(m_WorldDumpBuffer, g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->GetBitmap(), 0, 0);
+			// TODO_MULTITHREAD
+			//draw_sprite(m_WorldDumpBuffer, g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->GetBitmap(), 0, 0);
 
 			// Draw post-effects
 			g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffectsList, -1);

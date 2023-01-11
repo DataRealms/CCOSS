@@ -30,20 +30,13 @@ namespace RTE {
 
 ConcreteClassInfo(MOSRotating, MOSprite, 500);
 
-BITMAP * MOSRotating::m_spTempBitmap16 = 0;
-BITMAP * MOSRotating::m_spTempBitmap32 = 0;
-BITMAP * MOSRotating::m_spTempBitmap64 = 0;
-BITMAP * MOSRotating::m_spTempBitmap128 = 0;
-BITMAP * MOSRotating::m_spTempBitmap256 = 0;
-BITMAP * MOSRotating::m_spTempBitmap512 = 0;
-
-BITMAP * MOSRotating::m_spTempBitmapS16 = 0;
-BITMAP * MOSRotating::m_spTempBitmapS32 = 0;
-BITMAP * MOSRotating::m_spTempBitmapS64 = 0;
-BITMAP * MOSRotating::m_spTempBitmapS128 = 0;
-BITMAP * MOSRotating::m_spTempBitmapS256 = 0;
-BITMAP * MOSRotating::m_spTempBitmapS512 = 0;
-
+// Temp drawing bitmaps shared between all MOSRotatings
+static BITMAP *m_spTempBitmap16 = nullptr;
+static BITMAP *m_spTempBitmap32 = nullptr;
+static BITMAP *m_spTempBitmap64 = nullptr;
+static BITMAP *m_spTempBitmap128 = nullptr;
+static BITMAP *m_spTempBitmap256 = nullptr;
+static BITMAP *m_spTempBitmap512 = nullptr;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -83,9 +76,7 @@ void MOSRotating::Clear()
     m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
-	m_pFlipBitmapS = 0;
 	m_pTempBitmap = 0;
-	m_pTempBitmapS = 0;
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 0;
     m_NoSetDamageMultiplier = true;
@@ -148,50 +139,30 @@ int MOSRotating::Create()
     if (!m_spTempBitmap512)
         m_spTempBitmap512 = create_bitmap_ex(8, 512, 512);
 
-    // Can't create these earlier in the static declaration because allegro_init needs to be called before create_bitmap
-    if (!m_spTempBitmapS16)
-        m_spTempBitmapS16 = create_bitmap_ex(c_MOIDLayerBitDepth, 16, 16);
-    if (!m_spTempBitmapS32)
-        m_spTempBitmapS32 = create_bitmap_ex(c_MOIDLayerBitDepth, 32, 32);
-    if (!m_spTempBitmapS64)
-        m_spTempBitmapS64 = create_bitmap_ex(c_MOIDLayerBitDepth, 64, 64);
-    if (!m_spTempBitmapS128)
-        m_spTempBitmapS128 = create_bitmap_ex(c_MOIDLayerBitDepth, 128, 128);
-    if (!m_spTempBitmapS256)
-        m_spTempBitmapS256 = create_bitmap_ex(c_MOIDLayerBitDepth, 256, 256);
-    if (!m_spTempBitmapS512)
-        m_spTempBitmapS512 = create_bitmap_ex(c_MOIDLayerBitDepth, 512, 512);
-
     // Choose an appropriate size for this' diameter
     if (m_SpriteDiameter >= 256)
 	{
         m_pTempBitmap = m_spTempBitmap512;
-        m_pTempBitmapS = m_spTempBitmapS512;
 	}
     else if (m_SpriteDiameter >= 128)
 	{
         m_pTempBitmap = m_spTempBitmap256;
-        m_pTempBitmapS = m_spTempBitmapS256;
 	}
     else if (m_SpriteDiameter >= 64)
 	{
         m_pTempBitmap = m_spTempBitmap128;
-        m_pTempBitmapS = m_spTempBitmapS128;
 	}
     else if (m_SpriteDiameter >= 32)
 	{
         m_pTempBitmap = m_spTempBitmap64;
-        m_pTempBitmapS = m_spTempBitmapS64;
 	}
     else if (m_SpriteDiameter >= 16)
 	{
         m_pTempBitmap = m_spTempBitmap32;
-        m_pTempBitmapS = m_spTempBitmapS32;
 	}
     else
 	{
 		m_pTempBitmap = m_spTempBitmap16;
-		m_pTempBitmapS = m_spTempBitmapS16;
 	}
 
     return 0;
@@ -284,14 +255,6 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_NoSetDamageMultiplier = reference.m_NoSetDamageMultiplier;
 
     m_pTempBitmap = reference.m_pTempBitmap;
-    m_pTempBitmapS = reference.m_pTempBitmapS;
-	
-	if (!m_pFlipBitmap && m_aSprite[0]) {
-		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-	}
-	if (!m_pFlipBitmapS && m_aSprite[0]) {
-		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
-	}
 
     return 0;
 }
@@ -619,7 +582,6 @@ void MOSRotating::Destroy(bool notInherited)
     }
 
     destroy_bitmap(m_pFlipBitmap);
-    destroy_bitmap(m_pFlipBitmapS);
 
 // Not anymore; point to shared static bitmaps
 //    destroy_bitmap(m_pTempBitmap);
@@ -1383,6 +1345,9 @@ void MOSRotating::EraseFromTerrain()
 
 bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 {
+    // TODO_MULTITHREAD?
+    return false;
+
     // Check for deep penetration of the terrain and
     // generate splash of MOPixels accordingly.
     if (m_pDeepGroup && (m_pDeepGroup->InTerrain() || m_ForceDeepCheck))
@@ -1613,6 +1578,8 @@ void MOSRotating::Update() {
             TransferForcesFromAttachable(attachable);
         }
     }
+
+    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1845,13 +1812,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
 	BITMAP * pFlipBitmap = m_pFlipBitmap;
 	int keyColor = g_MaskColor;
 
-	// Switch to non 8-bit drawing mode if we're drawing onto MO layer
-	if (mode == g_DrawMOID || mode == g_DrawNoMOID) {
-		pTempBitmap = m_pTempBitmapS;
-		pFlipBitmap = m_pFlipBitmapS;
-		keyColor = g_MOIDMaskColor;
-	}
-
     Vector spritePos(m_Pos.GetRounded() - targetPos);
 
     if (m_Recoiled) {
@@ -1958,7 +1918,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
             for (int i = 0; i < passes; ++i) {
                 int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
                 int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
-                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
                 draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
             }
         } else {
@@ -1966,7 +1926,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
             for (int i = 0; i < passes; ++i) {
                 int spriteX = aDrawPos[i].GetFloorIntX();
                 int spriteY = aDrawPos[i].GetFloorIntY();
-                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX + m_SpriteOffset.m_X - (m_SpriteRadius * m_Scale), spriteY + m_SpriteOffset.m_Y - (m_SpriteRadius * m_Scale), spriteX - m_SpriteOffset.m_X + (m_SpriteRadius * m_Scale), spriteY - m_SpriteOffset.m_Y + (m_SpriteRadius * m_Scale));
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX - m_SpriteRadius + m_SpriteOffset.m_X, spriteY - m_SpriteRadius + m_SpriteOffset.m_Y, spriteX + m_SpriteRadius - m_SpriteOffset.m_X, spriteY + m_SpriteRadius - m_SpriteOffset.m_Y);
 #ifndef DRAW_MOID_LAYER
                 if (mode == g_DrawMOID) {
                     continue;
@@ -1990,14 +1950,14 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
             for (int i = 0; i < passes; ++i) {
                 int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
                 int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
-                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
                 draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
             }
         } else {
             for (int i = 0; i < passes; ++i) {
                 int spriteX = aDrawPos[i].GetFloorIntX();
                 int spriteY = aDrawPos[i].GetFloorIntY();
-                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX + m_SpriteOffset.m_X - (m_SpriteRadius * m_Scale), spriteY + m_SpriteOffset.m_Y - (m_SpriteRadius * m_Scale), spriteX - m_SpriteOffset.m_X + (m_SpriteRadius * m_Scale), spriteY - m_SpriteOffset.m_Y + (m_SpriteRadius * m_Scale));
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX - m_SpriteRadius + m_SpriteOffset.m_X, spriteY - m_SpriteRadius + m_SpriteOffset.m_Y, spriteX + m_SpriteRadius - m_SpriteOffset.m_X, spriteY + m_SpriteRadius - m_SpriteOffset.m_Y);
 #ifndef DRAW_MOID_LAYER
                 if (mode == g_DrawMOID) {
                     continue;

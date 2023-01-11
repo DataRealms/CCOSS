@@ -676,8 +676,9 @@ namespace RTE {
 			intPos[Y] = std::floor(position.m_Y);
 
 			// Get trail bitmap and put first pixel.
+			m_TrailLength = 0; // TODO_MULTITHREAD
 			if (m_TrailLength) {
-				trailBitmap = g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->GetBitmap();
+				trailBitmap = nullptr;//g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->GetBitmap();
 				trailPoints.push_back({ intPos[X], intPos[Y] });
 			}
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.

@@ -591,18 +591,7 @@ bool SceneMan::SceneIsLocked() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
-    if (g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->GetBitmap() == bitmap) { 
-        g_ThreadMan.GetModifiableGameState().m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-    }
-
-    // Technically the drawable game state can change too. This is ugly, but it's because the swap can happen mid-draw
-    // (render swaps potentially in the middle of a sim update), so...
-    // TODO_MULTITHREAD fix!
-    if (g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->GetBitmap() == bitmap) { 
-        g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-    }  
-        
-    if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+    if (moid != g_NoMOID) {
 #ifdef DRAW_MOID_LAYER
         m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 #else
@@ -2771,7 +2760,7 @@ void SceneMan::Update(int screenId) {
     g_CameraMan.Update(screenId);
 
     const Vector& offset = g_CameraMan.GetOffset(screenId);
-	g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->SetOffset(offset);
+	//g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
 	if (m_pDebugLayer) {
         m_pDebugLayer->SetOffset(offset);
@@ -2840,7 +2829,10 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->SetLayerToDraw(SLTerrain::LayerType::BackgroundLayer);
 				terrain->Draw(targetBitmap, targetBox);
 			}
-			g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->Draw(targetBitmap, targetBox);
+
+            //m_GameStateModifiable->m_pMOColorLayer->ClearBitmap(g_MaskColor);
+            g_MovableMan.Draw(targetBitmap, targetPos);
+			//g_ThreadMan.GetDrawableGameState().m_pMOColorLayer->Draw(targetBitmap, targetBox);
 
 			if (!skipTerrain) {
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
@@ -2856,8 +2848,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
             // TODO_MULTITHREAD
 			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
-			//g_ThreadMan.GetDrawableGameState().m_Activity->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			g_ThreadMan.GetDrawableGameState().m_Activity->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			//g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
 			if (m_pDebugLayer) { 
                 m_pDebugLayer->Draw(targetBitmap, targetBox);

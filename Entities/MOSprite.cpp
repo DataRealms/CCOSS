@@ -466,8 +466,12 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
 
 void MOSprite::Update() {
 	MovableObject::Update();
+}
 
-	// First, check that the sprite has enough frames to even have an animation and override the setting if not
+void MOSprite::UpdateDraw() {
+    MovableObject::UpdateDraw();
+
+	// Check that the sprite has enough frames to even have an animation and override the setting if not
 	if (m_FrameCount > 1) {
 		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
 		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
@@ -487,21 +491,21 @@ void MOSprite::Update() {
 		m_SpriteAnimMode = NOANIM;
 	}
 
-	// Animate the sprite, if applicable
-	unsigned int frameTime = m_SpriteAnimDuration / m_FrameCount;
-	unsigned int prevFrame = m_Frame;
+    // Animate the sprite, if applicable
+	double frameTime = m_SpriteAnimDuration / m_FrameCount;
 
-	if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+    while (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+        unsigned int prevFrame = m_Frame;
+        double newTime = m_SpriteAnimTimer.GetElapsedSimTimeMS() - frameTime;
+        m_SpriteAnimTimer.SetElapsedSimTimeMS(newTime);
 		switch (m_SpriteAnimMode) {
 		    case ALWAYSLOOP:
 			    m_Frame = ((m_Frame + 1) % m_FrameCount);
-                m_SpriteAnimTimer.Reset();
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
 					m_Frame = RandomNum<int>(0, m_FrameCount - 1);
 			    }
-                m_SpriteAnimTimer.Reset();
 			    break;
 		    case ALWAYSPINGPONG:
 			    if (m_Frame == m_FrameCount - 1) {
@@ -510,7 +514,6 @@ void MOSprite::Update() {
 				    m_SpriteAnimIsReversingFrames = false;
 			    }
 			    m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
-                m_SpriteAnimTimer.Reset();
 			    break;
 		    default:
 			    break;
@@ -618,7 +621,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
                 }
         }
 
-        g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
+        g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
     }
 }
 

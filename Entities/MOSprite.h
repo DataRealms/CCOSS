@@ -536,6 +536,10 @@ public:
 
 	void Update() override;
 
+    /// Update draw
+    // TODO_MULTITHREAD proper description
+    void UpdateDraw() override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

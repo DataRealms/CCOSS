@@ -24,10 +24,7 @@ namespace RTE
 {
 
 RenderableGameState::RenderableGameState() {
-    BITMAP *pBitmap = create_bitmap_ex(8, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
-    clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = std::make_unique<SceneLayerTracked>();
-    m_pMOColorLayer->Create(pBitmap, true, Vector(), g_SceneMan.SceneWrapsX(), g_SceneMan.SceneWrapsY(), Vector(1.0, 1.0));
+    
 }
 
 RenderableGameState::~RenderableGameState() {}
@@ -72,11 +69,9 @@ void ThreadMan::TransferSimStateToRenderer() {
     // Clear the effects list for this frame
     //m_PostScreenEffects.clear();
 
-    // this loses draws earlier in the update loop, we can do draws, with atom travel
+    // Note! we loses draws earlier in the update loop, we can do draws, with atom travel
     // And yes, that's pretttttty broken.
     // TODO_MULTIHREAD fix
-    m_GameStateModifiable->m_pMOColorLayer->ClearBitmap(g_MaskColor);
-    g_MovableMan.Draw(m_GameStateModifiable->m_pMOColorLayer->GetBitmap());
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
     g_TimerMan.FulfillDrawRequest(); // TODO_MULTITHREAD

@@ -29,7 +29,6 @@ namespace RTE
 
         std::unique_ptr<SLTerrain> m_Terrain = nullptr;
         std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
-        std::unique_ptr<SceneLayerTracked> m_pMOColorLayer = nullptr;
     };
 
     /// <summary>
@@ -79,6 +78,11 @@ namespace RTE
         /// </summary>
         void RunSimulationThreadFunctions();
 
+        /// <summary>
+        /// Get the mutex that is taken while MO lists are being manipulated by MovableMan
+        /// </summary>
+        std::mutex& GetMODeletedMutex() { return m_MODeletedMutex; }
+
         virtual const std::string & GetClassName() const { return m_ClassName; }
 
     protected:
@@ -91,6 +95,7 @@ namespace RTE
 		std::unique_ptr<RenderableGameState> m_GameStateModifiable; //!< Current game state game state that sim can update (owned)
 		std::unique_ptr<RenderableGameState> m_GameStateDrawable; //!< Stable game state that we are drawing (owned)
 		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
+		std::mutex m_MODeletedMutex; //!< Mutex to ensure MO lists aren't being modified while we loop through them.
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
 		//bool m_IsDrawingNewFrame; //!< Whether we are currently drawing a new render frame..
 

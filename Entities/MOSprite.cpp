@@ -493,10 +493,9 @@ void MOSprite::UpdateDraw() {
 
     // Animate the sprite, if applicable
 	double frameTime = m_SpriteAnimDuration / m_FrameCount;
-
     while (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
         unsigned int prevFrame = m_Frame;
-        double newTime = m_SpriteAnimTimer.GetElapsedSimTimeMS() - frameTime;
+        double newTime = frameTime > 0 ? m_SpriteAnimTimer.GetElapsedSimTimeMS() - frameTime : 0;
         m_SpriteAnimTimer.SetElapsedSimTimeMS(newTime);
 		switch (m_SpriteAnimMode) {
 		    case ALWAYSLOOP:

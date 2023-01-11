@@ -1123,13 +1123,11 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-    Attachable *attachable;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
-        RTEAssert((*attachableIterator), "Broken Attachable!");
-        attachable = *attachableIterator;
+	const std::vector<Attachable *> nonVolatileAttachablesVectorForLuaSafety { m_Attachables.begin(), m_Attachables.end() };
+	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
+        RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
         if (RandomNum() < attachable->GetGibWithParentChance()) {
-            ++attachableIterator;
             attachable->GibThis();
             continue;
         }
@@ -1143,7 +1141,6 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
 
-        ++attachableIterator;
         RemoveAttachable(attachable, true, true);
     }
     m_Attachables.clear();

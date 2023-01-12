@@ -1011,6 +1011,10 @@ namespace RTE {
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(SDLK_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
+				} else if (KeyHeld(SDLK_2)) {
+					g_TimerMan.SetTimeScale(99999.9F);
+				} else if (KeyHeld(SDLK_3)) {
+					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
 				} else if (KeyHeld(SDLK_5)) {
 					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
 				}

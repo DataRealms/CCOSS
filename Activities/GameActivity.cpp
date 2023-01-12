@@ -2302,6 +2302,8 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     float rightStackY = leftStackY;
 
     // Draw the objective points this player should care about
+    // TODO_MULTITHREAD
+#ifdef NO_MULTITHREAD
     for (std::list<ObjectivePoint>::iterator itr = m_Objectives.begin(); itr != m_Objectives.end(); ++itr)
     {
         // Only draw objectives of the same team as the current player
@@ -2374,6 +2376,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             }
         }
     }
+#endif
 
     // Team Icon up in the top left corner
     const Icon *pIcon = GetTeamIcon(m_Team[PoS]);

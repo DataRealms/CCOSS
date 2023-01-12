@@ -2848,8 +2848,7 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
             // TODO_MULTITHREAD
 			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
-			g_ThreadMan.GetDrawableGameState().m_Activity->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			//g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
 			if (m_pDebugLayer) { 
                 m_pDebugLayer->Draw(targetBitmap, targetBox);

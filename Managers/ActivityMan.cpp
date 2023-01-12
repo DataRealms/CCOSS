@@ -422,11 +422,6 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			// TODO_MULTITHREAD is this necessary?
-			//g_FrameMan.ClearBackBuffer8();
-			//g_FrameMan.FlipFrameBuffers();
-			//g_FrameMan.SwapWindow();
-
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
 			g_PerformanceMan.ResetPerformanceTimings();

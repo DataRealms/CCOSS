@@ -940,9 +940,7 @@ Actor * MovableMan::RemoveActor(MovableObject *pActorToRem)
         {
             if (*itr == pActorToRem)
             {
-                std::lock_guard<std::mutex> lock(m_ActorsMutex);
-                removed = *itr;
-                m_ValidActors.erase(*itr);
+                std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
                 m_Actors.erase(itr);
                 break;
             }
@@ -986,9 +984,7 @@ MovableObject * MovableMan::RemoveItem(MovableObject *pItemToRem)
         {
             if (*itr == pItemToRem)
             {
-                std::lock_guard<std::mutex> lock(m_ItemsMutex);
-                removed = *itr;
-                m_ValidItems.erase(*itr);
+                std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
                 m_Items.erase(itr);
                 break;
             }
@@ -1125,16 +1121,45 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 	pActor->SetTeam(team);
 	AddActorToTeamRoster(pActor);
 
-	// Because doors affect the team-based pathfinders, we need to tell them there's been a change.
-	// This is hackily done by erasing the door material, updating the pathfinders, then redrawing it and updating them again so they properly account for the door's new team.
-	if (ADoor *actorAsADoor = dynamic_cast<ADoor *>(pActor); actorAsADoor && actorAsADoor->GetDoorMaterialDrawn()) {
-		actorAsADoor->TempEraseOrRedrawDoorMaterial(true);
-		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
-		g_SceneMan.GetScene()->UpdatePathFinding();
-		actorAsADoor->TempEraseOrRedrawDoorMaterial(false);
-		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
-		g_SceneMan.GetScene()->UpdatePathFinding();
-	}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RemoveParticle
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes a MovableObject from the internal list of MO:s. After the
+//                  MO is removed, ownership is effectively released and transferred to
+//                  whatever client called this method.
+
+bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
+{
+    bool removed = false;
+
+    if (pMOToRem)
+    {
+        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr)
+        {
+            if (*itr == pMOToRem)
+            {
+                std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
+                m_Particles.erase(itr);
+                removed = true;
+                break;
+            }
+        }
+        // Try the newly added particles if we couldn't find it in the regular deque
+        if (!removed)
+        {
+            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); itr != m_AddedParticles.end(); ++itr)
+            {
+                if (*itr == pMOToRem)
+                {
+                    m_AddedParticles.erase(itr);
+                    removed = true;
+                    break;
+                }
+            }
+        }
+    }
+    return removed;
 }
 
 
@@ -2359,7 +2384,7 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void MovableMan::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int which, bool playerControlled)
 {
-    ZoneScoped;
+    std::lock_guard<std::mutex> lock(g_ThreadMan.GetMODeletedMutex());
 
     // Draw HUD elements
 	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)

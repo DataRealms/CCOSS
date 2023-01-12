@@ -287,8 +287,6 @@ namespace RTE {
 			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
 		}
 
-		g_TimerMan.SetTimeScale(99999.9F);
-
 		// TODO_MULTITHREAD have a gameSimMan, that holds this thread and coordinates renderable game state and communication between render/sim
 		// When the UI thread requests a particular breaking operation (i.e, pausing), we can set the sim thread to end/pause and join on it
 		// Also move things like ColorMOLayer into RenderableGameState
@@ -405,6 +403,14 @@ namespace RTE {
 
 			g_FrameMan.FlipFrameBuffers();
 			g_FrameMan.SwapWindow();
+
+			// TODO_MULTITHREAD
+			// Fix performance measurements - FPS should probably just be the full frame time, no sim insolved
+			// UPS should be purely based on true UPS, including TimeForSimUpdate throttling
+			// Draw time should be draw unincluding sync
+			// Update time should be single update iteration time
+			//long long drawEndTime = g_TimerMan.GetAbsoluteTime();
+			//g_PerformanceMan.UpdateMSPD(drawEndTime - drawStartTime);
 		}
 	}
 }

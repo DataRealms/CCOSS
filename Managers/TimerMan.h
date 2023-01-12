@@ -90,7 +90,7 @@ namespace RTE {
 		/// Sets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
 		/// </summary>
 		/// <param name="timeScale">A factor between the real world time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal.</param>
-		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; }
+		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; m_SimAccumulator = 0.0F; }
 
 		/// <summary>
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.

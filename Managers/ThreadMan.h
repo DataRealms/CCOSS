@@ -95,7 +95,13 @@ namespace RTE
 		std::unique_ptr<RenderableGameState> m_GameStateModifiable; //!< Current game state game state that sim can update (owned)
 		std::unique_ptr<RenderableGameState> m_GameStateDrawable; //!< Stable game state that we are drawing (owned)
 		std::mutex m_GameStateCopyMutex; //!< Mutex to ensure we can't swap our rendering game state while it's being copied to.
+
+        // TODO: Find a nicer way. We really need to queue drawings, from the sim thread, to happen in the render thread
+        // Not only is this mutex slow, but it's basically impossible to find all the permutables of how and when drawn things change
+        // I.E attachables, wounds etc changing
+        // I'll try to think of a nice not-requiring-too-many-massive-changes way of doing that...
 		std::mutex m_MODeletedMutex; //!< Mutex to ensure MO lists aren't being modified while we loop through them.
+
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
 		//bool m_IsDrawingNewFrame; //!< Whether we are currently drawing a new render frame..
 

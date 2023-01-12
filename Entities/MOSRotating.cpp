@@ -1808,7 +1808,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
 
     // Only bother with wrap drawing if the scene actually wraps around
     if (pTargetBitmap) {
-        // TODO - Y wrapping
         if (g_SceneMan.SceneWrapsX())
         {
             // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
@@ -1833,13 +1832,49 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
                 if (targetPos.m_X < 0)
                 {
                     aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_X -= g_SceneMan.GetSceneWidth();
+                    aDrawPos[passes].m_X += g_SceneMan.GetSceneWidth();
                     passes++;
                 }
                 if (targetPos.m_X + pTargetBitmap->w > g_SceneMan.GetSceneWidth())
                 {
                     aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_X += g_SceneMan.GetSceneWidth();
+                    aDrawPos[passes].m_X -= g_SceneMan.GetSceneWidth();
+                    passes++;
+                }
+            }
+        }
+
+        if (g_SceneMan.SceneWrapsY())
+        {
+            // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
+            if (targetPos.IsZero() && m_WrapDoubleDraw)
+            {
+                if (spritePos.m_Y < m_SpriteDiameter)
+                {
+                    aDrawPos[passes] = spritePos;
+                    aDrawPos[passes].m_Y += pTargetBitmap->h;
+                    passes++;
+                }
+                else if (spritePos.m_Y > pTargetBitmap->h - m_SpriteDiameter)
+                {
+                    aDrawPos[passes] = spritePos;
+                    aDrawPos[passes].m_Y -= pTargetBitmap->h;
+                    passes++;
+                }
+            }
+            // Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
+            else if (m_WrapDoubleDraw)
+            {
+                if (targetPos.m_Y < 0)
+                {
+                    aDrawPos[passes] = aDrawPos[0];
+                    aDrawPos[passes].m_Y += g_SceneMan.GetSceneHeight();
+                    passes++;
+                }
+                if (targetPos.m_Y + pTargetBitmap->h > g_SceneMan.GetSceneHeight())
+                {
+                    aDrawPos[passes] = aDrawPos[0];
+                    aDrawPos[passes].m_Y -= g_SceneMan.GetSceneHeight();
                     passes++;
                 }
             }

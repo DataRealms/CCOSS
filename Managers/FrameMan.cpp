@@ -945,13 +945,8 @@ namespace RTE {
 		}
 
 		// Draw the performance stats and console on top of everything.
-		g_PerformanceMan.Draw(m_BackBuffer32.get());
-		g_ConsoleMan.Draw(m_BackBuffer32.get());
-
-#ifdef DEBUG_BUILD
-		// Draw scene seam
-		vline(m_BackBuffer8.get(), 0, 0, g_SceneMan.GetSceneHeight(), 5);
-#endif
+		g_PerformanceMan.Draw(m_BackBuffer32);
+		g_ConsoleMan.Draw(m_BackBuffer32);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

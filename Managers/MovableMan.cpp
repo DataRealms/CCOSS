@@ -979,6 +979,8 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 	if (!pActor)
 		return;
 
+	if (pActor->IsPlayerControlled()) { g_ActivityMan.GetActivity()->LoseControlOfActor(pActor->GetController()->GetPlayer()); }
+
 	RemoveActorFromTeamRoster(pActor);
 	pActor->SetTeam(team);
 	AddActorToTeamRoster(pActor);

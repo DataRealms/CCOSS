@@ -658,6 +658,12 @@ namespace RTE {
 		virtual void SwitchToNextActor(int player, int team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
 
 		/// <summary>
+		/// Forces player to lose control of the currently selected Actor, as if it had died.
+		/// </summary>
+		/// <param name="player">Which player to lose control of their selected Actor.</param>
+		virtual void LoseControlOfActor(int player);
+
+		/// <summary>
 		/// Handles when an ACraft has left the game scene and entered orbit, though does not delete it. Ownership is NOT transferred, as the ACraft's inventory is just 'unloaded'.
 		/// </summary>
 		/// <param name="orbitedCraft">The ACraft instance that entered orbit. Ownership is NOT transferred!</param>

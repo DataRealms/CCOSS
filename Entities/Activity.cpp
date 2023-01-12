@@ -754,6 +754,19 @@ void Activity::Clear() {
 		return true;
 	}
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	void Activity::LoseControlOfActor(int player) {
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			if (Actor *actor = m_ControlledActor[player]) {
+				actor->SetControllerMode(Controller::CIM_AI);
+				actor->GetController()->SetDisabled(false);
+			}
+			m_ControlledActor[player] = nullptr;
+			m_ViewState[player] = ViewState::DeathWatch;
+		}
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::HandleCraftEnteringOrbit(ACraft *orbitedCraft) {

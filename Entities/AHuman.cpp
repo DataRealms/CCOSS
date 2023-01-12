@@ -1832,6 +1832,11 @@ void AHuman::UpdateAI()
     ////////////////////////////////////////////////
     // AI MODES
 
+	// Squad logic
+	if (m_AIMode == AIMODE_SQUAD) {
+		m_AIMode = AIMODE_GOTO;
+	}
+
     // If alarmed, override all modes, look at the alarming point
     if (!m_AlarmTimer.IsPastSimTimeLimit())
     {
@@ -1930,14 +1935,13 @@ void AHuman::UpdateAI()
         m_MoveVector = g_SceneMan.ShortestDistance(m_Pos, m_MoveTarget);
         if ((m_MoveVector.m_X > 0 && m_LateralMoveState == LAT_LEFT) || (m_MoveVector.m_X < 0 && m_LateralMoveState == LAT_RIGHT) || (m_LateralMoveState == LAT_STILL && m_DeviceState != AIMING && m_DeviceState != FIRING))
         {
-            // If not following an MO, stay still and switch to sentry mode if we're close enough to final static destination
-            if (!m_pMOMoveTarget && m_Waypoints.empty() && m_MovePath.empty() && fabs(m_MoveVector.m_X) <= 10)
-            {
-                // DONE MOVING TOWARD TARGET
-                m_LateralMoveState = LAT_STILL;
-                m_AIMode = AIMODE_SENTRY;
-                m_DeviceState = SCANNING;
-            }
+			// Stay still and switch to sentry mode if we're close enough to the final destination.
+			if (m_Waypoints.empty() && m_MovePath.empty() && std::abs(m_MoveVector.m_X) < 10.0F) {
+
+				m_LateralMoveState = LAT_STILL;
+				m_DeviceState = SCANNING;
+				if (!m_pMOMoveTarget) { m_AIMode = AIMODE_SENTRY; }
+			}
             // Turns only after a delay to avoid getting stuck on switchback corners in corridors
             else if (m_MoveOvershootTimer.IsPastSimMS(500) || m_LateralMoveState == LAT_STILL)
                 m_LateralMoveState = m_LateralMoveState == LAT_RIGHT ? LAT_LEFT : LAT_RIGHT;
@@ -2904,7 +2908,7 @@ void AHuman::UpdateAI()
                 Vector topHeadPos = m_Pos;
                 // Stack up the maximum height the top back of the head can have over the body's position
                 topHeadPos.m_X += m_HFlipped ? m_pHead->GetRadius() : -m_pHead->GetRadius();
-                topHeadPos.m_Y += m_pHead->GetParentOffset().m_Y - m_pHead->GetJointOffset().m_Y + m_pHead->GetSpriteOffset().m_Y - 6;
+                topHeadPos.m_Y += m_pHead->GetParentOffset().m_Y - m_pHead->GetJointOffset().m_Y + m_pHead->GetSpriteOffset().m_Y - 3;
                 // First check up to the top of the head, and then from there forward
                 if (g_SceneMan.CastStrengthRay(m_Pos, topHeadPos - m_Pos, 5, obstaclePos, 4, g_MaterialDoor) ||
                     g_SceneMan.CastStrengthRay(topHeadPos, heading, 5, obstaclePos, 4, g_MaterialDoor))

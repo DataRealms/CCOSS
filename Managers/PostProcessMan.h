@@ -135,7 +135,7 @@ namespace RTE {
 		/// Registers a specific IntRect to be post-processed and have special pixel colors lit up by glow effects in it.
 		/// </summary>
 		/// <param name="glowArea">The IntRect to have special color pixels glow in, in scene coordinates.</param>
-		void RegisterGlowArea(const IntRect &glowArea) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_GlowAreas.push_back(glowArea); } }
+		void RegisterGlowArea(const IntRect &glowArea) { m_GlowAreas.push_back(glowArea); }
 
 		/// <summary>
 		/// Creates an IntRect and registers it to be post-processed and have special pixel colors lit up by glow effects in it.

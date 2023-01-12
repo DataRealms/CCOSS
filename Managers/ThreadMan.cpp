@@ -74,7 +74,6 @@ void ThreadMan::TransferSimStateToRenderer() {
     // TODO_MULTIHREAD fix
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
-    g_TimerMan.FulfillDrawRequest(); // TODO_MULTITHREAD
     m_NewSimFrame = true;
 }
 

@@ -57,24 +57,6 @@ namespace RTE {
 		bool TimeForSimUpdate() const { return m_SimAccumulator >= m_DeltaTime; }
 
 		/// <summary>
-		/// Tells whether the current simulation update will be drawn in a frame. Use this to check if it is necessary to draw purely graphical things during the sim update.
-		/// </summary>
-		/// <returns>Whether this is the last sim update before a frame with its results will appear.</returns>
-		bool DrawnSimUpdate() const { return m_DrawnSimUpdate; }
-
-		/// <summary>
-		/// Marks the draw request as fulfilled, so sim can just continue on without copying data to render unless we're asked for another frame
-		/// </summary>
-		void FulfillDrawRequest() { m_DrawnSimUpdate = false; }
-
-		/// <summary>
-		/// Tells how many sim updates have been performed since the last one that ended up being a drawn frame.
-		/// If negative, it means no sim updates have happened, and a same frame will be drawn again.
-		/// </summary>
-		/// <returns>The number of pure sim updates that have happened since the last drawn.</returns>
-		int SimUpdatesSinceDrawn() const { return m_SimUpdatesSinceDrawn; }
-
-		/// <summary>
 		/// Gets the simulation speed over real time.
 		/// </summary>
 		/// <returns>The value of the simulation speed over real time.</returns>
@@ -96,7 +78,13 @@ namespace RTE {
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
 		/// </summary>
 		/// <returns>A float describing the current cap in seconds.</returns>
-		float GetRealToSimCap() const;
+		float GetRealToSimCap() const { return static_cast<float>(m_RealToSimCap) / static_cast<float>(m_TicksPerSecond); }
+
+		/// <summary>
+		/// Sets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
+		/// </summary>
+		/// <param name="newCap">A float specifying the new cap in seconds.</param>
+		void SetRealToSimCap(float newCap) { m_RealToSimCap = static_cast<long long>(newCap * static_cast<float>(m_TicksPerSecond)); }
 
 		/// <summary>
 		/// Gets the number of ticks per second (the resolution of the timer).
@@ -221,16 +209,12 @@ namespace RTE {
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 
-		std::atomic<int> m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
-		std::atomic<bool> m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
 		bool m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
 
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
 		std::atomic<bool> m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
-		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
-		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
 
 	private:
 

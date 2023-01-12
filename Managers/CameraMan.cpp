@@ -69,23 +69,21 @@ namespace RTE {
 	void CameraMan::SetScrollTarget(const Vector &targetCenter, float speed, int screenId) {
 		Screen &screen = m_Screens[screenId];
 
-        if (g_TimerMan.DrawnSimUpdate()) {
-            // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
-            if (screen.m_TargetWrapped) {
-                const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
-                if (terrain->WrapsX()) {
-                    int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
-                    screen.m_Offset.SetX(screen.m_Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
-                    screen.m_SeamCrossCount[X] += wrappingScrollDirection;
-                }
-                if (terrain->WrapsY()) {
-                    int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
-                    screen.m_Offset.SetY(screen.m_Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
-                    screen.m_SeamCrossCount[Y] += wrappingScrollDirection;
-                }
+        // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
+        if (screen.m_TargetWrapped) {
+            const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
+            if (terrain->WrapsX()) {
+                int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
+                screen.m_Offset.SetX(screen.m_Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
+                screen.m_SeamCrossCount[X] += wrappingScrollDirection;
             }
-            screen.m_TargetWrapped = false;
+            if (terrain->WrapsY()) {
+                int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
+                screen.m_Offset.SetY(screen.m_Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
+                screen.m_SeamCrossCount[Y] += wrappingScrollDirection;
+            }
         }
+        screen.m_TargetWrapped = false;
         
         Vector oldOffset(screen.m_Offset);
 

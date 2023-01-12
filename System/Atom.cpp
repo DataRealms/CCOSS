@@ -1007,7 +1007,7 @@ namespace RTE {
 		//RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segments!!");
 
 		// Draw the trail
-		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength && trailPoints.size() > 0) {
+		if (m_TrailLength && trailPoints.size() > 0) {
 			Vector topLeftExtent = Vector(trailPoints[0].first, trailPoints[0].second);
 			Vector bottomRightExtent = topLeftExtent + Vector(1.0F, 1.0F);
 

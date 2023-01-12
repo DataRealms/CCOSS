@@ -240,11 +240,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MOPixel::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-		// Don't draw color if this isn't a drawing frame
-		if (!g_TimerMan.DrawnSimUpdate() && mode == g_DrawColor) {
-			return;
-		}
-
 		int drawColor = -1;
 
 		switch (mode) {

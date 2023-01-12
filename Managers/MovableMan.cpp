@@ -1546,12 +1546,8 @@ void MovableMan::Update()
 
 	m_SimUpdateFrameNumber++;
 
-    // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
-        g_PostProcessMan.ClearScenePostEffects();
-    }
-    // ---TEMP---
-    
+    g_PostProcessMan.ClearScenePostEffects();
+
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TeamOne] = false;
     m_SortTeamRoster[Activity::TeamTwo] = false;

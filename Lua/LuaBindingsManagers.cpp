@@ -388,8 +388,7 @@ namespace RTE {
 
 		.property("TicksPerSecond", &LuaAdaptersTimerMan::GetTicksPerSecond)
 
-		.def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
-		.def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate);
+		.def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

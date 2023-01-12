@@ -3734,18 +3734,16 @@ void AHuman::Update()
 
     /////////////////////////////////
     // Manage Attachable:s
-    if (m_pHead) {
-        float toRotate = 0;
-        // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((adjustedAimAngle) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
+	if (m_pHead) {
+		float toRotate = 0;
+		if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
+			toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((adjustedAimAngle)* m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
 		} else {
 			// Rotate the head loosely along with the body if upside down, unstable or dying.
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(rot) * m_pHead->GetJointStiffness() * (std::abs(toRotate) + c_QuarterPI);
-        }
-        // Now actually rotate by the amount calculated above
-        m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
-    }
+			toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(rot) * m_pHead->GetJointStiffness() * c_QuarterPI;
+		}
+		m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
+	}
 
     if (m_pFGLeg) {
         m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
@@ -4281,6 +4279,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
             std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
+			m_HUDStack -= 9;
         }
 /*
         // AI Mode select GUI HUD

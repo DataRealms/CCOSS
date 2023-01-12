@@ -501,7 +501,7 @@ Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) con
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
-    if (woundToAdd && !ToDelete()) {
+    if (woundToAdd && !m_ToDelete) {
 		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
 			// Find and detach an attachable near the new wound before gibbing the object itself.
 			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
@@ -714,6 +714,10 @@ void MOSRotating::AddRecoil()
 
 bool MOSRotating::CollideAtPoint(HitData &hd)
 {
+	if (m_ToDelete) {
+		return false;	// TODO: Add a settings flag to enable old school particle sponges!
+	}
+
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
 

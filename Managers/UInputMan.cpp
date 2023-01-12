@@ -749,6 +749,12 @@ namespace RTE {
 	int UInputMan::Update() {
 		m_LastDeviceWhichControlledGUICursor = InputDevice::DEVICE_KEYB_ONLY;
 
+		// TODO_MULTITHREAD
+		// Handle this properly.
+		// There should be an intelligent division between inputs and controller states.
+		// Probably "stack" all UI updates into the controller for the *last* sim frame (so the state doesn't change mid-frame)
+		// But then that introduces a frame of latency. Alternatively, just let it update midframe. 
+		// Tbh having things update mid-frame hasn't hurt, unless it's deleting stuff or changing lists being looped through by draw
 		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
 		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
 		for (Gamepad &gamepad : s_ChangedJoystickStates) {

@@ -100,6 +100,12 @@ namespace RTE
         // Not only is this mutex slow, but it's basically impossible to find all the permutables of how and when drawn things change
         // I.E attachables, wounds etc changing
         // I'll try to think of a nice not-requiring-too-many-massive-changes way of doing that...
+        // Okay, how about this!
+        // We have a QueueInRenderThread, which takes a function pointer (just like QueueInSimThread)
+        // Either that or a full-blown draw queue - but that's trickier because different things draw in different ways
+        // Anyways, we queue these draw requests into ModifiableGameState
+        // SimThread handles it's MovableMan objects lists etc, but once it's done with something it doesn't immediately delete it. Instead, it queues deletions up
+        // Render thread, then, when swapping to the new draw queue, deletes the marked-for-deletion MOs
 		std::mutex m_MODeletedMutex; //!< Mutex to ensure MO lists aren't being modified while we loop through them.
 
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.

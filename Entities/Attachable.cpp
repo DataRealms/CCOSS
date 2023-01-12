@@ -368,10 +368,12 @@ namespace RTE {
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
 		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 
-		m_PrevPos = m_Pos;
-		m_PrevVel = m_Vel;
-		m_PrevParentOffset = m_ParentOffset;
-		m_PrevJointOffset = m_JointOffset;
+		if (m_Parent) {
+			m_PrevPos = m_Pos;
+			m_PrevVel = m_Vel;
+			m_PrevParentOffset = m_ParentOffset;
+			m_PrevJointOffset = m_JointOffset;
+		}
 		m_PreUpdateHasRunThisFrame = false;
 	}
 

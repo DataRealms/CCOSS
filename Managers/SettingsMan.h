@@ -244,6 +244,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable smart BuyMenu navigation or not.</param>
 		void SetSmartBuyMenuNavigation(bool enable) { m_EnableSmartBuyMenuNavigation = enable; }
+
+		/// <summary>
+		/// Gets the maximum height of a column of scrap terrain to collapse, when the bottom pixel is knocked loose.
+		/// </summary>
+		/// <returns>The compacting height of scrap terrain.</returns>
+		int GetCompactingHeight() const { return m_CompactingHeight; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -499,6 +505,7 @@ namespace RTE {
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 		bool m_EnableSmartBuyMenuNavigation; //!< Whether swapping to equipment mode and back should change active tabs in the BuyMenu.
+		int m_CompactingHeight; //!< The maximum height of a column of scrap terrain to collapse, when the bottom pixel is knocked loose.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

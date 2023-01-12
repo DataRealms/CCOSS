@@ -29,6 +29,7 @@ namespace RTE {
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
+		m_CompactingHeight = 25;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -164,6 +165,8 @@ namespace RTE {
 			reader >> m_ShowEnemyHUD;
 		} else if (propName == "SmartBuyMenuNavigation") {
 			reader >> m_EnableSmartBuyMenuNavigation;
+		} else if (propName == "CompactingHeight") {
+			reader >> m_CompactingHeight;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -346,6 +349,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
+		writer.NewPropertyWithValue("CompactingHeight", m_CompactingHeight);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

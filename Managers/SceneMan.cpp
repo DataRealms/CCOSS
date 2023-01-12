@@ -39,7 +39,6 @@ namespace RTE
 {
 
 #define CLEANAIRINTERVAL 200000
-#define COMPACTINGHEIGHT 25
 
 const std::string SceneMan::c_ClassName = "SceneMan";
 std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
@@ -1073,9 +1072,8 @@ bool SceneMan::TryPenetrate(int posX,
     Material const * sceneMat = GetMaterialFromID(materialID);
     Material const * spawnMat;
 
-    float sprayScale = 0.1;
-//    float spraySpread = 10.0;
-    float sqrImpMag = impulse.GetSqrMagnitude();
+	float sprayScale = 0.1F;
+	float sqrImpMag = impulse.GetSqrMagnitude();
 
     // Test if impulse force is enough to penetrate
     if (sqrImpMag >= (sceneMat->GetIntegrity() * sceneMat->GetIntegrity()))
@@ -1140,10 +1138,10 @@ bool SceneMan::TryPenetrate(int posX,
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
         retardation = -(sceneMat->GetIntegrity() / std::sqrt(sqrImpMag));
+		int compactingHeight = g_SettingsMan.GetCompactingHeight();
 
-        // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
-        if (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
-        {
+		// If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles.
+		if (compactingHeight > 0 && (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)) {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
             BITMAP *pBGColor = m_pCurrentScene->GetTerrain()->GetBGColorBitmap();
@@ -1152,58 +1150,42 @@ bool SceneMan::TryPenetrate(int posX,
             int testMaterialID = g_MaterialAir;
             MOPixel *pixelMO = 0;
             Color spawnColor;
-            float sprayMag = velocity.GetLargest() * sprayScale;
-            Vector sprayVel;
+			float sprayMag = std::sqrt(velocity.GetMagnitude() * sprayScale);
+			Vector sprayVel;
 
-            // Look at pixel above to see if it isn't air and has support, or should fall down
-            for (int testY = posY - 1; testY > posY - COMPACTINGHEIGHT && testY >= 0; --testY)
-            {
-                // Check if there is a material pixel above
-                if ((testMaterialID = _getpixel(pMaterial, posX, testY)) != g_MaterialAir)
-                {
-                    sceneMat = GetMaterialFromID(testMaterialID);
+			for (int testY = posY - 1; testY > posY - compactingHeight && testY >= 0; --testY) {
+				if ((testMaterialID = _getpixel(pMaterial, posX, testY)) != g_MaterialAir) {
+					sceneMat = GetMaterialFromID(testMaterialID);
 
-                    // No support in the background layer, or is scrap material, so make particle of some of them
-                    if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor)
-                    {
-                        //  Only generate  particles of some of 'em
-                        if (RandomNum() > 0.75F)
-                        {
-                            // Figure out the mateiral and color of the new spray particle
-                            spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
-                            if (spawnMat->UsesOwnColor())
-                                spawnColor = spawnMat->GetColor();
-                            else
-                                spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
+					if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor) {
+						if (RandomNum() < 0.7F) {
+							spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+							if (spawnMat->UsesOwnColor()) {
+								spawnColor = spawnMat->GetColor();
+							} else {
+								spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
+							}
+							if (spawnColor.GetIndex() != g_MaskColor) {
+								// Send terrain pixels flying at a diminishing rate the higher the column goes.
+								sprayVel.SetXY(0, -sprayMag * (1.0F - (static_cast<float>(posY - testY) / static_cast<float>(compactingHeight))));
+								sprayVel.RadRotate(RandomNum(-c_HalfPI, c_HalfPI));
 
-                            // No point generating a key-colored MOPixel
-                            if (spawnColor.GetIndex() != g_MaskColor)
-                            {
-                                // Figure out the randomized velocity the spray should have upward
-								sprayVel.SetXY(sprayMag* RandomNormalNum() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * RandomNum(0.0F, 0.5F)));
-
-                                // Create the new spray pixel
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
 
-                                // Let it loose into the world
-                                pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
-                                pixelMO->SetToGetHitByMOs(false);
-                                g_MovableMan.AddParticle(pixelMO);
-                                pixelMO = 0;
-                            }
-
-							// Remove orphaned terrain left from hits and scrap damage
-							RemoveOrphans(posX + testY%2 ? -1 : 1, testY, 5, 25, true);
+								pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
+								pixelMO->SetToGetHitByMOs(false);
+								g_MovableMan.AddParticle(pixelMO);
+								pixelMO = 0;
+							}
+							RemoveOrphans(posX + testY % 2 ? -1 : 1, testY, removeOrphansRadius + 5, removeOrphansMaxArea + 10, true);
 						}
 
-                        // Clear the terrain pixel now when the particle has been generated from it
 						RegisterTerrainChange(posX, testY, 1, 1, g_MaskColor, false);
-                        _putpixel(pFGColor, posX, testY, g_MaskColor);
-                        _putpixel(pMaterial, posX, testY, g_MaterialAir);
-                    }
-                    // There is support, so stop checking
-                    else
-                        break;
+						_putpixel(pFGColor, posX, testY, g_MaskColor);
+						_putpixel(pMaterial, posX, testY, g_MaterialAir);
+					} else {
+						break;
+					}
                 }
             }
         }

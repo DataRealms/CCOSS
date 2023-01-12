@@ -169,7 +169,6 @@ namespace RTE {
 
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
 
-		//TODO I think this is an array with 4 elements to account for Y wrapping. Y wrapping is not really handled in this game, so this can probably be knocked down to 2 elements. Also, I'm sure this code can be simplified.
 		std::array<Vector, 4> drawPositions = { spritePos };
 		int drawPasses = 1;
 		if (g_SceneMan.SceneWrapsX()) {
@@ -192,6 +191,30 @@ namespace RTE {
 				if (targetPos.GetFloorIntX() + targetBitmap->w > g_SceneMan.GetSceneWidth()) {
 					drawPositions.at(drawPasses) = drawPositions[0];
 					drawPositions.at(drawPasses).m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
+					drawPasses++;
+				}
+			}
+		}
+		if (g_SceneMan.SceneWrapsY()) {
+			if (targetPos.IsZero() && m_WrapDoubleDraw) {
+				if (spritePos.GetFloorIntY() < m_aSprite[m_Frame]->h) {
+					drawPositions.at(drawPasses) = spritePos;
+					drawPositions.at(drawPasses).m_Y += static_cast<float>(targetBitmap->h);
+					drawPasses++;
+				} else if (spritePos.GetFloorIntY() > targetBitmap->h - m_aSprite[m_Frame]->h) {
+					drawPositions.at(drawPasses) = spritePos;
+					drawPositions.at(drawPasses).m_Y -= static_cast<float>(targetBitmap->h);
+					drawPasses++;
+				}
+			} else if (m_WrapDoubleDraw) {
+				if (targetPos.m_Y < 0) {
+					drawPositions.at(drawPasses) = drawPositions[0];
+					drawPositions.at(drawPasses).m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
+					drawPasses++;
+				}
+				if (targetPos.GetFloorIntY() + targetBitmap->h > g_SceneMan.GetSceneHeight()) {
+					drawPositions.at(drawPasses) = drawPositions[0];
+					drawPositions.at(drawPasses).m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
 					drawPasses++;
 				}
 			}

@@ -287,9 +287,6 @@ namespace RTE {
 			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
 		}
 
-		// TODO_MULTITHREAD have a gameSimMan, that holds this thread and coordinates renderable game state and communication between render/sim
-		// When the UI thread requests a particular breaking operation (i.e, pausing), we can set the sim thread to end/pause and join on it
-		// Also move things like ColorMOLayer into RenderableGameState
 		std::thread simThread([]() {
 			while (!System::IsSetToQuit()) {
 				bool serverUpdated = false;
@@ -341,27 +338,26 @@ namespace RTE {
 					long long updateEndTime = g_TimerMan.GetAbsoluteTime();
 					g_PerformanceMan.NewPerformanceSample();
 					g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
+
+					if (g_NetworkServer.IsServerModeEnabled() && g_TimerMan.DrawnSimUpdate()) {
+						// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
+						g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
+
+						if (!serverUpdated) { g_NetworkServer.Update(); }
+
+						if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
+							long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+							if (ticksToSleep > 0) {
+								double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+								long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
+								std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
+							}
+						}
+					}
 				}
 
 				// Need to call here as well as in the main loop, in case we're paused
 				g_ThreadMan.RunSimulationThreadFunctions();
-
-				// TODO_MULTITHREAD figure out what to do here if Sim is running too far behind, so it's *always* time for sim update
-				if (g_NetworkServer.IsServerModeEnabled()) {
-					// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
-					g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
-
-					if (!serverUpdated) { g_NetworkServer.Update(); }
-
-					if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
-						long long ticksToSleep = g_TimerMan.GetTimeToSleep();
-						if (ticksToSleep > 0) {
-							double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-							long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
-							std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
-						}
-					}
-				}
 			}
 		});
 

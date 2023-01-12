@@ -3448,8 +3448,8 @@ void AHuman::Update()
 				heldMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), 0).RadRotate(adjustedAimAngle));
 				m_pFGArm->SetHandPos(heldMO->GetPos());
 				Vector tossVec(1.0F + std::sqrt(std::abs(m_pFGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
-				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
-				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				heldMO->SetVel(heldMO->GetVel() * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+				heldMO->SetAngularVel(heldMO->GetAngularVel() + m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 				if (HeldDevice *heldMOAsHeldDevice = dynamic_cast<HeldDevice *>(heldMO)) {
 					g_MovableMan.AddItem(heldMOAsHeldDevice);
 				} else {
@@ -3469,8 +3469,8 @@ void AHuman::Update()
 				heldMO->SetPos(m_pBGArm->GetJointPos() + Vector(m_pBGArm->GetMaxLength() * GetFlipFactor(), 0).RadRotate(adjustedAimAngle));
 				m_pBGArm->SetHandPos(heldMO->GetPos());
 				Vector tossVec(1.0F + std::sqrt(std::abs(m_pBGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
-				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
-				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				heldMO->SetVel(heldMO->GetVel() * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+				heldMO->SetAngularVel(heldMO->GetAngularVel() + m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 				if (HeldDevice *heldMOAsHeldDevice = dynamic_cast<HeldDevice *>(heldMO)) {
 					g_MovableMan.AddItem(heldMOAsHeldDevice);
 				} else {

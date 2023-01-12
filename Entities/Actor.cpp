@@ -703,22 +703,15 @@ void Actor::AddGold(float goldOz)
     g_ActivityMan.GetActivity()->ChangeTeamFunds(goldOz, m_Team);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void Actor::RestDetection() {
+	MOSRotating::RestDetection();
 
-void Actor::RestDetection()
-{
-    MOSRotating::RestDetection();
-
-    if (m_Status != DEAD) {
-        m_RestTimer.Reset();
-        m_ToSettle = false;
-    }
+	if (m_Status != DEAD) {
+		m_RestTimer.Reset();
+		m_ToSettle = false;
+	}
 }
 
 

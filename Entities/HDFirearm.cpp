@@ -602,22 +602,13 @@ Vector HDFirearm::GetMuzzlePos() const
     return m_Pos + RotateOffset(m_MuzzleOff);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void HDFirearm::RestDetection() {
+	HeldDevice::RestDetection();
 
-void HDFirearm::RestDetection()
-{
-    HeldDevice::RestDetection();
-
-    if (m_FiredOnce)
-        m_RestTimer.Reset();
+	if (m_FiredOnce) { m_RestTimer.Reset(); }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Activate

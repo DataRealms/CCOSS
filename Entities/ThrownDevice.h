@@ -129,7 +129,7 @@ namespace RTE {
 		void Activate() override;
 
 		/// <summary>
-		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
+		/// Does the calculations necessary to detect whether this ThrownDevice is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
 		void RestDetection() override { HeldDevice::RestDetection(); if (m_Activated) { m_RestTimer.Reset(); } }
 #pragma endregion

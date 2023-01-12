@@ -71,7 +71,6 @@ void MovableObject::Clear()
     m_HasEverBeenAddedToMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
-    m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
@@ -698,36 +697,14 @@ float MovableObject::GetAltitude(int max, int accuracy)
     return g_SceneMan.FindAltitude(m_Pos, max, accuracy);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-
-void MovableObject::RestDetection()
-{
-    if (m_PinStrength)
-        return;
-
-    // Translational settling detection
-    if ((m_Vel.Dot(m_PrevVel) < 0)) {
-        if (m_VelOscillations >= 2 && m_RestThreshold >= 0)
-            m_ToSettle = true;
-        else
-            ++m_VelOscillations;
-    }
-    else
-        m_VelOscillations = 0;
-
-//    if (fabs(m_Vel.m_X) >= 0.25 || fabs(m_Vel.m_Y) >= 0.25)
-//        m_RestTimer.Reset();
-
-    if (fabs(m_Pos.m_X - m_PrevPos.m_X) >= 1.0f || fabs(m_Pos.m_Y - m_PrevPos.m_Y) >= 1.0f)
-        m_RestTimer.Reset();
+void MovableObject::RestDetection() {
+	if (m_PinStrength) {
+		return;
+	}
+	if (std::abs(m_Pos.m_X - m_PrevPos.m_X) > 1.0F || std::abs(m_Pos.m_Y - m_PrevPos.m_Y) > 1.0F) { m_RestTimer.Reset(); }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsAtRest

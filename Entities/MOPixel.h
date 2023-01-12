@@ -156,7 +156,7 @@ namespace RTE {
 		bool CollideAtPoint(HitData &hitData) override;
 
 		/// <summary>
-		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
+		/// Does the calculations necessary to detect whether this MOPixel is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
 		void RestDetection() override;
 

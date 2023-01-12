@@ -545,17 +545,10 @@ ClassInfoGetters;
     void AddGold(float goldOz);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    void RestDetection() override;
-
+	/// <summary>
+	/// Does the calculations necessary to detect whether this Actor is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	void RestDetection() override;
 
 	/// <summary>
 	/// Adds health points to this Actor's current health value.

@@ -569,16 +569,10 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// <returns>The reload progress as a scalar from 0 to 1.</returns>
 	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? std::min(static_cast<float>(m_ReloadTmr.GetElapsedSimTimeMS() / m_ReloadTime), 1.0F) : 1.0F; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    void RestDetection() override;
+	/// <summary>
+	/// Does the calculations necessary to detect whether this HDFirearm is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

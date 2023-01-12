@@ -585,8 +585,6 @@ protected:
     // The precalculated maximum possible radius and diameter of this, in pixels
     float m_SpriteRadius;
     float m_SpriteDiameter;
-    // A counter to count the oscillations in rotation, in order to detect settling.
-    int m_AngOscillations;
     // Whether to disable the settle material ID when this gets drawn as material
     bool m_SettleMaterialDisabled;
     // Entry wound template

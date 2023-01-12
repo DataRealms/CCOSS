@@ -1233,47 +1233,24 @@ void MOSRotating::ResetAllTimers()
         (*attachable)->ResetAllTimers();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void MOSRotating::RestDetection() {
+	MOSprite::RestDetection();
 
-void MOSRotating::RestDetection()
-{
-    MOSprite::RestDetection();
+	if (std::abs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01) { m_RestTimer.Reset(); }
 
-    // Rotational settling detection.
-    if (((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) && m_RestThreshold >= 0) {
-        if (m_AngOscillations >= 2)
-            m_ToSettle = true;
-        else
-            ++m_AngOscillations;
-    }
-    else
-        m_AngOscillations = 0;
+	// If about to settle, make sure the object isn't flying in the air.
+	// Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
+	if (m_ToSettle || IsAtRest()) {
+		if (g_SceneMan.OverAltitude(m_Pos, static_cast<int>(m_SpriteRadius) + 4, 3) && m_pAtomGroup->RatioInTerrain() < 0.5F) {
+			m_RestTimer.Reset();
+			m_ToSettle = false;
+		}
+	}
 
-//    if (fabs(m_AngularVel) >= 1.0)
-//        m_RestTimer.Reset();
-
-    if (fabs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01)
-        m_RestTimer.Reset();
-
-    // If we seem to be about to settle, make sure we're not flying in the air still.
-    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
-    if (m_ToSettle || IsAtRest())
-    {
-        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
-        {
-            m_RestTimer.Reset();
-            m_ToSettle = false;
-        }
-    }
-
-    m_PrevRotation = m_Rotation;
-    m_PrevAngVel = m_AngularVel;
+	m_PrevRotation = m_Rotation;
+	m_PrevAngVel = m_AngularVel;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1469,8 +1446,8 @@ void MOSRotating::Travel()
 void MOSRotating::PostTravel()
 {
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
-    if (IsTooFast())
-        GibThis();
+    //if (IsTooFast())
+    //    GibThis();
 
 	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
 	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }

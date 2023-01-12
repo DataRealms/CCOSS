@@ -862,11 +862,7 @@ bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
                         // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
                         // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
                         if (previouslyHeldItem->GetsHitByMOs()) {
-#ifdef DRAW_MOID_LAYER
-                            previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true);
-#else
                             previouslyHeldItem->SetTraveling(true);
-#endif
                         }
                         AddToInventoryBack(previouslyHeldItem);
                     }

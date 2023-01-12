@@ -598,12 +598,6 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
                 draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_WhiteColor, -1);
                 break;
             case g_DrawMOID:
-#ifdef DRAW_MOID_LAYER
-                draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_MOID, -1);
-#endif
-                break;
-            case g_DrawNoMOID:
-                draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_NoMOID, -1);
                 break;
             case g_DrawTrans:
                 draw_trans_sprite(pTargetBitmap, m_aSprite[m_Frame], spriteX, spriteY);

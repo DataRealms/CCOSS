@@ -163,7 +163,7 @@ namespace RTE {
 		RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw " + GetPresetName());
 		RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds for " + GetPresetName());
 
-		if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
+		if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID)) {
 			return;
 		}
 
@@ -208,12 +208,6 @@ namespace RTE {
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_WhiteColor, -1);
 					break;
 				case g_DrawMOID:
-#ifdef DRAW_MOID_LAYER
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_MOID, -1);
-#endif
-					break;
-				case g_DrawNoMOID:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_NoMOID, -1);
 					break;
 				case g_DrawTrans:
 					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);

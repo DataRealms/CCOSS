@@ -1530,144 +1530,6 @@ void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) const {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MovableMan::RegisterAlarmEvent(const AlarmEvent &newEvent)
-{
-    std::lock_guard<std::mutex> lock(m_AddedAlarmEventsMutex);
-    m_AddedAlarmEvents.push_back(newEvent);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RedrawOverlappingMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces all objects potnetially overlapping a specific MO to re-draw
-//                  this MOID representations onto the MOID bitmap.
-
-void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
-{
-    for (std::deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-    {
-        (*aIt)->DrawMOIDIfOverlapping(pOverlapsThis);
-    }
-
-    for (std::deque<MovableObject *>::iterator iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
-    {
-        (*iIt)->DrawMOIDIfOverlapping(pOverlapsThis);
-    }
-
-    for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-    {
-        (*parIt)->DrawMOIDIfOverlapping(pOverlapsThis);
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments) {
-    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
-        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
-            Attachable* attachable = *attachablrItr;
-            ++attachablrItr;
-
-            attachable->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-            callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-        }
-
-        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
-            AEmitter* wound = *woundItr;
-            ++woundItr;
-
-            wound->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-            callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-        }
-    }
-
-    mo->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, bool includeAdded, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments) {
-    if (includeAdded) {
-        for (Actor* actor : m_AddedActors) {
-            callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-        }
-
-        for (MovableObject *item : m_AddedItems) {
-            callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-        }
-
-        for (MovableObject* particle : m_AddedParticles) {
-            callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-        }
-    }
-    
-    for (Actor *actor : m_Actors) {
-        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-    }
-
-    for (MovableObject *item : m_Items) {
-        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-    }
-
-    for (MovableObject* particle : m_Particles) {
-        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void reloadLuaFunctionsOnMORecursive(MovableObject* mo) {
-    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
-        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
-            Attachable* attachable = *attachablrItr;
-            ++attachablrItr;
-
-            attachable->ReloadScripts();
-            reloadLuaFunctionsOnMORecursive(attachable);
-        }
-
-        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
-            AEmitter* wound = *woundItr;
-            ++woundItr;
-
-            wound->ReloadScripts();
-            reloadLuaFunctionsOnMORecursive(wound);
-        }
-    }
-
-    mo->ReloadScripts();
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MovableMan::ReloadLuaScripts() {
-    for (Actor* actor : m_AddedActors) {
-        reloadLuaFunctionsOnMORecursive(actor);
-    }
-
-    for (MovableObject* item : m_AddedItems) {
-        reloadLuaFunctionsOnMORecursive(item);
-    }
-
-    for (MovableObject* particle : m_AddedParticles) {
-        reloadLuaFunctionsOnMORecursive(particle);
-    }
-
-    for (Actor* actor : m_Actors) {
-        reloadLuaFunctionsOnMORecursive(actor);
-    }
-
-    for (MovableObject* item : m_Items) {
-        reloadLuaFunctionsOnMORecursive(item);
-    }
-
-    for (MovableObject* particle : m_Particles) {
-        reloadLuaFunctionsOnMORecursive(particle);
-    }
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1728,7 +1590,22 @@ void MovableMan::Update()
     // Update all multithreaded scripts for all objects
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
-        ZoneScopedN("Multithreaded Scripts Update");
+        // Travel Actors
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
+        {
+            for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
+            {
+                if (!((*aIt)->IsUpdated()))
+                {
+                    (*aIt)->ApplyForces();
+                    (*aIt)->PreTravel();
+                    (*aIt)->Travel();
+                    (*aIt)->PostTravel();
+                }
+                (*aIt)->NewFrame();
+            }
+        }
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
         const std::string threadedUpdate = "ThreadedUpdate"; // avoid string reconstruction
 
@@ -2084,9 +1961,27 @@ void MovableMan::Update()
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
-    m_DrawMOIDsTask = g_ThreadMan.GetPriorityThreadPool().submit([this]() {
-        UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
-    });
+
+    UpdateDrawMOIDs();
+
+	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
+	{
+		int team = Activity::NoTeam;
+
+		for (team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
+			m_TeamMOIDCount[team] = 0;
+		
+		for (std::vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
+		{
+			if (*itr)
+			{
+				team = (*itr)->GetTeam();
+
+				if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
+					m_TeamMOIDCount[team]++;
+			}
+		}
+	}
 
     // Sort team rosters if necessary
     {
@@ -2279,10 +2174,9 @@ void MovableMan::VerifyMOIDIndex()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateDrawMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the MOIDs of all current MOs and draws their ID's to a BITMAP
-//                  of choice.
+// Description:     Updates the MOIDs of all current MOs and draws their ID's to the MOID grid
 
-void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
+void MovableMan::UpdateDrawMOIDs()
 {
     ZoneScoped;
 
@@ -2305,7 +2199,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
         m_ContiguousActorIDs[actor] = actorID++;
 		if (!actor->IsSetToDelete()) {
             actor->UpdateMOID(m_MOIDIndex);
-            actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
+            actor->Draw(nullptr, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
         } else {
             actor->SetAsNoID();
@@ -2315,7 +2209,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     for (MovableObject *item : m_Items) {
         if (!item->IsSetToDelete()) {
             item->UpdateMOID(m_MOIDIndex);
-            item->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
+            item->Draw(nullptr, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
         } else {
             item->SetAsNoID();
@@ -2325,7 +2219,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     for (MovableObject *particle : m_Particles) {
         if (!particle->IsSetToDelete()) {
             particle->UpdateMOID(m_MOIDIndex);
-            particle->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
+            particle->Draw(nullptr, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
         } else {
             particle->SetAsNoID();

@@ -1657,17 +1657,6 @@ enum MOType
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawMOIDIfOverlapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the MOID representation of this to the SceneMan's MOID layer if
-//                  this is found to potentially overlap another MovableObject.
-// Arguments:       The MovableObject to check this for overlap against.
-// Return value:    Whether it was drawn or not.
-
-    virtual bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO) { return false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this' current graphical HUD overlay representation to a

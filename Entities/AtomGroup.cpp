@@ -1445,9 +1445,6 @@ namespace RTE {
 				if (tempMO->GetsHitByMOs()) {
 					// Make that MO draw itself again in the MOID layer so we can find its true edges
 					intersectedMO = tempMO;
-#ifdef DRAW_MOID_LAYER
-					intersectedMO->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-#endif
 					break;
 				}
 			}

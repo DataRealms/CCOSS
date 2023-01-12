@@ -251,27 +251,16 @@ namespace RTE {
 			case g_DrawMaterial:
 				drawColor = m_Atom->GetMaterial()->GetSettleMaterial();
 				break;
-			case g_DrawMOID:
-				drawColor = m_MOID;
-				break;
-			case g_DrawNoMOID:
-				drawColor = g_NoMOID;
-				break;
 			default:
 				drawColor = m_Color.GetIndex();
 				break;
 		}
 
-		bool shouldDraw = true;
-
-#ifndef DRAW_MOID_LAYER
-		shouldDraw = mode != DrawMode::g_DrawMOID;
-#endif
-
-		Vector pixelPos = m_Pos - targetPos;
-
-		if (shouldDraw) {
-			putpixel(targetBitmap, pixelPos.GetFloorIntX(), pixelPos.GetFloorIntY(), drawColor);
+		if (mode != g_DrawMOID)
+		{
+			acquire_bitmap(targetBitmap);
+			putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
+			release_bitmap(targetBitmap);
 		}
 
 		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, m_Pos - targetPos, 1);

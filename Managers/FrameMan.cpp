@@ -981,14 +981,10 @@ namespace RTE {
 				textPosY += 12;
 			}
 
-			// Draw info text when in MOID or material layer draw mode
+			// Draw info text when in material layer draw mode
 			switch (g_SceneMan.GetLayerDrawMode()) {
 				case g_LayerTerrainMatter:
-					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
-					break;
-#ifdef DRAW_MOID_LAYER
-				case g_LayerMOID:
-					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing MovableObject ID layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
+					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to toggle", GUIFont::Centre, GUIFont::Bottom);
 					break;
 #endif
 				default:

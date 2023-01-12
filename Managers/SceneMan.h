@@ -42,11 +42,7 @@ struct PostEffect;
 enum LayerDrawMode
 {
     g_LayerNormal = 0,
-    g_LayerTerrainMatter,
-
-#ifdef DRAW_MOID_LAYER
-	g_LayerMOID
-#endif
+    g_LayerTerrainMatter
 };
 
 #define SCENEGRIDSIZE 24
@@ -368,29 +364,6 @@ public:
 // Return value:    A BITMAP pointer to the debug bitmap. Ownership is NOT transferred!
 
     BITMAP * GetDebugBitmap() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the bitmap of the SceneLayer that all MovableObject:s draw thir
-//                  current (for the frame only!) MOID's onto.
-// Arguments:       None.
-// Return value:    A BITMAP pointer to the MO bitmap. Ownership is NOT transferred!
-
-    BITMAP * GetMOIDBitmap() const;
-
-// TEMP!
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MOIDClearCheck
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure the MOID bitmap layer is completely of NoMOID color.
-//                  If found to be not, dumps MOID layer and the FG actor color layer for
-//                  debugging.
-// Arguments:       None.
-// Return value:    Was it clear?
-
-    bool MOIDClearCheck();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

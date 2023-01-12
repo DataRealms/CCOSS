@@ -752,18 +752,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RedrawOverlappingMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces all objects potnetially overlapping a specific MO to re-draw
-//                  this MOID representations onto the MOID bitmap.
-// Arguments:       A pointer to the MO to check for overlaps against. Ownerhip is NOT
-//                  transferred.
-// Return value:    None.
-
-    void RedrawOverlappingMOIDs(MovableObject *pOverlapsThis);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the state of this MovableMan. Supposed to be done every frame.
@@ -788,12 +776,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateDrawMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the MOIDs of all current MOs and draws their ID's to a BITMAP
-//                  of choice. If there are more than 255 MO's to draw, some will not be.
+// Description:     Updates the MOIDs of all current MOs and draws their ID's to the grid
 // Arguments:       A pointer to a BITMAP to draw on.
 // Return value:    None.
 
-    void UpdateDrawMOIDs(BITMAP *pTargetBitmap);
+    void UpdateDrawMOIDs();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

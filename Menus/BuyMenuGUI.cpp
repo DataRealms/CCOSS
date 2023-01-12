@@ -2375,7 +2375,7 @@ void BuyMenuGUI::AddPresetsToItemList()
         // Add the ship's cost, if there is one defined
         if ((*lItr).GetDeliveryCraft())
         {
-            loadoutLabel += " on " + (*lItr).GetDeliveryCraft()->GetPresetName();
+            loadoutLabel += " via " + (*lItr).GetDeliveryCraft()->GetPresetName();
             // Adjust price for foreignness of the ship to this player
             loadoutCost += (*lItr).GetDeliveryCraft()->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
         }

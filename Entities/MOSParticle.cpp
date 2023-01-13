@@ -176,6 +176,9 @@ namespace RTE {
 			return;
 		}
 
+        bool wrapDoubleDraw = m_WrapDoubleDraw;
+		char settleMaterial = m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial();
+
 		auto renderFunc = [=]() {
 			BITMAP* pTargetBitmap = targetBitmap;
 			Vector renderPos = spritePos;
@@ -188,7 +191,7 @@ namespace RTE {
 			std::array<Vector, 4> drawPositions = { renderPos };
 			int drawPasses = 1;
 			if (g_SceneMan.SceneWrapsX()) {
-				if (renderPos.IsZero() && m_WrapDoubleDraw) {
+				if (renderPos.IsZero() && wrapDoubleDraw) {
 					if (spritePos.GetFloorIntX() < currentFrame->w) {
 						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_X += static_cast<float>(pTargetBitmap->w);
@@ -198,7 +201,7 @@ namespace RTE {
 						drawPositions[drawPasses].m_X -= static_cast<float>(pTargetBitmap->w);
 						drawPasses++;
 					}
-				} else if (m_WrapDoubleDraw) {
+				} else if (wrapDoubleDraw) {
 					if (renderPos.m_X < 0) {
 						drawPositions[drawPasses] = drawPositions[0];
 						drawPositions[drawPasses].m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
@@ -212,7 +215,7 @@ namespace RTE {
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
-				if (renderPos.IsZero() && m_WrapDoubleDraw) {
+				if (renderPos.IsZero() && wrapDoubleDraw) {
 					if (spritePos.GetFloorIntY() < currentFrame->h) {
 						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_Y += static_cast<float>(pTargetBitmap->h);
@@ -222,7 +225,7 @@ namespace RTE {
 						drawPositions[drawPasses].m_Y -= static_cast<float>(pTargetBitmap->h);
 						drawPasses++;
 					}
-				} else if (m_WrapDoubleDraw) {
+				} else if (wrapDoubleDraw) {
 					if (renderPos.m_Y < 0) {
 						drawPositions[drawPasses] = drawPositions[0];
 						drawPositions[drawPasses].m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
@@ -241,7 +244,7 @@ namespace RTE {
 				int spriteY = drawPositions.at(i).GetFloorIntY();
 				switch (mode) {
 					case g_DrawMaterial:
-						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
+						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, settleMaterial, -1);
 						break;
 					case g_DrawWhite:
 						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, g_WhiteColor, -1);

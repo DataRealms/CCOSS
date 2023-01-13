@@ -721,6 +721,7 @@ namespace RTE {
 
 		int m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
 		ViewState m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
+		Timer m_DeathTimer[Players::MaxPlayerCount]; //!< Timers for measuring death view delays.
 
 		std::string m_TeamNames[Teams::MaxTeamCount]; //!< Names for each team.
 		Icon m_TeamIcons[Teams::MaxTeamCount]; //!< Icons for each team.

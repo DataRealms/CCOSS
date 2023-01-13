@@ -1138,7 +1138,7 @@ bool SceneMan::TryPenetrate(int posX,
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
         retardation = -(sceneMat->GetIntegrity() / std::sqrt(sqrImpMag));
-		int compactingHeight = g_SettingsMan.GetCompactingHeight();
+		int compactingHeight = g_SettingsMan.GetScrapCompactingHeight();
 
 		// If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles.
 		if (compactingHeight > 0 && (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)) {

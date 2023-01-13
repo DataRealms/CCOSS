@@ -60,7 +60,6 @@ void GameActivity::Clear()
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
-        m_DeathTimer[player].Reset();
         m_ActorSelectTimer[player].Reset();
         m_ActorCursor[player].Reset();
         m_pLastMarkedActor[player] = 0;
@@ -162,7 +161,6 @@ int GameActivity::Create(const GameActivity &reference)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
-//        m_DeathTimer[player] = reference.m_DeathTimer[player];
         m_ActorCursor[player] = reference.m_ActorCursor[player];
         m_pLastMarkedActor[player] = reference.m_pLastMarkedActor[player];
         m_LandingZone[player] = reference.m_LandingZone[player];

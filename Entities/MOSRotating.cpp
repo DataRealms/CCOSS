@@ -1446,8 +1446,7 @@ void MOSRotating::Travel()
 void MOSRotating::PostTravel()
 {
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
-    //if (IsTooFast())
-    //    GibThis();
+	if (IsTooFast()) { GibThis(); }
 
 	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
 	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }

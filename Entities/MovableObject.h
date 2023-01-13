@@ -1165,28 +1165,15 @@ enum MOType
 	/// </summary>
 	virtual void RestDetection();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NotResting
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO reset its tiemr that keeps track of how long it's been
-//                  at rest, effectively delaying it.
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Forces this MovableObject out of resting conditions.
+	/// </summary>
 	void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for more
-//                  than one (1) second.
-// Arguments:       None.
-// Return value:    Wheter the MovableObject has been at rest for more than one full second.
-
+	/// <summary>
+	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
 	bool IsAtRest();
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsUpdated

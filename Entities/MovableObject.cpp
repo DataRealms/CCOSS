@@ -700,29 +700,18 @@ float MovableObject::GetAltitude(int max, int accuracy)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::RestDetection() {
-	if (m_PinStrength) {
-		return;
+	if (m_PinStrength || (m_Pos - m_PrevPos).MagnitudeIsGreaterThan(1.0F)) { m_RestTimer.Reset(); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::IsAtRest() {
+	if (m_RestThreshold < 0) {
+		return false;
+	} else {
+		return m_RestTimer.IsPastSimMS(m_RestThreshold);
 	}
-	if (std::abs(m_Pos.m_X - m_PrevPos.m_X) > 1.0F || std::abs(m_Pos.m_Y - m_PrevPos.m_Y) > 1.0F) { m_RestTimer.Reset(); }
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for
-//                  more than one (1) second.
-
-bool MovableObject::IsAtRest()
-{
-    if (m_PinStrength)
-        return false;
-
-    if (m_RestThreshold < 0)
-        return false;
-    else
-        return m_RestTimer.IsPastSimMS(m_RestThreshold);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  OnMOHit

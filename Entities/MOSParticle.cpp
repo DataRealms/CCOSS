@@ -184,52 +184,53 @@ namespace RTE {
 				renderPos -= g_ThreadMan.GetRenderOffset();
 			}
 
+        	// Take care of wrapping situations
 			std::array<Vector, 4> drawPositions = { renderPos };
 			int drawPasses = 1;
 			if (g_SceneMan.SceneWrapsX()) {
-				if (targetPos.IsZero() && m_WrapDoubleDraw) {
-					if (renderPos.GetFloorIntX() < currentFrame->w) {
-						drawPositions[drawPasses] = renderPos;
+				if (renderPos.IsZero() && m_WrapDoubleDraw) {
+					if (spritePos.GetFloorIntX() < currentFrame->w) {
+						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_X += static_cast<float>(pTargetBitmap->w);
 						drawPasses++;
-					} else if (renderPos.GetFloorIntX() > pTargetBitmap->w - currentFrame->w) {
-						drawPositions[drawPasses] = renderPos;
+					} else if (spritePos.GetFloorIntX() > pTargetBitmap->w - currentFrame->w) {
+						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_X -= static_cast<float>(pTargetBitmap->w);
 						drawPasses++;
 					}
 				} else if (m_WrapDoubleDraw) {
-					if (targetPos.m_X < 0) {
-						drawPositions[drawPasses] = drawPositions[0];
-						drawPositions[drawPasses].m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
-						drawPasses++;
-					}
-					if (targetPos.GetFloorIntX() + pTargetBitmap->w > g_SceneMan.GetSceneWidth()) {
+					if (renderPos.m_X < 0) {
 						drawPositions[drawPasses] = drawPositions[0];
 						drawPositions[drawPasses].m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
+						drawPasses++;
+					}
+					if (renderPos.GetFloorIntX() + pTargetBitmap->w > g_SceneMan.GetSceneWidth()) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
 						drawPasses++;
 					}
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
-				if (targetPos.IsZero() && m_WrapDoubleDraw) {
-					if (renderPos.GetFloorIntY() < currentFrame->h) {
-						drawPositions[drawPasses] = renderPos;
+				if (renderPos.IsZero() && m_WrapDoubleDraw) {
+					if (spritePos.GetFloorIntY() < currentFrame->h) {
+						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_Y += static_cast<float>(pTargetBitmap->h);
 						drawPasses++;
-					} else if (renderPos.GetFloorIntY() > pTargetBitmap->h - currentFrame->h) {
-						drawPositions[drawPasses] = renderPos;
+					} else if (spritePos.GetFloorIntY() > pTargetBitmap->h - currentFrame->h) {
+						drawPositions[drawPasses] = spritePos;
 						drawPositions[drawPasses].m_Y -= static_cast<float>(pTargetBitmap->h);
 						drawPasses++;
 					}
 				} else if (m_WrapDoubleDraw) {
-					if (targetPos.m_Y < 0) {
-						drawPositions[drawPasses] = drawPositions[0];
-						drawPositions[drawPasses].m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
-						drawPasses++;
-					}
-					if (targetPos.GetFloorIntY() + pTargetBitmap->h > g_SceneMan.GetSceneHeight()) {
+					if (renderPos.m_Y < 0) {
 						drawPositions[drawPasses] = drawPositions[0];
 						drawPositions[drawPasses].m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
+						drawPasses++;
+					}
+					if (renderPos.GetFloorIntY() + pTargetBitmap->h > g_SceneMan.GetSceneHeight()) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
 						drawPasses++;
 					}
 				}

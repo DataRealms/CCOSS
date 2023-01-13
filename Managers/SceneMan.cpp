@@ -2756,13 +2756,13 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			break;
 	}
 
-#ifdef DEBUG_BUILD
+//#ifdef DEBUG_BUILD
     // Draw scene seams
     LinePrimitive horizontal(0, Vector(0, 0), Vector(GetSceneWidth(), 0), ColorKeys::g_GreenColor);
     LinePrimitive vertical(0, Vector(0, 0), Vector(0, GetSceneHeight()), ColorKeys::g_GreenColor);
     horizontal.Draw(targetBitmap, targetPos);
     vertical.Draw(targetBitmap, targetPos);
-#endif
+//#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

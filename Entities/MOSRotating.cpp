@@ -1790,80 +1790,53 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         }
 
         // Take care of wrapping situations
-        Vector aDrawPos[4];
-        int passes = 1;
-
-        aDrawPos[0] = renderPos;
-
-        // Only bother with wrap drawing if the scene actually wraps around
-        if (g_SceneMan.SceneWrapsX())
-        {
-            // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-            if (targetPos.IsZero() && m_WrapDoubleDraw)
-            {
-                if (renderPos.m_X < m_SpriteDiameter)
-                {
-                    aDrawPos[passes] = renderPos;
-                    aDrawPos[passes].m_X += pTargetBitmap->w;
-                    passes++;
+        std::array<Vector, 4> drawPositions = { renderPos };
+        int drawPasses = 1;
+        if (g_SceneMan.SceneWrapsX()) {
+            if (renderPos.IsZero() && m_WrapDoubleDraw) {
+                if (spritePos.GetFloorIntX() < currentFrame->w) {
+                    drawPositions[drawPasses] = spritePos;
+                    drawPositions[drawPasses].m_X += static_cast<float>(pTargetBitmap->w);
+                    drawPasses++;
+                } else if (spritePos.GetFloorIntX() > pTargetBitmap->w - currentFrame->w) {
+                    drawPositions[drawPasses] = spritePos;
+                    drawPositions[drawPasses].m_X -= static_cast<float>(pTargetBitmap->w);
+                    drawPasses++;
                 }
-                else if (renderPos.m_X > pTargetBitmap->w - m_SpriteDiameter)
-                {
-                    aDrawPos[passes] = renderPos;
-                    aDrawPos[passes].m_X -= pTargetBitmap->w;
-                    passes++;
+            } else if (m_WrapDoubleDraw) {
+                if (renderPos.m_X < 0) {
+                    drawPositions[drawPasses] = drawPositions[0];
+                    drawPositions[drawPasses].m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
+                    drawPasses++;
                 }
-            }
-            // Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
-            else if (m_WrapDoubleDraw)
-            {
-                if (targetPos.m_X < 0)
-                {
-                    aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_X -= g_SceneMan.GetSceneWidth();
-                    passes++;
-                }
-                if (targetPos.m_X + pTargetBitmap->w > g_SceneMan.GetSceneWidth())
-                {
-                    aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_X += g_SceneMan.GetSceneWidth();
-                    passes++;
+                if (renderPos.GetFloorIntX() + pTargetBitmap->w > g_SceneMan.GetSceneWidth()) {
+                    drawPositions[drawPasses] = drawPositions[0];
+                    drawPositions[drawPasses].m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
+                    drawPasses++;
                 }
             }
         }
-
-        if (g_SceneMan.SceneWrapsY())
-        {
-            // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-            if (targetPos.IsZero() && m_WrapDoubleDraw)
-            {
-                if (renderPos.m_Y < m_SpriteDiameter)
-                {
-                    aDrawPos[passes] = renderPos;
-                    aDrawPos[passes].m_Y += pTargetBitmap->h;
-                    passes++;
+        if (g_SceneMan.SceneWrapsY()) {
+            if (renderPos.IsZero() && m_WrapDoubleDraw) {
+                if (spritePos.GetFloorIntY() < currentFrame->h) {
+                    drawPositions[drawPasses] = spritePos;
+                    drawPositions[drawPasses].m_Y += static_cast<float>(pTargetBitmap->h);
+                    drawPasses++;
+                } else if (spritePos.GetFloorIntY() > pTargetBitmap->h - currentFrame->h) {
+                    drawPositions[drawPasses] = spritePos;
+                    drawPositions[drawPasses].m_Y -= static_cast<float>(pTargetBitmap->h);
+                    drawPasses++;
                 }
-                else if (renderPos.m_Y > pTargetBitmap->h - m_SpriteDiameter)
-                {
-                    aDrawPos[passes] = renderPos;
-                    aDrawPos[passes].m_Y -= pTargetBitmap->h;
-                    passes++;
+            } else if (m_WrapDoubleDraw) {
+                if (renderPos.m_Y < 0) {
+                    drawPositions[drawPasses] = drawPositions[0];
+                    drawPositions[drawPasses].m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
+                    drawPasses++;
                 }
-            }
-            // Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
-            else if (m_WrapDoubleDraw)
-            {
-                if (targetPos.m_Y < 0)
-                {
-                    aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_Y -= g_SceneMan.GetSceneHeight();
-                    passes++;
-                }
-                if (targetPos.m_Y + pTargetBitmap->h > g_SceneMan.GetSceneHeight())
-                {
-                    aDrawPos[passes] = aDrawPos[0];
-                    aDrawPos[passes].m_Y += g_SceneMan.GetSceneHeight();
-                    passes++;
+                if (renderPos.GetFloorIntY() + pTargetBitmap->h > g_SceneMan.GetSceneHeight()) {
+                    drawPositions[drawPasses] = drawPositions[0];
+                    drawPositions[drawPasses].m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
+                    drawPasses++;
                 }
             }
         }
@@ -1907,9 +1880,9 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
 
                 // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
                 // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-                for (int i = 0; i < passes; ++i) {
-                    int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
-                    int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                for (int i = 0; i < drawPasses; ++i) {
+                    int spriteX = drawPositions[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                    int spriteY = drawPositions[i].GetFloorIntY() - (pTempBitmap->h / 2);
 
                     draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
                 }
@@ -1918,10 +1891,10 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
             else
             {
                 // Do the passes loop in here so the flipping operation doesn't get done multiple times
-                for (int i = 0; i < passes; ++i)
+                for (int i = 0; i < drawPasses; ++i)
                 {
-                    int spriteX = aDrawPos[i].GetFloorIntX();
-                    int spriteY = aDrawPos[i].GetFloorIntY();
+                    int spriteX = drawPositions[i].GetFloorIntX();
+                    int spriteY = drawPositions[i].GetFloorIntY();
 
                     // Take into account the h-flipped pivot point
                     pivot_scaled_sprite(pTargetBitmap,
@@ -1961,9 +1934,9 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
 
                 // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
                 // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-                for (int i = 0; i < passes; ++i) {
-                    int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
-                    int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                for (int i = 0; i < drawPasses; ++i) {
+                    int spriteX = drawPositions[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                    int spriteY = drawPositions[i].GetFloorIntY() - (pTempBitmap->h / 2);
 
                     draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
                 }
@@ -1971,10 +1944,10 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
             // Non-transparent mode
             else
             {
-                for (int i = 0; i < passes; ++i)
+                for (int i = 0; i < drawPasses; ++i)
                 {
-                    int spriteX = aDrawPos[i].GetFloorIntX();
-                    int spriteY = aDrawPos[i].GetFloorIntY();
+                    int spriteX = drawPositions[i].GetFloorIntX();
+                    int spriteY = drawPositions[i].GetFloorIntY();
 
                     pivot_scaled_sprite(pTargetBitmap,
                                         mode == g_DrawColor ? currentFrame : pTempBitmap,

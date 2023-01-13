@@ -1519,10 +1519,6 @@ enum MOType
 
 	void Update() override;
 
-    /// Update draw
-    // TODO_MULTITHREAD proper description
-    virtual void UpdateDraw() {};
-
 
     /// <summary>
 	/// Updates this MovableObject's Lua scripts.

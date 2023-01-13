@@ -2,6 +2,7 @@
 
 #include "Atom.h"
 #include "PostProcessMan.h"
+#include "ThreadMan.h"
 
 namespace RTE {
 
@@ -162,89 +163,112 @@ namespace RTE {
 	void MOSParticle::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw " + GetPresetName());
 		RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds for " + GetPresetName());
-
-		if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID)) {
-			return;
+		
+		BITMAP *currentFrame = m_aSprite[m_Frame];
+		if (!currentFrame) {
+			RTEAbort("Sprite frame pointer is null when drawing MOSprite!");
 		}
 
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
-
-		std::array<Vector, 4> drawPositions = { spritePos };
-		int drawPasses = 1;
-		if (g_SceneMan.SceneWrapsX()) {
-			if (targetPos.IsZero() && m_WrapDoubleDraw) {
-				if (spritePos.GetFloorIntX() < m_aSprite[m_Frame]->w) {
-					drawPositions.at(drawPasses) = spritePos;
-					drawPositions.at(drawPasses).m_X += static_cast<float>(targetBitmap->w);
-					drawPasses++;
-				} else if (spritePos.GetFloorIntX() > targetBitmap->w - m_aSprite[m_Frame]->w) {
-					drawPositions.at(drawPasses) = spritePos;
-					drawPositions.at(drawPasses).m_X -= static_cast<float>(targetBitmap->w);
-					drawPasses++;
-				}
-			} else if (m_WrapDoubleDraw) {
-				if (targetPos.m_X < 0) {
-					drawPositions.at(drawPasses) = drawPositions[0];
-					drawPositions.at(drawPasses).m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
-					drawPasses++;
-				}
-				if (targetPos.GetFloorIntX() + targetBitmap->w > g_SceneMan.GetSceneWidth()) {
-					drawPositions.at(drawPasses) = drawPositions[0];
-					drawPositions.at(drawPasses).m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
-					drawPasses++;
-				}
-			}
-		}
-		if (g_SceneMan.SceneWrapsY()) {
-			if (targetPos.IsZero() && m_WrapDoubleDraw) {
-				if (spritePos.GetFloorIntY() < m_aSprite[m_Frame]->h) {
-					drawPositions.at(drawPasses) = spritePos;
-					drawPositions.at(drawPasses).m_Y += static_cast<float>(targetBitmap->h);
-					drawPasses++;
-				} else if (spritePos.GetFloorIntY() > targetBitmap->h - m_aSprite[m_Frame]->h) {
-					drawPositions.at(drawPasses) = spritePos;
-					drawPositions.at(drawPasses).m_Y -= static_cast<float>(targetBitmap->h);
-					drawPasses++;
-				}
-			} else if (m_WrapDoubleDraw) {
-				if (targetPos.m_Y < 0) {
-					drawPositions.at(drawPasses) = drawPositions[0];
-					drawPositions.at(drawPasses).m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
-					drawPasses++;
-				}
-				if (targetPos.GetFloorIntY() + targetBitmap->h > g_SceneMan.GetSceneHeight()) {
-					drawPositions.at(drawPasses) = drawPositions[0];
-					drawPositions.at(drawPasses).m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
-					drawPasses++;
-				}
-			}
+		
+		if (mode == g_DrawMOID) {
+			g_SceneMan.RegisterMOIDDrawing(m_MOID, spritePos.GetX(), spritePos.GetY(), spritePos.GetX() + currentFrame->w, spritePos.GetY() + currentFrame->h);
+			return;
 		}
 
-		for (int i = 0; i < drawPasses; ++i) {
-			int spriteX = drawPositions.at(i).GetFloorIntX();
-			int spriteY = drawPositions.at(i).GetFloorIntY();
-			switch (mode) {
-				case g_DrawMaterial:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
-					break;
-				case g_DrawWhite:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_WhiteColor, -1);
-					break;
-				case g_DrawMOID:
-					break;
-				case g_DrawTrans:
-					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
-					break;
-				case g_DrawAlpha:
-					set_alpha_blender();
-					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
-					break;
-				default:
-					draw_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
-					break;
+		auto renderFunc = [=]() {
+			BITMAP* pTargetBitmap = targetBitmap;
+			Vector renderPos = spritePos;
+			if (targetBitmap == nullptr) {
+				pTargetBitmap = g_ThreadMan.GetRenderTarget();
+				renderPos -= g_ThreadMan.GetRenderOffset();
 			}
 
-			g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
+			std::array<Vector, 4> drawPositions = { renderPos };
+			int drawPasses = 1;
+			if (g_SceneMan.SceneWrapsX()) {
+				if (targetPos.IsZero() && m_WrapDoubleDraw) {
+					if (renderPos.GetFloorIntX() < currentFrame->w) {
+						drawPositions[drawPasses] = renderPos;
+						drawPositions[drawPasses].m_X += static_cast<float>(pTargetBitmap->w);
+						drawPasses++;
+					} else if (renderPos.GetFloorIntX() > pTargetBitmap->w - currentFrame->w) {
+						drawPositions[drawPasses] = renderPos;
+						drawPositions[drawPasses].m_X -= static_cast<float>(pTargetBitmap->w);
+						drawPasses++;
+					}
+				} else if (m_WrapDoubleDraw) {
+					if (targetPos.m_X < 0) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_X -= static_cast<float>(g_SceneMan.GetSceneWidth());
+						drawPasses++;
+					}
+					if (targetPos.GetFloorIntX() + pTargetBitmap->w > g_SceneMan.GetSceneWidth()) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_X += static_cast<float>(g_SceneMan.GetSceneWidth());
+						drawPasses++;
+					}
+				}
+			}
+			if (g_SceneMan.SceneWrapsY()) {
+				if (targetPos.IsZero() && m_WrapDoubleDraw) {
+					if (renderPos.GetFloorIntY() < currentFrame->h) {
+						drawPositions[drawPasses] = renderPos;
+						drawPositions[drawPasses].m_Y += static_cast<float>(pTargetBitmap->h);
+						drawPasses++;
+					} else if (renderPos.GetFloorIntY() > pTargetBitmap->h - currentFrame->h) {
+						drawPositions[drawPasses] = renderPos;
+						drawPositions[drawPasses].m_Y -= static_cast<float>(pTargetBitmap->h);
+						drawPasses++;
+					}
+				} else if (m_WrapDoubleDraw) {
+					if (targetPos.m_Y < 0) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_Y -= static_cast<float>(g_SceneMan.GetSceneHeight());
+						drawPasses++;
+					}
+					if (targetPos.GetFloorIntY() + pTargetBitmap->h > g_SceneMan.GetSceneHeight()) {
+						drawPositions[drawPasses] = drawPositions[0];
+						drawPositions[drawPasses].m_Y += static_cast<float>(g_SceneMan.GetSceneHeight());
+						drawPasses++;
+					}
+				}
+			}
+
+			for (int i = 0; i < drawPasses; ++i) {
+				int spriteX = drawPositions.at(i).GetFloorIntX();
+				int spriteY = drawPositions.at(i).GetFloorIntY();
+				switch (mode) {
+					case g_DrawMaterial:
+						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
+						break;
+					case g_DrawWhite:
+						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, g_WhiteColor, -1);
+						break;
+					case g_DrawTrans:
+						// TODO_MULTITHREAD
+						//draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
+						break;
+					case g_DrawAlpha:
+						// TODO_MULTITHREAD
+						//set_alpha_blender();
+						//draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
+						break;
+					default:
+						draw_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
+						break;
+				}
+			}
+		};
+
+		if (targetBitmap == nullptr) {
+			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
+		} else {
+			renderFunc();
+		}
+
+		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { 
+			SetPostScreenEffectToDraw(); 
 		}
 	}
 

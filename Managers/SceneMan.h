@@ -492,34 +492,26 @@ public:
     bool SceneIsLocked() const;
 
     /// <summary>
-    /// Registers an area to be drawn upon, so it can be tracked and cleared later.
+    /// Registers a moid being drawn, so it can be added to our spatial partitioning grid.
     /// </summary>
-    /// <param name="bitmap">The bitmap being drawn upon.</param>
-    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="moid">The moid.</param>
     /// <param name="left">The left boundary of the draw area.</param>
     /// <param name="top">The top boundary of the drawn area.</param>
     /// <param name="right">The right boundary of the draw area.</param>
     /// <param name="bottom">The bottom boundary of the draw area.</param>
-    void RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom);
+    void RegisterMOIDDrawing(int moid, int left, int top, int right, int bottom);
 
     /// <summary>
-    /// Registers an area of to be drawn upon, so it can be tracked and cleared later.
+    /// Registers a moid being drawn, so it can be added to our spatial partitioning grid.
     /// </summary>
-    /// <param name="bitmap">The bitmap being drawn upon.</param>
-    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="moid">The moid.</param>
     /// <param name="center">The centre position of the drawn area.</param>
     /// <param name="radius">The radius of the drawn area.</param>
-    void RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius);
+    void RegisterMOIDDrawing(int moid, const Vector &center, float radius);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearAllMOIDDrawings
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all registered drawn areas of the MOID layer to the g_NoMOID
-//                  color and clears the registrations too. Should be done each sim update.
-// Arguments:       None.
-// Return value:    None.
-
+    /// <summary>
+    /// Clears all registered as drawn MOIDs, clearing our spatial partitioning grid.
+    /// </summary>
     void ClearAllMOIDDrawings();
 
 

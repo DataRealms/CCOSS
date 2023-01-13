@@ -36,6 +36,8 @@ void ThreadMan::Clear() {
 	m_GameStateDrawable.reset();
 	m_NewSimFrame = false;
     m_SimFunctions.clear();
+    m_RenderTarget = nullptr;
+    m_RenderOffset.Reset();
 }
 
 int ThreadMan::Initialize() {
@@ -59,19 +61,18 @@ void ThreadMan::TransferSimStateToRenderer() {
     std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
 
     // Copy game state into our current buffer
-    // TODO_MULTITHREAD: Figure out something better/faster...
-    // It's especially annoying that the MO draw itself takes place on the simulation thread
-    // Perhaps we can cache draw requests and pass them onto draw?
-    m_GameStateModifiable->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
-    m_GameStateModifiable->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
+    // TODO_MULTITHREAD: Remove as much of this as possible...
+    if (g_ActivityMan.IsInActivity()) {
+        m_GameStateModifiable->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
+        m_GameStateModifiable->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
+    }
+    m_GameStateModifiable->m_RenderQueue = m_SimRenderQueue;
+
+    m_SimRenderQueue.clear();
 
     // TODO_MULTITHREAD: add post processing effects to RenderableGameState
     // Clear the effects list for this frame
     //m_PostScreenEffects.clear();
-
-    // Note! we loses draws earlier in the update loop, we can do draws, with atom travel
-    // And yes, that's pretttttty broken.
-    // TODO_MULTIHREAD fix
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
     m_NewSimFrame = true;

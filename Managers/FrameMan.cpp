@@ -219,6 +219,15 @@ namespace RTE {
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
 
+		// Queue our MO renders
+		Vector targetPos{};
+		BITMAP* bitmap = m_BackBuffer8; //nullptr
+		g_MovableMan.Draw(nullptr, targetPos);
+
+		// TODO_MULTITHREAD
+		//g_MovableMan.DrawHUD(nullptr, targetPos, playerScreen);
+	}
+
 		// Prune unused color tables every 5 real minutes to prevent ridiculous memory usage over time.
 		if (m_ColorTablePruneTimer.IsPastRealMS(300000)) {
 			long long currentTime = g_TimerMan.GetAbsoluteTime() / 10000;

@@ -2,7 +2,7 @@
 
 #include "Atom.h"
 #include "PostProcessMan.h"
-#include "FrameMan.h"
+#include "ThreadMan.h"
 
 namespace RTE {
 
@@ -242,6 +242,11 @@ namespace RTE {
 	void MOPixel::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		int drawColor = -1;
 
+		if (mode == g_DrawMOID) {
+			g_SceneMan.RegisterMOIDDrawing(m_MOID, m_Pos, 1);
+			return;
+		}
+
 		switch (mode) {
 			case g_DrawMaterial:
 				drawColor = m_Atom->GetMaterial()->GetSettleMaterial();
@@ -251,14 +256,24 @@ namespace RTE {
 				break;
 		}
 
-		if (mode != g_DrawMOID)
-		{
-			acquire_bitmap(targetBitmap);
-			putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
-			release_bitmap(targetBitmap);
-		}
+		Vector spritePos = m_Pos - targetPos;
 
-		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawMOID ? m_MOID : g_NoMOID, m_Pos - targetPos, 1);
+		auto renderFunc = [=]() {
+			BITMAP* pTargetBitmap = targetBitmap;
+			Vector renderPos = spritePos;
+			if (targetBitmap == nullptr) {
+				pTargetBitmap = g_ThreadMan.GetRenderTarget();
+				renderPos -= g_ThreadMan.GetRenderOffset();
+			}
+
+			putpixel(pTargetBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), drawColor); 
+		};
+
+		if (targetBitmap == nullptr) {
+			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
+		} else {
+			renderFunc();
+		}
 		
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();

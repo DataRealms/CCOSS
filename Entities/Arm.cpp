@@ -1,9 +1,11 @@
 #include "Arm.h"
+
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
 #include "AHuman.h"
 #include "PresetMan.h"
 #include "SceneMan.h"
+#include "ThreadMan.h"
 
 namespace RTE {
 
@@ -382,19 +384,39 @@ namespace RTE {
 		Vector handPos(m_JointPos + m_HandCurrentOffset + (m_Recoiled ? m_RecoilOffset : Vector()) - targetPos);
 		handPos -= Vector(static_cast<float>(m_HandSpriteBitmap->w / 2), static_cast<float>(m_HandSpriteBitmap->h / 2));
 
-		if (!m_HFlipped) {
-			if (mode == DrawMode::g_DrawWhite) {
-				draw_character_ex(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
-			} else {
-				draw_sprite(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY());
+		// TODO
+		// Wrapping?!
+
+		BITMAP* handSpriteBitmap = m_HandSpriteBitmap;
+
+		auto renderFunc = [=]() {
+			BITMAP* pTargetBitmap = targetBitmap;
+			Vector renderPos = handPos;
+			if (targetBitmap == nullptr) {
+				pTargetBitmap = g_ThreadMan.GetRenderTarget();
+				renderPos -= g_ThreadMan.GetRenderOffset();
 			}
+
+			if (!m_HFlipped) {
+				if (mode == g_DrawWhite) {
+					draw_character_ex(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), g_WhiteColor, -1);
+				} else {
+					draw_sprite(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY());
+				}
+			} else {
+				//TODO this draw_character_ex won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
+				if (mode == g_DrawWhite) {
+					draw_character_ex(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), g_WhiteColor, -1);
+				} else {
+					draw_sprite_h_flip(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY());
+				}
+			}
+		};
+
+		if (targetBitmap == nullptr) {
+			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
 		} else {
-			//TODO this draw_character_ex won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
-			if (mode == DrawMode::g_DrawWhite) {
-				draw_character_ex(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
-			} else {
-				draw_sprite_h_flip(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY());
-			}
+			renderFunc();
 		}
 	}
 }

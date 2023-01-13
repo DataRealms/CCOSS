@@ -535,7 +535,7 @@ bool SceneMan::SceneIsLocked() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
+void SceneMan::RegisterMOIDDrawing(int moid, int left, int top, int right, int bottom) {
     if (moid != g_NoMOID) {
         const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
         RTEAssert(mo, "Trying to register a no MOID to the MOID grid! This is not allowed.")
@@ -546,9 +546,9 @@ void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius) {
+void SceneMan::RegisterMOIDDrawing(int moid, const Vector &center, float radius) {
     if (radius != 0.0F) {
-		RegisterDrawing(bitmap, moid, static_cast<int>(std::floor(center.m_X - radius)), static_cast<int>(std::floor(center.m_Y - radius)), static_cast<int>(std::floor(center.m_X + radius)), static_cast<int>(std::floor(center.m_Y + radius)));
+		RegisterMOIDDrawing(moid, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
 	}
 }
 
@@ -2726,8 +2726,11 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->Draw(targetBitmap, targetBox);
 			}
 
-            // TODO_MULTITHREAD
-            g_MovableMan.Draw(targetBitmap, targetPos);
+            g_ThreadMan.SetRenderTarget(targetBitmap);
+            g_ThreadMan.SetRenderOffset(targetPos);
+            for (auto& renderFunc : g_ThreadMan.GetDrawableGameState().m_RenderQueue) {
+                renderFunc();
+            }
 
 			if (!skipTerrain) {
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
@@ -2741,7 +2744,7 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			}
 
             // TODO_MULTITHREAD
-			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			//g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 

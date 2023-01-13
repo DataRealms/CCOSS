@@ -72,7 +72,7 @@ void MovableObject::Clear()
     m_MissionCritical = false;
     m_CanBeSquished = true;
     m_IsUpdated = false;
-    m_WrapDoubleDraw = true;
+    m_WrapDoubleDraw = false;//true;
     m_DidWrap = false;
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;

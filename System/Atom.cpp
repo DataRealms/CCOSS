@@ -1011,6 +1011,8 @@ namespace RTE {
 					Vector renderPos = spritePos - g_ThreadMan.GetRenderOffset();
 					putpixel(pTargetBitmap, renderPos.GetX(), renderPos.GetY(), trailColorIndex);
 				};
+				// TODO_MULTITHREAD - fix to account for wrapping!
+				// Also, dropships seem to be spitting out purple pixels?
 				g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
 			}
 		}

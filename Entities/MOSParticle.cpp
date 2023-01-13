@@ -252,13 +252,11 @@ namespace RTE {
 						draw_character_ex(pTargetBitmap, currentFrame, spriteX, spriteY, g_WhiteColor, -1);
 						break;
 					case g_DrawTrans:
-						// TODO_MULTITHREAD
-						//draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
+						draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
 						break;
 					case g_DrawAlpha:
-						// TODO_MULTITHREAD
-						//set_alpha_blender();
-						//draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
+						set_alpha_blender();
+						draw_trans_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);
 						break;
 					default:
 						draw_sprite(pTargetBitmap, currentFrame, spriteX, spriteY);

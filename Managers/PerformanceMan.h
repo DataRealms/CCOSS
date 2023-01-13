@@ -161,9 +161,10 @@ namespace RTE {
 		void UpdateMSPU(long long measuredUpdateTime);
 
 		/// <summary>
-		/// Updates the individual sim update time measurements and recalculates the average. Supposed to be done every sim update.
+		/// Updates the full frametime measurements and recalculates the averages. Supposed to be done every simulation update.
 		/// </summary>
-		void UpdateMSPSU() { CalculateTimeAverage(m_MSPSUs, m_MSPSUAverage, static_cast<float>(m_SimUpdateTimer->GetElapsedRealTimeMS())); m_SimUpdateTimer->Reset(); }
+		/// <param name="measuredUpdateTime">The total frame time measured in the game loop iteration.</param>
+		void UpdateMSPF(long long measuredFrameTime);
 
 		/// <summary>
 		/// Draws the performance stats to the screen.
@@ -203,18 +204,13 @@ namespace RTE {
 
 		std::unique_ptr<Timer> m_SimUpdateTimer; //!< Timer for measuring milliseconds per sim update for performance stats readings.
 
-		std::deque<float> m_MSPSUs; //!< History log of single update time measurements in milliseconds, for averaging the results. In milliseconds.
-		std::deque<float> m_MSPFs; //!< History log total frame time measurements in milliseconds, for averaging the results.
-		std::deque<float> m_MSPUs; //!< History log of frame update time measurements in milliseconds, for averaging the results. In milliseconds.
-		std::deque<float> m_MSPDs; //!< History log of frame draw time measurements in milliseconds, for averaging the results.
+		std::deque<float> m_MSPFs; //!< History log total render-thread frame time measurements in milliseconds, for averaging the results.
+		std::deque<float> m_MSPUs; //!< History log of update time measurements in milliseconds, for averaging the results. In milliseconds.
+		std::deque<float> m_MSPDs; //!< History log of draw time measurements in milliseconds, for averaging the results.
 
-		std::atomic<float> m_MSPSUAverage; //!< The average of the MSPSU reading buffer, calculated each sim update.
 		std::atomic<float> m_MSPFAverage; //!< The average of the MSPF reading buffer, calculated each game loop iteration.
 		std::atomic<float> m_MSPUAverage; //!< The average of the MSPU reading buffer, calculated each game loop iteration.
 		std::atomic<float> m_MSPDAverage; //!< The average of the MSPD reading buffer, calculated each game loop iteration.
-
-		std::atomic<long long> m_LastDrawTime; //!< How long the last draw took.
-		std::atomic<long long> m_LastUpdateTime; //!< How long the last update took.
 
 		int m_CurrentPing; //!< Current ping value to display on screen.
 

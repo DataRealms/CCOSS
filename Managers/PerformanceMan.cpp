@@ -20,8 +20,6 @@ namespace RTE {
 		m_AdvancedPerfStats = true;
 		m_Sample = 0;
 		m_SimUpdateTimer = nullptr;
-		m_MSPSUs.clear();
-		m_MSPSUAverage = 0;
 		m_MSPFs.clear();
 		m_MSPFAverage = 0;
 		m_MSPUs.clear();
@@ -113,17 +111,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::UpdateMSPU(long long measuredUpdateTime) {
-		m_LastUpdateTime = measuredUpdateTime;
 		CalculateTimeAverage(m_MSPUs, m_MSPUAverage, static_cast<float>(measuredUpdateTime / 1000));
-		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(measuredUpdateTime, m_LastDrawTime.load()) / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::UpdateMSPD(long long measuredDrawTime) {
-		m_LastDrawTime = measuredDrawTime;
 		CalculateTimeAverage(m_MSPDs, m_MSPDAverage, static_cast<float>(measuredDrawTime / 1000));
-		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(std::max(m_LastUpdateTime.load(), measuredDrawTime) / 1000));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::UpdateMSPF(long long measuredFrameTime) {
+		CalculateTimeAverage(m_MSPFs, m_MSPFAverage, static_cast<float>(measuredFrameTime / 1000));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,11 +136,11 @@ namespace RTE {
 			char str[128];
 
 			float fps = 1.0F / (m_MSPFAverage / 1000.0F);
-			float ups = 1.0F / (m_MSPSUAverage / 1000.0F);
+			float ups = 1.0F / std::max(m_MSPUAverage / 1000.0F, g_TimerMan.GetDeltaTimeSecs() / g_TimerMan.GetTimeScale());
 			std::snprintf(str, sizeof(str), "FPS: %.0f | UPS: %.0f", fps, ups);
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Frame: %.1fms | Update: %.1fms | Draw: %.1fms", m_MSPFAverage.load(), m_MSPUAverage.load(), m_MSPDAverage.load());
+			std::snprintf(str, sizeof(str), "Draw: %.1fms | Update: %.1fms", m_MSPDAverage.load(), m_MSPUAverage.load());
 			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Rst) | Sim Speed: x%.2f", g_TimerMan.GetTimeScale(), g_TimerMan.GetSimSpeed());

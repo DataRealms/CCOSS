@@ -177,7 +177,9 @@ namespace RTE {
 		}
 
         bool wrapDoubleDraw = m_WrapDoubleDraw;
-		char settleMaterial = m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial();
+		char settleMaterial = mode != g_DrawMaterial   ? 0                         :
+		                      m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : 
+							                             GetMaterial()->GetSettleMaterial();
 
 		auto renderFunc = [=]() {
 			BITMAP* pTargetBitmap = targetBitmap;

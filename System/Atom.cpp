@@ -1006,6 +1006,7 @@ namespace RTE {
 
 			// TODO_MULTITHREAD - fix to account for wrapping!
 			// Also, dropships seem to be spitting out purple pixels?
+			// Also, keep drawing trail after we are destroyed for 1 frame, so our trail doesn't immediately disappear
 
 			auto renderFunc = [lastTrailPoints = std::move(m_LastTrailPoints), trailPoints, trailColorIndex, length](float interpolationAmount) mutable {
 				BITMAP* pTargetBitmap = g_ThreadMan.GetRenderTarget();

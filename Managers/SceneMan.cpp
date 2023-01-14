@@ -2879,16 +2879,4 @@ BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) c
 	}
 	return m_IntermediateSettlingBitmaps.back().second;
 }
-
-// For script backwards compat
-void SceneMan::SetOffset(const Vector& offset, int screenId) { return g_CameraMan.SetOffset(offset, screenId); }
-Vector SceneMan::GetOffset(int screenId) const { return g_CameraMan.GetOffset(screenId); }
-void SceneMan::SetScroll(const Vector& center, int screenId) { return g_CameraMan.SetScroll(center, screenId); }
-void SceneMan::SetScreenOcclusion(const Vector& occlusion, int screenId) { return g_CameraMan.SetScreenOcclusion(occlusion, screenId); }
-Vector& SceneMan::GetScreenOcclusion(int screenId) { return g_CameraMan.GetScreenOcclusion(screenId); }
-void SceneMan::SetScrollTarget(const Vector& targetCenter, float speed, bool targetWrapped, int screenId) { return g_CameraMan.SetScrollTarget(targetCenter, speed, targetWrapped, screenId); }
-Vector SceneMan::GetScrollTarget(int screenId) const { return g_CameraMan.GetScrollTarget(screenId); }
-float SceneMan::TargetDistanceScalar(const Vector& point) const { return g_CameraMan.TargetDistanceScalar(point); }
-void SceneMan::CheckOffset(int screenId) { return g_CameraMan.CheckOffset(screenId); }
-
 } // namespace RTE

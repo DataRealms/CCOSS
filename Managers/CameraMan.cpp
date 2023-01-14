@@ -4,7 +4,6 @@
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
-#include "SettingsMan.h"
 #include "SLTerrain.h"
 #include "NetworkClient.h"
 

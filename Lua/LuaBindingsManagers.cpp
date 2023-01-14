@@ -274,17 +274,6 @@ namespace RTE {
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
 
-		// For script backwards compat
-		.def("GetOffset", &SceneMan::GetOffset)
-		.def("SetOffset", &SceneMan::SetOffset)
-		.def("GetScreenOcclusion", &SceneMan::GetScreenOcclusion)
-		.def("SetScreenOcclusion", &SceneMan::SetScreenOcclusion)
-		.def("SetScrollTarget", &SceneMan::SetScrollTarget)
-		.def("GetScrollTarget", &SceneMan::GetScrollTarget)
-		.def("TargetDistanceScalar", &SceneMan::TargetDistanceScalar)
-		.def("CheckOffset", &SceneMan::CheckOffset)
-		.def("SetScroll", &SceneMan::SetScroll)
-
 		.def("GetTerrain", &SceneMan::GetTerrain)
 		.def("GetMaterial", &SceneMan::GetMaterial)
 		.def("GetMaterialFromID", &SceneMan::GetMaterialFromID)

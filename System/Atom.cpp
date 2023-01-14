@@ -1000,7 +1000,7 @@ namespace RTE {
 		//RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segments!!");
 
 		// Draw the trail
-		if (m_TrailLength && trailPoints.size() > 0) {
+		if (m_TrailLength && (trailPoints.size() > 0 || m_LastTrailPoints.size() > 0)) {
 			int trailColorIndex = m_TrailColor.GetIndex();
 			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 

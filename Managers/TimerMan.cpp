@@ -27,6 +27,8 @@ namespace RTE {
 		m_SimSpeed = 1.0F;
 		m_TimeScale = 1.0F;
 		m_SimPaused = false;
+		m_LatestUpdateStartTime = 0;
+		m_UpdateTrueDeltaTimeTicks = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,20 +60,38 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TimerMan::ResetTime() {
-		m_StartTime = std::chrono::steady_clock::now();
+    float TimerMan::GetPredictedProportionOfUpdateCompletion() const {
+		if (m_UpdateTrueDeltaTimeTicks == 0) {
+			return 1.0F;
+		}
+
+        long long timeSinceLastUpdate = m_RealTimeTicks - m_LatestUpdateStartTime;
+		return std::min(static_cast<float>(timeSinceLastUpdate) / static_cast<float>(m_UpdateTrueDeltaTimeTicks), 1.0F);
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void TimerMan::ResetTime()
+    {
+        m_StartTime = std::chrono::steady_clock::now();
 
 		m_RealTimeTicks = 0;
 		m_SimAccumulator = 0;
 		m_SimTimeTicks = 0;
 		m_SimUpdateCount = 0;
 		m_TimeScale = 1.0F;
-	}
+		m_LatestUpdateStartTime = 0;
+		m_UpdateTrueDeltaTimeTicks = 0;
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::UpdateSim() {
 		m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPUAverage();
+
+		long long timeIncrease = m_RealTimeTicks - m_LatestUpdateStartTime;
+		m_LatestUpdateStartTime = m_RealTimeTicks;
+		m_UpdateTrueDeltaTimeTicks = timeIncrease;
 
 		if (TimeForSimUpdate()) {
 			// Transfer ticks from the accumulator to the sim time ticks.
@@ -87,7 +107,7 @@ namespace RTE {
 	void TimerMan::Update() {
 		long long prevTime = m_RealTimeTicks;
 		m_RealTimeTicks = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
-		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
+		long long timeIncrease = m_RealTimeTicks - prevTime;
 
 		// Cap it if too long (as when the app went out of focus).
 		if (timeIncrease > m_RealToSimCap) { 

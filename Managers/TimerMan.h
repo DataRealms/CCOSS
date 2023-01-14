@@ -72,7 +72,7 @@ namespace RTE {
 		/// Sets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
 		/// </summary>
 		/// <param name="timeScale">A factor between the real world time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal.</param>
-		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; m_SimAccumulator = 0.0F; }
+		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; m_SimAccumulator = std::min(m_SimAccumulator.load(), static_cast<long long>(m_DeltaTime * m_TimeScale)); }
 
 		/// <summary>
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
@@ -169,6 +169,19 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newDelta">The new delta time in seconds.</param>
 		void SetDeltaTimeSecs(float newDelta) { m_DeltaTimeS = newDelta; m_DeltaTime = static_cast<long long>(m_DeltaTimeS * static_cast<float>(m_TicksPerSecond)); }
+
+		/// <summary>
+		/// Returns the true update delta time, or how long has actually passed since the last update, in real time.
+		/// </summary>
+		/// <returns>The true update dt, in ms.</returns>
+		float GetTrueUpdateDeltaTimeMS() const { return m_UpdateTrueDeltaTimeTicks / 1000.0F; };
+
+		/// <summary>
+		/// Returns a predicted proportion of how far the current simulation update is through completion, based on the last update time.
+		/// Return 0.0F if a new update just started, and 1.0F if the time since this update started is equal to or past the last update time.
+		/// </summary>
+		/// <returns>A predicted proportion of how complete the current update cycle is.</returns>
+		float GetPredictedProportionOfUpdateCompletion() const;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -200,7 +213,8 @@ namespace RTE {
 
 		std::chrono::steady_clock::time_point m_StartTime; //!< The point in real time when the simulation (re)started.
 		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.
-		long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
+		volatile long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
+		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
 		std::atomic<long long> m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
@@ -209,7 +223,9 @@ namespace RTE {
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 
-		bool m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
+		float m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
+		long long m_UpdateTrueDeltaTimeTicks; //!< How long the last update took, in ticks.
+		long long m_LatestUpdateStartTime; //!< When our latest update started.
 
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.

@@ -187,7 +187,9 @@ int MovableObject::Create(const float mass,
 {
     m_Mass = mass;
     m_Pos = position;
+    m_PrevPos = position;
     m_Vel = velocity;
+    m_PrevVel = velocity;
     m_AgeTimer.Reset();
     m_RestTimer.Reset();
     m_Lifetime = lifetime;
@@ -219,7 +221,9 @@ int MovableObject::Create(const MovableObject &reference)
     m_MOType = reference.m_MOType;
     m_Mass = reference.m_Mass;
     m_Pos = reference.m_Pos;
+    m_PrevPos = reference.m_PrevPos;
     m_Vel = reference.m_Vel;
+    m_PrevVel = reference.m_PrevVel;
     m_Scale = reference.m_Scale;
     m_GlobalAccScalar = reference.m_GlobalAccScalar;
     m_AirResistance = reference.m_AirResistance;
@@ -996,6 +1000,12 @@ void MovableObject::PostTravel()
     // Check for stupid positions
     if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 1000)) {
         m_ToDelete = true;
+    }
+
+    // We might've teleported. If so, we don't want to interpolate a massive speed from our past location to our current
+    // So, if we'v moved more than our velocity would imply, just set PrevPos to our current position.
+    if ((m_PrevPos - m_Pos).GetSqrMagnitude() > (m_Vel * 1.5F).GetSqrMagnitude()) {
+        m_PrevPos = m_Pos;
     }
 
     // Fix speeds that are too high

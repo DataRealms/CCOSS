@@ -221,7 +221,6 @@ namespace RTE {
 
 		// Queue our MO renders
 		Vector targetPos{};
-		BITMAP* bitmap = m_BackBuffer8; //nullptr
 		g_MovableMan.Draw(nullptr, targetPos);
 
 		// TODO_MULTITHREAD

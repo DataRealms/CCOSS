@@ -364,10 +364,11 @@ public:
 // Virtual method:  SetRotAngle
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the current absolute angle of rotation of this MovableObject.
+//                  Also sets the prev position, as we've "teleported" and don't want to interpolate.
 // Arguments:       The new absolute angle in radians.
 // Return value:    None.
 
-	void SetRotAngle(float newAngle) override { m_Rotation.SetRadAngle(newAngle); }
+	void SetRotAngle(float newAngle) override { m_Rotation.SetRadAngle(newAngle); m_PrevRotation = m_Rotation; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

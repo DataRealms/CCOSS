@@ -692,14 +692,14 @@ namespace RTE {
 	void PieMenu::UpdateEnablingAndDisablingProgress() {
 		m_BGBitmapNeedsRedrawing = true;
 		if (m_EnabledState == EnabledState::Enabling) {
-			m_CurrentInnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), 0.0F, static_cast<float>(m_FullInnerRadius), static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
+			m_CurrentInnerRadius = static_cast<int>(Lerp(0.0F, static_cast<float>(c_EnablingDelay), 0.0F, static_cast<float>(m_FullInnerRadius), static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
 			if (IsSubPieMenu() || m_EnableDisableAnimationTimer.IsPastRealMS(c_EnablingDelay)) {
 				m_EnabledState = EnabledState::Enabled;
 				m_CurrentInnerRadius = m_FullInnerRadius;
 				m_SubPieMenuHoverOpenTimer.Reset();
 			}
 		} else if (m_EnabledState == EnabledState::Disabling) {
-			m_CurrentInnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), static_cast<float>(m_FullInnerRadius), 0.0F, static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
+			m_CurrentInnerRadius = static_cast<int>(Lerp(0.0F, static_cast<float>(c_EnablingDelay), static_cast<float>(m_FullInnerRadius), 0.0F, static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
 			if (IsSubPieMenu() || m_EnableDisableAnimationTimer.IsPastRealMS(c_EnablingDelay)) {
 				m_EnabledState = EnabledState::Disabled;
 				m_CurrentInnerRadius = 0;

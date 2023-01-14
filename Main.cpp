@@ -295,8 +295,6 @@ namespace RTE {
 					long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 					serverUpdated = false;
 
-					g_TimerMan.UpdateSim();
-
 					g_SceneMan.GetScene()->UpdateSim();
 
 					g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
@@ -312,6 +310,12 @@ namespace RTE {
 					g_ActivityMan.Update();
 					g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 					g_MovableMan.Update();
+
+					// We want the timer update as close as possible to the sim state transfer, to ensure
+					// where the render interpolation resets to 0 only after we have a new state to render
+					g_ThreadMan.TransferSimStateToRenderer();
+					g_TimerMan.UpdateSim();
+
 					g_AudioMan.Update();
 
 					g_ActivityMan.LateUpdateGlobalScripts();
@@ -320,14 +324,11 @@ namespace RTE {
 					// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
 					g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
 
-					g_ConsoleMan.Update();
 					g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
 					if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
 						break;
 					}
-
-					g_ThreadMan.TransferSimStateToRenderer();
 
 					g_ThreadMan.RunSimulationThreadFunctions();
 
@@ -387,6 +388,7 @@ namespace RTE {
 
 			g_TimerMan.Update();
 			g_UInputMan.Update();
+			g_ConsoleMan.Update();
 			g_ThreadMan.Update();
 
 			long long drawStartTime = g_TimerMan.GetAbsoluteTime();

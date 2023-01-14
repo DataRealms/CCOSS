@@ -2728,8 +2728,9 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 
             g_ThreadMan.SetRenderTarget(targetBitmap);
             g_ThreadMan.SetRenderOffset(targetPos);
+            float proportionOfTime = g_TimerMan.GetPredictedProportionOfUpdateCompletion();
             for (auto& renderFunc : g_ThreadMan.GetDrawableGameState().m_RenderQueue) {
-                renderFunc();
+                renderFunc(proportionOfTime);
             }
 
 			if (!skipTerrain) {

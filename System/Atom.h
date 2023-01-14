@@ -508,6 +508,7 @@ namespace RTE {
 		Vector m_HitImpulse; //!< The resulting impulse force of the last collision this Atom experienced in Kg * m/s.
 		*/
 
+		std::vector<std::pair<int, int>> m_LastTrailPoints; //!< Our trail points for the last frame, for render interpolation
 		Color m_TrailColor; //!< Trail color
 		int m_TrailLength; //!< The longest the trail should/can get drawn. If 0, no trail is drawn.
 		float m_TrailLengthVariation; //!< What percentage the trail length of this Atom can vary each frame it's drawn. 0 means no variance, 1 means 100% variance between 0 and its TrailLength.

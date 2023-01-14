@@ -169,6 +169,7 @@ namespace RTE {
 			RTEAbort("Sprite frame pointer is null when drawing MOSprite!");
 		}
 
+		Vector prevSpritePos(m_PrevPos + m_SpriteOffset - targetPos);
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
 		
 		if (mode == g_DrawMOID) {
@@ -181,9 +182,9 @@ namespace RTE {
 		                      m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : 
 							                             GetMaterial()->GetSettleMaterial();
 
-		auto renderFunc = [=]() {
+		auto renderFunc = [=](float interpolationAmount) {
 			BITMAP* pTargetBitmap = targetBitmap;
-			Vector renderPos = spritePos;
+			Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
 			if (targetBitmap == nullptr) {
 				pTargetBitmap = g_ThreadMan.GetRenderTarget();
 				renderPos -= g_ThreadMan.GetRenderOffset();
@@ -268,7 +269,7 @@ namespace RTE {
 		if (targetBitmap == nullptr) {
 			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
 		} else {
-			renderFunc();
+			renderFunc(1.0F);
 		}
 
 		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { 
@@ -281,7 +282,7 @@ namespace RTE {
 	void MOSParticle::SetPostScreenEffectToDraw() const {
 		if (m_AgeTimer.GetElapsedSimTimeMS() >= m_EffectStartTime && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime))) {
 			if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())) {
-				g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
+				g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, Lerp(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
 			}
 		}
 	}

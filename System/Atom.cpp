@@ -44,6 +44,7 @@ namespace RTE {
 		m_HitRadius.Reset();
 		m_HitImpulse.Reset();
 		*/
+		m_LastTrailPoints.clear();
 		m_TrailColor.Reset();
 		m_TrailLength = 0;
 		m_TrailLengthVariation = 0.0F;
@@ -653,10 +654,8 @@ namespace RTE {
 		Vector segTraj;
 		Vector hitAccel;
 
-		// Static buffer to avoid having to realloc with every atom's travel
-		// This saves us time because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
-		thread_local std::vector<std::pair<int, int>> trailPoints;
-		trailPoints.clear();
+		std::vector<std::pair<int, int>> trailPoints;
+		trailPoints.reserve(6); // This saves us time because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
 
 		didWrap = false;
 		int removeOrphansRadius = m_OwnerMO->m_RemoveOrphanTerrainRadius;
@@ -1004,17 +1003,25 @@ namespace RTE {
 		if (m_TrailLength && trailPoints.size() > 0) {
 			int trailColorIndex = m_TrailColor.GetIndex();
 			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
-			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
-				Vector spritePos(trailPoints[i].first, trailPoints[i].second);
-				auto renderFunc = [=]() {
-					BITMAP* pTargetBitmap = g_ThreadMan.GetRenderTarget();
+
+			// TODO_MULTITHREAD - fix to account for wrapping!
+			// Also, dropships seem to be spitting out purple pixels?
+
+			auto renderFunc = [lastTrailPoints = std::move(m_LastTrailPoints), trailPoints, trailColorIndex, length](float interpolationAmount) mutable {
+				BITMAP* pTargetBitmap = g_ThreadMan.GetRenderTarget();
+
+				int endPoint = lastTrailPoints.size() + (trailPoints.size() * interpolationAmount);
+				std::vector<std::pair<int, int>> allTrailPoints = lastTrailPoints;
+				allTrailPoints.insert(allTrailPoints.end(), trailPoints.begin(), trailPoints.end() );
+				for (int i = endPoint - std::min(length, static_cast<int>(endPoint)); i < endPoint; ++i) {
+					Vector spritePos(allTrailPoints[i].first, allTrailPoints[i].second);
 					Vector renderPos = spritePos - g_ThreadMan.GetRenderOffset();
 					putpixel(pTargetBitmap, renderPos.GetX(), renderPos.GetY(), trailColorIndex);
-				};
-				// TODO_MULTITHREAD - fix to account for wrapping!
-				// Also, dropships seem to be spitting out purple pixels?
-				g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
-			}
+				}
+			};
+
+			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
+			m_LastTrailPoints = std::move(trailPoints);
 		}
 
 		// Unlock all bitmaps involved.

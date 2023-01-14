@@ -77,7 +77,12 @@ namespace RTE {
 				.def("FileEOF", &LuaStateWrapper::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			luabind::def("LERP", &LERP),
+			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
+			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
+			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
+			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
+			luabind::def("Lerp", (float(*)(float, float, float, float, float)) &Lerp),
+			luabind::def("Lerp", (Vector(*)(float, float, Vector, Vector, float)) &Lerp),
 			luabind::def("EaseIn", &EaseIn),
 			luabind::def("EaseOut", &EaseOut),
 			luabind::def("EaseInOut", &EaseInOut),

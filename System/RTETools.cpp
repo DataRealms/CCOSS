@@ -32,13 +32,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float LERP(float scaleStart, float scaleEnd, float startValue, float endValue, float progressScalar) {
+	float Lerp(float scaleStart, float scaleEnd, float startValue, float endValue, float progressScalar) {
 		if (progressScalar <= scaleStart) {
 			return startValue;
 		} else if (progressScalar >= scaleEnd) {
 			return endValue;
 		}
 		return startValue + ((progressScalar - scaleStart) * ((endValue - startValue) / (scaleEnd - scaleStart)));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Vector Lerp(float scaleStart, float scaleEnd, Vector startPos, Vector endPos, float progressScalar) {
+		Vector startToEnd = endPos - startPos;
+		return startPos + (startToEnd * Lerp(scaleStart, scaleEnd, 0.0F, 1.0F, progressScalar));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

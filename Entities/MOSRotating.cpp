@@ -1742,7 +1742,8 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(targetBitmap, targetPos, mode, onlyPhysical); }
     }
 
-    Vector spritePos(m_Pos.GetRounded() - targetPos);
+    Vector prevSpritePos(m_PrevPos - targetPos);
+    Vector spritePos(m_Pos - targetPos);
 
     if (m_Recoiled) {
         spritePos += m_RecoilOffset;
@@ -1780,12 +1781,17 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         bool hFlipped = m_HFlipped;
         bool wrapDoubleDraw = m_WrapDoubleDraw;
         Vector spriteOffset = m_SpriteOffset;
-        Matrix rotation = m_Rotation;
+        Matrix prevRotation = m_PrevRotation;
+        Matrix currRotation = m_Rotation;
         float scale = m_Scale;
 
-        auto renderFunc = [=]() {
+        auto renderFunc = [=](float interpolationAmount) {
             BITMAP* pTargetBitmap = targetBitmap;
-            Vector renderPos = spritePos;
+            Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
+            // TODO_MULTITHREAD
+            // Add a proper rotational lerp
+            //Matrix rotation(Lerp(0.0F, 1.0F, prevRotation.GetRadAngle(), currRotation.GetRadAngle(), interpolationAmount));
+            Matrix rotation(currRotation);
             if (targetBitmap == nullptr) {
                 pTargetBitmap = g_ThreadMan.GetRenderTarget();
                 renderPos -= g_ThreadMan.GetRenderOffset();
@@ -1967,7 +1973,7 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         if (targetBitmap == nullptr) {
             g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
         } else {
-            renderFunc();
+            renderFunc(1.0F);
         }
     }
 

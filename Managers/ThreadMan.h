@@ -29,7 +29,7 @@ namespace RTE
 
         std::unique_ptr<SLTerrain> m_Terrain = nullptr;
         std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
-        std::vector<std::function<void(void)>> m_RenderQueue;
+        std::vector<std::function<void(float)>> m_RenderQueue;
     };
 
     /// <summary>
@@ -61,7 +61,7 @@ namespace RTE
         /// </summary>
         const RenderableGameState& GetDrawableGameState() const { return *m_GameStateDrawable; }
 
-        std::vector<std::function<void(void)>>& GetSimRenderQueue() { return m_SimRenderQueue; }
+        std::vector<std::function<void(float)>>& GetSimRenderQueue() { return m_SimRenderQueue; }
 
         /// <summary>
         /// Queue a function that will be ran in the sim thread
@@ -101,7 +101,7 @@ namespace RTE
         // We store this here, as well as in the game state copy mutex.
         // The sim thread uses this queue, and clears it at the start of each new sim thread
         // It then copies it into the RenderableGameState once it's finished with it.
-        std::vector<std::function<void(void)>> m_SimRenderQueue;
+        std::vector<std::function<void(float)>> m_SimRenderQueue;
 
 		std::atomic<bool> m_NewSimFrame; //!< Whether we have a new sim frame ready to draw.
 

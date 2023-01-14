@@ -414,11 +414,11 @@ namespace RTE {
 		// Lose health when door is lost, spinning out of control until grinds to halt
 		if (!m_Door && m_Status != DYING && m_Status != DEAD) {
 			m_SpriteAnimMode = ALWAYSLOOP;
-			m_SpriteAnimDuration = static_cast<int>(LERP(0, m_MaxHealth, 10.0F, static_cast<float>(m_InitialSpriteAnimDuration), m_Health));
+			m_SpriteAnimDuration = static_cast<int>(Lerp(0, m_MaxHealth, 10.0F, static_cast<float>(m_InitialSpriteAnimDuration), m_Health));
 
 			if (m_DoorMoveSound) {
 				if (!m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
-				m_DoorMoveSound->SetPitch(LERP(10.0F, static_cast<float>(m_InitialSpriteAnimDuration), 2.0F, 1.0F, static_cast<float>(m_SpriteAnimDuration)));
+				m_DoorMoveSound->SetPitch(Lerp(10.0F, static_cast<float>(m_InitialSpriteAnimDuration), 2.0F, 1.0F, static_cast<float>(m_SpriteAnimDuration)));
 			}
 
 			m_Health -= 0.4F;
@@ -509,11 +509,9 @@ namespace RTE {
 					m_DoorState = CLOSED;
 				}
 			} else {
-				Vector updatedOffset(LERP(0, m_DoorMoveTime, startOffset.m_X, endOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, startOffset.m_Y, endOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
-				
-				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle LERP that properly handles the 2PI border and +- angles.
-				// TODO_MULTITHREAD: multithread branch has lerped rotation, so once that's done!
-				float updatedAngle = LERP(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
+				Vector updatedOffset(Lerp(0, m_DoorMoveTime, startOffset.m_X, endOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), Lerp(0, m_DoorMoveTime, startOffset.m_Y, endOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
+				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle Lerp that properly handles the 2PI border and +- angles.
+				float updatedAngle = Lerp(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
 
 				m_Door->SetParentOffset(updatedOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));

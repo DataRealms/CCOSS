@@ -164,7 +164,7 @@ namespace RTE {
 		// Checking for 0.999 instead of 0.9999 or 1.0 here otherwise there is a hiccup between ending and starting a new orbit cycle.
 		if (m_StationOrbitProgress >= 0.999F) { m_StationOrbitTimer.Reset(); }
 		m_StationOrbitProgress = std::clamp(static_cast<float>(m_StationOrbitTimer.GetElapsedRealTimeS()) / 60.0F, 0.0F, 0.9999F);
-		m_StationOrbitRotation = LERP(0, 1.0F, c_PI, -c_PI, m_StationOrbitProgress);
+		m_StationOrbitRotation = Lerp(0, 1.0F, c_PI, -c_PI, m_StationOrbitProgress);
 
 		if (!m_FinishedPlayingIntro) {
 			if (m_TitleTransitionState == TitleTransition::PauseMenu) {
@@ -175,19 +175,18 @@ namespace RTE {
 			} else {
 				float introScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_IntroScrollStartTime) / m_IntroScrollDuration;
 
-				if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
-					UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
-				} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
-					m_ScrollOffset.SetY(LERP(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
-					UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
-				} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
-					if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
-					UpdateIntroPreMainMenuSequence();
-				}
-				if (m_SectionElapsedTime >= m_SectionDuration) {
-					m_SectionSwitch = true;
-					m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
-				}
+			if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+				UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
+			} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
+				m_ScrollOffset.SetY(Lerp(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
+				UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
+			} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
+				if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
+				UpdateIntroPreMainMenuSequence();
+			}
+			if (m_SectionElapsedTime >= m_SectionDuration) {
+				m_SectionSwitch = true;
+				m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
 			}
 		} else {
 			UpdateTitleTransitions();
@@ -215,25 +214,25 @@ namespace RTE {
 					SetSectionDurationAndResetSwitch(0.5F);
 					g_GUISound.SplashSound()->Play();
 				}
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;
 			case IntroSequence::DataRealmsLogoDisplay:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(2.0F); }
 				break;
 			case IntroSequence::DataRealmsLogoFadeOut:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.25F); }
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 0, 255.0F, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 0, 255.0F, m_SectionProgress));
 				break;
 			case IntroSequence::FmodLogoFadeIn:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.25F); }
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;
 			case IntroSequence::FmodLogoDisplay:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(2.0F); }
 				break;
 			case IntroSequence::FmodLogoFadeOut:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.5F); }
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 0, 255.0F, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 0, 255.0F, m_SectionProgress));
 				break;
 			default:
 				break;
@@ -264,7 +263,7 @@ namespace RTE {
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
 				}
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;
 			case IntroSequence::PreSlideshowPause:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(3.2F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS())); }
@@ -366,7 +365,7 @@ namespace RTE {
 					m_StationOrbitTimer.SetElapsedRealTimeS(40);
 					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0xFFFFFFFF);
 				}
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;
 			case IntroSequence::PlanetScroll:
 				if (m_SectionSwitch) {
@@ -460,7 +459,7 @@ namespace RTE {
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, 1.0F, m_SectionProgress));
-				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(Lerp(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::MetaGameMenu); }
 				break;
 			case TitleTransition::FadeOut:

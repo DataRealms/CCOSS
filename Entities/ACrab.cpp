@@ -2670,9 +2670,6 @@ void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, 
 void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -2684,6 +2681,10 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+
+	if (!m_HUDVisible) {
+		return;
+	}
 /*
 // TODO: REMOVE< THIS IS TEMP
     // Draw the AI paths

@@ -1028,13 +1028,13 @@ bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGro
 //                  of with the specified preset name in the inventory. If the held device already 
 //                  is of that preset name, or no device is in inventory, nothing happens.
 
-bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
+bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &presetName, bool doEquip)
 {
 	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
 		return false;
 	}
 
-	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && heldDevice->GetPresetName() == name) {
+	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == name) {
         return true;
     }
 
@@ -1043,7 +1043,7 @@ bool AHuman::EquipNamedDevice(const std::string name, bool doEquip)
     {
         HeldDevice *pDevice = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pDevice && pDevice->GetPresetName() == name)
+        if (pDevice && (moduleName.empty() || pDevice->GetModuleName() == moduleName) && pDevice->GetPresetName() == presetName)
         {
             if (doEquip)
             {
@@ -4001,7 +4001,7 @@ void AHuman::Update()
 		float rotDiff = rotTarget - rot;
 		if (!m_DeathTmr.IsPastSimMS(125) && std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
 			// TODO: finetune this for situations like low gravity!
-			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY * m_GlobalAccScalar) / GetPPM();
+			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY() * m_GlobalAccScalar) / c_PPM;
 			m_AngularVel += rotDiff * velScalar;
 			m_Vel.m_X += (rotTarget > 0 ? -std::abs(rotDiff) : std::abs(rotDiff)) * velScalar * 0.5F;
 		} else {
@@ -4104,9 +4104,6 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -4118,6 +4115,10 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+
+	if (!m_HUDVisible) {
+		return;
+	}
 
 #ifdef DEBUG_BUILD
     // Limbpath debug drawing
@@ -4315,6 +4316,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
             std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
+			m_HUDStack -= 9;
         }
 /*
         // AI Mode select GUI HUD

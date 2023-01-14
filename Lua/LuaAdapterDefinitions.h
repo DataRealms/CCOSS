@@ -20,6 +20,7 @@
 #include "Box.h"
 #include "Controller.h"
 #include "DataModule.h"
+#include "GraphicalPrimitive.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -444,8 +445,109 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region PrimitiveMan Lua Adapters
+	struct LuaAdaptersPrimitiveMan {
+		/// <summary>
+		/// Schedule to draw a polygon primitive.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="centerPos">Position of primitive's center in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a polygon primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="centerPos">Position of primitive's center in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a filled polygon primitive.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="startPos">Start position of the primitive in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &startPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a filled polygon primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="startPos">Start position of the primitive in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &startPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedules to draw multiple primitives of varying type with transparency enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithTransparency(PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable);
+
+		/// <summary>
+		/// Schedule to draw multiple primitives of varying type with blending enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+		/// <param name="blendAmount">The blending amount for all the channels. 0-100.</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithBlending(PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable);
+
+		/// <summary>
+		/// Schedule to draw multiple primitives of varying type with blending enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+		/// <param name="blendAmountR">The blending amount for the Red channel. 0-100.</param>
+		/// <param name="blendAmountG">The blending amount for the Green channel. 0-100.</param>
+		/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
+		/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithBlendingPerChannel(PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable);
+	};
+#pragma endregion
+
 #pragma region Utility Lua Adapters
 	struct LuaAdaptersUtility {
+		/// <summary>
+		/// Gets the ratio between the physics engine's meters and on-screen pixels.
+		/// </summary>
+		/// <returns>A float describing the current MPP ratio.</returns>
+		static float GetMPP();
+
+		/// <summary>
+		/// Gets the ratio between on-screen pixels and the physics engine's meters.
+		/// </summary>
+		/// <returns>A float describing the current PPM ratio.</returns>
+		static float GetPPM();
+
+		/// <summary>
+		/// Gets the ratio between the physics engine's Liters and on-screen pixels.
+		/// </summary>
+		/// <returns>A float describing the current LPP ratio.</returns>
+		static float GetLPP();
+
+		/// <summary>
+		/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
+		/// </summary>
+		/// <returns>A float describing the current PPL ratio.</returns>
+		static float GetPPL();
+
+		/// <summary>
+		/// Gets the default pathfinder penetration value that'll allow pathing through corpses, debris, and such stuff.
+		/// </summary>
+		/// <returns>A float describing the default pathfinder penetration value.</returns>
+		static float GetPathFindingDefaultDigStrength();
+
 		/// <summary>
 		/// Gets a random number between -1 and 1.
 		/// </summary>

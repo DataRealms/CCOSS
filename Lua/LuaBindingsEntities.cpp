@@ -1,3 +1,5 @@
+// Make sure that binding definition files are always set to NOT use pre-compiled headers and conformance mode (/permissive) otherwise everything will be on fire!
+
 #include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {
@@ -271,7 +273,8 @@ namespace RTE {
 		.def("RemoveMovePathBeginning", &Actor::RemoveMovePathBeginning)
 		.def("RemoveMovePathEnd", &Actor::RemoveMovePathEnd)
 		.def("AddInventoryItem", &Actor::AddInventoryItem, luabind::adopt(_2))
-		.def("RemoveInventoryItem", &Actor::RemoveInventoryItem)
+		.def("RemoveInventoryItem", (void (Actor::*)(const std::string &))&Actor::RemoveInventoryItem)
+		.def("RemoveInventoryItem", (void (Actor::*)(const std::string &, const std::string &))&Actor::RemoveInventoryItem)
 		.def("SwapNextInventory", &Actor::SwapNextInventory)
 		.def("SwapPrevInventory", &Actor::SwapPrevInventory)
 		.def("DropAllInventory", &Actor::DropAllInventory)
@@ -447,7 +450,8 @@ namespace RTE {
 		.def("EquipShield", &AHuman::EquipShield)
 		.def("EquipShieldInBGArm", &AHuman::EquipShieldInBGArm)
 		.def("EquipDeviceInGroup", &AHuman::EquipDeviceInGroup)
-		.def("EquipNamedDevice", &AHuman::EquipNamedDevice)
+		.def("EquipNamedDevice", (bool (AHuman::*)(const std::string &, bool))&AHuman::EquipNamedDevice)
+		.def("EquipNamedDevice", (bool (AHuman::*)(const std::string &, const std::string &, bool))&AHuman::EquipNamedDevice)
 		.def("EquipLoadedFirearmInGroup", &AHuman::EquipLoadedFirearmInGroup)
 		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
@@ -573,6 +577,7 @@ namespace RTE {
 		.property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
 		.property("JointPos", &Attachable::GetJointPos)
+		.property("DeleteWhenRemovedFromParent", &Attachable::GetDeleteWhenRemovedFromParent, &Attachable::SetDeleteWhenRemovedFromParent)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetParentBreakWound)

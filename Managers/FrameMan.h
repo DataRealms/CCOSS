@@ -317,10 +317,17 @@ namespace RTE {
 		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
-		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
+		/// Sets a specific color table which is used for any subsequent blended drawing in indexed color modes.
 		/// </summary>
-		/// <param name="transSetting">The transparency setting, see the enumerator.</param>
-		void SetTransTable(TransparencyPreset transSetting);
+		/// <param name="blendMode">The blending mode that will be used in drawing.</param>
+		/// <param name="colorChannelBlendAmounts">The color channel blend amounts that will be used to select or create the correct table in the specified blending mode.</param>
+		void SetColorTable(DrawBlendMode blendMode, std::array<int, 4> colorChannelBlendAmounts);
+
+		/// <summary>
+		/// Sets a specific pre-calculated transparency table which is used for any subsequent transparency drawing in indexed color modes.
+		/// </summary>
+		/// <param name="transValue">The transparency preset value. See the TransparencyPreset enumeration for values.</param>
+		void SetTransTableFromPreset(TransparencyPreset transValue);
 
 		/// <summary>
 		/// Flashes any of the players' screen with the specified color for this frame.
@@ -404,7 +411,7 @@ namespace RTE {
 		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
+		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
@@ -418,7 +425,7 @@ namespace RTE {
 		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
+		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
@@ -433,7 +440,7 @@ namespace RTE {
 
 		// TODO: Figure out.
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="screen"></param>
 		/// <returns></returns>
@@ -552,14 +559,19 @@ namespace RTE {
 		bool m_TwoPlayerVSplit; //!< Whether the screen is set to be split vertically when in two player splitscreen, or is default split horizontally.
 
 		ContentFile m_PaletteFile; //!< File of the screen palette.
-		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
+		PALETTE m_Palette; //!< The current array of RGB entries read from the palette file.
+		PALETTE m_DefaultPalette; //!< The default array of RGB entries read from the palette file at initialization.
+		RGB_MAP m_RGBTable; //!< RGB mapping table to speed up calculation of Allegro color maps.
 
 		int m_BlackColor; //!< Palette index for the black color.
 		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
-		COLOR_MAP m_LessTransTable; //!< Color table for low transparency.
-		COLOR_MAP m_HalfTransTable; //!< Color table for medium transparency.
-		COLOR_MAP m_MoreTransTable; //!< Color table for high transparency.
+		/// <summary>
+		/// Color tables for blended drawing in indexed color mode.
+		/// The key is an array of the RGBA values. The value is a pair of the color table itself and a time stamp of when it was last accessed for use during color table pruning.
+		/// </summary>
+		std::array<std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>>, DrawBlendMode::BlendModeCount> m_ColorTables;
+		Timer m_ColorTablePruneTimer; //!< Timer for pruning unused color tables to prevent ridiculous memory usage.
 
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
@@ -617,7 +629,9 @@ namespace RTE {
 		/// This flag does the job. While true blitting the backbuffer to the screen will be skipped during FlipFrameBuffers().
 		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
 		/// </summary>
-		static bool m_DisableFrameBufferFlip;
+		static bool s_DisableFrameBufferFlip;
+
+		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
@@ -632,9 +646,9 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
-#pragma region Display Switch Callbacks
+#pragma region Display Switch Handling
 		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
 		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
 		/// </summary>
 		static void DisplaySwitchOut();
@@ -643,21 +657,21 @@ namespace RTE {
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
 		/// </summary>
 		static void DisplaySwitchIn();
-#pragma endregion
-
-#pragma region Create Breakdown
-		/// <summary>
-		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
-		/// </summary>
-		void SetInitialGraphicsDriver();
 
 		/// <summary>
 		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
 		/// </summary>
 		void SetDisplaySwitchMode() const;
+#pragma endregion
+
+#pragma region Initialize Breakdown
+		/// <summary>
+		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Initialize().
+		/// </summary>
+		void SetInitialGraphicsDriver();
 
 		/// <summary>
-		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
+		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Initialize().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
@@ -674,10 +688,15 @@ namespace RTE {
 		bool ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
 
 		/// <summary>
-		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
+		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Initialize().
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();
+
+		/// <summary>
+		/// Creates the RGB lookup table and color table presets for drawing with transparency in indexed color mode. This is called during Initialize().
+		/// </summary>
+		void CreatePresetColorTables();
 #pragma endregion
 
 #pragma region Resolution Handling

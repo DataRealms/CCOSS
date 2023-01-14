@@ -162,6 +162,18 @@ namespace RTE {
 		void SetAlwaysDisplayUnheldItemsInStrategicMode(bool shouldShowUnheldItemsInStrategicMode) { m_AlwaysDisplayUnheldItemsInStrategicMode = shouldShowUnheldItemsInStrategicMode; }
 
 		/// <summary>
+		/// Gets the number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
+		/// </summary>
+		/// <returns>The number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.</returns>
+		int GetSubPieMenuHoverOpenDelay() const { return m_SubPieMenuHoverOpenDelay; }
+
+		/// <summary>
+		/// Sets the number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
+		/// </summary>
+		/// <param name="newSubPieMenuHoverOpenDelay">The number of MS a PieSlice with a sb-PieMenu needs to be hovered over for the sub-PieMenu to open.</param>
+		void SetSubPieMenuHoverOpenDelay(int newSubPieMenuHoverOpenDelay) { m_SubPieMenuHoverOpenDelay = newSubPieMenuHoverOpenDelay; }
+
+		/// <summary>
 		/// Whether red and white flashes appear when brain is damaged.
 		/// </summary>
 		/// <returns>Whether red and white flashes appear when brain is damaged.</returns>
@@ -481,6 +493,7 @@ namespace RTE {
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.
 		bool m_AlwaysDisplayUnheldItemsInStrategicMode; //!< Whether or not devices on Scene should always show their pick-up HUD when when the player is in strategic mode.
+		int m_SubPieMenuHoverOpenDelay; //!< The number of MS a PieSlice with a sub-PieMenu needs to be hovered over for the sub-PieMenu to open.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.

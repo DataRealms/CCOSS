@@ -709,11 +709,12 @@ void Actor::RestDetection() {
 	MOSRotating::RestDetection();
 
 	if (m_Status != DEAD) {
+		m_AngOscillations = 0;
+		m_VelOscillations = 0;
 		m_RestTimer.Reset();
 		m_ToSettle = false;
 	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddAIMOWaypoint

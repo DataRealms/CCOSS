@@ -506,6 +506,11 @@ ClassInfoGetters;
 	/// </summary>
 	void RestDetection() override;
 
+	/// <summary>
+	/// Indicates whether this MOSRotating has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
+	bool IsAtRest() override;
+
     /// <summary>
     /// Indicates whether this MOSRotating's current graphical representation, including its Attachables, overlaps a point in absolute scene coordinates.
     /// </summary>

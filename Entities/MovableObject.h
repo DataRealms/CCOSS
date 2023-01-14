@@ -1173,7 +1173,7 @@ enum MOType
 	/// <summary>
 	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
 	/// </summary>
-	bool IsAtRest();
+	virtual bool IsAtRest();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsUpdated
@@ -1911,6 +1911,7 @@ protected:
     bool m_HasEverBeenAddedToMovableMan;
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
+	int m_VelOscillations; //!< A counter for oscillations in translational velocity, in order to detect settling.
     // Mark to have the MovableMan copy this the terrain layers at the end
     // of update.
     bool m_ToSettle;

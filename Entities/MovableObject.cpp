@@ -71,6 +71,7 @@ void MovableObject::Clear()
     m_HasEverBeenAddedToMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
+	m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
@@ -700,15 +701,24 @@ float MovableObject::GetAltitude(int max, int accuracy)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::RestDetection() {
-	if (m_PinStrength || (m_Pos - m_PrevPos).MagnitudeIsGreaterThan(1.0F)) { m_RestTimer.Reset(); }
+	// Translational settling detection.
+	if (m_Vel.Dot(m_PrevVel) < 0) {
+		++m_VelOscillations;
+	} else {
+		m_VelOscillations = 0;
+	}
+	if ((m_Pos - m_PrevPos).MagnitudeIsGreaterThan(1.0F)) { m_RestTimer.Reset(); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::IsAtRest() {
-	if (m_RestThreshold < 0) {
+	if (m_RestThreshold < 0 || m_PinStrength) {
 		return false;
 	} else {
+		if (m_VelOscillations > 2) {
+			return true;
+		}
 		return m_RestTimer.IsPastSimMS(m_RestThreshold);
 	}
 }

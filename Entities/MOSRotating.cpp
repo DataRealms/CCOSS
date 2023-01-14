@@ -1238,19 +1238,50 @@ void MOSRotating::ResetAllTimers()
 void MOSRotating::RestDetection() {
 	MOSprite::RestDetection();
 
+	// Rotational settling detection.
+	if ((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) {
+		++m_AngOscillations;
+	} else {
+		m_AngOscillations = 0;
+	}
+
 	if (std::abs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01) { m_RestTimer.Reset(); }
 
 	// If about to settle, make sure the object isn't flying in the air.
 	// Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
 	if (m_ToSettle || IsAtRest()) {
-		if (g_SceneMan.OverAltitude(m_Pos, static_cast<int>(m_SpriteRadius) + 4, 3) && m_pAtomGroup->RatioInTerrain() < 0.5F) {
+		bool resting = true;
+		if (g_SceneMan.OverAltitude(m_Pos, static_cast<int>(m_SpriteRadius) + 4, 3)) {
+			resting = false;
+			for (const Attachable *attachable : m_Attachables) {
+				if (attachable->GetCollidesWithTerrainWhileAttached() && !g_SceneMan.OverAltitude(attachable->GetPos(), static_cast<int>(attachable->GetIndividualRadius()) + 2, 3)) {
+					resting = true;
+					break;
+				}
+			}
+		}
+		if (!resting) {
+			m_VelOscillations = 0;
+			m_AngOscillations = 0;
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}
 	}
-
 	m_PrevRotation = m_Rotation;
 	m_PrevAngVel = m_AngularVel;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MOSRotating::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength) {
+		return false;
+	} else {
+		if (m_VelOscillations > 2 || m_AngOscillations > 2) {
+			return true;
+		}
+		return m_RestTimer.IsPastSimMS(m_RestThreshold);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -637,7 +637,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - `BitmapPrimitive` drawing functions now accept `MOSprite` instead of `Entity` for the object they get the bitmap to draw from.  
 	This changes nothing regarding the bindings, but will now print an error to the console when attempting to draw a non-`MOSprite` based object (e.g. `MOPixel`), instead of silently skipping it.
 
-- Deprecated the following `SceneMan` functions:
+- The following `SceneMan` functions have been moved to `CameraMan`:
 	```lua
 	SetOffset(offsetVector, screenId);
 	GetScreenOcclusion(screenId);
@@ -648,7 +648,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	CheckOffset(screenId);
 	SetScroll(center, screenId);
 	```
-	These have all been moved to `CameraMan`.
 
 </details>
 

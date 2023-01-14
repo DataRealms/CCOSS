@@ -57,6 +57,11 @@ namespace RTE
         void TransferSimStateToRenderer();
 
         /// <summary>
+        /// Tells us whether or not there's a new sim frame waiting to be drawn.
+        /// </summary>
+        bool NewSimFrameIsReady() { return m_NewSimFrame; }
+
+        /// <summary>
         /// Get a game state we can safely read from the render thread.
         /// </summary>
         const RenderableGameState& GetDrawableGameState() const { return *m_GameStateDrawable; }

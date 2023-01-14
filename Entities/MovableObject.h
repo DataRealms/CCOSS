@@ -1467,6 +1467,16 @@ enum MOType
     void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
 
 
+    /// <summary>
+    /// Sets the position of the MO. 
+    /// </summary>
+    /// <param name="newPos">New position for this MovableObject.</param>
+    /// <param name="teleport">Whether we're teleporting or moving smoothly. If we teleport, we don't interpolate between positions when rendering.</param>
+	void SetPos(const Vector &newPos, bool teleport = true) override;
+
+    // I couldn't get the getter/setter stuff in Lua to work with overloading... so...
+	void SetPosLuaBinding(const Vector &newPos) { SetPos(newPos, true); }
+    
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
 //////////////////////////////////////////////////////////////////////////////////////////

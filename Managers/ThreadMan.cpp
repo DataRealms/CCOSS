@@ -75,6 +75,7 @@ void ThreadMan::TransferSimStateToRenderer() {
     //m_PostScreenEffects.clear();
 
     // Mark that we have a new sim frame, so we can swap rendered game state at the start of the new render
+    g_TimerMan.MarkNewSimUpdateComplete();
     m_NewSimFrame = true;
 }
 

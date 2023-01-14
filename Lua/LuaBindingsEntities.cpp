@@ -983,7 +983,7 @@ namespace RTE {
 
 		.property("Material", &MovableObject::GetMaterial)
 		.property("Mass", &MovableObject::GetMass, &MovableObject::SetMass)
-		.property("Pos", &MovableObject::GetPos, &MovableObject::SetPos)
+		.property("Pos", &MovableObject::GetPos, &MovableObject::SetPosLuaBinding)
 		.property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)
 		.property("PrevPos", &MovableObject::GetPrevPos)
 		.property("PrevVel", &MovableObject::GetPrevVel)
@@ -1332,8 +1332,7 @@ namespace RTE {
 
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneObject) {
 		return AbstractTypeLuaClassDefinition(SceneObject, Entity)
-
-		.property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)
+		.property("Pos", &SceneObject::GetPos, &SceneObject::SetPosLuaBinding)
 		.property("HFlipped", &SceneObject::IsHFlipped, &SceneObject::SetHFlipped)
 		.property("RotAngle", &SceneObject::GetRotAngle, &SceneObject::SetRotAngle)
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)

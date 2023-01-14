@@ -389,12 +389,13 @@ namespace RTE {
 
 		// MULTITHREAD_TODO
 		// Proper interpolation
+		Vector prevPos = handPos;
 
 		BITMAP* handSpriteBitmap = m_HandSpriteBitmap;
 
-		auto renderFunc = [=](float interpolation) {
+		auto renderFunc = [=](float interpolationAmount) {
 			BITMAP* pTargetBitmap = targetBitmap;
-			Vector renderPos = handPos;
+			Vector renderPos = Lerp(0.0F, 1.0F, prevPos, handPos, interpolationAmount);
 			if (targetBitmap == nullptr) {
 				pTargetBitmap = g_ThreadMan.GetRenderTarget();
 				renderPos -= g_ThreadMan.GetRenderOffset();

@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "PerformanceMan.h"
 #include "SettingsMan.h"
+#include "ThreadMan.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -65,6 +66,12 @@ namespace RTE {
 			return 1.0F;
 		}
 
+		// We might be rendering the last sim frame even while a new one is waiting for us
+		// If that's the case, return 1.0F, so we don't "jump" back and start rendering the beginning of the last frame again
+		if (g_ThreadMan.NewSimFrameIsReady()) {
+			return 1.0F;
+		}
+
         long long timeSinceLastUpdate = m_RealTimeTicks - m_LatestUpdateStartTime;
 		return std::min(static_cast<float>(timeSinceLastUpdate) / static_cast<float>(m_UpdateTrueDeltaTimeTicks), 1.0F);
     }
@@ -89,10 +96,6 @@ namespace RTE {
 	void TimerMan::UpdateSim() {
 		m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPUAverage();
 
-		long long timeIncrease = m_RealTimeTicks - m_LatestUpdateStartTime;
-		m_LatestUpdateStartTime = m_RealTimeTicks;
-		m_UpdateTrueDeltaTimeTicks = timeIncrease;
-
 		if (TimeForSimUpdate()) {
 			// Transfer ticks from the accumulator to the sim time ticks.
 			m_SimAccumulator -= m_DeltaTime;
@@ -100,6 +103,14 @@ namespace RTE {
 
 			++m_SimUpdateCount;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TimerMan::MarkNewSimUpdateComplete() {
+		long long timeIncrease = m_RealTimeTicks - m_LatestUpdateStartTime;
+		m_LatestUpdateStartTime = m_RealTimeTicks;
+		m_UpdateTrueDeltaTimeTicks = timeIncrease;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,8 +131,13 @@ namespace RTE {
 
 		// If not paused, add the new time difference to the sim accumulator, scaling by the TimeScale.
 		if (!m_SimPaused) { 
-			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale); 
+			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
 		}
+
+		// If we run with infinite timescale, we can became extremely far behind, and we'll never catch up
+		// This means that even if we slow down timescale after to a reasonable value, it'll continue to run as-fast-as-possible
+		// So we cap our accumulator to never be more than 3 updates ahead
+		m_SimAccumulator = std::min(m_SimAccumulator.load(), m_DeltaTime * 3);
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 	}

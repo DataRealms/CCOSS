@@ -398,6 +398,12 @@ namespace RTE {
 			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 		}
 
+		// TODO_MULTITHREAD Being done in draw for now...
+		//m_PrevPos = m_Pos;
+
+		m_PrevVel = m_Vel;
+		m_PrevParentOffset = m_ParentOffset;
+		m_PrevJointOffset = m_JointOffset;
 		m_PreUpdateHasRunThisFrame = false;
 	}
 
@@ -406,7 +412,10 @@ namespace RTE {
 	void Attachable::PreUpdate() {
 		if (!m_PreUpdateHasRunThisFrame) {
 			if (m_Parent) {
-				if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
+				if (InheritsHFlipped() != 0) { 
+					m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); 
+				}
+
 				if (InheritsRotAngle()) {
 					SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * m_Parent->GetFlipFactor());
 					m_AngularVel = 0.0F;

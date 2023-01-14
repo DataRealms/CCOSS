@@ -1248,13 +1248,16 @@ void MOSRotating::RestDetection() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MOSRotating::IsAtRest() {
-	if (m_RestThreshold < 0 || m_PinStrength != 0) {
-		return false;
-	} else if (m_VelOscillations > 2 || m_AngOscillations > 2) {
-		return true;
-	}
-	return m_RestTimer.IsPastSimMS(m_RestThreshold);
+    // If we seem to be about to settle, make sure we're not flying in the air still.
+    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
+    if (m_ToSettle || IsAtRest())
+    {
+        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
+        {
+            m_RestTimer.Reset();
+            m_ToSettle = false;
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1498,7 +1501,9 @@ void MOSRotating::PostTravel()
 void MOSRotating::Update() {
     MOSprite::Update();
 
-    if (m_InheritEffectRotAngle) { m_EffectRotAngle = m_Rotation.GetRadAngle(); }
+    if (m_InheritEffectRotAngle) { 
+        m_EffectRotAngle = m_Rotation.GetRadAngle(); 
+    }
 
     if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0F) {
         m_OrientToVel = std::clamp(m_OrientToVel, 0.0F, 1.0F);
@@ -1549,7 +1554,9 @@ void MOSRotating::Update() {
         }
     }
 
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); }
+    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { 
+        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); 
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1788,10 +1795,7 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         auto renderFunc = [=](float interpolationAmount) {
             BITMAP* pTargetBitmap = targetBitmap;
             Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
-            // TODO_MULTITHREAD
-            // Add a proper rotational lerp
-            //Matrix rotation(Lerp(0.0F, 1.0F, prevRotation.GetRadAngle(), currRotation.GetRadAngle(), interpolationAmount));
-            Matrix rotation(currRotation);
+            Matrix rotation(Lerp(0.0F, 1.0F, prevRotation, currRotation, interpolationAmount));
             if (targetBitmap == nullptr) {
                 pTargetBitmap = g_ThreadMan.GetRenderTarget();
                 renderPos -= g_ThreadMan.GetRenderOffset();
@@ -1971,6 +1975,10 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         };
 
         if (targetBitmap == nullptr) {
+            // TODO_MULTITHREAD: HUUUUGE hack to update this here, but it's the safest way for now... The game is super inconsistent about updating the previous position/rotation of things.
+            // It differs depending on what things are attached to etc. Doing it here means it gives the nicest result for render interpolation.
+            const_cast<MOSRotating*>(this)->m_PrevPos = m_Pos;
+            const_cast<MOSRotating*>(this)->m_PrevRotation = m_Rotation;
             g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
         } else {
             renderFunc(1.0F);

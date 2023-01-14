@@ -520,14 +520,11 @@ void AEmitter::Update()
 
 					if (emission.GetOffset().IsZero()) {
 						if (m_EmissionOffset.IsZero()) {
-							pParticle->SetPrevPos(m_Pos);
 							pParticle->SetPos(m_Pos);
 						} else {
-                            pParticle->SetPrevPos(m_Pos);
 							pParticle->SetPos(m_Pos + RotateOffset(m_EmissionOffset));
 						}
 					} else {
-                        pParticle->SetPrevPos(m_Pos);
 						pParticle->SetPos(m_Pos + RotateOffset((*eItr)->GetOffset()));
 					}
     // TODO: Optimize making the random angles!")

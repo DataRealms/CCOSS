@@ -302,7 +302,10 @@ public:
 // Arguments:       A Vector describing the current absolute position in pixels.
 // Return value:    None.
 
-	void SetPos(const Vector &newPos) { m_Pos = newPos; }
+	virtual void SetPos(const Vector &newPos, bool teleport = true) { m_Pos = newPos; }
+
+    // I couldn't get the getter/setter stuff in Lua to work with overloading... so...
+	void SetPosLuaBinding(const Vector &newPos) { SetPos(newPos, true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

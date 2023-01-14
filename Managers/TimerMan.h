@@ -72,7 +72,7 @@ namespace RTE {
 		/// Sets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
 		/// </summary>
 		/// <param name="timeScale">A factor between the real world time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal.</param>
-		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; m_SimAccumulator = std::min(m_SimAccumulator.load(), static_cast<long long>(m_DeltaTime * m_TimeScale)); }
+		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; }
 
 		/// <summary>
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
@@ -194,6 +194,11 @@ namespace RTE {
 		/// Updates the simulation time to represent the current amount of simulation time passed from the start of the simulation up to the last update.
 		/// </summary>
 		void UpdateSim();
+
+		/// <summary>
+		/// Marks that the last simulation update has completed.
+		/// </summary>
+		void MarkNewSimUpdateComplete();
 
 		/// <summary>
 		/// Updates the real time ticks based on the actual clock time and adds it to the accumulator which the simulation ticks will draw from in whole DeltaTime-sized chunks.

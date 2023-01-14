@@ -950,8 +950,7 @@ void MovableObject::PreTravel()
         m_IsTraveling = true;
 	}
 
-    // Save previous position and velocities before moving
-    m_PrevPos = m_Pos;
+    //m_PrevPos = m_Pos; // This is set when things draw
     m_PrevVel = m_Vel;
 
 	m_MOIDHit = g_NoMOID;
@@ -1002,12 +1001,6 @@ void MovableObject::PostTravel()
         m_ToDelete = true;
     }
 
-    // We might've teleported. If so, we don't want to interpolate a massive speed from our past location to our current
-    // So, if we'v moved more than our velocity would imply, just set PrevPos to our current position.
-    if ((m_PrevPos - m_Pos).GetSqrMagnitude() > (m_Vel * 1.5F).GetSqrMagnitude()) {
-        m_PrevPos = m_Pos;
-    }
-
     // Fix speeds that are too high
     FixTooFast();
 
@@ -1025,7 +1018,9 @@ void MovableObject::PostTravel()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Update() {
-	if (m_RandomizeEffectRotAngleEveryFrame) { m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); }
+	if (m_RandomizeEffectRotAngleEveryFrame) { 
+        m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); 
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1327,6 +1322,15 @@ bool MovableObject::DrawToTerrain(SLTerrain *terrain) {
 		g_SceneMan.RegisterTerrainChange(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), 1, 1, DrawMode::g_DrawColor, false);
 	}
 	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::SetPos(const Vector &newPos, bool teleport) {
+    m_Pos = newPos;
+    if (teleport) {
+        m_PrevPos = newPos;
+    }
 }
 
 } // namespace RTE

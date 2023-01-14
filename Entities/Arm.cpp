@@ -259,19 +259,18 @@ MovableObject * Arm::ReleaseHeldMO()
 //                  MovableMan. Ownership is transferred to MovableMan.
 // Arguments:       None.
 
-MovableObject * Arm::DropEverything()
-{
-    MovableObject *pReturnMO = m_pHeldMO;
+MovableObject * Arm::DropEverything() {
+    MovableObject *heldMO = ReleaseHeldMO();
 
-    if (m_pHeldMO && m_pHeldMO->IsDevice()) {
-        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false);
-    }
-    else if (m_pHeldMO)
-        g_MovableMan.AddParticle(m_pHeldMO);
+	if (heldMO) {
+		Vector tossVec = m_HandOffset;
+		tossVec.SetMagnitude(RandomNum(3.0F, 6.0F));
+		heldMO->SetVel((heldMO->GetVel() + m_Vel) * 0.5F + tossVec.RadRotate(c_QuarterPI * RandomNormalNum()));
+		heldMO->SetAngularVel(heldMO->GetAngularVel() + RandomNormalNum());
+		g_MovableMan.AddMO(heldMO);
+	}
 
-    m_pHeldMO = 0;
-
-    return pReturnMO;
+    return heldMO;
 }
 
 

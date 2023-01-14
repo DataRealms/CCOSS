@@ -862,7 +862,8 @@ void Actor::DropAllInventory()
 			velMax = velMin + std::sqrt(m_SpriteRadius);
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNum(), 0);
+			gibROffset.RadRotate(c_PI * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -880,18 +881,17 @@ void Actor::DropAllInventory()
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
+				pObject->SetAngularVel((pObject->GetAngularVel() * RandomNum(0.5F, 1.5F)) * (RandomNum() < 0.5F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
 			if (gibVel.IsZero()) {
 				gibVel.SetXY(RandomNum(velMin, velMax), 0.0F);
+				gibVel.RadRotate(c_PI * RandomNormalNum());
 			} else {
 				gibVel.SetMagnitude(RandomNum(velMin, velMax));
 			}
-			// Don't! the offset was already rotated!
-			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
 			//            gibVel += (impactImpulse / m_Gibs.size()) / pObject->GetMass();
 			pObject->SetVel(m_Vel + gibVel);

@@ -551,10 +551,12 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 					if (gameActivity && gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) { unheldItemDisplayRange = -1.0F; }
 				}
 				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
-				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
-				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+				if (!m_SeenByPlayer.at(viewingPlayer)) {
+					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && m_Vel.MagnitudeIsLessThan(2.0F) && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+				} else {
+					if (unheldItemDisplayRange > 0) { unheldItemDisplayRange += 4.0F; }
+					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
 
-				if (m_SeenByPlayer.at(viewingPlayer)) {
 					char pickupArrowString[64];
 					pickupArrowString[0] = 0;
 					if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {

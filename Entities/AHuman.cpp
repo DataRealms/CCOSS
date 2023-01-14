@@ -3756,13 +3756,13 @@ void AHuman::Update()
     }
 
 	if (m_pFGArm) {
-		float affectingBodyAngle = 0.0F;
-		if (m_FGArmFlailScalar != 0 && m_SharpAimDelay != 0) {
+		float affectingBodyAngle = m_Status < INACTIVE ? m_FGArmFlailScalar : 1.0F;
+		if (affectingBodyAngle != 0 && m_SharpAimDelay != 0) {
 			float aimScalar = std::min(static_cast<float>(m_SharpAimTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			float revertScalar = std::min(static_cast<float>(m_SharpAimRevertTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			aimScalar = (aimScalar > revertScalar) ? aimScalar : 1.0F - revertScalar;
 
-			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
+			affectingBodyAngle *= std::abs(std::sin(rot)) * rot * (1.0F - aimScalar);
 		}
 		m_pFGArm->SetRotAngle(affectingBodyAngle + adjustedAimAngle);
 
@@ -3780,7 +3780,8 @@ void AHuman::Update()
     }
 
     if (m_pBGArm) {
-		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (adjustedAimAngle));
+		float affectingBodyAngle = m_Status < INACTIVE ? m_BGArmFlailScalar : 1.0F;
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * affectingBodyAngle + (adjustedAimAngle));
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield

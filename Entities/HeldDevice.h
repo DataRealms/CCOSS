@@ -272,6 +272,18 @@ ClassInfoGetters;
 	/// <param name="supported">Whether this HeldDevice is being supported.</param>
     void SetSupported(bool supported) { m_Supported = m_Supportable && supported; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice has a second Arm available to provide support.
+	/// </summary>
+	/// <returns>Whether this HeldDevice has a second Arm available to provide support.</returns>
+	bool GetSupportAvailable() const { return m_Supportable && m_SupportAvailable; }
+
+	/// <summary>
+	/// Sets whether this HeldDevice has a second Arm available to provide support.
+	/// </summary>
+	/// <param name="supported">Whether this HeldDevice has a second Arm available to provide support.</param>
+	void SetSupportAvailable(bool supportAvailable) { m_SupportAvailable = m_Supportable && supportAvailable; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSupportOffset
@@ -467,10 +479,10 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Throws out the currently used Magazine, if any, and puts in a new one
 //                  after the reload delay is up.
-// Arguments:       Whether or not this is being reloaded one-handed.
+// Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload(bool isBeingReloadedOneHanded = false) {}
+    virtual void Reload() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -631,8 +643,8 @@ protected:
     // How much farther the player can see when aiming this sharply.
     float m_MaxSharpLength;
 	bool m_Supportable; //!< Whether or not this HeldDevice can be supported.
-    // If this HeldDevice is currently being supported by a second hand.
-    bool m_Supported;
+    bool m_Supported; //!< Whether or not this HeldDevice is currently being supported by another Arm.
+	bool m_SupportAvailable; //!< Whether or not this HeldDevice has a supporting Arm available (or is on a Turret), even if it's the available Arm is not currently supporting the HeldDevice.
     bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
 	//TODO: move this smelly thing elsewhere
 	std::array<bool, Players::MaxPlayerCount> m_SeenByPlayer; //!< An array of players that can currently see the pickup HUD of this HeldDevice.

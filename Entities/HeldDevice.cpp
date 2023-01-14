@@ -46,10 +46,11 @@ void HeldDevice::Clear()
     m_SharpStanceOffset.Reset();
     m_SharpAim = 0.0F;
     m_MaxSharpLength = 0;
+	m_Supportable = true;
     m_Supported = false;
+	m_SupportAvailable = false;
     m_SupportOffset.Reset();
 	m_SeenByPlayer.fill(false);
-	m_Supportable = true;
     m_IsUnPickupable = false;
     m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
@@ -152,7 +153,9 @@ int HeldDevice::Create(const HeldDevice &reference)
 
     m_SharpAim = reference.m_SharpAim;
     m_MaxSharpLength = reference.m_MaxSharpLength;
+	m_Supportable = reference.m_Supportable;
     m_Supported = reference.m_Supported;
+	m_SupportAvailable = reference.m_SupportAvailable;
     m_Loudness = reference.m_Loudness;
 
     return 0;

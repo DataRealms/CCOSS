@@ -1034,7 +1034,7 @@ bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &
 		return false;
 	}
 
-	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
+	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
         return true;
     }
 
@@ -1537,18 +1537,18 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 				float percentageOfReloadTimeToStayAtReloadOffset = 0.85F;
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
 
-				heldFirearm->Reload(!otherArmIsAvailable);
+				heldFirearm->Reload();
 				if (otherArmIsAvailable) {
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (!m_ReloadOffset.IsZero()) {
-						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					} else {
-						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					}
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				} else if (!m_ReloadOffset.IsZero()) {
-					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				}
 			}
@@ -3219,6 +3219,16 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Standard Reloading
 	
+
+	for (const Arm *arm : { m_pFGArm, m_pBGArm }) {
+		if (arm) {
+			if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(arm->GetHeldDevice())) {
+				const Arm *otherArm = arm == m_pFGArm ? m_pBGArm : m_pFGArm;
+				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+				heldFirearm->SetSupportAvailable(otherArmIsAvailable);
+			}
+		}
+	}
 	if (m_Controller.IsState(ControlState::WEAPON_RELOAD)) {
 		ReloadFirearms();
 	}

@@ -685,7 +685,7 @@ void HDFirearm::StopActivationSound()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HDFirearm::Reload(bool isBeingReloadedOneHanded) {
+void HDFirearm::Reload() {
 	if (!m_Reloading && m_Reloadable) {
 		bool hadMagazineBeforeReloading = m_pMagazine != nullptr;
         if (hadMagazineBeforeReloading) {
@@ -703,7 +703,7 @@ void HDFirearm::Reload(bool isBeingReloadedOneHanded) {
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
-		m_ReloadTmr.SetSimTimeLimitMS(static_cast<int>(static_cast<float>(m_ReloadTime) * (isBeingReloadedOneHanded ? m_OneHandedReloadTimeMultiplier : 1.0F)));
+		CorrectReloadTimerForSupportAvailable();
 
 		RunScriptedFunctionInAppropriateScripts("OnReload", false, false, {}, { hadMagazineBeforeReloading ? "true" : "false" });
 

@@ -16,6 +16,8 @@ namespace RTE {
 	/// The singleton manager of the camera for each player.
 	/// </summary>
 	class CameraMan : public Singleton<CameraMan> {
+		friend class SettingsMan;
+
 	public:
 
 #pragma region Creation
@@ -41,6 +43,50 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the CameraMan object.
 		/// </summary>
 		void Destroy();
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the screen shake strength multiplier.
+		/// </summary>
+		/// <returns>The screen shake strength multiplier.</returns>
+		float GetScreenShakeStrength() const { return m_ScreenShakeStrength; }
+
+		/// <summary>
+		/// Sets the screen shake strength multiplier.
+		/// </summary>
+		/// <param name="newValue">New value for the screen shake strength multiplier.</param>
+		void SetScreenShakeStrength(float newValue) { m_ScreenShakeStrength = newValue; }
+
+		/// <summary>
+		/// Gets how quickly screen shake decays, per second.
+		/// </summary>
+		/// <returns>The screen shake decay.</returns>
+		float GetScreenShakeDecay() const { return m_ScreenShakeDecay; }
+
+		/// <summary>
+		/// Gets the maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
+		/// </summary>
+		/// <returns>The maximum screen shake time, in seconds.</returns>
+		float GetMaxScreenShakeTime() const { return m_MaxScreenShakeTime; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of gib energy.</returns>
+		float GetDefaultShakePerUnitOfGibEnergy() const { return m_DefaultShakePerUnitOfGibEnergy; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of recoil energy.</returns>
+		float GetDefaultShakePerUnitOfRecoilEnergy() const { return m_DefaultShakePerUnitOfRecoilEnergy; }
+
+		/// <summary>
+		/// The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
+		/// </summary>
+		/// <returns>The maximum auto-calculated recoil shakiness.</returns>
+		float GetDefaultShakeFromRecoilMaximum() const { return m_DefaultShakeFromRecoilMaximum; }
 #pragma endregion
 
 #pragma region Screen Handling
@@ -221,6 +267,13 @@ namespace RTE {
 			// The magnitude of screen shake that is currently being applied
 			float m_ScreenShakeMagnitude;
 		};
+
+		float m_ScreenShakeStrength; //!< A global multiplier applied to screen shaking strength.
+		float m_ScreenShakeDecay; //!< How quickly screen shake falls off.
+		float m_MaxScreenShakeTime; //!< The maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
+		float m_DefaultShakePerUnitOfGibEnergy; //!< How much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
+		float m_DefaultShakePerUnitOfRecoilEnergy; //!< How much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
+		float m_DefaultShakeFromRecoilMaximum; //!< The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
 
 		std::array<Screen, c_MaxScreenCount> m_Screens;
 

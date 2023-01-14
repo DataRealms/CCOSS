@@ -13,6 +13,13 @@ namespace RTE {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void CameraMan::Clear() {
+		m_ScreenShakeStrength = 1.0F;
+		m_ScreenShakeDecay = 50.0F;
+		m_MaxScreenShakeTime = 1.0F;
+		m_DefaultShakePerUnitOfGibEnergy = 0.001F;
+		m_DefaultShakePerUnitOfRecoilEnergy = 0.5F;
+		m_DefaultShakeFromRecoilMaximum = 0.0F;
+
         for (Screen& screen : m_Screens) {
             screen.m_Offset.Reset();
             screen.m_DeltaOffset.Reset();
@@ -46,13 +53,11 @@ namespace RTE {
         Screen& screen = m_Screens[screenId];
         const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
 
-        const float screenShakeDecay = g_SettingsMan.GetScreenShakeDecay();
-
         // Don't let our screen shake beyond our max
-        screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, screenShakeDecay * g_SettingsMan.GetMaxScreenShakeTime());
+        screen.m_ScreenShakeMagnitude = std::min(screen.m_ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
 
         // Reduce screen shake over time
-        screen.m_ScreenShakeMagnitude -= screenShakeDecay * screen.m_ScrollTimer.GetElapsedRealTimeS();
+        screen.m_ScreenShakeMagnitude -= m_ScreenShakeDecay * screen.m_ScrollTimer.GetElapsedRealTimeS();
         screen.m_ScreenShakeMagnitude = std::max(screen.m_ScreenShakeMagnitude, 0.0F);
 
         // Feedback was that the best screenshake strength was between 25% and 40% of default
@@ -62,7 +67,7 @@ namespace RTE {
 
         Vector screenShakeOffset(1.0f, 0.0f);
         screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
-        screenShakeOffset *= screen.m_ScreenShakeMagnitude * g_SettingsMan.GetScreenShakeStrength() * screenShakeScale;
+        screenShakeOffset *= screen.m_ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
 
         if (g_TimerMan.DrawnSimUpdate()) {
             // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.

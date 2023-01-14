@@ -17,7 +17,6 @@
 #include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
-#include "SettingsMan.h"
 
 #include "Magazine.h"
 #include "ThrownDevice.h"
@@ -1027,8 +1026,8 @@ void HDFirearm::Update()
             int controllingPlayer = pActor->GetController()->GetPlayer();
             int screenId = g_ActivityMan.GetActivity()->ScreenOfPlayer(controllingPlayer);
             if (screenId != -1) {
-                const float shakiness = g_SettingsMan.GetDefaultShakePerUnitOfRecoilEnergy();
-                const float maxShakiness = g_SettingsMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
+                const float shakiness = g_CameraMan.GetDefaultShakePerUnitOfRecoilEnergy();
+                const float maxShakiness = g_CameraMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
                 float screenShakeAmount = m_RecoilScreenShakeAmount == -1.0F ? std::min(totalFireForce * m_JointStiffness * shakiness, maxShakiness) : m_RecoilScreenShakeAmount;
                 g_CameraMan.ApplyScreenShake(screenShakeAmount, screenId);
             }

@@ -617,8 +617,15 @@ void Actor::SetTeam(int team)
 
 void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 {
+
+	Controller::InputMode previousControllerMode = m_Controller.GetInputMode();
+	int previousControllingPlayer = m_Controller.GetPlayer();
+
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
+
+	RunScriptedFunctionInAppropriateScripts("OnControllerInputModeChange", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
+
 
     // So the AI doesn't jerk around
     m_StuckTimer.Reset();
@@ -636,13 +643,7 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, int newPlayer)
 {
     Controller::InputMode returnMode = m_Controller.GetInputMode();
-    m_Controller.SetInputMode(newMode);
-    m_Controller.SetPlayer(newPlayer);
-
-    // So the AI doesn't jerk around
-    m_StuckTimer.Reset();
-
-    m_NewControlTmr.Reset();
+	SetControllerMode(newMode, newPlayer);
     return returnMode;
 }
 
@@ -1612,9 +1613,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
     m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -1633,8 +1631,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 
-    // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-    if (!targetPos.IsZero())
+    // If we have something to draw, adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
+    if ((m_HUDVisible || m_PieMenu->IsVisible()) && !targetPos.IsZero())
     {
         // Spans vertical scene seam
         int sceneWidth = g_SceneMan.GetSceneWidth();
@@ -1668,6 +1666,15 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         }
     }
 
+	int actorScreen = g_ActivityMan.GetActivity() ? g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) : -1;
+	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && actorScreen == whichScreen))) {
+		m_PieMenu->Draw(pTargetBitmap, targetPos);
+	}
+
+	if (!m_HUDVisible) {
+		return;
+	}
+
     // Draw the selection arrow, if controlled and under the arrow's time limit
     if (m_Controller.IsPlayerControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < ARROWTIME)
     {
@@ -1683,7 +1690,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     {
         AllegroBitmap bitmapInt(pTargetBitmap);
 
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE))
+        if (!m_Controller.IsState(PIE_MENU_ACTIVE) || actorScreen != whichScreen)
         {
             // If we're still alive, show the team colors
             if (m_Health > 0)
@@ -1821,10 +1828,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // Don't proceed to draw all the secret stuff below if this screen is for a player on the other team!
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)
         return;
-
-	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen))) {
-		m_PieMenu->Draw(pTargetBitmap, targetPos);
-	}
 
     // AI waypoints or points of interest
     if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))

@@ -85,6 +85,7 @@ namespace RTE {
 			luabind::def("GetLPP", &LuaAdaptersUtility::GetLPP),
 			luabind::def("GetPathFindingDefaultDigStrength", &LuaAdaptersUtility::GetPathFindingDefaultDigStrength),
 			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
+			luabind::def("RoundToNearestMultiple", &RoundToNearestMultiple),
 
 			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Box),
@@ -158,7 +159,24 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
 			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions)
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, ArcPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, SplinePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BoxPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BoxFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, RoundedBoxPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, RoundedBoxFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, CirclePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, CircleFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipsePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, EllipseFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TrianglePrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive)
 		];
 
 		// Assign the manager instances to globals in the lua master state

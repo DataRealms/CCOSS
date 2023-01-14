@@ -1065,6 +1065,9 @@
     <ClCompile Include="Managers\CameraMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <Filter>Lua</Filter>
     </ClCompile>

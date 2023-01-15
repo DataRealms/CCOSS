@@ -12,7 +12,12 @@
 // Inclusions of header files
 
 #include "HDFirearm.h"
+
+#include "ActivityMan.h"
+#include "CameraMan.h"
+#include "FrameMan.h"
 #include "PresetMan.h"
+
 #include "Magazine.h"
 #include "ThrownDevice.h"
 #include "MOPixel.h"
@@ -60,6 +65,7 @@ void HDFirearm::Clear()
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
 	m_ShellVelVariation = 0.1F;
+    m_RecoilScreenShakeAmount = 0.0F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;
@@ -135,7 +141,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
-	m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_ShellVelVariation = reference.m_ShellVelVariation;
+    m_RecoilScreenShakeAmount = reference.m_RecoilScreenShakeAmount;
     m_MuzzleOff = reference.m_MuzzleOff;
     m_EjectOff = reference.m_EjectOff;
     m_MagOff = reference.m_MagOff;
@@ -225,6 +232,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_ShellAngVelRange /= 2;
 	} else if (propName == "ShellVelVariation") {
 		reader >> m_ShellVelVariation;
+    } else if (propName == "RecoilScreenShakeAmount") {
+		reader >> m_RecoilScreenShakeAmount;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
 	} else if (propName == "EjectionOffset") {
@@ -301,8 +310,10 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
     writer << m_ShellAngVelRange * 2;
-	writer.NewProperty("ShellVelocityVariation");
+	writer.NewProperty("ShellVelVariation");
 	writer << m_ShellVelVariation;
+    writer.NewProperty("RecoilScreenShakeAmount");
+    writer << m_RecoilScreenShakeAmount;
     writer.NewProperty("MuzzleOffset");
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
@@ -760,14 +771,16 @@ void HDFirearm::Update()
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
     if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
+    Actor *pActor = dynamic_cast<Actor*>(GetRootParent());
+
     /////////////////////////////////
     // Activation/firing logic
 
     int roundsFired = 0;
 	m_RoundsFired = 0;
     float degAimAngle = m_Rotation.GetDegAngle();
-    degAimAngle = m_HFlipped ? (180 + degAimAngle) : degAimAngle;
-    float totalFireForce = 0;
+    degAimAngle = m_HFlipped ? (180.0F + degAimAngle) : degAimAngle;
+    float totalFireForce = 0.0F;
     m_FireFrame = false;
     m_DoneReloading = false;
     bool playedRoundFireSound = false;
@@ -775,10 +788,6 @@ void HDFirearm::Update()
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
         if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
-
-            // Get the parent root of this AEmitter
-// TODO: Potentially get this once outside instead, like in attach/detach")
-            MovableObject *pRootParent = GetRootParent();
 
             // Full auto
             if (m_FullAuto)
@@ -826,9 +835,9 @@ void HDFirearm::Update()
             float shake, particleSpread, shellSpread, lethalRange;
 
             lethalRange = m_MaxSharpLength * m_SharpAim + std::max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.51F;
-            Actor *pUser = dynamic_cast<Actor *>(pRootParent);
-            if (pUser)
-                lethalRange += pUser->GetAimDistance();
+            if (pActor) {
+                lethalRange += pActor->GetAimDistance();
+            }
 
             // Fire all rounds that were fired this frame.
             for (int i = 0; i < roundsFired && !m_pMagazine->IsEmpty(); ++i)
@@ -876,13 +885,16 @@ void HDFirearm::Update()
 
                     // Remove from parent if it's an attachable
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
-                    if (pAttachable)
-                    {
-                        if (pAttachable->IsAttached()) { pAttachable->GetParent()->RemoveAttachable(pAttachable); }
+                    if (pAttachable) {
+                        if (pAttachable->IsAttached()) { 
+                            pAttachable->GetParent()->RemoveAttachable(pAttachable); 
+                        }
+
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
-                        if (pTD)
+                        if (pTD) {
                             pTD->Activate();
+                        }
                     }
 
                     // Set the fired particle to not hit this HeldDevice's parent, if applicable
@@ -1000,6 +1012,18 @@ void HDFirearm::Update()
 			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
         }
 
+        // Screen shake
+        if (pActor) {
+            int controllingPlayer = pActor->GetController()->GetPlayer();
+            int screenId = g_ActivityMan.GetActivity()->ScreenOfPlayer(controllingPlayer);
+            if (screenId != -1) {
+                const float shakiness = g_CameraMan.GetDefaultShakePerUnitOfRecoilEnergy();
+                const float maxShakiness = g_CameraMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
+                float screenShakeAmount = m_RecoilScreenShakeAmount == -1.0F ? std::min(totalFireForce * m_JointStiffness * shakiness, maxShakiness) : m_RecoilScreenShakeAmount;
+                g_CameraMan.ApplyScreenShake(screenShakeAmount, screenId);
+            }
+        }
+
         AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
@@ -1024,7 +1048,7 @@ void HDFirearm::Update()
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		if (m_RecoilForce.GetMagnitude() > 0.01F) {
+		if (m_RecoilForce.MagnitudeIsGreaterThan(0.01F)) {
 			m_RecoilForce *= 0.6F;
 		} else {
 			m_RecoilForce.Reset();

@@ -273,23 +273,13 @@ namespace RTE {
 
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
-		.def("GetOffset", &SceneMan::GetOffset)
-		.def("SetOffset", (void (SceneMan::*)(const Vector &, int))&SceneMan::SetOffset)
-		.def("SetOffsetX", &SceneMan::SetOffsetX)
-		.def("SetOffsetY", &SceneMan::SetOffsetY)
-		.def("GetScreenOcclusion", &SceneMan::GetScreenOcclusion)
-		.def("SetScreenOcclusion", &SceneMan::SetScreenOcclusion)
+
 		.def("GetTerrain", &SceneMan::GetTerrain)
 		.def("GetMaterial", &SceneMan::GetMaterial)
 		.def("GetMaterialFromID", &SceneMan::GetMaterialFromID)
 		.def("GetTerrMatter", &SceneMan::GetTerrMatter)
 		.def("GetMOIDPixel", &SceneMan::GetMOIDPixel)
 		.def("SetLayerDrawMode", &SceneMan::SetLayerDrawMode)
-		.def("SetScroll", &SceneMan::SetScroll)
-		.def("SetScrollTarget", &SceneMan::SetScrollTarget)
-		.def("GetScrollTarget", &SceneMan::GetScrollTarget)
-		.def("TargetDistanceScalar", &SceneMan::TargetDistanceScalar)
-		.def("CheckOffset", &SceneMan::CheckOffset)
 		.def("LoadUnseenLayer", &SceneMan::LoadUnseenLayer)
 		.def("MakeAllUnseen", &SceneMan::MakeAllUnseen)
 		.def("AnythingUnseen", &SceneMan::AnythingUnseen)
@@ -331,6 +321,24 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(ManagerLuaBindings, CameraMan) {
+		return luabind::class_<CameraMan>("CameraManager")
+
+			.def("GetOffset", &CameraMan::GetOffset)
+			.def("SetOffset", &CameraMan::SetOffset)
+			.def("GetScreenOcclusion", &CameraMan::GetScreenOcclusion)
+			.def("SetScreenOcclusion", &CameraMan::SetScreenOcclusion)
+			.def("GetScrollTarget", &CameraMan::GetScrollTarget)
+			.def("SetScrollTarget", &CameraMan::SetScrollTarget)
+			.def("TargetDistanceScalar", &CameraMan::TargetDistanceScalar)
+			.def("CheckOffset", &CameraMan::CheckOffset)
+			.def("SetScroll", &CameraMan::SetScroll)
+			.def("AddScreenShake", (void (CameraMan::*)(float, int))&CameraMan::AddScreenShake)
+			.def("AddScreenShake", (void (CameraMan::*)(float, const Vector &))&CameraMan::AddScreenShake);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaBindingRegisterFunctionDefinitionForType(ManagerLuaBindings, SettingsMan) {
 		return luabind::class_<SettingsMan>("SettingsManager")

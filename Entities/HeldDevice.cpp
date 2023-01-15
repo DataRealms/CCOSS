@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "HeldDevice.h"
+
+#include "CameraMan.h"
 #include "MovableMan.h"
 #include "AtomGroup.h"
 #include "Arm.h"
@@ -550,12 +552,12 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 					const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(activity);
 					if (gameActivity && gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) { unheldItemDisplayRange = -1.0F; }
 				}
-				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
 				if (!m_SeenByPlayer.at(viewingPlayer)) {
-					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && m_Vel.MagnitudeIsLessThan(2.0F) && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && m_Vel.MagnitudeIsLessThan(2.0F) && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
 				} else {
+					// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
 					if (unheldItemDisplayRange > 0) { unheldItemDisplayRange += 4.0F; }
-					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
 
 					char pickupArrowString[64];
 					pickupArrowString[0] = 0;

@@ -13,6 +13,7 @@
 
 #include "AreaPickerGUI.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -323,7 +324,7 @@ void AreaPickerGUI::Update()
         occlusion.m_X = m_pParentBox->GetXPos() - g_FrameMan.GetPlayerScreenWidth();
 
         m_pParentBox->SetPositionAbs(position.m_X, position.m_Y);
-        g_SceneMan.SetScreenOcclusion(occlusion, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(occlusion, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
         if (m_pParentBox->GetXPos() <= enabledPos)
             m_PickerEnabled = ENABLED;
@@ -335,7 +336,7 @@ void AreaPickerGUI::Update()
 
         float toGo = std::ceil((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + toGo, 0);
-        g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetXPos() - g_FrameMan.GetPlayerScreenWidth(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(m_pParentBox->GetXPos() - g_FrameMan.GetPlayerScreenWidth(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
         if (m_pParentBox->GetXPos() >= g_FrameMan.GetPlayerScreenWidth())
         {

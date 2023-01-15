@@ -1,5 +1,6 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "CameraMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
@@ -167,6 +168,18 @@ namespace RTE {
 			reader >> m_EnableSmartBuyMenuNavigation;
 		} else if (propName == "ScrapCompactingHeight") {
 			reader >> m_ScrapCompactingHeight;
+		} else if (propName == "ScreenShakeStrength") {
+			reader >> g_CameraMan.m_ScreenShakeStrength;
+		} else if (propName == "ScreenShakeDecay") {
+			reader >> g_CameraMan.m_ScreenShakeDecay;
+		} else if (propName == "MaxScreenShakeTime") {
+			reader >> g_CameraMan.m_MaxScreenShakeTime;
+		} else if (propName == "DefaultShakePerUnitOfGibEnergy") {
+			reader >> g_CameraMan.m_DefaultShakePerUnitOfGibEnergy;
+		} else if (propName == "DefaultShakePerUnitOfRecoilEnergy") {
+			reader >> g_CameraMan.m_DefaultShakePerUnitOfRecoilEnergy;
+		} else if (propName == "DefaultShakeFromRecoilMaximum") {
+			reader >> g_CameraMan.m_DefaultShakeFromRecoilMaximum;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -350,6 +363,17 @@ namespace RTE {
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
 		writer.NewPropertyWithValue("ScrapCompactingHeight", m_ScrapCompactingHeight);
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Screen Shake Settings", false);
+		writer.NewLine(false);
+		writer.NewPropertyWithValue("ScreenShakeStrength", g_CameraMan.m_ScreenShakeStrength);
+		writer.NewPropertyWithValue("ScreenShakeDecay", g_CameraMan.m_ScreenShakeDecay);
+		writer.NewPropertyWithValue("MaxScreenShakeTime", g_CameraMan.m_MaxScreenShakeTime);
+		writer.NewPropertyWithValue("DefaultShakePerUnitOfGibEnergy", g_CameraMan.m_DefaultShakePerUnitOfGibEnergy);
+		writer.NewPropertyWithValue("DefaultShakePerUnitOfRecoilEnergy", g_CameraMan.m_DefaultShakePerUnitOfRecoilEnergy);
+		writer.NewPropertyWithValue("DefaultShakeFromRecoilMaximum", g_CameraMan.m_DefaultShakeFromRecoilMaximum);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

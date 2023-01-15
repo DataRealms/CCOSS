@@ -1,5 +1,6 @@
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
@@ -304,14 +305,18 @@ void Activity::Clear() {
 		// Intentionally doing all players, all need controllers
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Normal;
-			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
 			m_PlayerController[player].Reset();
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);
 			m_PlayerController[player].SetTeam(m_Team[player]);
 
 			m_MessageTimer[player].Reset();
+
+			if (int screenId = ScreenOfPlayer(player); screenId != -1) {
+				g_FrameMan.ClearScreenText(screenId);
+				g_CameraMan.SetScreenOcclusion(Vector(), screenId);
+				g_CameraMan.SetScreenShake(0.0F, screenId);
+			}
 
 			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {

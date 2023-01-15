@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "GameActivity.h"
+
+#include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
@@ -890,9 +892,9 @@ int GameActivity::Start()
             continue;
 
         // Set the team associations with each screen displayed
-        g_SceneMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
         // And occlusion
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
+        g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
         // Allocate and (re)create the Inventory Menu GUIs
         if (m_InventoryMenuGUI[player]) {
@@ -1084,7 +1086,7 @@ void GameActivity::End()
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
+        g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
         if (m_Team[player] == m_WinnerTeam)
         {
@@ -1157,7 +1159,7 @@ void GameActivity::UpdateEditing()
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
-        g_SceneMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
 
         // Check if the player says he's done editing, and if so, make sure he really is good to go
         if (m_pEditorGUI[player]->GetEditorGUIMode() == SceneEditorGUI::DONEEDITING)
@@ -1257,7 +1259,7 @@ void GameActivity::UpdateEditing()
                 // CLear the messages before starting the game
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Reset the screen occlusion if any players are still in menus
-                g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
+                g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
             }
         }
 
@@ -1318,7 +1320,7 @@ void GameActivity::Update()
         bool skipBuyUpdate = false;
 
         // Set the team associations with each screen displayed
-        g_SceneMan.SetScreenTeam(ScreenOfPlayer(player), team);
+        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), team);
 
         //////////////////////////////////////////////////////
         // Assure that Controlled Actor is a safe pointer
@@ -1453,7 +1455,7 @@ void GameActivity::Update()
                 m_PlayerController[player].RelativeCursorMovement(m_ObservationTarget[player], 1.2f);
             }
             // Set the view to the observation position
-            g_SceneMan.SetScrollTarget(m_ObservationTarget[player], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[player]), ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(m_ObservationTarget[player], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[player]), ScreenOfPlayer(player));
         }
 
         ///////////////////////////////////////////////////
@@ -1515,7 +1517,7 @@ void GameActivity::Update()
 
             // Set the view to the cursor pos
             bool wrapped = g_SceneMan.ForceBounds(m_ActorCursor[player]);
-            g_SceneMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
 
 			if (m_pLastMarkedActor[player]) {
 				if (!g_MovableMan.ValidMO(m_pLastMarkedActor[player])) {
@@ -1552,7 +1554,7 @@ void GameActivity::Update()
 
             // Set the view to the cursor pos
             bool wrapped = g_SceneMan.ForceBounds(m_ActorCursor[player]);
-            g_SceneMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
 
             // Draw the actor's waypoints
             m_ControlledActor[player]->DrawWaypoints(true);
@@ -1625,12 +1627,12 @@ void GameActivity::Update()
 
             // Set the view to the cursor pos
             wrapped = g_SceneMan.ForceBounds(m_ActorCursor[player]);
-            //g_SceneMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
+            //g_CameraMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
 
             // Set the view to the actor pos
 			Vector scrollPos = Vector(m_ControlledActor[player]->GetPos());
             wrapped = g_SceneMan.ForceBounds(scrollPos);
-            g_SceneMan.SetScrollTarget(scrollPos, 0.1, wrapped, ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(scrollPos, 0.1, wrapped, ScreenOfPlayer(player));
 
             // Disable the actor's controller
             m_ControlledActor[player]->GetController()->SetDisabled(true);
@@ -1814,7 +1816,7 @@ void GameActivity::Update()
 
             // Set the view to a little above the LZ position
             Vector viewTarget(m_LandingZone[player].m_X, m_LandingZone[player].m_Y - (g_FrameMan.GetPlayerScreenHeight() / 4));
-            g_SceneMan.SetScrollTarget(viewTarget, 0.1, wrapped, ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(viewTarget, 0.1, wrapped, ScreenOfPlayer(player));
         }
 
         ////////////////////////////
@@ -1825,7 +1827,7 @@ void GameActivity::Update()
             // Continuously deathwatch message
             g_FrameMan.SetScreenText("Lost control of remote body!", ScreenOfPlayer(player));
             // Don't move anything, just stay put watching the death funnies
-            g_SceneMan.SetScrollTarget(m_DeathViewTarget[player], 0.1, false, ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(m_DeathViewTarget[player], 0.1, false, ScreenOfPlayer(player));
         }
 
         ////////////////////////////////////////////////////
@@ -1834,7 +1836,7 @@ void GameActivity::Update()
 		// and double scrolling will cause CC gitch when we'll cross the seam
 		else if (m_ControlledActor[player] && m_ActivityState != ActivityState::Editing && m_ActivityState != ActivityState::PreGame)
         {
-            g_SceneMan.SetScrollTarget(m_ControlledActor[player]->GetViewPoint(), 0.1, m_ControlledActor[player]->DidWrap(), ScreenOfPlayer(player));
+            g_CameraMan.SetScrollTarget(m_ControlledActor[player]->GetViewPoint(), 0.1, m_ControlledActor[player]->DidWrap(), ScreenOfPlayer(player));
         }
 
 		if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle) {
@@ -2096,7 +2098,7 @@ void GameActivity::Update()
         }
 
         // Set the view to the observation position
-        g_SceneMan.SetScrollTarget(m_ObservationTarget[Players::PlayerFour], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[Players::PlayerFour]), ScreenOfPlayer(Players::PlayerFour));
+        g_CameraMan.SetScrollTarget(m_ObservationTarget[Players::PlayerFour], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[Players::PlayerFour]), ScreenOfPlayer(Players::PlayerFour));
     }
 */
 }
@@ -2308,14 +2310,14 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     // Team Icon up in the top left corner
     const Icon *pIcon = GetTeamIcon(m_Team[PoS]);
     if (pIcon)
-        draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
+        draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_CameraMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
     std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, std::floor(GetTeamFunds(m_Team[PoS])));
-    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
+    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_CameraMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
     std::snprintf(str, sizeof(str), "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Teams::TeamOne), -59, GetTeamDeathCount(Teams::TeamTwo));
-    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MIN(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
+    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MIN(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_CameraMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
 */
     // Show the player's controller scheme icon in the upper right corner of his screen, but only for a minute
     if (m_GameTimer.GetElapsedRealTimeS() < 30)
@@ -2327,7 +2329,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             pIcon = g_UInputMan.GetSchemeIcon(PoS);
             if (pIcon)
             {
-                draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MIN(pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2, pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos);
+                draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MIN(pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2, pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2 + g_CameraMan.GetScreenOcclusion(which).m_X), yTextPos);
 // TODO: make a black Activity intro screen, saying "Player X, press any key/button to show that you are ready!, and display their controller icon, then fade into the scene"
 //                stretch_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], 10, 10, pIcon->GetBitmaps8()[0]->w * 4, pIcon->GetBitmaps8()[0]->h * 4);
             }

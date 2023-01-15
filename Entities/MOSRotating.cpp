@@ -1274,14 +1274,12 @@ void MOSRotating::RestDetection() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MOSRotating::IsAtRest() {
-	if (m_RestThreshold < 0 || m_PinStrength) {
+	if (m_RestThreshold < 0 || m_PinStrength != 0) {
 		return false;
-	} else {
-		if (m_VelOscillations > 2 || m_AngOscillations > 2) {
-			return true;
-		}
-		return m_RestTimer.IsPastSimMS(m_RestThreshold);
+	} else if (m_VelOscillations > 2 || m_AngOscillations > 2) {
+		return true;
 	}
+	return m_RestTimer.IsPastSimMS(m_RestThreshold);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

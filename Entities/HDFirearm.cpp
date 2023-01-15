@@ -780,7 +780,7 @@ void HDFirearm::Update()
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
     if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
-    Actor* pActor = dynamic_cast<Actor*>(GetRootParent());
+    Actor *pActor = dynamic_cast<Actor*>(GetRootParent());
 
     /////////////////////////////////
     // Activation/firing logic

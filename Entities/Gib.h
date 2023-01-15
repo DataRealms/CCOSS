@@ -130,6 +130,7 @@ namespace RTE {
 		/// <returns>The spread mode of this Gib.</returns>
 		SpreadMode GetSpreadMode() const { return m_SpreadMode; }
 
+		/// <summary>
 		/// Sets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles.
 		/// </summary>
 		/// <param name="newSpreadMode">The new spread mode of this Gib. See the SpreadMode enumeration.</param>

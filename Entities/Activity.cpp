@@ -311,8 +311,7 @@ void Activity::Clear() {
 
 			m_MessageTimer[player].Reset();
 
-			int screenId = ScreenOfPlayer(player);
-			if (screenId != -1) {
+			if (int screenId = ScreenOfPlayer(player); screenId != -1) {
 				g_FrameMan.ClearScreenText(screenId);
 				g_CameraMan.SetScreenOcclusion(Vector(), screenId);
 				g_CameraMan.SetScreenShake(0.0F, screenId);

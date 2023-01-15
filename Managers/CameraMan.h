@@ -42,64 +42,20 @@ namespace RTE {
 		void Destroy() { Clear(); }
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// Gets the screen shake strength multiplier.
-		/// </summary>
-		/// <returns>The screen shake strength multiplier.</returns>
-		float GetScreenShakeStrength() const { return m_ScreenShakeStrength; }
-
-		/// <summary>
-		/// Sets the screen shake strength multiplier.
-		/// </summary>
-		/// <param name="newValue">New value for the screen shake strength multiplier.</param>
-		void SetScreenShakeStrength(float newValue) { m_ScreenShakeStrength = newValue; }
-
-		/// <summary>
-		/// Gets how quickly screen shake decays, per second.
-		/// </summary>
-		/// <returns>The screen shake decay.</returns>
-		float GetScreenShakeDecay() const { return m_ScreenShakeDecay; }
-
-		/// <summary>
-		/// Gets the maximum amount of screen-shakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
-		/// </summary>
-		/// <returns>The maximum screen shake time, in seconds.</returns>
-		float GetMaxScreenShakeTime() const { return m_MaxScreenShakeTime; }
-
-		/// <summary>
-		/// Gets how much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
-		/// </summary>
-		/// <returns>The default shakiness per unit of gib energy.</returns>
-		float GetDefaultShakePerUnitOfGibEnergy() const { return m_DefaultShakePerUnitOfGibEnergy; }
-
-		/// <summary>
-		/// Gets how much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
-		/// </summary>
-		/// <returns>The default shakiness per unit of recoil energy.</returns>
-		float GetDefaultShakePerUnitOfRecoilEnergy() const { return m_DefaultShakePerUnitOfRecoilEnergy; }
-
-		/// <summary>
-		/// The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
-		/// </summary>
-		/// <returns>The maximum auto-calculated recoil shakiness.</returns>
-		float GetDefaultShakeFromRecoilMaximum() const { return m_DefaultShakeFromRecoilMaximum; }
-#pragma endregion
-
 #pragma region Screen Handling
-		/// <summary>
-		/// Sets the offset (scroll position) of the terrain.
-		/// </summary>
-		/// <param name="offset">The new offset value.</param>
-		/// <param name="screenId">Which screen you want to set the offset of.</param>
-		void SetOffset(const Vector &offset, int screenId = 0);
-
 		/// <summary>
 		/// Gets the offset (scroll position) of the terrain.
 		/// </summary>
 		/// <param name="screenId">Which screen you want to get the offset of.</param>
 		/// <returns>The offset for the given screen.</returns>
 		Vector GetOffset(int screenId = 0) const { return m_Screens[screenId].Offset; }
+
+		/// <summary>
+		/// Sets the offset (scroll position) of the terrain.
+		/// </summary>
+		/// <param name="offset">The new offset value.</param>
+		/// <param name="screenId">Which screen you want to set the offset of.</param>
+		void SetOffset(const Vector &offset, int screenId = 0);
 
 		/// <summary>
 		/// Gets the difference in current offset and that of the Update() before.
@@ -123,6 +79,13 @@ namespace RTE {
 		void SetScroll(const Vector &center, int screenId = 0);
 
 		/// <summary>
+		/// Gets the team associated with a specific screen.
+		/// </summary>
+		/// <param name="screenId">Which screen you want to get the team of.</param>
+		/// <returns>The team associated with the screen.</returns>
+		int GetScreenTeam(int screenId = 0) const { return m_Screens[screenId].ScreenTeam; }
+
+		/// <summary>
 		/// Sets the team associated with a specific screen.
 		/// </summary>
 		/// <param name="team">The team to set the screen to.</param>
@@ -130,11 +93,12 @@ namespace RTE {
 		void SetScreenTeam(int team, int screenId = 0) { m_Screens[screenId].ScreenTeam = team; }
 
 		/// <summary>
-		/// Gets the team associated with a specific screen.
+		/// Gets the amount that a specific screen is occluded by a GUI panel or something of the sort.
+		/// This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.
 		/// </summary>
 		/// <param name="screenId">Which screen you want to get the team of.</param>
-		/// <returns>The team associated with the screen.</returns>
-		int GetScreenTeam(int screenId = 0) const { return m_Screens[screenId].ScreenTeam; }
+		/// <returns>A vector indicating the screen occlusion amount.</returns>
+		Vector & GetScreenOcclusion(int screenId = 0) { return m_Screens[screenId].ScreenOcclusion; }
 
 		/// <summary>
 		/// Sets the amount that a specific screen is occluded by a GUI panel or something of the sort.
@@ -145,28 +109,20 @@ namespace RTE {
 		void SetScreenOcclusion(const Vector &occlusion, int screenId = 0) { m_Screens[screenId].ScreenOcclusion = occlusion; }
 
 		/// <summary>
-		/// Gets the amount that a specific screen is occluded by a GUI panel or something of the sort.
-		/// This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.
+		/// Gets the currently set scroll target, i.e. where the center of the specific screen is trying to line up with.
 		/// </summary>
-		/// <returns>A vector indicating the screen occlusion amount.</returns>
-		/// <param name="screenId">Which screen you want to get the team of.</param>
-		Vector & GetScreenOcclusion(int screenId = 0) { return m_Screens[screenId].ScreenOcclusion; }
+		/// <param name="screenId">Which screen to get the target for.</param>
+		/// <returns>Current target vector in Scene coordinates.</returns>
+		Vector GetScrollTarget(int screenId = 0) const;
 
 		/// <summary>
 		/// Interpolates a smooth scroll of the view from wherever it is now, towards centering on a new scroll target over time.
 		/// </summary>
-		/// <param name="targetCenter">The new target vector in *scene coordinates*.</param>
+		/// <param name="targetCenter">The new target vector in Scene coordinates.</param>
 		/// <param name="speed">The normalized speed at screen the view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.</param>
 		/// <param name="targetWrapped">Whether the target was wrapped around the scene this frame or not.</param>
 		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
 		void SetScrollTarget(const Vector &targetCenter, float speed = 0.1F, bool targetWrapped = false, int screenId = 0);
-
-		/// <summary>
-		/// Gets the currently set scroll target, screen is where the center of the specific screen is trying to line up with.
-		/// </summary>
-		/// <param name="screenId">Which screen to get the target for.</param>
-		/// <returns>Current target vector in *scene coordinates*.</returns>
-		Vector GetScrollTarget(int screenId = 0) const;
 
 		/// <summary>
 		/// Calculates a scalar of how distant a certain point in the world is from the currently closest scroll target of all active screens.
@@ -183,18 +139,62 @@ namespace RTE {
 		/// If that is found to be the case, the offset is corrected so that the view rectangle
 		/// is as close to the old offset as possible, but still entirely within the scene world.
 		/// </summary>
-		/// <param name="screen">Which screen you want to check the offset of.</param>
+		/// <param name="screenId">Which screen you want to check the offset of.</param>
 		void CheckOffset(int screenId = 0);
 
 		/// <summary>
 		/// Gets the frame width/height for a given screen.
 		/// </summary>
-		/// <param name="screen">Which screen you want to get frame width/height.</param>
+		/// <param name="screenId">Which screen you want to get frame width/height of.</param>
 		/// <returns>The frame width (x) and height (y).</returns>
 		Vector GetFrameSize(int screenId = 0);
 #pragma endregion
 
-#pragma region Screen Shake
+#pragma region Screen Shake Getters and Setters
+		/// <summary>
+		/// Gets the screen shake strength multiplier.
+		/// </summary>
+		/// <returns>The screen shake strength multiplier.</returns>
+		float GetScreenShakeStrength() const { return m_ScreenShakeStrength; }
+
+		/// <summary>
+		/// Sets the screen shake strength multiplier.
+		/// </summary>
+		/// <param name="newValue">New value for the screen shake strength multiplier.</param>
+		void SetScreenShakeStrength(float newValue) { m_ScreenShakeStrength = newValue; }
+
+		/// <summary>
+		/// Gets how quickly screen shake decays, per second.
+		/// </summary>
+		/// <returns>The screen shake decay.</returns>
+		float GetScreenShakeDecay() const { return m_ScreenShakeDecay; }
+
+		/// <summary>
+		/// Gets the maximum amount of screen shake time, i.e. the number of seconds screen shake will happen until ScreenShakeDecay reduces it to zero.
+		/// </summary>
+		/// <returns>The maximum screen shake time, in seconds.</returns>
+		float GetMaxScreenShakeTime() const { return m_MaxScreenShakeTime; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of gib energy.</returns>
+		float GetDefaultShakePerUnitOfGibEnergy() const { return m_DefaultShakePerUnitOfGibEnergy; }
+
+		/// <summary>
+		/// Gets how much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
+		/// </summary>
+		/// <returns>The default shakiness per unit of recoil energy.</returns>
+		float GetDefaultShakePerUnitOfRecoilEnergy() const { return m_DefaultShakePerUnitOfRecoilEnergy; }
+
+		/// <summary>
+		/// The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
+		/// </summary>
+		/// <returns>The maximum auto-calculated recoil shakiness.</returns>
+		float GetDefaultShakeFromRecoilMaximum() const { return m_DefaultShakeFromRecoilMaximum; }
+#pragma endregion
+
+#pragma region Screen Shake Actions
 		/// <summary>
 		/// Increases the magnitude of screen shake.
 		/// This is used for spatially located screen-shake, and will automatically determine which screens have shake applied
@@ -236,7 +236,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// A screen. Each player should have one of these
+		/// A screen. Each player should have one of these.
 		/// </summary>
 		/// TODO: This is a struct right now, as it has been torn verbatim out of SceneMan. In future it should be a proper class with methods, instead of CameraMan handling everything.
 		struct Screen {
@@ -247,7 +247,7 @@ namespace RTE {
 			Vector ScrollTarget; //!< The final offset target of the current scroll interpolation, in scene coordinates.
 
 			Timer ScrollTimer; //!< Scroll timer for making scrolling work framerate independently.
-			float ScrollSpeed = 0; //!< The normalized speed at screen the view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.
+			float ScrollSpeed = 0; //!< The normalized speed the screen's view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.
 
 			bool TargetWrapped = false; //!< Whether the ScrollTarget got wrapped around the world this frame or not.
 			std::array<int, 2> SeamCrossCount = { 0, 0 }; //!< Keeps track of how many times and in screen directions the wrapping seam has been crossed. This is used for keeping the background layers' scroll from jumping when wrapping around. X and Y.
@@ -259,7 +259,7 @@ namespace RTE {
 
 		float m_ScreenShakeStrength; //!< A global multiplier applied to screen shaking strength.
 		float m_ScreenShakeDecay; //!< How quickly screen shake falls off.
-		float m_MaxScreenShakeTime; //!< The maximum amount of screen-shakiness, in how many seconds until ScreenShakeDecay reduces it to zero.
+		float m_MaxScreenShakeTime; //!< The maximum amount of screen shake time, i.e. the number of seconds screen shake will happen until ScreenShakeDecay reduces it to zero.
 		float m_DefaultShakePerUnitOfGibEnergy; //!< How much the screen should shake per unit of energy from gibbing (i.e explosions), when screen shake amount is auto-calculated.
 		float m_DefaultShakePerUnitOfRecoilEnergy; //!< How much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
 		float m_DefaultShakeFromRecoilMaximum; //!< The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.

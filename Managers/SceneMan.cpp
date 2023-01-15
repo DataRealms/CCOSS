@@ -2736,26 +2736,25 @@ void SceneMan::Update(int screenId) {
 	m_LastUpdatedScreen = screenId;
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screenId == 0) { 
-        m_pCurrentScene->Update(); 
-    }
+	if (screenId == 0) {
+		m_pCurrentScene->Update(); 
+	}
 
     g_CameraMan.Update(screenId);
 
-	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
-
-    const Vector& offset = g_CameraMan.GetOffset(screenId);
+    const Vector &offset = g_CameraMan.GetOffset(screenId);
 	m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
 	if (m_pDebugLayer) { 
         m_pDebugLayer->SetOffset(offset);
     }
 
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
 	terrain->SetOffset(offset);
 	terrain->Update();
 
 	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
-    const Vector& unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
+    const Vector &unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();

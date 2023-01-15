@@ -473,7 +473,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
 	`ScreenShakeDecay` - how quickly screen shake falls off.  
-	`MaxScreenShakeTime` - the maximum amount of screenshakiness, in how many seconds until ScreenShakeDecay reduces it to zero.  
+	`MaxScreenShakeTime` - the amount of screen shake time, i.e. the maximum number of seconds screen shake will happen until ScreenShakeDecay reduces it to zero.  
 	`DefaultShakePerUnitOfGibEnergy` - how much the screen should shake per unit of energy from gibbing (i.e explosions), when the screen shake amount is auto-calculated.  
 	`DefaultShakePerUnitOfRecoilEnergy` - how much the screen should shake per unit of energy for recoil, when the screen shake amount is auto-calculated.  
 	`DefaultShakeFromRecoilMaximum` - the maximum amount of screen shake recoil can cause, when the screen shake amount is auto-calculated. This is ignored by per-firearm shake settings.
@@ -482,7 +482,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	New Lua functions on CameraMan:
 	```lua
 	AddScreenShake(screenShakeAmount, screen); -- Can be used to shake a particular screen.
-	AddScreenShake(screenShakeAmount, position); -- Applies screenshake at a position in the game world. All screens looking near this position will have their screen shaked.
+	AddScreenShake(screenShakeAmount, position); -- Applies screenshake at a position in the game world. All screens looking near this position will have their screen shaken.
 	```
 	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
 
@@ -642,8 +642,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	SetOffset(offsetVector, screenId);
 	GetScreenOcclusion(screenId);
 	SetScreenOcclusion(occlusionVector, screenId);
-	SetScrollTarget(targetPosition, screenId);
 	GetScrollTarget(screenId);
+	SetScrollTarget(targetPosition, screenId);
 	TargetDistanceScalar(point);
 	CheckOffset(screenId);
 	SetScroll(center, screenId);

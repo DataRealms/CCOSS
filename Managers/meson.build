@@ -2,6 +2,7 @@ sources += files(
 'AchievementMan.cpp',
 'ActivityMan.cpp',
 'AudioMan.cpp',
+'CameraMan.cpp',
 'ConsoleMan.cpp',
 'FrameMan.cpp',
 'LuaMan.cpp',

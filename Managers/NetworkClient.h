@@ -10,6 +10,7 @@
 
 #include "Singleton.h"
 #include "NetworkMessages.h"
+#include "PostProcessMan.h"
 #include "Vector.h"
 
 #define g_NetworkClient NetworkClient::Instance()
@@ -21,7 +22,6 @@
 namespace RTE {
 
 	class SoundContainer;
-	struct PostEffect;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer client.

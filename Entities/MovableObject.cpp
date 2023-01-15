@@ -71,7 +71,6 @@ void MovableObject::Clear()
     m_IgnoresActorHits = false;
     m_MissionCritical = false;
     m_CanBeSquished = true;
-    m_IsUpdated = false;
     m_WrapDoubleDraw = true;
     m_DidWrap = false;
     m_MOID = g_NoMOID;
@@ -989,7 +988,6 @@ void MovableObject::PostTravel()
 		}
 		m_AlreadyHitBy.clear();
 	}
-	m_IsUpdated = true;
 
     // Check for age expiration
     if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) {
@@ -1331,6 +1329,13 @@ void MovableObject::SetPos(const Vector &newPos, bool teleport) {
     if (teleport) {
         m_PrevPos = newPos;
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::NewFrame() {
+    m_PrevPos = m_Pos;
+    m_PrevVel = m_Vel;
 }
 
 } // namespace RTE

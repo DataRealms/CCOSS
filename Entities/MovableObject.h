@@ -1185,30 +1185,10 @@ enum MOType
 	/// </summary>
 	virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; m_VelOscillations = 0; }
 
-	/// <summary>
-	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
-	/// </summary>
-	virtual bool IsAtRest();
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsUpdated
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter this MovableObject has been updated yet during this
-//                  frame.
-// Arguments:       None.
-// Return value:    Wheter or not the MovableObject has been updated yet during this frame.
-
-    bool IsUpdated() const { return m_IsUpdated; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          NewFrame
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tell this MovableObject that a new frame has started.
-// Arguments:       None.
-// Return value:    None.
-
-    void NewFrame() { m_IsUpdated = false; }
+    /// <summary>
+    /// Notify that a new frame has started, allowing us to update information like our previous state.
+    /// </summary>
+    virtual void NewFrame();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2045,8 +2025,6 @@ protected:
     bool m_MissionCritical;
     // Whether this can be destroyed by being squished into the terrain
     bool m_CanBeSquished;
-    // Whether or not this MovableObject has been updated yet this frame.
-    bool m_IsUpdated;
     // Whether wrap drawing double across wrapping seams is enabled or not
     bool m_WrapDoubleDraw;
     // Whether the position of this object wrapped around the world this frame, or not.

@@ -818,11 +818,10 @@ ClassInfoGetters;
 	/// </summary>
 	virtual void CorrectAttachableAndWoundPositionsAndRotations() const;
 
-	/// <summary>
-	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
-	/// </summary>
-	void OnSave() override;
-
+    /// <summary>
+    /// Notify that a new frame has started, allowing us to update information like our previous state.
+    /// </summary>
+    void NewFrame() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

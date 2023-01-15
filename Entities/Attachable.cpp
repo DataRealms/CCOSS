@@ -346,11 +346,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Update() {
-		if (!m_PreUpdateHasRunThisFrame) { 
-			PreUpdate(); 
-		}
-
-		UpdatePositionAndJointPositionBasedOnOffsets();
+		PreUpdate(); 
 
 		if (m_Parent) {
 			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { 
@@ -384,26 +380,18 @@ namespace RTE {
 
 		MOSRotating::Update();
 
-		if (m_Parent && m_InheritsFrame) {
-			SetFrame(m_Parent->GetFrame());
+		if (m_Parent && m_InheritsFrame) { 
+			SetFrame(m_Parent->GetFrame()); 
 		}
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
-		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {});
-			}
-			UpdateScripts();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) { 
+			UpdateScripts(); 
 		}
 
-		// TODO_MULTITHREAD Being done in draw for now...
-		//m_PrevPos = m_Pos;
-
-		m_PrevVel = m_Vel;
 		m_PrevParentOffset = m_ParentOffset;
 		m_PrevJointOffset = m_JointOffset;
+
 		m_PreUpdateHasRunThisFrame = false;
 	}
 
@@ -545,11 +533,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::UpdatePositionAndJointPositionBasedOnOffsets() {
+	void Attachable::UpdatePositionAndJointPositionBasedOnOffsets(bool newAdded) {
 		if (m_Parent) {
 			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
 			m_PrevPos = m_Pos;
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
+			if (newAdded) {
+				// Avoid render interp from 0, 0 to our new position
+				m_PrevPos = m_Pos;
+			}
 		} else {
 			m_JointPos = m_Pos + RotateOffset(m_JointOffset);
 		}

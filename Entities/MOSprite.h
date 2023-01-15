@@ -561,6 +561,10 @@ public:
 
 	float GetFlipFactor() const { return m_HFlipped ? -1.0F : 1.0F; }
 
+    /// <summary>
+    /// Notify that a new frame has started, allowing us to update information like our previous state.
+    /// </summary>
+    void NewFrame() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

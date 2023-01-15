@@ -1975,10 +1975,6 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
         };
 
         if (targetBitmap == nullptr) {
-            // TODO_MULTITHREAD: HUUUUGE hack to update this here, but it's the safest way for now... The game is super inconsistent about updating the previous position/rotation of things.
-            // It differs depending on what things are attached to etc. Doing it here means it gives the nicest result for render interpolation.
-            const_cast<MOSRotating*>(this)->m_PrevPos = m_Pos;
-            const_cast<MOSRotating*>(this)->m_PrevRotation = m_Rotation;
             g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
         } else {
             renderFunc(1.0F);
@@ -2034,13 +2030,13 @@ void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
 	for (Attachable *attachable : m_Attachables) {
 		attachable->PreUpdate();
 		attachable->m_PreUpdateHasRunThisFrame = false;
-		attachable->UpdatePositionAndJointPositionBasedOnOffsets();
+		attachable->UpdatePositionAndJointPositionBasedOnOffsets(true);
 		attachable->CorrectAttachableAndWoundPositionsAndRotations();
 	}
 	for (Attachable *wound : m_Wounds) {
 		wound->PreUpdate();
 		wound->m_PreUpdateHasRunThisFrame = false;
-		wound->UpdatePositionAndJointPositionBasedOnOffsets();
+		wound->UpdatePositionAndJointPositionBasedOnOffsets(true);
 		wound->CorrectAttachableAndWoundPositionsAndRotations();
 	}
 }
@@ -2068,6 +2064,158 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     return intact;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  GetStringValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the string value associated with the specified key or "" if it does not exist.
+
+std::string MOSRotating::GetStringValue(std::string key) const
+{
+	if (StringValueExists(key))
+		return m_StringValueMap.at(key);
+	else
+		return "";
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  GetNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the number value associated with the specified key or 0 if it does not exist.
+// Arguments:       Key to retrieve value.
+// Return value:    Number (double) value.
+
+double MOSRotating::GetNumberValue(std::string key) const
+{
+	if (NumberValueExists(key))
+		return m_NumberValueMap.at(key);
+	else
+		return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  GetObjectValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the object value associated with the specified key or 0 if it does not exist.
+// Arguments:       None.
+// Return value:    Object (Entity *) value.
+
+Entity * MOSRotating::GetObjectValue(std::string key) const
+{
+	if (ObjectValueExists(key))
+		return m_ObjectValueMap.at(key);
+	else
+		return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  SetStringValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+
+void MOSRotating::SetStringValue(std::string key, std::string value)
+{
+	m_StringValueMap[key] = value;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  SetNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+
+void MOSRotating::SetNumberValue(std::string key, double value)
+{
+	m_NumberValueMap[key] = value;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  SetObjectValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+
+void MOSRotating::SetObjectValue(std::string key, Entity * value)
+{
+	m_ObjectValueMap[key] = value;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  RemoveStringValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Remove the string value associated with the specified key.
+
+void MOSRotating::RemoveStringValue(std::string key)
+{
+	m_StringValueMap.erase(key);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  RemoveNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Remove the number value associated with the specified key.
+
+void MOSRotating::RemoveNumberValue(std::string key)
+{
+	m_NumberValueMap.erase(key);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  RemoveObjectValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Remove the object value associated with the specified key.
+
+void MOSRotating::RemoveObjectValue(std::string key)
+{
+	m_ObjectValueMap.erase(key);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  StringValueExists
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Checks whether the value associated with the specified key exists.
+
+bool MOSRotating::StringValueExists(std::string key) const
+{
+	if (m_StringValueMap.find(key) != m_StringValueMap.end())
+		return true;
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  NumberValueExists
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Checks whether the value associated with the specified key exists.
+
+bool MOSRotating::NumberValueExists(std::string key) const
+{
+	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
+		return true;
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  ObjectValueExists
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Checks whether the value associated with the specified key exists.
+
+bool MOSRotating::ObjectValueExists(std::string key) const
+{
+	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
+		return true;
+	return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::NewFrame() {
+    MOSprite::NewFrame();
+
+    for (Attachable *attachable : m_Attachables) {
+		attachable->NewFrame();
+	}
+	for (Attachable *wound : m_Wounds) {
+		wound->NewFrame();
+	}
 }
 
 } // namespace RTE

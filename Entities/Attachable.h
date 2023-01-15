@@ -613,7 +613,8 @@ namespace RTE {
 		/// <summary>
 		/// Updates the position of this Attachable based on its parent offset and joint offset. Used during update and when something sets these offsets through setters.
 		/// </summary>
-		void UpdatePositionAndJointPositionBasedOnOffsets();
+		/// <param name="newAdded">Whether this attachable was just added to it's parent.</param>
+		void UpdatePositionAndJointPositionBasedOnOffsets(bool newAdded = false);
 
 		/// <summary>
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.

@@ -1588,26 +1588,40 @@ void MovableMan::Update()
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
-                if (!((*aIt)->IsUpdated()))
-                {
-                    (*aIt)->ApplyForces();
-                    (*aIt)->PreTravel();
-                    (*aIt)->Travel();
-                    (*aIt)->PostTravel();
-                }
                 (*aIt)->NewFrame();
+                (*aIt)->ApplyForces();
+                (*aIt)->PreTravel();
+                (*aIt)->Travel();
+                (*aIt)->PostTravel();
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
-        const std::string threadedUpdate = "ThreadedUpdate"; // avoid string reconstruction
+        // Travel items
+        {
+            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
+            {
+                (*iIt)->NewFrame();
+                (*iIt)->ApplyForces();
+                (*iIt)->PreTravel();
+                (*iIt)->Travel();
+                (*iIt)->PostTravel();
+            }
+        }
 
-        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        g_ThreadMan.GetPriorityThreadPool().parallelize_loop(luaStates.size(),
-            [&](int start, int end) {
-                RTEAssert(start + 1 == end, "Threaded script state being updated across multiple threads!");
-                LuaStateWrapper& luaState = luaStates[start];
-                g_LuaMan.SetThreadLuaStateOverride(&luaState);
+        // Travel particles
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
+        {
+            for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
+            {
+                (*parIt)->NewFrame();
+                (*parIt)->ApplyForces();
+                (*parIt)->PreTravel();
+                (*parIt)->Travel();
+                (*parIt)->PostTravel();
+            }
+        }
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 
                 for (MovableObject *mo : luaState.GetRegisteredMOs()) {
                     mo->RunScriptedFunctionInAppropriateScripts(threadedUpdate, false, false, {}, {}, {});

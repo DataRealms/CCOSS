@@ -267,10 +267,6 @@ namespace RTE {
 		};
 
 		if (targetBitmap == nullptr) {
-			// TODO_MULTITHREAD: HUUUUGE hack to update this here, but it's the safest way for now... The game is super inconsistent about updating the previous position/rotation of things.
-        	// It differs depending on what things are attached to etc. Doing it here means it gives the nicest result for render interpolation.
-			const_cast<MOSParticle*>(this)->m_PrevPos = m_Pos;
-			const_cast<MOSParticle*>(this)->m_PrevRotation = m_Rotation;
 			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
 		} else {
 			renderFunc(1.0F);

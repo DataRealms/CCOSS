@@ -10,6 +10,7 @@ namespace RTE {
 
 	bool System::s_Quit = false;
 	bool System::s_LogToCLI = false;
+	bool System::s_ExternalModuleValidation = false;
 	std::string System::s_WorkingDirectory = ".";
 	std::vector<size_t> System::s_WorkingTree;
 	std::filesystem::file_time_type System::s_ProgramStartTime = std::filesystem::file_time_type::clock::now();

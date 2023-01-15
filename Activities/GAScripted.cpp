@@ -135,7 +135,7 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 
 int GAScripted::Save(Writer &writer) const {
     // Call the script OnSave() function, if it exists
-    g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
+    g_LuaMan.RunScriptString("if " + m_LuaClassName + " and " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
     
     GameActivity::Save(writer);
 

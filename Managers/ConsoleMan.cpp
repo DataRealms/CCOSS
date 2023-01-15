@@ -140,18 +140,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::AddLoadWarningLogIndentationFormatEntry(const std::string &readerPosition, int numSpaces) {
-		std::string newEntry = "Encountered " + std::to_string(numSpaces) + " space characters used for indentation in file " + readerPosition + ". Treated as " + std::to_string(numSpaces / 4) + " tabs to preserve preset structure.";
-		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
-			PrintString(newEntry);
-		} else {
-			std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
-			m_LoadWarningLog.emplace(newEntry);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void ConsoleMan::AddLoadWarningLogExtensionMismatchEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
 		const std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
 		std::string newEntry = pathAndAccessLocation + (!altFileExtension.empty() ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");

@@ -434,7 +434,7 @@ ClassInfoGetters;
 // Arguments:       A Status enumeration.
 // Return value:    None.
 
-    void SetStatus(Actor::Status newStatus) { m_Status = newStatus; }
+	void SetStatus(Actor::Status newStatus) { m_Status = newStatus; if (newStatus == Actor::Status::UNSTABLE) { m_StableRecoverTimer.Reset(); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

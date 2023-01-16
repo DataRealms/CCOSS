@@ -556,7 +556,7 @@ void MOSprite::Draw(BITMAP * targetBitmap,
 
     auto renderFunc = [=](float interpolationAmount) {
         BITMAP* pTargetBitmap = targetBitmap;
-        Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
+        Vector renderPos = g_SceneMan.Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
         if (targetBitmap == nullptr) {
             pTargetBitmap = g_ThreadMan.GetRenderTarget();
             renderPos -= g_ThreadMan.GetRenderOffset();

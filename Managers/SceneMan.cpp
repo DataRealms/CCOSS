@@ -2304,7 +2304,7 @@ Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SceneMan::IsWithinBounds(const int pixelX, const int pixelY, const int margin)
+bool SceneMan::IsWithinBounds(const int pixelX, const int pixelY, const int margin) const
 {
     if (m_pCurrentScene)
         return m_pCurrentScene->GetTerrain()->IsWithinBounds(pixelX, pixelY, margin);
@@ -2314,7 +2314,7 @@ bool SceneMan::IsWithinBounds(const int pixelX, const int pixelY, const int marg
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SceneMan::ForceBounds(int &posX, int &posY)
+bool SceneMan::ForceBounds(int &posX, int &posY) const
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->ForceBounds(posX, posY);
@@ -2322,7 +2322,7 @@ bool SceneMan::ForceBounds(int &posX, int &posY)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SceneMan::ForceBounds(Vector &pos)
+bool SceneMan::ForceBounds(Vector &pos) const
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
@@ -2339,7 +2339,7 @@ bool SceneMan::ForceBounds(Vector &pos)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SceneMan::WrapPosition(int &posX, int &posY)
+bool SceneMan::WrapPosition(int &posX, int &posY) const
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->WrapPosition(posX, posY);
@@ -2347,7 +2347,7 @@ bool SceneMan::WrapPosition(int &posX, int &posY)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SceneMan::WrapPosition(Vector &pos)
+bool SceneMan::WrapPosition(Vector &pos) const
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
@@ -2364,7 +2364,7 @@ bool SceneMan::WrapPosition(Vector &pos)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Vector SceneMan::SnapPosition(const Vector &pos, bool snap)
+Vector SceneMan::SnapPosition(const Vector &pos, bool snap) const
 {
     Vector snappedPos = pos;
 
@@ -2379,7 +2379,7 @@ Vector SceneMan::SnapPosition(const Vector &pos, bool snap)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Vector SceneMan::ShortestDistance(Vector pos1, Vector pos2, bool checkBounds)
+Vector SceneMan::ShortestDistance(Vector pos1, Vector pos2, bool checkBounds) const
 {
     if (!m_pCurrentScene)
         return Vector();
@@ -2427,7 +2427,7 @@ Vector SceneMan::ShortestDistance(Vector pos1, Vector pos2, bool checkBounds)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float SceneMan::ShortestDistanceX(float val1, float val2, bool checkBounds, int direction)
+float SceneMan::ShortestDistanceX(float val1, float val2, bool checkBounds, int direction) const
 {
     if (!m_pCurrentScene)
         return 0;
@@ -2471,7 +2471,7 @@ float SceneMan::ShortestDistanceX(float val1, float val2, bool checkBounds, int 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int direction)
+float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int direction) const
 {
     if (!m_pCurrentScene)
         return 0;
@@ -2629,6 +2629,20 @@ int SceneMan::WrapBox(const Box &wrapBox, std::list<Box> &outputList)
     }
 
     return addedTimes;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Vector SceneMan::Lerp(float scaleStart, float scaleEnd, Vector startPos, Vector endPos, float progressScalar) const
+{
+    if (!m_pCurrentScene) {
+        return RTE::Lerp(scaleStart, scaleEnd, startPos, endPos, progressScalar);
+    }
+
+    Vector startToEnd = ShortestDistance(startPos, endPos);
+    Vector lerped = startPos + (startToEnd * RTE::Lerp(scaleStart, scaleEnd, 0.0F, 1.0F, progressScalar));
+    WrapPosition(lerped);
+    return lerped;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

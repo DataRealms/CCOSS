@@ -1092,7 +1092,7 @@ public:
 //                  A margin
 // Return value:    Whether within bounds or not, considering wrapping.
 
-    bool IsWithinBounds(const int pixelX, const int pixelY, const int margin = 0);
+    bool IsWithinBounds(const int pixelX, const int pixelY, const int margin = 0) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1103,7 +1103,7 @@ public:
 // Arguments:       The X and Y coordinates of the position to wrap, if needed.
 // Return value:    Whether wrapping was performed or not. (Does not report on bounding)
 
-    bool ForceBounds(int &posX, int &posY);
+    bool ForceBounds(int &posX, int &posY) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1114,7 +1114,7 @@ public:
 // Arguments:       The vector coordinates of the position to wrap, if needed.
 // Return value:    Whether wrapping was performed or not. (Does not report on bounding)
 
-    bool ForceBounds(Vector &pos);
+    bool ForceBounds(Vector &pos) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1125,7 +1125,7 @@ public:
 // Arguments:       The X and Y coordinates of the position to wrap, if needed.
 // Return value:    Whether wrapping was performed or not.
 
-    bool WrapPosition(int &posX, int &posY);
+    bool WrapPosition(int &posX, int &posY) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1136,7 +1136,7 @@ public:
 // Arguments:       The vector coordinates of the position to wrap, if needed.
 // Return value:    Whether wrapping was performed or not.
 
-    bool WrapPosition(Vector &pos);
+    bool WrapPosition(Vector &pos) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1147,7 +1147,7 @@ public:
 //                  Whether to actually snap or not. This is useful for cleaner toggle code.
 // Return value:    The new snapped position.
 
-    Vector SnapPosition(const Vector &pos, bool snap = true);
+    Vector SnapPosition(const Vector &pos, bool snap = true) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1163,7 +1163,7 @@ public:
 // Return value:    The resulting vector screen shows the shortest distance, spanning over
 //                  wrapping borders etc. Basically the ideal pos2 - pos1.
 
-    Vector ShortestDistance(Vector pos1, Vector pos2, bool checkBounds = false);
+    Vector ShortestDistance(Vector pos1, Vector pos2, bool checkBounds = false) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1182,7 +1182,7 @@ public:
 // Return value:    The resulting X value screen shows the shortest distance, spanning over
 //                  wrapping borders etc. Basically the ideal val2 - val1.
 
-    float ShortestDistanceX(float val1, float val2, bool checkBounds = false, int direction = 0);
+    float ShortestDistanceX(float val1, float val2, bool checkBounds = false, int direction = 0) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1201,7 +1201,7 @@ public:
 // Return value:    The resulting Y value screen shows the shortest distance, spanning over
 //                  wrapping borders etc. Basically the ideal val2 - val1.
 
-    float ShortestDistanceY(float val1, float val2, bool checkBounds = false, int direction = 0);
+    float ShortestDistanceY(float val1, float val2, bool checkBounds = false, int direction = 0) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1271,6 +1271,11 @@ public:
 //                  no wrapping need was detected, up to 4 possible (if straddling both seams)
 
     int WrapBox(const Box &wrapBox, std::list<Box> &outputList);
+
+    /// <summary>
+    /// Lerp between two positions, in a wrapping-safe manner
+    /// </summary>
+    Vector Lerp(float scaleStart, float scaleEnd, Vector startPos, Vector endPos, float progressScalar) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

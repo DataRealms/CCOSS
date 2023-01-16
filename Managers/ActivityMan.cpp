@@ -380,7 +380,7 @@ namespace RTE {
 			}
 
 			g_ThreadMan.QueueInSimulationThread([&]() { 
-				m_Activity->SetPaused(pause); 
+				m_Activity->SetPaused(pause);
 			});
 
 			m_InActivity = !pause;
@@ -450,7 +450,7 @@ namespace RTE {
 		} else {
 			activityStarted = StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 		}
-		g_TimerMan.PauseSim(false);
+
 		if (activityStarted >= 0) {
 			m_InActivity = true;
 			return true;

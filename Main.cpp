@@ -241,6 +241,8 @@ namespace RTE {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
 
+		g_TimerMan.PauseSim(true);
+
 		while (!System::IsSetToQuit()) {
 			g_WindowMan.ClearRenderer();
 			PollSDLEvents();
@@ -260,6 +262,7 @@ namespace RTE {
 			}
 
 			if (g_MenuMan.Update()) {
+				g_TimerMan.PauseSim(false);
 				break;
 			}
 			g_ConsoleMan.Update();

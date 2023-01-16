@@ -256,24 +256,26 @@ namespace RTE {
 				break;
 		}
 
-		Vector prevSpritePos = m_PrevPos - targetPos;
-		Vector spritePos = m_Pos - targetPos;
+		if (drawColor != g_MaskColor) {
+			Vector prevSpritePos = m_PrevPos - targetPos;
+			Vector spritePos = m_Pos - targetPos;
 
-		auto renderFunc = [=](float interpolationAmount) {
-			BITMAP* pTargetBitmap = targetBitmap;
-			Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
+			auto renderFunc = [=](float interpolationAmount) {
+				BITMAP* pTargetBitmap = targetBitmap;
+				Vector renderPos = Lerp(0.0F, 1.0F, prevSpritePos, spritePos, interpolationAmount);
+				if (targetBitmap == nullptr) {
+					pTargetBitmap = g_ThreadMan.GetRenderTarget();
+					renderPos -= g_ThreadMan.GetRenderOffset();
+				}
+
+				putpixel(pTargetBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), drawColor); 
+			};
+
 			if (targetBitmap == nullptr) {
-				pTargetBitmap = g_ThreadMan.GetRenderTarget();
-				renderPos -= g_ThreadMan.GetRenderOffset();
+				g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
+			} else {
+				renderFunc(1.0F);
 			}
-
-			putpixel(pTargetBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), drawColor); 
-		};
-
-		if (targetBitmap == nullptr) {
-			g_ThreadMan.GetSimRenderQueue().push_back(renderFunc);
-		} else {
-			renderFunc(1.0F);
 		}
 		
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {

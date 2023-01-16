@@ -981,13 +981,12 @@ namespace RTE {
 		//RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segments!!");
 
 		// Draw the trail
-		if (m_TrailLength && (trailPoints.size() > 0 || m_LastTrailPoints.size() > 0)) {
-			int trailColorIndex = m_TrailColor.GetIndex();
+		int trailColorIndex = m_TrailColor.GetIndex();
+		if (trailColorIndex != g_MaskColor && m_TrailLength && (trailPoints.size() > 0 || m_LastTrailPoints.size() > 0)) {
 			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 
 			// TODO_MULTITHREAD - fix to account for wrapping!
-			// Also, dropships seem to be spitting out purple pixels?
-			// Also, keep drawing trail after we are destroyed for 1 frame, so our trail doesn't immediately disappear
+			// Also, keep drawing trail after we are destroyed for 1 frame, so our trail doesn't immediately disappear?
 
 			auto renderFunc = [lastTrailPoints = std::move(m_LastTrailPoints), trailPoints, trailColorIndex, length](float interpolationAmount) mutable {
 				BITMAP* pTargetBitmap = g_ThreadMan.GetRenderTarget();

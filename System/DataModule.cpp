@@ -427,7 +427,7 @@ namespace RTE {
 			if (directoryEntry.path().extension() == ".ini" && directoryEntry.path().filename() != "Index.ini") {
 				Reader iniReader;
 				if (iniReader.Create(m_FileName + "/" + directoryEntry.path().filename().generic_string(), false, progressCallback) >= 0) {
-					result = Serializable::Create(iniReader, false, true);
+					result = Serializable::CreateSerializable(iniReader, false, true, true);
 					if (progressCallback) { progressCallback(" ", true); }
 				}
 			}

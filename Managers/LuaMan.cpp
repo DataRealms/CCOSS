@@ -83,6 +83,7 @@ namespace RTE {
 			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
 			luabind::def("Lerp", (float(*)(float, float, float, float, float)) &Lerp),
 			luabind::def("Lerp", (Vector(*)(float, float, Vector, Vector, float)) &Lerp),
+			luabind::def("Lerp", (Matrix(*)(float, float, Matrix, Matrix, float)) &Lerp),
 			luabind::def("EaseIn", &EaseIn),
 			luabind::def("EaseOut", &EaseOut),
 			luabind::def("EaseInOut", &EaseInOut),

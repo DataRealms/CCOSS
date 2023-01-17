@@ -3501,7 +3501,7 @@ void AHuman::Update()
 		reach += m_pFGArm ? m_pFGArm->GetMaxLength() : m_pBGArm->GetMaxLength();
 		reachPoint = m_pFGArm ? m_pFGArm->GetJointPos() : m_pBGArm->GetJointPos();
 
-		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(0.5F, 1.0F) * GetFlipFactor(), 0).RadRotate(m_pItemInReach ? adjustedAimAngle : RandomNum(-(c_HalfPI + c_EighthPI), m_AimAngle * 0.75F + c_EighthPI) * GetFlipFactor()), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 3);
 
 		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
 			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {

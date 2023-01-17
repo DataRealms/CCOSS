@@ -206,6 +206,7 @@ namespace RTE {
 
 		.def(luabind::constructor<>())
 
+		.property("PlayerControllable", &Actor::IsPlayerControllable, &Actor::SetPlayerControllable)
 		.property("BodyHitSound", &Actor::GetBodyHitSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetBodyHitSound)
 		.property("AlarmSound", &Actor::GetAlarmSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetAlarmSound)
 		.property("PainSound", &Actor::GetPainSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPainSound)

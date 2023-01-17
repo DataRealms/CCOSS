@@ -184,6 +184,18 @@ ClassInfoGetters;
 
     virtual bool IsControllable() const { return true; }
 
+	/// <summary>
+	/// Gets whether or not this Actor can be controlled by human players. Note that this does not protect the Actor's Controller from having its input mode forced to CIM_PLAYER (e.g. via Lua).
+	/// </summary>
+	/// <returns>Whether or not this Actor can be controlled by human players.</returns>
+	bool IsPlayerControllable() const { return m_PlayerControllable; }
+
+	/// <summary>
+	/// Sets whether or not this Actor can be controlled by human players.
+	/// </summary>
+	/// <param name="playerControllable">Whether or not this Actor should be able to be controlled by human players.</param>
+	void SetPlayerControllable(bool playerControllable) { m_PlayerControllable = playerControllable; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetStatus
@@ -1421,6 +1433,7 @@ protected:
 
     AtomGroup *m_pHitBody;
     Controller m_Controller;
+	bool m_PlayerControllable; //!< Whether or not this Actor can be controlled by human players.
 
     // Sounds
     SoundContainer *m_BodyHitSound;

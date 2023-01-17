@@ -62,6 +62,7 @@ bool Actor::m_sIconsLoaded = false;
 
 void Actor::Clear() {
     m_Controller.Reset();
+	m_PlayerControllable = true;
     m_BodyHitSound = nullptr;
     m_AlarmSound = nullptr;
     m_PainSound = nullptr;
@@ -198,6 +199,7 @@ int Actor::Create(const Actor &reference)
     m_Controller = reference.m_Controller;
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
+	m_PlayerControllable = reference.m_PlayerControllable;
 
 	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
 	if (reference.m_AlarmSound) { m_AlarmSound = dynamic_cast<SoundContainer*>(reference.m_AlarmSound->Clone()); }
@@ -313,7 +315,9 @@ int Actor::Create(const Actor &reference)
 
 int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "BodyHitSound") {
+	if (propName == "PlayerControllable") {
+		reader >> m_PlayerControllable;
+	} else if (propName == "BodyHitSound") {
 		m_BodyHitSound = new SoundContainer;
 		reader >> m_BodyHitSound;
 	} else if (propName == "AlarmSound") {
@@ -420,6 +424,7 @@ int Actor::Save(Writer &writer) const
 {
     MOSRotating::Save(writer);
 
+	writer.NewPropertyWithValue("PlayerControllable", m_PlayerControllable);
     writer.NewProperty("BodyHitSound");
     writer << m_BodyHitSound;
     writer.NewProperty("AlarmSound");
@@ -1973,7 +1978,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*prevItr) == (*selfItr))
                         break;
                 }
-                while((*prevItr)->GetController()->IsPlayerControlled() ||
+                while(!(*prevItr)->IsPlayerControllable() || (*prevItr)->GetController()->IsPlayerControlled() ||
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 // Get the next actor in the list (not controlled by another player)
@@ -1985,7 +1990,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*nextItr) == (*selfItr))
                         break;
                 }
-                while((*nextItr)->GetController()->IsPlayerControlled() ||
+                while(!(*nextItr)->IsPlayerControllable() || (*nextItr)->GetController()->IsPlayerControlled() ||
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 Vector iconPos = cpuPos;

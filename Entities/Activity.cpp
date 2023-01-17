@@ -726,7 +726,7 @@ void Activity::Clear() {
 		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return false;
 		}
-		if (!actor || !g_MovableMan.IsActor(actor)) {
+		if (!actor || !g_MovableMan.IsActor(actor) || !actor->IsPlayerControllable()) {
 			return false;
 		}
 		if ((actor != m_Brain[player] && actor->IsPlayerControlled()) || IsOtherPlayerBrain(actor, player)) {

@@ -391,9 +391,29 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this Attachable is currently able to collide with terrain, taking into account its terrain collision settings and those of its parent and so on.</returns>
 		bool CanCollideWithTerrain() const;
+
+		/// <summary>
+		/// Gets whether this Attachable currently ignores collisions with single-atom particles.
+		/// </summary>
+		/// <return>>Whether this attachable ignores collisions with single-atom particles.</return>
+		bool GetIgnoresParticlesWhileAttached() const { return m_IgnoresParticlesWhileAttached; }
+
+		/// <summary>
+		/// Sets whether this Attachable currently ignores collisions with single-atom particles.
+		/// </summary>
+		/// <param name="collidesWithTerrainWhileAttached">Whether this attachable ignores collisions with single-atom particles.</param>
+		void SetIgnoresParticlesWhileAttached(bool ignoresParticlesWhileAttached) { m_IgnoresParticlesWhileAttached = ignoresParticlesWhileAttached; }
 #pragma endregion
 
 #pragma region Override Methods
+		/// <summary>
+		/// Calculates the collision response when another MO's Atom collides with this MO's physical representation.
+		/// The effects will be applied directly to this MO, and also represented in the passed in HitData. 
+		/// </summary>
+		/// <param name="hitData">Reference to the HitData struct which describes the collision. This will be modified to represent the results of the collision.</param>
+		/// <returns>Whether the collision has been deemed valid. If false, then disregard any impulses in the HitData.</returns>
+		bool CollideAtPoint(HitData &hitData) override;
+
 		/// <summary>
 		/// Determines whether a particle which has hit this MO will penetrate, and if so, whether it gets lodged or exits on the other side of this MO.
 		/// Appropriate effects will be determined and applied ONLY IF there was penetration! If not, nothing will be affected.
@@ -554,6 +574,7 @@ namespace RTE {
 
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+		bool m_IgnoresParticlesWhileAttached; //!< Whether this Attachable should ignore collisions with single-atom MOs while attached.
 
 		std::vector<std::unique_ptr<PieSlice>> m_PieSlices; //!< The vector of PieSlices belonging to this Attachable. Added to and removed from the RootParent as appropriate, when a parent is set.
 

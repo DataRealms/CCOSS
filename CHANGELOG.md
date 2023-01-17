@@ -501,6 +501,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
 
+- New `Attachable` INI and Lua property `IgnoresParticlesWhileAttached`, which determines whether the `Attachable` should ignore collisions (and penetrations) with single-atom particles. Useful for preventing `HeldDevice`s from being destroyed by bullets while equipped.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -40,6 +40,7 @@ namespace RTE {
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
+		m_IgnoresParticlesWhileAttached = true;
 
 		m_PieSlices.clear();
 
@@ -91,6 +92,7 @@ namespace RTE {
 
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
+		m_IgnoresParticlesWhileAttached = reference.m_IgnoresParticlesWhileAttached;
 
 		for (const std::unique_ptr<PieSlice> &pieSlice : reference.m_PieSlices) {
 			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(pieSlice->Clone())));
@@ -142,6 +144,8 @@ namespace RTE {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
+		} else if (propName == "IgnoresParticlesWhileAttached") {
+			reader >> m_IgnoresParticlesWhileAttached;
 		} else if (propName == "AddPieSlice") {
 			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
@@ -173,6 +177,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
 		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
+		writer.NewPropertyWithValue("IgnoresParticlesWhileAttached", m_IgnoresParticlesWhileAttached);
 
 		for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
 			writer.NewPropertyWithValue("AddPieSlice", pieSlice.get());
@@ -285,6 +290,18 @@ namespace RTE {
 			if (const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent())) { return parentAsAttachable->CanCollideWithTerrain(); }
 		}
 		return m_CollidesWithTerrainWhileAttached;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Attachable::CollideAtPoint(HitData &hd) {
+		if (m_IgnoresParticlesWhileAttached && m_Parent && !m_Parent->ToDelete()) {
+			MOSRotating *hitorAsMOSR = dynamic_cast<MOSRotating *>(hd.Body[HITOR]);
+			if (!hitorAsMOSR) {
+				return false;
+			}
+		}
+		return MOSRotating::CollideAtPoint(hd);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

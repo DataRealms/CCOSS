@@ -566,6 +566,7 @@ namespace RTE {
 		.property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
 		.property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
 		.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
+		.property("IgnoresParticlesWhileAttached", &Attachable::GetIgnoresParticlesWhileAttached, &Attachable::SetIgnoresParticlesWhileAttached)
 		.property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain)
 		.property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
 		.property("InheritsFrame", &Attachable::InheritsFrame, &Attachable::SetInheritsFrame)

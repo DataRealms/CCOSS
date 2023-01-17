@@ -243,6 +243,19 @@ namespace RTE {
 
 		g_TimerMan.PauseSim(true);
 
+		// TODO_MULTITHREAD
+		// The next philosophical question is how to handle the quadrillion-and-one edge cases where things update in different places, that all have dependencies.
+		// GUI for example, that needs to interact with sim but also draw to screen. HUD is another example. Various editors, pie menus, all that jazz
+		// These are single-threaded fundamentally. I thought about doing this properly (like with the MO drawing), and that's possible...
+		// but it's really tough because there's a billion edge cases and it's tough to solve all of them. 
+		// As such, the current plan I have is that we'll still do some limited drawing on the sim thread to handle these situations. 
+		// It's definitely not ideal, but following in line with the pareto principle we've already achieved the bulk of the advantage with what we've properly split.
+		// (that is to say, the main game world drawing)
+		// So, that being said... next steps:
+		// Store a Allegro bitmap (per screen) on the RenderableGameState.
+		// Sim thread can safely draw to that without a worry in the world, and it'll be swapped over to render to simply blit after our other redrawing is done.
+		// Moving things over to a more formal render/sim split will be an ongoing task that we'll do over time.
+
 		while (!System::IsSetToQuit()) {
 			g_WindowMan.ClearRenderer();
 			PollSDLEvents();

@@ -1481,24 +1481,6 @@ void Actor::Update()
 			g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_WhiteColor, 500);
 		}
 	}
-
-// Do NOT mess witht he HUD stack in update... it should only be altered in DrawHUD, or it will jitter when multiple sim updates happen
-//    m_HUDStack = -m_CharHeight / 2;
-
-/*
-// *** TEMP Hack for testing animation
-    int bajs = m_aSprite->GetVelX();
-    bajs %= 5;
-    m_aSprite->SetVelX(++bajs);
-
-    if (bajs == 1)
-    {
-        int frame = m_aSprite->GetFrame();
-        if (++frame >= 7)
-            frame = 1;
-        m_aSprite->SetFrame(frame);
-    }
-*/
 }
 
 void Actor::FullUpdate() {
@@ -1515,12 +1497,17 @@ void Actor::FullUpdate() {
 
 void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
 {
-	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
+	// This should probably be a local var and not alter a member one in a draw func. Would let us make these functions const
     m_HUDStack = -m_CharHeight / 2;
 
-    // Only do HUD if on a team
-    if (m_Team < 0)
+    if (!m_HUDVisible) {
         return;
+    }
+
+    // Only do HUD if on a team
+    if (m_Team < 0) {
+        return;
+    }
 
 	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
 	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
@@ -1646,24 +1633,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 
-/* Obsolete red/gren heart Team icon
-            // Health
-            if (m_HeartBeat.GetElapsedSimTimeMS() > (m_Health > 90 ? 850 : (m_Health > 25 ? 350 : 100)) || m_Health <= 0)
-            {
-                str[0] = m_Health > 0 ? (m_Team == 0 ? -64 : -61) : -39;
-                str[1] = 0;
-                pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                if (m_HeartBeat.GetElapsedSimTimeMS() > (m_Health > 90 ? 950 : (m_Health > 25 ? 500 : 175)))
-                    m_HeartBeat.Reset();
-            }
-            else
-            {
-                str[0] = m_Team == 0 ? -63 : -60;
-                str[1] = 0;
-                pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-            }
-*/
-			std::snprintf(str, sizeof(str), "%.0f", std::ceil(m_Health));
+            std::snprintf(str, sizeof(str), "%.0f", m_Health);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
             m_HUDStack += -12;
@@ -1685,14 +1655,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					}
 				}
 			}
-/* Obsolete
-            // Draw the contol pointer, if controlled and under the icon's time limit
-            if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
-            {
-                std::snprintf(str, sizeof(str), "%c", -38);
-                pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-            }
-*/
         }
     }
 

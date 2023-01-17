@@ -1567,33 +1567,6 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-	if (!m_HUDVisible) {
-		return;
-	}
-/*
-// TODO: REMOVE< THIS IS TEMP
-    // Draw the AI paths
-    list<Vector>::iterator last = m_MovePath.begin();
-    Vector waypoint, lastPoint, lineVec;
-    for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
-    {
-        lastPoint = (*last) - targetPos;
-        waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
-        line(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, waypoint.m_X, waypoint.m_Y, g_RedColor);
-        last = lItr;
-    }
-    waypoint = m_MoveTarget - targetPos;
-    circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 3, g_RedColor);
-    lastPoint = m_PrevPathTarget - targetPos;
-    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    lastPoint = m_DigTunnelEndPos - targetPos;
-    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    // Raidus
-//    waypoint = m_Pos - targetPos;
-//    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);
-// TODO: REMOVE THIS IS TEMP
-*/
-
     // Player AI drawing
 
 	if ((m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
@@ -1663,100 +1636,6 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
-
-		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || !m_pJetpack->IsFullyFueled())) {
-			if (m_pJetpack->GetJetTimeLeft() < 100.0F) {
-				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-			} else if (m_pJetpack->IsEmitting()) {
-				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
-				if (acceleration > 0.41F) {
-					str[0] = acceleration > 0.47F ? -31 : -30;
-				} else {
-					str[0] = acceleration > 0.35F ? -29 : -28;
-					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
-				}
-			} else {
-				str[0] = -27;
-			}
-			str[1] = 0;
-			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
-
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			if (m_pJetpack->GetJetTimeTotal() > 0.0F) {
-				float jetTimeRatio = m_pJetpack->GetJetTimeRatio();
-				int gaugeColor;
-				if (jetTimeRatio > 0.75F) {
-					gaugeColor = 149;
-				} else if (jetTimeRatio > 0.5F) {
-					gaugeColor = 133;
-				} else if (jetTimeRatio > 0.375F) {
-					gaugeColor = 77;
-				} else if (jetTimeRatio > 0.25F) {
-					gaugeColor = 48;
-				} else {
-					gaugeColor = 13;
-				}
-				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-			}
-			m_HUDStack -= 9;
-		}
-
-		// Print aim angle and rot angle stoff
-		/*{
-			std::snprintf(str, sizeof(str), "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
-			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-
-			m_HUDStack += -10;
-		}*/
-
-/*
-        // AI Mode select GUI HUD
-        if (m_Controller.IsState(AI_MODE_SET))
-        {
-            int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
-            Vector iconPos = GetCPUPos() - targetPos;
-
-            if (m_AIMode == AIMODE_SENTRY)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Sentry");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
-            }
-            else if (m_AIMode == AIMODE_PATROL)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Patrol");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
-            }
-            else if (m_AIMode == AIMODE_BRAINHUNT)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Brainhunt");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
-            }
-            else if (m_AIMode == AIMODE_GOLDDIG)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Gold Dig");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
-            }
-
-            // Draw the mode alternatives if they are not the current one
-            if (m_AIMode != AIMODE_SENTRY)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_SENTRY], iconPos.m_X - 6, iconPos.m_Y - 6 - iconOff);
-            }
-            if (m_AIMode != AIMODE_PATROL)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_PATROL], iconPos.m_X - 6 - iconOff, iconPos.m_Y - 6);
-            }
-            if (m_AIMode != AIMODE_BRAINHUNT)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_BRAINHUNT], iconPos.m_X - 6 + iconOff, iconPos.m_Y - 6);
-            }
-            if (m_AIMode != AIMODE_GOLDDIG)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_GOLDDIG], iconPos.m_X - 6, iconPos.m_Y - 6 + iconOff);
-            }
-        }
-*/
     }
 }
 

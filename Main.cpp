@@ -254,6 +254,8 @@ namespace RTE {
 		// So, that being said... next steps:
 		// Store a Allegro bitmap (per screen) on the RenderableGameState.
 		// Sim thread can safely draw to that without a worry in the world, and it'll be swapped over to render to simply blit after our other redrawing is done.
+		// Need to think about how to properly allow the player to pan the camera without stuff "sticking" at a low update simrate...
+		// I could just pan around the bitmap, but then the edges would be cut off. Alternatively we draw to a scene-wide bitmap... but that's expensive to clear.
 		// Moving things over to a more formal render/sim split will be an ongoing task that we'll do over time.
 
 		while (!System::IsSetToQuit()) {

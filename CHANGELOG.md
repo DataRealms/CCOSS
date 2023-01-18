@@ -495,6 +495,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added Lua convenience function `RoundToNearestMultiple(num, multiple)` which returns a number rounded to the nearest specified multiple.  
 	Note that this operates on integers, so fractional parts will be truncated towards zero by type conversion.
 
+- Added `AHuman` Lua property (R/W) `UpperBodyState`, that lets you get and set the `AHuman`'s `UpperBodyState`. If you don't know what this does, you probably don't need or want it.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

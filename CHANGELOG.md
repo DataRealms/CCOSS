@@ -466,6 +466,26 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
+	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+
+	New `Settings.ini` screen-shake properties:  
+	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
+	`ScreenShakeDecay` - how quickly screen shake falls off.  
+	`MaxScreenShakeTime` - the amount of screen shake time, i.e. the maximum number of seconds screen shake will happen until ScreenShakeDecay reduces it to zero.  
+	`DefaultShakePerUnitOfGibEnergy` - how much the screen should shake per unit of energy from gibbing (i.e explosions), when the screen shake amount is auto-calculated.  
+	`DefaultShakePerUnitOfRecoilEnergy` - how much the screen should shake per unit of energy for recoil, when the screen shake amount is auto-calculated.  
+	`DefaultShakeFromRecoilMaximum` - the maximum amount of screen shake recoil can cause, when the screen shake amount is auto-calculated. This is ignored by per-firearm shake settings.
+
+- Added new Lua manager `CameraMan`, to handle camera movement.
+	New Lua functions on CameraMan:
+	```lua
+	AddScreenShake(screenShakeAmount, screen); -- Can be used to shake a particular screen.
+	AddScreenShake(screenShakeAmount, position); -- Applies screenshake at a position in the game world. All screens looking near this position will have their screen shaken.
+	```
+	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
+
 - Added alternative `Actor` Lua function `RemoveInventoryItem(moduleName, presetName)`, that lets you specify the module and preset name of the inventory item, instead of just the preset name.
 
 - Added alternative `AHuman` Lua function `EquipNamedDevice(moduleName, presetName, doEquip)`, that lets you specify the module and preset name of the `HeldDevice` to equip, instead of just the preset name.
@@ -484,6 +504,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
 
 - Added `AHuman` Lua function `ReloadFirearms(onlyReloadEmptyFirearms)`. This behaves the same as the pre-existing `ReloadFirearms` function, but if the parameter is set to true, only `HDFirearms` that are empty will be reloaded.
+
+- Added `AHuman` Lua property (R/W) `UpperBodyState`, that lets you get and set the `AHuman`'s `UpperBodyState`. If you don't know what this does, you probably don't need or want it.
 
 - Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
 
@@ -621,9 +643,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
-- Indentation in INI with space characters in multiples of 4 will no longer crash during loading and instead create a warning entry with the file name and line in the non-fatal loading error log.  
-	Space characters **not** in multiples of 4 will crash with a more informative message.
-
 - Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
 	The `MSPF` measurement now displays 3 values:  
 	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
@@ -669,6 +688,18 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	**`RemoveNextHandTarget()`**  - Removes the next hand target from the queue, if there are any.  
 	**`ClearHandTargets()`**  - Empties the queue of hand targets. Once the queue is empty, the hand will move towards its appropriate idle offset.
 
+- The following `SceneMan` functions have been moved to `CameraMan`:
+	```lua
+	SetOffset(offsetVector, screenId);
+	GetScreenOcclusion(screenId);
+	SetScreenOcclusion(occlusionVector, screenId);
+	GetScrollTarget(screenId);
+	SetScrollTarget(targetPosition, screenId);
+	TargetDistanceScalar(point);
+	CheckOffset(screenId);
+	SetScroll(center, screenId);
+	```
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -700,6 +731,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Removed `Activity` Lua function `EnteredOrbit`. This tells the `Activity` to consider an `ACraft` as having entered orbit, and should never actually have been accessible to Lua.
 
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
+
+- Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
 
 </details>
 

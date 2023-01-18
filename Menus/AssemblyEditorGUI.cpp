@@ -13,6 +13,7 @@
 
 #include "AssemblyEditorGUI.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -443,7 +444,7 @@ void AssemblyEditorGUI::Update()
     }
 
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     else
         g_FrameMan.SetScreenText("Pick what you want to place next" + selectedAssembly, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
@@ -938,7 +939,7 @@ void AssemblyEditorGUI::Update()
     bool cursorWrapped = g_SceneMan.ForceBounds(m_CursorPos);
 // TODO: make setscrolltarget with 'sloppy' target
     // Scroll to the cursor's scene position
-    g_SceneMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     // Apply the cursor position to the currently held object
     if (m_pCurrentObject && m_DrawCurrentObject)
     {

@@ -5,6 +5,7 @@
 
 #include "ActivityMan.h"
 #include "AudioMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"

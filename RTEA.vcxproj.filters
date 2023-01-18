@@ -543,6 +543,9 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\CameraMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Lua\LuaAdapterDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
@@ -1058,6 +1061,9 @@
     </ClCompile>
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\CameraMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
       <Filter>Lua</Filter>

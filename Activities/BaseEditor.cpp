@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "BaseEditor.h"
+
+#include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
@@ -195,8 +197,8 @@ int BaseEditor::Start()
         m_ViewState[editingPlayer] = ViewState::Normal;
         g_FrameMan.ClearScreenText(ScreenOfPlayer(editingPlayer));
         // Set the team associations with the first screen so that the correct unseen are shows up
-        g_SceneMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
+        g_CameraMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
+        g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
         m_PlayerController[editingPlayer].Reset();
         m_PlayerController[editingPlayer].Create(Controller::CIM_PLAYER, editingPlayer);

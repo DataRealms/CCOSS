@@ -400,6 +400,17 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The new angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</param>
 	void SetOneHandedReloadAngle(float newValue) { m_OneHandedReloadAngle = newValue; }
 
+	/// Gets this AHuman's UpperBodyState.
+	/// </summary>
+	/// <returns>This AHuman's UpperBodyState.</returns>
+	UpperBodyState GetUpperBodyState() const { return m_ArmsState; }
+
+	/// <summary>
+	/// Sets this AHuman's UpperBodyState to the new state.
+	/// </summary>
+	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
+	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
@@ -617,7 +628,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// </summary>
 	/// <returns>The BG Arm's HeldDevice.</returns>
 	HeldDevice * GetEquippedBGItem() const { return m_pBGArm ? m_pBGArm->GetHeldDevice() : nullptr; }
-
 
 	/// <summary>
 	/// Gets the total mass of this AHuman's currently equipped devices.

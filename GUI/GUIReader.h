@@ -128,7 +128,6 @@ namespace RTE {
 		GUIReader & operator>>(unsigned long &var);
 		GUIReader & operator>>(float &var);
 		GUIReader & operator>>(double &var);
-		GUIReader & operator>>(char * var);
 		GUIReader & operator>>(std::string &var);
 #pragma endregion
 

@@ -40,7 +40,7 @@ namespace RTE {
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
-		m_IgnoresParticlesWhileAttached = true;
+		m_IgnoresParticlesWhileAttached = false;
 
 		m_PieSlices.clear();
 

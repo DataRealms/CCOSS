@@ -511,19 +511,13 @@ namespace RTE {
 				replacedPieSlice = pieQuadrant.m_RightPieSlices[1].release();
 				pieQuadrant.m_RightPieSlices[1] = std::unique_ptr<PieSlice>(replacementPieSlice);
 			}
+			RTEAssert(replacedPieSlice, "Tried to do PieSlice replacement in PieQuadrant, but PieSlice to replace was not found and removed from any PieQuadrant.");
 		};
 
 		if (Directions sliceDirection = pieSliceToReplace->GetDirection(); sliceDirection > Directions::None) {
 			if (sliceDirection == Directions::Any) {
 				for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
 					if (pieQuadrant.ContainsPieSlice(pieSliceToReplace)) {
-						replacementPieSlice->SetOriginalSource(pieSliceToReplace->GetOriginalSource());
-						replacementPieSlice->SetDirection(pieSliceToReplace->GetDirection());
-						replacementPieSlice->SetCanBeMiddleSlice(pieSliceToReplace->GetCanBeMiddleSlice());
-						replacementPieSlice->SetStartAngle(pieSliceToReplace->GetStartAngle());
-						replacementPieSlice->SetSlotCount(pieSliceToReplace->GetSlotCount());
-						replacementPieSlice->SetMidAngle(pieSliceToReplace->GetMidAngle());
-
 						DoPieSliceReplacementInPieQuadrant(pieQuadrant);
 						break;
 					}
@@ -534,6 +528,13 @@ namespace RTE {
 		}
 
 		if (replacedPieSlice) {
+			replacementPieSlice->SetOriginalSource(pieSliceToReplace->GetOriginalSource());
+			replacementPieSlice->SetDirection(pieSliceToReplace->GetDirection());
+			replacementPieSlice->SetCanBeMiddleSlice(pieSliceToReplace->GetCanBeMiddleSlice());
+			replacementPieSlice->SetStartAngle(pieSliceToReplace->GetStartAngle());
+			replacementPieSlice->SetSlotCount(pieSliceToReplace->GetSlotCount());
+			replacementPieSlice->SetMidAngle(pieSliceToReplace->GetMidAngle());
+
 			if (m_HoveredPieSlice == pieSliceToReplace) {
 				m_HoveredPieSlice = replacementPieSlice;
 			}
@@ -543,6 +544,7 @@ namespace RTE {
 			if (m_AlreadyActivatedPieSlice == pieSliceToReplace) {
 				m_AlreadyActivatedPieSlice = replacementPieSlice;
 			}
+
 			RepopulateAndRealignCurrentPieSlices();
 		}
 

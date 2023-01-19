@@ -162,9 +162,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PieSlice`s with no preset name will always be added by this.
 
 	**`RemovePieSlice(pieSliceToRemove)`** - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.  
-	**`RemovePieSlicesByPresetName()`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByType()`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByOriginalSource()`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
+	**`RemovePieSlicesByPresetName(presetNameToRemoveBy)`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByType(pieSliceTypeToRemoveBy)`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByOriginalSource(originalSource)`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	
+	**`ReplacePieSlice`(pieSliceToReplace, replacementPieSlice)`** - Replaces the specified `PieSlice` to replace, if it exists in the `PieMenu`, with the replacement `PieSlice` and returns the replaced `PieSlice` for use (e.g. for adding to a different `PieMenu`). The replacement `PieSlice` takes the replaced `PieSlice`'s original source, direction, middle slice eligibility, angles and slot count, so it seamlessly replaces it.
 
 - `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:  
 

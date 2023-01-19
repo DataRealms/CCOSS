@@ -1143,7 +1143,8 @@ namespace RTE {
 		.def("RemovePieSlice", &PieMenu::RemovePieSlice, luabind::adopt(luabind::return_value))
 		.def("RemovePieSlicesByPresetName", &PieMenu::RemovePieSlicesByPresetName)
 		.def("RemovePieSlicesByType", &PieMenu::RemovePieSlicesByType)
-		.def("RemovePieSlicesByOriginalSource", &PieMenu::RemovePieSlicesByOriginalSource);
+		.def("RemovePieSlicesByOriginalSource", &PieMenu::RemovePieSlicesByOriginalSource)
+		.def("ReplacePieSlice", &PieMenu::ReplacePieSlice, luabind::adopt(luabind::result) + luabind::adopt(_3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

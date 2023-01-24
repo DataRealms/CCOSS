@@ -577,6 +577,18 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// </summary>
 	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
 
+	/// <summary>
+	/// Gets this AHuman's UpperBodyState.
+	/// </summary>
+	/// <returns>This AHuman's UpperBodyState.</returns>
+	UpperBodyState GetUpperBodyState() const { return m_ArmsState; }
+
+	/// <summary>
+	/// Sets this AHuman's UpperBodyState to the new state.
+	/// </summary>
+	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
+	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetEquippedItem

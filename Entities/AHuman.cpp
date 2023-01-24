@@ -3519,8 +3519,8 @@ void AHuman::Update()
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
         MovableObject *pMO = armToUse->ReleaseHeldMO();
 		if (pMO) { m_Inventory.push_back(pMO); }
+		armToUse->SetHandPos(m_pItemInReach->GetJointPos());
 		armToUse->SetHeldMO(m_pItemInReach);
-		armToUse->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 		m_pItemInReach = nullptr;
 
 		if (armToUse != m_pBGArm) {

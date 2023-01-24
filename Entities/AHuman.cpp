@@ -3786,7 +3786,7 @@ void AHuman::Update()
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield
-				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) { UnequipBGArm(); }
+				if (m_MoveState != CRAWL && m_ProneState == PRONE) { UnequipBGArm(); }
 				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
 			} else {

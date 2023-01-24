@@ -522,7 +522,6 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 		}
         woundToAdd->SetCollidesWithTerrainWhileAttached(false);
         woundToAdd->SetParentOffset(parentOffsetToSet);
-        woundToAdd->SetInheritsHFlipped(false);
         woundToAdd->SetParent(this);
         woundToAdd->SetIsWound(true);
         if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
@@ -952,11 +951,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         {
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
-            pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
+			pEntryWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle() + c_PI);
             float damageMultiplier = pEntryWound->HasNoSetDamageMultiplier() ? 1.0F : pEntryWound->GetDamageMultiplier();
 			pEntryWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
-            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
+            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteWidth() / 2);
 			AddWound(pEntryWound, entryPos + m_SpriteOffset);
             pEntryWound = 0;
         }
@@ -971,8 +970,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             {
                 AEmitter *pExitWound = dynamic_cast<AEmitter *>(m_pExitWound->Clone());
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
-                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
-                pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
+                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteWidth() / 2);
+				pExitWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle());
                 float damageMultiplier = pExitWound->HasNoSetDamageMultiplier() ? 1.0F : pExitWound->GetDamageMultiplier();
 				pExitWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
 				AddWound(pExitWound, exitPos + m_SpriteOffset);
@@ -1714,7 +1713,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());
             if (parentBreakWound) {
 				parentBreakWound->SetDrawnAfterParent(attachable->IsDrawnAfterParent());
-                parentBreakWound->SetEmitAngle((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
+				parentBreakWound->SetInheritedRotAngleOffset((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
                 AddWound(parentBreakWound, attachable->GetParentOffset(), false);
                 parentBreakWound = nullptr;
             }
@@ -1722,7 +1721,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
         if (!attachable->IsSetToDelete() && attachable->GetBreakWound()) {
             AEmitter *childBreakWound = dynamic_cast<AEmitter *>(attachable->GetBreakWound()->Clone());
             if (childBreakWound) {
-                childBreakWound->SetEmitAngle(attachable->GetJointOffset().GetAbsRadAngle());
+				childBreakWound->SetInheritedRotAngleOffset(attachable->GetJointOffset().GetAbsRadAngle());
                 attachable->AddWound(childBreakWound, attachable->GetJointOffset());
                 childBreakWound = nullptr;
             }

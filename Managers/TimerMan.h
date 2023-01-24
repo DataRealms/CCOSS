@@ -229,8 +229,9 @@ namespace RTE {
 		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 
 		float m_DrawDeltaTimeS; //!< How long the last draw took, in seconds.
-		long long m_UpdateTrueDeltaTimeTicks; //!< How long the last update took, in ticks.
-		long long m_LatestUpdateStartTime; //!< When our latest update started.
+		volatile long long m_UpdateTrueDeltaTimeTicks; //!< How long the last update took, in ticks.
+		volatile long long m_LatestUpdateStartTime; //!< When our latest update started.
+		volatile long long m_LatestUpdateEndTime; //!< When our latest update completed.
 
 		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.

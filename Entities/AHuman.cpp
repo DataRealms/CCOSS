@@ -3662,7 +3662,8 @@ void AHuman::Update()
 				if (m_pBGArm) {
 					m_ArmClimbing[BGROUND] = true;
 					m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
-				} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+				}
+				if (m_pFGArm && !m_pFGArm->HoldsSomething() && !(m_Paths[FGROUND][ARMCRAWL].PathEnded() && m_Paths[BGROUND][ARMCRAWL].GetRegularProgress() < 0.5F)) {
 					m_ArmClimbing[FGROUND] = true;
 					m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
 				}

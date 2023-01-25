@@ -57,6 +57,8 @@ void HDFirearm::Clear()
     m_FullAuto = false;
     m_FireIgnoresThis = true;
 	m_Reloadable = true;
+	m_DualReloadable = false;
+	m_OneHandedReloadTimeMultiplier = 1.0F;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -131,9 +133,13 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_Reloading = reference.m_Reloading;
     m_DoneReloading = reference.m_DoneReloading;
     m_ReloadTime = reference.m_ReloadTime;
+	m_LastFireTmr = reference.m_LastFireTmr;
+	m_ReloadTmr = reference.m_ReloadTmr;
     m_FullAuto = reference.m_FullAuto;
     m_FireIgnoresThis = reference.m_FireIgnoresThis;
     m_Reloadable = reference.m_Reloadable;
+	m_DualReloadable = reference.m_DualReloadable;
+	m_OneHandedReloadTimeMultiplier = reference.m_OneHandedReloadTimeMultiplier;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -199,14 +205,18 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_ActivationDelay;
     } else if (propName == "DeactivationDelay") {
         reader >> m_DeactivationDelay;
-    } else if (propName == "ReloadTime") {
-        reader >> m_ReloadTime;
+	} else if (propName == "ReloadTime") {
+		reader >> m_ReloadTime;
     } else if (propName == "FullAuto") {
         reader >> m_FullAuto;
     } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
     } else if (propName == "Reloadable") {
         reader >> m_Reloadable;
+	} else if (propName == "DualReloadable") {
+		reader >> m_DualReloadable;
+	} else if (propName == "OneHandedReloadTimeMultiplier") {
+		reader >> m_OneHandedReloadTimeMultiplier;
     } else if (propName == "RecoilTransmission") {
         reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
@@ -291,6 +301,8 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("FireIgnoresThis");
     writer << m_FireIgnoresThis;
     writer.NewProperty("Reloadable");
+	writer.NewPropertyWithValue("DualReloadable", m_DualReloadable);
+	writer.NewPropertyWithValue("OneHandedReloadTimeMultiplier", m_OneHandedReloadTimeMultiplier);
     writer << m_Reloadable;
     writer.NewProperty("RecoilTransmission");
     writer << m_JointStiffness;
@@ -635,7 +647,6 @@ void HDFirearm::Activate() {
 		if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->FadeOut(); }
         if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
         if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
-		if (IsEmpty()) { Reload(); }
     }
 }
 
@@ -674,15 +685,9 @@ void HDFirearm::StopActivationSound()
 	//m_LastFireTmr.SetElapsedSimTimeMS(m_DeactivationDelay + 1);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reload
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Throws out the currently used Magazine, if any, and puts in a new one
-//                  after the reload delay is up.
-
-void HDFirearm::Reload()
-{
+void HDFirearm::Reload() {
 	if (!m_Reloading && m_Reloadable) {
 		bool hadMagazineBeforeReloading = m_pMagazine != nullptr;
         if (hadMagazineBeforeReloading) {
@@ -700,12 +705,15 @@ void HDFirearm::Reload()
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
+		CorrectReloadTimerForSupportAvailable();
 
 		RunScriptedFunctionInAppropriateScripts("OnReload", false, false, {}, { hadMagazineBeforeReloading ? "true" : "false" });
 
 		m_Reloading = true;
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -756,6 +764,8 @@ bool HDFirearm::IsEmpty() const {
 	}
     return true;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -969,7 +979,7 @@ void HDFirearm::Update()
         m_AlreadyClicked = true;
     }
 
-	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
+	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimTimeLimit()) {
 		SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
 		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 

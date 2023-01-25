@@ -505,7 +505,27 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Attachable` INI and Lua property `IgnoresParticlesWhileAttached`, which determines whether the `Attachable` should ignore collisions (and penetrations) with single-atom particles. Useful for preventing `HeldDevice`s from being destroyed by bullets while equipped.
 
+- Added `AHuman` INI and Lua (R/W) property `DeviceArmSwayRate`, that defines how much `HeldDevices` will sway when walking. 0 is no sway, 1 directly couples sway with leg movement, >1 may be funny. Defaults to 0.75.
+
+- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`. A non-zero value is reqiured for `OneHandedReloadAngle` to be used.
+
+- Added `AHuman` INI and Lua (R/W) property `OneHandedReloadAngle`, that defines the angle in radians which `HeldDevices` are rotated to when reloading with only one hand (i.e. the `HeldDevice` is one-handed, or the `AHuman` no longer has their bg`Arm`) and the `AHuman` has a non-zero `ReloadOffset`.
+
+- Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
+
+- Added `AHuman` Lua function `ReloadFirearms(onlyReloadEmptyFirearms)`. This behaves the same as the pre-existing `ReloadFirearms` function, but if the parameter is set to true, only `HDFirearms` that are empty will be reloaded.
+
 - Added `AHuman` Lua property (R/W) `UpperBodyState`, that lets you get and set the `AHuman`'s `UpperBodyState`. If you don't know what this does, you probably don't need or want it.
+
+- Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
+
+- Added `HeldDevice` INI and Lua (R/W) property `OneHandedReloadTimeMultiplier`, that determines how much faster or slower an `HeldDevice` is when reloading one-handed (i.e. if it's one-handed and the other `Arm` is missing, or is holding something).
+
+- Added `HeldDevice` INI and Lua (R/W) property `Supportable`, that determines whether or not a `HeldDevice` can be supported by a background `Arm`.
+
+- Added `Timer` Lua function `GetSimTimeLimitMS()` that gets the sim time limit of the `Timer` in milliseconds.
+
+- Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
 </details>
 
@@ -645,6 +665,38 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - `BitmapPrimitive` drawing functions now accept `MOSprite` instead of `Entity` for the object they get the bitmap to draw from.  
 	This changes nothing regarding the bindings, but will now print an error to the console when attempting to draw a non-`MOSprite` based object (e.g. `MOPixel`), instead of silently skipping it.
+
+- Unless set to dual-reload, one-handed `HDFirearms` will now reload one-at-a-time. To maintain this behaviour in Lua scripts, it is recommend to use `AHuman:ReloadFirearms()` instead of reloading `HeldDevices` directly, as the latter will ignore restrictions.
+
+- Made a lot of changes to `Arms` - they can now only hold `HeldDevices` (and subclasses like `HDFirearms` and `ThrownDevices`), and `AHumans` have a lot of `Arm` animations, including sway when walking and holding something, smoother `Arm` movement and reload animations.  
+	They now have the following INI properties:  
+	```
+	MaxLength - The max length of the Arm in pixels.
+	MoveSpeed - How quickly the Arm moves between targets. 0 means no movement, 1 means instant movement.
+	HandDefaultIdleOffset - The idle offset this Arm will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
+	HandSprite - The sprite file for this Arm's hand. Hand is also allowed for compatibility.
+	GripStrength - The Arm's grip strength when holding HeldDevices. Further described below, in the entry where it was added.
+	ThrowStrength - The Arm's throw strength when throwing ThrownDevices. Further described below, in the entry where it was added.
+	HeldDevice - Allows you to set the HeldDevice attached to this Arm.
+	```
+	They now have the following Lua properties and functions:  
+	**`MaxLength`** (R) - Allows getting the `Arm`'s maximum length.  
+	**`MoveSpeed`** (R/W) - Allows getting and setting the `Arm`'s movement speed. 0 means no movement, 1 means instant movement.  
+	**`HandDefaultIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
+	**`HandCurrentPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
+	**`HasAnyHandTargets`** (R) - Gets whether or not this `Arm` has any hand targets, i.e. any positions the `Arm` is supposed to try to move its hand to.  
+	**`NumberOfHandTargets`** (R) - Gets the number of hand targets this `Arm` has.  
+	**`NextHandTargetDescription`** (R/W) - Gets the description of the next target this `Arm`'s hand is moving to, or an empty string if there are no targets.  
+	**`NextHandTargetPosition`** (R/W) - Gets the position of the next target this `Arm`'s hand is moving to, or `Vector(0, 0)` if there are no targets.  
+	**`HandHasReachedCurrentTarget`** (R) - Gets whether or not this `Arm`'s hand has reached its current target. This may not be reliably accessible from Lua since it can often get reset before being read from Lua, if the target has no delay. Note that this will be true if there are no targets but that hand has reached its appropriate idle offset.  
+	**`GripStrength`** (R/W) - Gets and sets the `Arm`'s grip strength when holding `HeldDevices`. Further described below, in the entry where it was added.  
+	**`ThrowStrength`** (R/W) - Gets and sets the `Arm`'s throw strength when throwing `ThrownDevices`. Further described below, in the entry where it was added.  
+	**`HeldDevice`** (R/W) - Gets and sets the `HeldDevice` held by this `Arm`.  
+	**`SupportedHeldDevice`** (R) - Gets the `HeldDevice` this `Arm` is supporting. For obvious reasons, this will be empty if this is not the BG `Arm` or if it has a `HeldDevice` of its own.  
+	**`AddHandTarget(description, positionOnScene)`**  - Adds a target for this `Arm`'s hand to move to. The target goes to the back of the queue, allowing for multiple animations to be added in succession. The description is arbitrary, but useful for identification, and if the target being added has the same description as the target at the end of the queue, they will be merged to avoid duplication.  
+	**`AddHandTarget(description, positionOnScene, delayAtTarget)`**  - Adds a target for this `Arm`'s hand to move to as above, but the hand will wait at the target for the specified amount of time.  
+	**`RemoveNextHandTarget()`**  - Removes the next hand target from the queue, if there are any.  
+	**`ClearHandTargets()`**  - Empties the queue of hand targets. Once the queue is empty, the hand will move towards its appropriate idle offset.
 
 - The following `SceneMan` functions have been moved to `CameraMan`:
 	```lua

@@ -48,7 +48,9 @@ void HeldDevice::Clear()
     m_SharpStanceOffset.Reset();
     m_SharpAim = 0.0F;
     m_MaxSharpLength = 0;
+	m_Supportable = true;
     m_Supported = false;
+	m_SupportAvailable = false;
     m_SupportOffset.Reset();
 	m_SeenByPlayer.fill(false);
     m_IsUnPickupable = false;
@@ -144,6 +146,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
+	m_Supportable = reference.m_Supportable;
     m_IsUnPickupable = reference.m_IsUnPickupable;
     for (std::string referenceActorWhoCanPickThisUp : reference.m_PickupableByPresetNames) {
         m_PickupableByPresetNames.insert(referenceActorWhoCanPickThisUp);
@@ -152,7 +155,9 @@ int HeldDevice::Create(const HeldDevice &reference)
 
     m_SharpAim = reference.m_SharpAim;
     m_MaxSharpLength = reference.m_MaxSharpLength;
+	m_Supportable = reference.m_Supportable;
     m_Supported = reference.m_Supported;
+	m_SupportAvailable = reference.m_SupportAvailable;
     m_Loudness = reference.m_Loudness;
 
     return 0;
@@ -179,7 +184,9 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_StanceOffset;
     else if (propName == "SharpStanceOffset")
         reader >> m_SharpStanceOffset;
-    else if (propName == "SupportOffset")
+	else if (propName == "Supportable") {
+		reader >> m_Supportable;
+	} else if (propName == "SupportOffset")
         reader >> m_SupportOffset;
     else if (propName == "PickupableBy") {
         std::string pickupableByValue = reader.ReadPropValue();
@@ -235,6 +242,7 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_StanceOffset;
     writer.NewProperty("SharpStanceOffset");
     writer << m_SharpStanceOffset;
+	writer.NewPropertyWithValue("Supportable", m_Supportable);
     writer.NewProperty("SupportOffset");
     writer << m_SupportOffset;
     writer.NewProperty("GripStrengthMultiplier");

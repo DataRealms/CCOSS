@@ -367,6 +367,18 @@ ClassInfoGetters;
 	/// <param name="newOffset">A new holster offset.</param>
 	void SetHolsterOffset(Vector newOffset) { m_HolsterOffset = newOffset; }
 
+	/// <summary>
+	/// Gets the offset position of where this Actor reloads his devices from.
+	/// </summary>
+	/// <returns>The offset position of the where this Actor reloads his devices from.</returns>
+	Vector GetReloadOffset() const { return m_ReloadOffset; }
+
+	/// <summary>
+	/// Sets the offset position of the where this Actor reloads his devices from.
+	/// </summary>
+	/// <param name="newOffset">The new offset position of where this Actor reloads his devices from.</param>
+	void SetReloadOffset(Vector newOffset) { m_ReloadOffset = newOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetViewPoint
@@ -828,7 +840,7 @@ ClassInfoGetters;
 // Arguments:       An pointer to the new item to add. Ownership IS TRANSFERRED!
 // Return value:    None..
 
-    virtual void AddInventoryItem(MovableObject *pItemToAdd) { if (pItemToAdd) { m_Inventory.emplace_back(pItemToAdd); } }
+    virtual void AddInventoryItem(MovableObject *pItemToAdd) { AddToInventoryBack(pItemToAdd); }
 
 
 
@@ -867,7 +879,7 @@ ClassInfoGetters;
 // Return value:    The next MovableObject in this Actor's inventory. Ownership IS xferred!
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
-	MovableObject * SwapNextInventory(MovableObject *pSwapIn = 0, bool muteSound = false);
+	virtual MovableObject * SwapNextInventory(MovableObject *pSwapIn = nullptr, bool muteSound = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -880,7 +892,7 @@ ClassInfoGetters;
 // Return value:    The prev MovableObject in this Actor's inventory. Ownership IS xferred!
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
-	MovableObject * SwapPrevInventory(MovableObject *pSwapIn = 0);
+	virtual MovableObject * SwapPrevInventory(MovableObject *pSwapIn = nullptr);
 
     /// <summary>
     /// Swaps the inventory items at the given indices. Will return false if a given index is invalid.
@@ -946,6 +958,18 @@ ClassInfoGetters;
 	/// </summary>
 	/// <returns>The maximum carriable mass of this Actor.</returns>
 	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
+
+    /// <summary>
+	/// Attempts to add an item to the front of our inventory.
+	/// </summary>
+	/// <returns>Whether we succeeded in adding the item. We may fail if the object doesn't exist or is set to delete.</returns>
+	bool AddToInventoryFront(MovableObject *itemToAdd);
+
+    /// <summary>
+	/// Attempts to add an item to the back of our inventory.
+	/// </summary>
+	/// <returns>Whether we succeeded in adding the item. We may fail if the object doesn't exist or is set to delete.</returns>
+	bool AddToInventoryBack(MovableObject *itemToAdd);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1467,6 +1491,7 @@ protected:
 //    float
     // The offset position of the holster where this Actor draws his devices from.
     Vector m_HolsterOffset;
+	Vector m_ReloadOffset; //!< The offset position of where this Actor reloads his devices from.
     // The point at which this actor is viewing, or the scene frame
     // should be centered on if tracking this Actor's view.
     // In absolute scene coordinates.

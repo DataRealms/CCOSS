@@ -129,6 +129,19 @@ namespace RTE {
 		static std::string ExtractZippedDataModule(const std::string &zippedModulePath);
 #pragma endregion
 
+#pragma region Module Validation
+		/// <summary>
+		/// Gets Whether the program is running in module validation mode that is used by an external tool.
+		/// </summary>
+		/// <returns>Whether the program is running in module validation mode.</returns>
+		static bool IsInExternalModuleValidationMode() { return s_ExternalModuleValidation; }
+
+		/// <summary>
+		/// Sets the program to run in module validation mode to be used by an external tool.
+		/// </summary>
+		static void EnableExternalModuleValidationMode() { s_ExternalModuleValidation = true; }
+#pragma endregion
+
 #pragma region Misc
 		/// <summary>
 		/// Fires up the default browser for the current OS on a specific URL.
@@ -149,6 +162,7 @@ namespace RTE {
 
 		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
+		static bool s_ExternalModuleValidation; //!< Whether to run the program in a special mode where it will immediately quit without any messages after either successful loading of all modules or aborting during loading. For use by an external tool.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
 		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting.

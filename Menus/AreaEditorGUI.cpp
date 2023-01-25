@@ -12,8 +12,8 @@
 // Inclusions of header files
 
 #include "AreaEditorGUI.h"
-#include "GUISound.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -27,6 +27,7 @@
 #include "SLTerrain.h"
 #include "AreaPickerGUI.h"
 #include "Scene.h"
+#include "GUISound.h"
 
 using namespace RTE;
 
@@ -325,7 +326,7 @@ void AreaEditorGUI::Update()
     }
 
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
     if (m_EditorGUIMode != PICKINGAREA)
     {
@@ -567,7 +568,7 @@ void AreaEditorGUI::Update()
     bool cursorWrapped = g_SceneMan.ForceBounds(m_CursorPos);
 // TODO: make setscrolltarget with 'sloppy' target
     // Scroll to the cursor's scene position
-    g_SceneMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 }
 
 
@@ -607,8 +608,8 @@ void AreaEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     if (m_FullFeatured)
     {
         // Set the drawin mode to be transparent and use the
-//        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
-        g_FrameMan.SetTransTable(MoreTrans);
+//        g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
+        g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
 
         // Draw all already placed Box:es, and the currently edited one

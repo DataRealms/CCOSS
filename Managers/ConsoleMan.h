@@ -99,13 +99,6 @@ namespace RTE {
 		bool LoadWarningsExist() const { return !m_LoadWarningLog.empty(); }
 
 		/// <summary>
-		/// Adds a new indentation format mismatch entry to the loading warning log.
-		/// </summary>
-		/// <param name="readerPosition">The file and line currently being loaded.</param>
-		/// <param name="numSpaces">The number of space characters encountered.</param>
-		void AddLoadWarningLogIndentationFormatEntry(const std::string &readerPosition, int numSpaces);
-
-		/// <summary>
 		/// Adds a new file extension mismatch entry to the loading warning log.
 		/// </summary>
 		/// <param name="pathToLog">The path that produced the warning.</param>

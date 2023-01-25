@@ -388,6 +388,29 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
+	/// <summary>
+	/// Gets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// </summary>
+	/// <returns>The angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</returns>
+	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
+
+	/// <summary>
+	/// Sets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// </summary>
+	/// <param name="newValue">The new angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</param>
+	void SetOneHandedReloadAngle(float newValue) { m_OneHandedReloadAngle = newValue; }
+
+	/// Gets this AHuman's UpperBodyState.
+	/// </summary>
+	/// <returns>This AHuman's UpperBodyState.</returns>
+	UpperBodyState GetUpperBodyState() const { return m_ArmsState; }
+
+	/// <summary>
+	/// Sets this AHuman's UpperBodyState to the new state.
+	/// </summary>
+	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
+	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
@@ -419,6 +442,23 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 // Return value:    None.
 
 	void AddInventoryItem(MovableObject *pItemToAdd) override;
+
+	/// <summary>
+	/// Swaps the next MovableObject carried by this AHuman and puts one not currently carried into the back of the inventory of this.
+	/// For safety reasons, this will dump any non-HeldDevice inventory items it finds into MovableMan, ensuring the returned item is a HeldDevice (but not casted to one, for overload purposes).
+	/// </summary>
+	/// <param name="inventoryItemToSwapIn">A pointer to the external MovableObject to swap in. Ownership IS transferred.</param>
+	/// <param name="muteSound">Whether or not to mute the sound on this event.</param>
+	/// <returns>The next HeldDevice in this AHuman's inventory, if there are any.</returns>
+	MovableObject * SwapNextInventory(MovableObject *inventoryItemToSwapIn = nullptr, bool muteSound = false) override;
+
+	/// <summary>
+	/// Swaps the previous MovableObject carried by this AHuman and puts one not currently carried into the back of the inventory of this.
+	/// For safety reasons, this will dump any non-HeldDevice inventory items it finds into MovableMan, ensuring the returned item is a HeldDevice (but not casted to one, for overload purposes).
+	/// </summary>
+	/// <param name="inventoryItemToSwapIn">A pointer to the external MovableObject to swap in. Ownership IS transferred.</param>
+	/// <returns>The previous HeldDevice in this AHuman's inventory, if there are any.</returns>
+	MovableObject * SwapPrevInventory(MovableObject *inventoryItemToSwapIn = nullptr) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -578,37 +618,16 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
 
 	/// <summary>
-	/// Gets this AHuman's UpperBodyState.
+	/// Gets the FG Arm's HeldDevice. Ownership is NOT transferred.
 	/// </summary>
-	/// <returns>This AHuman's UpperBodyState.</returns>
-	UpperBodyState GetUpperBodyState() const { return m_ArmsState; }
+	/// <returns>The FG Arm's HeldDevice.</returns>
+	HeldDevice * GetEquippedItem() const { return m_pFGArm ? m_pFGArm->GetHeldDevice() : nullptr; }
 
 	/// <summary>
-	/// Sets this AHuman's UpperBodyState to the new state.
+	/// Gets the BG Arm's HeldDevice. Ownership is NOT transferred.
 	/// </summary>
-	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
-	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetEquippedItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-// Arguments:       None.
-// Return value:    The currently equipped item, if any.
-
-	MovableObject * GetEquippedItem() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetEquippedBGItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the BG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
-// Arguments:       None.
-// Return value:    The currently equipped item, if any.
-
-	MovableObject * GetEquippedBGItem() const;
-
+	/// <returns>The BG Arm's HeldDevice.</returns>
+	HeldDevice * GetEquippedBGItem() const { return m_pBGArm ? m_pBGArm->GetHeldDevice() : nullptr; }
 
 	/// <summary>
 	/// Gets the total mass of this AHuman's currently equipped devices.
@@ -657,6 +676,12 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	bool FirearmNeedsReload() const;
 
+	/// <summary>
+	/// Indicates whether currently held HDFirearms are reloading. If the parameter is true, it will only return true if all firearms are reloading, otherwise it will return whether any firearm is reloading.
+	/// </summary>
+	/// <returns>Whether or not currently held HDFirearms are reloading.</returns>
+	bool FirearmsAreReloading(bool onlyIfAllFirearmsAreReloading) const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  FirearmIsSemiAuto
@@ -683,10 +708,10 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 // Method:  ReloadFirearm
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reloads the currently held firearm, if any. Will only reload the BG Firearm if the FG one is full already, to support reloading guns one at a time.
-// Arguments:       None.
+// Arguments:       Whether or not to only reload empty fireams.
 // Return value:    None.
 
-	void ReloadFirearms() const;
+	void ReloadFirearms(bool onlyReloadEmptyFirearms = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -925,16 +950,28 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
 
 	/// <summary>
-	/// Gets the rate at which this AHuman is set to swing its arms while walking.
+	/// Gets the rate at which this AHuman's Arms will swing with Leg movement, if they're not holding or supporting a HeldDevice.
 	/// </summary>
 	/// <returns>The arm swing rate of this AHuman.</returns>
 	float GetArmSwingRate() const { return m_ArmSwingRate; }
 
 	/// <summary>
-	/// Sets the rate at which this AHuman is set to swing its arms while walking.
+	/// Sets the rate at which this AHuman's Arms will swing with Leg movement, if they're not holding or supporting a HeldDevice.
 	/// </summary>
 	/// <param name="newValue">The new arm swing rate for this AHuman.</param>
 	void SetArmSwingRate(float newValue) { m_ArmSwingRate = newValue; }
+
+	/// <summary>
+	/// Gets the rate at which this AHuman's Arms will sway with Leg movement, if they're holding or supporting a HeldDevice.
+	/// </summary>
+	/// <returns>The device arm sway rate of this AHuman.</returns>
+	float GetDeviceArmSwayRate() const { return m_DeviceArmSwayRate; }
+
+	/// <summary>
+	/// Sets the rate at which this AHuman's Arms will sway with Leg movement, if they're holding or supporting a HeldDevice.
+	/// </summary>
+	/// <param name="newValue">The new device arm sway rate for this AHuman.</param>
+	void SetDeviceArmSwayRate(float newValue) { m_DeviceArmSwayRate = newValue; }
 
 	/// <summary>
 	/// Gets this AHuman's stride sound. Ownership is NOT transferred!
@@ -1006,6 +1043,8 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
+	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
+	float m_OneHandedReloadAngle; //!< The angle to which HDFirearms should point when they're being reloaded one-handed.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.
@@ -1041,7 +1080,8 @@ protected:
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
 	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
-	float m_ArmSwingRate; //!< Controls the rate at which this AHuman's arms follow the movement of its legs.
+	float m_ArmSwingRate; //!< Controls the rate at which this AHuman's Arms follow the movement of its Legs while they're not holding device(s).
+	float m_DeviceArmSwayRate; //!< Controls the rate at which this AHuman's Arms follow the movement of its Legs while they're holding device(s). One-handed devices sway half as much as two-handed ones. Defaults to three quarters of Arm swing rate.
 
     ////////////////
     // AI States

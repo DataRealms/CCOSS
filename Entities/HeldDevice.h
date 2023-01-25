@@ -273,15 +273,15 @@ ClassInfoGetters;
     void SetSupported(bool supported) { m_Supported = m_Supportable && supported; }
 
 	/// <summary>
-	/// Gets whether this HeldDevice has a second Arm available to provide support.
+	/// Gets whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
 	/// </summary>
-	/// <returns>Whether this HeldDevice has a second Arm available to provide support.</returns>
+	/// <returns>Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</returns>
 	bool GetSupportAvailable() const { return m_Supportable && m_SupportAvailable; }
 
 	/// <summary>
-	/// Sets whether this HeldDevice has a second Arm available to provide support.
+	/// Sets whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
 	/// </summary>
-	/// <param name="supported">Whether this HeldDevice has a second Arm available to provide support.</param>
+	/// <param name="supported">Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</param>
 	void SetSupportAvailable(bool supportAvailable) { m_SupportAvailable = m_Supportable && supportAvailable; }
 
 
@@ -644,7 +644,7 @@ protected:
     float m_MaxSharpLength;
 	bool m_Supportable; //!< Whether or not this HeldDevice can be supported.
     bool m_Supported; //!< Whether or not this HeldDevice is currently being supported by another Arm.
-	bool m_SupportAvailable; //!< Whether or not this HeldDevice has a supporting Arm available (or is on a Turret), even if it's the available Arm is not currently supporting the HeldDevice.
+	bool m_SupportAvailable; //!< Whether or not this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
     bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
 	//TODO: move this smelly thing elsewhere
 	std::array<bool, Players::MaxPlayerCount> m_SeenByPlayer; //!< An array of players that can currently see the pickup HUD of this HeldDevice.

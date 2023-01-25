@@ -937,30 +937,26 @@ void Actor::DropAllInventory()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-bool Actor::AddToInventoryFront(MovableObject *itemToAdd)
-{
-    // This function is called often to add stuff we just removed from our hands, which may be set to delete
-    // So we need to guard against that lest we crash
-    if (!itemToAdd || itemToAdd->IsSetToDelete()) {
-        return false;
-    }
+bool Actor::AddToInventoryFront(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
 
-    m_Inventory.push_front(itemToAdd);
-    return true;
+	m_Inventory.push_front(itemToAdd);
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-bool Actor::AddToInventoryBack(MovableObject *itemToAdd)
-{
-    // This function is called often to add stuff we just removed from our hands, which may be set to delete
-    // So we need to guard against that lest we crash
-    if (!itemToAdd || itemToAdd->IsSetToDelete()) {
-        return false;
-    }
+bool Actor::AddToInventoryBack(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
 
-    m_Inventory.push_back(itemToAdd);
-    return true;
+	m_Inventory.push_back(itemToAdd);
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

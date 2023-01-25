@@ -10,7 +10,7 @@ namespace RTE {
 	ConcreteClassInfo(Arm, Attachable, 50);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void Arm::Clear() {
 		m_MaxLength = 0;
 		m_MoveSpeed = 0;
@@ -71,7 +71,7 @@ namespace RTE {
 		m_HandTargets = reference.m_HandTargets;
 		m_HandMovementDelayTimer = reference.m_HandMovementDelayTimer;
 		m_HandHasReachedCurrentTarget = reference.m_HandHasReachedCurrentTarget;
-		
+
 		m_HandSpriteFile = reference.m_HandSpriteFile;
 		m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
 		RTEAssert(m_HandSpriteBitmap, "Failed to load hand bitmap in Arm::Create.");
@@ -134,7 +134,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void Arm::AddHandTarget(const std::string &description, const Vector &handTargetPositionToAdd, float delayAtTarget) {
 		Vector handTargetOffsetToAdd = g_SceneMan.ShortestDistance(m_JointPos, handTargetPositionToAdd, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 		if (!handTargetOffsetToAdd.IsZero()) {
@@ -171,10 +171,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	HeldDevice * Arm::SwapHeldDevice(HeldDevice * newHeldDevice) {
+	HeldDevice * Arm::SwapHeldDevice(HeldDevice *newHeldDevice) {
 		Attachable *previousHeldDevice = RemoveAttachable(m_HeldDevice, false, false);
 		SetHeldDevice(newHeldDevice);
 		return dynamic_cast<HeldDevice *>(previousHeldDevice);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Arm::HandIsCloseToTargetOffset(const Vector &targetOffset) const {
+		return (m_HandCurrentOffset - targetOffset).MagnitudeIsLessThan(m_MaxLength / 10.0F);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +348,7 @@ namespace RTE {
 	void Arm::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		Attachable::Draw(targetBitmap, targetPos, mode, onlyPhysical);
 
-		if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans)) {
+		if (!onlyPhysical && (mode == DrawMode::g_DrawColor || mode == DrawMode::g_DrawWhite || mode == DrawMode::g_DrawTrans)) {
 			DrawHand(targetBitmap, targetPos, mode);
 			if (m_HeldDevice && m_HeldDevice->IsDrawnAfterParent()) { m_HeldDevice->Draw(targetBitmap, targetPos, mode, onlyPhysical); }
 		}
@@ -352,28 +358,21 @@ namespace RTE {
 
 	void Arm::DrawHand(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode) const {
 		Vector handPos(m_JointPos + m_HandCurrentOffset + (m_Recoiled ? m_RecoilOffset : Vector()) - targetPos);
-		handPos.m_X -= static_cast<float>(m_HandSpriteBitmap->w / 2);
-		handPos.m_Y -= static_cast<float>(m_HandSpriteBitmap->h / 2);
+		handPos -= Vector(static_cast<float>(m_HandSpriteBitmap->w / 2), static_cast<float>(m_HandSpriteBitmap->h / 2));
 
 		if (!m_HFlipped) {
-			if (mode == g_DrawWhite) {
+			if (mode == DrawMode::g_DrawWhite) {
 				draw_character_ex(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
 			} else {
 				draw_sprite(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY());
 			}
 		} else {
 			//TODO this draw_character_ex won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
-			if (mode == g_DrawWhite) {
+			if (mode == DrawMode::g_DrawWhite) {
 				draw_character_ex(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
 			} else {
 				draw_sprite_h_flip(targetBitmap, m_HandSpriteBitmap, handPos.GetFloorIntX(), handPos.GetFloorIntY());
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool Arm::HandIsCloseToTargetOffset(const Vector &targetOffset) const {
-		return (m_HandCurrentOffset - targetOffset).MagnitudeIsLessThan(m_MaxLength / 10.0F);
 	}
 }

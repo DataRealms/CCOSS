@@ -949,9 +949,6 @@ void MovableObject::PreTravel()
         m_IsTraveling = true;
 	}
 
-    //m_PrevPos = m_Pos; // This is set when things draw
-    m_PrevVel = m_Vel;
-
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;

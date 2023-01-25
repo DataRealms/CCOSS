@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+
 #include "CameraMan.h"
 #include "SettingsMan.h"
 #include "AtomGroup.h"

@@ -13,6 +13,7 @@
 
 #include "SceneEditorGUI.h"
 
+#include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -554,7 +555,7 @@ void SceneEditorGUI::Update()
     }
 
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+        g_CameraMan.SetScreenOcclusion(Vector(), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     else
         g_FrameMan.SetScreenText("Pick what you want to place next", g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
@@ -1351,7 +1352,7 @@ void SceneEditorGUI::Update()
     bool cursorWrapped = g_SceneMan.ForceBounds(m_CursorPos);
 // TODO: make setscrolltarget with 'sloppy' target
     // Scroll to the cursor's scene position
-    g_SceneMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     // Apply the cursor position to the currently held object
     if (m_pCurrentObject && m_DrawCurrentObject)
     {
@@ -1442,7 +1443,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
             // Draw the currently held object into the order of the std::list if it is to be placed inside
             if (m_pCurrentObject && m_DrawCurrentObject && i == m_ObjectListOrder)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
                 m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
                 pActor = dynamic_cast<Actor *>(m_pCurrentObject);
                 if (pActor)
@@ -1456,7 +1457,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
             // Blink trans if we are supposed to blink this one
             if ((*itr) == m_pObjectToBlink)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
                 (*itr)->Draw(pTargetBitmap, targetPos, g_DrawTrans);
             }
             // Drawing of already placed objects that aren't highlighted or anything
@@ -1470,7 +1471,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
                     // Animate the ghosted into appearing solid in the build order to make the order clear
                     if (i >= m_RevealIndex)
                     {
-                        g_FrameMan.SetTransTable(pActor ? MoreTrans : HalfTrans);
+                        g_FrameMan.SetTransTableFromPreset(pActor ? TransparencyPreset::MoreTrans : TransparencyPreset::HalfTrans);
                         (*itr)->Draw(pTargetBitmap, targetPos, g_DrawTrans);
                     }
                     // Show as non-transparent half the time to still give benefits of WYSIWYG
@@ -1547,7 +1548,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     // If the held object will be placed at the end of the std::list, draw it last to the scene, transperent blinking
 	else if (m_pCurrentObject && (m_ObjectListOrder < 0 || (pSceneObjectList &&  m_ObjectListOrder == pSceneObjectList->size())))
     {
-        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+        g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
         m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
         Actor *pActor = dynamic_cast<Actor *>(m_pCurrentObject);
         if (pActor && m_FeatureSet != BLUEPRINTEDIT && m_FeatureSet != AIPLANEDIT)

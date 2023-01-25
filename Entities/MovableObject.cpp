@@ -963,16 +963,17 @@ int MovableObject::UpdateScripts() {
 		return -1;
 	}
 
+	int status = 0;
+	if (!ObjectScriptsInitialized()) {
+		status = InitializeObjectScripts();
+	}
+
 	if (m_SimUpdatesSinceLastScriptedUpdate < m_SimUpdatesBetweenScriptedUpdates) {
 		return 1;
 	}
 
 	m_SimUpdatesSinceLastScriptedUpdate = 0;
 
-	int status = 0;
-	if (!ObjectScriptsInitialized()) {
-		status = InitializeObjectScripts();
-	}
 	if (status >= 0) {
 		status = RunScriptedFunctionInAppropriateScripts("Update", false, true);
 	}

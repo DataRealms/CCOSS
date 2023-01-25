@@ -13,6 +13,7 @@
 
 #include "MOSRotating.h"
 
+#include "CameraMan.h"
 #include "SettingsMan.h"
 #include "AtomGroup.h"
 #include "SLTerrain.h"
@@ -74,6 +75,7 @@ void MOSRotating::Clear()
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
+    m_GibScreenShakeAmount = -1.0F;
 	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
 	m_DetachAttachablesBeforeGibbingFromWounds = true;
 	m_GibAtEndOfLifetime = false;
@@ -263,6 +265,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
+    m_GibScreenShakeAmount = reference.m_GibScreenShakeAmount;
 	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
 	m_DetachAttachablesBeforeGibbingFromWounds = reference.m_DetachAttachablesBeforeGibbingFromWounds;
 	m_GibAtEndOfLifetime = reference.m_GibAtEndOfLifetime;
@@ -350,6 +353,8 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GibWoundLimit;
 	else if (propName == "GibBlastStrength") {
 		reader >> m_GibBlastStrength;
+    } else if (propName == "GibScreenShakeAmount") {
+		reader >> m_GibScreenShakeAmount;
 	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
         reader >> m_WoundCountAffectsImpulseLimitRatio;
 	} else if (propName == "DetachAttachablesBeforeGibbingFromWounds") {
@@ -1026,6 +1031,10 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
+    if (m_GibScreenShakeAmount != -1.0F) {
+        g_CameraMan.AddScreenShake(m_GibScreenShakeAmount, m_Pos);
+    }
+
     for (const Gib &gibSettingsObject : m_Gibs) {
         if (gibSettingsObject.GetCount() == 0) {
             continue;
@@ -1045,6 +1054,14 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             minVelocity = m_GibBlastStrength / mass;
             maxVelocity = minVelocity + 10.0F;
         }
+
+        if (m_GibScreenShakeAmount == -1.0F) {
+            // Automatically calculate a value based on the amount of energy going on here
+            float averageSpeed = (minVelocity + maxVelocity) * 0.5F;
+            float energy = mass * averageSpeed * static_cast<float>(count);
+            g_CameraMan.AddScreenShake(energy * g_CameraMan.GetDefaultShakePerUnitOfGibEnergy(), m_Pos);
+        }
+
 		float velocityRange = maxVelocity - minVelocity;
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
 
@@ -1124,13 +1141,11 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-    Attachable *attachable;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
-        RTEAssert((*attachableIterator), "Broken Attachable!");
-        attachable = *attachableIterator;
+	const std::vector<Attachable *> nonVolatileAttachablesVectorForLuaSafety { m_Attachables.begin(), m_Attachables.end() };
+	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
+        RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
         if (RandomNum() < attachable->GetGibWithParentChance()) {
-            ++attachableIterator;
             attachable->GibThis();
             continue;
         }
@@ -1144,7 +1159,6 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
 
-        ++attachableIterator;
         RemoveAttachable(attachable, true, true);
     }
     m_Attachables.clear();

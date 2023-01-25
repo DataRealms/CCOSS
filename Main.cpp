@@ -127,6 +127,8 @@ namespace RTE {
 
 			if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
 
+			if (currentArg == "-ext-validate") { System::EnableExternalModuleValidationMode(); }
+
 			if (!lastArg && !singleModuleSet && currentArg == "-module") {
 				std::string moduleToLoad = argValue[++i];
 				if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
@@ -313,24 +315,27 @@ int main(int argc, char **argv) {
 	HandleMainArgs(argc, argv);
 
 	g_PresetMan.LoadAllDataModules();
-	// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
-	g_UInputMan.LoadDeviceIcons();
 
-	if (g_ConsoleMan.LoadWarningsExist()) {
-		g_ConsoleMan.PrintString("WARNING: Encountered non-fatal errors during module loading!\nSee \"LogLoadingWarning.txt\" for information.");
-		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
-		// Open the console so the user is aware there are loading warnings.
-		g_ConsoleMan.SetEnabled(true);
-	} else {
-		// Delete an existing log if there are no warnings so there's less junk in the root folder.
-		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+	if (!System::IsInExternalModuleValidationMode()) {
+		// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+		g_UInputMan.LoadDeviceIcons();
+
+		if (g_ConsoleMan.LoadWarningsExist()) {
+			g_ConsoleMan.PrintString("WARNING: Encountered non-fatal errors during module loading!\nSee \"LogLoadingWarning.txt\" for information.");
+			g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
+			// Open the console so the user is aware there are loading warnings.
+			g_ConsoleMan.SetEnabled(true);
+		} else {
+			// Delete an existing log if there are no warnings so there's less junk in the root folder.
+			if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+		}
+
+		if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+		RunGameLoop();
 	}
 
-	if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
-	RunGameLoop();
-
 	DestroyManagers();
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 #ifdef _WIN32

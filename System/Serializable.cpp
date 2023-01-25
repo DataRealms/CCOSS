@@ -4,13 +4,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Serializable::Create(Reader &reader, bool checkType, bool doCreate) {
+	int Serializable::CreateSerializable(Reader &reader, bool checkType, bool doCreate, bool skipStartingObject) {
 		if (checkType && reader.ReadPropValue() != GetClassName()) {
 			reader.ReportError("Wrong type in Reader when passed to Serializable::Create()");
 			return -1;
 		}
 
-		reader.StartObject();
+		if (!skipStartingObject) { reader.StartObject(); }
 		while (reader.NextProperty()) {
 			SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 			std::string propName = reader.ReadPropName();
@@ -19,7 +19,6 @@ namespace RTE {
 			if (!propName.empty() && ReadProperty(propName, reader) < 0) {
 				// TODO: Could not match property. Log here!
 			}
-
 		}
 
 		return doCreate ? Create() : 0;

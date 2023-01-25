@@ -14,6 +14,7 @@
 #include "ActorEditor.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "CameraMan.h"
 #include "UInputMan.h"
 //#include "AHuman.h"
 //#include "MOPixel.h"
@@ -218,7 +219,7 @@ void ActorEditor::Update()
         // Show the picker dialog to select an object to load
         m_pPicker->SetEnabled(true);
         // Scroll to center of scene
-        g_SceneMan.SetScrollTarget(g_SceneMan.GetSceneDim() * 0.5);
+        g_CameraMan.SetScrollTarget(g_SceneMan.GetSceneDim() * 0.5);
         m_EditorMode = m_PreviousMode = EditorActivity::LOADDIALOG;
         m_ModeChange = true;
     }
@@ -238,7 +239,7 @@ void ActorEditor::Update()
     {
         m_pEditedActor->SetPos(g_SceneMan.GetSceneDim() * 0.5);
         m_pEditedActor->Update();
-        g_SceneMan.SetScrollTarget(m_pEditedActor->GetPos());
+        g_CameraMan.SetScrollTarget(m_pEditedActor->GetPos());
     }
 
     /////////////////////////////////////////////////////
@@ -252,7 +253,7 @@ void ActorEditor::Update()
 
     // Set the screen occlusion situation
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(Players::PlayerOne));
+        g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(Players::PlayerOne));
 
     // Picking something to load into the editor
     if (m_EditorMode == EditorActivity::LOADDIALOG)

@@ -51,9 +51,9 @@ namespace RTE {
 		} else if (propName == "Spread") {
 			reader >> m_Spread;
 		} else if (propName == "MinVelocity") {
-			SetMinVelocity(std::stof(reader.ReadPropValue()));
+			reader >> m_MinVelocity;
 		} else if (propName == "MaxVelocity") {
-			SetMaxVelocity(std::stof(reader.ReadPropValue()));
+			reader >> m_MaxVelocity;
 		} else if (propName == "LifeVariation") {
 			reader >> m_LifeVariation;
 		} else if (propName == "InheritsVel") {
@@ -89,9 +89,9 @@ namespace RTE {
 		writer.NewProperty("Spread");
 		writer << m_Spread;
 		writer.NewProperty("MinVelocity");
-		writer << m_MinVelocity;
+		writer << GetMinVelocity();
 		writer.NewProperty("MaxVelocity");
-		writer << m_MaxVelocity;
+		writer << GetMaxVelocity();
 		writer.NewProperty("LifeVariation");
 		writer << m_LifeVariation;
 		writer.NewProperty("InheritsVel");

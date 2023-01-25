@@ -1,9 +1,11 @@
 #include "FrameMan.h"
+
 #include "PostProcessMan.h"
 #include "PresetMan.h"
 #include "PrimitiveMan.h"
 #include "PerformanceMan.h"
 #include "ActivityMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "UInputMan.h"
@@ -1145,7 +1147,8 @@ namespace RTE {
 					}
 				}
 			}
-			Vector targetPos = g_SceneMan.GetOffset(playerScreen);
+
+			Vector targetPos = g_CameraMan.GetOffset(playerScreen);
 
 			// Adjust the drawing position on the target screen for if the target screen is larger than the scene in non-wrapping dimension.
 			// Scene needs to be displayed centered on the target bitmap then, and that has to be adjusted for when drawing to the screen
@@ -1247,7 +1250,7 @@ namespace RTE {
 
 				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
 
-				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetRoundIntX();
+				int screenOcclusionOffsetX = g_CameraMan.GetScreenOcclusion(playerScreen).GetRoundIntX();
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
 

@@ -5,6 +5,7 @@
 
 #include "ActivityMan.h"
 #include "AudioMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
@@ -233,6 +234,7 @@ namespace RTE {
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AEmitter, SoundContainer, SetBurstSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AEmitter, SoundContainer, SetEndSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ADoor, Attachable, SetDoor);
+		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Arm, HeldDevice, SetHeldDevice);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Leg, Attachable, SetFoot);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Actor, PieMenu, SetPieMenu);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(Actor, SoundContainer, SetBodyHitSound);
@@ -294,6 +296,12 @@ namespace RTE {
 	struct LuaAdaptersEntity {
 		// TODO this is a temporary fix for lua PresetName setting causing scripts to have to rerun. It should be replaced with a DisplayName property someday.
 		static void SetPresetName(Entity *luaSelfObject, const std::string &presetName);
+	};
+#pragma endregion
+
+#pragma region AHuman Lua Adapters
+	struct LuaAdaptersAHuman {
+		static void ReloadFirearms(AHuman *luaSelfObject);
 	};
 #pragma endregion
 

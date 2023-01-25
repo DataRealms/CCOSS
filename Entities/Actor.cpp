@@ -11,10 +11,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
+#include "Actor.h"
 #include "UInputMan.h"
 #include "ActivityMan.h"
+#include "CameraMan.h"
 #include "GameActivity.h"
-#include "Actor.h"
 #include "ACrab.h"
 #include "ACraft.h"
 #include "AtomGroup.h"
@@ -101,6 +102,7 @@ void Actor::Clear() {
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
+	m_ReloadOffset.Reset();
     m_ViewPoint.Reset();
     m_Inventory.clear();
 	m_MaxInventoryMass = -1.0F;
@@ -228,6 +230,7 @@ int Actor::Create(const Actor &reference)
 	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
+	m_ReloadOffset = reference.m_ReloadOffset;
 
     for (std::deque<MovableObject*>::const_iterator itr = reference.m_Inventory.begin(); itr != reference.m_Inventory.end(); ++itr) {
         m_Inventory.push_back(dynamic_cast<MovableObject*>((*itr)->Clone()));
@@ -368,11 +371,13 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_CharHeight;
     else if (propName == "HolsterOffset")
         reader >> m_HolsterOffset;
+	else if (propName == "ReloadOffset")
+        reader >> m_ReloadOffset;
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
 		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
-        m_Inventory.push_back(pInvMO);
+        AddToInventoryBack(pInvMO);
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
@@ -454,6 +459,7 @@ int Actor::Save(Writer &writer) const
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
     writer << m_HolsterOffset;
+	writer.NewPropertyWithValue("ReloadOffset", m_ReloadOffset);
     for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         writer.NewProperty("AddInventory");
@@ -753,7 +759,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
     if (pSwapIn)
     {
-        m_Inventory.push_back(pSwapIn);
+		pSwapIn->SetAsNoID();
+        AddToInventoryBack(pSwapIn);
         playSound = true;
     }
 
@@ -805,7 +812,8 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
     if (pSwapIn)
     {
-        m_Inventory.push_front(pSwapIn);
+		pSwapIn->SetAsNoID();
+        AddToInventoryFront(pSwapIn);
         playSound = true;
     }
 
@@ -832,9 +840,10 @@ MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, 
     if (!newInventoryItem) {
         return RemoveInventoryItemAtIndex(inventoryIndex);
     }
+	newInventoryItem->SetAsNoID();
 
     if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
-        m_Inventory.emplace_back(newInventoryItem);
+        AddToInventoryBack(newInventoryItem);
         return nullptr;
     }
     MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
@@ -926,6 +935,29 @@ void Actor::DropAllInventory()
     m_Inventory.clear();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryFront(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
+
+	m_Inventory.push_front(itemToAdd);
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryBack(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
+
+	m_Inventory.push_back(itemToAdd);
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GibThis
@@ -1902,7 +1934,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
 		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
 	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);

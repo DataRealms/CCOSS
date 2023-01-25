@@ -2941,7 +2941,7 @@ void Scene::UpdatePathFinding()
     }
 
     // Update our shared pathFinder
-    std::unordered_set<int> updatedNodes = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas(), nodesToUpdate);
+    std::vector<PathNode*> updatedNodes = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas(), nodesToUpdate);
     if (!updatedNodes.empty()) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {

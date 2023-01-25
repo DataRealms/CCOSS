@@ -2697,6 +2697,8 @@ void SceneMan::Update(int screenId) {
         unseenLayer->SetOffset(offset);
     }
 
+    // TODO_MULTITHREAD this should be updated in a sim update, not render update
+    // Is this even necessary, though?
 	if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL) {
 		terrain->CleanAir();
 		m_CleanTimer.Reset();

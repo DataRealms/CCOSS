@@ -177,7 +177,6 @@ namespace RTE {
 		Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		Reader & operator>>(char * var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
@@ -198,8 +197,6 @@ namespace RTE {
 			int CurrentLine; //!< The line number the stream is on.
 			int PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
-
-		static constexpr int c_TabSizeInSpaces = 4; //!< The number of space characters to treat as one tab character during reading, to preserve indentation structure.
 
 		std::unique_ptr<std::ifstream> m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::stack<StreamInfo> m_StreamStack; //!< Stack of open streams in this Reader, each one representing a file opened to read from within another.

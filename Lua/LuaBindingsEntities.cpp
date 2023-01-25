@@ -223,6 +223,7 @@ namespace RTE {
 		.property("CPUPos", &Actor::GetCPUPos)
 		.property("EyePos", &Actor::GetEyePos)
 		.property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
+		.property("ReloadOffset", &Actor::GetReloadOffset, &Actor::SetReloadOffset)
 		.property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
 		.property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
 		.property("SharpAimProgress", &Actor::GetSharpAimProgress)
@@ -426,6 +427,8 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
+		.property("OneHandedReloadAngle", &AHuman::GetOneHandedReloadAngle, &AHuman::SetOneHandedReloadAngle)
+		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
@@ -440,6 +443,7 @@ namespace RTE {
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 		.property("IsClimbing", &AHuman::IsClimbing)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
+		.property("DeviceArmSwayRate", &AHuman::GetDeviceArmSwayRate, &AHuman::SetDeviceArmSwayRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)
@@ -453,7 +457,9 @@ namespace RTE {
 		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
 		.def("UnequipArms", &AHuman::UnequipArms)
+		.def("ReloadFirearms", &LuaAdaptersAHuman::ReloadFirearms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
+		.def("FirearmsAreReloading", &AHuman::FirearmsAreReloading)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)
 		.def("LookForGold", &AHuman::LookForGold)
@@ -538,12 +544,28 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Arm) {
 		return ConcreteTypeLuaClassDefinition(Arm, Attachable)
 
-		.property("HeldDevice", &Arm::GetHeldMO)
-		.property("MaxLength", &Arm::GetMaxLength)
-		.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
-		.property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
-		.property("ThrowStrength", &Arm::GetThrowStrength, &Arm::SetThrowStrength)
-		.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos);
+			.property("MaxLength", &Arm::GetMaxLength)
+			.property("MoveSpeed", &Arm::GetMoveSpeed, &Arm::SetMoveSpeed)
+
+			.property("HandDefaultIdleOffset", &Arm::GetHandDefaultIdleOffset, &Arm::SetHandDefaultIdleOffset)
+
+			.property("HandCurrentPos", &Arm::GetHandCurrentPos, &Arm::SetHandCurrentPos)
+			.property("HasAnyHandTargets", &Arm::HasAnyHandTargets)
+			.property("NumberOfHandTargets", &Arm::GetNumberOfHandTargets)
+			.property("NextHandTargetDescription", &Arm::GetNextHandTargetDescription)
+			.property("NextHandTargetPosition", &Arm::GetNextHandTargetPosition)
+			.property("HandHasReachedCurrentTarget", &Arm::GetHandHasReachedCurrentTarget)
+
+			.property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
+			.property("ThrowStrength", &Arm::GetThrowStrength, &Arm::SetThrowStrength)
+
+			.property("HeldDevice", &Arm::GetHeldDevice, &LuaAdaptersPropertyOwnershipSafetyFaker::ArmSetHeldDevice)
+			.property("SupportedHeldDevice", &Arm::GetHeldDeviceThisArmIsTryingToSupport)
+
+			.def("AddHandTarget", (void (Arm::*)(const std::string &description, const Vector &handTargetPositionToAdd))&Arm::AddHandTarget)
+			.def("AddHandTarget", (void (Arm::*)(const std::string &description, const Vector &handTargetPositionToAdd, float delayAtTarget))&Arm::AddHandTarget)
+			.def("RemoveNextHandTarget", &Arm::RemoveNextHandTarget)
+			.def("ClearHandTargets", &Arm::ClearHandTargets);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -647,6 +669,8 @@ namespace RTE {
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
 		.property("Reloadable", &HDFirearm::IsReloadable, &HDFirearm::SetReloadable)
+		.property("DualReloadable", &HDFirearm::IsDualReloadable, &HDFirearm::SetDualReloadable)
+		.property("OneHandedReloadTimeMultiplier", &HDFirearm::GetOneHandedReloadTimeMultiplier, &HDFirearm::SetOneHandedReloadTimeMultiplier)
 		.property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
 		.property("RoundInMagCapacity", &HDFirearm::GetRoundInMagCapacity)
 		.property("Magazine", &HDFirearm::GetMagazine, &LuaAdaptersPropertyOwnershipSafetyFaker::HDFirearmSetMagazine)
@@ -697,6 +721,7 @@ namespace RTE {
 		.property("SharpStanceOffset", &HeldDevice::GetSharpStanceOffset, &HeldDevice::SetSharpStanceOffset)
 		.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 		.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
+		.property("Supportable", &HeldDevice::IsSupportable, &HeldDevice::SetSupportable)
 		.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)

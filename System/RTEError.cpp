@@ -25,20 +25,22 @@ namespace RTE {
 
 		currentAborting = true;
 
-		// Save out the screen bitmap, after making a copy of it, faster sometimes
-		if (screen) {
-			BITMAP *abortScreenBuffer = create_bitmap(g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
-			blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
-			PALETTE palette;
-			get_palette(palette);
-			save_bmp("AbortScreen.bmp", abortScreenBuffer, palette);
-			destroy_bitmap(abortScreenBuffer);
-		}
+		if (!System::IsInExternalModuleValidationMode()) {
+			// Save out the screen bitmap, after making a copy of it, faster sometimes
+			if (screen) {
+				BITMAP *abortScreenBuffer = create_bitmap(g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
+				blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
+				PALETTE palette;
+				get_palette(palette);
+				save_bmp("AbortScreen.bmp", abortScreenBuffer, palette);
+				destroy_bitmap(abortScreenBuffer);
+			}
 
-		// Ditch the video mode so the message box appears without problems
-		if (g_FrameMan.GetWindow()) {
-			SDL_SetWindowFullscreen(g_FrameMan.GetWindow(), 0);
-			SDL_SetWindowTitle(g_FrameMan.GetWindow(), "RTE Aborted! (x_x)");
+			// Ditch the video mode so the message box appears without problems
+			if (g_FrameMan.GetWindow()) {
+				SDL_SetWindowFullscreen(g_FrameMan.GetWindow(), 0);
+				SDL_SetWindowTitle(g_FrameMan.GetWindow(), "RTE Aborted! (x_x)");
+			}
 		}
 
 		std::string abortMessage;

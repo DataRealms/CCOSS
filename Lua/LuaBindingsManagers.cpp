@@ -1,3 +1,5 @@
+// Make sure that binding definition files are always set to NOT use pre-compiled headers and conformance mode (/permissive) otherwise everything will be on fire!
+
 #include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {
@@ -234,13 +236,27 @@ namespace RTE {
 		.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
 		.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
 		.def("DrawTextPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
+		.def("DrawTextPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &text, bool isSmall, int alignment, float rotAngle))&PrimitiveMan::DrawTextPrimitive)
 		.def("DrawTextPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
-		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
-		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
-		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
-		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawTextPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &text, bool isSmall, int alignment, float rotAngle))&PrimitiveMan::DrawTextPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const MOSprite *moSprite, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const MOSprite *moSprite, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const MOSprite *moSprite, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const MOSprite *moSprite, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &filePath, float rotAngle))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &filePath, float rotAngle))&PrimitiveMan::DrawBitmapPrimitive)
+		.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
 		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
-		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive);
+		.def("DrawIconPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity))&PrimitiveMan::DrawIconPrimitive)
+
+		.def("DrawPolygonPrimitive", &LuaAdaptersPrimitiveMan::DrawPolygonPrimitive)
+		.def("DrawPolygonPrimitive", &LuaAdaptersPrimitiveMan::DrawPolygonPrimitiveForPlayer)
+		.def("DrawPolygonFillPrimitive", &LuaAdaptersPrimitiveMan::DrawPolygonFillPrimitive)
+		.def("DrawPolygonFillPrimitive", &LuaAdaptersPrimitiveMan::DrawPolygonFillPrimitiveForPlayer)
+		.def("DrawPrimitives", &LuaAdaptersPrimitiveMan::DrawPrimitivesWithTransparency)
+		.def("DrawPrimitives", &LuaAdaptersPrimitiveMan::DrawPrimitivesWithBlending)
+		.def("DrawPrimitives", &LuaAdaptersPrimitiveMan::DrawPrimitivesWithBlendingPerChannel);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,17 +277,6 @@ namespace RTE {
 
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
-
-		// For script backwards compat
-		.def("GetOffset", &SceneMan::GetOffset)
-		.def("SetOffset", &SceneMan::SetOffset)
-		.def("GetScreenOcclusion", &SceneMan::GetScreenOcclusion)
-		.def("SetScreenOcclusion", &SceneMan::SetScreenOcclusion)
-		.def("SetScrollTarget", &SceneMan::SetScrollTarget)
-		.def("GetScrollTarget", &SceneMan::GetScrollTarget)
-		.def("TargetDistanceScalar", &SceneMan::TargetDistanceScalar)
-		.def("CheckOffset", &SceneMan::CheckOffset)
-		.def("SetScroll", &SceneMan::SetScroll)
 
 		.def("GetTerrain", &SceneMan::GetTerrain)
 		.def("GetMaterial", &SceneMan::GetMaterial)
@@ -329,8 +334,8 @@ namespace RTE {
 			.def("SetOffset", &CameraMan::SetOffset)
 			.def("GetScreenOcclusion", &CameraMan::GetScreenOcclusion)
 			.def("SetScreenOcclusion", &CameraMan::SetScreenOcclusion)
-			.def("SetScrollTarget", &CameraMan::SetScrollTarget)
 			.def("GetScrollTarget", &CameraMan::GetScrollTarget)
+			.def("SetScrollTarget", &CameraMan::SetScrollTarget)
 			.def("TargetDistanceScalar", &CameraMan::TargetDistanceScalar)
 			.def("CheckOffset", &CameraMan::CheckOffset)
 			.def("SetScroll", &CameraMan::SetScroll)

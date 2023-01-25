@@ -432,7 +432,7 @@ void AssemblyEditorGUI::Update()
             m_pCurrentObject->Update();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
-                
+
             // If done picking, revert to moving object mode
             if (m_pPicker->DonePicking())
             {
@@ -647,7 +647,7 @@ void AssemblyEditorGUI::Update()
 					if (pPickedSceneObject)
 					{
 						pAHuman = dynamic_cast<const AHuman *>(pPickedSceneObject);
-						
+
 						if (!pAHuman)
 						{
 							// Maybe we clicked the underlying bunker module, search for actor in range
@@ -713,7 +713,7 @@ void AssemblyEditorGUI::Update()
                 std::list<Entity *> assemblies;
 				g_PresetMan.GetAllOfGroup(assemblies, pBAS->GetPresetName(), "BunkerAssembly", -1);
 				for (int i = 1; i < 256; i++)
-				{	
+				{
 					number = i;
 					char currentName[256];
 
@@ -748,7 +748,7 @@ void AssemblyEditorGUI::Update()
 			{
 				//Clear current scheme and assign new one
 				delete m_pCurrentScheme;
-				
+
 				const Entity *pPreset = g_PresetMan.GetEntityPreset("BunkerAssemblyScheme", pBA->GetParentAssemblySchemeName(), -1);
 				if (pPreset)
 				{
@@ -771,7 +771,7 @@ void AssemblyEditorGUI::Update()
 					{
 						if (pos.m_X < 0)
 							pos.m_X += g_SceneMan.GetScene()->GetWidth();
-						
+
 						if (pos.m_X >= g_SceneMan.GetScene()->GetWidth())
 							pos.m_X -= g_SceneMan.GetScene()->GetWidth();
 					}
@@ -780,7 +780,7 @@ void AssemblyEditorGUI::Update()
 					{
 						if (pos.m_Y < 0)
 							pos.m_Y += g_SceneMan.GetScene()->GetHeight();
-						
+
 						if (pos.m_Y >= g_SceneMan.GetScene()->GetHeight())
 							pos.m_Y -= g_SceneMan.GetScene()->GetHeight();
 					}
@@ -983,7 +983,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
             // Draw the currently held object into the order of the list if it is to be placed inside
             if (m_pCurrentObject && m_DrawCurrentObject && i == m_ObjectListOrder)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
                 m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
                 pActor = dynamic_cast<Actor *>(m_pCurrentObject);
                 if (pActor)
@@ -992,12 +992,12 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
 
             // Is the placed object an actor?
             pActor = dynamic_cast<Actor *>(*itr);
-//            pItem = dynamic_cast<MovableObject *>(*itr);            
+//            pItem = dynamic_cast<MovableObject *>(*itr);
 
             // Blink trans if we are supposed to blink this one
             if ((*itr) == m_pObjectToBlink)
             {
-                g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) ? LessTrans : HalfTrans);
+                g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
                 (*itr)->Draw(pTargetBitmap, targetPos, g_DrawTrans);
             }
             // Drawing of already placed objects that aren't highlighted or anything
@@ -1025,7 +1025,7 @@ void AssemblyEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) con
     // If the held object will be placed at the end of the list, draw it last to the scene, transperent blinking
 	else if (m_pCurrentObject && (m_ObjectListOrder < 0 || (pSceneObjectList && m_ObjectListOrder == pSceneObjectList->size())))
     {
-        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? LessTrans : HalfTrans);
+        g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGOBJECT ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
         m_pCurrentObject->Draw(pTargetBitmap, targetPos, g_DrawTrans);
         Actor *pActor = dynamic_cast<Actor *>(m_pCurrentObject);
         if (pActor)

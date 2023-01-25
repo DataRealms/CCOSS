@@ -1058,7 +1058,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             // Automatically calculate a value based on the amount of energy going on here
             float averageSpeed = (minVelocity + maxVelocity) * 0.5F;
             float energy = mass * averageSpeed * static_cast<float>(count);
-            g_CameraMan.AddScreenShake(energy * g_SettingsMan.GetDefaultShakePerUnitOfGibEnergy(), m_Pos);
+            g_CameraMan.AddScreenShake(energy * g_CameraMan.GetDefaultShakePerUnitOfGibEnergy(), m_Pos);
         }
 
 		float velocityRange = maxVelocity - minVelocity;
@@ -1140,13 +1140,11 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-    Attachable *attachable;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
-        RTEAssert((*attachableIterator), "Broken Attachable!");
-        attachable = *attachableIterator;
+	const std::vector<Attachable *> nonVolatileAttachablesVectorForLuaSafety { m_Attachables.begin(), m_Attachables.end() };
+	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
+        RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
         if (RandomNum() < attachable->GetGibWithParentChance()) {
-            ++attachableIterator;
             attachable->GibThis();
             continue;
         }
@@ -1160,7 +1158,6 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
 
-        ++attachableIterator;
         RemoveAttachable(attachable, true, true);
     }
     m_Attachables.clear();

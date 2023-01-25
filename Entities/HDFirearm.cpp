@@ -17,7 +17,6 @@
 #include "CameraMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
-#include "SettingsMan.h"
 
 #include "Magazine.h"
 #include "ThrownDevice.h"
@@ -697,7 +696,7 @@ void HDFirearm::StopActivationSound()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HDFirearm::Reload(bool isBeingReloadedOneHanded) {
+void HDFirearm::Reload() {
 	if (!m_Reloading && m_Reloadable) {
 		bool hadMagazineBeforeReloading = m_pMagazine != nullptr;
         if (hadMagazineBeforeReloading) {
@@ -715,7 +714,7 @@ void HDFirearm::Reload(bool isBeingReloadedOneHanded) {
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();
-		m_ReloadTmr.SetSimTimeLimitMS(static_cast<int>(static_cast<float>(m_ReloadTime) * (isBeingReloadedOneHanded ? m_OneHandedReloadTimeMultiplier : 1.0F)));
+		CorrectReloadTimerForSupportAvailable();
 
 		RunScriptedFunctionInAppropriateScripts("OnReload", false, false, {}, { hadMagazineBeforeReloading ? "true" : "false" });
 
@@ -791,7 +790,7 @@ void HDFirearm::Update()
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
     if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
-    Actor* pActor = dynamic_cast<Actor*>(GetRootParent());
+    Actor *pActor = dynamic_cast<Actor*>(GetRootParent());
 
     /////////////////////////////////
     // Activation/firing logic
@@ -1037,8 +1036,8 @@ void HDFirearm::Update()
             int controllingPlayer = pActor->GetController()->GetPlayer();
             int screenId = g_ActivityMan.GetActivity()->ScreenOfPlayer(controllingPlayer);
             if (screenId != -1) {
-                const float shakiness = g_SettingsMan.GetDefaultShakePerUnitOfRecoilEnergy();
-                const float maxShakiness = g_SettingsMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
+                const float shakiness = g_CameraMan.GetDefaultShakePerUnitOfRecoilEnergy();
+                const float maxShakiness = g_CameraMan.GetDefaultShakeFromRecoilMaximum(); // Some weapons fire huge rounds, so restrict the amount
                 float screenShakeAmount = m_RecoilScreenShakeAmount == -1.0F ? std::min(totalFireForce * m_JointStiffness * shakiness, maxShakiness) : m_RecoilScreenShakeAmount;
                 g_CameraMan.ApplyScreenShake(screenShakeAmount, screenId);
             }

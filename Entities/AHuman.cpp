@@ -814,7 +814,7 @@ void AHuman::AddInventoryItem(MovableObject *pItemToAdd) {
 
 MovableObject * AHuman::SwapNextInventory(MovableObject *inventoryItemToSwapIn, bool muteSound) {
 	MovableObject *swappedInventoryItem = Actor::SwapNextInventory(inventoryItemToSwapIn, muteSound);
-	while (!dynamic_cast<HeldDevice *>(swappedInventoryItem) && ! m_Inventory.empty()) {
+	while (!dynamic_cast<HeldDevice *>(swappedInventoryItem) && !m_Inventory.empty()) {
 		g_MovableMan.AddMO(swappedInventoryItem);
 		swappedInventoryItem = Actor::SwapNextInventory(nullptr, muteSound);
 	}
@@ -899,7 +899,7 @@ bool AHuman::EquipFirearm(bool doEquip)
 // Virtual Method:  EquipDeviceInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of the specified group in the inventory. If the held device already 
+//                  of the specified group in the inventory. If the held device already
 //                  is of that group, or no device is in inventory, nothing happens.
 
 bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
@@ -934,11 +934,11 @@ bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
                         // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
                         // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
                         if (previouslyHeldItem->GetsHitByMOs()) {
-#ifdef DRAW_MOID_LAYER
+//#ifdef DRAW_MOID_LAYER
                             previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true);
-#else
-                            previouslyHeldItem->SetTraveling(true);
-#endif
+//#else
+//                            previouslyHeldItem->SetTraveling(true);
+//#endif
                         }
                         AddToInventoryBack(previouslyHeldItem);
                     }
@@ -968,7 +968,7 @@ bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
 // Virtual Method:  EquipLoadedFirearmInGroup
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first loaded HDFirearm
-//                  of the specified group in the inventory. If no such weapon is in the 
+//                  of the specified group in the inventory. If no such weapon is in the
 //                  inventory, nothing happens.
 
 bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGroup, bool doEquip)
@@ -1025,7 +1025,7 @@ bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGro
 // Virtual Method:  EquipNamedDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Switches the currently held device (if any) to the first found device
-//                  of with the specified preset name in the inventory. If the held device already 
+//                  of with the specified preset name in the inventory. If the held device already
 //                  is of that preset name, or no device is in inventory, nothing happens.
 
 bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &presetName, bool doEquip)
@@ -1034,8 +1034,8 @@ bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &
 		return false;
 	}
 
-	if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && 
-        (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
+	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); 
+        heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
         return true;
     }
 
@@ -1221,7 +1221,7 @@ float AHuman::EstimateDigStrength()
             maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
         }
     }
-    
+
     return maxPenetration;
 }
 
@@ -1475,7 +1475,7 @@ bool AHuman::FirearmsAreReloading(bool onlyIfAllFirearmsAreReloading) const {
 			reloadingFirearmCount++;
 		}
 	}
-	
+
 	return onlyIfAllFirearmsAreReloading ? reloadingFirearmCount == totalFirearmCount : reloadingFirearmCount > 0;
 }
 
@@ -1538,18 +1538,18 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 				float percentageOfReloadTimeToStayAtReloadOffset = 0.85F;
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
 
-				heldFirearm->Reload(!otherArmIsAvailable);
+				heldFirearm->Reload();
 				if (otherArmIsAvailable) {
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (!m_ReloadOffset.IsZero()) {
-						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					} else {
-						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					}
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				} else if (!m_ReloadOffset.IsZero()) {
-					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), heldFirearm->GetReloadTime() * percentageOfReloadTimeToStayAtReloadOffset);
+					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
 					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				}
 			}
@@ -1745,7 +1745,7 @@ void AHuman::ResetAllTimers()
 // Description:     Updates the path to move along to the currently set movetarget.
 
 bool AHuman::UpdateMovePath()
-{    
+{
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())
         return false;
@@ -2254,7 +2254,7 @@ void AHuman::UpdateAI()
                 if (m_DigState != FINISHINGDIG && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.33)))
                 {
 					Vector notUsed;
-					
+
                     // If we have cleared the buried path segment, advance to the next
                     if (!g_SceneMan.CastStrengthRay(m_PrevPathTarget, g_SceneMan.ShortestDistance(m_PrevPathTarget, m_MoveTarget), 5, notUsed, 1, g_MaterialDoor))
                     {
@@ -2284,7 +2284,7 @@ void AHuman::UpdateAI()
                     m_DeviceState = SCANNING;
                     m_DigState = NOTDIGGING;
                 }
-            }  
+            }
         }
         // If we need to and can, pick up any weapon on the ground
         else if (m_pItemInReach)
@@ -2567,8 +2567,8 @@ void AHuman::UpdateAI()
     // Already in a jump
     if (m_ObstacleState == JUMPING)
     {
-        // Override the lateral control for the precise jump 
-        // Turn around 
+        // Override the lateral control for the precise jump
+        // Turn around
         if (m_MoveVector.m_X > 0 && m_LateralMoveState == LAT_LEFT)
             m_LateralMoveState = LAT_RIGHT;
         else if (m_MoveVector.m_X < 0 && m_LateralMoveState == LAT_RIGHT)
@@ -2615,14 +2615,14 @@ void AHuman::UpdateAI()
                 m_JumpTimer.Reset();
             }
         }
-		
+
 		Vector notUsed;
-		
+
         // Got the height, now wait until we crest the top and start falling again
         if (m_JumpState == APEXJUMP)
         {
 			Vector notUsedInner;
-			
+
             m_PointingTarget = m_JumpTarget;
 
             // We are falling again, and we can still see the target! start adjusting our aim and jet nozzle forward
@@ -2658,7 +2658,7 @@ void AHuman::UpdateAI()
         if (m_JumpState == LANDJUMP)
         {
 			Vector notUsedInner;
-			
+
             m_PointingTarget = m_JumpTarget;
 
             // Burn the jetpack for a short while to get forward momentum, but not too much
@@ -2700,7 +2700,7 @@ void AHuman::UpdateAI()
     else if (!m_MoveTarget.IsZero() && !m_Crawling)
     {
 		Vector notUsed;
-		
+
         // UPWARD JUMP TRIGGERINGS if it's a good time to jump up to a ledge
         if ((-m_MoveVector.m_Y > m_CharHeight * 0.75) && m_DeviceState != AIMING && m_DeviceState != FIRING)// && (fabs(m_MoveVector.m_X) < m_CharHeight))
         {
@@ -2754,9 +2754,9 @@ void AHuman::UpdateAI()
                     if (rise >= m_CharHeight)
                         break;
                 }
-				
+
 				Vector notUsedInner;
-				
+
                 // The rise is high enough to warrant looking across the trench for obstacles in the way of a jump
                 if (rise >= m_CharHeight && !g_SceneMan.CastStrengthRay(cpuPos, Vector((*pItr).m_X - cpuPos.m_X, 0), 5, notUsedInner, 3))
                 {
@@ -3016,7 +3016,7 @@ void AHuman::UpdateAI()
             {
                 m_ObstacleState = BACKSTEPPING;
                 m_StuckTimer.Reset();
-            }  
+            }
         }
         else
         {
@@ -3091,7 +3091,7 @@ void AHuman::Update()
 {
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
-	
+
 	Vector analogAim = m_Controller.GetAnalogAim();
     const float analogDeadzone = 0.1F;
 
@@ -3182,7 +3182,7 @@ void AHuman::Update()
                 m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
                 m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
             }
-			
+
 			// Walk backwards if the aiming is already focused in the opposite direction of travel.
 			// Note that we check against zero here rather than the deadzone, because using the deadzone makes jetpacking mouse players unable to fly one way and aim the other.
             if (!analogAim.IsZero() || isSharpAiming) {
@@ -3219,7 +3219,17 @@ void AHuman::Update()
 
 	////////////////////////////////////
 	// Standard Reloading
-	
+
+
+	for (const Arm *arm : { m_pFGArm, m_pBGArm }) {
+		if (arm) {
+			if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(arm->GetHeldDevice())) {
+				const Arm *otherArm = arm == m_pFGArm ? m_pBGArm : m_pFGArm;
+				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+				heldFirearm->SetSupportAvailable(otherArmIsAvailable);
+			}
+		}
+	}
 	if (m_Controller.IsState(ControlState::WEAPON_RELOAD)) {
 		ReloadFirearms();
 	}
@@ -3264,7 +3274,7 @@ void AHuman::Update()
 	if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE) {
         // Set the timer to a base number so we don't get a sluggish feeling at start.
 		if (m_AimState != AIMUP) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
-		m_AimState = AIMUP; 
+		m_AimState = AIMUP;
 		m_AimAngle += isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle > m_AimRange) { m_AimAngle = m_AimRange; }
 
@@ -3782,7 +3792,7 @@ void AHuman::Update()
     if (m_pBGArm) {
 		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (adjustedAimAngle));
 
-        if (m_Status == STABLE) { 
+        if (m_Status == STABLE) {
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield
 				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) {
@@ -3797,14 +3807,14 @@ void AHuman::Update()
 				} else if (heldDevice) {
 					if (HeldDevice *bgDevice = GetEquippedBGItem(); bgDevice && !heldDevice->IsOneHanded()) {
 						UnequipBGArm();
-					} else if (!bgDevice && !heldDevice->IsReloading()) {
+					} else if (!bgDevice && !heldDevice->IsReloading() && heldDevice->IsSupportable()) {
 						m_pBGArm->SetHeldDeviceThisArmIsTryingToSupport(heldDevice);
 
-						if (m_pBGArm->GetHandHasReachedCurrentTarget()) {
+						if (!m_pBGArm->HasAnyHandTargets() && m_pBGArm->GetHandHasReachedCurrentTarget()) {
 							heldDevice->SetSupported(true);
 							m_pBGArm->SetRecoil(heldDevice->GetRecoilForce(), heldDevice->GetRecoilOffset(), heldDevice->IsRecoiled());
 						} else {
-							// BGArm did not reach to support the device. Count device as supported anyway, if crouching.
+							// BGArm did not reach to support the device. Count device as supported anyway, if crouching or prone.
 							heldDevice->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
 							m_pBGArm->SetRecoil(Vector(), Vector(), false);
 						}
@@ -3817,7 +3827,7 @@ void AHuman::Update()
 	} else if (HeldDevice *heldDevice = GetEquippedItem()) {
 		heldDevice->SetSupported(false);
     }
-	// Make sure the bg arm doesn't think it's supporting something when it isn't. 
+	// Make sure the bg arm doesn't think it's supporting something when it isn't.
 	if (m_pBGArm && (!m_pFGArm || !m_pFGArm->GetHeldDevice() || m_pBGArm->GetHeldDevice())) {
 		m_pBGArm->SetHeldDeviceThisArmIsTryingToSupport(nullptr);
 	}
@@ -4105,9 +4115,6 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -4119,6 +4126,10 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+
+	if (!m_HUDVisible) {
+		return;
+	}
 
 #ifdef DEBUG_BUILD
     // Limbpath debug drawing
@@ -4150,7 +4161,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
     // Radius
 //    waypoint = m_Pos - targetPos;
-//    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
+//    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);
 #endif
 
     // Player AI drawing
@@ -4316,6 +4327,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
             std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
+			m_HUDStack -= 9;
         }
 /*
         // AI Mode select GUI HUD
@@ -4324,7 +4336,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             int iconOff = m_apAIIcons[0]->w + 2;
             int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
-            
+
             if (m_AIMode == AIMODE_SENTRY)
             {
                 std::snprintf(str, sizeof(str), "%s", "Sentry");
@@ -4459,7 +4471,7 @@ void AHuman::SetLimbPathSpeed(int speedPreset, float speed)
 // Virtual method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 
 float AHuman::GetLimbPathPushForce() const
 {
@@ -4470,7 +4482,7 @@ float AHuman::GetLimbPathPushForce() const
 // Virtual method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 
 void AHuman::SetLimbPathPushForce(float force)
 {
@@ -4489,7 +4501,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 			case PieSlice::SliceType::Reload:
 				pieSlice->SetType(m_pItemInReach ? PieSlice::SliceType::Pickup : PieSlice::SliceType::Reload);
 				pieSlice->SetIcon(dynamic_cast<Icon *>(g_PresetMan.GetEntityPreset("Icon", m_pItemInReach ? "Pick Up" : "Refresh")->Clone()));
-				
+
 				if (pieSlice->GetType() == PieSlice::SliceType::Pickup) {
 					if (m_pFGArm || (m_pBGArm && m_pItemInReach->IsOneHanded())) {
 						pieSlice->SetEnabled(true);

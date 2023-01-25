@@ -1,7 +1,6 @@
 #ifndef _RTEARM_
 #define _RTEARM_
 
-
 #include "Attachable.h"
 
 namespace RTE {
@@ -28,14 +27,14 @@ namespace RTE {
 		/// <summary>
 		/// Makes the Arm object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override;
 
 		/// <summary>
 		/// Creates an Arm to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Arm to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const Arm &reference);
 #pragma endregion
 
@@ -110,7 +109,8 @@ namespace RTE {
 		/// Sets the current offset of this Arm's hand, i.e. its distance from the joint position. The value is capped to the max length of the Arm.
 		/// </summary>
 		/// <param name="newHandOffset">The new current offset of this Arm's hand.</param>
-		void SetHandCurrentOffset(const Vector &newHandOffset) { m_HandCurrentOffset = newHandOffset; m_HandCurrentOffset.CapMagnitude(m_MaxLength); } //TODO maybe dont' want this in favour of SetHandPos?
+		//TODO maybe don't want this in favor of SetHandPos?
+		void SetHandCurrentOffset(const Vector &newHandOffset) { m_HandCurrentOffset = newHandOffset; m_HandCurrentOffset.CapMagnitude(m_MaxLength); }
 
 		/// <summary>
 		/// Gets the current position of this Arm's hand in absolute Scene coordinates.
@@ -124,6 +124,32 @@ namespace RTE {
 		/// <param name="newHandPos">The new current position of this Arm's hand as absolute scene coordinate.</param>
 		void SetHandCurrentPos(const Vector &newHandPos);
 
+		/// <summary>
+		/// Gets the the strength with which this Arm will grip its HeldDevice.
+		/// </summary>
+		/// <returns>The grip strength of this Arm.</returns>
+		float GetGripStrength() const { return m_GripStrength; }
+
+		/// <summary>
+		/// Sets the strength with which this Arm will grip its HeldDevice.
+		/// </summary>
+		/// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
+		void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
+
+		/// <summary>
+		/// Gets the the strength with which this Arm will throw a ThrownDevice.
+		/// </summary>
+		/// <returns>The throw strength of this Arm.</returns>
+		float GetThrowStrength() const { return m_ThrowStrength; }
+
+		/// <summary>
+		/// Sets the strength with which this Arm will throw a ThrownDevice.
+		/// </summary>
+		/// <param name="newThrowStrength">The new throw strength for this Arm to use.</param>
+		void SetThrowStrength(float newThrowStrength) { m_ThrowStrength = newThrowStrength; }
+#pragma endregion
+
+#pragma region Hand Animation Handling
 		/// <summary>
 		/// Adds a HandTarget position, in absolute scene coordinates, to the queue for the Arm to move its hand towards. Target positions are removed from the queue when they're reached (or as close to reached as is possible).
 		/// </summary>
@@ -179,30 +205,6 @@ namespace RTE {
 		/// Empties the queue of HandTargets. With the queue empty, the hand will move to its appropriate idle offset.
 		/// </summary>
 		void ClearHandTargets() { m_HandTargets = {}; }
-
-		/// <summary>
-		/// Gets the the strength with which this Arm will grip its HeldDevice.
-		/// </summary>
-		/// <returns>The grip strength of this Arm.</returns>
-		float GetGripStrength() const { return m_GripStrength; }
-
-		/// <summary>
-		/// Sets the strength with which this Arm will grip its HeldDevice.
-		/// </summary>
-		/// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
-		void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
-
-		/// <summary>
-		/// Gets the the strength with which this Arm will throw a ThrownDevice.
-		/// </summary>
-		/// <returns>The throw strength of this Arm.</returns>
-		float GetThrowStrength() const { return m_ThrowStrength; }
-
-		/// <summary>
-		/// Sets the strength with which this Arm will throw a ThrownDevice.
-		/// </summary>
-		/// <param name="newThrowStrength">The new throw strength for this Arm to use.</param>
-		void SetThrowStrength(float newThrowStrength) { m_ThrowStrength = newThrowStrength; }
 #pragma endregion
 
 #pragma region HeldDevice Management
@@ -238,6 +240,16 @@ namespace RTE {
 		HeldDevice * SwapHeldDevice(HeldDevice *newHeldDevice);
 #pragma endregion
 
+#pragma region Concrete Methods
+		/// <summary>
+		/// Draws this Arm's hand's graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
+		void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
+#pragma endregion
+
 #pragma region Override Methods
 		/// <summary>
 		/// Does stuff that needs to be done after Update().
@@ -259,27 +271,23 @@ namespace RTE {
 		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 #pragma endregion
 
-		/// <summary>
-		/// Draws this Arm's hand's graphical representation to a BITMAP of choice.
-		/// </summary>
-		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
-		void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
-
 	private:
-		
+
 		/// <summary>
 		/// Struct for storing data about each target in the Arm's queue of HandTargets.
 		/// </summary>
 		struct HandTarget {
-			HandTarget(const std::string_view &description, const Vector &targetOffset, float delayAtTarget, bool hFlippedWhenTargetWasCreated) { Description = description, TargetOffset = targetOffset, DelayAtTarget = delayAtTarget, HFlippedWhenTargetWasCreated = hFlippedWhenTargetWasCreated; }
-			std::string Description;
-			Vector TargetOffset = Vector();
+			/// <summary>
+			/// Constructor method used to instantiate a HandTarget object in system memory.
+			/// </summary>
+			HandTarget(const std::string_view &description, const Vector &targetOffset, float delayAtTarget, bool hFlippedWhenTargetWasCreated) : Description(description), TargetOffset(targetOffset), DelayAtTarget(delayAtTarget), HFlippedWhenTargetWasCreated(hFlippedWhenTargetWasCreated) {}
+
+			std::string Description = "";
+			Vector TargetOffset;
 			float DelayAtTarget = 0;
 			bool HFlippedWhenTargetWasCreated = false;
 		};
-	
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 		float m_MaxLength; //!< The maximum length of this Arm when fully extended, i.e. the length of the straight Arm sprite.
@@ -293,16 +301,16 @@ namespace RTE {
 		std::queue<HandTarget> m_HandTargets; // A queue of target positions this Arm's hand is reaching towards. If it's empty, the Arm isn't reaching towards anything.
 		Timer m_HandMovementDelayTimer; //!< A Timer for making the hand wait at its current HandTarget.
 		bool m_HandHasReachedCurrentTarget; //!< A flag for whether or not the hand has reached its current target. The target is either the front of the HandTarget queue, or the appropriate target to move to if the queue is empty.
-		
+
 		ContentFile m_HandSpriteFile; //!< The ContentFile containing this Arm's hand bitmap.
 		BITMAP *m_HandSpriteBitmap; //!< An unowned pointer to the Bitmap held by the hand sprite ContentFile.
 
-		float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
-		float m_ThrowStrength; //!< The strength with which this Arm will throw a ThrownDevice. Effectively supercedes the ThrownDevice's ThrowVelocity values.
+		float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supersedes the HeldDevice's JointStrength.
+		float m_ThrowStrength; //!< The strength with which this Arm will throw a ThrownDevice. Effectively supersedes the ThrownDevice's ThrowVelocity values.
 
 		HeldDevice *m_HeldDevice; //!< A pointer to the HeldDevice this Arm is currently holding. Owned in the MOSRotating Attachables list, kept here for convenience.
 		HeldDevice *m_HeldDeviceThisArmIsTryingToSupport; //!< A pointer to the HeldDevice being supported by this Arm (i.e. this is the background Arm for another HeldDevice).
-		
+
 		/// <summary>
 		/// Gets whether or not the hand is close to the given offset.
 		/// </summary>

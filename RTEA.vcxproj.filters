@@ -1080,6 +1080,9 @@
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <Filter>Lua</Filter>
     </ClCompile>

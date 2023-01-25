@@ -21,6 +21,7 @@
 #include "Box.h"
 #include "Controller.h"
 #include "DataModule.h"
+#include "GraphicalPrimitive.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -446,6 +447,77 @@ namespace RTE {
 		/// <param name="className">The class name of the Entity to reload.</param>
 		/// <returns>Whether or not the Entity was reloaded.</returns>
 		static bool ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className);
+	};
+#pragma endregion
+
+#pragma region PrimitiveMan Lua Adapters
+	struct LuaAdaptersPrimitiveMan {
+		/// <summary>
+		/// Schedule to draw a polygon primitive.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="centerPos">Position of primitive's center in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a polygon primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="centerPos">Position of primitive's center in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a filled polygon primitive.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="startPos">Start position of the primitive in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &startPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedule to draw a filled polygon primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="startPos">Start position of the primitive in Scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="verticesTable">A Lua table that contains the positions of the primitive's vertices, relative to the center position.</param>
+		static void DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &startPos, int color, const luabind::object &verticesTable);
+
+		/// <summary>
+		/// Schedules to draw multiple primitives of varying type with transparency enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="transValue">The transparency value the primitives should be drawn at. From 0 (opaque) to 100 (transparent).</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithTransparency(PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable);
+
+		/// <summary>
+		/// Schedule to draw multiple primitives of varying type with blending enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+		/// <param name="blendAmount">The blending amount for all the channels. 0-100.</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithBlending(PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable);
+
+		/// <summary>
+		/// Schedule to draw multiple primitives of varying type with blending enabled.
+		/// </summary>
+		/// <param name="primitiveMan">A reference to PrimitiveMan, provided by Lua.</param>
+		/// <param name="blendMode">The blending mode the primitives should be drawn with. See DrawBlendMode enumeration.</param>
+		/// <param name="blendAmountR">The blending amount for the Red channel. 0-100.</param>
+		/// <param name="blendAmountG">The blending amount for the Green channel. 0-100.</param>
+		/// <param name="blendAmountB">The blending amount for the Blue channel. 0-100.</param>
+		/// <param name="blendAmountA">The blending amount for the Alpha channel. 0-100.</param>
+		/// <param name="primitivesTable">A Lua table of primitives to schedule drawing for.</param>
+		static void DrawPrimitivesWithBlendingPerChannel(PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable);
 	};
 #pragma endregion
 

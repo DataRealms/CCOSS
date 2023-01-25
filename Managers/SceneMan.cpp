@@ -2722,26 +2722,25 @@ void SceneMan::Update(int screenId) {
 	m_LastUpdatedScreen = screenId;
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screenId == 0) { 
-        m_pCurrentScene->Update(); 
-    }
+	if (screenId == 0) {
+		m_pCurrentScene->Update(); 
+	}
 
     g_CameraMan.Update(screenId);
 
-	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
-
-    const Vector& offset = g_CameraMan.GetOffset(screenId);
+    const Vector &offset = g_CameraMan.GetOffset(screenId);
 	m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
 	if (m_pDebugLayer) { 
         m_pDebugLayer->SetOffset(offset);
     }
 
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
 	terrain->SetOffset(offset);
 	terrain->Update();
 
 	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
-    const Vector& unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
+    const Vector &unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();
@@ -2857,16 +2856,4 @@ BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) c
 	}
 	return m_IntermediateSettlingBitmaps.back().second;
 }
-
-// For script backwards compat
-void SceneMan::SetOffset(const Vector& offset, int screenId) { return g_CameraMan.SetOffset(offset, screenId); }
-Vector SceneMan::GetOffset(int screenId) const { return g_CameraMan.GetOffset(screenId); }
-void SceneMan::SetScroll(const Vector& center, int screenId) { return g_CameraMan.SetScroll(center, screenId); }
-void SceneMan::SetScreenOcclusion(const Vector& occlusion, int screenId) { return g_CameraMan.SetScreenOcclusion(occlusion, screenId); }
-Vector& SceneMan::GetScreenOcclusion(int screenId) { return g_CameraMan.GetScreenOcclusion(screenId); }
-void SceneMan::SetScrollTarget(const Vector& targetCenter, float speed, bool targetWrapped, int screenId) { return g_CameraMan.SetScrollTarget(targetCenter, speed, targetWrapped, screenId); }
-Vector SceneMan::GetScrollTarget(int screenId) const { return g_CameraMan.GetScrollTarget(screenId); }
-float SceneMan::TargetDistanceScalar(const Vector& point) const { return g_CameraMan.TargetDistanceScalar(point); }
-void SceneMan::CheckOffset(int screenId) { return g_CameraMan.CheckOffset(screenId); }
-
 } // namespace RTE

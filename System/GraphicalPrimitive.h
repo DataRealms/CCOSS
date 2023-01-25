@@ -1,7 +1,7 @@
 #ifndef _RTEPRIMITIVE_
 #define _RTEPRIMITIVE_
 
-#include "Vector.h"
+#include "MOSprite.h"
 
 namespace RTE {
 
@@ -14,10 +14,43 @@ namespace RTE {
 
 	public:
 
+		/// <summary>
+		/// Convenience macro to cut down on duplicate methods in classes that extend GraphicalPrimitive.
+		/// </summary>
+		#define GraphicalPrimitiveOverrideMethods \
+			const PrimitiveType GetPrimtiveType() const override { return c_PrimitiveType; } \
+			void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+
+		/// <summary>
+		/// Enumeration of the different primitive types derived from GraphicalPrimitive.
+		/// </summary>
+		enum class PrimitiveType {
+			None, // Not derived (base GraphicalPrimitive).
+			Line,
+			Arc,
+			Spline,
+			Box,
+			BoxFill,
+			RoundedBox,
+			RoundedBoxFill,
+			Circle,
+			CircleFill,
+			Ellipse,
+			EllipseFill,
+			Triangle,
+			TriangleFill,
+			Polygon,
+			PolygonFill,
+			Text,
+			Bitmap
+		};
+
 		Vector m_StartPos; //!< Start position of the primitive.
 		Vector m_EndPos; //!< End position of the primitive.
-		unsigned char m_Color; //!< Color to draw this primitive with.
-		int m_Player; //!< Player screen to draw this primitive on.
+		unsigned char m_Color = 0; //!< Color to draw this primitive with.
+		int m_Player = -1; //!< Player screen to draw this primitive on.
+		DrawBlendMode m_BlendMode = DrawBlendMode::NoBlend; //!< The blending mode that will be used when drawing this primitive.
+		std::array<int, 4> m_ColorChannelBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend }; //!< The blending amount for each color channel when drawing in blended mode.
 
 		/// <summary>
 		/// Destructor method used to clean up a GraphicalPrimitive object before deletion from system memory.
@@ -47,6 +80,16 @@ namespace RTE {
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
 		virtual void Draw(BITMAP *drawScreen, const Vector &targetPos) = 0;
+
+		/// <summary>
+		/// Gets the type identifier of this primitive.
+		/// </summary>
+		/// <returns>The type identifier of this primitive.</returns>
+		virtual const PrimitiveType GetPrimtiveType() const = 0;
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -57,6 +100,8 @@ namespace RTE {
 	class LinePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
@@ -72,12 +117,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -89,10 +131,12 @@ namespace RTE {
 
 	public:
 
-		float m_StartAngle; //!< The angle from which the arc begins.
-		float m_EndAngle; //!< The angle at which the arc ends.
-		int m_Radius; //!< Radius of the arc primitive.
-		int m_Thickness; //!< Thickness of the arc primitive in pixels.
+		GraphicalPrimitiveOverrideMethods;
+
+		float m_StartAngle = 0; //!< The angle from which the arc begins.
+		float m_EndAngle = 0; //!< The angle at which the arc ends.
+		int m_Radius = 0; //!< Radius of the arc primitive.
+		int m_Thickness = 0; //!< Thickness of the arc primitive in pixels.
 
 		/// <summary>
 		/// Constructor method for ArcPrimitive object.
@@ -111,12 +155,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -127,6 +168,8 @@ namespace RTE {
 	class SplinePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_GuidePointAPos; //!< A guide point that controls the curve of the spline.
 		Vector m_GuidePointBPos; //!< A guide point that controls the curve of the spline.
@@ -149,12 +192,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -165,6 +205,8 @@ namespace RTE {
 	class BoxPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for BoxPrimitive object.
@@ -180,12 +222,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -196,6 +235,8 @@ namespace RTE {
 	class BoxFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		/// <summary>
 		/// Constructor method for BoxFillPrimitive object.
@@ -211,12 +252,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -228,7 +266,9 @@ namespace RTE {
 
 	public:
 
-		int m_CornerRadius; //!< The radius of the corners of the box.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxPrimitive object.
@@ -247,12 +287,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -264,7 +301,9 @@ namespace RTE {
 
 	public:
 
-		int m_CornerRadius; //!< The radius of the corners of the box.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_CornerRadius = 0; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxFillPrimitive object.
@@ -283,12 +322,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -300,7 +336,9 @@ namespace RTE {
 
 	public:
 
-		int m_Radius; //!< Radius of the circle primitive.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_Radius = 0; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
@@ -317,12 +355,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -334,7 +369,9 @@ namespace RTE {
 
 	public:
 
-		int m_Radius; //!< Radius of the circle primitive.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_Radius = 0; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -351,12 +388,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -368,8 +402,10 @@ namespace RTE {
 
 	public:
 
-		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipsePrimitive object.
@@ -387,12 +423,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -404,8 +437,10 @@ namespace RTE {
 
 	public:
 
-		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		GraphicalPrimitiveOverrideMethods;
+
+		int m_HorizRadius = 0; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius = 0; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipseFillPrimitive object.
@@ -422,12 +457,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -438,6 +470,8 @@ namespace RTE {
 	class TrianglePrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_PointAPos; //!< First point of the triangle.
 		Vector m_PointBPos; //!< Second point of the triangle.
@@ -458,12 +492,9 @@ namespace RTE {
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -474,6 +505,8 @@ namespace RTE {
 	class TriangleFillPrimitive : public GraphicalPrimitive {
 
 	public:
+
+		GraphicalPrimitiveOverrideMethods;
 
 		Vector m_PointAPos; //!< First point of the triangle.
 		Vector m_PointBPos; //!< Second point of the triangle.
@@ -494,12 +527,75 @@ namespace RTE {
 			m_Player = player;
 		}
 
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
+	};
+#pragma endregion
+
+#pragma region Polygon Primitive
+	/// <summary>
+	/// Class used to schedule drawing of polygon primitives created from Lua.
+	/// </summary>
+	class PolygonPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		GraphicalPrimitiveOverrideMethods;
+
+		std::vector<Vector *> m_Vertices = {}; //!< Positions of the vertices of the polygon, relative to the center position.
+
 		/// <summary>
-		/// Draws this primitive on provided bitmap.
+		/// Constructor method for PolygonPrimitive object.
 		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
+		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		PolygonPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices) :
+			m_Vertices(vertices) {
+
+			m_StartPos = startPos;
+			m_Color = color;
+			m_Player = player;
+		}
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
+	};
+#pragma endregion
+
+#pragma region Filled Polygon Primitive
+	/// <summary>
+	/// Class used to schedule drawing of filled polygon primitives created from Lua.
+	/// </summary>
+	class PolygonFillPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		GraphicalPrimitiveOverrideMethods;
+
+		std::vector<Vector *> m_Vertices = {}; //!< Positions of the vertices of the polygon, relative to the center position.
+
+		/// <summary>
+		/// Constructor method for PolygonFillPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
+		/// <param name="vertices">A vector containing the positions of the vertices of the polygon, relative to the center position.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		PolygonFillPrimitive(int player, const Vector &startPos, unsigned char color, const std::vector<Vector *> &vertices) :
+			m_Vertices(vertices) {
+
+			m_StartPos = startPos;
+			m_Color = color;
+			m_Player = player;
+		}
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -511,9 +607,12 @@ namespace RTE {
 
 	public:
 
-		std::string m_Text; //!< String containing text to draw.
-		bool m_IsSmall; //!< Use small or large font. True for small font.
-		int m_Alignment; //!< Alignment of text.
+		GraphicalPrimitiveOverrideMethods;
+
+		std::string m_Text = ""; //!< String containing text to draw.
+		bool m_IsSmall = false; //!< Use small or large font. True for small font.
+		int m_Alignment = 0; //!< Alignment of text.
+		float m_RotAngle = 0; //!< Angle to rotate text in radians.
 
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
@@ -523,19 +622,17 @@ namespace RTE {
 		/// <param name="text">String containing text to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		TextPrimitive(int player, const Vector &pos, const std::string &text, bool isSmall, int alignment) :
-			m_Text(text), m_IsSmall(isSmall), m_Alignment(alignment) {
+		/// <param name="rotAngle">Angle to rotate text in radians.</param>
+		TextPrimitive(int player, const Vector &pos, const std::string &text, bool isSmall, int alignment, float rotAngle) :
+			m_Text(text), m_IsSmall(isSmall), m_Alignment(alignment), m_RotAngle(rotAngle) {
 
 			m_StartPos = pos;
 			m_Player = player;
 		}
 
-		/// <summary>
-		/// Draws this primitive on provided bitmap.
-		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 
@@ -547,20 +644,22 @@ namespace RTE {
 
 	public:
 
-		BITMAP *m_Bitmap; //!< Bitmap to draw.
-		float m_RotAngle; //!< Angle to rotate bitmap in radians.
-		bool m_HFlipped; //!< Whether the Bitmap to draw should be horizontally flipped.
-		bool m_VFlipped; //!< Whether the Bitmap to draw should be vertically flipped.
+		GraphicalPrimitiveOverrideMethods;
+
+		BITMAP *m_Bitmap = nullptr; //!< Bitmap to draw.
+		float m_RotAngle = 0; //!< Angle to rotate bitmap in radians.
+		bool m_HFlipped = false; //!< Whether the Bitmap to draw should be horizontally flipped.
+		bool m_VFlipped = false; //!< Whether the Bitmap to draw should be vertically flipped.
 
 		/// <summary>
 		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive's center.</param>
-		/// <param name="bitmap">Bitmap to draw.</param>
-		/// <param name="rotAngle">Angle to rotate bitmap in radians.</param>
-		/// <param name="hFlipped">Whether the bitmap to draw should be horizontally flipped.</param>
-		/// <param name="vFlipped">Whether the bitmap to draw should be vertically flipped.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="bitmap">BITMAP to draw.</param>
+		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
+		/// <param name="hFlipped">Whether the BITMAP to draw should be horizontally flipped.</param>
+		/// <param name="vFlipped">Whether the BITMAP to draw should be vertically flipped.</param>
 		BitmapPrimitive(int player, const Vector &centerPos, BITMAP *bitmap, float rotAngle, bool hFlipped, bool vFlipped) :
 			m_Bitmap(bitmap), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
 
@@ -569,11 +668,41 @@ namespace RTE {
 		}
 
 		/// <summary>
-		/// Draws this primitive on provided bitmap.
+		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
-		/// <param name="drawScreen">Bitmap to draw on.</param>
-		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="moSprite">The MOSprite to get the BITMAP to draw from.</param>
+		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
+		/// <param name="frame">Frame number of the MOSprite that will be drawn.</param>
+		/// <param name="hFlipped">Whether the BITMAP to draw should be horizontally flipped.</param>
+		/// <param name="vFlipped">Whether the BITMAP to draw should be vertically flipped.</param>
+		BitmapPrimitive(int player, const Vector &centerPos, const MOSprite *moSprite, float rotAngle, int frame, bool hFlipped, bool vFlipped) :
+			m_Bitmap(moSprite->GetSpriteFrame(frame)), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
+
+			m_StartPos = centerPos;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Constructor method for BitmapPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
+		/// <param name="filePath">The path to get the BITMAP to draw from.</param>
+		/// <param name="rotAngle">Angle to rotate BITMAP in radians.</param>
+		/// <param name="hFlipped">Whether the BITMAP to draw should be horizontally flipped.</param>
+		/// <param name="vFlipped">Whether the BITMAP to draw should be vertically flipped.</param>
+		BitmapPrimitive(int player, const Vector &centerPos, const std::string &filePath, float rotAngle, bool hFlipped, bool vFlipped) :
+			m_Bitmap(ContentFile(filePath.c_str()).GetAsBitmap()), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
+
+			m_StartPos = centerPos;
+			m_Player = player;
+		}
+
+	private:
+
+		static const PrimitiveType c_PrimitiveType; //!< Type identifier of this primitive.
 	};
 #pragma endregion
 }

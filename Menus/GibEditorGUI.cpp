@@ -707,7 +707,7 @@ void GibEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         // Draw the currently held object into the order of the list if it is to be placed inside
         if (m_pCurrentGib && m_DrawCurrentGib && i == m_GibListOrder)
         {
-            g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGGIB ? LessTrans : HalfTrans);
+            g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGGIB ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
             m_pCurrentGib->Draw(pTargetBitmap, targetPos, g_DrawTrans);
             Actor *pActor = dynamic_cast<Actor *>(m_pCurrentGib);
             if (pActor)
@@ -717,7 +717,7 @@ void GibEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         // Blink trans if we are supposed to blink this one
         if ((*itr) == m_pObjectToBlink)
         {
-            g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) ? LessTrans : HalfTrans);
+            g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
             (*itr)->Draw(pTargetBitmap, targetPos, g_DrawTrans);
         }
         else
@@ -742,7 +742,7 @@ void GibEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
     // If the held object will be placed at the end of the list, draw it last to the scene, transperent blinking
     else if (m_pCurrentGib && (m_GibListOrder < 0 || m_GibListOrder == m_PlacedGibs.size()))
     {
-        g_FrameMan.SetTransTable(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGGIB ? LessTrans : HalfTrans);
+        g_FrameMan.SetTransTableFromPreset(m_BlinkTimer.AlternateReal(333) || m_EditorGUIMode == PLACINGGIB ? TransparencyPreset::LessTrans : TransparencyPreset::HalfTrans);
         m_pCurrentGib->Draw(pTargetBitmap, targetPos, g_DrawTrans);
         Actor *pActor = dynamic_cast<Actor *>(m_pCurrentGib);
         if (pActor)
@@ -769,7 +769,7 @@ void GibEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         // Copy to the intermediate source bitmap
         blit(pTargetBitmap, m_pZoomSource, sourceCenter.m_X - halfWidth, sourceCenter.m_Y - halfHeight, 0, 0, m_pZoomSource->w, m_pZoomSource->h);
 
-        
+
         Vector zoomedCenter = m_CursorPos - targetPos;
 
         // Make sure the zoomed view is within the target bitmap

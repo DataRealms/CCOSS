@@ -200,8 +200,6 @@ namespace RTE {
 			int PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
 
-		static constexpr int c_TabSizeInSpaces = 4; //!< The number of space characters to treat as one tab character during reading, to preserve indentation structure.
-
 		std::unique_ptr<std::ifstream> m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::stack<StreamInfo> m_StreamStack; //!< Stack of open streams in this Reader, each one representing a file opened to read from within another.
 		bool m_EndOfStreams; //!< All streams have been depleted.

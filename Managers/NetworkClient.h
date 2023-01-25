@@ -1,12 +1,6 @@
 #ifndef _RTENETWORKCLIENT_
 #define _RTENETWORKCLIENT_
 
-#include "Singleton.h"
-#include "SoundContainer.h"
-#include "PostProcessMan.h"
-
-#include "NetworkMessages.h"
-
 // TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
 #include "RakPeerInterface.h"
 #include "NatPunchthroughClient.h"
@@ -16,6 +10,7 @@
 
 #include "Singleton.h"
 #include "NetworkMessages.h"
+#include "PostProcessMan.h"
 #include "Vector.h"
 
 #define g_NetworkClient NetworkClient::Instance()
@@ -25,6 +20,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 namespace RTE {
+
+	class SoundContainer;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer client.

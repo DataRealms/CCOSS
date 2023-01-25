@@ -1,6 +1,7 @@
 #include "SettingsGameplayGUI.h"
 #include "SettingsMan.h"
 #include "MovableMan.h"
+#include "CameraMan.h"
 
 #include "GUI.h"
 #include "GUICollectionBox.h"
@@ -63,13 +64,13 @@ namespace RTE {
 		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->SetCheck(g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode());
 
 		m_ScreenShakeStrengthSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderScreenShakeStrength"));
-		int screenShakeStrengthValue = static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F);
+		int screenShakeStrengthValue = static_cast<int>(g_CameraMan.GetScreenShakeStrength() * 100.0F);
 		if (screenShakeStrengthValue == 0) {
 			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMinimum());
 		} else if (screenShakeStrengthValue <= -1) {
 			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMaximum());
 		} else {
-			m_ScreenShakeStrengthSlider->SetValue(static_cast<int>(g_SettingsMan.GetScreenShakeStrength() * 100.0F));
+			m_ScreenShakeStrengthSlider->SetValue(static_cast<int>(g_CameraMan.GetScreenShakeStrength() * 100.0F));
 		}
 		m_ScreenShakeStrengthLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelScreenShakeStrengthValue"));
 		UpdateScreenShakeStrength();
@@ -125,7 +126,7 @@ namespace RTE {
 	void SettingsGameplayGUI::UpdateScreenShakeStrength() {
 		int newValue = m_ScreenShakeStrengthSlider->GetValue();
 		m_ScreenShakeStrengthLabel->SetText(std::to_string(newValue) + "%");
-		g_SettingsMan.SetScreenShakeStrength(static_cast<float>(newValue) / 100.0F);
+		g_CameraMan.SetScreenShakeStrength(static_cast<float>(newValue) / 100.0F);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -438,17 +438,9 @@ namespace RTE {
 		GL_CHECK(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BackBuffer32, 0));
 		glViewport(0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
 
-		m_PostProcessShader->Use();
-
 		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
 		//DrawDotGlowEffects();
 		//DrawPostScreenEffects();
-
-		// Reference. Do not remove.
-		//release_bitmap(m_BackBuffer32);
-		//release_bitmap(m_BackBuffer8);
-		// Set blender mode back??
-		//set_trans_blender(128, 128, 128, 128);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

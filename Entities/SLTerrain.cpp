@@ -194,11 +194,6 @@ namespace RTE {
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
 
-		// We want to multithread this, however parallel fors only work on container types
-		// This is sorta ugly, but a necessary evil for now :)
-		std::vector<int> rows(m_MainBitmap->h); // we loop through h first, because we want each thread to have sequential memory that they're touching
-		std::iota(std::begin(rows), std::end(rows), 0);
-
 		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap.
 		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap.
 		std::for_each(std::execution::par_unseq, std::begin(rows), std::end(rows),
@@ -256,7 +251,9 @@ namespace RTE {
 
 					_putpixel(bgLayerTexture, xPos, yPos, bgPixelColor);
 				}
-			});
+				_putpixel(m_BGColorLayer->GetBitmap(), xPos, yPos, bgPixelColor);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -335,20 +332,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAir() {
-		std::vector<int> rows(m_MainBitmap->h); // we loop through h first, because we want each thread to have sequential memory that they're touching
-		std::iota(std::begin(rows), std::end(rows), 0);
+		int width = m_MainBitmap->w;
+		int height = m_MainBitmap->h;
 
-		std::for_each(std::execution::par_unseq, std::begin(rows), std::end(rows),
-			[&](int yPos) {
-				for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
-					int matPixel = _getpixel(m_MainBitmap, xPos, yPos);
-					if (matPixel == MaterialColorKeys::g_MaterialCavity) {
-						_putpixel(m_MainBitmap, xPos, yPos, MaterialColorKeys::g_MaterialAir);
-						matPixel = MaterialColorKeys::g_MaterialAir;
-					}
-					if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), xPos, yPos, ColorKeys::g_MaskColor); }
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				int matPixel = _getpixel(m_MainBitmap, x, y);
+				if (matPixel == MaterialColorKeys::g_MaterialCavity) {
+					_putpixel(m_MainBitmap, x, y, MaterialColorKeys::g_MaterialAir);
+					matPixel = MaterialColorKeys::g_MaterialAir;
 				}
-			});
+				if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), x, y, ColorKeys::g_MaskColor); }
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

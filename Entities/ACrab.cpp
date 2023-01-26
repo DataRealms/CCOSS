@@ -1609,6 +1609,32 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
         }
 
+		// Weight and jetpack energy
+		if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP)) {
+			float mass = GetMass();
+			if (m_JetTimeLeft < 100.0F) {
+				// Draw empty fuel indicator
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else {
+				// Display normal jet icons
+				// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
+				str[0] = mass < 135.0F ? -31 : 
+                         mass < 150.0F ? -30 : 
+                         mass < 165.0F ? -29 : 
+                                         -28;
+				// Do the blinky blink
+				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
+			}
+			str[1] = 0;
+            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
+
+			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+
+            m_HUDStack += -10;
+        }
         // Held-related GUI stuff
 		if (m_pTurret) {
             std::string textString;

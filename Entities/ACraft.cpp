@@ -997,43 +997,39 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
 
     // Draw hud guides for the Exits, depending on whether the doors are open
-    if (m_HatchState == OPEN)// || m_HatchState == OPENING)
-    {
+    if (m_HatchState == OPEN) {
         // Doors open and inventory not empty yet, so show arrows pointing out of the exits since things are still coming out
-        if (!IsInventoryEmpty())
-        {
+        if (!IsInventoryEmpty()) {
             //  --------
             //  |  \  \
             // -+-  |  |
             //  |  /  /
             //  --------
             // Make the dotted lines crawl out of the exit, indicating that things are still coming out
-            if (--m_ExitLinePhase < 0)
+            if (--m_ExitLinePhase < 0) {
                 m_ExitLinePhase = EXITLINESPACING - 1;
+            }
         }
         // Inventory empty and doors open, so show arrows pointing into the exits IF the delay to allow for things to eject away all the way has passed
-        else if (m_ExitTimer.IsPastSimMS(EXITSUCKDELAYMS))
-        {
+        else if (m_ExitTimer.IsPastSimMS(EXITSUCKDELAYMS)) {
             // Make the dotted lines crawl back into the exit, inviting people to jump in
-            if (++m_ExitLinePhase >= EXITLINESPACING)
+            if (++m_ExitLinePhase >= EXITLINESPACING) {
                 m_ExitLinePhase = 0;
+            }
         }
 
-        Vector exitRadius;
-        Vector exitCorner;
-        Vector arrowVec;
         // Draw the actual dotted lines
-        for (std::list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit)
-        {
-            if (exit->CheckIfClear(m_Pos, m_Rotation, 18))
-            {
-                exitRadius = RotateOffset(exit->GetVelocity().GetPerpendicular().SetMagnitude(exit->GetRadius()));
-                exitCorner = m_Pos - targetPos + RotateOffset(exit->GetOffset()) + exitRadius;
-                arrowVec = RotateOffset(exit->GetVelocity().SetMagnitude(exit->GetRange()));
-                g_FrameMan.DrawLine(pTargetBitmap, exitCorner, exitCorner + arrowVec, 120, 120, EXITLINESPACING, m_ExitLinePhase);
-                exitCorner -= exitRadius * 2;
-                g_FrameMan.DrawLine(pTargetBitmap, exitCorner, exitCorner + arrowVec, 120, 120, EXITLINESPACING, m_ExitLinePhase);
+        for (std::list<Exit>::iterator exit = m_Exits.begin(); exit != m_Exits.end(); ++exit) {
+            if (!exit->CheckIfClear(m_Pos, m_Rotation, 18)) {
+                continue;
             }
+
+            Vector exitRadius = RotateOffset(exit->GetVelocity().GetPerpendicular().SetMagnitude(exit->GetRadius()));
+            Vector exitCorner = m_Pos - targetPos + RotateOffset(exit->GetOffset()) + exitRadius;
+            Vector arrowVec = RotateOffset(exit->GetVelocity().SetMagnitude(exit->GetRange()));
+            g_FrameMan.DrawLine(pTargetBitmap, exitCorner, exitCorner + arrowVec, 120, 120, EXITLINESPACING, m_ExitLinePhase);
+            exitCorner -= exitRadius * 2;
+            g_FrameMan.DrawLine(pTargetBitmap, exitCorner, exitCorner + arrowVec, 120, 120, EXITLINESPACING, m_ExitLinePhase);
         }
     }
 }

@@ -2814,26 +2814,61 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
 		Vector drawPos = m_Pos - targetPos;
 
-		// Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-		if (!targetPos.IsZero())
-		{
-			// Spans vertical scene seam
-			int sceneWidth = g_SceneMan.GetSceneWidth();
-			if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth)
-			{
-				if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w)))
-					drawPos.m_X -= sceneWidth;
-				else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w))
-					drawPos.m_X += sceneWidth;
-			}
-			// Spans horizontal scene seam
-			int sceneHeight = g_SceneMan.GetSceneHeight();
-			if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight)
-			{
-				if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h)))
-					drawPos.m_Y -= sceneHeight;
-				else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h))
-					drawPos.m_Y += sceneHeight;
+        // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
+        if (!targetPos.IsZero()) {
+            // Spans vertical scene seam
+            int sceneWidth = g_SceneMan.GetSceneWidth();
+            if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth) {
+                if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w))) {
+                    drawPos.m_X -= sceneWidth;
+                } else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w)) {
+                    drawPos.m_X += sceneWidth;
+                }
+            }
+
+            // Spans horizontal scene seam
+            int sceneHeight = g_SceneMan.GetSceneHeight();
+            if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight) {
+                if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h))) {
+                    drawPos.m_Y -= sceneHeight;
+                } else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h)) {
+                    drawPos.m_Y += sceneHeight;
+                }
+            }
+        }
+
+        // Weight and jetpack energy
+        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
+        {
+            // Draw empty fuel indicator
+            if (m_JetTimeLeft < 100)
+                str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+            // Display normal jet icons
+            else
+            {
+                float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.47F) {
+					str[0] = -31;
+				} else {
+					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
+				}
+				// Do the blinky blink
+				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
+            }
+            // null-terminate
+            str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 9, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+
+            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+
+			m_HUDStack -= 10;
+			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
+				std::string equippedItemsString = (m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
+				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
+				m_HUDStack -= 9;
 			}
 		}
 
@@ -2909,9 +2944,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
             }
-        }
-        else
-        {
+        } else {
             std::snprintf(str, sizeof(str), "NO ARM!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack -= 9;

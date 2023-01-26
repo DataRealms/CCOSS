@@ -675,8 +675,6 @@ namespace RTE {
 		int dotHeight = drawDot ? dot->h : 0;
 		int dotWidth = drawDot ? dot->w : 0;
 
-		//acquire_bitmap(bitmap);
-
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
 
@@ -747,8 +745,6 @@ namespace RTE {
 				skipped = 0;
 			}
 		}
-
-		//release_bitmap(bitmap);
 
 		// Return the end phase state of the skipping
 		return skipped;

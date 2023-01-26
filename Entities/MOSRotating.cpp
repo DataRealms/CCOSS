@@ -779,8 +779,9 @@ bool MOSRotating::OnSink(HitData &hd)
 bool MOSRotating::ParticlePenetration(HitData &hd)
 {
     // Only particles can penetrate.
-    if (!(dynamic_cast<MOPixel *>(hd.Body[HITOR]) || dynamic_cast<MOSParticle *>(hd.Body[HITOR])))
+    if (!(dynamic_cast<MOPixel *>(hd.Body[HITOR]) || dynamic_cast<MOSParticle *>(hd.Body[HITOR]))) {
         return false;
+    }
 
     float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
@@ -796,9 +797,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         int intPos[2], delta[2], delta2[2], increment[2], bounds[2];
         int error, dom, sub, domSteps, subSteps;
         bool inside = false, exited = false, subStepped = false;
-
-        // Lock all bitmaps involved outside the loop.
-        acquire_bitmap(m_aSprite[m_Frame]);
 
         bounds[X] = m_aSprite[m_Frame]->w;
         bounds[Y] = m_aSprite[m_Frame]->h;
@@ -894,8 +892,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             }
             error += delta2[sub];
         }
-        // Unlock all bitmaps involved outside the loop.
-        release_bitmap(m_aSprite[m_Frame]);
 
         if (m_pEntryWound)
         {
@@ -939,12 +935,9 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             hd.ResImpulse[HITEE] -= hd.ResImpulse[HITEE] * (impulseForce / hd.ResImpulse[HITEE].GetMagnitude());
             hd.ResImpulse[HITOR] = -(hd.ResImpulse[HITEE]);
         }
-        // Particle got lodged inside this MOSRotating, so stop it and delete it from scene.
         else
         {
-            // Set the exiting particle's position to where it looks lodged
-//            hd.Body[HITOR]->SetPos(m_Pos - m_SpriteOffset + entryPos);
-//            hd.Body[HITOR]->SetVel(Vector());
+            // Particle got lodged inside this MOSRotating, so stop it and delete it from scene.
             hd.Body[HITOR]->SetToDelete(true);
             hd.Terminate[HITOR] = true;
         }

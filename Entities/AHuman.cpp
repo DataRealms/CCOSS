@@ -3470,7 +3470,7 @@ void AHuman::Update()
 	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
 		bool anyDropped = false;
 		for (Arm *arm : { m_pFGArm, m_pBGArm }) {
-			if (arm && arm->GetHeldDevice()) {
+			if (!anyDropped && arm && arm->GetHeldDevice()) {
 				HeldDevice *heldDevice = arm->GetHeldDevice();
 				arm->RemoveAttachable(heldDevice, true, false);
 
@@ -3784,6 +3784,7 @@ void AHuman::Update()
 			}
         } else {
 			m_pFGArm->ClearHandTargets();
+			m_pFGArm->AddHandTarget("Arm Flail", m_pFGHandGroup->GetLimbPos(m_HFlipped));
         }
     }
 
@@ -3822,6 +3823,7 @@ void AHuman::Update()
 			}
         } else {
 			m_pBGArm->ClearHandTargets();
+			m_pBGArm->AddHandTarget("Arm Flail", m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
 	} else if (HeldDevice *heldDevice = GetEquippedItem()) {
 		heldDevice->SetSupported(false);
@@ -4083,7 +4085,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
     if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
 
     // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
-    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->GetHandHasReachedCurrentTarget()) {
+    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->GetHandHasReachedCurrentTarget() && !GetEquippedBGItem()) {
 		if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && !dynamic_cast<ThrownDevice *>(heldDevice) && !heldDevice->IsReloading() && !heldDevice->IsShield()) {
 			m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
 		}

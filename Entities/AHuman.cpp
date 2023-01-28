@@ -75,7 +75,7 @@ void AHuman::Clear()
 	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
 	m_WaitingToReloadOffhand = false;
-	m_OneHandedReloadAngle = 0.75F;
+	m_OneHandedReloadAngleOffset = -0.4F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
@@ -180,7 +180,7 @@ int AHuman::Create(const AHuman &reference) {
     m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
 	m_WaitingToReloadOffhand = reference.m_WaitingToReloadOffhand;
-	m_OneHandedReloadAngle = reference.m_OneHandedReloadAngle;
+	m_OneHandedReloadAngleOffset = reference.m_OneHandedReloadAngleOffset;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
 	m_ArmSwingRate = reference.m_ArmSwingRate;
@@ -255,8 +255,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_JetReplenishRate;
 	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
 		reader >> m_JetAngleRange;
-	} else if (propName == "OneHandedReloadAngle") {
-		reader >> m_OneHandedReloadAngle;
+	} else if (propName == "OneHandedReloadAngleOffset") {
+		reader >> m_OneHandedReloadAngleOffset;
 	} else if (propName == "FGArmFlailScalar") {
 		reader >> m_FGArmFlailScalar;
 	} else if (propName == "BGArmFlailScalar") {
@@ -360,7 +360,7 @@ int AHuman::Save(Writer &writer) const
 	writer << m_JetReplenishRate;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
-	writer.NewPropertyWithValue("OneHandedReloadAngle", m_OneHandedReloadAngle);
+	writer.NewPropertyWithValue("OneHandedReloadAngle", m_OneHandedReloadAngleOffset);
 	writer.NewProperty("FGArmFlailScalar");
 	writer << m_FGArmFlailScalar;
 	writer.NewProperty("BGArmFlailScalar");
@@ -3861,6 +3861,21 @@ void AHuman::Update()
 		}
 	}
 
+	// Point HeldDevices that are trying to to a one-handed reload towards the one handed reload angle.
+	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
+		if (arm) {
+			if (HeldDevice *heldDevice = arm->GetHeldDevice(); heldDevice && heldDevice->IsReloading() && arm->GetNextHandTargetDescription() == "Reload Offset") {
+				float currentForearmAngle = (arm->GetHandCurrentOffset().GetAbsRadAngle() - (m_HFlipped ? c_PI : 0)) * GetFlipFactor();
+				heldDevice->SetInheritedRotAngleOffset(currentForearmAngle - m_OneHandedReloadAngleOffset);
+			} else if (heldDevice && heldDevice->DoneReloading()) {
+				heldDevice->SetInheritedRotAngleOffset(0);
+				if (arm->GetNextHandTargetDescription() == "Reload Offset") {
+					arm->RemoveNextHandTarget();
+				}
+			}
+		}
+	}
+
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
@@ -3924,18 +3939,6 @@ void AHuman::Update()
 
 	// Add velocity also so the viewpoint moves ahead at high speeds
 	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
-
-	// Point HeldDevices that are trying to to a one-handed reload towards the one handed reload angle.
-	for (Arm *arm : { m_pFGArm, m_pBGArm }) {
-		if (arm && arm->HasAnyHandTargets()) {
-			if (HeldDevice *heldDevice = arm->GetHeldDevice(); heldDevice && heldDevice->IsReloading()) {
-				float currentForearmAngle = (arm->GetHandCurrentOffset().GetAbsRadAngle() - (m_HFlipped ? c_PI : 0)) + (m_OneHandedReloadAngle * GetFlipFactor()) + GetRotAngle();
-				heldDevice->SetRotAngle(currentForearmAngle);
-			} else if (heldDevice && !heldDevice->IsReloading() && arm->GetNextHandTargetDescription() == "Reload Offset") {
-				arm->RemoveNextHandTarget();
-			}
-		}
-	}
 
     /////////////////////////////////////////
     // Gold Chunk inventroy management

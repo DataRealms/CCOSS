@@ -858,11 +858,11 @@ void MovableObject::PreTravel()
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
         m_IsTraveling = true;
-		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 #ifdef DRAW_MOID_LAYER
+		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
-#endif
 		}
+#endif
 	}
 
     // Save previous position and velocities before moving

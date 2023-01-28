@@ -165,10 +165,7 @@ MovableObject * MovableMan::GetMOFromID(MOID whichID) {
 	return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HitTestMOAtPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tests whether this MOID is present at this Pixel Position
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const {
     if (!mo.GetsHitByMOs() || mo.GetRootParent()->GetTraveling()) {
@@ -176,18 +173,16 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
     }
 
     if (const MOSprite *moSprite = dynamic_cast<const MOSprite *>(&mo); moSprite) {
-        // Check if the pixel is nearer than the "maximum sprite radius"
-        Vector sampleToMO = g_SceneMan.ShortestDistance(moSprite->GetPos(), Vector(pixelX, pixelY));
-        if (sampleToMO.MagnitudeIsLessThan(moSprite->GetRadius())) {
-            // Check the scene position in the current local space of the MO
-            // Account for Position, Sprite Offset, Angle and HFlipped (and Scale eventually maybe)
-            Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works
-            Vector entryPos = (sampleToMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
-            int localX = std::floor(entryPos.m_X);
-            int localY = std::floor(entryPos.m_Y);
+        Vector distanceBetweenTestPositionAndMO = g_SceneMan.ShortestDistance(moSprite->GetPos(), Vector(static_cast<float>(pixelX), static_cast<float>(pixelY)));
+        if (distanceBetweenTestPositionAndMO.MagnitudeIsLessThan(moSprite->GetRadius())) {
+            // Check the scene position in the current local space of the MO, accounting for Position, Sprite Offset, Angle and HFlipped.
+			//TODO Account for Scale as well someday, maybe.
+            Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works.
+            Vector entryPos = (distanceBetweenTestPositionAndMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
+            int localX = static_cast<int>(std::floor(entryPos.m_X));
+            int localY = static_cast<int>(std::floor(entryPos.m_Y));
 
-            // Return the MOID if we hit the Sprite
-            BITMAP* sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
+            BITMAP *sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
             return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != g_MaskColor;
         }
     } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
@@ -198,13 +193,10 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
     return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a MOID from pixel coordinates in the Scene.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList) {
-    // Loop through the MOs. We do this in reverse, as we want to collide with the top layer (last drawn)
+    // Note - We loop through the MOs in reverse to make sure that the topmost (last drawn) MO that overlaps the specified coordinates is the one returned.
     for (auto itr = moidList.rbegin(), itrEnd = moidList.rend(); itr < itrEnd; ++itr) {
         MOID moid = *itr;
 
@@ -215,9 +207,10 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
         }
     }
 
-    // If no MO's were found at this location, return g_NoMOID
     return g_NoMOID;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RegisterObject

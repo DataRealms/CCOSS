@@ -15,6 +15,7 @@ namespace RTE {
 		friend class NetworkServer;
 
 	public:
+
 		EntityAllocation(SceneLayerImpl);
 		SerializableOverrideMethods;
 
@@ -203,7 +204,7 @@ namespace RTE {
 		/// <summary>
 		/// Clears our BITMAP.
 		/// </summary>
-		/// <param name="clearTo"> What color to clear the bitmap to</param>
+		/// <param name="clearTo">What color to clear the bitmap to.</param>
 		void ClearBitmap(ColorKeys clearTo);
 
 		/// <summary>
@@ -255,40 +256,33 @@ namespace RTE {
 #pragma endregion
 
 	protected:
+
 #pragma region Drawing Tracking
 		/// <summary>
-		/// Registers an area of the layer to be drawn upon. These areas will be cleared when ClearBitmap is called.
+		/// Registers an area of the SceneLayer to be drawn upon. These areas will be cleared when ClearBitmap is called.
 		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="top"></param>
-		/// <param name="right"></param>
-		/// <param name="bottom"></param>
+		/// <param name="left">The position of the left side of the area to be drawn upon.</param>
+		/// <param name="top">The position of the top of the area to be drawn upon.</param>
+		/// <param name="right">The position of the right side of the area to be drawn upon.</param>
+		/// <param name="bottom"The position of the bottom of the area to be drawn upon.></param>
 		void RegisterDrawing(int left, int top, int right, int bottom);
 
 		/// <summary>
-		/// Registers an area of the layer to be drawn upon. These areas will be cleared when ClearBitmap is called.
+		/// Registers an area of the SceneLayer to be drawn upon. These areas will be cleared when ClearBitmap is called.
 		/// </summary>
-		/// <param name="center"></param>
-		/// <param name="radius"></param>
+		/// <param name="center">The position of the center of the area to be drawn upon.</param>
+		/// <param name="radius">The radius of the area to be drawn upon.</param>
 		void RegisterDrawing(const Vector &center, float radius);
-
-	private:
-		/// <summary>
-		/// Clears any tracked and drawn to areas.
-		/// </summary>
-		/// <param name="clearTo">Color to clear to</param>
-		void ClearDrawings(BITMAP *bitmap, const std::vector<IntRect>& drawings, ColorKeys clearTo);
 #pragma endregion
-
-	protected:
+		
 		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
 
 		// We use two bitmaps, as a backbuffer.
 		// While the main bitmap is being used, the secondary bitmap will be cleared on a seperate thread.
 		// This is because we tend to want to clear some scene layers every frame... and that is costly.
-		std::mutex m_BitmapClearMutex; //!< mutex for clearing bitmap in background
-		ColorKeys m_LastClearColor; //!< The last color we cleared to
-		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on the layer since last clear
+		std::mutex m_BitmapClearMutex; //!< Mutex for clearing bitmap in background.
+		ColorKeys m_LastClearColor; //!< The last color we cleared this SceneLayer to.
+		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on this SceneLayer since the last clear.
 
 		BITMAP *m_MainBitmap; //!< The main BITMAP of this SceneLayer.
 		BITMAP *m_BackBitmap; //!< The backbuffer BITMAP of this SceneLayer.
@@ -340,32 +334,38 @@ namespace RTE {
 		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const;
 #pragma endregion
 
+	private:
+		/// <summary>
+		/// Clears any tracked and drawn to areas.
+		/// </summary>
+		/// <param name="clearTo">Color to clear to.</param>
+		void ClearDrawings(BITMAP *bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo);
+
 		/// <summary>
 		/// Clears all the member variables of this SceneLayer, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		SceneLayerImpl(const SceneLayerImpl&reference) = delete;
-		void operator=(const SceneLayerImpl&rhs) = delete;
+		SceneLayerImpl(const SceneLayerImpl &reference) = delete;
+		void operator=(const SceneLayerImpl &rhs) = delete;
 	};
 
 	// If we track drawings, then disallow getting non-const access to the underlying bitmap - we must draw through special functions on scenelayer that'll track the drawings
 	class SceneLayerTracked : public SceneLayerImpl<true> {
 	public:
 		EntityAllocation(SceneLayerTracked);
-		SerializableOverrideMethods;
 		ClassInfoGetters;
 
 		SceneLayerTracked() : SceneLayerImpl<true>() { }
 
-		// TODO: We shouldn't let external users access a non-const version of our bitmap. We should do all drawing to it internally, and track registering our MOID drawings internally too
+		// TODO: We shouldn't let external users access a non-const version of our bitmap. We should do all drawing to it internally, and track registering our MOID drawings internally too.
 		// However, in the interest of time (and my own sanity), given that the old code already does this, we're not doing that yet.
 		/// <summary>
 		/// Gets the BITMAP that this SceneLayer uses.
 		/// </summary>
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
-		/*const*/ BITMAP* GetBitmap() const { return m_MainBitmap; }
+		BITMAP * GetBitmap() const { return m_MainBitmap; }
 
 		void RegisterDrawing(int left, int top, int right, int bottom);
 		void RegisterDrawing(const Vector& center, float radius);
@@ -377,7 +377,6 @@ namespace RTE {
 	class SceneLayer : public SceneLayerImpl<false> {
 	public:
 		EntityAllocation(SceneLayer);
-		SerializableOverrideMethods;
 		ClassInfoGetters;
 
 		SceneLayer() : SceneLayerImpl<false>() { }
@@ -386,7 +385,7 @@ namespace RTE {
 		/// Gets the BITMAP that this SceneLayer uses.
 		/// </summary>
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
-		BITMAP* GetBitmap() const { return m_MainBitmap; }
+		BITMAP * GetBitmap() const { return m_MainBitmap; }
 
 	protected:
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.

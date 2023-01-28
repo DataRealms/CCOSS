@@ -45,24 +45,6 @@ namespace RTE
 const std::string SceneMan::c_ClassName = "SceneMan";
 std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool IntRect::IntersectionCut(const IntRect &rhs)
-{
-    if (Intersects(rhs))
-    {
-        m_Left = MAX(m_Left, rhs.m_Left);
-        m_Right = MIN(m_Right, rhs.m_Right);
-        m_Top = MAX(m_Top, rhs.m_Top);
-        m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
-        return true;
-    }
-
-    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";
@@ -516,8 +498,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
-    if (pixelX < 0 || pixelX >= m_pMOIDLayer->GetBitmap()->w ||
-        pixelY < 0 || pixelY >= m_pMOIDLayer->GetBitmap()->h) {
+    if (pixelX < 0 || pixelX >= m_pMOIDLayer->GetBitmap()->w || pixelY < 0 || pixelY >= m_pMOIDLayer->GetBitmap()->h) {
         return g_NoMOID;
     }
 
@@ -600,14 +581,12 @@ bool SceneMan::SceneIsLocked() const
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
     if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
         m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
-    }  
-        
-    if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+    } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
 #ifdef DRAW_MOID_LAYER
         m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 #else
         const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-        RTEAssert(mo, "Trying to register a no MOID to the MOID grid! This is not allowed.")
+        RTEAssert(mo, "Trying to register a null MOID to the MOID grid! This is not allowed.")
         IntRect rect(left, top, right, bottom);
         m_MOIDsGrid.Add(rect, *mo);
 #endif
@@ -618,7 +597,7 @@ void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top
 
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius) {
     if (radius != 0.0F) {
-		RegisterDrawing(bitmap, moid, center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+		RegisterDrawing(bitmap, moid, static_cast<int>(std::floor(center.m_X - radius)), static_cast<int>(std::floor(center.m_Y - radius)), static_cast<int>(std::floor(center.m_X + radius)), static_cast<int>(std::floor(center.m_Y + radius)));
 	}
 }
 
@@ -2036,7 +2015,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             hitMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
-#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                 // Check if we're supposed to ignore the team of what we hit
                 if (ignoreTeam != Activity::NoTeam)
                 {
@@ -2272,7 +2251,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 if (pHitMO)
                 {
                     checkMOID = pHitMO->GetRootID();
-#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                     // Check if we're supposed to ignore the team of what we hit
                     if (ignoreTeam != Activity::NoTeam)
                     {

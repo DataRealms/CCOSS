@@ -1124,16 +1124,6 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
 bool Actor::CollideAtPoint(HitData &hd)
 {
     return MOSRotating::CollideAtPoint(hd);
-
-//    if (hd.ResImpulse[HITEE].MagnitudeIsGreaterThan(GetMaterial().strength)) {
-//        m_pParent->
-//    }
-/* Obsolete
-    // Set item as being reached if it collides with us
-    if (hd.Body[HITOR]->IsHeldDevice())
-        m_pItemInReach = dynamic_cast<HeldDevice *>(hd.Body[HITOR]);
-*/
-//    if (Status != ACTIVE)
 }
 
 
@@ -1165,6 +1155,21 @@ bool Actor::ParticlePenetration(HitData &hd) {
 
     return penetrated;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  OnMOHit
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Defines what should happen when this MovableObject hits another MO.
+//                  This is called by the owned Atom/AtomGroup of this MovableObject during
+//                  travel.
+
+bool Actor::OnMOHit(MovableObject *pOtherMO)
+{
+    // Don't terminate, continue travel
+    return false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAIModeIcon

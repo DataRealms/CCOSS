@@ -437,9 +437,9 @@ public:
     MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(pixelX, pixelY, Activity::NoTeam); }
 
     /// <summary>
-    /// Gets this Scene's MOID SpatialPartitioningGrid.
+    /// Gets this Scene's MOID SpatialPartitionGrid.
     /// </summary>
-    /// <returns>This Scene's MOID SpatialPartitioningGrid.</returns>
+    /// <returns>This Scene's MOID SpatialPartitionGrid.</returns>
     const SpatialPartitionGrid & GetMOIDGrid() const { return m_MOIDsGrid; }
 
 

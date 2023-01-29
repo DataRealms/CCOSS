@@ -286,6 +286,7 @@ namespace RTE {
 
 		m_BitmapClearMutex.lock();
 		if (m_LastClearColor != clearTo) {
+			// Note: Having to clear to an unexpected colour here is expensive. We should always aim to clear to the same colour to avoid it as much as possible.
 			clear_to_color(m_BackBitmap, clearTo);
 			m_LastClearColor = clearTo;
 		}

@@ -104,10 +104,10 @@ namespace RTE {
 		Vector topLeft = box.GetCorner();
 		Vector bottomRight = topLeft + Vector(box.GetWidth(), box.GetHeight());
 
-		int topLeftCellX = topLeft.GetFloorIntX() / m_CellSize;
-		int topLeftCellY = topLeft.GetFloorIntY() / m_CellSize;
-		int bottomRightCellX = bottomRight.GetFloorIntX() / m_CellSize;
-		int bottomRightCellY = bottomRight.GetFloorIntY() / m_CellSize;
+		int topLeftCellX = static_cast<int>(std::floorf(topLeft.m_X / static_cast<float>(m_CellSize)));
+		int topLeftCellY = static_cast<int>(std::floorf(topLeft.m_Y / static_cast<float>(m_CellSize)));
+		int bottomRightCellX = static_cast<int>(std::floorf(bottomRight.m_X / static_cast<float>(m_CellSize)));
+		int bottomRightCellY = static_cast<int>(std::floorf(bottomRight.m_Y / static_cast<float>(m_CellSize)));
 
 		// Note - GetCellIdForCellCoords accounts for wrapping automatically, so we don't have to deal with it here.
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
@@ -141,10 +141,10 @@ namespace RTE {
 
 		std::unordered_set<MOID> potentialMOIDs;
 
-		int topLeftCellX = static_cast<int>(centre.m_X - radius) / m_CellSize;
-		int topLeftCellY = static_cast<int>(centre.m_Y - radius) / m_CellSize;
-		int bottomRightCellX = static_cast<int>(centre.m_X + radius) / m_CellSize;
-		int bottomRightCellY = static_cast<int>(centre.m_Y + radius) / m_CellSize;
+		int topLeftCellX = static_cast<int>(std::floorf((centre.m_X - radius) / static_cast<float>(m_CellSize)));
+		int topLeftCellY = static_cast<int>(std::floorf((centre.m_Y - radius) / static_cast<float>(m_CellSize)));
+		int bottomRightCellX = static_cast<int>(std::floorf((centre.m_X + radius) / static_cast<float>(m_CellSize)));
+		int bottomRightCellY = static_cast<int>(std::floorf((centre.m_Y + radius) / static_cast<float>(m_CellSize)));
 
 		// Note - GetCellIdForCellCoords accounts for wrapping automatically, so we don't have to deal with it here.
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {

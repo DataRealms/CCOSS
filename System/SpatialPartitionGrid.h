@@ -51,7 +51,7 @@ namespace RTE {
 		void Reset();
 
 		/// <summary>
-		/// Adds the given MovableObject to this SpatialPartitioningGrid.
+		/// Adds the given MovableObject to this SpatialPartitionGrid.
 		/// </summary>
 		/// <param name="rect">A rectangle defining the space the MovableObject takes up.</param>
 		/// <param name="mo">The MovableObject to add.</param>

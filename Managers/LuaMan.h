@@ -6,7 +6,7 @@
 
 #define g_LuaMan LuaMan::Instance()
 
-class lua_State;
+struct lua_State;
 
 namespace RTE {
 
@@ -210,7 +210,7 @@ namespace RTE {
 		std::recursive_mutex m_Mutex; //!< Mutex to enxure that updates to this lua state are done safely.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 16;
+	static constexpr int c_NumThreadedLuaStates = 256;
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>

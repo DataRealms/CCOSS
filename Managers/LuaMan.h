@@ -210,7 +210,7 @@ namespace RTE {
 		std::recursive_mutex m_Mutex; //!< Mutex to enxure that updates to this lua state are done safely.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 256;
+	static constexpr int c_NumThreadedLuaStates = 2048;
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>

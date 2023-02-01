@@ -195,12 +195,44 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ContentFile::ReloadAllBitmaps() {
+		for (auto& [filePath, oldBitmap] : s_LoadedBitmaps[BitDepths::Eight]) {
+			ReloadBitmap(filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::ReloadBitmap(std::string_view filePath, int conversionMode) {
+		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		auto itr = s_LoadedBitmaps[bitDepth].find(filePath);
+		if (itr == s_LoadedBitmaps[bitDepth].end()) {
+			return;
+		}
+		
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
+		
+		BITMAP *loadedBitmap = (*itr).second;
+		BITMAP* newBitmap = load_bitmap(filePath.c_str(), currentPalette);
+
+		BITMAP swap;
+		std::memcpy(&swap, loadedBitmap, sizeof(BITMAP));
+		std::memcpy(loadedBitmap, newBitmap, sizeof(BITMAP));
+		std::memcpy(newBitmap, &swap, sizeof(BITMAP));
+
+		destroy_bitmap(newBitmap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
 		BITMAP *returnBitmap = nullptr;
-		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		const int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 

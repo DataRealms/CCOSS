@@ -846,6 +846,7 @@ namespace RTE {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {
 				g_PresetMan.ReloadAllScripts();
+				ContentFile::ReloadAllBitmaps();
 			} else if (KeyPressed(KEY_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
 			} else if (KeyPressed(KEY_F4)) {

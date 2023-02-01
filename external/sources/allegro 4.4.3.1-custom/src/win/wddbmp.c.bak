@@ -667,8 +667,8 @@ void gfx_directx_destroy_system_bitmap(BITMAP *bmp)
            return;
       }
 
-      if (bmp->dat)
-        _AL_FREE(bmp->dat);
+      _AL_FREE(bmp->line);
+      _AL_FREE(bmp->dat);
 
       _AL_FREE(bmp);
 

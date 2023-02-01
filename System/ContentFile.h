@@ -136,6 +136,17 @@ namespace RTE {
 
 #pragma region Data Handling
 		/// <summary>
+		/// Reloads all bitmaps, letting you change them at runtime in-game.
+		/// </summary>
+		static void ReloadAllBitmaps();
+
+		/// <summary>
+		/// Reloads a specific bitmap, letting you change them at runtime in-game.
+		/// </summary>
+		static void ReloadBitmap(std::string_view filePath, int conversionMode = 0);
+
+
+		/// <summary>
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
 		/// </summary>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
@@ -172,12 +183,6 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
-		/// <summary>
-		/// Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on this definition.
-		/// </summary>
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
-
 		/// <summary>
 		/// Enumeration for the image file information types that can be stored.
 		/// </summary>

@@ -521,8 +521,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
         m_OwningState = &g_LuaMan.GetRandomThreadedScriptState();
     }
 
-    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
-
 	std::string luaClearSupportedFunctionsString;
 	luaClearSupportedFunctionsString.reserve(160);
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
@@ -596,7 +594,6 @@ int MovableObject::InitializeObjectScripts() {
         m_OwningState = &g_LuaMan.GetRandomThreadedScriptState();
     }
 
-    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
 	m_OwningState->SetTempEntity(this);
 
 	m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
@@ -654,7 +651,6 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     }
 
     if (status >= 0) {
-        std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
         for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
             if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
 				status = m_OwningState->RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
@@ -674,7 +670,6 @@ int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std:
 		return -1;
 	}
 
-	std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
 	for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
 		if (scriptPath == functionObjectWrapper->GetFilePath() && m_OwningState->RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
 			if (m_AllLoadedScripts.size() > 1) {

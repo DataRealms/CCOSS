@@ -1797,6 +1797,12 @@ enum MOType
 	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
 	bool DrawToTerrain(SLTerrain *terrain);
 
+	/// <summary>
+	/// Used to get the Lua state that handles our scripts.
+	/// </summary>
+    /// <returns>Our lua state. Can potentially be nullptr.</returns>
+    LuaStateWrapper* GetLuaState() { return m_OwningState; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

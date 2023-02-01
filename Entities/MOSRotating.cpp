@@ -462,6 +462,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
         woundToAdd->SetParent(this);
         woundToAdd->SetIsWound(true);
         if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
+        woundToAdd->UpdatePositionAndJointPositionBasedOnOffsets(true);
         m_AttachableAndWoundMass += woundToAdd->GetMass();
         m_Wounds.push_back(woundToAdd);
     }
@@ -1589,6 +1590,7 @@ void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffs
         if (g_MovableMan.ValidMO(attachable)) { g_MovableMan.RemoveMO(attachable); }
         attachable->SetParentOffset(parentOffsetToSet);
         attachable->SetParent(this);
+        attachable->UpdatePositionAndJointPositionBasedOnOffsets(true);
         m_AttachableAndWoundMass += attachable->GetMass();
         HandlePotentialRadiusAffectingAttachable(attachable);
         m_Attachables.push_back(attachable);

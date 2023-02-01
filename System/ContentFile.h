@@ -143,8 +143,9 @@ namespace RTE {
 		/// <summary>
 		/// Reloads a specific bitmap, letting you change them at runtime in-game.
 		/// </summary>
-		static void ReloadBitmap(std::string_view filePath, int conversionMode = 0);
-
+		/// <param name="filePath">The filepath to the bitmap we want to reload.</param>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when reloading this bitmap.</param>
+		static void ReloadBitmap(const std::string &filePath, int conversionMode = 0);
 
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!

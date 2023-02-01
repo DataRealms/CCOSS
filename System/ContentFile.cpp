@@ -203,7 +203,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ContentFile::ReloadBitmap(std::string_view filePath, int conversionMode) {
+	void ContentFile::ReloadBitmap(const std::string &filePath, int conversionMode) {
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		auto itr = s_LoadedBitmaps[bitDepth].find(filePath);
 		if (itr == s_LoadedBitmaps[bitDepth].end()) {

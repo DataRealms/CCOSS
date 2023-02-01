@@ -38,13 +38,6 @@ namespace RTE {
 		void Destroy();
 #pragma endregion
 
-#pragma region Thread-Safety
-		/// <summary>
-		/// Get the mutex for this Lua State
-		/// </summary>
-		std::recursive_mutex & GetMutex();
-#pragma endregion
-
 #pragma region Getters and Setters
 		/// <summary>
 		/// Gets a temporary Entity that can be accessed in the Lua state.
@@ -207,10 +200,9 @@ namespace RTE {
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
-		std::recursive_mutex m_Mutex; //!< Mutex to enxure that updates to this lua state are done safely.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 2048;
+	static constexpr int c_NumThreadedLuaStates = 8;
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>

@@ -1798,9 +1798,10 @@ enum MOType
 	bool DrawToTerrain(SLTerrain *terrain);
 
 	/// <summary>
-	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
+	/// Used to get the Lua state that handles our scripts.
 	/// </summary>
-	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
+    /// <returns>Our lua state. Can potentially be nullptr.</returns>
+    LuaStateWrapper* GetLuaState() { return m_OwningState; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

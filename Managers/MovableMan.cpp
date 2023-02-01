@@ -1681,9 +1681,14 @@ void MovableMan::Update()
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-            std::for_each(std::execution::par, m_Actors.begin(), m_Actors.end(), 
-                [](Actor *actor) {
-                    actor->GetController()->Update();
+            auto& luaStates = g_LuaMan.GetThreadedScriptStates();
+            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+                [&](LuaStateWrapper &luaState) {
+                    for (Actor *actor : m_Actors) {
+                        if (actor->GetLuaState() == &luaState) {
+                            actor->GetController()->Update();
+                        }
+                    }
                 });
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 

@@ -1142,7 +1142,6 @@ BITMAP *create_sub_bitmap(BITMAP *parent, int x, int y, int width, int height)
    if (system_driver->create_sub_bitmap)
       return system_driver->create_sub_bitmap(parent, x, y, width, height);
 
-   nr_pointers = MAX(2, height);
    bitmap = _AL_MALLOC(sizeof(BITMAP));
    if (!bitmap)
       return NULL;

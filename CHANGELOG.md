@@ -517,6 +517,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
+- Pressing `F2` now reloads sprites as well as scripts. This allows you to see changes made to sprites immediately in-game.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

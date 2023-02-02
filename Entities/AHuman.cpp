@@ -4510,7 +4510,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 
 				if (pieSlice->GetType() == PieSlice::SliceType::Pickup) {
 					if (m_pFGArm || (m_pBGArm && m_pItemInReach->IsOneHanded())) {
-						pieSlice->SetEnabled(true);
+						pieSlice->SetEnabled(m_Status != INACTIVE);
 						pieSlice->SetDescription("Pick Up " + m_pItemInReach->GetPresetName());
 					} else {
 						pieSlice->SetEnabled(false);
@@ -4520,7 +4520,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 					const HeldDevice *fgHeldDevice = dynamic_cast<const HeldDevice *>(GetEquippedItem());
 					const HeldDevice *bgHeldDevice = dynamic_cast<const HeldDevice *>(GetEquippedBGItem());
 					if (fgHeldDevice || bgHeldDevice) {
-						pieSlice->SetEnabled((fgHeldDevice && !fgHeldDevice->IsFull()) || (bgHeldDevice && !bgHeldDevice->IsFull()));
+						pieSlice->SetEnabled(m_Status != INACTIVE && ((fgHeldDevice && !fgHeldDevice->IsFull()) || (bgHeldDevice && !bgHeldDevice->IsFull())));
 						pieSlice->SetDescription("Reload");
 					} else {
 						pieSlice->SetEnabled(false);
@@ -4530,7 +4530,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 				break;
 			case PieSlice::SliceType::NextItem:
 				if (!IsInventoryEmpty() && m_pFGArm) {
-					pieSlice->SetEnabled(true);
+					pieSlice->SetEnabled(m_Status != INACTIVE);
 					pieSlice->SetDescription("Next Item");
 				} else {
 					pieSlice->SetEnabled(false);
@@ -4539,7 +4539,7 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 				break;
 			case PieSlice::SliceType::PreviousItem:
 				if (!IsInventoryEmpty() && m_pFGArm) {
-					pieSlice->SetEnabled(true);
+					pieSlice->SetEnabled(m_Status != INACTIVE);
 					pieSlice->SetDescription("Prev Item");
 				} else {
 					pieSlice->SetEnabled(false);

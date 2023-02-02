@@ -615,7 +615,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <summary>
 	/// Unequips whatever is in either of the arms and puts them into the inventory.
 	/// </summary>
-	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
+	void UnequipArms() { UnequipBGArm(); UnequipFGArm(); }
 
 	/// <summary>
 	/// Gets the FG Arm's HeldDevice. Ownership is NOT transferred.

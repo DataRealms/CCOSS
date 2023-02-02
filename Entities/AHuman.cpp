@@ -85,7 +85,7 @@ void AHuman::Clear()
 	m_EquipHUDTimer.Reset();
 	m_WalkAngle.fill(Matrix());
 	m_ArmSwingRate = 1.0F;
-	m_DeviceArmSwayRate = m_ArmSwingRate * 0.75F;
+	m_DeviceArmSwayRate = 0.5F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -3841,7 +3841,7 @@ void AHuman::Update()
 	/////////////////////////////////
 	// Arm swinging or device swaying walking animations
 
-	if (m_MoveState == MovementState::WALK && (m_ArmSwingRate > 0 || m_DeviceArmSwayRate > 0)) {
+	if (m_MoveState != MovementState::STAND && (m_ArmSwingRate > 0 || m_DeviceArmSwayRate > 0)) {
 		for (Arm *arm : { m_pFGArm, m_pBGArm }) {
 			if (arm && !arm->GetHeldDeviceThisArmIsTryingToSupport()) {
 				Leg *legToSwingWith = arm == m_pFGArm ? m_pBGLeg : m_pFGLeg;
@@ -3853,11 +3853,7 @@ void AHuman::Update()
 				if (legToSwingWith) {
 					float armMovementRateToUse = m_ArmSwingRate;
 					if (HeldDevice *heldDevice = arm->GetHeldDevice()) {
-						// For device sway, the Leg doesn't matter, but both HeldDevices (if there are 2) need to use the same Arm or it looks silly!
-						if (arm == m_pBGArm && otherLeg) {
-							std::swap(legToSwingWith, otherLeg);
-						}
-						armMovementRateToUse = m_DeviceArmSwayRate * (heldDevice->IsOneHanded() ? 0.5F : 1.0F);
+						armMovementRateToUse = m_DeviceArmSwayRate * (1.0F - m_SharpAimProgress) * std::sin(std::abs(heldDevice->GetStanceOffset().GetAbsRadAngle()));
 					}
 					float angleToSwingTo = std::sin(legToSwingWith->GetRotAngle() + (c_HalfPI * GetFlipFactor()));
 					arm->SetHandIdleRotation(angleToSwingTo * armMovementRateToUse);

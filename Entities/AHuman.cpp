@@ -3617,7 +3617,7 @@ void AHuman::Update()
             // Slightly negative BGArmProg makes sense because any progress on the starting segments are reported as negative,
             // and there's many starting segments on properly formed climbing paths
 			if (climbing) {
-				if (m_pFGArm && !(m_Paths[FGROUND][CLIMB].PathEnded() && BGArmProg > 0.1F)) {	// < 0.5F
+				if (m_pFGArm && !m_pFGArm->GetHeldDevice() && !(m_Paths[FGROUND][CLIMB].PathEnded() && BGArmProg > 0.1F)) {	// < 0.5F
 					m_ArmClimbing[FGROUND] = true;
 					m_Paths[FGROUND][WALK].Terminate();
 					m_StrideStart = true;

@@ -1087,7 +1087,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				}
 				gibParticleClone->SetRotAngle(gibVelocity.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0));
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);
@@ -1120,14 +1120,14 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				// TODO: Figure out how much the magnitude of an offset should affect spread
 				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
 
-				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() > 0 ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
 				}
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);

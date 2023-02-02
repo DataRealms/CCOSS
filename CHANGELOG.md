@@ -712,6 +712,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	SetScroll(center, screenId);
 	```
 
+- `Gib` property `InheritsVel` now works as a `float` scalar from 0 to 1, defining the portion of velocity inherited from the parent object.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

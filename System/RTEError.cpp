@@ -2,6 +2,7 @@
 
 #include "SDL2/SDL_messagebox.h"
 #include "FrameMan.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 
@@ -29,14 +30,15 @@ namespace RTE {
 
 		std::string abortMessage;
 
+		g_ConsoleMan.PrintString(abortMessage);
+		g_ConsoleMan.SaveAllText("AbortLog.txt");
 #ifndef RELEASE_BUILD
 		// Show message box with explanation
-		abortMessage = "Runtime Error in file " + file + ", line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
+		abortMessage = "Runtime Error in file " + file + ", line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp', Console Log has been dumped to 'AbortLog.txt'";
 #else
 		// Shortened and less confusing one. users have no use of knowing which source file and where.
-		abortMessage = description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
+		abortMessage = description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp', Console Log has been dumped to 'AbortLog.txt'";
 #endif
-
 		System::PrintToCLI(abortMessage);
 
 		ShowMessageBox(abortMessage);

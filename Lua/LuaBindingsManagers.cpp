@@ -318,7 +318,8 @@ namespace RTE {
 		.def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
 		.def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
 		.def("AddSceneObject", &SceneMan::AddSceneObject, luabind::adopt(_2))
-		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans);
+		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
+		.def("DislodgePixel", &SceneMan::DislodgePixel);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

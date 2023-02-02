@@ -1044,6 +1044,37 @@ bool SceneMan::TryPenetrate(int posX,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
+
+	unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
+	if (materialID == g_MaterialAir) {
+		return nullptr;
+	}
+	Material const * sceneMat = GetMaterialFromID(materialID);
+	Material const * spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+	Color spawnColor;
+	if (spawnMat->UsesOwnColor()) {
+		spawnColor = spawnMat->GetColor();
+	} else {
+		spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
+	}
+	// No point generating a key-colored MOPixel
+	if (spawnColor.GetIndex() == g_MaskColor) {
+		return nullptr;
+	}
+	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, posY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
+	pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
+	g_MovableMan.AddParticle(pixelMO);
+
+	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+	RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
+	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
+
+	return pixelMO;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void SceneMan::MakeAllUnseen(Vector pixelSize, const int team)
 {
     RTEAssert(m_pCurrentScene, "Messing with scene before the scene exists!");

@@ -208,6 +208,157 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PrimitiveMan:DrawLinePrimitive(player, startPos, endPos, color, thickness)`  
 	Original bindings with no thickness argument are untouched and can be called as they were.
 
+- Added rotation option to Text primitives.  
+	New bindings with argument for rotation are:  
+	`PrimitiveMan:DrawTextPrimitive(pos, text, bool useSmallFont, alignment, rotAngleInRadians)`  
+	`PrimitiveMan:DrawTextPrimitive(player, pos, text, bool useSmallFont, alignment, rotAngleInRadians)`  
+	Original bindings with no rotation argument are untouched and can be called as they were.
+
+- Added option to draw bitmap from file instead of from `MOSPrite` based object to Bitmap primitives.  
+	New bindings with argument for file path are:  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, filePath, rotAngleInRadians)`  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, filePath, rotAngleInRadians, hFlipped, vFlipped)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, filePath, rotAngleInRadians)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, filePath, rotAngleInRadians, hFlipped, vFlipped)`  
+	Note that the `frame` argument does not exist in these bindings.  
+	Original bindings with no filepath argument are untouched and can be called as they were.
+
+- Added new primitive drawing functions to `PrimitiveMan`:  
+	```lua
+	-- Polygon
+	PrimitiveMan:DrawPolygonPrimitive(Vector startPos, color, { Vector vertexRelPos, ... })
+	PrimitiveMan:DrawPolygonPrimitive(player, Vector startPos, { Vector vertexRelPos, ... })
+
+	PrimitiveMan:DrawPolygonFillPrimitive(Vector startPos, color, { Vector vertexRelPos, ... })
+	PrimitiveMan:DrawPolygonFillPrimitive(player, Vector startPos, { Vector vertexRelPos, ... })
+	```
+	The vertices table contains `Vector`s with the position of each vertex of the polygon **RELATIVE** to the starting position. The starting position will be automatically added to each vertex position, doing so manually will lead to unexpected results.  
+	A minimum of 2 vertices (which would result in a line) are required to draw a polygon primitive. A console error will be printed and drawing will be skipped if less are provided.  
+	There may be a limit for the number of vertices in `PolygonFillPrimitive` because it has different handling but it was not reached during testing.
+
+	The order of vertices is of high importance. Bad ordering will lead to unexpected results.  
+	For example: `{ Vector(10, 0), Vector(10, 10), Vector(0, 10), Vector(0, 0) }` will result in a square, while `{ Vector(10, 0), Vector(0, 10), Vector(10, 10), Vector(0, 0) }` will result in an hourglass shape.  
+	Note that **all** vertices of the shape must be specified, as the last vertex will be connected to the first vertex and not to the starting position (whether it is used as center or as a corner) to complete the shape.  
+	Omitting the last `Vector(0, 0)` in the above example would result in a right angle triangle.
+
+	**The `Vector`s in the vertices table are single use! They will be deleted after being drawn, so they cannot be re-used!**
+
+	Usage example:
+	```lua
+	local myVertices = {
+		Vector(10, 0),
+		Vector(10, 10),
+		Vector(0, 10),
+		Vector(0, 0)
+	};
+	PrimitiveMan:DrawPolygonPrimitive(self.Pos, 13, myVertices);
+
+	-- myVertices no longer contains valid Vectors for this call, they were deleted after being drawn by the previous call.
+	PrimitiveMan:DrawPolygonFillPrimitive(self.Pos, 13, {
+		Vector(10, 0),
+		Vector(10, 10),
+		Vector(0, 10),
+		Vector(0, 0)
+	});
+	```
+
+- Added blended drawing functions to `PrimitiveMan`:  
+	There are 10 blending modes available to produce different color and transparency effects for both true primitives and bitmap based primitives.  
+	Blended drawing effects are not the same as post-processing (glows), as they are all drawn in indexed color mode and will produce widely different results.
+
+	**Note that blended drawing is very expensive and chugs FPS like no tomorrow. It should not be abused!**
+
+	There are 3 blended drawing function overloads:
+
+	* `PrimitiveMan:DrawPrimitives(blendMode, blendAmountR, blendAmountG, blendAmountB, blendAmountA, { primitiveObj, ... })`  
+	This is the fully fledged blended drawing function which allows individual control over each color channel blend amount.  
+	Blend amounts are in percentages, where 0 means no blending and 100 means full blending (e.g. `blendAmountA = 100` will result in a fully transparent primitive, as if it was not drawn at all).  
+	The blend mode and amounts will be applied to all the primitives in the primitive table.  
+	Note that blend amounts are internally rounded to multiples of 5 (e.g. 32 will round to 30, 33 will round to 35) to reduce memory usage and because smaller steps are hardly noticeable.
+	
+	* `PrimitiveMan:DrawPrimitives(blendMode, blendAmountRGBA, { primitiveObj, ... })`  
+	This overload allows selecting a blend mode and applies the blend amount to all color channels at once.  
+	This overload is for convenience when using certain modes (e.g. `Invert` and `Dissolve`). See blend mode specifics further below.
+	
+	* `PrimitiveMan:DrawPrimitives(transBlendAmount, { primitiveObj, ... })`  
+	This overload uses the transparency blending mode and applies the blend amount to all color channels at once.  
+	Transparency blending is likely to be the most commonly used mode so this exists for convenience.
+
+	The blending modes are defined in the new `DrawBlendMode` enum as follows:
+	```
+	(0)  NoBlend
+	(1)  Burn
+	(2)  Color
+	(3)  Difference
+	(4)  Dissolve
+	(5)  Dodge
+	(6)  Invert
+	(7)  Luminance
+	(8)  Multiply
+	(9)  Saturation
+	(10) Screen
+	(11) Transparency
+	(12) BlendModeCount
+	```
+	The blending modes are common and information on what the result of each is can be found with a quick search.
+
+	Some blend mode specifics:
+	* `Invert` and `Dissolve` modes only use alpha channel blend amount. RGB channels blend amounts are ignored in these modes.  
+	* `Transparency` mode ignores alpha channel blend amount. Only RGB channels blend amounts are used in this mode.  
+	* Some trial and error is expected to produce desired results in other modes.
+
+	The primitives table must be filled with `GraphicalPrimitive` objects. For this the constructors for all the supported primitives have been exposed:
+	```lua
+	LinePrimitive(player, startPos, endPos, color)
+	ArcPrimitive(player, centerPos, startAngle, endAngle, radius, thickness, color)
+	SplinePrimitive(player, startPos, guideA, guideB, endPos, color)
+	BoxPrimitive(player, topLeftPos, bottomRightPos, color)
+	BoxFillPrimitive(player, topLeftPos, bottomRightPos, color)
+	RoundedBoxPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)
+	RoundedBoxFillPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)
+	CirclePrimitive(player, centerPos, radius, color)
+	CircleFillPrimitive(player, centerPos, radius, color)
+	EllipsePrimitive(player, centerPos, horizRadius, vertRadius, color)
+	EllipseFillPrimitive(player, centerPos, horizRadius, vertRadius, color)
+	TrianglePrimitive(player, pointA, pointB, pointC, color)
+	TriangleFillPrimitive(player, pointA, pointB, pointC, color)
+	TextPrimitive(player, pos, text, useSmallFont, alignment, rotAngle)
+	BitmapPrimitive(player, centerPos, moSprite, rotAngle, frame, hFlipped, vFlipped)
+	BitmapPrimitive(player, centerPos, filePath, rotAngle, hFlipped, vFlipped)
+	```
+	Note that `PolygonPrimitive`, `IconPrimitive` and `LinePrimitive` with thickness do not support blended drawing.
+
+	**The `GraphicalPrimitive`s in the primitives table are single use! They will be deleted after being drawn, so they cannot be re-used!**
+
+	Usage example:
+	```lua
+	local myPrimitives = {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, 0), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, 0), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	};
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.Screen, 50, 0, 50, 0, myPrimitives);
+
+	-- myPrimitives no longer contains valid primitives for this call, they were deleted after being drawn by the previous call.
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.Dissolve, 50, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -100), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -100), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+
+	PrimitiveMan:DrawPrimitives(50, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -200), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -200), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+
+	-- NoBlend will draw the primitives without any blending mode (solid mode). Any color channel blend amounts are ignored.
+	PrimitiveMan:DrawPrimitives(DrawBlendMode.NoBlend, 0, 0, 0, 0, {
+		CircleFillPrimitive(-1, self.Pos + Vector(-100, -300), 20, 13),
+		BitmapPrimitive(-1, self.Pos + Vector(100, -300), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false)
+	});
+	-- It is equivalent to calling the individual draw functions like so:
+	-- PrimitiveMan:DrawCircleFillPrimitive(-1, self.Pos + Vector(-100, -200), 20, 13);
+	-- PrimitiveMan:DrawBitmapPrimitive(-1, self.Pos + Vector(100, -200), "Base.rte/Craft/Rockets/MK2/RocketMK2000.png", 0, false, false);
+	```
+
 - New `Vector` Lua (R/O) property `SqrMagnitude` which returns the squared magnitude of the `Vector`.  
 	Should be used for more efficient comparison with `vector.SqrMagnitude > (floatValue * floatValue)` over `vector.Magnitude > floatValue`.
 
@@ -308,7 +459,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	When UPS is capped at the target, FPS will be greater than UPS because there is enough time to perform multiple draws before it is time for the next sim update.  
 	Results will obviously vary depending on system performance.
 
-- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.
+- Added `LuaMan` Lua functions `GetDirectoryList(pathToGetDirectoryNamesIn)` and `GetFileList(pathToGetFileNamesIn)`, that get the names of all directories or files at the specified file path.  
+
+- Added a new Lua scripted function for `Actor`s: `OnControllerInputModeChange(self, previousControllerMode, previousControllingPlayer)` that triggers when an `Actor`'s `Controller`'s input state changes (between AI/Player/Network control etc). This provides a script hook that fires when a player starts/stops controlling an `Actor`.
 
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
@@ -321,11 +474,56 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
+- Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
+	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+
+	New `Settings.ini` screen-shake properties:  
+	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
+	`ScreenShakeDecay` - how quickly screen shake falls off.  
+	`MaxScreenShakeTime` - the amount of screen shake time, i.e. the maximum number of seconds screen shake will happen until ScreenShakeDecay reduces it to zero.  
+	`DefaultShakePerUnitOfGibEnergy` - how much the screen should shake per unit of energy from gibbing (i.e explosions), when the screen shake amount is auto-calculated.  
+	`DefaultShakePerUnitOfRecoilEnergy` - how much the screen should shake per unit of energy for recoil, when the screen shake amount is auto-calculated.  
+	`DefaultShakeFromRecoilMaximum` - the maximum amount of screen shake recoil can cause, when the screen shake amount is auto-calculated. This is ignored by per-firearm shake settings.
+
+- Added new Lua manager `CameraMan`, to handle camera movement.
+	New Lua functions on CameraMan:
+	```lua
+	AddScreenShake(screenShakeAmount, screen); -- Can be used to shake a particular screen.
+	AddScreenShake(screenShakeAmount, position); -- Applies screenshake at a position in the game world. All screens looking near this position will have their screen shaken.
+	```
+	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
+
 - Added alternative `Actor` Lua function `RemoveInventoryItem(moduleName, presetName)`, that lets you specify the module and preset name of the inventory item, instead of just the preset name.
 
 - Added alternative `AHuman` Lua function `EquipNamedDevice(moduleName, presetName, doEquip)`, that lets you specify the module and preset name of the `HeldDevice` to equip, instead of just the preset name.
 
 - Added Lua access (R/W) to `Attachable` property `DeleteWhenRemovedFromParent`, which determines whether the given `Attachable` should delete itself when it's removed from its current parent.
+
+- Added Lua convenience function `RoundToNearestMultiple(num, multiple)` which returns a number rounded to the nearest specified multiple.  
+	Note that this operates on integers, so fractional parts will be truncated towards zero by type conversion.
+
+- Added `AHuman` INI and Lua (R/W) property `DeviceArmSwayRate`, that defines how much `HeldDevices` will sway when walking. 0 is no sway, 1 directly couples sway with leg movement, >1 may be funny. Defaults to 0.75.
+
+- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`. A non-zero value is reqiured for `OneHandedReloadAngle` to be used.
+
+- Added `AHuman` INI and Lua (R/W) property `OneHandedReloadAngleOffset`, that defines the angle in radians that should be added to `HeldDevice`s when reloading with only one hand (i.e. the `HeldDevice` is one-handed, or the `AHuman` no longer has their bg`Arm`), in addition to the `Arm`'s rotation. Note that this will only be used if the `AHuman` has a non-zero `ReloadOffset`.
+
+- Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
+
+- Added `AHuman` Lua function `ReloadFirearms(onlyReloadEmptyFirearms)`. This behaves the same as the pre-existing `ReloadFirearms` function, but if the parameter is set to true, only `HDFirearms` that are empty will be reloaded.
+
+- Added `AHuman` Lua property (R/W) `UpperBodyState`, that lets you get and set the `AHuman`'s `UpperBodyState`. If you don't know what this does, you probably don't need or want it.
+
+- Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
+
+- Added `HeldDevice` INI and Lua (R/W) property `OneHandedReloadTimeMultiplier`, that determines how much faster or slower an `HeldDevice` is when reloading one-handed (i.e. if it's one-handed and the other `Arm` is missing, or is holding something).
+
+- Added `HeldDevice` INI and Lua (R/W) property `Supportable`, that determines whether or not a `HeldDevice` can be supported by a background `Arm`.
+
+- Added `Timer` Lua function `GetSimTimeLimitMS()` that gets the sim time limit of the `Timer` in milliseconds.
+
+- Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
 </details>
 
@@ -453,9 +651,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 				CopyOf = Thing // Over-indented. Will crash.
 	```
 
-- Indentation in INI with space characters in multiples of 4 will no longer crash during loading and instead create a warning entry with the file name and line in the non-fatal loading error log.  
-	Space characters **not** in multiples of 4 will crash with a more informative message.
-
 - Improve accuracy of the `MSPF` measurement in performance stats, which also improves the accuracy of the `FPS` measurement.  
 	The `MSPF` measurement now displays 3 values:  
 	`Frame` (previously `MSPF`) - The total frame time (game loop iteration), in milliseconds.  
@@ -465,6 +660,53 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Advanced performance stats (graphs) will now scale to `RealToSimCap`.
 
 - The keyboard shortcut for clearing the console is now `F10`, since `F5` is used for quick-saving (`F9` quick-loads).
+
+- `BitmapPrimitive` drawing functions now accept `MOSprite` instead of `Entity` for the object they get the bitmap to draw from.  
+	This changes nothing regarding the bindings, but will now print an error to the console when attempting to draw a non-`MOSprite` based object (e.g. `MOPixel`), instead of silently skipping it.
+
+- Unless set to dual-reload, one-handed `HDFirearms` will now reload one-at-a-time. To maintain this behaviour in Lua scripts, it is recommend to use `AHuman:ReloadFirearms()` instead of reloading `HeldDevices` directly, as the latter will ignore restrictions.
+
+- Made a lot of changes to `Arms` - they can now only hold `HeldDevices` (and subclasses like `HDFirearms` and `ThrownDevices`), and `AHumans` have a lot of `Arm` animations, including sway when walking and holding something, smoother `Arm` movement and reload animations.  
+	They now have the following INI properties:  
+	```
+	MaxLength - The max length of the Arm in pixels.
+	MoveSpeed - How quickly the Arm moves between targets. 0 means no movement, 1 means instant movement.
+	HandDefaultIdleOffset - The idle offset this Arm will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
+	HandSprite - The sprite file for this Arm's hand. Hand is also allowed for compatibility.
+	GripStrength - The Arm's grip strength when holding HeldDevices. Further described below, in the entry where it was added.
+	ThrowStrength - The Arm's throw strength when throwing ThrownDevices. Further described below, in the entry where it was added.
+	HeldDevice - Allows you to set the HeldDevice attached to this Arm.
+	```
+	They now have the following Lua properties and functions:  
+	**`MaxLength`** (R) - Allows getting the `Arm`'s maximum length.  
+	**`MoveSpeed`** (R/W) - Allows getting and setting the `Arm`'s movement speed. 0 means no movement, 1 means instant movement.  
+	**`HandDefaultIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
+	**`HandCurrentPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
+	**`HasAnyHandTargets`** (R) - Gets whether or not this `Arm` has any hand targets, i.e. any positions the `Arm` is supposed to try to move its hand to.  
+	**`NumberOfHandTargets`** (R) - Gets the number of hand targets this `Arm` has.  
+	**`NextHandTargetDescription`** (R/W) - Gets the description of the next target this `Arm`'s hand is moving to, or an empty string if there are no targets.  
+	**`NextHandTargetPosition`** (R/W) - Gets the position of the next target this `Arm`'s hand is moving to, or `Vector(0, 0)` if there are no targets.  
+	**`HandHasReachedCurrentTarget`** (R) - Gets whether or not this `Arm`'s hand has reached its current target. This may not be reliably accessible from Lua since it can often get reset before being read from Lua, if the target has no delay. Note that this will be true if there are no targets but that hand has reached its appropriate idle offset.  
+	**`GripStrength`** (R/W) - Gets and sets the `Arm`'s grip strength when holding `HeldDevices`. Further described below, in the entry where it was added.  
+	**`ThrowStrength`** (R/W) - Gets and sets the `Arm`'s throw strength when throwing `ThrownDevices`. Further described below, in the entry where it was added.  
+	**`HeldDevice`** (R/W) - Gets and sets the `HeldDevice` held by this `Arm`.  
+	**`SupportedHeldDevice`** (R) - Gets the `HeldDevice` this `Arm` is supporting. For obvious reasons, this will be empty if this is not the BG `Arm` or if it has a `HeldDevice` of its own.  
+	**`AddHandTarget(description, positionOnScene)`**  - Adds a target for this `Arm`'s hand to move to. The target goes to the back of the queue, allowing for multiple animations to be added in succession. The description is arbitrary, but useful for identification, and if the target being added has the same description as the target at the end of the queue, they will be merged to avoid duplication.  
+	**`AddHandTarget(description, positionOnScene, delayAtTarget)`**  - Adds a target for this `Arm`'s hand to move to as above, but the hand will wait at the target for the specified amount of time.  
+	**`RemoveNextHandTarget()`**  - Removes the next hand target from the queue, if there are any.  
+	**`ClearHandTargets()`**  - Empties the queue of hand targets. Once the queue is empty, the hand will move towards its appropriate idle offset.
+
+- The following `SceneMan` functions have been moved to `CameraMan`:
+	```lua
+	SetOffset(offsetVector, screenId);
+	GetScreenOcclusion(screenId);
+	SetScreenOcclusion(occlusionVector, screenId);
+	GetScrollTarget(screenId);
+	SetScrollTarget(targetPosition, screenId);
+	TargetDistanceScalar(point);
+	CheckOffset(screenId);
+	SetScroll(center, screenId);
+	```
 
 </details>
 
@@ -499,6 +741,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Removed `Activity` Lua function `EnteredOrbit`. This tells the `Activity` to consider an `ACraft` as having entered orbit, and should never actually have been accessible to Lua.
 
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
+
+- Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
 
 </details>
 

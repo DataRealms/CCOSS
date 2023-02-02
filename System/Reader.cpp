@@ -265,16 +265,7 @@ namespace RTE {
 
 		// This precaution enables us to use DiscardEmptySpace repeatedly without messing up the indentation tracking logic
 		if (discardedLine) {
-			if (leadingSpaceCount > 0) {
-				if (leadingSpaceCount % c_TabSizeInSpaces != 0) {
-					ReportError("Encountered invalid number of space characters used for indentation where a tab character was expected!\nPlease make sure the preset definition structure is correct.\n");
-				} else {
-					for (int i = leadingSpaceCount; i > 0; i -= c_TabSizeInSpaces) {
-						indent++;
-					}
-					g_ConsoleMan.AddLoadWarningLogIndentationFormatEntry(m_FilePath + " at line " + std::to_string(m_CurrentLine), leadingSpaceCount);
-				}
-			}
+			if (leadingSpaceCount > 0) { ReportError("Encountered space characters used for indentation where a tab character was expected!\nPlease make sure the preset definition structure is correct.\n"); }
 			// Get indentation difference from the last line of the last call to DiscardEmptySpace(), and the last line of this call to DiscardEmptySpace().
 			m_IndentDifference = indent - m_PreviousIndent;
 			if (m_IndentDifference > 1) { ReportError("Over indentation detected!\nPlease make sure the preset definition structure is correct.\n"); }

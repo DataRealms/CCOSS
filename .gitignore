@@ -13,6 +13,8 @@ compile_commands.json
 
 /build*
 
+/enc_temp_folder
+
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug
 /NATPunchServer/Server/NATCompleteServer/Release

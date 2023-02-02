@@ -1,3 +1,5 @@
+// Make sure that binding definition files are always set to NOT use pre-compiled headers and conformance mode (/permissive) otherwise everything will be on fire!
+
 #include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {
@@ -152,6 +154,7 @@ namespace RTE {
 		.def("AlternateReal", &Timer::AlternateReal)
 		.def("GetSimTimeLimitMS", &Timer::GetSimTimeLimitMS)
 		.def("SetSimTimeLimitMS", &Timer::SetSimTimeLimitMS)
+		.def("GetSimTimeLimitS", &Timer::GetSimTimeLimitS)
 		.def("SetSimTimeLimitS", &Timer::SetSimTimeLimitS)
 		.def("IsPastSimTimeLimit", &Timer::IsPastSimTimeLimit)
 		.def("LeftTillSimTimeLimitMS", &Timer::LeftTillSimTimeLimitMS)

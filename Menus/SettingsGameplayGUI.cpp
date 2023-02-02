@@ -1,6 +1,7 @@
 #include "SettingsGameplayGUI.h"
 #include "SettingsMan.h"
 #include "MovableMan.h"
+#include "CameraMan.h"
 
 #include "GUI.h"
 #include "GUICollectionBox.h"
@@ -61,6 +62,18 @@ namespace RTE {
 
 		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxAlwaysShowUnheldItemsInStrategicMode"));
 		m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->SetCheck(g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode());
+
+		m_ScreenShakeStrengthSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderScreenShakeStrength"));
+		int screenShakeStrengthValue = static_cast<int>(g_CameraMan.GetScreenShakeStrength() * 100.0F);
+		if (screenShakeStrengthValue == 0) {
+			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMinimum());
+		} else if (screenShakeStrengthValue <= -1) {
+			m_ScreenShakeStrengthSlider->SetValue(m_ScreenShakeStrengthSlider->GetMaximum());
+		} else {
+			m_ScreenShakeStrengthSlider->SetValue(static_cast<int>(g_CameraMan.GetScreenShakeStrength() * 100.0F));
+		}
+		m_ScreenShakeStrengthLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelScreenShakeStrengthValue"));
+		UpdateScreenShakeStrength();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +123,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsGameplayGUI::UpdateScreenShakeStrength() {
+		int newValue = m_ScreenShakeStrengthSlider->GetValue();
+		m_ScreenShakeStrengthLabel->SetText(std::to_string(newValue) + "%");
+		g_CameraMan.SetScreenShakeStrength(static_cast<float>(newValue) / 100.0F);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsGameplayGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Notification) {
 			if (guiEvent.GetControl() == m_FlashOnBrainDamageCheckbox) {
@@ -132,6 +153,8 @@ namespace RTE {
 				UpdateCrabBombThresholdTextbox();
 			} else if (guiEvent.GetControl() == m_UnheldItemsHUDDisplayRangeSlider) {
 				UpdateUnheldItemsHUDDisplayRange();
+			} else if (guiEvent.GetControl() == m_ScreenShakeStrengthSlider) {
+				UpdateScreenShakeStrength();
 			} else if (guiEvent.GetControl() == m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox) {
 				g_SettingsMan.SetAlwaysDisplayUnheldItemsInStrategicMode(m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox->GetCheck());
 			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input.

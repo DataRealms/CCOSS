@@ -81,7 +81,11 @@ namespace RTE {
 				m_Direction = c_DirectionNameToDirectionsMap.find(directionString)->second;
 			} else {
 				try {
-					m_Direction = static_cast<Directions>(std::stoi(directionString));
+					int direction = std::stoi(directionString);
+					if (direction < Directions::None || direction > Directions::Any) {
+						reader.ReportError("Direction " + directionString + " is invalid (Out of Bounds).");
+					}
+					m_Direction = static_cast<Directions>(direction);
 				} catch (const std::invalid_argument &) {
 					reader.ReportError("Direction " + directionString + " is invalid.");
 				}

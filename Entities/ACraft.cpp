@@ -601,8 +601,9 @@ void ACraft::CloseHatch()
         m_HatchTimer.Reset();
 
         // When closing, move all newly added inventory to the regular inventory list so it'll be ejected next time doors open
-        for (std::deque<MovableObject *>::const_iterator niItr = m_CollectedInventory.begin(); niItr != m_CollectedInventory.end(); ++niItr)
-            m_Inventory.push_back(*niItr);
+        for (std::deque<MovableObject *>::const_iterator niItr = m_CollectedInventory.begin(); niItr != m_CollectedInventory.end(); ++niItr) {
+            AddToInventoryBack(*niItr);
+        }
 
         // Clear the new inventory hold, it's all been moved to the regular inventory
         m_CollectedInventory.clear();
@@ -630,7 +631,7 @@ void ACraft::AddInventoryItem(MovableObject *pItemToAdd)
             m_CollectedInventory.push_back(pItemToAdd);
         // If doors are already closed, it's safe to put the item directly the regular inventory
         else
-            m_Inventory.push_back(pItemToAdd);
+            AddToInventoryBack(pItemToAdd);
     }
 }
 
@@ -988,9 +989,6 @@ void ACraft::Update()
 void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -1002,6 +1000,10 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+
+	if (!m_HUDVisible) {
+		return;
+	}
 
     GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();

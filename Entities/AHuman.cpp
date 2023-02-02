@@ -3786,7 +3786,7 @@ void AHuman::Update()
             if (m_ArmClimbing[FGROUND]) {
                 m_pFGArm->AddHandTarget("Hand AtomGroup Limb Pos", m_pFGHandGroup->GetLimbPos(m_HFlipped));
 			}
-        } else {
+        } else if (!m_pFGArm->GetHeldDevice()) {
 			m_pFGArm->ClearHandTargets();
 			m_pFGArm->AddHandTarget("Arm Flail", m_pFGHandGroup->GetLimbPos(m_HFlipped));
         }

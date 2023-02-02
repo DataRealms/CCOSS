@@ -589,7 +589,7 @@ namespace RTE {
 
 		if (m_EnabledState != EnabledState::Disabled) {
 			if (m_DrawBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
-				g_FrameMan.SetTransTable(MoreTrans);
+				g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
 				draw_trans_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);
 			} else {
 				draw_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);

@@ -229,19 +229,17 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
     void SetDeactivationDelay(int delay) { m_DeactivationDelay = delay; };
 
-
-
 	/// <summary>
-	/// Gets how long this HDFirearm takes to reload. Used for HDFirearms.
+	/// Gets how long this HDFirearm takes to reload, in milliseconds.
 	/// </summary>
-	/// <returns>How long this HeldDevice takes to reload.</returns>
-	float GetReloadTime() const { return m_ReloadTmr.GetSimTimeLimitMS() <= 0 ? m_ReloadTime : m_ReloadTmr.GetSimTimeLimitMS(); };
+	/// <returns>How long this HeldDevice takes to reload, in milliseconds.</returns>
+	int GetReloadTime() const { return m_ReloadTmr.GetSimTimeLimitMS() <= 0 ? m_ReloadTime : static_cast<int>(std::floor(m_ReloadTmr.GetSimTimeLimitMS())); };
 
     /// <summary>
-    /// Sets how long this HDFirearm takes to reload.
+    /// Sets how long this HDFirearm takes to reload, in milliseconds.
     /// </summary>
-    /// <param name="delay">How long this HDFirearm should take to reload.</param>
-    void SetReloadTime(int newReloadTime) { m_ReloadTime = newReloadTime; };
+    /// <param name="delay">How long this HDFirearm should take to reload, in milliseconds.</param>
+	void SetReloadTime(int newReloadTime) { m_ReloadTime = newReloadTime; CorrectReloadTimerForSupportAvailable(); };
 
 	/// <summary>
 	/// Gets whether or not this HDFirearm allows dual-reload, i.e. if it's one-handed and dual-wieldable, it can reload at the same time as another weapon that also allows dual-reload.
@@ -636,10 +634,10 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Throws out the currently used Magazine, if any, and puts in a new one
 //                  after the reload delay is up.
-// Arguments:       Whether or not this is being reloaded one-handed.
+// Arguments:       None.
 // Return value:    None.
 
-	void Reload(bool isBeingReloadedOneHanded) override;
+	void Reload() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -940,6 +938,11 @@ protected:
 
 private:
 
+
+	/// <summary>
+	/// Ensures the reload Timer's time limit is set accordingly, based on whether the HDFirearm has support available.
+	/// </summary>
+	void CorrectReloadTimerForSupportAvailable() { m_ReloadTmr.SetSimTimeLimitMS(static_cast<double>(static_cast<float>(m_ReloadTime) * (m_SupportAvailable ? 1.0F : m_OneHandedReloadTimeMultiplier))); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

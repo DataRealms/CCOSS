@@ -1345,7 +1345,7 @@ namespace RTE {
 		g_SceneMan.WrapRect(IntRect(drawPos.GetFloorIntX(), drawPos.GetFloorIntY(), drawPos.GetFloorIntX() + m_CarouselBitmap->w, drawPos.GetFloorIntY() + m_CarouselBitmap->h), wrappedRectangles);
 		for (const IntRect &wrappedRectangle : wrappedRectangles) {
 			if (m_CarouselBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
-				g_FrameMan.SetTransTable(MoreTrans);
+				g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
 				draw_trans_sprite(targetBitmap, m_CarouselBGBitmap.get(), wrappedRectangle.m_Left - m_CarouselBGBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBGBitmap->h / 2);
 				draw_sprite(targetBitmap, m_CarouselBitmap.get(), wrappedRectangle.m_Left - m_CarouselBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBitmap->h / 2);
 			} else {

@@ -248,23 +248,41 @@ ClassInfoGetters;
 
     void SetSharpLength(float newLength) { m_MaxSharpLength = newLength; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice can be supported when held.
+	/// </summary>
+	/// <returns>Whether this HeldDevice can be supported when held.</returns>
+	bool IsSupportable() const { return m_Supportable; }
 
 	/// <summary>
-	/// Gets whether this HeldDevice is currently supported by a second hand.
+	/// Sets whether this HeldDevice can be supported when held.
 	/// </summary>
-	/// <returns>Whether the device is supported or not.</returns>
-	bool GetSupported() const { return m_Supported; }
+	/// <param name="shouldBeSupportable">Whether this HeldDevice can be supported when held.</param>
+	void SetSupportable(bool shouldBeSupportable) { m_Supportable = shouldBeSupportable; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice is currently supported by a second Arm.
+	/// </summary>
+	/// <returns>Whether this HeldDevice is supported or not.</returns>
+	bool GetSupported() const { return m_Supportable && m_Supported; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSupported
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this HeldDevice is currently supported by a second hand
-//                  or not.
-// Arguments:       If it should be supported or not.
-// Return value:    None.
+    /// <summary>
+    /// Sets whether this HeldDevice is currently supported by a second Arm.
+    /// </summary>
+	/// <param name="supported">Whether this HeldDevice is being supported.</param>
+    void SetSupported(bool supported) { m_Supported = m_Supportable && supported; }
 
-    void SetSupported(bool supported) { m_Supported = supported; }
+	/// <summary>
+	/// Gets whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
+	/// </summary>
+	/// <returns>Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</returns>
+	bool GetSupportAvailable() const { return m_Supportable && m_SupportAvailable; }
+
+	/// <summary>
+	/// Sets whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
+	/// </summary>
+	/// <param name="supported">Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</param>
+	void SetSupportAvailable(bool supportAvailable) { m_SupportAvailable = m_Supportable && supportAvailable; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -461,10 +479,10 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Throws out the currently used Magazine, if any, and puts in a new one
 //                  after the reload delay is up.
-// Arguments:       Whether or not this is being reloaded one-handed.
+// Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload(bool isBeingReloadedOneHanded = false) {}
+    virtual void Reload() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -624,8 +642,9 @@ protected:
     float m_SharpAim;
     // How much farther the player can see when aiming this sharply.
     float m_MaxSharpLength;
-    // If this HeldDevice is currently being supported by a second hand.
-    bool m_Supported;
+	bool m_Supportable; //!< Whether or not this HeldDevice can be supported.
+    bool m_Supported; //!< Whether or not this HeldDevice is currently being supported by another Arm.
+	bool m_SupportAvailable; //!< Whether or not this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).
     bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
 	//TODO: move this smelly thing elsewhere
 	std::array<bool, Players::MaxPlayerCount> m_SeenByPlayer; //!< An array of players that can currently see the pickup HUD of this HeldDevice.

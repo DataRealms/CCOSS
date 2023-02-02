@@ -47,8 +47,18 @@ namespace RTE {
 		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
+		/// <param name="skipStartingObject>Skips notifying the Reader that a new object is being read in order to associate any subsequent reads with the currently read object. Special edge case for DataModules that use ScanFolderContents.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true);
+		int CreateSerializable(Reader &reader, bool checkType, bool doCreate, bool skipStartingObject);
+
+		/// <summary>
+		/// Makes the Serializable object ready for use.
+		/// </summary>
+		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
+		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
+		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return CreateSerializable(reader, checkType, doCreate, false); }
 #pragma endregion
 
 #pragma region Destruction

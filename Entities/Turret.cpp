@@ -88,6 +88,8 @@ namespace RTE {
 			m_MountedDevices[0]->SetGibWithParentChance(1.0F);
 			//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 			m_MountedDevices[0]->SetJointStrength(0.0F);
+			m_MountedDevices[0]->SetSupportable(true);
+			m_MountedDevices[0]->SetSupportAvailable(true);
 		}
 	}
 
@@ -111,6 +113,8 @@ namespace RTE {
 		newMountedDevice->SetGibWithParentChance(1.0F);
 		//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 		newMountedDevice->SetJointStrength(0.0F);
+		newMountedDevice->SetSupportable(true);
+		newMountedDevice->SetSupportAvailable(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

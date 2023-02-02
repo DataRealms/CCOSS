@@ -41,6 +41,7 @@ namespace RTE {
 	struct joy_buttons : public luabind::enum_wrapper {};
 	struct joy_directions : public luabind::enum_wrapper {};
 	struct directions : public luabind::enum_wrapper {};
+	struct blend_modes : public luabind::enum_wrapper {};
 	struct sdl_keycodes : public luabind::enum_wrapper {};
 	struct sdl_scancodes : public luabind::enum_wrapper {};
 	struct sdl_gamepadbuttons : public luabind::enum_wrapper {};
@@ -67,6 +68,22 @@ namespace RTE {
 			}
 		}
 		return 1;
+	}
+
+	/// <summary>
+	/// Converts a Lua table to a C++ vector of the specified type. Ownership of the objects in the Lua table is transferred!
+	/// </summary>
+	/// <param name="luaTable">The Lua table object to convert to vector.</param>
+	/// <returns>A C++ vector containing all the objects from the Lua table. Ownership is transferred!</returns>
+	/// <remarks>In case of type mismatch (by specifying wrong type or a mix of types in the Lua table) object_cast will print an error to the console and throw, so no need to check what it returns before emplacing.</remarks>
+	template <typename Type> static std::vector<Type> ConvertLuaTableToVectorOfType(const luabind::object &luaObject) {
+		std::vector<Type> outVector = {};
+		if (luaObject.is_valid() && luabind::type(luaObject) == LUA_TTABLE) {
+			for (luabind::iterator tableItr(luaObject), tableEnd; tableItr != tableEnd; ++tableItr) {
+				outVector.emplace_back(luabind::object_cast<Type>(*tableItr, luabind::adopt(luabind::result)));
+			}
+		}
+		return outVector;
 	}
 }
 #endif

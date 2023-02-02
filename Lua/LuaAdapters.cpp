@@ -488,6 +488,48 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersPrimitiveMan::DrawPolygonPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(-1, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPolygonPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &centerPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(player, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPolygonFillPrimitive(PrimitiveMan &primitiveMan, const Vector &startPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(-1, startPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPolygonFillPrimitiveForPlayer(PrimitiveMan &primitiveMan, int player, const Vector &startPos, int color, const luabind::object &verticesTable) {
+		primitiveMan.DrawPolygonOrPolygonFillPrimitive(player, startPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), true);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPrimitivesWithTransparency(PrimitiveMan &primitiveMan, int transValue, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(DrawBlendMode::BlendTransparency, transValue, transValue, transValue, BlendAmountLimits::MinBlend, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPrimitivesWithBlending(PrimitiveMan &primitiveMan, int blendMode, int blendAmount, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmount, blendAmount, blendAmount, blendAmount, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersPrimitiveMan::DrawPrimitivesWithBlendingPerChannel(PrimitiveMan &primitiveMan, int blendMode, int blendAmountR, int blendAmountG, int blendAmountB, int blendAmountA, const luabind::object &primitivesTable) {
+		primitiveMan.SchedulePrimitivesForBlendedDrawing(static_cast<DrawBlendMode>(blendMode), blendAmountR, blendAmountG, blendAmountB, blendAmountA, ConvertLuaTableToVectorOfType<GraphicalPrimitive *>(primitivesTable));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	float LuaAdaptersUtility::GetMPP() {
 		return c_MPP;
 	}

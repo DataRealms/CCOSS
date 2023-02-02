@@ -391,6 +391,11 @@ public:
 	/// <returns>The height of the GUI icon bitmap.</returns>
 	int GetIconHeight() const { return GetGraphicalIcon()->h; }
 
+	/// <summary>
+	/// Forces this MOSprite out of resting conditions.
+	/// </summary>
+	void NotResting() override { MovableObject::NotResting(); m_AngOscillations = 0; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsTooFast

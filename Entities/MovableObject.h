@@ -1168,7 +1168,7 @@ enum MOType
 	/// <summary>
 	/// Forces this MovableObject out of resting conditions.
 	/// </summary>
-	void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
+	virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; m_VelOscillations = 0; }
 
 	/// <summary>
 	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.

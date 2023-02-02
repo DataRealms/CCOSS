@@ -136,7 +136,7 @@ int AHuman::Create()
     // If empty-handed, equip first thing in inventory
     if (m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldDevice()) {
         m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory(nullptr, true)));
-        m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
     }
 
     // Initalize the jump time left
@@ -802,7 +802,7 @@ void AHuman::AddInventoryItem(MovableObject *pItemToAdd) {
     // If we have nothing in inventory, and nothing in our hands, just grab this first thing added to us.
     if (HeldDevice *itemToAddAsHeldDevice = dynamic_cast<HeldDevice *>(pItemToAdd); itemToAddAsHeldDevice && m_Inventory.empty() && m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldDevice()) {
         m_pFGArm->SetHeldDevice(itemToAddAsHeldDevice);
-        m_pFGArm->SetHandCurrentPos(m_HolsterOffset.GetXFlipped(m_HFlipped));
+        m_pFGArm->SetHandPos(m_HolsterOffset.GetXFlipped(m_HFlipped));
 	} else {
 		Actor::AddInventoryItem(pItemToAdd);
 	}
@@ -878,7 +878,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pWeapon);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -947,7 +947,7 @@ bool AHuman::EquipDeviceInGroup(std::string group, bool doEquip)
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pDevice);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -1004,7 +1004,7 @@ bool AHuman::EquipLoadedFirearmInGroup(std::string group, std::string excludeGro
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pFirearm);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -1061,7 +1061,7 @@ bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pDevice);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm if applicable
                 EquipShieldInBGArm();
@@ -1119,7 +1119,7 @@ bool AHuman::EquipThrowable(bool doEquip)
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pThrown);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm as applicable
                 EquipShieldInBGArm();
@@ -1176,7 +1176,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 // Now put the device we were looking for and found into the hand
                 m_pFGArm->SetHeldDevice(pTool);
                 // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
                 // Equip shield in BG arm is applicable
                 EquipShieldInBGArm();
@@ -1263,7 +1263,7 @@ bool AHuman::EquipShield()
             // Now put the device we were looking for and found into the hand
             m_pFGArm->SetHeldDevice(pShield);
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
-            m_pFGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
             // Equip shield in BG arm is applicable
             EquipShieldInBGArm();
@@ -1328,7 +1328,7 @@ bool AHuman::EquipShieldInBGArm()
             // Now put the device we were looking for and found into the hand
             m_pBGArm->SetHeldDevice(pShield);
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
-            m_pBGArm->SetHandCurrentPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+            m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
@@ -1346,7 +1346,7 @@ bool AHuman::UnequipFGArm() {
 		if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice()) {
 			heldDevice->Deactivate();
 			AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
-			m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			return true;
 		}
 	}
@@ -1360,7 +1360,7 @@ bool AHuman::UnequipBGArm() {
 		if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice()) {
 			heldDevice->Deactivate();
 			AddToInventoryBack(m_pBGArm->RemoveAttachable(heldDevice));
-			m_pBGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+			m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			return true;
 		}
 	}
@@ -3262,7 +3262,7 @@ void AHuman::Update()
 					m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapPrevInventory(m_pFGArm->RemoveAttachable(m_pFGArm->GetHeldDevice()))));
 				}
 				EquipShieldInBGArm();
-				m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 			m_EquipHUDTimer.Reset();
 			m_SharpAimProgress = 0;
@@ -3422,7 +3422,7 @@ void AHuman::Update()
 			}
 		} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 			m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
-			m_pFGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			EquipShieldInBGArm();
 			m_ArmsState = WEAPON_READY;
 		} else if (m_ArmsState == THROWING_RELEASE) {
@@ -3483,10 +3483,10 @@ void AHuman::Update()
 				heldDevice->SetVel(heldDevice->GetVel() * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 				heldDevice->SetAngularVel(heldDevice->GetAngularVel() + m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 
-				arm->SetHandCurrentPos(heldDevice->GetPos());
+				arm->SetHandPos(heldDevice->GetPos());
 				if (!m_Inventory.empty()) {
 					arm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
-					arm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+					arm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 				}
 				anyDropped = true;
 				break;
@@ -3495,7 +3495,7 @@ void AHuman::Update()
 		if (!anyDropped && !m_Inventory.empty() && !m_pFGArm) {
 			DropAllInventory();
 			if (m_pBGArm) {
-				m_pBGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
+				m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 		}
 		EquipShieldInBGArm();
@@ -3532,7 +3532,7 @@ void AHuman::Update()
 		Arm *armToUse = m_pFGArm ? m_pFGArm : m_pBGArm;
         Attachable *pMO = armToUse->RemoveAttachable(armToUse->GetHeldDevice());
 		AddToInventoryBack(pMO);
-		armToUse->SetHandCurrentPos(m_pItemInReach->GetJointPos());
+		armToUse->SetHandPos(m_pItemInReach->GetJointPos());
 		armToUse->SetHeldDevice(m_pItemInReach);
 		m_pItemInReach = nullptr;
 

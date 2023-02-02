@@ -15,7 +15,7 @@ namespace RTE {
 		m_MaxLength = 0;
 		m_MoveSpeed = 0;
 
-		m_HandDefaultIdleOffset.Reset();
+		m_HandIdleOffset.Reset();
 		m_HandIdleRotation = 0;
 
 		m_HandCurrentOffset.Reset();
@@ -63,7 +63,7 @@ namespace RTE {
 		m_MaxLength = reference.m_MaxLength;
 		m_MoveSpeed = reference.m_MoveSpeed;
 
-		m_HandDefaultIdleOffset = reference.m_HandDefaultIdleOffset;
+		m_HandIdleOffset = reference.m_HandIdleOffset;
 		m_HandIdleRotation = reference.m_HandIdleRotation;
 
 		m_HandCurrentOffset = reference.m_HandCurrentOffset;
@@ -93,8 +93,8 @@ namespace RTE {
 			reader >> m_MaxLength;
 		} else if (propName == "MoveSpeed") {
 			reader >> m_MoveSpeed;
-		} else if (propName == "HandDefaultIdleOffset" || propName == "IdleOffset") {
-			reader >> m_HandDefaultIdleOffset;
+		} else if (propName == "HandIdleOffset" || propName == "IdleOffset") {
+			reader >> m_HandIdleOffset;
 		} else if (propName == "HandSprite" || propName == "Hand") {
 			reader >> m_HandSpriteFile;
 			m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
@@ -118,7 +118,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("MaxLength", m_MaxLength);
 		writer.NewPropertyWithValue("MoveSpeed", m_MoveSpeed);
-		writer.NewPropertyWithValue("HandDefaultIdleOffset", m_HandDefaultIdleOffset);
+		writer.NewPropertyWithValue("HandIdleOffset", m_HandIdleOffset);
 		writer.NewPropertyWithValue("HandSprite", m_HandSpriteFile);
 		writer.NewPropertyWithValue("GripStrength", m_GripStrength);
 		writer.NewPropertyWithValue("ThrowStrength", m_ThrowStrength);
@@ -129,7 +129,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Arm::SetHandCurrentPos(const Vector &newHandPos) {
+	void Arm::SetHandPos(const Vector &newHandPos) {
 		SetHandCurrentOffset(g_SceneMan.ShortestDistance(m_JointPos, newHandPos, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()));
 	}
 
@@ -243,7 +243,7 @@ namespace RTE {
 				} else if (parentIsStable && m_HeldDeviceThisArmIsTryingToSupport) {
 					targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_HeldDeviceThisArmIsTryingToSupport->GetSupportPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 				} else {
-					targetOffset = m_HandDefaultIdleOffset.GetXFlipped(m_Parent->IsHFlipped()).GetRadRotatedCopy(m_Parent->GetRotAngle());
+					targetOffset = m_HandIdleOffset.GetXFlipped(m_Parent->IsHFlipped()).GetRadRotatedCopy(m_Parent->GetRotAngle());
 				}
 				if (m_HandIdleRotation != 0) {
 					targetOffset.RadRotate(m_HandIdleRotation);

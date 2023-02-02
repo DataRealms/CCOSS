@@ -548,9 +548,9 @@ namespace RTE {
 			.property("MaxLength", &Arm::GetMaxLength)
 			.property("MoveSpeed", &Arm::GetMoveSpeed, &Arm::SetMoveSpeed)
 
-			.property("HandDefaultIdleOffset", &Arm::GetHandDefaultIdleOffset, &Arm::SetHandDefaultIdleOffset)
+			.property("HandIdleOffset", &Arm::GetHandIdleOffset, &Arm::SetHandIdleOffset)
 
-			.property("HandCurrentPos", &Arm::GetHandCurrentPos, &Arm::SetHandCurrentPos)
+			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos)
 			.property("HasAnyHandTargets", &Arm::HasAnyHandTargets)
 			.property("NumberOfHandTargets", &Arm::GetNumberOfHandTargets)
 			.property("NextHandTargetDescription", &Arm::GetNextHandTargetDescription)

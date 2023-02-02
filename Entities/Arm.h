@@ -79,13 +79,13 @@ namespace RTE {
 		/// Gets the default idle offset of this Arm's hand, i.e. the default offset from the joint position that this Arm will try to move to when not moving towards a position.
 		/// </summary>
 		/// <returns>The idle offset of this Arm's hand.</returns>
-		Vector GetHandDefaultIdleOffset() const { return m_HandDefaultIdleOffset; }
+		Vector GetHandIdleOffset() const { return m_HandIdleOffset; }
 
 		/// <summary>
 		/// Sets the default idle offset of this Arm's hand, i.e. the default offset from the joint position that this Arm will try to move to when not moving towards a position.
 		/// </summary>
 		/// <param name="newDefaultIdleOffset">The new idle offset of this Arm's hand.</param>
-		void SetHandDefaultIdleOffset(const Vector &newDefaultIdleOffset) { m_HandDefaultIdleOffset = newDefaultIdleOffset; }
+		void SetHandIdleOffset(const Vector &newDefaultIdleOffset) { m_HandIdleOffset = newDefaultIdleOffset; }
 
 		/// <summary>
 		/// Gets the rotation that is being applied to this Arm's hand, if it's using an idle offset.
@@ -116,13 +116,13 @@ namespace RTE {
 		/// Gets the current position of this Arm's hand in absolute Scene coordinates.
 		/// </summary>
 		/// <returns>The current position of this Arm's hand in absolute Scene coordinates.</returns>
-		Vector GetHandCurrentPos() const { return m_JointPos + m_HandCurrentOffset; }
+		Vector GetHandPos() const { return m_JointPos + m_HandCurrentOffset; }
 
 		/// <summary>
 		/// Sets the current position of this Arm's hand to an absolute scene coordinate. If needed, the set position is modified so its distance from the joint position of the Arm is capped to the max length of the Arm.
 		/// </summary>
 		/// <param name="newHandPos">The new current position of this Arm's hand as absolute scene coordinate.</param>
-		void SetHandCurrentPos(const Vector &newHandPos);
+		void SetHandPos(const Vector &newHandPos);
 
 		/// <summary>
 		/// Gets the the strength with which this Arm will grip its HeldDevice.
@@ -293,7 +293,7 @@ namespace RTE {
 		float m_MaxLength; //!< The maximum length of this Arm when fully extended, i.e. the length of the straight Arm sprite.
 		float m_MoveSpeed; //!< How quickly this Arm moves between targets. 0.0 means it doesn't move at all, 1.0 means it moves instantly.
 
-		Vector m_HandDefaultIdleOffset; //!< The default offset that this Arm's hand should move to when not moving towards anything else, relative to its joint position. Other offsets are used under certain circumstances.
+		Vector m_HandIdleOffset; //!< The default offset that this Arm's hand should move to when not moving towards anything else, relative to its joint position. Other offsets are used under certain circumstances.
 		float m_HandIdleRotation; //!< The rotation to be applied to the idle offset, when it's being used. Resets every update to avoid locking it.
 
 		Vector m_HandCurrentOffset; //!< The current offset of this Arm's hand, relative to its joint position.

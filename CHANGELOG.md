@@ -675,7 +675,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	MaxLength - The max length of the Arm in pixels.
 	MoveSpeed - How quickly the Arm moves between targets. 0 means no movement, 1 means instant movement.
-	HandDefaultIdleOffset - The idle offset this Arm will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
+	HandIdleOffset - The idle offset this Arm's hand will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
 	HandSprite - The sprite file for this Arm's hand. Hand is also allowed for compatibility.
 	GripStrength - The Arm's grip strength when holding HeldDevices. Further described below, in the entry where it was added.
 	ThrowStrength - The Arm's throw strength when throwing ThrownDevices. Further described below, in the entry where it was added.
@@ -684,8 +684,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	They now have the following Lua properties and functions:  
 	**`MaxLength`** (R) - Allows getting the `Arm`'s maximum length.  
 	**`MoveSpeed`** (R/W) - Allows getting and setting the `Arm`'s movement speed. 0 means no movement, 1 means instant movement.  
-	**`HandDefaultIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
-	**`HandCurrentPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
+	**`HandIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
+	**`HandPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
 	**`HasAnyHandTargets`** (R) - Gets whether or not this `Arm` has any hand targets, i.e. any positions the `Arm` is supposed to try to move its hand to.  
 	**`NumberOfHandTargets`** (R) - Gets the number of hand targets this `Arm` has.  
 	**`NextHandTargetDescription`** (R/W) - Gets the description of the next target this `Arm`'s hand is moving to, or an empty string if there are no targets.  

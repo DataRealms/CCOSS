@@ -918,6 +918,10 @@ protected:
 	// Every team's MO footprint
 	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
+    // TODO_MULTITHREAD:
+    // Mutex on MOs being added/removed, or objects being registered/unregistered.
+    // Also fix issue with Lua GC seems to destroy object belong to another lua state?!
+
     // The alarm events on the scene where something alarming happened, for use with AI firings awareness os they react to shots fired etc.
     // This is the last frame's events, is the one for Actors to poll for events, should be cleaned out and refilled each frame.
     std::list<AlarmEvent> m_AlarmEvents;

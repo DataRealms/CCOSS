@@ -3483,15 +3483,16 @@ void AHuman::Update()
 				heldDevice->SetVel(heldDevice->GetVel() * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 				heldDevice->SetAngularVel(heldDevice->GetAngularVel() + m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 
-				arm->AddHandTarget("HeldDevice Pos", heldDevice->GetPos());
+				arm->SetHandCurrentPos(heldDevice->GetPos());
 				if (!m_Inventory.empty()) {
 					arm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
 					arm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
 				}
 				anyDropped = true;
+				break;
 			}
 		}
-		if (!anyDropped && !m_Inventory.empty()) {
+		if (!anyDropped && !m_Inventory.empty() && !m_pFGArm) {
 			DropAllInventory();
 			if (m_pBGArm) {
 				m_pBGArm->SetHandCurrentPos(m_Pos + RotateOffset(m_HolsterOffset));
@@ -4547,13 +4548,13 @@ int AHuman::WhilePieMenuOpenListener(const PieMenu *pieMenu) {
 				break;
 			case PieSlice::SliceType::Drop:
 				if (const MovableObject *equippedFGItem = GetEquippedItem()) {
-					pieSlice->SetEnabled(true);
+					pieSlice->SetEnabled(m_Status != INACTIVE);
 					pieSlice->SetDescription("Drop " + equippedFGItem->GetPresetName());
 				} else if (const MovableObject *equippedBGItem = GetEquippedBGItem()) {
 					pieSlice->SetDescription("Drop " + equippedBGItem->GetPresetName());
-					pieSlice->SetEnabled(true);
-				} else if (!IsInventoryEmpty()) {
-					pieSlice->SetEnabled(true);
+					pieSlice->SetEnabled(m_Status != INACTIVE);
+				} else if (!IsInventoryEmpty() && !m_pFGArm) {
+					pieSlice->SetEnabled(m_Status != INACTIVE);
 					pieSlice->SetDescription("Drop Inventory");
 				} else {
 					pieSlice->SetEnabled(false);

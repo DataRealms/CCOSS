@@ -219,7 +219,7 @@ namespace RTE {
 		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
 
 		// This needs to be a recursive Mutex, because we can have some interesting cross-thread behaviour in rare circumstances:
-		// For example, an AI picks up an object. OnAttach() is triggered in Lua script, while the attachable may be in a seperate Lua state!
+		// For example, an AI picks up an object. OnAttach() is triggered in Lua script, while the attachable may be in a separate Lua state!
 		// As such, if it's a seperate Lua state, we need to block. We could queue the call till later or something, but it's sufficiently rare that I don't care enough...
 		// If it's the same Lua state, we can immediately call it - but we've already acquired the mutex in a parent scope, therefore recursive to avoid a deadlock.
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.

@@ -469,6 +469,8 @@ namespace RTE {
 			return error;
 		}
 
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		for (const std::string &functionName : functionNamesToLookFor) {
 			luabind::object functionObject = luabind::globals(m_State)[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
@@ -483,20 +485,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaStateWrapper::Update() {
-		// Performing this explicit GC step doesn't seem necessary and slows things down a fair amount
-		//lua_gc(m_State, LUA_GCSTEP, 1);
+		lua_gc(m_State, LUA_GCCOLLECT, 1);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaStateWrapper::StopGC() {
-		lua_gc(m_State, LUA_GCSTOP, 0);
+		// For whatever reason, LUA_GCSTOP doesn't seem to work... so, we do this instead :/
+		lua_gc(m_State, LUA_GCSETPAUSE, std::numeric_limits<int>::max());
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void LuaStateWrapper::RestartGC(){
-		lua_gc(m_State, LUA_GCRESTART, 0);
+    void LuaStateWrapper::RestartGC() {
+
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

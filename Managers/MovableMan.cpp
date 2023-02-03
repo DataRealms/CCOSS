@@ -1696,6 +1696,14 @@ void MovableMan::Update()
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
             {
                 LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+
+                // We need to stop the GC while performing parallel execution
+                // This is necessary as a result of how Lua scripts in one state can create different objects that potentially belong to another state
+                // Luabind really doesn't like that, and panics when it sees that mismatch
+                for (LuaStateWrapper &luaState : luaStates) {
+                    luaState.StopGC();
+                }
+
                 std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
                     [&](LuaStateWrapper &luaState) {
                         for (Actor *actor : m_Actors) {
@@ -1704,6 +1712,10 @@ void MovableMan::Update()
                             }
                         }
                     });
+
+                for (LuaStateWrapper &luaState : luaStates) {
+                    luaState.RestartGC();
+                }
             }
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 

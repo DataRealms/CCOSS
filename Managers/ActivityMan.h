@@ -259,7 +259,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this and the current Activity. Supposed to be done every frame before drawing.
 		/// </summary>
-		void Update() const { if (m_Activity) { m_Activity->Update(); } }
+		void Update();
 #pragma endregion
 
 	private:

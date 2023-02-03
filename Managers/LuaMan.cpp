@@ -315,6 +315,9 @@ namespace RTE {
 		}
 		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
 
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		// Lock here, even though we also lock in RunScriptString(), to ensure that the temp entity vector isn't stomped by separate threads.
+
 		scriptString << functionName + "(";
 		if (!selfObjectName.empty()) { scriptString << selfObjectName; }
 		bool isFirstFunctionArgument = selfObjectName.empty();
@@ -350,6 +353,8 @@ namespace RTE {
 		}
 		int error = 0;
 
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		// Load the script string onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadstring(m_State, scriptString.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
@@ -372,6 +377,8 @@ namespace RTE {
 
 	int LuaStateWrapper::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		int status = 0;
+
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		functionObject->GetLuabindObject()->push(m_State);
@@ -433,6 +440,8 @@ namespace RTE {
 
 		int error = 0;
 
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadfile(m_State, filePath.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
@@ -483,6 +492,8 @@ namespace RTE {
 		}
 		bool result = false;
 
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		// Push the script string onto the stack so we can execute it, and then actually try to run it. Assign the result to a dedicated temp global variable.
 		if (luaL_dostring(m_State, std::string("ExpressionResult = " + expression + ";").c_str())) {
 			m_LastError = std::string("When evaluating Lua expression: ") + lua_tostring(m_State, -1);
@@ -504,6 +515,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaStateWrapper::SavePointerAsGlobal(void *objectToSave, const std::string &globalName) {
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		// Push the pointer onto the Lua stack.
 		lua_pushlightuserdata(m_State, objectToSave);
 		// Pop and assign that pointer to a global var in the Lua state.
@@ -513,6 +526,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaStateWrapper::GlobalIsDefined(const std::string &globalName) {
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+
 		// Get the var you want onto the stack so we can check it.
 		lua_getglobal(m_State, globalName.c_str());
 		// Now report if it is nil/null or not.
@@ -526,6 +541,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaStateWrapper::TableEntryIsDefined(const std::string &tableName, const std::string &indexName) {
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		
 		// Push the table onto the stack, checking if it even exists.
 		lua_getglobal(m_State, tableName.c_str());
 		if (!lua_istable(m_State, -1)) {

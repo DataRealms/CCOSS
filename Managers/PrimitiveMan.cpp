@@ -1,5 +1,6 @@
 #include "PrimitiveMan.h"
 
+#include "FrameMan.h"
 #include "SceneMan.h"
 #include "ConsoleMan.h"
 #include "MOSprite.h"

@@ -29,7 +29,7 @@
 #include "Atom.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
-#include "lua.hpp"
+#include "LuaMan.h"
 
 #include <execution>
 
@@ -1599,16 +1599,6 @@ void MovableMan::Update()
 
 	m_SimUpdateFrameNumber++;
 
-    // Clear the MO color layer only if this is a drawn update
-    if (g_TimerMan.DrawnSimUpdate()) {
-        g_SceneMan.ClearMOColorLayer();
-    }
-
-    // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
-        g_PostProcessMan.ClearScenePostEffects();
-    }
-
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TeamOne] = false;
     m_SortTeamRoster[Activity::TeamTwo] = false;
@@ -1632,105 +1622,12 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator parIt;
     std::deque<MovableObject *>::iterator midIt;
 
-    ////////////////////////////////////////////////////////////////////////////
-    // First Pass
-
-    {
-        // Travel Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
-        {
-            for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-            {
-                if (!((*aIt)->IsUpdated()))
-                {
-                    (*aIt)->ApplyForces();
-                    (*aIt)->PreTravel();
-        /*
-                    if (aIt == m_Actors.begin())
-                    {
-                        PALETTE palette;
-                        get_palette(palette);
-                        save_bmp("poop.bmp", g_SceneMan.GetMOIDBitmap(), palette);
-                    }
-        */
-                    (*aIt)->Travel();
-                    (*aIt)->PostTravel();
-                }
-                (*aIt)->NewFrame();
-            }
-        }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
-
-        // Travel items
-        {
-            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
-            {
-                if (!((*iIt)->IsUpdated()))
-                {
-                    (*iIt)->ApplyForces();
-                    (*iIt)->PreTravel();
-                    (*iIt)->Travel();
-                    (*iIt)->PostTravel();
-                }
-                (*iIt)->NewFrame();
-            }
-        }
-
-        // Travel particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
-        {
-            for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-            {
-                if (!((*parIt)->IsUpdated()))
-                {
-                    (*parIt)->ApplyForces();
-                    (*parIt)->PreTravel();
-                    (*parIt)->Travel();
-                    (*parIt)->PostTravel();
-                }
-                (*parIt)->NewFrame();
-            }
-        }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
-
-        g_SceneMan.UnlockScene();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Second Pass
-
     {
         g_SceneMan.LockScene();
 
         // Actors
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-            {
-                LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-
-                // We need to stop the GC while performing parallel execution
-                // This is necessary as a result of how Lua scripts in one state can create different objects that potentially belong to another state
-                // Luabind really doesn't like that, and panics when it sees that mismatch
-                for (LuaStateWrapper &luaState : luaStates) {
-                    luaState.StopGC();
-                }
-
-                std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-                    [&](LuaStateWrapper &luaState) {
-                        for (Actor *actor : m_Actors) {
-                            if (actor->GetLuaState() == &luaState) {
-                                actor->GetController()->Update();
-                            }
-                        }
-                    });
-
-                for (LuaStateWrapper &luaState : luaStates) {
-                    luaState.RestartGC();
-                }
-            }
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-
             for (Actor *actor : m_Actors) {
                 actor->Update();
                 actor->UpdateScripts();
@@ -1999,6 +1896,111 @@ void MovableMan::Update()
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::Travel()
+{
+    // ---TEMP ---
+    // These are here for multithreaded AI, but will be unnecessary when multithreaded-sim-and-render is in!
+    // Clear the MO color layer only if this is a drawn update
+    if (g_TimerMan.DrawnSimUpdate()) {
+        g_SceneMan.ClearMOColorLayer();
+    }
+
+    // If this is the first sim update since a drawn one, then clear the post effects
+    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
+        g_PostProcessMan.ClearScenePostEffects();
+    }
+    // ---TEMP---
+
+    // Travel Actors
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
+    {
+        for (auto aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
+        {
+            if (!((*aIt)->IsUpdated()))
+            {
+                (*aIt)->ApplyForces();
+                (*aIt)->PreTravel();
+    /*
+                if (aIt == m_Actors.begin())
+                {
+                    PALETTE palette;
+                    get_palette(palette);
+                    save_bmp("poop.bmp", g_SceneMan.GetMOIDBitmap(), palette);
+                }
+    */
+                (*aIt)->Travel();
+                (*aIt)->PostTravel();
+            }
+            (*aIt)->NewFrame();
+        }
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
+
+    // Travel items
+    {
+        for (auto iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
+        {
+            if (!((*iIt)->IsUpdated()))
+            {
+                (*iIt)->ApplyForces();
+                (*iIt)->PreTravel();
+                (*iIt)->Travel();
+                (*iIt)->PostTravel();
+            }
+            (*iIt)->NewFrame();
+        }
+    }
+
+    // Travel particles
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
+    {
+        for (auto parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
+        {
+            if (!((*parIt)->IsUpdated()))
+            {
+                (*parIt)->ApplyForces();
+                (*parIt)->PreTravel();
+                (*parIt)->Travel();
+                (*parIt)->PostTravel();
+            }
+            (*parIt)->NewFrame();
+        }
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::UpdateControllers()
+{
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
+    {
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+
+        // We need to stop the GC while performing parallel execution
+        // This is necessary as a result of how Lua scripts in one state can create different objects that potentially belong to another state
+        // Luabind really doesn't like that, and panics when it sees that mismatch
+        for (LuaStateWrapper &luaState : luaStates) {
+            luaState.StopGC();
+        }
+
+        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+            [&](LuaStateWrapper &luaState) {
+                for (Actor *actor : m_Actors) {
+                    if (actor->GetLuaState() == &luaState) {
+                        actor->GetController()->Update();
+                    }
+                }
+            });
+
+        for (LuaStateWrapper &luaState : luaStates) {
+            luaState.RestartGC();
+        }
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMatter

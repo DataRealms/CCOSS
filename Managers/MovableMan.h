@@ -770,6 +770,18 @@ public:
 
 	void Update();
 
+    /// <summary>
+	/// Travels all of our MOs, updating their location/velocity/physical characteristics.
+	/// </summary>
+	void Travel();
+
+    /// <summary>
+	/// Updates the controllers of all the actors we own.
+    /// This is needed for a tricky reason - we want the controller from the activity to override the normal controller state
+    /// So we need to update the controller state prior to activity, so the changes from activity are layered on top.
+	/// </summary>
+    void UpdateControllers();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMatter

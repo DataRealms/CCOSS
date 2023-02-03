@@ -25,7 +25,7 @@ namespace RTE {
 		/// </summary>
 		enum PerformanceCounters {
 			SimTotal = 0,
-			ActorsAIUpdate,
+			ActorsAI,
 			ActorsTravel,
 			ActorsUpdate,
 			ParticlesTravel,

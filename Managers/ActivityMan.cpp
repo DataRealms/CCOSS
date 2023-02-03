@@ -8,6 +8,7 @@
 #include "AudioMan.h"
 #include "WindowMan.h"
 #include "FrameMan.h"
+#include "PerformanceMan.h"
 #include "PostProcessMan.h"
 #include "MetaMan.h"
 
@@ -454,4 +455,15 @@ namespace RTE {
 	void ActivityMan::LateUpdateGlobalScripts() const {
 		if (GAScripted *scriptedActivity = dynamic_cast<GAScripted *>(m_Activity.get())) { scriptedActivity->UpdateGlobalScripts(true); }
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void ActivityMan::Update()
+    {
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
+		if (m_Activity) { 
+			m_Activity->Update(); 
+		}
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
+    }
 }

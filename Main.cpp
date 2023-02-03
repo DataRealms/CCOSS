@@ -282,10 +282,12 @@ namespace RTE {
 				}
 				g_FrameMan.Update();
 				g_LuaMan.Update();
-				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
+
+				g_MovableMan.Travel();
+				g_MovableMan.UpdateControllers();
 				g_ActivityMan.Update();
-				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 				g_MovableMan.Update();
+
 				g_AudioMan.Update();
 
 				g_ActivityMan.LateUpdateGlobalScripts();

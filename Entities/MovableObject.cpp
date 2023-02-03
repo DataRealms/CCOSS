@@ -596,6 +596,9 @@ int MovableObject::InitializeObjectScripts() {
         m_OwningState = &g_LuaMan.GetRandomThreadedScriptState();
     }
 
+    // Ensure temp entity isn't messed with
+    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
+
 	m_OwningState->SetTempEntity(this);
 
 	m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";

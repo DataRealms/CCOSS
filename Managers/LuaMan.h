@@ -128,6 +128,13 @@ namespace RTE {
 		void Update();
 #pragma endregion
 
+#pragma region MultiThreading
+		/// <summary>
+		/// Gets the mutex to lock this lua state.
+		/// </summary>
+		std::recursive_mutex& GetMutex() { return m_Mutex; };
+#pragma endregion
+
 #pragma region
 		/// <summary>
 		/// Gets whether the given Lua expression evaluates to true or false.
@@ -184,7 +191,7 @@ namespace RTE {
 		void ClearErrors();
 #pragma endregion
 
-	//private:
+	private:
 		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
 		/// </summary>

@@ -137,6 +137,16 @@ namespace RTE {
 
 #pragma region
 		/// <summary>
+		/// Stops the GC, disallowing garbage collection until we're restarted.
+		/// </summary>
+		void StopGC();
+
+		/// <summary>
+		/// Restarts the GC, allowing garbage collection to take place.
+		/// </summary>
+		void RestartGC();
+
+		/// <summary>
 		/// Gets whether the given Lua expression evaluates to true or false.
 		/// </summary>
 		/// <param name="expression">The string with the expression to evaluate.</param>

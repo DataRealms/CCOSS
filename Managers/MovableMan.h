@@ -911,16 +911,28 @@ protected:
     std::deque<MovableObject *> m_AddedItems;
     std::deque<MovableObject *> m_AddedParticles;
 
+    // Mutexes to ensure MOs aren't being removed from separate threads at the same time
+    std::mutex m_ActorsMutex;
+    std::mutex m_ItemsMutex;
+    std::mutex m_ParticlesMutex;
+
+    // Mutexes to ensure MOs aren't being added from separate threads at the same time
+    std::mutex m_AddedActorsMutex;
+    std::mutex m_AddedItemsMutex;
+    std::mutex m_AddedParticlesMutex;
+
+    // Mutex to ensure objects aren't registered/deregistered from separate threads at the same time
+    std::mutex m_ObjectRegisteredMutex;
+
+    // Mutex to ensure actors don't change team roster from seperate threads at the same time
+    std::mutex m_ActorRosterMutex;
+
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
     std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];
     // Whether to draw HUD lines between the actors of a specific team
     bool m_SortTeamRoster[Activity::MaxTeamCount];
 	// Every team's MO footprint
 	int m_TeamMOIDCount[Activity::MaxTeamCount];
-
-    // TODO_MULTITHREAD:
-    // Mutex on MOs being added/removed, or objects being registered/unregistered.
-    // Also fix issue with Lua GC seems to destroy object belong to another lua state?!
 
     // The alarm events on the scene where something alarming happened, for use with AI firings awareness os they react to shots fired etc.
     // This is the last frame's events, is the one for Actors to poll for events, should be cleaned out and refilled each frame.

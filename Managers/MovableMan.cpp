@@ -31,6 +31,7 @@
 #include "FrameMan.h"
 #include "SceneMan.h"
 //#include "LuaMan.h"
+#include "lua.hpp"
 
 #include <execution>
 
@@ -234,8 +235,12 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
 
 void MovableMan::RegisterObject(MovableObject * mo) 
 { 
-	if (mo) 
-		m_KnownObjects[mo->GetUniqueID()] = mo; 
+	if (mo) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(m_ObjectRegisteredMutex);
+    m_KnownObjects[mo->GetUniqueID()] = mo;
 }
 
 
@@ -247,12 +252,13 @@ void MovableMan::RegisterObject(MovableObject * mo)
 // Return value:    None.
 
 void MovableMan::UnregisterObject(MovableObject * mo) 
-{ 
-	if (mo)
-	{
-		m_KnownObjects.erase(mo->GetUniqueID());
-		//g_ConsoleMan.PrintString(std::to_string(mo->GetUniqueID()));
-	}
+{
+	if (mo) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(m_ObjectRegisteredMutex);
+    m_KnownObjects.erase(mo->GetUniqueID());
 }
 
 const std::vector<MovableObject *> &MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const
@@ -851,7 +857,11 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 			actorToAdd->SetAge(0);
         }
 
-        m_AddedActors.push_back(actorToAdd);
+        {
+            std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
+            m_AddedActors.push_back(actorToAdd);
+        }
+
 		AddActorToTeamRoster(actorToAdd);
     }
 }
@@ -871,6 +881,8 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 			itemToAdd->NewFrame();
 			itemToAdd->SetAge(0);
         }
+
+        std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
         m_AddedItems.push_back(itemToAdd);
     }
 }
@@ -891,8 +903,10 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
             particleToAdd->SetAge(0);
         }
 		if (particleToAdd->IsDevice()) {
+            std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
 			m_AddedItems.push_back(particleToAdd);
 		} else {
+            std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
 			m_AddedParticles.push_back(particleToAdd);
 		}
     }
@@ -916,6 +930,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
         {
             if (*itr == pActorToRem)
             {
+                std::lock_guard<std::mutex> lock(m_ActorsMutex);
                 m_Actors.erase(itr);
                 removed = true;
                 break;
@@ -928,6 +943,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             {
                 if (*itr == pActorToRem)
                 {
+                    std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
                     m_AddedActors.erase(itr);
                     removed = true;
                     break;
@@ -958,6 +974,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
         {
             if (*itr == pItemToRem)
             {
+                std::lock_guard<std::mutex> lock(m_ItemsMutex);
                 m_Items.erase(itr);
                 removed = true;
                 break;
@@ -970,6 +987,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
             {
                 if (*itr == pItemToRem)
                 {
+                    std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
                     m_AddedItems.erase(itr);
                     removed = true;
                     break;
@@ -982,8 +1000,6 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
 }
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddActorToTeamRoster
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -993,8 +1009,9 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
 
 void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
 {
-	if (!pActorToAdd)
+	if (!pActorToAdd) {
 		return;
+    }
 
 	// Add to the team roster and then sort it too
 	int team = pActorToAdd->GetTeam();
@@ -1003,6 +1020,7 @@ void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
 	// Only add to a roster if it's on a team AND is controllable (eg doors are not)
 	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount && pActorToAdd->IsControllable())
 	{
+        std::lock_guard<std::mutex> lock(m_ActorRosterMutex);
 		m_ActorRoster[pActorToAdd->GetTeam()].push_back(pActorToAdd);
 		m_ActorRoster[pActorToAdd->GetTeam()].sort(MOXPosComparison());
 	}
@@ -1018,14 +1036,17 @@ void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
 
 void MovableMan::RemoveActorFromTeamRoster(Actor * pActorToRem)
 {
-	if (!pActorToRem)
+	if (!pActorToRem) {
 		return;
+    }
 
 	int team = pActorToRem->GetTeam();
 
 	// Remove from roster as well
-	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount)
+	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount) {
+        std::lock_guard<std::mutex> lock(m_ActorRosterMutex);
 		m_ActorRoster[team].remove(pActorToRem);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1035,8 +1056,9 @@ void MovableMan::RemoveActorFromTeamRoster(Actor * pActorToRem)
 
 void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 {
-	if (!pActor)
+	if (!pActor) {
 		return;
+    }
 
 	if (pActor->IsPlayerControlled()) { g_ActivityMan.GetActivity()->LoseControlOfActor(pActor->GetController()->GetPlayer()); }
 
@@ -1074,6 +1096,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
         {
             if (*itr == pMOToRem)
             {
+                std::lock_guard<std::mutex> lock(m_ParticlesMutex);
                 m_Particles.erase(itr);
                 removed = true;
                 break;
@@ -1086,6 +1109,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
             {
                 if (*itr == pMOToRem)
                 {
+                    std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
                     m_AddedParticles.erase(itr);
                     removed = true;
                     break;
@@ -1681,15 +1705,17 @@ void MovableMan::Update()
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
-            auto& luaStates = g_LuaMan.GetThreadedScriptStates();
-            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-                [&](LuaStateWrapper &luaState) {
-                    for (Actor *actor : m_Actors) {
-                        if (actor->GetLuaState() == &luaState) {
-                            actor->GetController()->Update();
+            {
+                LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+                std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+                    [&](LuaStateWrapper &luaState) {
+                        for (Actor *actor : m_Actors) {
+                            if (actor->GetLuaState() == &luaState) {
+                                actor->GetController()->Update();
+                            }
                         }
-                    }
-                });
+                    });
+            }
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
             for (Actor *actor : m_Actors) {

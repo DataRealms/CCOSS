@@ -27,10 +27,8 @@
 #include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
-//#include "Entity.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
-//#include "LuaMan.h"
 #include "lua.hpp"
 
 #include <execution>
@@ -93,6 +91,9 @@ void MovableMan::Clear()
 
 int MovableMan::Initialize()
 {
+    // TODO: Increase this number, or maybe only for certain classes?
+    Entity::ClassInfo::FillAllPools();
+
     return 0;
 }
 
@@ -235,7 +236,7 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
 
 void MovableMan::RegisterObject(MovableObject * mo) 
 { 
-	if (mo) {
+	if (!mo) {
         return;
     }
 
@@ -253,7 +254,7 @@ void MovableMan::RegisterObject(MovableObject * mo)
 
 void MovableMan::UnregisterObject(MovableObject * mo) 
 {
-	if (mo) {
+	if (!mo) {
         return;
     }
 

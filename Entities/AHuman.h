@@ -389,16 +389,16 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 	/// <summary>
-	/// Gets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// Gets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
 	/// </summary>
-	/// <returns>The angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</returns>
-	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
+	/// <returns>The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</returns>
+	float GetOneHandedReloadAngleOffset() const { return m_OneHandedReloadAngleOffset; }
 
 	/// <summary>
-	/// Sets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
+	/// Sets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
 	/// </summary>
-	/// <param name="newValue">The new angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</param>
-	void SetOneHandedReloadAngle(float newValue) { m_OneHandedReloadAngle = newValue; }
+	/// <param name="newValue">The new angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</param>
+	void SetOneHandedReloadAngleOffset(float newValue) { m_OneHandedReloadAngleOffset = newValue; }
 
 	/// Gets this AHuman's UpperBodyState.
 	/// </summary>
@@ -1044,7 +1044,7 @@ protected:
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
-	float m_OneHandedReloadAngle; //!< The angle to which HDFirearms should point when they're being reloaded one-handed.
+	float m_OneHandedReloadAngleOffset; //!< The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.

@@ -1485,10 +1485,12 @@ void GameActivity::Update()
 
 				m_ViewState[player] = ViewState::Normal;
                 g_GUISound.UserErrorSound()->Play(player);
-				if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
-					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				if (m_ControlledActor[player]) {
+					if (m_ControlledActor[player]->GetPieMenu()) {
+						m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+					}
+					m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 				}
-				m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 				if (pMarkedActor && pMarkedActor->GetPieMenu()) {
 					pMarkedActor->GetPieMenu()->DoDisableAnimation();
 				}

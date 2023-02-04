@@ -125,8 +125,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson
-          
+          brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng libtbb ninja meson
+
       - name: Build
         env:
           CC: "gcc-12"

@@ -55,6 +55,6 @@ namespace RTE {
 
 	void RTEAssertFunc(const char *description, const char *file, int line, bool &alwaysIgnore) {
 		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-		RTEAbortFunc(description, __FILE__, __LINE__);
+		RTEAbortFunc(description, filePath, line);
 	}
 }

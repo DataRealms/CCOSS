@@ -257,8 +257,8 @@ namespace RTE {
 				if (!m_HeldDevice->GetRecoilForce().IsZero()) {
 					AccountForHeldDeviceRecoil(m_HeldDevice, targetOffset);
 				}
-				AccountForHeldDeviceTerrainClipping(m_HeldDevice, targetOffset);
 				targetOffset *= m_Rotation;
+				AccountForHeldDeviceTerrainClipping(m_HeldDevice, targetOffset);
 			}
 
 			targetOffset.ClampMagnitude(m_MaxLength / 2.0F, m_MaxLength);

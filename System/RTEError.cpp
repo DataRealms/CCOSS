@@ -26,9 +26,7 @@ namespace RTE {
 			if (screen) {
 				BITMAP *abortScreenBuffer = create_bitmap(screen->w, screen->h);
 				blit(screen, abortScreenBuffer, 0, 0, 0, 0, screen->w, screen->h);
-				PALETTE palette;
-				get_palette(palette);
-				save_bmp("AbortScreen.bmp", abortScreenBuffer, palette);
+				save_bmp("AbortScreen.bmp", abortScreenBuffer, nullptr);
 				destroy_bitmap(abortScreenBuffer);
 			}
 

@@ -1,7 +1,7 @@
 external_inc_dirs = [include_directories('common',
                                          'common/boost_1_75',
                                          'common/fmod',
-                                         'common/luabind'
+                                         'common/luabind')
 if host_machine.system() in ['linux', 'darwin']
 endif
 if host_machine.system() == 'windows'

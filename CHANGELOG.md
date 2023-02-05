@@ -481,7 +481,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
 	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
 
-- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON` 
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
@@ -748,9 +748,11 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
-
 - Fix fire weapons causing extreme lag.
+
+- Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
 
 </details>
 

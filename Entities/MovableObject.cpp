@@ -520,8 +520,19 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
     if (m_OwningState == nullptr) {
-        m_OwningState = &g_LuaMan.GetRandomThreadedScriptState();
+        int i = RandomNum(0, c_NumThreadedLuaStates-1);
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+        while(true) {
+            i = (i + 1) % c_NumThreadedLuaStates;
+            if (luaStates[i].GetMutex().try_lock()) {
+                m_OwningState = &luaStates[i];
+                break;
+            }
+        }
+    } else {
+        m_OwningState->GetMutex().lock();
     }
+    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex(), std::adopt_lock);
 
 	std::string luaClearSupportedFunctionsString;
 	luaClearSupportedFunctionsString.reserve(160);
@@ -591,13 +602,20 @@ int MovableObject::ReloadScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::InitializeObjectScripts() {
-    // Lazily-init our owning lua script state
     if (m_OwningState == nullptr) {
-        m_OwningState = &g_LuaMan.GetRandomThreadedScriptState();
+        int i = RandomNum(0, c_NumThreadedLuaStates-1);
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+        while(true) {
+            i = (i + 1) % c_NumThreadedLuaStates;
+            if (luaStates[i].GetMutex().try_lock()) {
+                m_OwningState = &luaStates[i];
+                break;
+            }
+        }
+    } else {
+        m_OwningState->GetMutex().lock();
     }
-
-    // Ensure temp entity isn't messed with
-    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex());
+    std::lock_guard<std::recursive_mutex> lock(m_OwningState->GetMutex(), std::adopt_lock);
 
 	m_OwningState->SetTempEntity(this);
 

@@ -121,7 +121,9 @@ namespace RTE {
 		}
 		// Do static particle bounce calculations.
 		int hitCount = 0;
-		if (!IsTooFast()) { m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); }
+		if (!IsTooFast()) { 
+			m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); 
+		}
 
 		m_Atom->ClearMOIDIgnoreList();
 

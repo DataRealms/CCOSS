@@ -1984,7 +1984,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     int actorID = 0;
     for (Actor *actor : m_Actors) {
         m_ContiguousActorIDs[actor] = actorID++;
-		if (actor->GetsHitByMOs() && !actor->IsSetToDelete()) {
+		if (!actor->IsSetToDelete()) {
             actor->UpdateMOID(m_MOIDIndex);
             actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -1994,7 +1994,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *item : m_Items) {
-        if (item->GetsHitByMOs() && !item->IsSetToDelete()) {
+        if (!item->IsSetToDelete()) {
             item->UpdateMOID(m_MOIDIndex);
             item->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -2004,7 +2004,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *particle : m_Particles) {
-        if (particle->GetsHitByMOs() && !particle->IsSetToDelete()) {
+        if (!particle->IsSetToDelete()) {
             particle->UpdateMOID(m_MOIDIndex);
             particle->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();

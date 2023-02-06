@@ -1793,9 +1793,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
 
-    // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
-    if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+    // Only draw MOID if this has a valid MOID assigned to it
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
+    }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before

@@ -67,7 +67,9 @@ namespace RTE {
 
 				long subgroupID = atomCopy->GetSubID();
 				if (subgroupID != 0) {
-					if (m_SubGroups.find(subgroupID) == m_SubGroups.end()) { m_SubGroups.insert({ subgroupID, std::list<Atom *>() }); }
+					if (m_SubGroups.find(subgroupID) == m_SubGroups.end()) { 
+						m_SubGroups.insert({ subgroupID, std::vector<Atom *>() }); 
+					}
 
 					m_SubGroups.find(subgroupID)->second.push_back(atomCopy);
 				}
@@ -80,7 +82,9 @@ namespace RTE {
 			m_IgnoreMOIDs.push_back(moidToIgnore);
 		}
 
-		if (!reference.m_Atoms.empty()) { m_Material = reference.m_Atoms.front()->GetMaterial(); }
+		if (!reference.m_Atoms.empty()) { 
+			m_Material = reference.m_Atoms.front()->GetMaterial(); 
+		}
 
 		return 0;
 	}
@@ -222,8 +226,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long subgroupID, const Vector &offset, const Matrix &offsetRotation) {
-		if (m_SubGroups.count(subgroupID) == 0) { m_SubGroups.insert({ subgroupID, std::list<Atom *>() }); }
+	void AtomGroup::AddAtoms(const std::vector<Atom *> &atomList, long subgroupID, const Vector &offset, const Matrix &offsetRotation) {
+		if (m_SubGroups.count(subgroupID) == 0) { m_SubGroups.insert({ subgroupID, std::vector<Atom *>() }); }
 
 		Atom *atomToAdd;
 		for (const Atom * atom : atomList) {
@@ -244,25 +248,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AtomGroup::RemoveAtoms(long removeID) {
-		bool removedAny = false;
-		std::list<Atom *>::iterator eraseItr;
+		std::size_t oldSize = m_Atoms.size();
 
-		// TODO: Look into using remove_if.
-		for (std::list<Atom *>::iterator atomItr = m_Atoms.begin(); atomItr != m_Atoms.end();) {
-			if ((*atomItr)->GetSubID() == removeID) {
-				delete (*atomItr);
-				eraseItr = atomItr;
-				atomItr++;
-				m_Atoms.erase(eraseItr);
-				removedAny = true;
-			} else {
-				atomItr++;
-			}
-		}
+		m_Atoms.erase(
+			std::remove_if(m_Atoms.begin(), m_Atoms.end(),
+				[removeID](Atom *atom) {
+					return atom->GetSubID() == removeID;
+				}), 
+			m_Atoms.end());
+
 		m_SubGroups.erase(removeID);
+
+		bool removedAny = oldSize != m_Atoms.size();
 		if (removedAny) {
 			m_MomentOfInertia = 0.0F;
-			if (m_OwnerMOSR) { GetMomentOfInertia(); }
+			if (m_OwnerMOSR) { 
+				GetMomentOfInertia(); 
+			}
 		}
 
 		return removedAny;
@@ -322,10 +324,10 @@ namespace RTE {
 
 		HitData hitData;
 
-		std::map<MOID, std::list<Atom *>> hitMOAtoms;
-		std::list<Atom *> hitTerrAtoms;
-		std::list<Atom *> penetratingAtoms;
-		std::list<Atom *> hitResponseAtoms;
+		std::unordered_map<MOID, std::vector<Atom *>> hitMOAtoms;
+		std::vector<Atom *> hitTerrAtoms;
+		std::vector<Atom *> penetratingAtoms;
+		std::vector<Atom *> hitResponseAtoms;
 
 		// Lock all bitmaps involved outside the loop - only relevant for video bitmaps so disabled at the moment.
 		//if (!scenePreLocked) { g_SceneMan.LockScene(); }
@@ -449,9 +451,7 @@ namespace RTE {
 
 								// See if we already have another Atom hitting this MO in this step. If not, then create a new list unique for that MO's ID and insert into the map of MO-hitting Atoms.
 								if (!(hitMOAtoms.count(tempMOID))) {
-									std::list<Atom *> newList;
-									newList.push_back(atom);
-									hitMOAtoms.insert({ tempMOID, newList });
+									hitMOAtoms.insert({ tempMOID, std::vector<Atom*>{ atom } });
 								} else {
 									// If another Atom of this group has already hit this same MO during this step, go ahead and add the new Atom to the corresponding map for that MOID.
 									hitMOAtoms.at(tempMOID).push_back(atom);
@@ -513,7 +513,7 @@ namespace RTE {
 					const float momentInertiaDistribution = m_MomentOfInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Determine which of the colliding Atoms will penetrate the terrain.
-					for (std::list<Atom*>::iterator atomItr = hitTerrAtoms.begin(); atomItr != hitTerrAtoms.end(); ) {
+					for (std::vector<Atom*>::iterator atomItr = hitTerrAtoms.begin(); atomItr != hitTerrAtoms.end(); ) {
 						// Calculate and store the accurate hit radius of the Atom in relation to the CoM
 						hitData.HitRadius[HITOR] = m_OwnerMOSR->RotateOffset((*atomItr)->GetOffset()) * c_MPP;
 						// Figure out the pre-collision velocity of the hitting Atom due to body translation and rotation.
@@ -1432,7 +1432,7 @@ namespace RTE {
 			return false;
 		}
 
-		std::list<Atom *> intersectingAtoms;
+		std::vector<Atom *> intersectingAtoms;
 
 		// Restart and go through all Atoms to find all intersecting the specific intersected MO
 		for (Atom *atom : m_Atoms) {
@@ -1502,8 +1502,13 @@ namespace RTE {
 		}
 
 		// Now actually apply the exit vectors to both, but only if the jump isn't too jarring
-		if (thisExit.MagnitudeIsLessThan(m_OwnerMOSR->GetIndividualRadius())) { position += thisExit; }
-		if (!intersectedExit.IsZero() && intersectedExit.MagnitudeIsLessThan(intersectedMO->GetRadius())) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
+		if (thisExit.MagnitudeIsLessThan(m_OwnerMOSR->GetIndividualRadius())) { 
+			position += thisExit; 
+		}
+
+		if (!intersectedExit.IsZero() && intersectedExit.MagnitudeIsLessThan(intersectedMO->GetRadius())) { 
+			intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); 
+		}
 
 		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.MagnitudeIsGreaterThan(m_OwnerMOSR->GetDiameter())) */ {
 			// Move back before gibbing so gibs don't end up inside terrain

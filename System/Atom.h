@@ -310,7 +310,7 @@ namespace RTE {
 		/// AtomGroup may set this shared list of ignored MOIDs to avoid setting and removing ignored MOIDs for every atom one by one. The list is maintained only by AtomGroup, Atom never owns it.
 		/// </summary>
 		/// <param name="ignoreMOIDsByGroup">New MOIDs list to ignore.</param>
-		void SetIgnoreMOIDsByGroup(std::list<MOID> const * ignoreMOIDsByGroup) { m_IgnoreMOIDsByGroup = ignoreMOIDsByGroup; };
+		void SetIgnoreMOIDsByGroup(std::vector<MOID> const * ignoreMOIDsByGroup) { m_IgnoreMOIDsByGroup = ignoreMOIDsByGroup; };
 
 		/// <summary>
 		/// Clear the list of MOIDs that this Atom is set to ignore collisions with during its next travel sequence.
@@ -492,8 +492,8 @@ namespace RTE {
 
 		MovableObject *m_OwnerMO; //!< The owner of this Atom. The owner is obviously not owned by this Atom.
 		MOID m_IgnoreMOID; //!< Special ignored MOID.
-		std::list<MOID> m_IgnoreMOIDs; //!< ignore hits with MOs of these IDs.
-		std::list<MOID> const * m_IgnoreMOIDsByGroup; //!< Also ignore hits with MOs of these IDs. This one may be set externally by atom group.
+		std::vector<MOID> m_IgnoreMOIDs; //!< ignore hits with MOs of these IDs.
+		std::vector<MOID> const * m_IgnoreMOIDsByGroup; //!< Also ignore hits with MOs of these IDs. This one may be set externally by atom group.
 
 		HitData m_LastHit; //!< Data containing information on the last collision experienced by this Atom.
 		MOID m_MOIDHit; //!< The MO, if any, this Atom hit on the last step.

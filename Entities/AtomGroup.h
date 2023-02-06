@@ -95,7 +95,7 @@ namespace RTE {
 		/// Gets the current list of Atoms that make up the group.
 		/// </summary>
 		/// <returns>A const reference to the Atom list.</returns>
-		const std::list<Atom *> & GetAtomList() const { return m_Atoms; }
+		const std::vector<Atom *> & GetAtomList() const { return m_Atoms; }
 
 		/// <summary>
 		/// Gets the current number of Atoms that make up the group.
@@ -189,7 +189,7 @@ namespace RTE {
 		/// <param name="subgroupID">The desired subgroup ID for the Atoms being added.</param>
 		/// <param name="offset">An offset that should be applied to all added Atoms.</param>
 		/// <param name="offsetRotation">The rotation of the placed Atoms around the specified offset.</param>
-		void AddAtoms(const std::list<Atom *> &atomList, long subgroupID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
+		void AddAtoms(const std::vector<Atom *> &atomList, long subgroupID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
 
 		/// <summary>
 		/// Removes all Atoms of a specific subgroup ID from this AtomGroup.
@@ -357,8 +357,8 @@ namespace RTE {
 
 		// TODO: It's probably worth trying out changing this from a list to a vector. m_Atoms is iterated over often and we could probably get some big gainz by doing this swap.
 		// The downside is anytime attachables with atoms get added we may have the cost of resizing the vector but that's an uncommon use case while iterating over atoms happens multiple times per frame.
-		std::list<Atom *> m_Atoms; //!< List of Atoms that constitute the group. Owned by this.
-		std::unordered_map<long, std::list<Atom *>> m_SubGroups; //!< Sub groupings of Atoms. Points to Atoms owned in m_Atoms. Not owned.
+		std::vector<Atom *> m_Atoms; //!< List of Atoms that constitute the group. Owned by this.
+		std::unordered_map<long, std::vector<Atom *>> m_SubGroups; //!< Sub groupings of Atoms. Points to Atoms owned in m_Atoms. Not owned.
 
 		MOSRotating *m_OwnerMOSR; //!< The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
 		float m_StoredOwnerMass; //!< The stored mass for the owner MOSR. Used to figure out when the moment of inertia needs to be recalculated due to significant mass changes.
@@ -381,7 +381,7 @@ namespace RTE {
 
 		float m_MomentOfInertia; //!< Moment of Inertia for this AtomGroup.
 
-		std::list<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
+		std::vector<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
 
 	private:
 

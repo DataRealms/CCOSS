@@ -63,10 +63,6 @@ namespace RTE {
 		RTEAssert(activity, "Tried to add to spatial partition grid with no running activity!");
 
 		const MovableObject &rootParentMo = *mo.GetRootParent();
-		if (!rootParentMo.GetsHitByMOs() && !rootParentMo.HitsMOs()) {
-			return;
-		}
-
 		int topLeftCellX = rect.m_Left / m_CellSize;
 		int topLeftCellY = rect.m_Top / m_CellSize;
 		int bottomRightCellX = rect.m_Right / m_CellSize;
@@ -158,8 +154,7 @@ namespace RTE {
 
 		for (MOID moid : potentialMOIDs) {
 			MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-			Vector shortest = g_SceneMan.ShortestDistance(centre, mo->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
-			if (mo && !shortest.MagnitudeIsGreaterThan(radius)) {
+			if (mo && !g_SceneMan.ShortestDistance(centre, mo->GetPos()).MagnitudeIsGreaterThan(radius)) {
 				s_MOList.push_back(mo);
 			}
 		}

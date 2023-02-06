@@ -858,11 +858,11 @@ void MovableObject::PreTravel()
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
         m_IsTraveling = true;
-		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 #ifdef DRAW_MOID_LAYER
+		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
-#endif
 		}
+#endif
 	}
 
     // Save previous position and velocities before moving
@@ -952,6 +952,16 @@ void MovableObject::Update()
 
 void MovableObject::Update() {
 	if (m_RandomizeEffectRotAngleEveryFrame) { m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode mode, bool onlyPhysical) const {
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
+        return;
+    }
+    
+    g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1.0F);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

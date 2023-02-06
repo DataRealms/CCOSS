@@ -6,6 +6,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool IntRect::IntersectionCut(const IntRect &rhs) {
+		if (Intersects(rhs)) {
+			m_Left = MAX(m_Left, rhs.m_Left);
+			m_Right = MIN(m_Right, rhs.m_Right);
+			m_Top = MAX(m_Top, rhs.m_Top);
+			m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
+			return true;
+		}
+
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Box::Create(const Vector &corner1, const Vector &corner2) {
 		m_Corner = corner1;
 		m_Width = corner2.m_X - corner1.m_X;

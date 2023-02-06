@@ -150,8 +150,9 @@ namespace RTE {
 		RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw " + GetPresetName());
 		RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds for " + GetPresetName());
 
-		if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+		if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
 			return;
+		}
 
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
 

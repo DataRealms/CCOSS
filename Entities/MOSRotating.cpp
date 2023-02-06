@@ -1595,15 +1595,9 @@ void MOSRotating::Update() {
     if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) { m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawMOIDIfOverlapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the MOID representation of this to the SceneMan's MOID layer if
-//                  this is found to potentially overlap another MovableObject.
-
-bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
-{
+bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO) {
     if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
         return false;
     }
@@ -1612,13 +1606,7 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
         return false;
     }
 
-    float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
-    Vector otherPos = pOverlapMO->GetPos();
-
-    // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-    if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
-    {
-        // They may be overlapping, so draw the MOID rep of this to the MOID layer
+    if (g_SceneMan.ShortestDistance(m_Pos, pOverlapMO->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(GetRadius() + pOverlapMO->GetRadius())) {
         Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
         return true;
     }
@@ -1801,9 +1789,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
 
-    // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
-    if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+    // Only draw MOID if this has a valid MOID assigned to it
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
+    }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before

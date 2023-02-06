@@ -257,7 +257,7 @@ namespace RTE {
 			release_bitmap(targetBitmap);
 		}
 
-		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1);
+		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1.0F);
 		
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();

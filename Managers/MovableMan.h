@@ -151,22 +151,22 @@ public:
 
     int GetMOIDCount() { return m_MOIDIndex.size(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HitTestMOatPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tests whether this MOID is present at this Pixel Position
-// Arguments:       The X and Y coordinates of screen Scene pixel to test the MO at.
-// Return value:    Whether the MOID is currently at the specified pixel location.
-
+    /// <summary>
+    /// Tests whether the given MovableObject is currently at the specified pixel coordinates.
+    /// </summary>
+    /// <param name="mo">The MovableObject to test.</param>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+    /// <returns>Whether the given MovableObject is currently at the specified pixel coordinates.</returns>
     bool HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a MOID from pixel coordinates in the Scene.
-// Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
-// Return value:    The MOID currently at the specified pixel location.
-
+    /// <summary>
+    /// Gets a MOID from pixel coordinates in the Scene.
+    /// </summary>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to get the MOID of.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to get the MOID of.</param>
+    /// <param name="moidList">The collection of MOIDs to check the against the specified coordinates.</param>
+    /// <returns>The topmost MOID currently at the specified pixel coordinates.</returns>
     MOID GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList);
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -875,15 +875,35 @@ public:
 	unsigned int GetSimUpdateFrameNumber() const { return m_SimUpdateFrameNumber; }
 
     /// <summary>
-    /// Get MOs that are within a box
+    /// Gets pointers to the MOs that are within the given Box, and whose team is not ignored.
     /// </summary>
+    /// <param name="box">The Box to get MOs within.</param>
+    /// <param name="ignoreTeam">The team to ignore.</param>
+    /// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
     const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); }
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the given Box.
+	/// </summary>
+	/// <param name="box">The Box to get MOs within.</param>
+	/// <returns>Pointers to the MOs that are within the given Box.</returns>
     const std::vector<MovableObject *> & GetMOsInBox(const Box &box) const { return GetMOsInBox(box, Activity::NoTeam); }
 
-    /// <summary>
-    /// Get MOs that are within a radius
-    /// </summary>
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
     const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam); }
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position.</returns>
     const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
 
 

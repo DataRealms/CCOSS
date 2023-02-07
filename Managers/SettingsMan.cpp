@@ -150,7 +150,7 @@ namespace RTE {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
 			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
-    } else if (propName == "SubPieMenuHoverOpenDelay") {
+		} else if (propName == "SubPieMenuHoverOpenDelay") {
 			reader >> m_SubPieMenuHoverOpenDelay;
 		} else if (propName == "EndlessMode") {
 			reader >> m_EndlessMetaGameMode;

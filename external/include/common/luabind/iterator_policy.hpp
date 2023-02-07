@@ -68,6 +68,12 @@ int make_range(lua_State* L, Container& container)
     return make_range(L, container.begin(), container.end());
 }
 
+template <class Container>
+int make_range(lua_State* L, Container* container)
+{
+    return make_range(L, container->begin(), container->end());
+}
+
 struct iterator_converter
 {
     typedef boost::mpl::bool_<false> is_value_converter;

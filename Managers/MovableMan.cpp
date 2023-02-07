@@ -177,10 +177,7 @@ MovableObject * MovableMan::GetMOFromID(MOID whichID) {
 	return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HitTestMOAtPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tests whether this MOID is present at this Pixel Position
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const {
     if (!mo.GetsHitByMOs() || mo.GetRootParent()->GetTraveling()) {
@@ -188,19 +185,17 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
     }
 
     if (const MOSprite *moSprite = dynamic_cast<const MOSprite *>(&mo); moSprite) {
-        // Check if the pixel is nearer than the "maximum sprite radius"
-        Vector sampleToMO = g_SceneMan.ShortestDistance(moSprite->GetPos(), Vector(pixelX, pixelY));
-        if (sampleToMO.MagnitudeIsLessThan(moSprite->GetRadius())) {
-            // Check the scene position in the current local space of the MO
-            // Account for Position, Sprite Offset, Angle and HFlipped (and Scale eventually maybe)
-            Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works
-            Vector entryPos = (sampleToMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
-            int localX = std::floor(entryPos.m_X);
-            int localY = std::floor(entryPos.m_Y);
+        Vector distanceBetweenTestPositionAndMO = g_SceneMan.ShortestDistance(moSprite->GetPos(), Vector(static_cast<float>(pixelX), static_cast<float>(pixelY)));
+        if (distanceBetweenTestPositionAndMO.MagnitudeIsLessThan(moSprite->GetRadius())) {
+            // Check the scene position in the current local space of the MO, accounting for Position, Sprite Offset, Angle and HFlipped.
+			//TODO Account for Scale as well someday, maybe.
+            Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works.
+            Vector entryPos = (distanceBetweenTestPositionAndMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
+			int localX = entryPos.GetFloorIntX();
+            int localY = entryPos.GetFloorIntY();
 
-            // Return the MOID if we hit the Sprite
-            BITMAP* sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
-            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != g_MaskColor;
+            BITMAP *sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
+            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != ColorKeys::g_MaskColor;
         }
     } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
         const Vector &pos = moPixel->GetPos();
@@ -210,26 +205,24 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
     return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a MOID from pixel coordinates in the Scene.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList) {
-    // Loop through the MOs. We do this in reverse, as we want to collide with the top layer (last drawn)
+    // Note - We loop through the MOs in reverse to make sure that the topmost (last drawn) MO that overlaps the specified coordinates is the one returned.
     for (auto itr = moidList.rbegin(), itrEnd = moidList.rend(); itr < itrEnd; ++itr) {
         MOID moid = *itr;
 
         const MovableObject *mo = GetMOFromID(moid);
-        RTEAssert(mo, "Null MO found in moid list!");
+        RTEAssert(mo, "Null MO found in MOID list!");
         if (mo && HitTestMOAtPixel(*mo, pixelX, pixelY)) {
             return moid;
         }
     }
 
-    // If no MO's were found at this location, return g_NoMOID
     return g_NoMOID;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RegisterObject
@@ -2065,7 +2058,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     int actorID = 0;
     for (Actor *actor : m_Actors) {
         m_ContiguousActorIDs[actor] = actorID++;
-		if (actor->GetsHitByMOs() && !actor->IsSetToDelete()) {
+		if (!actor->IsSetToDelete()) {
             actor->UpdateMOID(m_MOIDIndex);
             actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -2075,7 +2068,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *item : m_Items) {
-        if (item->GetsHitByMOs() && !item->IsSetToDelete()) {
+        if (!item->IsSetToDelete()) {
             item->UpdateMOID(m_MOIDIndex);
             item->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -2085,7 +2078,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *particle : m_Particles) {
-        if (particle->GetsHitByMOs() && !particle->IsSetToDelete()) {
+        if (!particle->IsSetToDelete()) {
             particle->UpdateMOID(m_MOIDIndex);
             particle->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();

@@ -329,9 +329,9 @@ namespace RTE {
 #pragma region MOSRotating Lua Adapters
 	struct LuaAdaptersMOSRotating {
 		static void GibThis(MOSRotating *luaSelfObject);
-		static const std::vector<AEmitter *> & GetWounds1(const MOSRotating *luaSelfObject);
-		static const std::vector<AEmitter *> & GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
-		// Need a seperate implementation function without the static return so we can safely recurse.
+		static std::vector<AEmitter *> * GetWounds1(const MOSRotating *luaSelfObject);
+		static std::vector<AEmitter *> * GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
+		// Need a seperate implementation function without the return so we can safely recurse.
 		static void GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds);
 	};
 #pragma endregion

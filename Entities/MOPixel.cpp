@@ -249,17 +249,20 @@ namespace RTE {
 				break;
 		}
 
+		bool shouldDraw = true;
+
 #ifndef DRAW_MOID_LAYER
-		if (mode != g_DrawMOID)
+		shouldDraw = mode != DrawMode::g_DrawMOID;
 #endif
-		{
-			acquire_bitmap(targetBitmap);
-			putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
-			release_bitmap(targetBitmap);
+
+		Vector pixelPos = m_Pos - targetPos;
+
+		if (shouldDraw) {
+			putpixel(targetBitmap, pixelPos.GetFloorIntX(), pixelPos.GetFloorIntY(), drawColor);
 		}
 
-		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1);
-		
+		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, pixelPos, 1.0F);
+
 		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();
 		}

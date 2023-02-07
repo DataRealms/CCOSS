@@ -316,22 +316,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<AEmitter *> & LuaAdaptersMOSRotating::GetWounds1(const MOSRotating *luaSelfObject) {
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds1(const MOSRotating *luaSelfObject) {
 		return GetWounds2(luaSelfObject, true, false, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<AEmitter *> & LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, 
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, 
 	                                                                  bool includePositiveDamageAttachables,
 	                                                                  bool includeNegativeDamageAttachables, 
 	                                                                  bool includeNoDamageAttachables) {
-		// We use a static vector because we need to return a reference to work with Luabind.
-		// This requires a static memory location, so we use this vector here as a buffer.
-		static std::vector<AEmitter *> wounds;
-		wounds.clear();
+		auto *wounds = new std::vector<AEmitter *>();
 
-		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, *wounds);
 		return wounds;
 	}
 

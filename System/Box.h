@@ -7,6 +7,41 @@
 namespace RTE {
 
 	/// <summary>
+	/// A simple rectangle with integer coordinates.
+	/// </summary>
+	struct IntRect {
+
+		int m_Left = 0; //!< X position of the IntRect top left corner.
+		int m_Top = 0; //!< Y position of the IntRect top left corner.
+		int m_Right = 0; //!< X position of the IntRect bottom right corner.
+		int m_Bottom = 0; //!< Y position of the IntRect bottom right corner.
+
+		/// <summary>
+		/// Constructor method used to instantiate an IntRect object from four int values defining the initial corners of this IntRect.
+		/// </summary>
+		/// <param name="left">X position of the IntRect top left corner.</param>
+		/// <param name="top">Y position of the IntRect top left corner.</param>
+		/// <param name="right">X position of the IntRect bottom right corner.</param>
+		/// <param name="bottom">Y position of the IntRect bottom right corner.</param>
+		IntRect(int left, int top, int right, int bottom) : m_Left(left), m_Top(top), m_Right(right), m_Bottom(bottom) {}
+
+		/// <summary>
+		/// Checks whether this IntRect is intersecting another one.
+		/// </summary>
+		/// <param name="rhs">The other IntRect to check for intersection with.</param>
+		/// <returns>Whether this IntRect is intersecting another one.</returns>
+		bool Intersects(const IntRect &rhs) const { return m_Left < rhs.m_Right && m_Right > rhs.m_Left && m_Top < rhs.m_Bottom && m_Bottom > rhs.m_Top; }
+
+		/// <summary>
+		/// If this and the passed in IntRect intersect, this will be modified to represent the boolean AND of the two.
+		/// If they don't intersect, nothing happens and false is returned.
+		/// </summary>
+		/// <param name="rhs">THe other IntRect to cut against.</param>
+		/// <returns>Whether an intersection was detected and this was cut down to the AND of the two IntRects.</returns>
+		bool IntersectionCut(const IntRect &rhs);
+	};
+
+	/// <summary>
 	/// A useful 2D axis-aligned rectangle class.
 	/// </summary>
 	class Box : public Serializable {
@@ -258,36 +293,6 @@ namespace RTE {
 		/// Clears all the member variables of this Box, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear() { m_Corner.Reset(); m_Width = m_Height = 0; }
-	};
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Struct:          IntRect
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     A simple rectangle with integer coordinates.
-	// Parent(s):       None.
-	// Class history:   8/4/2007 IntRect created.
-
-	struct IntRect
-	{
-		int m_Left;
-		int m_Top;
-		int m_Right;
-		int m_Bottom;
-
-		IntRect() { m_Left = m_Top = m_Right = m_Bottom = 0; }
-		IntRect(int left, int top, int right, int bottom) { m_Left = left; m_Top = top; m_Right = right; m_Bottom = bottom; }
-		bool Intersects(const IntRect& rhs) { return m_Left < rhs.m_Right&& m_Right > rhs.m_Left && m_Top < rhs.m_Bottom&& m_Bottom > rhs.m_Top; }
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Method:          IntersectionCut
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     If this and the passed in IntRect intersect, this will be modified to
-		//                  represent the boolean AND of the two. If it doens't intersect, nothing
-		//                  happens and false is returned.
-		// Arguments:       The other IntRect to cut against.
-		// Return value:    Whether an intersection was detected and this was cut down to the AND.
-		bool IntersectionCut(const IntRect& rhs);
 	};
 }
 #endif

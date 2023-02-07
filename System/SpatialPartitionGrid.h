@@ -1,7 +1,7 @@
 #ifndef _RTESPATIALPARTITIONGRID_
 #define _RTESPATIALPARTITIONGRID_
 
-// For Teams :(
+//TODO Move Team enum into Constants so we can avoid including Activity here.
 #include "Activity.h"
 
 #include "Constants.h"
@@ -13,11 +13,12 @@ namespace RTE {
 	class MovableObject;
 
 	/// <summary>
-	/// A spatial partitioning grid, used to optimize MOID collision checks
+	/// A spatial partitioning grid, used to optimize MOID collision checks.
 	/// </summary>
 	class SpatialPartitionGrid {
 
 	public:
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a SpatialPartitionGrid object.
@@ -28,12 +29,6 @@ namespace RTE {
 		/// Constructor method used to instantiate a SpatialPartitionGrid object.
 		/// </summary>
 		SpatialPartitionGrid(int width, int height, int cellSize) { Clear(); Create(width, height, cellSize); }
-
-		/// <summary>
-		/// Copy constructor method used to instantiate a SpatialPartitionGrid object identical to an already existing one.
-		/// </summary>
-		/// <param name="reference">A SpatialPartitionGrid object which is passed in by reference.</param>
-		SpatialPartitionGrid(const SpatialPartitionGrid &reference) { Clear(); Create(reference); }
 
 		/// <summary>
 		/// Makes the SpatialPartitionGrid object ready for use.
@@ -50,54 +45,72 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Grid Management
-		typedef std::vector<MOID> MOIDList;
-
 		/// <summary>
 		/// Resets the spatial partitioning grid, removing everything from it
 		/// </summary>
 		void Reset();
 
 		/// <summary>
-		/// Adds a MOID to the spatial partitioning grid
+		/// Adds the given MovableObject to this SpatialPartitionGrid.
 		/// </summary>
+		/// <param name="rect">A rectangle defining the space the MovableObject takes up.</param>
+		/// <param name="mo">The MovableObject to add.</param>
 		void Add(const IntRect &rect, const MovableObject &mo);
 
 		/// <summary>
-		/// Get MOIDs that are within a box
+		/// Gets a vector of pointers to all MovableObjects within the given Box, who aren't of the ignored team.
 		/// </summary>
+		/// <param name="box">The Box to get MovableObjects within.</param>
+		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
+		/// <returns>A vector of pointers to all MovableObjects within the given Box, who aren't of the ignored team.</returns>
 		const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const;
 
 		/// <summary>
-		/// Get MOIDs that are within a radius
+		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.
 		/// </summary>
-		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
+		/// <param name="center">The center point to get MovableObjects around.</param>
+		/// <param name="radius">The radius to get MovableObjects within.</param>
+		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
+		/// <returns>A vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.</returns>
+		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const;
 
 		/// <summary>
-		/// Get MOIDs that are potentially overlapping a pixel
+		/// Gets the MOIDs that are potentially overlapping the given X and Y Scene coordinates.
 		/// </summary>
-		const SpatialPartitionGrid::MOIDList & GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
+		/// <param name="x">The X coordinate to check.</param>
+		/// <param name="y">The Y coordinate to check.</param>
+		/// <param name="ignoreTeam">The team to ignore when getting MOIDs.</param>
+		/// <returns>A vector of MOIDs that are potentially overlapping the x and y coordinates.</returns>
+		const std::vector<int> & GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
 #pragma endregion
 
 	private:
-		int GetCellIdForCellCoords(int cellX, int cellY) const;
 
-		int m_Width; // Grid width in cells
-		int m_Height; // Grid height in cells
-		int m_CellSize; // Cell size, in pixels
+		int m_Width; //!< The width of the SpatialPartitionGrid, in cells.
+		int m_Height; //!< The height of the SpatialPartitionGrid, in cells.
+		int m_CellSize; //!< The size of each of the SpatialPartitionGrid's cells, in pixels.
 
-		// We store a list per team, so overlapping actors don't waste loads of time collision checking against themselves
-		// Note, this is this list of moids that are potentially colliding per team, not the list of MOIDS per team
-		// So the list for team 1 includes the MOIDs for team 2, 3, 4, and no-team
-		typedef std::array<std::vector<MOIDList>, Activity::MaxTeamCount+1> CellsPerTeam;
-		CellsPerTeam m_Cells;
+		// We store a list per team, so overlapping Actors don't waste loads of time collision checking against themselves.
+		// Note that this is this list of MOIDs that are potentially colliding per team, so the list for team 1 contains the MOIDs for team 2, 3, 4, and no-team, as well as anything for team 1 that doesn't ignore team hits.
+		std::array<std::vector<std::vector<int>>, Activity::MaxTeamCount + 1> m_Cells; //!< Array of cells for each team. The outside-vector is the vector of cells for the team, and each inside-vector entry contains all MOIDs in the cell's space that can collide with that team.
 
-		// We also don't want to waste loads of time looping through and unclearing unused cells, so store a set of used cells
-		std::unordered_set<int> m_UsedCells;
+		std::unordered_set<int> m_UsedCellIds; //!< Set of used cell Ids, maintained to avoid wasting time looping through and clearing unused cells.
 
 		/// <summary>
-		/// Clears all the member variables of this SpatialPartitionGrid, effectively resetting the members of this abstraction level only.
+		/// Gets the Id of the cell at the given SpatialPartitionGrid coordinates, automatically accounting for wrapping.
+		/// </summary>
+		/// <param name="cellX">The x coordinate of the cell to get the Id of.</param>
+		/// <param name="cellY">The y coordinate of the cell to get the Id of.</param>
+		/// <returns>The Id of the cell at the given SpatialPartitionGrid coordinates.</returns>
+		int GetCellIdForCellCoords(int cellX, int cellY) const;
+
+		/// <summary>
+		/// Clears all the member variables of this SpatialPartitionGrid.
 		/// </summary>
 		void Clear();
+
+		// Disallow the use of an implicit method.
+		SpatialPartitionGrid(const SpatialPartitionGrid &reference) = delete;
 	};
 }
 #endif

@@ -1515,6 +1515,8 @@ enum MOType
 
 	void Update() override;
 
+    void Draw(BITMAP* pTargetBitmap, const Vector& targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateScript

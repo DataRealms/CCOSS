@@ -105,12 +105,11 @@ namespace RTE {
 #pragma region Logging
 		/// <summary>
 		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
-		/// Abstract base to allow reader to set our reader position. However, because we're often used as a parent for basic types
-		/// (i.e, Vector, Matrix, Color: types where we don't want to spend any time doing string construction)
-		/// we don't actually store this data here. This just provides an interface.
+		/// Because we're often used as a parent for basic types (i.e, Vector, Matrix, Color), where we don't want to spend any time doing string construction we don't actually store this data here.
+		/// This just acts as an abstract base for child classes to implement.
 		/// </summary>
 		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
-		virtual void SetFormattedReaderPosition(const std::string &newPosition) { }
+		virtual void SetFormattedReaderPosition(const std::string &newPosition) {}
 #pragma endregion
 
 #pragma region Operator Overloads

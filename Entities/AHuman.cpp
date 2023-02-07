@@ -4317,11 +4317,6 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 							if (reloadMultiplier != 1.0F) {
 								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
 								barColorIndex = reloadMultiplier > 1.0F ? (m_IconBlinkTimer.AlternateSim(250) ? 13 : barColorIndex) : 133;
-								/*
-								if (m_IconBlinkTimer.AlternateSim(250)) {
-									barColorIndex = reloadMultiplier > 1.0F ? (reloadMultiplier > 1.5F ? (reloadMultiplier > 2.0F ? 47 : 48) : 86) : 133;
-								}
-								*/
 							}
 						}
 						int totalTextWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;

@@ -428,7 +428,6 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
-		.property("OneHandedReloadAngleOffset", &AHuman::GetOneHandedReloadAngleOffset, &AHuman::SetOneHandedReloadAngleOffset)
 		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)

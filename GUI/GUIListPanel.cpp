@@ -438,12 +438,10 @@ void GUIListPanel::OnMouseWheelChange(int x, int y, int modifier, int mouseWheel
 	if (!m_MouseScroll) {
 		return;
 	}
-	else if ( (PointInsideList(x, y) && !m_MultiSelect) || (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y)) )
-	{
+	else if ((PointInsideList(x, y) && !m_MultiSelect) || (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y)) =) {
 		ScrollBarScrolling(mouseWheelChange);
 	}
-	if (m_HotTracking && GetItem(x, y) != nullptr && (GetItem(x, y) != GetSelected()))
-	{
+	if (m_HotTracking && GetItem(x, y) != nullptr && (GetItem(x, y) != GetSelected())) {
 		SelectItem(x, y, modifier);
 	}
 }

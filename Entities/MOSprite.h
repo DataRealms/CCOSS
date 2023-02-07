@@ -400,19 +400,18 @@ public:
 // Arguments:       None.
 // Return value:    Whether this is either moving or rotating too fast.
 
-	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (GetRadius() + 1.0f)); }
-    //bool IsTooFast() const override { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
+	bool IsTooFast() const override { return m_Vel.MagnitudeIsGreaterThan(500.0F) || std::fabs(m_AngularVel) > (2000.0F / (GetRadius() + 1.0F)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  FixTooFast
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Slows the speed of anyhting that is deemed to be too fast to within
+// Description:     Slows the speed of anything that is deemed to be too fast to within
 //                  acceptable rates.
 // Arguments:       None.
 // Return value:    None.
 
-	void FixTooFast() override { while (IsTooFast()) { m_Vel *= 0.5; m_AngularVel *= 0.5; } }
+	void FixTooFast() override { while (IsTooFast()) { m_Vel *= 0.5F; m_AngularVel *= 0.5F; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

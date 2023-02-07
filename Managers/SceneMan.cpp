@@ -2761,9 +2761,11 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			terrain->SetLayerToDraw(SLTerrain::LayerType::MaterialLayer);
 			terrain->Draw(targetBitmap, targetBox);
 			break;
+#ifdef DRAW_MOID_LAYER
 		case LayerDrawMode::g_LayerMOID:
 			m_pMOIDLayer->Draw(targetBitmap, targetBox);
 			break;
+#endif
 		default:
 			if (!skipBackgroundLayers) {
 				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {

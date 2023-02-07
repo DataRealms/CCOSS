@@ -799,34 +799,24 @@ void HDFirearm::Update()
     {
         if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
 
-            // Full auto
-            if (m_FullAuto)
-            {
-                // ms per Round.
-                double mspr = (long double)60000 / (long double)m_RateOfFire;
-                // First round should fly as soon as activated and the delays are taken into account
-                if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_DeactivationDelay - m_ActivationDelay) > mspr)
-                {
-                    roundsFired = 1;
-                    // Wind back the last fire timer appropriately for the first round, but not farther back than 0
-                    m_LastFireTmr.SetElapsedSimTimeMS(MAX(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
-                }
-                // How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
-                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay))
-                    roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
-                else
-                    roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / mspr;
-            }
-            // Semi-auto
-            else
-            {
-                double mspr = (long double)60000 / (long double)m_RateOfFire;
-// TODO: Confirm that the delays work properly in semi-auto!
-                if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_ActivationDelay - m_DeactivationDelay) > mspr)
-                    roundsFired = 1;
-                else
-                    roundsFired = 0;
-            }
+			double msPerRound = GetMSPerRound();
+			if (m_FullAuto) {
+				// First round should fly as soon as activated and the delays are taken into account
+				if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_DeactivationDelay - m_ActivationDelay) > msPerRound) {
+					roundsFired = 1;
+					// Wind back the last fire timer appropriately for the first round, but not farther back than 0
+					m_LastFireTmr.SetElapsedSimTimeMS(std::max(m_LastFireTmr.GetElapsedSimTimeMS() - msPerRound, (double)0));
+				}
+				// How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
+				if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay)) {
+					roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / msPerRound;
+				} else {
+					roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / msPerRound;
+				}
+            } else {
+				// TODO: Confirm that the delays work properly in semi-auto!
+				roundsFired = !m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_ActivationDelay - m_DeactivationDelay) > msPerRound ? 1 : 0;
+			}
 
             if (roundsFired >= 1)
             {

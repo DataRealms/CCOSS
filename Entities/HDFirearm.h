@@ -130,6 +130,12 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
+	/// <summary>
+	/// Gets the minimum time in between shots, in MS.
+	/// </summary>
+	/// <returns>The minimum time in between shots, in MS.</returns>
+	double GetMSPerRound() const { return (double)60000 / (double)m_RateOfFire; }
+
     /// <summary>
     /// Gets the Magazine of this HDFirearm.
     /// </summary>
@@ -775,6 +781,17 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
 	bool FiredFrame() const { return m_FireFrame; }
 
+	/// <summary>
+	/// Gets whether this HDFirearm is ready to be fired.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is ready to pop another Round.</returns>
+	bool CanFire() const { return m_ActivationTimer.IsPastSimMS(GetMSPerRound()); }
+
+	/// <summary>
+	/// Gets whether this HDFirearm is halfway to be fired. Used for evenly spacing out dual-wielded fire.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is halfway to pop another Round.</returns>
+	bool HalfwayToNextRound() const { return m_LastFireTmr.IsPastSimMS(GetMSPerRound() / (double)2); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  RoundsFired

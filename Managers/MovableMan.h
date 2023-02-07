@@ -891,7 +891,7 @@ public:
     /// <param name="box">The Box to get MOs within.</param>
     /// <param name="ignoreTeam">The team to ignore.</param>
     /// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); }
+    const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const;
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the given Box.
@@ -907,7 +907,7 @@ public:
 	/// <param name="radius">The radius to check for MOs within.</param>
 	/// <param name="ignoreTeam">The team to ignore.</param>
 	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam); }
+    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the specified radius of the given centre position.

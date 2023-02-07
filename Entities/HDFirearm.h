@@ -271,6 +271,12 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// <param name="newDualReloadTimeMultiplier">The new multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</param>
 	void SetOneHandedReloadTimeMultiplier(float newOneHandedReloadTimeMultiplier) { m_OneHandedReloadTimeMultiplier = newOneHandedReloadTimeMultiplier; }
 
+	/// <summary>
+	/// Gets the default reload angle, if support is available, or the one handed reload angle, if not.
+	/// </summary>
+	/// <returns>The appropriate reload angle to use, in radians.</returns>
+	float GetReloadAngle() const { return m_SupportAvailable ? m_ReloadAngle : m_OneHandedReloadAngle; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetShakeRange
@@ -881,6 +887,8 @@ protected:
 	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
 	float m_OneHandedReloadTimeMultiplier; //!< The multiplier for how long this weapon takes to reload when being used one-handed. Only relevant for one-handed weapons.
 	bool m_DualReloadable; //!< Whether or not this weapon can be dual-reloaded, i.e. both guns can reload at once instead of having to wait til the other dual-wielded gun isn't being reloaded. Only relevant for one-handed weapons.
+	float m_ReloadAngle; //!< Reload angle width for the default reload animation, in radians.
+	float m_OneHandedReloadAngle; //!< Reload angle width for one-handed reload animation, in radians.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

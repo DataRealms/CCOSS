@@ -58,7 +58,9 @@ void HDFirearm::Clear()
     m_FireIgnoresThis = true;
 	m_Reloadable = true;
 	m_DualReloadable = false;
-	m_OneHandedReloadTimeMultiplier = 1.0F;
+	m_OneHandedReloadTimeMultiplier = 1.5F;
+	m_ReloadAngle = -0.5F;
+	m_OneHandedReloadAngle = -1.0F;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -140,6 +142,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_Reloadable = reference.m_Reloadable;
 	m_DualReloadable = reference.m_DualReloadable;
 	m_OneHandedReloadTimeMultiplier = reference.m_OneHandedReloadTimeMultiplier;
+	m_ReloadAngle = reference.m_ReloadAngle;
+	m_OneHandedReloadAngle = reference.m_OneHandedReloadAngle;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -217,6 +221,10 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_DualReloadable;
 	} else if (propName == "OneHandedReloadTimeMultiplier") {
 		reader >> m_OneHandedReloadTimeMultiplier;
+	} else if (propName == "ReloadAngle") {
+		reader >> m_ReloadAngle;
+	} else if (propName == "OneHandedReloadAngle") {
+		reader >> m_OneHandedReloadAngle;
     } else if (propName == "RecoilTransmission") {
         reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
@@ -303,6 +311,8 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("Reloadable");
 	writer.NewPropertyWithValue("DualReloadable", m_DualReloadable);
 	writer.NewPropertyWithValue("OneHandedReloadTimeMultiplier", m_OneHandedReloadTimeMultiplier);
+	writer.NewPropertyWithValue("ReloadAngle", m_ReloadAngle);
+	writer.NewPropertyWithValue("OneHandedReloadAngle", m_OneHandedReloadAngle);
     writer << m_Reloadable;
     writer.NewProperty("RecoilTransmission");
     writer << m_JointStiffness;

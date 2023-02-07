@@ -1530,23 +1530,20 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 			}
 
 			if (reloadHeldFirearm) {
+				heldFirearm->Reload();
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				//TODO it would be nice to calculate this based on arm movement speed, so it accounts for moving the arm there and back but I couldn't figure out the maths. Alternatively, the reload time could be calculated based on this, instead of this trying to calculate from the reload time.
-				float percentageOfReloadTimeToStayAtReloadOffset = 0.85F;
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
 
-				heldFirearm->Reload();
 				if (otherArmIsAvailable) {
+					float delayAtTarget = std::max(static_cast<float>(heldFirearm->GetReloadTime() - 200), 0.0F);
 					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
 					if (!m_ReloadOffset.IsZero()) {
-						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), delayAtTarget);
 					} else {
-						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
+						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), delayAtTarget);
 					}
-					otherArm->AddHandTarget("Magazine Pos", heldFirearm->GetMagazinePos());
-					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-				} else if (!m_ReloadOffset.IsZero()) {
-					arm->AddHandTarget("Reload Offset", m_Pos + RotateOffset(m_ReloadOffset), static_cast<float>(heldFirearm->GetReloadTime()) * percentageOfReloadTimeToStayAtReloadOffset);
-					if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+					otherArm->SetHandPos(heldFirearm->GetMagazinePos());
 				}
 			}
 		}
@@ -3220,12 +3217,12 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Standard Reloading
 
-
 	for (const Arm *arm : { m_pFGArm, m_pBGArm }) {
 		if (arm) {
 			if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(arm->GetHeldDevice())) {
-				const Arm *otherArm = arm == m_pFGArm ? m_pBGArm : m_pFGArm;
+				Arm *otherArm = arm == m_pFGArm ? m_pBGArm : m_pFGArm;
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+				if (otherArmIsAvailable && heldFirearm->DoneReloading()) { otherArm->SetHandPos(heldFirearm->GetMagazinePos()); };
 				heldFirearm->SetSupportAvailable(otherArmIsAvailable);
 			}
 		}

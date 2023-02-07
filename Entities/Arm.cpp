@@ -238,9 +238,27 @@ namespace RTE {
 		if (armHasParent) {
 			Vector targetOffset;
 			if (m_HandTargets.empty()) {
-				if (bool parentIsStable = dynamic_cast<Actor *>(m_Parent)->IsStatus(Actor::Status::STABLE); parentIsStable && m_HeldDevice) {
+				if (m_HeldDevice) {
 					targetOffset = m_HeldDevice->GetStanceOffset();
-				} else if (parentIsStable && m_HeldDeviceThisArmIsTryingToSupport) {
+					if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(m_HeldDevice); heldFirearm && heldFirearm->GetReloadAngle() != 0) {
+						if (heldFirearm->IsReloading()) {
+							float reloadProgressSin = std::sin(heldFirearm->GetReloadProgress() * c_PI);
+							// TODO: There are a few values available for customization here, but they need clear property names. The following plays out well as a default.
+							// Currently, non-supported always move to the same angle relative to the body. Supported items move halfway between the aim angle and body rotation.
+							// What needs to be decided upon is the property name(s) for the rate at which both the two-handed and one-handed reload angles move between the aim angle and body rotation.
+							float noSupportFactor = std::min(std::abs(heldFirearm->GetReloadAngle()), 1.0F);
+							float inheritedBodyAngle = m_Rotation.GetRadAngle() * noSupportFactor;
+							// m_Rotation corresponds to the aim angle here, since the arm hasn't been adjusted yet.
+							float reloadAngle = (heldFirearm->GetReloadAngle() - inheritedBodyAngle * GetFlipFactor()) * reloadProgressSin;
+							heldFirearm->SetInheritedRotAngleOffset(reloadAngle);
+							targetOffset.RadRotate(reloadAngle * GetFlipFactor());
+							float retractionRate = 0.5F * noSupportFactor;	// Another value potentially open for customization.
+							targetOffset.SetMagnitude(targetOffset.GetMagnitude() * (1.0F - reloadProgressSin * retractionRate));
+						} else if (heldFirearm->DoneReloading()) {
+							heldFirearm->SetInheritedRotAngleOffset(0);
+						}
+					}
+				} else if (bool parentIsStable = dynamic_cast<Actor *>(m_Parent)->IsStatus(Actor::Status::STABLE); parentIsStable && m_HeldDeviceThisArmIsTryingToSupport) {
 					targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_HeldDeviceThisArmIsTryingToSupport->GetSupportPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 				} else {
 					targetOffset = m_HandIdleOffset.GetXFlipped(m_Parent->IsHFlipped()).GetRadRotatedCopy(m_Parent->GetRotAngle());

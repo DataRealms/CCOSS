@@ -511,9 +511,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `AHuman` INI and Lua (R/W) property `DeviceArmSwayRate`, that defines how much `HeldDevices` will sway when walking. 0 is no sway, 1 directly couples sway with leg movement, >1 may be funny. Defaults to 0.75.
 
-- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`. A non-zero value is reqiured for `OneHandedReloadAngle` to be used.
-
-- Added `AHuman` INI and Lua (R/W) property `OneHandedReloadAngleOffset`, that defines the angle in radians that should be added to `HeldDevice`s when reloading with only one hand (i.e. the `HeldDevice` is one-handed, or the `AHuman` no longer has their bg`Arm`), in addition to the `Arm`'s rotation. Note that this will only be used if the `AHuman` has a non-zero `ReloadOffset`.
+- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`.
 
 - Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
 
@@ -534,6 +532,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
 
 - New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+
+- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
 

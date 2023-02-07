@@ -185,7 +185,8 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
-    m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), static_cast<int>(c_PPM));
+	const int cellSize = 20;
+	m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), cellSize);
 
     // Create the Debug SceneLayer
     if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {

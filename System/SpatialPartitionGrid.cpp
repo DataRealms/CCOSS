@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SpatialPartitionGrid::Clear() {
 		m_Width = 0;
 		m_Height = 0;
@@ -43,11 +45,11 @@ namespace RTE {
 
 	void SpatialPartitionGrid::Reset() {
 		const Activity *activity = g_ActivityMan.GetActivity();
-		RTEAssert(activity, "Tried to reset spatial partition grid with no running activity!");
+		RTEAssert(activity, "Tried to reset spatial partition grid with no running Activity!");
 
 		for (int team = Activity::NoTeam; team < Activity::MaxTeamCount; ++team) {
 			if (team == Activity::NoTeam || activity->TeamActive(team)) {
-				for (int usedCellId : m_UsedCellIds) {
+				for (const int &usedCellId : m_UsedCellIds) {
 					m_Cells[team + 1][usedCellId].clear();
 				}
 			}
@@ -60,7 +62,7 @@ namespace RTE {
 
 	void SpatialPartitionGrid::Add(const IntRect &rect, const MovableObject &mo) {
 		const Activity *activity = g_ActivityMan.GetActivity();
-		RTEAssert(activity, "Tried to add to spatial partition grid with no running activity!");
+		RTEAssert(activity, "Tried to add to spatial partition grid with no running Activity!");
 
 		const MovableObject &rootParentMo = *mo.GetRootParent();
 		int topLeftCellX = rect.m_Left / m_CellSize;
@@ -129,7 +131,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const {
+	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const {
 		static std::vector<MovableObject *> s_MOList; // Note - This static vector exists to allow this data to be passed safely to Lua.
 		s_MOList.clear();
 
@@ -137,10 +139,10 @@ namespace RTE {
 
 		std::unordered_set<MOID> potentialMOIDs;
 
-		int topLeftCellX = static_cast<int>(std::floor((centre.m_X - radius) / static_cast<float>(m_CellSize)));
-		int topLeftCellY = static_cast<int>(std::floor((centre.m_Y - radius) / static_cast<float>(m_CellSize)));
-		int bottomRightCellX = static_cast<int>(std::floor((centre.m_X + radius) / static_cast<float>(m_CellSize)));
-		int bottomRightCellY = static_cast<int>(std::floor((centre.m_Y + radius) / static_cast<float>(m_CellSize)));
+		int topLeftCellX = static_cast<int>(std::floor((center.m_X - radius) / static_cast<float>(m_CellSize)));
+		int topLeftCellY = static_cast<int>(std::floor((center.m_Y - radius) / static_cast<float>(m_CellSize)));
+		int bottomRightCellX = static_cast<int>(std::floor((center.m_X + radius) / static_cast<float>(m_CellSize)));
+		int bottomRightCellY = static_cast<int>(std::floor((center.m_Y + radius) / static_cast<float>(m_CellSize)));
 
 		// Note - GetCellIdForCellCoords accounts for wrapping automatically, so we don't have to deal with it here.
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
@@ -154,7 +156,7 @@ namespace RTE {
 
 		for (MOID moid : potentialMOIDs) {
 			MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-			if (mo && !g_SceneMan.ShortestDistance(centre, mo->GetPos()).MagnitudeIsGreaterThan(radius)) {
+			if (mo && !g_SceneMan.ShortestDistance(center, mo->GetPos()).MagnitudeIsGreaterThan(radius)) {
 				s_MOList.push_back(mo);
 			}
 		}

@@ -8,13 +8,12 @@ namespace RTE {
 
 	bool IntRect::IntersectionCut(const IntRect &rhs) {
 		if (Intersects(rhs)) {
-			m_Left = MAX(m_Left, rhs.m_Left);
-			m_Right = MIN(m_Right, rhs.m_Right);
-			m_Top = MAX(m_Top, rhs.m_Top);
-			m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
+			m_Left = std::max(m_Left, rhs.m_Left);
+			m_Right = std::min(m_Right, rhs.m_Right);
+			m_Top = std::max(m_Top, rhs.m_Top);
+			m_Bottom = std::min(m_Bottom, rhs.m_Bottom);
 			return true;
 		}
-
 		return false;
 	}
 

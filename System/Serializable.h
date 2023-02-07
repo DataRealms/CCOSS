@@ -109,7 +109,7 @@ namespace RTE {
 		/// This just acts as an abstract base for child classes to implement.
 		/// </summary>
 		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
-		virtual void SetFormattedReaderPosition(const std::string &newPosition) { }
+		virtual void SetFormattedReaderPosition(const std::string &newPosition) {}
 #pragma endregion
 
 #pragma region Operator Overloads

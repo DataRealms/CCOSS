@@ -21,7 +21,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a SceneLayer object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a SceneLayerImpl object in system memory. Create() should be called before using the object.
 		/// </summary>
 		SceneLayerImpl() { Clear(); }
 
@@ -240,23 +240,6 @@ namespace RTE {
 		bool ForceBounds(Vector &pos) const { return ForceBoundsOrWrapPosition(pos, true); }
 #pragma endregion
 
-#pragma region Virtual Methods
-		/// <summary>
-		/// Updates the state of this SceneLayer.
-		/// </summary>
-		virtual void Update() {}
-
-		/// <summary>
-		/// Draws this SceneLayer's current scrolled position to a bitmap.
-		/// </summary>
-		/// <param name="targetBitmap">The bitmap to draw to.</param>
-		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="offsetNeedsScrollRatioAdjustment">Whether the offset of this SceneLayer or the passed in offset override need to be adjusted to scroll ratio.</param>
-		virtual void Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment = false);
-#pragma endregion
-
-	protected:
-
 #pragma region Drawing Tracking
 		/// <summary>
 		/// Registers an area of the SceneLayer to be drawn upon. These areas will be cleared when ClearBitmap is called.
@@ -274,18 +257,33 @@ namespace RTE {
 		/// <param name="radius">The radius of the area to be drawn upon.</param>
 		void RegisterDrawing(const Vector &center, float radius);
 #pragma endregion
-		
-		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
 
-		// We use two bitmaps, as a backbuffer.
-		// While the main bitmap is being used, the secondary bitmap will be cleared on a seperate thread.
-		// This is because we tend to want to clear some scene layers every frame... and that is costly.
-		std::mutex m_BitmapClearMutex; //!< Mutex for clearing bitmap in background.
-		ColorKeys m_LastClearColor; //!< The last color we cleared this SceneLayer to.
-		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on this SceneLayer since the last clear.
+#pragma region Virtual Methods
+		/// <summary>
+		/// Updates the state of this SceneLayer.
+		/// </summary>
+		virtual void Update() {}
+
+		/// <summary>
+		/// Draws this SceneLayer's current scrolled position to a bitmap.
+		/// </summary>
+		/// <param name="targetBitmap">The bitmap to draw to.</param>
+		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
+		/// <param name="offsetNeedsScrollRatioAdjustment">Whether the offset of this SceneLayer or the passed in offset override need to be adjusted to scroll ratio.</param>
+		virtual void Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment = false);
+#pragma endregion
+
+	protected:
+
+		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
 
 		BITMAP *m_MainBitmap; //!< The main BITMAP of this SceneLayer.
 		BITMAP *m_BackBitmap; //!< The backbuffer BITMAP of this SceneLayer.
+
+		// We use two bitmaps, as a backbuffer. While the main bitmap is being used, the secondary bitmap will be cleared on a separate thread. This is because we tend to want to clear some scene layers every frame and that is costly.
+		std::mutex m_BitmapClearMutex; //!< Mutex for clearing BITMAP in background.
+		ColorKeys m_LastClearColor; //!< The last color we cleared this SceneLayer to.
+		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on this SceneLayer since the last clear.
 
 		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
 		bool m_DrawMasked; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
@@ -335,11 +333,12 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
 		/// <summary>
-		/// Clears any tracked and drawn to areas.
+		/// Clears any tracked and drawn-to areas.
 		/// </summary>
 		/// <param name="clearTo">Color to clear to.</param>
-		void ClearDrawings(BITMAP *bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo);
+		void ClearDrawings(BITMAP *bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo) const;
 
 		/// <summary>
 		/// Clears all the member variables of this SceneLayer, effectively resetting the members of this abstraction level only.
@@ -351,13 +350,20 @@ namespace RTE {
 		void operator=(const SceneLayerImpl &rhs) = delete;
 	};
 
-	// If we track drawings, then disallow getting non-const access to the underlying bitmap - we must draw through special functions on scenelayer that'll track the drawings
+	/// <summary>
+	/// If we track drawings, then disallow getting non-const access to the underlying bitmap - we must draw through special functions on SceneLayer that'll track the drawings.
+	/// </summary>
 	class SceneLayerTracked : public SceneLayerImpl<true> {
+
 	public:
+
 		EntityAllocation(SceneLayerTracked);
 		ClassInfoGetters;
 
-		SceneLayerTracked() : SceneLayerImpl<true>() { }
+		/// <summary>
+		/// Constructor method used to instantiate a SceneLayerTracked object in system memory. Create() should be called before using the object.
+		/// </summary>
+		SceneLayerTracked() : SceneLayerImpl<true>() {}
 
 		// TODO: We shouldn't let external users access a non-const version of our bitmap. We should do all drawing to it internally, and track registering our MOID drawings internally too.
 		// However, in the interest of time (and my own sanity), given that the old code already does this, we're not doing that yet.
@@ -367,19 +373,22 @@ namespace RTE {
 		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		BITMAP * GetBitmap() const { return m_MainBitmap; }
 
-		void RegisterDrawing(int left, int top, int right, int bottom);
-		void RegisterDrawing(const Vector& center, float radius);
-
 	protected:
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 	};
 
 	class SceneLayer : public SceneLayerImpl<false> {
+
 	public:
+
 		EntityAllocation(SceneLayer);
 		ClassInfoGetters;
 
-		SceneLayer() : SceneLayerImpl<false>() { }
+		/// <summary>
+		/// Constructor method used to instantiate a SceneLayer object in system memory. Create() should be called before using the object.
+		/// </summary>
+		SceneLayer() : SceneLayerImpl<false>() {}
 
 		/// <summary>
 		/// Gets the BITMAP that this SceneLayer uses.
@@ -388,6 +397,7 @@ namespace RTE {
 		BITMAP * GetBitmap() const { return m_MainBitmap; }
 
 	protected:
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 	};
 }

@@ -112,7 +112,7 @@ namespace RTE {
 		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
 		/// </summary>
 		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
-		virtual void SetFormattedReaderPosition(const std::string &newPosition) override;
+		void SetFormattedReaderPosition(const std::string &newPosition) override;
 #pragma endregion
 
 #pragma region Image Info Getters

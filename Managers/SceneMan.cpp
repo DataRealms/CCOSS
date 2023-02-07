@@ -48,13 +48,12 @@ std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";
-    m_pSceneToLoad = 0;
+    m_pSceneToLoad = nullptr;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
-    m_pCurrentScene = 0;
-    m_pMOColorLayer = 0;
-    m_pMOIDLayer = 0;
-    m_MOIDsGrid = SpatialPartitionGrid();
+    m_pCurrentScene = nullptr;
+    m_pMOColorLayer = nullptr;
+    m_pMOIDLayer = nullptr;
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -66,7 +65,7 @@ void SceneMan::Clear()
 
 	m_MaterialCopiesVector.clear();
 
-    m_pUnseenRevealSound = 0;
+    m_pUnseenRevealSound = nullptr;
     m_DrawRayCastVisualizations = false;
     m_DrawPixelCheckVisualizations = false;
     m_LastUpdatedScreen = 0;
@@ -186,8 +185,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
-    const int cellSize = 20;
-    m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), cellSize);
+    m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), static_cast<int>(c_PPM));
 
     // Create the Debug SceneLayer
     if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
@@ -508,6 +506,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
     const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
     MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
 #endif
+
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));

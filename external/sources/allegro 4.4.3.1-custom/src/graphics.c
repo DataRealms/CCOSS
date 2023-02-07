@@ -1496,8 +1496,8 @@ void destroy_bitmap(BITMAP *bitmap)
 	    return;
       }
 
-      _AL_FREE(bitmap->dat);
       _AL_FREE(bitmap->line);
+      _AL_FREE(bitmap->dat);
       _AL_FREE(bitmap);
    }
 }

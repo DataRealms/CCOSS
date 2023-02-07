@@ -60,15 +60,11 @@ void MovableMan::Clear()
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
     m_SplashRatio = 0.75;
     m_MaxDroppedItems = 25;
-    m_SloMoTimer.Reset();
-    m_SloMoThreshold = 100;
-    m_SloMoDuration = 1000;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
 }
@@ -83,10 +79,6 @@ int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();
-
-    // Set the time limit to 0 so it will report as being past it from the get go
-    m_SloMoTimer.SetSimTimeLimitMS(0);
-    m_SloMoTimer.SetRealTimeLimitMS(0);
 
     return 0;
 }
@@ -171,6 +163,52 @@ MovableObject * MovableMan::GetMOFromID(MOID whichID) {
 	return nullptr;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const {
+    if (!mo.GetsHitByMOs() || mo.GetRootParent()->GetTraveling()) {
+        return false;
+    }
+
+    if (const MOSprite *moSprite = dynamic_cast<const MOSprite *>(&mo); moSprite) {
+        Vector distanceBetweenTestPositionAndMO = g_SceneMan.ShortestDistance(moSprite->GetPos(), Vector(static_cast<float>(pixelX), static_cast<float>(pixelY)));
+        if (distanceBetweenTestPositionAndMO.MagnitudeIsLessThan(moSprite->GetRadius())) {
+            // Check the scene position in the current local space of the MO, accounting for Position, Sprite Offset, Angle and HFlipped.
+			//TODO Account for Scale as well someday, maybe.
+            Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works.
+            Vector entryPos = (distanceBetweenTestPositionAndMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
+			int localX = entryPos.GetFloorIntX();
+            int localY = entryPos.GetFloorIntY();
+
+            BITMAP *sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
+            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != ColorKeys::g_MaskColor;
+        }
+    } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
+        const Vector &pos = moPixel->GetPos();
+        return pos.GetFloorIntX() == pixelX && pos.GetFloorIntY() == pixelY;
+    }
+
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList) {
+    // Note - We loop through the MOs in reverse to make sure that the topmost (last drawn) MO that overlaps the specified coordinates is the one returned.
+    for (auto itr = moidList.rbegin(), itrEnd = moidList.rend(); itr < itrEnd; ++itr) {
+        MOID moid = *itr;
+
+        const MovableObject *mo = GetMOFromID(moid);
+        RTEAssert(mo, "Null MO found in MOID list!");
+        if (mo && HitTestMOAtPixel(*mo, pixelX, pixelY)) {
+            return moid;
+        }
+    }
+
+    return g_NoMOID;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RegisterObject
@@ -231,15 +269,9 @@ void MovableMan::PurgeAllMOs()
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
-
-    // Set the time limit to 0 so it will report as being past it from the start of simulation
-    m_SloMoTimer.SetRealTimeLimitMS(0);
-    m_SloMoTimer.SetSimTimeLimitMS(0);
-
 	m_KnownObjects.clear();
 }
 
@@ -1048,37 +1080,11 @@ bool MovableMan::ValidateMOIDs() {
 // Method:          ValidMO
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the passed in MovableObject pointer points to an
-//                  MO that's currently active in the simulation, and kept by this
-//                  MovableMan. Internal optimization is made so that the same MO can
-//                  efficiently be checked many times during the same frame.
+//                  MO that's currently active in the simulation, and kept by this MovableMan.
 
 bool MovableMan::ValidMO(const MovableObject *pMOToCheck)
 {
-    bool found = false;
-
-    if (pMOToCheck)
-    {
-
-        // See if this MO has been found earlier this frame
-        for (auto itr = m_ValiditySearchResults.begin(); !found && itr != m_ValiditySearchResults.end(); ++itr)
-        {
-            // If the MO is found to have been searched for earlier this frame, then just return the search results
-            if (itr->first == pMOToCheck)
-                return itr->second;
-        }
-
-        // Check actors
-        found = found ? true : IsActor(pMOToCheck);
-        // Check Items
-        found = found ? true : IsDevice(pMOToCheck);
-        // Check particles
-        found = found ? true : IsParticle(pMOToCheck);
-
-        // Save search result for future requests this frame
-        m_ValiditySearchResults.push_back(std::pair<const MovableObject *, bool>(pMOToCheck, found));
-    }
-
-    return found;
+    return pMOToCheck && pMOToCheck->GetID() != g_NoMOID;
 }
 
 
@@ -1531,20 +1537,20 @@ void MovableMan::Update()
 	m_SimUpdateFrameNumber++;
 
     // Clear the MO color layer only if this is a drawn update
-    if (g_TimerMan.DrawnSimUpdate())
+    if (g_TimerMan.DrawnSimUpdate()) {
         g_SceneMan.ClearMOColorLayer();
+    }
 
     // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
-		g_PostProcessMan.ClearScenePostEffects();
+    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
+        g_PostProcessMan.ClearScenePostEffects();
+    }
 
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TeamOne] = false;
     m_SortTeamRoster[Activity::TeamTwo] = false;
     m_SortTeamRoster[Activity::TeamThree] = false;
     m_SortTeamRoster[Activity::TeamFour] = false;
-    // Clear out MO finding optimization buffer - will be added to each frame as thigns are searched for as curently exisitng in the manager
-    m_ValiditySearchResults.clear();
 
     // Move all last frame's alarm events into the proper buffer, and clear out the new one to fill up with this frame's
     m_AlarmEvents.clear();
@@ -1685,17 +1691,6 @@ void MovableMan::Update()
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
 
     g_SceneMan.ClearAllMOIDDrawings();
-//    g_SceneMan.MOIDClearCheck();
-
-    ///////////////////////////////////////////////////
-    // Determine whether we should go into a brief period of slo-mo for when the sim gets hit heavily all of a sudden
-
-    if (m_AddedActors.size() + m_AddedActors.size() + m_AddedParticles.size() > m_SloMoThreshold)
-    {
-        m_SloMoTimer.SetSimTimeLimitMS(m_SloMoDuration);
-        m_SloMoTimer.Reset();
-    }
-    g_TimerMan.SetOneSimUpdatePerFrame(!m_SloMoTimer.IsPastSimTimeLimit());
 
     //////////////////////////////////////////////////////////////////////
     // TRANSFER ALL MOs ADDED THIS FRAME
@@ -1875,8 +1870,6 @@ void MovableMan::Update()
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
 
-// Not anymore, we're using ClearAllMOIDDrawings instead.. much more efficient
-//    g_SceneMan.ClearMOIDLayer();
     UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
 
 	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
@@ -1991,7 +1984,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     int actorID = 0;
     for (Actor *actor : m_Actors) {
         m_ContiguousActorIDs[actor] = actorID++;
-		if (actor->GetsHitByMOs() && !actor->IsSetToDelete()) {
+		if (!actor->IsSetToDelete()) {
             actor->UpdateMOID(m_MOIDIndex);
             actor->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -2001,7 +1994,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *item : m_Items) {
-        if (item->GetsHitByMOs() && !item->IsSetToDelete()) {
+        if (!item->IsSetToDelete()) {
             item->UpdateMOID(m_MOIDIndex);
             item->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();
@@ -2011,7 +2004,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
     }
 
     for (MovableObject *particle : m_Particles) {
-        if (particle->GetsHitByMOs() && !particle->IsSetToDelete()) {
+        if (!particle->IsSetToDelete()) {
             particle->UpdateMOID(m_MOIDIndex);
             particle->Draw(pTargetBitmap, Vector(), g_DrawMOID, true);
             currentMOID = m_MOIDIndex.size();

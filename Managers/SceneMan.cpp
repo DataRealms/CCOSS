@@ -44,34 +44,15 @@ namespace RTE
 const std::string SceneMan::c_ClassName = "SceneMan";
 std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool IntRect::IntersectionCut(const IntRect &rhs)
-{
-    if (Intersects(rhs))
-    {
-        m_Left = MAX(m_Left, rhs.m_Left);
-        m_Right = MIN(m_Right, rhs.m_Right);
-        m_Top = MAX(m_Top, rhs.m_Top);
-        m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
-        return true;
-    }
-
-    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";
-    m_pSceneToLoad = 0;
+    m_pSceneToLoad = nullptr;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
-    m_pCurrentScene = 0;
-    m_pMOColorLayer = 0;
-    m_pMOIDLayer = 0;
-    m_MOIDDrawings.clear();
+    m_pCurrentScene = nullptr;
+    m_pMOColorLayer = nullptr;
+    m_pMOIDLayer = nullptr;
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -83,7 +64,7 @@ void SceneMan::Clear()
 
 	m_MaterialCopiesVector.clear();
 
-    m_pUnseenRevealSound = 0;
+    m_pUnseenRevealSound = nullptr;
     m_DrawRayCastVisualizations = false;
     m_DrawPixelCheckVisualizations = false;
     m_LastUpdatedScreen = 0;
@@ -191,7 +172,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = new SceneLayer();
+    m_pMOColorLayer = new SceneLayerTracked();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -199,9 +180,12 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOIDLayer;
     pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
-    m_pMOIDLayer = new SceneLayer();
+    m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
+
+	const int cellSize = 20;
+	m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), cellSize);
 
     // Create the Debug SceneLayer
     if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
@@ -506,19 +490,23 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
+MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 {
     WrapPosition(pixelX, pixelY);
 
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
-    if (pixelX < 0 ||
-       pixelX >= m_pMOIDLayer->GetBitmap()->w ||
-       pixelY < 0 ||
-       pixelY >= m_pMOIDLayer->GetBitmap()->h)
+    if (pixelX < 0 || pixelX >= m_pMOIDLayer->GetBitmap()->w || pixelY < 0 || pixelY >= m_pMOIDLayer->GetBitmap()->h) {
         return g_NoMOID;
+    }
 
+#ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+#else
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
+    MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
+#endif
+
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
@@ -526,9 +514,9 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 		} else {
 			return ColorKeys::g_NoMOID;
 		}
-	} else {
-		return moid;
 	}
+
+	return moid;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -589,66 +577,38 @@ bool SceneMan::SceneIsLocked() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
-{
-    if (radius != 0)
-        RegisterMOIDDrawing(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
+    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+        m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+    } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+#ifdef DRAW_MOID_LAYER
+        m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
+#else
+        const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
+        RTEAssert(mo, "Trying to register a null MOID to the MOID grid! This is not allowed.")
+        IntRect rect(left, top, right, bottom);
+        m_MOIDsGrid.Add(rect, *mo);
+#endif
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearAllMOIDDrawings()
-{
-    for (std::list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
-        ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
-
-    m_MOIDDrawings.clear();
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius) {
+    if (radius != 0.0F) {
+		RegisterDrawing(bitmap, moid, static_cast<int>(std::floor(center.m_X - radius)), static_cast<int>(std::floor(center.m_Y - radius)), static_cast<int>(std::floor(center.m_X + radius)), static_cast<int>(std::floor(center.m_Y + radius)));
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
-{
-    // Draw the first unwrapped rect
-    rectfill(m_pMOIDLayer->GetBitmap(), left, top, right, bottom, g_NoMOID);
-
-    // Draw wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-        {
-            int wrapLeft = left + sceneWidth;
-            int wrapRight = sceneWidth - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-        if (right >= sceneWidth)
-        {
-            int wrapLeft = 0;
-            int wrapRight = right - sceneWidth;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-        {
-            int wrapTop = top + sceneHeight;
-            int wrapBottom = sceneHeight - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-        if (bottom >= sceneHeight)
-        {
-            int wrapTop = 0;
-            int wrapBottom = bottom - sceneHeight;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-    }
+void SceneMan::ClearAllMOIDDrawings() {
+#ifdef DRAW_MOID_LAYER
+    m_pMOIDLayer->ClearBitmap(g_NoMOID);
+#else
+    m_MOIDsGrid.Reset();
+#endif
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1565,7 +1525,7 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
             // See if we found the looked-for pixel of the correct material,
             // Or an MO is blocking the way
             if (GetTerrMatter(intPos[X], intPos[Y]) != material ||
-                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]) != g_NoMOID))
+                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam) != g_NoMOID))
             {
                 // Save result and report success
                 foundPixel = true;
@@ -2065,9 +2025,10 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                 // Check if we're supposed to ignore the team of what we hit
                 if (ignoreTeam != Activity::NoTeam)
                 {
@@ -2087,6 +2048,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                 }
                 // Legit hit
                 else
+#endif
                 {
                     // Save last ray pos
                     m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
@@ -2188,7 +2150,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam);
             if (hitMOID == targetMOID || g_MovableMan.GetRootMOID(hitMOID) == targetMOID)
             {
                 // Found target MOID, so save result and report success
@@ -2293,7 +2255,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             unsigned char checkMat = GetTerrMatter(intPos[X], intPos[Y]);
-            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
 
             // Translate any found MOID into the root MOID of that hit MO
             if (checkMOID != g_NoMOID)
@@ -2302,14 +2264,17 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 if (pHitMO)
                 {
                     checkMOID = pHitMO->GetRootID();
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                     // Check if we're supposed to ignore the team of what we hit
                     if (ignoreTeam != Activity::NoTeam)
                     {
                         pHitMO = pHitMO->GetRootParent();
                         // We are indeed supposed to ignore this object because of its ignoring of its specific team
-                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam)
+                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam) {
                             checkMOID = g_NoMOID;
+                        }
                     }
+#endif
                 }
             }
 
@@ -2606,7 +2571,7 @@ float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int 
 
 bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
-    bool obscured = m_pMOIDLayer->GetPixel(x, y) != g_NoMOID || m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir;
+    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(x, y, Activity::NoTeam) != g_NoMOID;
 
     if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);
@@ -2809,9 +2774,11 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			terrain->SetLayerToDraw(SLTerrain::LayerType::MaterialLayer);
 			terrain->Draw(targetBitmap, targetBox);
 			break;
+#ifdef DRAW_MOID_LAYER
 		case LayerDrawMode::g_LayerMOID:
 			m_pMOIDLayer->Draw(targetBitmap, targetBox);
 			break;
+#endif
 		default:
 			if (!skipBackgroundLayers) {
 				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {
@@ -2851,16 +2818,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 
 void SceneMan::ClearMOColorLayer()
 {
-    clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
-
-    if (m_pDebugLayer) { clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor); }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::ClearMOIDLayer()
-{
-    clear_to_color(m_pMOIDLayer->GetBitmap(), g_NoMOID);
+    m_pMOColorLayer->ClearBitmap(g_MaskColor);
+    if (m_pDebugLayer) { m_pDebugLayer->ClearBitmap(g_MaskColor); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

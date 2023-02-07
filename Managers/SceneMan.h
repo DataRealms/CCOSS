@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Box.h"
 #include "Singleton.h"
+#include "SpatialPartitionGrid.h"
 
 #include "ActivityMan.h"
 
@@ -28,6 +29,7 @@ namespace RTE
 
 class Scene;
 class SceneLayer;
+class SceneLayerTracked;
 class SLTerrain;
 class SceneObject;
 class TerrainObject;
@@ -41,45 +43,15 @@ enum LayerDrawMode
 {
     g_LayerNormal = 0,
     g_LayerTerrainMatter,
-    g_LayerMOID
+
+#ifdef DRAW_MOID_LAYER
+	g_LayerMOID
+#endif
 };
 
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Struct:          IntRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A simple rectangle with integer coordinates.
-// Parent(s):       None.
-// Class history:   8/4/2007 IntRect created.
-
-struct IntRect
-{
-    int m_Left;
-    int m_Top;
-    int m_Right;
-    int m_Bottom;
-
-    IntRect() { m_Left = m_Top = m_Right = m_Bottom = 0; }
-    IntRect(int left, int top, int right, int bottom) { m_Left = left; m_Top = top; m_Right = right; m_Bottom = bottom; }
-    bool Intersects(const IntRect &rhs) { return m_Left < rhs.m_Right && m_Right > rhs.m_Left && m_Top < rhs.m_Bottom && m_Bottom > rhs.m_Top; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IntersectionCut
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If this and the passed in IntRect intersect, this will be modified to
-//                  represent the boolean AND of the two. If it doens't intersect, nothing
-//                  happens and false is returned.
-// Arguments:       The other IntRect to cut against.
-// Return value:    Whether an intersection was detected and this was cut down to the AND.
-
-    bool IntersectionCut(const IntRect &rhs);
-
-
-};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -450,15 +422,28 @@ public:
     unsigned char GetTerrMatter(int pixelX, int pixelY);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a MOID from pixel coordinates in the Scene. LockScene() must be
-//                  called before using this method.
-// Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
-// Return value:    The MOID currently at the specified pixel location.
+	/// <summary>
+	/// Gets a MOID from pixel coordinates in the Scene. LockScene() must be called before using this method.
+	/// </summary>
+	/// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+	/// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <returns>The MOID currently at the specified pixel coordinates.</returns>
+    MOID GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam);
 
-    MOID GetMOIDPixel(int pixelX, int pixelY);
+    /// <summary>
+    /// Gets a MOID from pixel coordinates in the Scene. LockScene() must be called before using this method.
+    /// </summary>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+    /// <returns>The MOID currently at the specified pixel coordinates.</returns>
+    MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(pixelX, pixelY, Activity::NoTeam); }
+
+    /// <summary>
+    /// Gets this Scene's MOID SpatialPartitionGrid.
+    /// </summary>
+    /// <returns>This Scene's MOID SpatialPartitionGrid.</returns>
+    const SpatialPartitionGrid & GetMOIDGrid() const { return m_MOIDsGrid; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -540,29 +525,25 @@ public:
 
     bool SceneIsLocked() const;
 
+    /// <summary>
+    /// Registers an area to be drawn upon, so it can be tracked and cleared later.
+    /// </summary>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="left">The left boundary of the draw area.</param>
+    /// <param name="top">The top boundary of the drawn area.</param>
+    /// <param name="right">The right boundary of the draw area.</param>
+    /// <param name="bottom">The bottom boundary of the draw area.</param>
+    void RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The coordinates of the new area on the MOID layer to clear upon the
-//                  end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(int left, int top, int right, int bottom) { m_MOIDDrawings.push_back(IntRect(left, top, right, bottom)); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The center coordinates and a radius around it of the new area on the
-//                  MOID layer to clear upon the end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(const Vector &center, float radius);
+    /// <summary>
+    /// Registers an area of to be drawn upon, so it can be tracked and cleared later.
+    /// </summary>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="center">The centre position of the drawn area.</param>
+    /// <param name="radius">The radius of the drawn area.</param>
+    void RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -574,17 +555,6 @@ public:
 // Return value:    None.
 
     void ClearAllMOIDDrawings();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets a specific rectangle of the scene's MOID layer to not contain
-//                  any MOID data anymore. Sets it all to NoMOID. Will take care of wrapping.
-// Arguments:       The coordinates of the rectangle to be reset to NoMOID.
-// Return value:    None.
-
-    void ClearMOIDRect(int left, int top, int right, int bottom);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1393,16 +1363,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDLayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the MOID layer. Should be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDLayer();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearSeenPixels
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Clears the list of pixels on the unseen map that have been revealed.
@@ -1466,11 +1426,11 @@ public:
     // Current scene being used
     Scene *m_pCurrentScene;
     // Color MO layer
-    SceneLayer *m_pMOColorLayer;
+    SceneLayerTracked *m_pMOColorLayer;
     // MovableObject ID layer
-    SceneLayer *m_pMOIDLayer;
-    // All the areas drawn within on the MOID layer since last Update
-    std::list<IntRect> m_MOIDDrawings;
+    SceneLayerTracked *m_pMOIDLayer;
+    // A spatial partitioning grid of MOIDs, used to optimize collision and distance queries
+    SpatialPartitionGrid m_MOIDsGrid;
 
     // Debug layer for seeing cast rays etc
     SceneLayer *m_pDebugLayer;

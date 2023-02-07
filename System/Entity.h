@@ -349,6 +349,20 @@ namespace RTE {
 		void ResetOriginalPresetFlag() { m_IsOriginalPreset = false; }
 #pragma endregion
 
+#pragma region Logging
+		/// <summary>
+		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// </summary>
+		/// <returns>A string containing the currently read file path and the line being read.</returns>
+		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }
+
+		/// <summary>
+		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// </summary>
+		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
+		void SetFormattedReaderPosition(const std::string &newPosition) override { m_FormattedReaderPosition = newPosition; }
+#pragma endregion
+
 #pragma region Virtual Override Methods
 		/// <summary>
 		/// Makes this an original Preset in a different module than it was before. It severs ties deeply to the old module it was saved in.
@@ -446,6 +460,7 @@ namespace RTE {
 
 		std::string m_PresetName; //!< The name of the Preset data this was cloned from, if any.
 		std::string m_PresetDescription; //!< The description of the preset in user friendly plain text that will show up in menus etc.
+		std::string m_FormattedReaderPosition; //!< A string containing the file path and the line we were read from. Formatted to be used for logging.
 
 		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.
 		int m_DefinedInModule; //!< The DataModule ID that this was successfully added to at some point. -1 if not added to anything yet.

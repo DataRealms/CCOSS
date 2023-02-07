@@ -1266,9 +1266,11 @@ namespace RTE {
 				case g_LayerTerrainMatter:
 					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
 					break;
+#ifdef DRAW_MOID_LAYER
 				case g_LayerMOID:
 					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing MovableObject ID layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
 					break;
+#endif
 				default:
 					break;
 			}

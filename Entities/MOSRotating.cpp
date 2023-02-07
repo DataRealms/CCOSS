@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+
 #include "CameraMan.h"
 #include "SettingsMan.h"
 #include "AtomGroup.h"
@@ -1437,8 +1438,10 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 void MOSRotating::PreTravel() {
 	MOSprite::PreTravel();
 
+#ifdef DRAW_MOID_LAYER
 	// If this is going slow enough, check for and redraw the MOID representations of any other MOSRotatings that may be overlapping this
 	if (m_GetsHitByMOs && m_HitsMOs && m_Vel.GetX() < 2.0F && m_Vel.GetY() < 2.0F) { g_MovableMan.RedrawOverlappingMOIDs(this); }
+#endif
 }
 
 
@@ -1604,27 +1607,20 @@ void MOSRotating::Update() {
     if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) { m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawMOIDIfOverlapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the MOID representation of this to the SceneMan's MOID layer if
-//                  this is found to potentially overlap another MovableObject.
+bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO) {
+    if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
+        return false;
+    }
 
-bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
-{
-    if (pOverlapMO != this && m_GetsHitByMOs)
-    {
-        float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
-        Vector otherPos = pOverlapMO->GetPos();
+    if (m_IgnoresTeamHits && pOverlapMO->IgnoresTeamHits() && m_Team == pOverlapMO->GetTeam()) {
+        return false;
+    }
 
-        // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
-        {
-            // They may be overlapping, so draw the MOID rep of this to the MOID layer
-            Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-            return true;
-        }
+    if (g_SceneMan.ShortestDistance(m_Pos, pOverlapMO->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(GetRadius() + pOverlapMO->GetRadius())) {
+        Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+        return true;
     }
 
     return false;
@@ -1805,9 +1801,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
 
-    // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
-    if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+    // Only draw MOID if this has a valid MOID assigned to it
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
+    }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before
@@ -1836,30 +1833,34 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
     Vector spritePos(m_Pos.GetRounded() - targetPos);
 
-    if (m_Recoiled)
+    if (m_Recoiled) {
         spritePos += m_RecoilOffset;
+    }
 
     // If we're drawing a material silhouette, then create an intermediate material bitmap as well
-    if (mode != g_DrawColor && mode != g_DrawTrans)
-    {
+#ifdef DRAW_MOID_LAYER
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans;
+#else
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans && mode != g_DrawMOID;
+    RTEAssert(mode != g_DrawNoMOID, "DrawNoMOID drawing mode used with no MOID layer!");
+#endif
+    if (intermediateBitmapUsed) {
         clear_to_color(pTempBitmap, keyColor);
 
-// TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
+        // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
         // Draw the requested material silhouette on the material bitmap
-        if (mode == g_DrawMaterial)
+        if (mode == g_DrawMaterial) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
-        else if (mode == g_DrawWhite)
+        } else if (mode == g_DrawWhite) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);
-        else if (mode == g_DrawMOID)
+        } else if (mode == g_DrawMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_MOID, -1);
-        else if (mode == g_DrawNoMOID)
+        } else if (mode == g_DrawNoMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
-		else if (mode == g_DrawDoor)
+        } else if (mode == g_DrawDoor) {
 			draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialDoor, -1);
-        else
-        {
-//            return;
-//            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
+        } else {
+            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
         }
     }
 
@@ -1937,8 +1938,12 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-            for (int i = 0; i < passes; ++i)
-                draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
+            }
         }
         // Non-transparent mode
         else
@@ -1946,19 +1951,23 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             // Do the passes loop in here so the flipping operation doesn't get done multiple times
             for (int i = 0; i < passes; ++i)
             {
+                int spriteX = aDrawPos[i].GetFloorIntX();
+                int spriteY = aDrawPos[i].GetFloorIntY();
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX - m_SpriteRadius + m_SpriteOffset.m_X, spriteY - m_SpriteRadius + m_SpriteOffset.m_Y, spriteX + m_SpriteRadius - m_SpriteOffset.m_X, spriteY + m_SpriteRadius - m_SpriteOffset.m_Y);
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
                 // Take into account the h-flipped pivot point
                 pivot_scaled_sprite(pTargetBitmap,
                                     pFlipBitmap,
-                                    aDrawPos[i].GetFloorIntX(),
-                                    aDrawPos[i].GetFloorIntY(),
+                                    spriteX,
+                                    spriteY,
                                     pFlipBitmap->w + m_SpriteOffset.m_X,
                                     -(m_SpriteOffset.m_Y),
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
-
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }
@@ -1987,26 +1996,34 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-            for (int i = 0; i < passes; ++i)
-                draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
+            }
         }
         // Non-transparent mode
         else
         {
             for (int i = 0; i < passes; ++i)
             {
+                int spriteX = aDrawPos[i].GetFloorIntX();
+                int spriteY = aDrawPos[i].GetFloorIntY();
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX - m_SpriteRadius + m_SpriteOffset.m_X, spriteY - m_SpriteRadius + m_SpriteOffset.m_Y, spriteX + m_SpriteRadius - m_SpriteOffset.m_X, spriteY + m_SpriteRadius - m_SpriteOffset.m_Y);
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
                 pivot_scaled_sprite(pTargetBitmap,
                                     mode == g_DrawColor ? m_aSprite[m_Frame] : pTempBitmap,
-                                    aDrawPos[i].GetFloorIntX(),
-                                    aDrawPos[i].GetFloorIntY(),
+                                    spriteX,
+                                    spriteY,
                                     -(m_SpriteOffset.m_X),
                                     -(m_SpriteOffset.m_Y),
                                     ftofix(m_Rotation.GetAllegroAngle()),
                                     ftofix(m_Scale));
-
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }

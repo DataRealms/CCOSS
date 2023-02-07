@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MovableObject.h"
+
 #include "PresetMan.h"
 #include "SceneMan.h"
 #include "ConsoleMan.h"
@@ -629,14 +630,16 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
     int status = 0;
-    if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end() || m_FunctionsAndScripts.find(functionName)->second.empty()) {
+
+    auto itr = m_FunctionsAndScripts.find(functionName);
+    if (itr == m_FunctionsAndScripts.end() || itr->second.empty()) {
         status = -1;
     } else if (!ObjectScriptsInitialized()) {
         status = InitializeObjectScripts();
     }
 
     if (status >= 0) {
-        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
+        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
             if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
 				status = g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
                 if (status < 0 && stopOnError) {
@@ -830,11 +833,12 @@ void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
-		if (g_SettingsMan.SimplifiedCollisionDetection()) {
-			m_IsTraveling = true;
-		} else {
+        m_IsTraveling = true;
+#ifdef DRAW_MOID_LAYER
+		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
 		}
+#endif
 	}
 
     // Save previous position and velocities before moving
@@ -867,35 +871,40 @@ void MovableObject::Travel()
 void MovableObject::PostTravel()
 {
     // Toggle whether this gets hit by other AtomGroup MOs depending on whether it's going slower than a set threshold
-    if (m_IgnoresAGHitsWhenSlowerThan > 0)
-        m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
+    if (m_IgnoresAGHitsWhenSlowerThan > 0) {
+        m_IgnoresAtomGroupHits = m_Vel.MagnitudeIsLessThan(m_IgnoresAGHitsWhenSlowerThan);
+    }
 
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
-			if (g_SettingsMan.SimplifiedCollisionDetection()) {
-				m_IsTraveling = false;
-			} else {
-				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
+            m_IsTraveling = false;
+#ifdef DRAW_MOID_LAYER
+			if (!g_SettingsMan.SimplifiedCollisionDetection()) {
+                Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
 			}
+#endif
 		}
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;
 
     // Check for age expiration
-    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime)
+    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) {
         m_ToDelete = true;
+    }
 
-    // Check for stupid positions and velocities, but critical stuff can't go too fast
-    if (!g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 100))
+    // Check for stupid positions
+    if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 1000)) {
         m_ToDelete = true;
+    }
 
     // Fix speeds that are too high
     FixTooFast();
 
     // Never let mission critical stuff settle or delete
-    if (m_MissionCritical)
+    if (m_MissionCritical) {
         m_ToSettle = false;
+    }
 
     // Reset the terrain intersection warning
     m_CheckTerrIntersection = false;
@@ -919,6 +928,16 @@ void MovableObject::Update()
 
 void MovableObject::Update() {
 	if (m_RandomizeEffectRotAngleEveryFrame) { m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode mode, bool onlyPhysical) const {
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
+        return;
+    }
+    
+    g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1.0F);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -388,18 +388,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
-	/// <summary>
-	/// Gets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
-	/// </summary>
-	/// <returns>The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</returns>
-	float GetOneHandedReloadAngleOffset() const { return m_OneHandedReloadAngleOffset; }
-
-	/// <summary>
-	/// Sets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
-	/// </summary>
-	/// <param name="newValue">The new angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</param>
-	void SetOneHandedReloadAngleOffset(float newValue) { m_OneHandedReloadAngleOffset = newValue; }
-
 	/// Gets this AHuman's UpperBodyState.
 	/// </summary>
 	/// <returns>This AHuman's UpperBodyState.</returns>

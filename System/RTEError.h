@@ -32,7 +32,6 @@ namespace RTE {
 	/// <param name="description">Message explaining the reason for aborting.</param>
 	/// <param name="file">The source file from which abort was called.</param>
 	/// <param name="line">The line abort was called from in the source file.</param>
-	/// <returns>Always returns true to trigger AbortAction.</returns>
 	extern void RTEAbortFunc(const std::string &description, const std::string &file, int line);
 
 	#define RTEAbort(description) {							\

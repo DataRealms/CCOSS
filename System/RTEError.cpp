@@ -38,7 +38,7 @@ namespace RTE {
 
 			// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
 			std::filesystem::path filePath = file;
-			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory() ? filePath.filename().generic_string() : file);
+			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
 
 			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe game has attempted to save to 'AbortSave'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
 			ShowMessageBox(abortMessage);

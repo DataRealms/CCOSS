@@ -1044,7 +1044,6 @@ protected:
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
-	float m_OneHandedReloadAngleOffset; //!< The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.

@@ -288,18 +288,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Arm::AccountForHeldDeviceRecoil(const HeldDevice *heldDevice, Vector &targetOffset) {
-		// TODO: Fine-tune this if needed.
 		if (!heldDevice->GetRecoilForce().IsZero()) {
 			float totalGripStrength = m_GripStrength * heldDevice->GetGripStrengthMultiplier();
 			if (totalGripStrength == 0) { totalGripStrength = heldDevice->GetJointStrength(); }
 			if (heldDevice->GetSupported()) {
 				const AHuman *rootParentAsAHuman = dynamic_cast<const AHuman *>(GetRootParent());
-				const Arm *rootParentAsHumanBGArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
-				if (rootParentAsHumanBGArm) {
-					if (rootParentAsHumanBGArm->GetGripStrength() < 0) {
+				const Arm *supportingArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
+				if (supportingArm) {
+					if (supportingArm->GetGripStrength() < 0) {
 						totalGripStrength = -1.0F;
-					} else if (rootParentAsHumanBGArm->GetGripStrength() > 0) {
-						totalGripStrength += (rootParentAsHumanBGArm->GetGripStrength() * heldDevice->GetGripStrengthMultiplier());
+					} else if (supportingArm->GetGripStrength() > 0) {
+						totalGripStrength += (supportingArm->GetGripStrength() * 0.5F * heldDevice->GetGripStrengthMultiplier());
 					} else {
 						totalGripStrength *= 1.5F;
 					}
@@ -308,7 +307,7 @@ namespace RTE {
 			if (totalGripStrength > 0) {
 				// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.
 				float rotAngleScalar = std::abs(std::cos(m_Parent->GetRotAngle()));
-				float recoilScalar = std::min((heldDevice->GetRecoilForce() / totalGripStrength).GetMagnitude() * 0.4F, 0.8F) * rotAngleScalar;
+				float recoilScalar = std::sqrt(std::min(heldDevice->GetRecoilForce().GetMagnitude() / totalGripStrength, 0.7F)) * rotAngleScalar;
 				targetOffset.SetX(targetOffset.GetX() * (1.0F - recoilScalar));
 
 				// Shift Y offset slightly so the device is more likely to go under the shoulder rather than over it, otherwise it looks goofy.

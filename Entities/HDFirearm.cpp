@@ -1006,6 +1006,9 @@ void HDFirearm::Update()
     //////////////////////////////////////////////
     // Recoil and other activation effects logic.
 
+	// TODO: don't use arbitrary numbers?
+	m_RecoilForce.SetMagnitude(std::max(m_RecoilForce.GetMagnitude() * 0.7F - 1.0F, 0.0F));
+
     if (roundsFired > 0) {
         // Alternate to get that shake effect!
         m_Recoiled = !m_Recoiled;
@@ -1019,7 +1022,7 @@ void HDFirearm::Update()
 
             // Set up the recoil shake offset
             m_RecoilOffset = m_RecoilForce;
-			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
+			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.0F));
         }
 
         // Screen shake
@@ -1057,12 +1060,6 @@ void HDFirearm::Update()
 		if (m_Loudness > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness)); }
     } else {
         m_Recoiled = false;
-		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		if (m_RecoilForce.MagnitudeIsGreaterThan(0.01F)) {
-			m_RecoilForce *= 0.6F;
-		} else {
-			m_RecoilForce.Reset();
-		}
 		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 

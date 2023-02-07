@@ -3884,7 +3884,7 @@ void AHuman::Update()
 			if (arm && !arm->GetHeldDeviceThisArmIsTryingToSupport()) {
 				Leg *legToSwingWith = arm == m_pFGArm ? m_pBGLeg : m_pFGLeg;
 				Leg *otherLeg = legToSwingWith == m_pBGLeg ? m_pFGLeg : m_pBGLeg;
-				if (!legToSwingWith) {
+				if (!legToSwingWith || m_MoveState == JUMP || m_MoveState == CROUCH) {
 					std::swap(legToSwingWith, otherLeg);
 				}
 

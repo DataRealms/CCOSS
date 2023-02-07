@@ -4285,34 +4285,54 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
 
             if (fgHeldFirearm || bgHeldFirearm) {
-                str[0] = -56; str[1] = 0;
-                pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 10, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
+                str[0] = -56;
+				str[1] = 0;
 
 				std::string fgWeaponString = "EMPTY";
 				if (fgHeldFirearm) {
 					if (fgHeldFirearm->IsReloading()) {
 						fgWeaponString = "Reloading";
+						int barColorIndex = 77;
+						if (!fgHeldFirearm->GetSupportAvailable()) {
+							float reloadMultiplier = fgHeldFirearm->GetOneHandedReloadTimeMultiplier();
+							if (reloadMultiplier != 1.0F) {
+								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
+								barColorIndex = reloadMultiplier > 1.0F ? (m_IconBlinkTimer.AlternateSim(250) ? 13 : barColorIndex) : 133;
+							}
+						}
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
-						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * fgHeldFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * fgHeldFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, barColorIndex);
 					} else {
 						fgWeaponString = fgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(fgHeldFirearm->GetRoundInMagCount());
 					}
 				}
 
+				std::string bgWeaponString;
                 if (bgHeldFirearm) {
-					std::string bgWeaponString;
 					if (bgHeldFirearm->IsReloading()) {
 						bgWeaponString = "Reloading";
+						int barColorIndex = 77;
+						if (!bgHeldFirearm->GetSupportAvailable()) {
+							float reloadMultiplier = bgHeldFirearm->GetOneHandedReloadTimeMultiplier();
+							if (reloadMultiplier != 1.0F) {
+								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
+								barColorIndex = reloadMultiplier > 1.0F ? (m_IconBlinkTimer.AlternateSim(250) ? 13 : barColorIndex) : 133;
+								/*
+								if (m_IconBlinkTimer.AlternateSim(250)) {
+									barColorIndex = reloadMultiplier > 1.0F ? (reloadMultiplier > 1.5F ? (reloadMultiplier > 2.0F ? 47 : 48) : 86) : 133;
+								}
+								*/
+							}
+						}
 						int totalTextWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
-						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * bgHeldFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * bgHeldFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, barColorIndex);
 					} else {
 						bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
 					}
-					std::snprintf(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
-                } else {
-                    std::snprintf(str, sizeof(str), "%s", fgWeaponString.c_str());
                 }
+				pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - pSymbolFont->CalculateWidth(str) - 3, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
+				std::snprintf(str, sizeof(str), bgHeldFirearm ? "%s | %s" : "%s", fgWeaponString.c_str(), bgWeaponString.c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
                 m_HUDStack -= 10;

@@ -10,15 +10,27 @@ namespace RTE {
 	/// A simple rectangle with integer coordinates.
 	/// </summary>
 	struct IntRect {
-		int m_Left;
-		int m_Top;
-		int m_Right;
-		int m_Bottom;
 
-		IntRect() { m_Left = m_Top = m_Right = m_Bottom = 0; }
+		int m_Left = 0; //!< X position of the IntRect top left corner.
+		int m_Top = 0; //!< Y position of the IntRect top left corner.
+		int m_Right = 0; //!< X position of the IntRect bottom right corner.
+		int m_Bottom = 0; //!< Y position of the IntRect bottom right corner.
+
+		/// <summary>
+		/// Constructor method used to instantiate an IntRect object from four int values defining the initial corners of this IntRect.
+		/// </summary>
+		/// <param name="left">X position of the IntRect top left corner.</param>
+		/// <param name="top">Y position of the IntRect top left corner.</param>
+		/// <param name="right">X position of the IntRect bottom right corner.</param>
+		/// <param name="bottom">Y position of the IntRect bottom right corner.</param>
 		IntRect(int left, int top, int right, int bottom) : m_Left(left), m_Top(top), m_Right(right), m_Bottom(bottom) {}
 
-		bool Intersects(const IntRect &rhs) const { return m_Left < rhs.m_Right &&m_Right > rhs.m_Left && m_Top < rhs.m_Bottom &&m_Bottom > rhs.m_Top; }
+		/// <summary>
+		/// Checks whether this IntRect is intersecting another one.
+		/// </summary>
+		/// <param name="rhs">The other IntRect to check for intersection with.</param>
+		/// <returns>Whether this IntRect is intersecting another one.</returns>
+		bool Intersects(const IntRect &rhs) const { return m_Left < rhs.m_Right && m_Right > rhs.m_Left && m_Top < rhs.m_Bottom && m_Bottom > rhs.m_Top; }
 
 		/// <summary>
 		/// If this and the passed in IntRect intersect, this will be modified to represent the boolean AND of the two.

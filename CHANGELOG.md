@@ -748,11 +748,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fix fire weapons causing extreme lag.
-
-- Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
-
-- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
 
 </details>
 

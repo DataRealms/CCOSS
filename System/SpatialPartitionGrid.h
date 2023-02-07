@@ -66,33 +66,25 @@ namespace RTE {
 		const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const;
 
 		/// <summary>
-		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given centre point, who aren't of the ignored team.
+		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.
 		/// </summary>
-		/// <param name="centre">The centre point to get MovableObjects around.</param>
+		/// <param name="center">The center point to get MovableObjects around.</param>
 		/// <param name="radius">The radius to get MovableObjects within.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
-		/// <returns>A vector of pointers to all the MovableObjects within the specified radius of the given centre point, who aren't of the ignored team.</returns>
-		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
+		/// <returns>A vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.</returns>
+		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const;
 
 		/// <summary>
-		/// Gets the MOIDs that are potentially overlapping the given x and y Scene coordinates.
+		/// Gets the MOIDs that are potentially overlapping the given X and Y Scene coordinates.
 		/// </summary>
-		/// <param name="x">The x coordinate to check.</param>
-		/// <param name="y">The y coordinate to check.</param>
+		/// <param name="x">The X coordinate to check.</param>
+		/// <param name="y">The Y coordinate to check.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MOIDs.</param>
 		/// <returns>A vector of MOIDs that are potentially overlapping the x and y coordinates.</returns>
 		const std::vector<int> & GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
 #pragma endregion
 
 	private:
-
-		/// <summary>
-		/// Gets the Id of the cell at the given SpatialPartitionGrid coordinates, automatically accounting for wrapping.
-		/// </summary>
-		/// <param name="cellX">The x coordinate of the cell to get the Id of.</param>
-		/// <param name="cellY">The y coordinate of the cell to get the Id of.</param>
-		/// <returns>The Id of the cell at the given SpatialPartitionGrid coordinates.</returns>
-		int GetCellIdForCellCoords(int cellX, int cellY) const;
 
 		int m_Width; //!< The width of the SpatialPartitionGrid, in cells.
 		int m_Height; //!< The height of the SpatialPartitionGrid, in cells.
@@ -105,7 +97,15 @@ namespace RTE {
 		std::unordered_set<int> m_UsedCellIds; //!< Set of used cell Ids, maintained to avoid wasting time looping through and clearing unused cells.
 
 		/// <summary>
-		/// Clears all the member variables of this SpatialPartitionGrid, effectively resetting the members of this abstraction level only.
+		/// Gets the Id of the cell at the given SpatialPartitionGrid coordinates, automatically accounting for wrapping.
+		/// </summary>
+		/// <param name="cellX">The x coordinate of the cell to get the Id of.</param>
+		/// <param name="cellY">The y coordinate of the cell to get the Id of.</param>
+		/// <returns>The Id of the cell at the given SpatialPartitionGrid coordinates.</returns>
+		int GetCellIdForCellCoords(int cellX, int cellY) const;
+
+		/// <summary>
+		/// Clears all the member variables of this SpatialPartitionGrid.
 		/// </summary>
 		void Clear();
 

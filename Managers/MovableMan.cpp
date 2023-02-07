@@ -26,8 +26,6 @@
 #include "ADoor.h"
 #include "Atom.h"
 
-#include "PrimitiveMan.h"
-
 namespace RTE {
 
 const std::string MovableMan::c_ClassName = "MovableMan";
@@ -179,11 +177,11 @@ bool MovableMan::HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixel
 			//TODO Account for Scale as well someday, maybe.
             Matrix rotation = moSprite->GetRotMatrix(); // <- Copy to non-const variable so / operator overload works.
             Vector entryPos = (distanceBetweenTestPositionAndMO / rotation).GetXFlipped(moSprite->IsHFlipped()) - moSprite->GetSpriteOffset();
-            int localX = static_cast<int>(std::floor(entryPos.m_X));
-            int localY = static_cast<int>(std::floor(entryPos.m_Y));
+			int localX = entryPos.GetFloorIntX();
+            int localY = entryPos.GetFloorIntY();
 
             BITMAP *sprite = moSprite->GetSpriteFrame(moSprite->GetFrame());
-            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != g_MaskColor;
+            return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != ColorKeys::g_MaskColor;
         }
     } else if (const MOPixel *moPixel = dynamic_cast<const MOPixel *>(&mo); moPixel) {
         const Vector &pos = moPixel->GetPos();
@@ -201,7 +199,7 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
         MOID moid = *itr;
 
         const MovableObject *mo = GetMOFromID(moid);
-        RTEAssert(mo, "Null MO found in moid list!");
+        RTEAssert(mo, "Null MO found in MOID list!");
         if (mo && HitTestMOAtPixel(*mo, pixelX, pixelY)) {
             return moid;
         }

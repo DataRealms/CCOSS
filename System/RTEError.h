@@ -32,11 +32,10 @@ namespace RTE {
 	/// <param name="description">Message explaining the reason for aborting.</param>
 	/// <param name="file">The source file from which abort was called.</param>
 	/// <param name="line">The line abort was called from in the source file.</param>
-	/// <returns>Always returns true to trigger AbortAction.</returns>
 	extern void RTEAbortFunc(const std::string &description, const std::string &file, int line);
 
-	#define RTEAbort(description) {											\
-		RTEAbortFunc(description, __FILE__, __LINE__);	                    \
+	#define RTEAbort(description) {							\
+		RTEAbortFunc(description, __FILE__, __LINE__);		\
 	}
 
 	/// <summary>
@@ -47,19 +46,14 @@ namespace RTE {
 	/// <param name="file">The source file in which the assertion is made.</param>
 	/// <param name="line">The line where the assertion is made.</param>
 	/// <param name="alwaysIgnore">A reference to a bool that is used in an "Always ignore" functionality.</param>
-	/// <returns>Whether the assertion failed AND the user chose to break in the dialog box.</returns>
-	extern void RTEAssertFunc(const char *description, const char *file, int line, bool &alwaysIgnore);
+	extern void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore);
 
-	inline extern void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore) {
-		return RTEAssertFunc(description.c_str(), file, line, alwaysIgnore);
-	}
-
-	#define RTEAssert(expression, description) {															\
-		static bool alwaysIgnore = false;	                                                                \
-		bool success = expression;                                                                          \
-		if (!success && !alwaysIgnore) {																	\
-			RTEAssertFunc(description, __FILE__, __LINE__, alwaysIgnore);                                   \
-		}																									\
+	#define RTEAssert(expression, description) {								\
+		static bool alwaysIgnore = false;										\
+		bool success = expression;												\
+		if (!success && !alwaysIgnore) {										\
+			RTEAssertFunc(description, __FILE__, __LINE__, alwaysIgnore);		\
+		}																		\
 	}
 }
 #endif

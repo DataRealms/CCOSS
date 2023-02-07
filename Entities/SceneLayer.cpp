@@ -16,7 +16,7 @@ namespace RTE {
 		m_BitmapFile.Reset();
 		m_MainBitmap = nullptr;
 		m_BackBitmap = nullptr;
-		m_LastClearColor = g_InvalidColor;
+		m_LastClearColor = ColorKeys::g_InvalidColor;
 		m_Drawings.clear();
 		m_MainBitmapOwned = false;
 		m_DrawMasked = true;
@@ -53,7 +53,7 @@ namespace RTE {
 		m_MainBitmapOwned = true;
 
 		m_BackBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
-		m_LastClearColor = g_InvalidColor;
+		m_LastClearColor = ColorKeys::g_InvalidColor;
 
 		m_DrawMasked = drawMasked;
 		m_Offset = offset;
@@ -92,7 +92,7 @@ namespace RTE {
 			blit(bitmapToCopy, m_MainBitmap, 0, 0, 0, 0, bitmapToCopy->w, bitmapToCopy->h);
 
 			m_BackBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
-			m_LastClearColor = g_InvalidColor;
+			m_LastClearColor = ColorKeys::g_InvalidColor;
 
 			InitScrollRatios();
 
@@ -139,7 +139,6 @@ namespace RTE {
 	void SceneLayerImpl<TRACK_DRAWINGS>::Destroy(bool notInherited) {
 		if (m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
 		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
-		m_LastClearColor = ColorKeys::g_InvalidColor;
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
 	}
@@ -220,7 +219,7 @@ namespace RTE {
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
 			m_BitmapFile.SetDataPath(bitmapPath);
-			// TODO: Move this into some global thread container or a ThreadMan� instead of detaching.
+			// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 			saveThread.detach();
 		}
 		return 0;
@@ -233,9 +232,11 @@ namespace RTE {
 		if (m_MainBitmap && m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
 		m_MainBitmap = nullptr;
 		m_MainBitmapOwned = false;
+
 		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
 		m_BackBitmap = nullptr;
 		m_LastClearColor = ColorKeys::g_InvalidColor;
+
 		return 0;
 	}
 
@@ -284,9 +285,10 @@ namespace RTE {
 	void SceneLayerImpl<TRACK_DRAWINGS>::ClearBitmap(ColorKeys clearTo) {
 		RTEAssert(m_MainBitmapOwned, "Bitmap not owned! We shouldn't be clearing this!");
 
-		m_BitmapClearMutex.lock();
+		std::scoped_lock<std::mutex> bitmapClearLock(m_BitmapClearMutex);
+
 		if (m_LastClearColor != clearTo) {
-			// Note: We're clearing to a different colour than expected, which is expensive! We should always aim to clear to the same colour to avoid it as much as possible.
+			// Note: We're clearing to a different color than expected, which is expensive! We should always aim to clear to the same color to avoid it as much as possible.
 			clear_to_color(m_BackBitmap, clearTo);
 			m_LastClearColor = clearTo;
 		}
@@ -301,7 +303,6 @@ namespace RTE {
 		}, m_BackBitmap, m_Drawings);
 
 		clearBackBitmapThread.detach();
-		m_BitmapClearMutex.unlock();
 
 		m_Drawings.clear(); // This was copied into the new thread, so can be safely deleted.
 	}
@@ -396,6 +397,24 @@ namespace RTE {
 		pos.SetXY(static_cast<float>(posX) + (pos.GetX() - std::floor(pos.GetX())), static_cast<float>(posY) + (pos.GetY() - std::floor(pos.GetY())));
 
 		return wrapped;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::RegisterDrawing(int left, int top, int right, int bottom) {
+		if constexpr (TRACK_DRAWINGS) {
+			m_Drawings.emplace_back(left, top, right, bottom);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::RegisterDrawing(const Vector &center, float radius) {
+		if (radius != 0.0F) {
+			RegisterDrawing(static_cast<int>(center.GetX() - radius), static_cast<int>(center.GetY() - radius), static_cast<int>(center.GetX() + radius), static_cast<int>(center.GetY() + radius));
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,85 +523,49 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	template <>
-	void SceneLayerImpl<true>::RegisterDrawing(int left, int top, int right, int bottom) {
-		m_Drawings.emplace_back(left, top, right, bottom); 
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	template <>
-	void SceneLayerImpl<false>::RegisterDrawing(int left, int top, int right, int bottom) { /* no-op */ }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	template <bool TRACK_DRAWINGS>
-	void SceneLayerImpl<TRACK_DRAWINGS>::RegisterDrawing(const Vector &center, float radius) {
-		if (radius != 0.0F) {
-			RegisterDrawing(static_cast<int>(center.m_X - radius), static_cast<int>(center.m_Y - radius), static_cast<int>(center.m_X + radius), static_cast<int>(center.m_Y + radius));
-		}
-	}
+	void SceneLayerImpl<TRACK_DRAWINGS>::ClearDrawings(BITMAP* bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo) const {
+		if constexpr (TRACK_DRAWINGS) {
+			for (const IntRect &rect : drawings) {
+				int left = rect.m_Left;
+				int top = rect.m_Top;
+				int bottom = rect.m_Bottom;
+				int right = rect.m_Right;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				rectfill(bitmap, left, top, right, bottom, clearTo);
 
-	template <>
-	void SceneLayerImpl<false>::ClearDrawings(BITMAP* bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo) {
-		clear_to_color(bitmap, clearTo);
-	}
+				if (m_WrapX) {
+					if (left < 0) {
+						int wrapLeft = left + bitmap->w;
+						int wrapRight = bitmap->w - 1;
+						rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
+					}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	template <>
-	void SceneLayerImpl<true>::ClearDrawings(BITMAP *bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo) {
-		for (const auto &rect : drawings) {
-			int left = rect.m_Left;
-			int top = rect.m_Top;
-			int bottom = rect.m_Bottom;
-			int right = rect.m_Right;
-
-			rectfill(bitmap, left, top, right, bottom, clearTo);
-
-			if (m_WrapX) {
-				if (left < 0) {
-					int wrapLeft = left + bitmap->w;
-					int wrapRight = bitmap->w - 1;
-					rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
+					if (right >= bitmap->w) {
+						int wrapLeft = 0;
+						int wrapRight = right - bitmap->w;
+						rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
+					}
 				}
 
-				if (right >= bitmap->w) {
-					int wrapLeft = 0;
-					int wrapRight = right - bitmap->w;
-					rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
-				}
-			}
+				if (m_WrapY) {
+					if (top < 0) {
+						int wrapTop = top + bitmap->h;
+						int wrapBottom = bitmap->h - 1;
+						rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
+					}
 
-			if (m_WrapY) {
-				if (top < 0) {
-					int wrapTop = top + bitmap->h;
-					int wrapBottom = bitmap->h - 1;
-					rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
-				}
-
-				if (bottom >= bitmap->h) {
-					int wrapTop = 0;
-					int wrapBottom = bottom - bitmap->h;
-					rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
+					if (bottom >= bitmap->h) {
+						int wrapTop = 0;
+						int wrapBottom = bottom - bitmap->h;
+						rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
+					}
 				}
 			}
+		} else {
+			clear_to_color(bitmap, clearTo);
 		}
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SceneLayerTracked::RegisterDrawing(int left, int top, int right, int bottom) { 
-		SceneLayerImpl::RegisterDrawing(left, top, right, bottom); 
-	};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SceneLayerTracked::RegisterDrawing(const Vector &center, float radius) { 
-		SceneLayerImpl::RegisterDrawing(center, radius); 
-	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

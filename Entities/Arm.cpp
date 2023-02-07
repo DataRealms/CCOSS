@@ -195,7 +195,7 @@ namespace RTE {
 			m_AngularVel = 0.0F;
 		}
 
-		if (m_HeldDeviceThisArmIsTryingToSupport && !m_HeldDeviceThisArmIsTryingToSupport->IsSupportable()) {
+		if (m_HeldDeviceThisArmIsTryingToSupport && (!m_HeldDeviceThisArmIsTryingToSupport->IsSupportable() || m_HeldDeviceThisArmIsTryingToSupport->GetSupportOffset().MagnitudeIsGreaterThan(m_MaxLength * 2.0F))) {
 			m_HeldDeviceThisArmIsTryingToSupport = nullptr;
 		}
 

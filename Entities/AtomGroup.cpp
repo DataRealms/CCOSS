@@ -1082,7 +1082,7 @@ namespace RTE {
 					// Call the call-on-bounce function, if requested.
 					//if (m_OwnerMOSR && callOnBounce) { halted = m_OwnerMOSR->OnBounce(position); }
 
-					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size());
+					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size()/* + atomsHitMOsCount*/);
 
 					// Gather the collision response effects so that the impulse force can be calculated.
 					for (const std::pair<Atom *, Vector> &hitTerrAtomsEntry : hitTerrAtoms) {

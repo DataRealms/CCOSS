@@ -338,6 +338,12 @@ namespace RTE {
 		/// <param name="position">Current position of the owner MOSR.</param>>
 		/// <returns>Whether all intersections were successfully resolved.</returns>
 		bool ResolveMOSIntersection(Vector &position);
+
+		/// <summary>
+		/// Returns the surface area for a given pixel width, assuming that we're a circle with depth.
+		/// </summary>
+		/// <returns>Our surface area.</returns>
+		float GetSurfaceArea(int pixelWidth);
 #pragma endregion
 
 #pragma region Debug

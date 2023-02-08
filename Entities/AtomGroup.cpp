@@ -21,6 +21,7 @@ namespace RTE {
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
+		m_AreaDistributionType = AreaDistributionType::Circular;
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -55,6 +56,7 @@ namespace RTE {
 		m_Resolution = reference.m_Resolution;
 		m_Depth = reference.m_Depth;
 		m_JointOffset = reference.m_JointOffset;
+		m_AreaDistributionType = reference.m_AreaDistributionType;
 
 		m_Atoms.clear();
 		m_SubGroups.clear();
@@ -127,6 +129,10 @@ namespace RTE {
 			m_Atoms.push_back(atom);
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
+		} else if (propName == "AreaDistributionType") {
+			std::underlying_type_t<AreaDistributionType> type;
+			reader >> type;
+			m_AreaDistributionType = static_cast<AreaDistributionType>(type);
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -157,6 +163,9 @@ namespace RTE {
 
 		writer.NewProperty("JointOffset");
 		writer << m_JointOffset;
+
+		writer.NewProperty("AreaDistributionType");
+		writer << static_cast<std::underlying_type_t<AreaDistributionType>>(m_AreaDistributionType);
 
 		return 0;
 	}
@@ -1073,10 +1082,7 @@ namespace RTE {
 					// Call the call-on-bounce function, if requested.
 					//if (m_OwnerMOSR && callOnBounce) { halted = m_OwnerMOSR->OnBounce(position); }
 
-					// Calculate the distributed mass that each bouncing Atom has.
-					// Usually we assume our mass distribution is circular, not linear
-					// but we're not doing that here cause we like bouncy things
-					float massDistribution = mass / static_cast<float>((hitTerrAtoms.size()/* + atomsHitMOsCount*/) * (m_Resolution ? m_Resolution : 1));
+					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size()/* + atomsHitMOsCount*/);
 
 					// Gather the collision response effects so that the impulse force can be calculated.
 					for (const std::pair<Atom *, Vector> &hitTerrAtomsEntry : hitTerrAtoms) {
@@ -1528,8 +1534,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetSurfaceArea(int pixelWidth) {
-		float radius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
-		return c_PI * radius * radius;
+		switch (m_AreaDistributionType) {
+			case AreaDistributionType::Linear:
+				return static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1));
+
+			case AreaDistributionType::Circular: {
+				const float radius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
+				return c_PI * radius * radius;
+			}
+
+			default:
+				RTEAbort("Unexpected area distribution type!");
+		}
+
+		return 1.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

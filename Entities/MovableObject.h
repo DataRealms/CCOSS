@@ -922,9 +922,9 @@ enum MOType
 // Description:     Indicates whether this MO is moving or rotating stupidly fast in a way
 //                  that will screw up the simulation.
 // Arguments:       None.
-// Return value:    Whetehr this is eitehr moving or rotating too fast.
+// Return value:    Whether this is either moving or rotating too fast.
 
-    virtual bool IsTooFast() const { return m_Vel.GetLargest() > 500; }
+    virtual bool IsTooFast() const { return m_Vel.MagnitudeIsGreaterThan(500.0F); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -935,7 +935,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void FixTooFast() { if (IsTooFast()) { m_Vel.SetMagnitude(450); } }
+    virtual void FixTooFast() { if (IsTooFast()) { m_Vel.SetMagnitude(450.0F); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1076,8 +1076,8 @@ enum MOType
 	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
 
 #ifndef RELEASE_BUILD
-		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+		RTEAssert(impulse.MagnitudeIsLessThan(500000.0F), "HUEG IMPULSE FORCE");
+		RTEAssert(offset.MagnitudeIsLessThan(5000.0F), "HUGE IMPULSE FORCE OFFSET");
 #endif
 
         m_ImpulseForces.push_back({impulse, offset});
@@ -1523,6 +1523,8 @@ enum MOType
 
 	void Update() override;
 
+    void Draw(BITMAP* pTargetBitmap, const Vector& targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateScript
@@ -1792,6 +1794,12 @@ enum MOType
     /// <returns>Whether this MO's RootParent can GetHitByMOs and is currently traveling.</returns>
     bool GetTraveling() const { return GetRootParent()->m_IsTraveling; }
 
+    /// <summary>
+    /// Sets whether this MO's RootParent is currently traveling.
+    /// </summary>
+    /// <param name="newValue">Whether this MO's RootParent is currently traveling.</param>
+    void SetTraveling(bool newValue) { GetRootParent()->m_IsTraveling = newValue; }
+
 	/// <summary>
 	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
 	/// </summary>
@@ -1941,7 +1949,7 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-	bool m_IsTraveling; //!< Prevents self-intersection while traveling when simplified collision detection is used.
+	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.

@@ -412,6 +412,13 @@ namespace RTE {
 		
 		float m_AreaDistributionSurfaceAreaMultiplier; //!< A multiplier for the AtomGroup's surface area, which affects how much it digs into terrain. 0.5 would halve the surface area so it would dig into terrain twice as much, 2.0 would make it dig into terrain half as much.
 
+		enum class AreaDistributionType : int {
+			Linear, // AtomGroup will distribute energy as if it's a 2d line.
+			Circular // AtomGroup will distribute energy as if it's a circle.
+		};
+
+		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup with distribute energy when it collides with something.
+
 	private:
 
 #pragma region Create Breakdown

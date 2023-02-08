@@ -31,8 +31,7 @@ namespace RTE {
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
-		m_AreaDistributionType = AreaDistributionType::Circle;
-		m_AreaDistributionSurfaceAreaMultiplier = 0.5F; // Assume an oval of half our depth to width
+		m_AreaDistributionType = AreaDistributionType::Circular;
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -68,7 +67,6 @@ namespace RTE {
 		m_Depth = reference.m_Depth;
 		m_JointOffset = reference.m_JointOffset;
 		m_AreaDistributionType = reference.m_AreaDistributionType;
-		m_AreaDistributionSurfaceAreaMultiplier = reference.m_AreaDistributionSurfaceAreaMultiplier;
 
 		m_Atoms.clear();
 		m_SubGroups.clear();
@@ -143,25 +141,16 @@ namespace RTE {
 			Atom *atom = new Atom;
 			reader >> *atom;
 			m_Atoms.push_back(atom);
-		});
-		MatchProperty("JointOffset", { reader >> m_JointOffset; });
-		MatchProperty("AreaDistributionType", {
-			std::string areaDistributionTypeString = reader.ReadPropValue();
-			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
-			if (itr != c_AreaDistributionTypeMap.end()) {
-				m_AreaDistributionType = itr->second;
-			} else {
-				try {
-					m_AreaDistributionType = static_cast<AreaDistributionType>(std::stoi(areaDistributionTypeString));
-				} catch (const std::invalid_argument &) {
-					reader.ReportError("AreaDistributionType " + areaDistributionTypeString + " is invalid.");
-				}
-			}
-		});
-		MatchProperty("AreaDistributionSurfaceAreaMultiplier", { reader >> m_AreaDistributionSurfaceAreaMultiplier; });
-		
-		
-		EndPropertyList;
+		} else if (propName == "JointOffset") {
+			reader >> m_JointOffset;
+		} else if (propName == "AreaDistributionType") {
+			std::underlying_type_t<AreaDistributionType> type;
+			reader >> type;
+			m_AreaDistributionType = static_cast<AreaDistributionType>(type);
+		} else {
+			return Entity::ReadProperty(propName, reader);
+		}
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,8 +180,6 @@ namespace RTE {
 
 		writer.NewProperty("AreaDistributionType");
 		writer << static_cast<std::underlying_type_t<AreaDistributionType>>(m_AreaDistributionType);
-		writer.NewProperty("AreaDistributionSurfaceAreaMultiplier");
-		writer << m_AreaDistributionSurfaceAreaMultiplier;
 
 		return 0;
 	}
@@ -1551,27 +1538,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float AtomGroup::GetSurfaceArea(int pixelWidth) const {
-		float distributionAmount;
-
+	float AtomGroup::GetSurfaceArea(int pixelWidth) {
 		switch (m_AreaDistributionType) {
 			case AreaDistributionType::Linear:
-				distributionAmount = static_cast<float>(pixelWidth);
-				break;
-			case AreaDistributionType::Circle: {
-					const float radius = static_cast<float>(pixelWidth) * 0.5F;
-					distributionAmount = c_PI * radius * radius;
-					break;
-				}
-			case AreaDistributionType::Square:
-				distributionAmount = static_cast<float>(pixelWidth * pixelWidth);
-				break;
+				return static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1));
+
+			case AreaDistributionType::Circular: {
+				const float radius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
+				return c_PI * radius * radius;
+			}
+
 			default:
 				RTEAbort("Unexpected area distribution type!");
-				distributionAmount = 1.0F;
 		}
 
-		return distributionAmount * m_AreaDistributionSurfaceAreaMultiplier;
+		return 1.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

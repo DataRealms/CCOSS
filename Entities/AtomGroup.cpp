@@ -1073,10 +1073,7 @@ namespace RTE {
 					// Call the call-on-bounce function, if requested.
 					//if (m_OwnerMOSR && callOnBounce) { halted = m_OwnerMOSR->OnBounce(position); }
 
-					// Calculate the distributed mass that each bouncing Atom has.
-					// Usually we assume our mass distribution is circular, not linear
-					// but we're not doing that here cause we like bouncy things
-					float massDistribution = mass / static_cast<float>((hitTerrAtoms.size()/* + atomsHitMOsCount*/) * (m_Resolution ? m_Resolution : 1));
+					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size());
 
 					// Gather the collision response effects so that the impulse force can be calculated.
 					for (const std::pair<Atom *, Vector> &hitTerrAtomsEntry : hitTerrAtoms) {

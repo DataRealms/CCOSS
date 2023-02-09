@@ -308,14 +308,9 @@ namespace RTE {
 			while (!System::IsSetToQuit()) {
 				g_ThreadMan.RunSimulationThreadFunctions();
 
-				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
-					continue;
-				}
-
-				// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
-				if (!g_TimerMan.TimeForSimUpdate()) {
-					continue;
-				}
+		while (!System::IsSetToQuit()) {
+			g_FrameMan.ClearFrame();
+			bool serverUpdated = false;
 
 				long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 				bool serverUpdated = false;

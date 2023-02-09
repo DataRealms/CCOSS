@@ -21,7 +21,7 @@ namespace RTE {
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
-		m_AreaDistributionType = AreaDistributionType::Circular;
+		m_AreaDistributionType = AreaDistributionType::Oval;
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -1538,9 +1538,15 @@ namespace RTE {
 			case AreaDistributionType::Linear:
 				return static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1));
 
-			case AreaDistributionType::Circular: {
+			case AreaDistributionType::Circle: {
 				const float radius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
 				return c_PI * radius * radius;
+			}
+
+			case AreaDistributionType::Oval: {
+				const float majorRadius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
+				const float minorRadius = majorRadius * 0.5F;
+				return c_PI * minorRadius * majorRadius;
 			}
 
 			default:

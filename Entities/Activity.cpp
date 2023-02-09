@@ -764,7 +764,7 @@ void Activity::Clear() {
 
 	void Activity::LoseControlOfActor(int player) {
 		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
-			if (Actor *actor = m_ControlledActor[player]) {
+			if (Actor *actor = m_ControlledActor[player]; actor && g_MovableMan.IsActor(actor)) {
 				actor->SetControllerMode(Controller::CIM_AI);
 				actor->GetController()->SetDisabled(false);
 			}

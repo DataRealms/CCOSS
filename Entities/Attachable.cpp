@@ -17,6 +17,7 @@ namespace RTE {
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
 		m_DeleteWhenRemovedFromParent = false;
+		m_GibWhenRemovedFromParent = false;
 		m_ApplyTransferredForcesAtOffset = true;
 
 		m_GibWithParentChance = 0.0F;
@@ -69,6 +70,7 @@ namespace RTE {
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
 		m_DeleteWhenRemovedFromParent = reference.m_DeleteWhenRemovedFromParent;
+		m_GibWhenRemovedFromParent = reference.m_GibWhenRemovedFromParent;
 		m_ApplyTransferredForcesAtOffset = reference.m_ApplyTransferredForcesAtOffset;
 
 		m_GibWithParentChance = reference.m_GibWithParentChance;
@@ -112,6 +114,8 @@ namespace RTE {
 			reader >> m_DrawAfterParent;
 		} else if (propName == "DeleteWhenRemovedFromParent") {
 			reader >> m_DeleteWhenRemovedFromParent;
+		} else if (propName == "GibWhenRemovedFromParent") {
+			reader >> m_GibWhenRemovedFromParent;
 		} else if (propName == "ApplyTransferredForcesAtOffset") {
 			reader >> m_ApplyTransferredForcesAtOffset;
 		} else if (propName == "GibWithParentChance") {
@@ -163,6 +167,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ParentOffset", m_ParentOffset);
 		writer.NewPropertyWithValue("DrawAfterParent", m_DrawAfterParent);
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", m_DeleteWhenRemovedFromParent);
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", m_GibWhenRemovedFromParent);
 		writer.NewPropertyWithValue("ApplyTransferredForcesAtOffset", m_ApplyTransferredForcesAtOffset);
 
 		writer.NewPropertyWithValue("JointStrength", m_JointStrength);

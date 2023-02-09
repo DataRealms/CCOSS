@@ -136,16 +136,28 @@ namespace RTE {
 		void SetDrawnNormallyByParent(bool drawnNormallyByParent) { m_DrawnNormallyByParent = drawnNormallyByParent; }
 
 		/// <summary>
-		/// Gets whether this Attachable will be deleted when it's removed from its parent. Has no effect until the Attachable is added to a parent.
+		/// Gets whether this Attachable will be deleted when removed from its parent. Has no effect until the Attachable has been added to a parent.
 		/// </summary>
-		/// <returns>Whether this Attachable is marked to be deleted when it's removed from its parent or not.</returns>
+		/// <returns>Whether this Attachable is marked to be deleted when removed from its parent or not.</returns>
 		bool GetDeleteWhenRemovedFromParent() const { return m_DeleteWhenRemovedFromParent; }
 
 		/// <summary>
-		/// Sets whether this Attachable will be deleted when it's removed from its parent.
+		/// Sets whether this Attachable will be deleted when removed from its parent.
 		/// </summary>
-		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
+		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when removed from its parent.</param>
 		virtual void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
+
+		/// <summary>
+		/// Gets whether this Attachable will gib when removed from its parent. Has no effect until the Attachable has been added to a parent.
+		/// </summary>
+		/// <returns>Whether this Attachable is marked to gib when removed from its parent or not.</returns>
+		bool GetGibWhenRemovedFromParent() const { return m_GibWhenRemovedFromParent; }
+
+		/// <summary>
+		/// Sets whether this Attachable will gib when removed from its parent.
+		/// </summary>
+		/// <param name="gibWhenRemovedFromParent">Whether this Attachable should gib when removed from its parent.</param>
+		virtual void SetGibWhenRemovedFromParent(bool gibWhenRemovedFromParent) { m_GibWhenRemovedFromParent = gibWhenRemovedFromParent; }
 
 		/// <summary>
 		/// Gets whether forces transferred from this Attachable should be applied at its parent's offset (rotated to match the parent) where they will produce torque, or directly at its parent's position.
@@ -549,7 +561,8 @@ namespace RTE {
 		Vector m_ParentOffset; //!< The offset from the parent's Pos to the joint point this Attachable is attached with.
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
 		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be drawn normally when attached, or will require special handling by some non-MOSR parent type.
-		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when it's removed from its parent.
+		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when removed from its parent.
+		bool m_GibWhenRemovedFromParent; //!< Whether this Attachable should gib when removed from its parent.
 		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
 
 		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.

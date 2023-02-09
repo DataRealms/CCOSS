@@ -539,6 +539,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
 
+- New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

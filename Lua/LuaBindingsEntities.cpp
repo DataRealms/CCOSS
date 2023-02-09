@@ -579,6 +579,7 @@ namespace RTE {
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
 		.property("JointPos", &Attachable::GetJointPos)
 		.property("DeleteWhenRemovedFromParent", &Attachable::GetDeleteWhenRemovedFromParent, &Attachable::SetDeleteWhenRemovedFromParent)
+		.property("GibWhenRemovedFromParent", &Attachable::GetGibWhenRemovedFromParent, &Attachable::SetGibWhenRemovedFromParent)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetParentBreakWound)

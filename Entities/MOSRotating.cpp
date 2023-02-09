@@ -1146,7 +1146,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
 	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
         RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
-        if (RandomNum() < attachable->GetGibWithParentChance()) {
+        if (RandomNum() < attachable->GetGibWithParentChance() || attachable->GetGibWhenRemovedFromParent()) {
             attachable->GibThis();
             continue;
         }
@@ -1754,6 +1754,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
     if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
     if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);
+		if (attachable->GetGibWhenRemovedFromParent()) { attachable->GibThis(); }
         return nullptr;
     }
 

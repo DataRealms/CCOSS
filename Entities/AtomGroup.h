@@ -391,7 +391,8 @@ namespace RTE {
 
 		enum class AreaDistributionType : int {
 			Linear, // AtomGroup will distribute energy as if it's a 2d line.
-			Circular // AtomGroup will distribute energy as if it's a circle.
+			Circle, // AtomGroup will distribute energy as if it's a circle.
+			Oval    // AtomGroup will distribute energy as if it's an oval, with a depth of half it's width.
 		};
 
 		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup with distribute energy when it collides with something.

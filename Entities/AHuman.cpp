@@ -3118,7 +3118,7 @@ void AHuman::Update()
 		} else {
 			m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
 		}
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;

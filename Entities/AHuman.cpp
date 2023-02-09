@@ -1532,7 +1532,6 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 			if (reloadHeldFirearm) {
 				heldFirearm->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-				//TODO it would be nice to calculate this based on arm movement speed, so it accounts for moving the arm there and back but I couldn't figure out the maths. Alternatively, the reload time could be calculated based on this, instead of this trying to calculate from the reload time.
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
 
 				if (otherArmIsAvailable) {
@@ -4296,8 +4295,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 						if (!fgHeldFirearm->GetSupportAvailable()) {
 							float reloadMultiplier = fgHeldFirearm->GetOneHandedReloadTimeMultiplier();
 							if (reloadMultiplier != 1.0F) {
+								// Add a hand icon next to the ammo icon when reloading without supporting hand.
 								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
-								barColorIndex = reloadMultiplier > 1.0F ? (m_IconBlinkTimer.AlternateSim(250) ? 13 : barColorIndex) : 133;
+								if (reloadMultiplier > 1.0F) {
+									if (m_IconBlinkTimer.AlternateSim(250)) { barColorIndex = 13; }
+								} else {
+									barColorIndex = 133;
+								}
 							}
 						}
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
@@ -4315,8 +4319,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 						if (!bgHeldFirearm->GetSupportAvailable()) {
 							float reloadMultiplier = bgHeldFirearm->GetOneHandedReloadTimeMultiplier();
 							if (reloadMultiplier != 1.0F) {
+								// Add a hand icon next to the ammo icon when reloading without supporting hand.
 								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
-								barColorIndex = reloadMultiplier > 1.0F ? (m_IconBlinkTimer.AlternateSim(250) ? 13 : barColorIndex) : 133;
+								if (reloadMultiplier > 1.0F) {
+									if (m_IconBlinkTimer.AlternateSim(250)) { barColorIndex = 13; }
+								} else {
+									barColorIndex = 133;
+								}
 							}
 						}
 						int totalTextWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;

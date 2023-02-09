@@ -354,7 +354,7 @@ namespace RTE {
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
 		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
 		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD)
-		.property("ScrapCompactingheight", &SettingsMan::GetScrapCompactingHeight, &SettingsMan::SetScrapCompactingHeight);
+		.property("ScrapCompactingHeight", &SettingsMan::GetScrapCompactingHeight, &SettingsMan::SetScrapCompactingHeight);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

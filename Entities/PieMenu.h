@@ -323,7 +323,7 @@ namespace RTE {
 		/// The existing PieSlice is returned, and ownership IS transferred both ways!
 		/// </summary>
 		/// <param name="pieSliceToReplace">The PieSlice that will be replaced.</param>
-		/// <param name="replacementPieSlice">The PieSlice that will replace the existing one.</param>
+		/// <param name="replacementPieSlice">The PieSlice that will replace the existing one. If this is nullptr, the existing one will just be removed.</param>
 		/// <returns>The removed PieSlice, if there is one. Ownership IS transferred!</returns>
 		PieSlice * ReplacePieSlice(const PieSlice *pieSliceToReplace, PieSlice *replacementPieSlice);
 #pragma endregion

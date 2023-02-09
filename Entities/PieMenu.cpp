@@ -492,6 +492,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     PieSlice * PieMenu::ReplacePieSlice(const PieSlice *pieSliceToReplace, PieSlice *replacementPieSlice) {
+		if (pieSliceToReplace == nullptr) {
+			return nullptr;
+		}
+		if (replacementPieSlice == nullptr) {
+			return RemovePieSlice(pieSliceToReplace);
+		}
+
 		PieSlice *replacedPieSlice = nullptr;
 
 		auto DoPieSliceReplacementInPieQuadrant = [&replacedPieSlice, &pieSliceToReplace, &replacementPieSlice](PieQuadrant &pieQuadrant) {

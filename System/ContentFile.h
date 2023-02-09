@@ -89,6 +89,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
+		/// This uses boost::hash for compiler independent hashing.
 		/// </summary>
 		/// <returns>Hash value of a path to a ContentFile.</returns>
 		size_t GetHash() const;

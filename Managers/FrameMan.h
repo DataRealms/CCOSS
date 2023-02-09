@@ -354,27 +354,27 @@ namespace RTE {
 		/// <summary>
 		/// Clear the GL backbuffer to start a new frame.
 		/// </summary>
-		void ClearFrame() const;
+		void ClearFrame();
 
 		/// <summary>
 		/// Flips the frame buffers, draws the software backbuffer to the gl backbuffer. Draw other gl things (imgui) after this.
 		/// </summary>
-		void FlipFrameBuffers() const;
+		void FlipFrameBuffers();
 
 		/// <summary>
 		/// Present the window content.
 		/// </summary>
-		void SwapWindow() const;
+		void SwapWindow();
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer8() const { clear_to_color(m_BackBuffer8, m_BlackColor); }
+		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8, m_BlackColor); }
 
 		/// <summary>
 		/// Clears the 32bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
+		void ClearBackBuffer32() { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
 		/// Sets a specific color table which is used for any subsequent blended drawing in indexed color modes.
@@ -574,7 +574,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToPNG(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
+		int SaveScreenToPNG(const char *nameBase) { m_WantScreenDump = true; m_ScreenDumpName = nameBase; return 0; } // return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
 		/// Dumps a bitmap of everything on the scene to a PNG file.
@@ -663,6 +663,8 @@ namespace RTE {
 		bool m_FlashedLastFrame[c_MaxScreenCount]; //!< Whether we flashed last frame or not.
 		Timer m_FlashTimer[c_MaxScreenCount]; //!< Flash screen timer.
 
+		bool m_WantScreenDump; //!< Whether to save a screenshot at the end of the frame.
+		std::string m_ScreenDumpName; //!< The filename of the screenshot to save.
 		BITMAP *m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		BITMAP *m_OverlayBitmap32; //!< 32bpp bitmap used for overlaying (fading in/out or darkening) the screen.
@@ -835,7 +837,7 @@ namespace RTE {
 		/// </param>
 		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 or nullptr if not in SingleBitmap mode.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = nullptr);
+		int SaveBitmap(SaveBitmapMode modeToSave, const std::string& nameBase, BITMAP *bitmapToSave = nullptr);
 
 		/// <summary>
 		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.

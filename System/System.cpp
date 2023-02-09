@@ -45,6 +45,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
+		//note - using boost::hash to stay consistent between os
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
 				for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::recursive_directory_iterator(s_WorkingDirectory, std::filesystem::directory_options::follow_directory_symlink)) {

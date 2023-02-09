@@ -493,7 +493,7 @@ Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) con
 	Attachable *nearestAttachable = nullptr;
 	float closestRadius = -1.0F;
 	for (Attachable *attachable : m_Attachables) {
-		if (attachable->GetsHitByMOs() && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0) {
+		if (attachable->GetsHitByMOs() && attachable->GetGibImpulseLimit() > 0 && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0 && offset.Dot(attachable->GetParentOffset()) > 0) {
 			float radius = (offset - attachable->GetParentOffset()).GetMagnitude();
 			if (closestRadius < 0 || radius < closestRadius) {
 				closestRadius = radius;
@@ -509,11 +509,9 @@ Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) con
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
     if (woundToAdd && !m_ToDelete) {
 		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
-			// Find and detach an attachable near the new wound before gibbing the object itself.
-			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
-				if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
-					RemoveAttachable(attachableToDetach, true, true);
-				}
+			// Find and detach an attachable near the new wound before gibbing the object itself. TODO: Perhaps move this to Actor, since it's more relevant there?
+			if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet); attachableToDetach && m_DetachAttachablesBeforeGibbingFromWounds) {
+				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
@@ -1214,15 +1212,24 @@ void MOSRotating::ApplyImpulses() {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && totalImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
+			float impulseRemainder = totalImpulse.GetMagnitude();
+			Vector invertedImpulseOffset = Vector(totalImpulse.GetX(), totalImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation;
+			Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(invertedImpulseOffset);
+			while (nearestAttachableToImpulse) {
+				float attachableImpulseLimit = nearestAttachableToImpulse->GetGibImpulseLimit();
+				float attachableJointStrength = nearestAttachableToImpulse->GetJointStrength();
+				if (impulseRemainder > attachableImpulseLimit) {
+					nearestAttachableToImpulse->GibThis(totalImpulse.SetMagnitude(attachableImpulseLimit));
+					impulseRemainder -= attachableImpulseLimit;
+				} else if (impulseRemainder > attachableJointStrength) {
+					RemoveAttachable(nearestAttachableToImpulse, true, true);
+					impulseRemainder -= attachableJointStrength;
+				} else {
+					break;
 				}
+				nearestAttachableToImpulse = GetNearestAttachableToOffset(invertedImpulseOffset);
 			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(averagedImpulseForceOffset.SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && totalImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis(totalImpulse);
+			if (impulseRemainder > impulseLimit) { GibThis(totalImpulse.SetMagnitude(impulseRemainder)); }
 		}
 	}
 
@@ -1508,15 +1515,24 @@ void MOSRotating::PostTravel()
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && m_TravelImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
+			float impulseRemainder = m_TravelImpulse.GetMagnitude();
+			Vector invertedImpulseOffset = Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation;
+			Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(invertedImpulseOffset);
+			while (nearestAttachableToImpulse) {
+				float attachableImpulseLimit = nearestAttachableToImpulse->GetGibImpulseLimit();
+				float attachableJointStrength = nearestAttachableToImpulse->GetJointStrength();
+				if (impulseRemainder > attachableImpulseLimit) {
+					nearestAttachableToImpulse->GibThis();
+					impulseRemainder -= attachableImpulseLimit;
+				} else if (impulseRemainder > attachableJointStrength) {
+					RemoveAttachable(nearestAttachableToImpulse, true, true);
+					impulseRemainder -= attachableJointStrength;
+				} else {
+					break;
 				}
+				nearestAttachableToImpulse = GetNearestAttachableToOffset(invertedImpulseOffset);
 			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && m_TravelImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis();
+			if (impulseRemainder > impulseLimit) { GibThis(); }
 		}
 	}
     // Reset

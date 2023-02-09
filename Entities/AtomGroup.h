@@ -338,6 +338,12 @@ namespace RTE {
 		/// <param name="position">Current position of the owner MOSR.</param>>
 		/// <returns>Whether all intersections were successfully resolved.</returns>
 		bool ResolveMOSIntersection(Vector &position);
+
+		/// <summary>
+		/// Returns the surface area for a given pixel width.
+		/// </summary>
+		/// <returns>Our surface area.</returns>
+		float GetSurfaceArea(int pixelWidth);
 #pragma endregion
 
 #pragma region Debug
@@ -382,6 +388,14 @@ namespace RTE {
 		float m_MomentOfInertia; //!< Moment of Inertia for this AtomGroup.
 
 		std::vector<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
+
+		enum class AreaDistributionType : int {
+			Linear, // AtomGroup will distribute energy as if it's a 2d line.
+			Circle, // AtomGroup will distribute energy as if it's a circle.
+			Oval    // AtomGroup will distribute energy as if it's an oval, with a depth of half it's width.
+		};
+
+		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup with distribute energy when it collides with something.
 
 	private:
 

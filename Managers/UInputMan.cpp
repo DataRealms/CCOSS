@@ -898,7 +898,7 @@ namespace RTE {
 			}
 		} else {
 			// PrntScren to save a single ScreenDump
-			if (KeyPressed(SDLK_PRINTSCREEN)) {
+			if (KeyPressed(SDLK_PRINTSCREEN)||KeyPressed(SDLK_F12)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			} else if (KeyPressed(SDLK_F1)) {
 				g_ConsoleMan.ShowShortcuts();

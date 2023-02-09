@@ -21,6 +21,7 @@ namespace RTE {
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
+		m_AreaDistributionType = AreaDistributionType::Oval;
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -55,6 +56,7 @@ namespace RTE {
 		m_Resolution = reference.m_Resolution;
 		m_Depth = reference.m_Depth;
 		m_JointOffset = reference.m_JointOffset;
+		m_AreaDistributionType = reference.m_AreaDistributionType;
 
 		m_Atoms.clear();
 		m_SubGroups.clear();
@@ -131,6 +133,10 @@ namespace RTE {
 			m_Atoms.push_back(atom);
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
+		} else if (propName == "AreaDistributionType") {
+			std::underlying_type_t<AreaDistributionType> type;
+			reader >> type;
+			m_AreaDistributionType = static_cast<AreaDistributionType>(type);
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -161,6 +167,9 @@ namespace RTE {
 
 		writer.NewProperty("JointOffset");
 		writer << m_JointOffset;
+
+		writer.NewProperty("AreaDistributionType");
+		writer << static_cast<std::underlying_type_t<AreaDistributionType>>(m_AreaDistributionType);
 
 		return 0;
 	}
@@ -509,7 +518,8 @@ namespace RTE {
 				do {
 					somethingPenetrated = false;
 
-					const float massDistribution = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
+					const float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size());
+
 					const float momentInertiaDistribution = m_MomentOfInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Determine which of the colliding Atoms will penetrate the terrain.
@@ -547,7 +557,7 @@ namespace RTE {
 					}
 
 					// Calculate the distributed mass that each bouncing Atom has.
-					//massDistribution = mass /*/ (hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1))*/;
+					//massDistribution = mass /*/ GetSurfaceArea(hitTerrAtoms.size())*/;
 					//momentInertiaDistribution = m_MomentOfInertia/* / (hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1))*/;
 
 					const float hitFactor = 1.0F / static_cast<float>(hitTerrAtoms.size());
@@ -1039,16 +1049,15 @@ namespace RTE {
 				// TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 				bool somethingPenetrated = false;
-				float massDist = 0;
 
 				// Determine which of the colliding Atoms will penetrate the terrain.
 				do {
 					somethingPenetrated = false;
 
-					massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
+					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size());
 
 					for (std::deque<std::pair<Atom *, Vector>>::iterator atomItr = hitTerrAtoms.begin(); atomItr != hitTerrAtoms.end(); ) {
-						if (g_SceneMan.WillPenetrate(intPos[X] + (*atomItr).second.GetFloorIntX(), intPos[Y] + (*atomItr).second.GetFloorIntY(), forceVel, massDist)) {
+						if (g_SceneMan.WillPenetrate(intPos[X] + (*atomItr).second.GetFloorIntX(), intPos[Y] + (*atomItr).second.GetFloorIntY(), forceVel, massDistribution)) {
 							// Move the penetrating Atom to the penetrating list from the collision list.
 							penetratingAtoms.push_back({ (*atomItr).first, (*atomItr).second });
 							atomItr = hitTerrAtoms.erase(atomItr);
@@ -1073,8 +1082,7 @@ namespace RTE {
 					// Call the call-on-bounce function, if requested.
 					//if (m_OwnerMOSR && callOnBounce) { halted = m_OwnerMOSR->OnBounce(position); }
 
-					// Calculate the distributed mass that each bouncing Atom has.
-					massDist = mass / static_cast<float>((hitTerrAtoms.size()/* + atomsHitMOsCount*/) * (m_Resolution ? m_Resolution : 1));
+					float massDistribution = mass / GetSurfaceArea(hitTerrAtoms.size()/* + atomsHitMOsCount*/);
 
 					// Gather the collision response effects so that the impulse force can be calculated.
 					for (const std::pair<Atom *, Vector> &hitTerrAtomsEntry : hitTerrAtoms) {
@@ -1123,7 +1131,7 @@ namespace RTE {
 						}
 
 						// Compute and store this Atom's collision response impulse force.
-						impulseForces.push_back({ (newVel - forceVel) * massDist, atomOffset });
+						impulseForces.push_back({ (newVel - forceVel) * massDistribution, atomOffset });
 
 						// Extract the current Atom's offset from the int positions.
 						intPos[X] -= atomOffset.GetFloorIntX();
@@ -1144,12 +1152,12 @@ namespace RTE {
 					// Call the call-on-sink function, if requested.
 					//if (m_OwnerMOSR && callOnSink) { halted = m_OwnerMOSR->OnSink(position); }
 
-					massDist = mass / static_cast<float>(penetratingAtoms.size() * (m_Resolution ? m_Resolution : 1));
+					float massDistribution = mass / GetSurfaceArea(penetratingAtoms.size());
 
 					// Apply the collision response effects.
 					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
-						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDist, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
-							impulseForces.push_back({ forceVel * massDist * retardation, penetratingAtomsEntry.second });
+						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDistribution, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
+							impulseForces.push_back({ forceVel * massDistribution * retardation, penetratingAtomsEntry.second });
 						}
 					}
 				}
@@ -1526,6 +1534,31 @@ namespace RTE {
 
 		// TODO: Figure out if a check for clearness after moving the position is actually needed and add one so this return is accurate.
 		return intersectingAtoms.empty();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float AtomGroup::GetSurfaceArea(int pixelWidth) {
+		switch (m_AreaDistributionType) {
+			case AreaDistributionType::Linear:
+				return static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1));
+
+			case AreaDistributionType::Circle: {
+				const float radius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
+				return c_PI * radius * radius;
+			}
+
+			case AreaDistributionType::Oval: {
+				const float majorRadius = static_cast<float>(pixelWidth * (m_Resolution ? m_Resolution : 1)) * 0.5F;
+				const float minorRadius = majorRadius * 0.5F;
+				return c_PI * minorRadius * majorRadius;
+			}
+
+			default:
+				RTEAbort("Unexpected area distribution type!");
+		}
+
+		return 1.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

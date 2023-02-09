@@ -1,4 +1,4 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release', 'b_lto=true'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
@@ -158,6 +158,10 @@ cccpelf = executable(
   install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),
   win_subsystem:'windows' # Windows mark as GUI app
 )
+
+if get_option('debug') and get_option('b_lto')
+  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
+endif
 
 #### Installing #####
 base_exclude_files = [

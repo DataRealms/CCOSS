@@ -4,9 +4,6 @@
 #include "Scene.h"
 #include "SceneMan.h"
 
-#include <atomic>
-#include <execution>
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +56,7 @@ namespace RTE {
 			for (int x = 0; x < m_GridWidth; ++x) {
 				// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene).
 				if (nodePos.m_X >= sceneWidth) {
-					nodePos.m_X = sceneWidth - 1.0F; 
+					nodePos.m_X = sceneWidth - 1.0F;
 				}
 
 				// Add the newly created node to the column. Emplace back is used to ensure this is constructed in-place, so the Up/Right/Down etc references are all correct.
@@ -87,7 +84,7 @@ namespace RTE {
 			}
 		}
 
-		// Create and allocate the pather class which will do the work
+		// Create and allocate the pather class which will do the work.
 		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, false);
 
 		RecalculateAllCosts();
@@ -107,11 +104,11 @@ namespace RTE {
 	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
 		RTEAssert(m_Pather, "No pather exists, can't calculate the path!");
 
-		// Make sure start and end are within scene bounds
+		// Make sure start and end are within scene bounds.
 		g_SceneMan.ForceBounds(start);
 		g_SceneMan.ForceBounds(end);
 
-		// Convert from absolute scene pixel coordinates to path node indices
+		// Convert from absolute scene pixel coordinates to path node indices.
 		int startNodeX = std::floor(start.m_X / static_cast<float>(m_NodeDimension));
 		int startNodeY = std::floor(start.m_Y / static_cast<float>(m_NodeDimension));
 		int endNodeX = std::floor(end.m_X / static_cast<float>(m_NodeDimension));
@@ -121,8 +118,8 @@ namespace RTE {
 		pathResult.clear();
 
 		if (m_DigStrength != digStrength) {
-			// Unfortunately, digstrength-aware pathing means that we're adjusting node transition costs, so we need to reset our path cache on every call.
-			// In future we'll potentially store a different pather for different mobility bands, and reuse pathing costs. 
+			// Unfortunately, DigStrength-aware pathing means that we're adjusting node transition costs, so we need to reset our path cache on every call.
+			// In future we'll potentially store a different pather for different mobility bands, and reuse pathing costs.
 			// But then again it's probably more fruitful to optimize the graph node to make searches faster, instead.
 			m_Pather->Reset();
 		}
@@ -132,9 +129,8 @@ namespace RTE {
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path.
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void*>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+		int result = m_Pather->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
 
-		// We got something back
 		if (!statePath.empty()) {
 			// Replace the approximate first point from the pathfound path with the exact starting point.
 			pathResult.push_back(start);
@@ -164,8 +160,8 @@ namespace RTE {
 
 	void PathFinder::RecalculateAllCosts() {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
-		
-		// I hate this copy, but fuck it
+
+		// I hate this copy, but fuck it.
 		std::vector<PathNode *> pathNodesPtrVec;
 		pathNodesPtrVec.reserve(m_NodeGrid.size());
 		for (PathNode &node : m_NodeGrid) {
@@ -341,7 +337,7 @@ namespace RTE {
 
 	std::vector<PathNode *> PathFinder::GetNodesInBox(Box box) {
 		std::vector<PathNode *> result;
-		
+
 		box.Unflip();
 
 		// Get the extents of the box's potential influence on PathNodes and their connecting edges.
@@ -384,7 +380,7 @@ namespace RTE {
 	bool PathFinder::UpdateNodeList(const std::vector<PathNode *> &nodeVec) {
 		std::atomic<bool> anyChange = false;
 
-		// Update all the costs going out from each node
+		// Update all the costs going out from each node.
 		std::for_each(
 			std::execution::par_unseq,
 			nodeVec.begin(),
@@ -397,8 +393,8 @@ namespace RTE {
 		);
 
 		if (anyChange) {
-			// UpdateNodeCosts only calculates Materials for Right and Down directions, so each PathNode's Up and Left direction Materials need to be matched to the respective neighbour's opposite direction Materials
-			// For example, this PathNode's Left Material is its Left neighbour's Right Material.
+			// UpdateNodeCosts only calculates Materials for Right and Down directions, so each PathNode's Up and Left direction Materials need to be matched to the respective neighbor's opposite direction Materials.
+			// For example, this PathNode's Left Material is its Left neighbor's Right Material.
 			std::for_each(
 				std::execution::par_unseq,
 				nodeVec.begin(),

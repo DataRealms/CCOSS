@@ -15,6 +15,7 @@ namespace RTE {
 	/// Contains everything related to a PathNode on the path grid used by PathFinder.
 	/// </summary>
 	struct PathNode {
+
 		static constexpr int c_MaxAdjacentNodeCount = 8; //!< The maximum number of adjacent PathNodes to any given PathNode. Thusly, also the number of directions for PathNodes to be in.
 
 		Vector Pos; //!< Absolute position of the center of this PathNode in the scene.
@@ -154,6 +155,7 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
 		static constexpr float c_NodeCostChangeEpsilon = 5.0F; //!< The minimum change in a PathNodes's cost for the pathfinder to recognize a change and reset itself. This is so minor changes (e.g. blood particles) don't force constant pathfinder resets.
 
 		MicroPather *m_Pather; //!< The actual pathing object that does the pathfinding work. Owned.
@@ -208,8 +210,8 @@ namespace RTE {
 		/// <summary>
 		/// Gets the PathNode at the given coordinates.
 		/// </summary>
-		/// <param name="x">The x coordinate, in PathNodes.</param>
-		/// <param name="y">The y coordinate, in PathNodes.</param>
+		/// <param name="x">The X coordinate, in PathNodes.</param>
+		/// <param name="y">The Y coordinate, in PathNodes.</param>
 		/// <returns>The PathNode at the given coordinates.</returns>
 		PathNode * GetPathNodeAtGridCoords(int x, int y);
 

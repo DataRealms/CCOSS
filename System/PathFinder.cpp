@@ -59,7 +59,8 @@ namespace RTE {
 					nodePos.m_X = sceneWidth - 1.0F;
 				}
 
-				// Add the newly created node to the column. Emplace back is used to ensure this is constructed in-place, so the Up/Right/Down etc references are all correct.
+				// Add the newly created node to the column. 
+				// Warning! Emplace back must be used to ensure this is constructed in-place, as otherwise the Up/Right/Down etc references will be incorrect.
 				m_NodeGrid.emplace_back(nodePos);
 
 				nodePos.m_X += static_cast<float>(nodeDimension);
@@ -162,28 +163,28 @@ namespace RTE {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
 
 		// I hate this copy, but fuck it.
-		std::vector<PathNode *> pathNodesPtrVec;
-		pathNodesPtrVec.reserve(m_NodeGrid.size());
-		for (PathNode &node : m_NodeGrid) {
-			pathNodesPtrVec.push_back(&node);
+		std::vector<int> pathNodesIdsVec;
+		pathNodesIdsVec.reserve(m_NodeGrid.size());
+		for (int i = 0; i < m_NodeGrid.size(); ++i) {
+			pathNodesIdsVec.push_back(i);
 		}
 
-		UpdateNodeList(pathNodesPtrVec);
+		UpdateNodeList(pathNodesIdsVec);
 		m_Pather->Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode *> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
-		std::unordered_set<PathNode *> nodeIDsToUpdate;
+	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {
-			std::vector<PathNode *> nodesInside = GetNodesInBox(boxList.front());
-			for (PathNode *node : nodesInside) {
-				nodeIDsToUpdate.insert(node);
+			std::vector<int> nodesInside = GetNodeIdsInBox(boxList.front());
+			for (int nodeId : nodesInside) {
+				nodeIDsToUpdate.insert(nodeId);
 			}
-			boxList.pop_front();
 
+			boxList.pop_front();
 			if (nodeIDsToUpdate.size() > nodeUpdateLimit) {
 				break;
 			}
@@ -192,7 +193,7 @@ namespace RTE {
 		// Note - This copy is necessary because std::for_each with parallel execution doesn't appear to work with std::unordered_set -
 		// Using it will cause nodes to randomly fail to update. This should be rechecked when the codebase upgrades to C++20,
 		// and then UpdateNodeList can be refactored to take a pair of iterators instead of a vector.
-		std::vector<PathNode *> nodeVec(nodeIDsToUpdate.begin(), nodeIDsToUpdate.end());
+		std::vector<int> nodeVec(nodeIDsToUpdate.begin(), nodeIDsToUpdate.end());
 
 		// If no PathNode costs were changed, clear the set of IDs to update, so it's empty when it's returned.
 		if (!UpdateNodeList(nodeVec)) {
@@ -335,8 +336,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<PathNode *> PathFinder::GetNodesInBox(Box box) {
-		std::vector<PathNode *> result;
+	std::vector<int> PathFinder::GetNodeIdsInBox(Box box) {
+		std::vector<int> result;
 
 		box.Unflip();
 
@@ -349,9 +350,9 @@ namespace RTE {
 		// Only iterate through the grid where the box overlaps any edges.
 		for (int nodeX = firstX; nodeX <= lastX; ++nodeX) {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
-				PathNode *node = GetPathNodeAtGridCoords(nodeX, nodeY);
-				if (node != nullptr) {
-					result.push_back(node);
+				int nodeId = ConvertCoordsToNodeId(nodeX, nodeY);
+				if (nodeId != -1) {
+					result.push_back(nodeId);
 				}
 			}
 		}
@@ -377,7 +378,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PathFinder::UpdateNodeList(const std::vector<PathNode *> &nodeVec) {
+	bool PathFinder::UpdateNodeList(const std::vector<int> &nodeVec) {
 		std::atomic<bool> anyChange = false;
 
 		// Update all the costs going out from each node.
@@ -385,8 +386,8 @@ namespace RTE {
 			std::execution::par_unseq,
 			nodeVec.begin(),
 			nodeVec.end(),
-			[this, &anyChange](PathNode *node) {
-				if (UpdateNodeCosts(node)) {
+			[this, &anyChange](int nodeId) {
+				if (UpdateNodeCosts(&m_NodeGrid[nodeId])) {
 					anyChange = true;
 				}
 			}
@@ -399,7 +400,8 @@ namespace RTE {
 				std::execution::par_unseq,
 				nodeVec.begin(),
 				nodeVec.end(),
-				[](PathNode *node) {
+				[this](int nodeId) {
+					PathNode *node = &m_NodeGrid[nodeId];
 					if (node->Right) { node->Right->LeftMaterial = node->RightMaterial; }
 					if (node->Down) { node->Down->UpMaterial = node->DownMaterial; }
 					if (node->UpRight) { node->UpRight->DownLeftMaterial = node->UpRightMaterial; }
@@ -416,6 +418,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	PathNode * PathFinder::GetPathNodeAtGridCoords(int x, int y) {
+		int nodeId = ConvertCoordsToNodeId(x, y);
+		return nodeId != -1 ? &m_NodeGrid[nodeId] : nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int PathFinder::ConvertCoordsToNodeId(int x, int y) {
 		if (m_WrapsX) {
 			x = x % m_GridWidth;
 			x = x < 0 ? x + m_GridWidth : x;
@@ -427,9 +436,9 @@ namespace RTE {
 		}
 
 		if (x < 0 || x >= m_GridWidth || y < 0 || y >= m_GridHeight) {
-			return nullptr;
+			return -1;
 		}
 
-		return &m_NodeGrid[(y * m_GridWidth) + x];
+		return (y * m_GridWidth) + x;
 	}
 }

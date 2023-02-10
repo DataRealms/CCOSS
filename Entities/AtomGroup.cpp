@@ -21,7 +21,7 @@ namespace RTE {
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
-		m_AreaDistributionType = AreaDistributionType::Oval;
+		m_AreaDistributionType = AreaDistributionType::Circle;
 		m_IgnoreMOIDs.clear();
 	}
 

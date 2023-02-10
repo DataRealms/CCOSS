@@ -207,21 +207,29 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
-		if (m_Door && m_Door->IsAttached()) { RemoveAndDeleteAttachable(m_Door); }
 		if (newDoor == nullptr) {
-			if (m_DoorMaterialDrawn) { EraseDoorMaterial(); }
-			m_Door = nullptr;
+			if (m_DoorMaterialDrawn) { 
+				EraseDoorMaterial(); 
+			}
 		} else {
-			m_Door = newDoor;
 			AddAttachable(newDoor);
 
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
 			}});
 
-			m_Door->SetInheritsRotAngle(false);
-			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
+			newDoor->SetInheritsRotAngle(false);
+			int fuck = newDoor->GetMaterial()->GetIndex();;
+			m_DoorMaterialID = newDoor->GetMaterial()->GetIndex();
+			fuck = fuck;
+			m_DoorMaterialID = fuck;
 		}
+
+		if (m_Door && m_Door->IsAttached()) { 
+			RemoveAndDeleteAttachable(m_Door); 
+		}
+
+		m_Door = newDoor;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

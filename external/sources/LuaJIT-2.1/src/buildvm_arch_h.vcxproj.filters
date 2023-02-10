@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\CMakeFiles\5395049260d79b96201bd33e9cd25774\buildvm_arch.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\CMakeFiles\8ee33f102b622c96ca742bc062bbbf9e\buildvm_arch_h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\src\CMakeFiles\buildvm_arch_h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CB97D707-FC45-3FBB-BD75-F3334D934A66}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

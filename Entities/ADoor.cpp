@@ -207,22 +207,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
-		if (newDoor == nullptr) {
-			if (m_DoorMaterialDrawn) { 
-				EraseDoorMaterial(); 
-			}
-		} else {
-			AddAttachable(newDoor);
-
-			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
-				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
-			}});
-
-			newDoor->SetInheritsRotAngle(false);
-			int fuck = newDoor->GetMaterial()->GetIndex();;
-			m_DoorMaterialID = newDoor->GetMaterial()->GetIndex();
-			fuck = fuck;
-			m_DoorMaterialID = fuck;
+		if (m_DoorMaterialDrawn) {
+			RTEAssert(m_Door, "Door material drawn without an m_Door! This should've been cleared when the door was!");
+			EraseDoorMaterial(); 
 		}
 
 		if (m_Door && m_Door->IsAttached()) { 
@@ -230,6 +217,16 @@ namespace RTE {
 		}
 
 		m_Door = newDoor;
+		if (m_Door) {
+			AddAttachable(m_Door);
+
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({m_Door->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
+			}});
+
+			m_Door->SetInheritsRotAngle(false);
+			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -273,7 +273,7 @@ namespace RTE {
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.
 		/// </summary>
 		/// <param name="disallowErasingMaterialBeforeDrawing">Whether to disallow calling EraseDoorMaterial before drawing. Defaults to false, which means normal behaviour applies and this may erase the material before drawing it.</param>
-		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false);
+		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false, bool updateMaterialArea = true);
 
 		/// <summary>
 		/// Flood-fills the material area under the last position of the door attachable that matches the material index of it.

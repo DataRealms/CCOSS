@@ -231,7 +231,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing) {
+	void ADoor::DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing, bool updateMaterialArea) {
 		if (!m_Door || m_DoorMaterialTempErased || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
@@ -241,7 +241,9 @@ namespace RTE {
 		m_LastDoorMaterialPos = m_Door->GetPos();
 		m_DoorMaterialDrawn = true;
 
-		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
+		if (updateMaterialArea) {
+			g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,11 +256,16 @@ namespace RTE {
 		int fillX = m_LastDoorMaterialPos.GetFloorIntX();
 		int fillY = m_LastDoorMaterialPos.GetFloorIntY();
 
-		DrawDoorMaterial(true);
+		DrawDoorMaterial(true, false);
 		m_DoorMaterialDrawn = false;
+
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
-			if (m_Door && updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
+
+			if (m_Door && updateMaterialArea) { 
+				g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); 
+			}
+
 			return true;
 		}
 		return false;
@@ -274,11 +281,11 @@ namespace RTE {
 		bool doorMaterialDrawnState = m_DoorMaterialDrawn;
 		if (erase && m_DoorMaterialDrawn && !m_DoorMaterialTempErased) {
 			m_DoorMaterialTempErased = erase;
-			EraseDoorMaterial(true);
+			EraseDoorMaterial(false);
 			m_DoorMaterialDrawn = doorMaterialDrawnState;
 		} else if (!erase && m_DoorMaterialDrawn && m_DoorMaterialTempErased) {
 			m_DoorMaterialTempErased = erase;
-			DrawDoorMaterial(true);
+			DrawDoorMaterial(true, false);
 			m_DoorMaterialDrawn = doorMaterialDrawnState;
 		}
 	}

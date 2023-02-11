@@ -77,6 +77,8 @@
 #include <random>
 #include <array>
 #include <filesystem>
+#include <atomic>
+#include <execution>
 
 #include "glad/gl.h"
 #include "GLCheck.h"

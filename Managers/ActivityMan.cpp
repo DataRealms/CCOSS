@@ -1,6 +1,7 @@
 #include "ActivityMan.h"
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "UInputMan.h"
@@ -263,6 +264,9 @@ namespace RTE {
 
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
+
+		// Reset screen positions and shake
+		g_CameraMan.Clear();
 
 		m_ActivityAllowsSaving = false;
 

@@ -621,7 +621,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a new SceneLayer for a specific team and fills it with black
 //                  pixels that end up being a specific size on the screen.
-// Arguments:       A Vector with the desired dimensions of the unseen layer's chunky pixels.
+// Arguments:       A Vector with the desired dimensions of the unseen layer's chunky pixels.R
 //                  Which team to get the unseen layer for.
 //                  Whether to create the unseen layers now, or wait until next time
 //                  LoadData is called on this.

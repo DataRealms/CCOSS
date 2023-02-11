@@ -207,6 +207,8 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
+		bool m_RedrawAfterInit; //!< Forces the door material to redraw. Set after loading
+
 		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using LERP. For internal use only.
 
 		std::list<ADSensor> m_Sensors; //!< All the sensors for detecting Actors approaching the door.
@@ -241,7 +243,6 @@ namespace RTE {
 
 		unsigned char m_DoorMaterialID; //!< The ID of the door material drawn to the terrain.
 		bool m_DoorMaterialDrawn; //!< Whether the door material is currently drawn onto the material layer.
-		Timer m_DoorMaterialRedrawTimer; //!< Timer for redrawing the door material layer from time-to-time.
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
@@ -273,7 +274,7 @@ namespace RTE {
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.
 		/// </summary>
 		/// <param name="disallowErasingMaterialBeforeDrawing">Whether to disallow calling EraseDoorMaterial before drawing. Defaults to false, which means normal behaviour applies and this may erase the material before drawing it.</param>
-		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false);
+		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false, bool updateMaterialArea = true);
 
 		/// <summary>
 		/// Flood-fills the material area under the last position of the door attachable that matches the material index of it.

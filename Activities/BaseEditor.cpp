@@ -197,7 +197,7 @@ int BaseEditor::Start()
         m_ViewState[editingPlayer] = ViewState::Normal;
         g_FrameMan.ClearScreenText(ScreenOfPlayer(editingPlayer));
         // Set the team associations with the first screen so that the correct unseen are shows up
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
+        g_CameraMan.SetScreenTeam(m_Team[editingPlayer], ScreenOfPlayer(editingPlayer));
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
         m_PlayerController[editingPlayer].Reset();

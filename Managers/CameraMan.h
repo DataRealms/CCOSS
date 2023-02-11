@@ -24,6 +24,11 @@ namespace RTE {
 		CameraMan() { Clear(); }
 
 		/// <summary>
+		/// Clears all the member variables of this CameraMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		/// <summary>
 		/// Makes the CameraMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -265,11 +270,6 @@ namespace RTE {
 		float m_DefaultShakeFromRecoilMaximum; //!< The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
 
 		std::array<Screen, c_MaxScreenCount> m_Screens;
-
-		/// <summary>
-		/// Clears all the member variables of this CameraMan, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
 
 		// Disallow the use of some implicit methods.
 		CameraMan(const CameraMan &reference) = delete;

@@ -23,4 +23,5 @@ sources += files(
 'Matrix.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
+'SpatialPartitionGrid.cpp',
 )

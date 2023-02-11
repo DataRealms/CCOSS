@@ -1,4 +1,5 @@
 #include "MOPixel.h"
+
 #include "Atom.h"
 #include "PostProcessMan.h"
 
@@ -230,7 +231,7 @@ namespace RTE {
 			return;
 		}
 
-		unsigned char drawColor = 0;
+		int drawColor = -1;
 
 		switch (mode) {
 			case g_DrawMaterial:
@@ -247,13 +248,21 @@ namespace RTE {
 				break;
 		}
 
-		acquire_bitmap(targetBitmap);
-		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
-		release_bitmap(targetBitmap);
+		bool shouldDraw = true;
 
-		if (mode == g_DrawMOID) {
-			g_SceneMan.RegisterMOIDDrawing(m_Pos - targetPos, 1);
-		} else if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
+#ifndef DRAW_MOID_LAYER
+		shouldDraw = mode != DrawMode::g_DrawMOID;
+#endif
+
+		Vector pixelPos = m_Pos - targetPos;
+
+		if (shouldDraw) {
+			putpixel(targetBitmap, pixelPos.GetFloorIntX(), pixelPos.GetFloorIntY(), drawColor);
+		}
+
+		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, pixelPos, 1.0F);
+
+		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();
 		}
 	}

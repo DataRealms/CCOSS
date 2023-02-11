@@ -302,12 +302,6 @@
     <ClCompile Include="src\lj_vmevent.c" />
     <ClCompile Include="src\lj_vmmath.c" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="buildvm.vcxproj">
-      <Project>{AA244DB4-5948-3CC8-A085-4C49C917D632}</Project>
-      <Name>buildvm</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

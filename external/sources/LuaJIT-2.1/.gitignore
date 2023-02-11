@@ -12,7 +12,7 @@
 
 buildvm_arch.h
 
-_Bin*
+_Bin/libluajit*
 
 
 #cmake

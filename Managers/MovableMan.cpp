@@ -1561,6 +1561,11 @@ void MovableMan::OverrideMaterialDoors(bool eraseDoorMaterial, int team) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MovableMan::RegisterAlarmEvent(const AlarmEvent &newEvent)
+{
+    std::lock_guard<std::mutex> lock(m_AddedAlarmEventsMutex);
+    m_AddedAlarmEvents.push_back(newEvent);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RedrawOverlappingMOIDs
@@ -1979,14 +1984,6 @@ void MovableMan::UpdateControllers()
     {
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
 
-        // We need to stop the GC while performing parallel execution
-        // This is necessary as a result of how Lua scripts in one state can create different objects that potentially belong to another state
-        // Luabind really doesn't like that, and panics when it sees that mismatch
-        g_LuaMan.GetMasterScriptState().StopGC();
-        for (LuaStateWrapper &luaState : luaStates) {
-            luaState.StopGC();
-        }
-
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
             [&](LuaStateWrapper &luaState) {
                 for (Actor *actor : m_Actors) {
@@ -1995,11 +1992,6 @@ void MovableMan::UpdateControllers()
                     }
                 }
             });
-
-        g_LuaMan.GetMasterScriptState().RestartGC();
-        for (LuaStateWrapper &luaState : luaStates) {
-            luaState.RestartGC();
-        }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

@@ -704,7 +704,7 @@ public:
 // Arguments:       The AlarmEvent to register.
 // Return value:    None.
 
-    void RegisterAlarmEvent(const AlarmEvent &newEvent) { m_AddedAlarmEvents.push_back(newEvent); }
+    void RegisterAlarmEvent(const AlarmEvent &newEvent);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -972,6 +972,9 @@ protected:
     // The alarm events on the scene where something alarming happened, for use with AI firings awareness os they react to shots fired etc.
     // This is the current frame's events, will be filled up during MovableMan Updates, should be transferred to Last Frame at end of update.
     std::list<AlarmEvent> m_AddedAlarmEvents;
+
+    // Mutexes to ensure alarm events aren't being added from separate threads at the same time
+    std::mutex m_AddedAlarmEventsMutex;
 
     // The list created each frame to register all the current MO's
     std::vector<MovableObject *> m_MOIDIndex;

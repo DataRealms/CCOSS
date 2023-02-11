@@ -1,7 +1,7 @@
+src/*.lib
 *.[oa]
 *.so
 *.obj
-*.lib
 *.exp
 *.dll
 *.exe

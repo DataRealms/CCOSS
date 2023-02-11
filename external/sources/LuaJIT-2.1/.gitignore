@@ -10,9 +10,17 @@
 *.swp
 .tags
 
+buildvm_arch.h
+
 #cmake
 /build/
 cmake_install.cmake
 CmakeCache.txt
 /CMakeFiles*
 */CMakeFiles*
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+INSTALL.vcxproj
+INSTALL.vcxproj.filters
+ZERO_CHECK.vcxproj
+ZERO_CHECK.vcxproj.filters

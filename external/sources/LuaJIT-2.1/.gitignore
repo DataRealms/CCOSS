@@ -12,6 +12,9 @@
 
 buildvm_arch.h
 
+_Bin*
+
+
 #cmake
 /build/
 cmake_install.cmake

@@ -228,12 +228,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\ZERO_CHECK.vcxproj">
-      <Project>{628578B9-C8EC-3D4A-A39B-59DBB7A79634}</Project>
-      <Name>ZERO_CHECK</Name>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </ProjectReference>
     <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\LuaJIT-2.1\src\host\cmake\buildvm\buildvm.vcxproj">
       <Project>{AA244DB4-5948-3CC8-A085-4C49C917D632}</Project>
       <Name>buildvm</Name>

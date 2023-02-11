@@ -21,11 +21,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libluajit", "src\libluajit.
 		{67F3941F-F1C3-353E-8626-238945475DE2} = {67F3941F-F1C3-353E-8626-238945475DE2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lj_gen_folddef", "src\lj_gen_folddef.vcxproj", "{010E1552-B051-382C-9892-19F44A3C25AE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{AA244DB4-5948-3CC8-A085-4C49C917D632} = {AA244DB4-5948-3CC8-A085-4C49C917D632}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lj_gen_headers", "src\lj_gen_headers.vcxproj", "{67F3941F-F1C3-353E-8626-238945475DE2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AA244DB4-5948-3CC8-A085-4C49C917D632} = {AA244DB4-5948-3CC8-A085-4C49C917D632}
@@ -98,11 +93,5 @@ Global
 		{69B157BB-2D9C-3D08-8E23-067F2542E313}.Release|x64.Build.0 = Release|x64
 		{69B157BB-2D9C-3D08-8E23-067F2542E313}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{69B157BB-2D9C-3D08-8E23-067F2542E313}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {3BA890C0-2F88-35E3-9922-AEDDD7490BF9}
 	EndGlobalSection
 EndGlobal

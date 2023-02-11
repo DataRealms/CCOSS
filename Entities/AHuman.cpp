@@ -1772,7 +1772,7 @@ void AHuman::UpdateAI()
     ///////////////////////////////////////////////
     // React to relevant AlarmEvents
 
-	const std::list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
+	const std::vector<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
 	if (!events.empty()) {
 		Vector alarmVec;
 		Vector sensorPos = GetEyePos();

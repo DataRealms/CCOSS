@@ -1612,8 +1612,9 @@ void MovableMan::Update()
 
     // Move all last frame's alarm events into the proper buffer, and clear out the new one to fill up with this frame's
     m_AlarmEvents.clear();
-    for (std::list<AlarmEvent>::iterator aeItr = m_AddedAlarmEvents.begin(); aeItr != m_AddedAlarmEvents.end(); ++aeItr)
+    for (std::vector<AlarmEvent>::iterator aeItr = m_AddedAlarmEvents.begin(); aeItr != m_AddedAlarmEvents.end(); ++aeItr) {
         m_AlarmEvents.push_back(*aeItr);
+    }
     m_AddedAlarmEvents.clear();
 
     // Pre-lock Scene for all the accesses to its bitmaps

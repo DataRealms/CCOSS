@@ -1,3 +1,7 @@
+@rem This will be executed as a post-build job when building the static lib in VS.
+
+@if not defined INCLUDE goto :FAIL
+
 cd %~dp0\src\
 
 @setlocal
@@ -8,7 +12,8 @@ cd %~dp0\src\
 @set LJLIBNAMEEXT=.lib
 @set BUILDTYPE=release
 
-@minilua >nul 2>&1
+@rem Call minilua to determine what the architecture is.
+@minilua
 @if errorlevel 8 (
   @if "%1"=="" (@set BUILDTYPE=release-64)
   @if "%1"=="debug" (@set BUILDTYPE=debug-64)
@@ -27,11 +32,12 @@ cd %~dp0\src\
 if exist luajit.exe.manifest^
   %LJMT% -manifest luajit.exe.manifest -outputresource:luajit.exe
 
-@move /y %LJLIBNAME% ..\_Bin\%LJLIBNAME%
-
 @del *.lib *.obj *.exp *.manifest *.exe
 @del host\buildvm_arch.h
 @del lj_bcdef.h lj_ffdef.h lj_libdef.h lj_recdef.h lj_folddef.h
+
+@echo.
+@echo === Successfully complete post-build job for Windows/%LJARCH% ===
 
 @goto :END
 :BAD

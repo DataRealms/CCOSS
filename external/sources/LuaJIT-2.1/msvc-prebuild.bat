@@ -1,4 +1,3 @@
-@rem Script to build LuaJIT static lib prerequisites with MSVC.
 @rem This will be executed as a pre-build job when building the static lib in VS.
 
 @if not defined INCLUDE goto :FAIL
@@ -11,7 +10,6 @@ cd %~dp0\src\
 @set LJMT=mt /nologo
 @set DASMDIR=../dynasm
 @set DASM=%DASMDIR%\dynasm.lua
-@set DASC=vm_x64.dasc
 @set ALL_LIB=lib_base.c lib_math.c lib_bit.c lib_string.c lib_table.c lib_io.c lib_os.c lib_package.c lib_debug.c lib_jit.c lib_ffi.c lib_buffer.c
 
 %LJCOMPILE% host\minilua.c
@@ -21,13 +19,16 @@ cd %~dp0\src\
 if exist minilua.exe.manifest^
   %LJMT% -manifest minilua.exe.manifest -outputresource:minilua.exe
 
-@set DASMFLAGS=-D WIN -D JIT -D FFI -D P64
 @set LJARCH=x64
+@set DASC=vm_x64.dasc
+@set DASMFLAGS=-D WIN -D JIT -D FFI -D P64
+
+@rem Call minilua to determine what the architecture is.
 @minilua
 @if errorlevel 8 goto :X64
+@set LJARCH=x86
 @set DASC=vm_x86.dasc
 @set DASMFLAGS=-D WIN -D JIT -D FFI
-@set LJARCH=x86
 @set LJCOMPILE=%LJCOMPILE% /arch:SSE2
 :X64
 @if "%1" neq "nogc64" goto :GC64
@@ -61,7 +62,7 @@ buildvm -m folddef -o lj_folddef.h lj_opt_fold.c
 @if errorlevel 1 goto :BAD
 
 @echo.
-@echo === Successfully built LuaJIT prerequisites for Windows/%LJARCH% ===
+@echo === Successfully complete pre-build job for Windows/%LJARCH% ===
 
 @goto :END
 :BAD

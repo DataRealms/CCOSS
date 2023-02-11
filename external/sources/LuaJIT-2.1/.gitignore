@@ -12,3 +12,7 @@
 
 #cmake
 /build/
+cmake_install.cmake
+CmakeCache.txt
+/CMakeFiles*
+*/CMakeFiles*

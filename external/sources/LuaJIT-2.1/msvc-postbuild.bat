@@ -7,29 +7,15 @@ cd %~dp0\src\
 @set LJLIBNAMESTEM=..\_Bin\luajit-
 @set LJLIBNAMEEXT=.lib
 @set BUILDTYPE=release
-@set LJARCH=x64
 
 @minilua >nul 2>&1
-@if errorlevel 8 goto :X64
-@echo x86
-@set LJARCH=x86
-@if "%1"=="debug" (
-  @set BUILDTYPE=debug
-)
-@if "%1"=="debug-release" (
-  @set BUILDTYPE=debug-release
-)
-
-:X64
-@echo x64
-@if "%1"=="" (
-  @set BUILDTYPE=release-64
-)
-@if "%1"=="debug" (
-  @set BUILDTYPE=debug-64
-)
-@if "%1"=="debug-release" (
-  @set BUILDTYPE=debug-release-64
+@if errorlevel 8 (
+  @if "%1"=="" (@set BUILDTYPE=release-64)
+  @if "%1"=="debug" (@set BUILDTYPE=debug-64)
+  @if "%1"=="debug-release" (@set BUILDTYPE=debug-release-64)
+) else (
+  @if "%1"=="debug" (@set BUILDTYPE=debug)
+  @if "%1"=="debug-release" (@set BUILDTYPE=debug-release)
 )
 
 @set LJLIBNAME=%LJLIBNAMESTEM%%BUILDTYPE%%LJLIBNAMEEXT%

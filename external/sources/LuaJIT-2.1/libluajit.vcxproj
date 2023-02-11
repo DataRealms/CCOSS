@@ -43,11 +43,13 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -114,24 +116,33 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
       <Command>call "$(ProjectDir)/msvc-prebuild.bat"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Command>call "$(ProjectDir)/msvc-postbuild.bat" debug</Command>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -144,24 +155,33 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
       <Command>call "$(ProjectDir)/msvc-prebuild.bat"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Command>call "$(ProjectDir)/msvc-postbuild.bat" debug</Command>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -172,17 +192,23 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
@@ -190,8 +216,11 @@
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -202,17 +231,23 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
@@ -220,8 +255,11 @@
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
@@ -233,24 +271,32 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
       <Command>call "$(ProjectDir)/msvc-prebuild.bat"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Command>call "$(ProjectDir)/msvc-postbuild.bat" debug-release</Command>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
     <ClCompile>
@@ -262,24 +308,32 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Message>Prerequisites for building static lib</Message>
       <Command>call "$(ProjectDir)/msvc-prebuild.bat"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)/msvc-postbuild.bat"</Command>
-      <Message>Cleanup of prerequisites used for building static lib</Message>
+      <Command>call "$(ProjectDir)/msvc-postbuild.bat" debug-release</Command>
+      <Message>Post build linking</Message>
     </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\lib_aux.c" />
@@ -349,6 +403,9 @@
     <ClCompile Include="src\lj_udata.c" />
     <ClCompile Include="src\lj_vmevent.c" />
     <ClCompile Include="src\lj_vmmath.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="src\lj_vm.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

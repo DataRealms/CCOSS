@@ -208,4 +208,7 @@
       <UniqueIdentifier>{605D62EA-30AF-3360-8CBD-EE1CFB58744C}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Object Include="src\lj_vm.obj" />
+  </ItemGroup>
 </Project>

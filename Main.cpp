@@ -236,9 +236,9 @@ namespace RTE {
 				g_FrameMan.Update();
 				g_LuaMan.Update();
 
-				g_MovableMan.Travel();
 				g_MovableMan.UpdateControllers();
 				g_ActivityMan.Update();
+				g_MovableMan.Travel();
 				g_MovableMan.Update();
 
 				g_AudioMan.Update();

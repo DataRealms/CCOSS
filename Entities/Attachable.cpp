@@ -201,12 +201,7 @@ namespace RTE {
 			return true;
 		}
 
-		Vector totalForce;
-		for (const auto &[force, forceOffset] : m_Forces) {
-			totalForce += force;
-		}
-
-		jointForces += totalForce;
+		jointForces += GetTotalForce();
 		m_Forces.clear();
 		return true;
 	}

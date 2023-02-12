@@ -752,6 +752,15 @@ void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
     RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Vector MovableObject::GetTotalForce() {
+	Vector totalForceVector;
+	for (const auto &[force, forceOffset] : m_Forces) {
+		totalForceVector += force;
+	}
+	return totalForceVector;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ApplyForces
@@ -780,13 +789,11 @@ void MovableObject::ApplyForces()
     if (m_AirResistance > 0 && m_Vel.GetLargest() >= m_AirThreshold)
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
-    // Apply the translational effects of all the forces accumulated during the Update()
-    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
-    {
-        // Continuous force application to transformational velocity.
-        // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime);
-    }
+	// Apply the translational effects of all the forces accumulated during the Update().
+	if (m_Forces.size() > 0) {
+		// Continuous force application to transformational velocity (F = m * a -> a = F / m).
+		m_Vel += GetTotalForce() / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime;
+	}
 
     // Clear out the forces list
     m_Forces.clear();

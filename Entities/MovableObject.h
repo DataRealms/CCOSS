@@ -1362,6 +1362,11 @@ enum MOType
 
 	Vector GetForceVector(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].first; else return Vector(0, 0); }
 
+	/// <summary>
+	/// Gets the total sum of all forces applied to this MovableObject in a single Vector.
+	/// </summary>
+	/// <returns>The total sum of all forces applied to this MovableObject.</returns>
+	virtual Vector GetTotalForce();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetForceOffset()

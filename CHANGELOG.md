@@ -494,6 +494,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
 
+- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
+
+- `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
+
 - Added alternative `Actor` Lua function `RemoveInventoryItem(moduleName, presetName)`, that lets you specify the module and preset name of the inventory item, instead of just the preset name.
 
 - Added alternative `AHuman` Lua function `EquipNamedDevice(moduleName, presetName, doEquip)`, that lets you specify the module and preset name of the `HeldDevice` to equip, instead of just the preset name.
@@ -528,6 +532,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
 

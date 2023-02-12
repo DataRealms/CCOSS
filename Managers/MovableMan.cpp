@@ -1653,7 +1653,7 @@ void MovableMan::Update()
         {
             LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
             // seq for now, until I add some mutexes on things ;)
-            std::for_each(std::execution::seq, luaStates.begin(), luaStates.end(),
+            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
                 [&](LuaStateWrapper& luaState) {
                     g_LuaMan.SetThreadLuaStateOverride(&luaState);
 

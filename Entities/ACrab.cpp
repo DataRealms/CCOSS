@@ -2764,10 +2764,21 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
 			}
 			str[1] = 0;
-            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 8, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
 			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			int gaugeColor;
+			if (jetTimeRatio > 0.75F) {
+				gaugeColor = 149;
+			} else if (jetTimeRatio > 0.5F) {
+				gaugeColor = 133;
+			} else if (jetTimeRatio > 0.375F) {
+				gaugeColor = 77;
+			} else if (jetTimeRatio > 0.25F) {
+				gaugeColor = 48;
+			} else {
+				gaugeColor = 13;
+			}
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 

@@ -58,7 +58,6 @@ void SceneMan::Clear()
     m_pMOColorLayer = nullptr;
     m_pMOIDLayer = nullptr;
     m_pDebugLayer = nullptr;
-    s_LastRayHitPos.Reset();
 
     m_LayerDrawMode = g_LayerNormal;
 

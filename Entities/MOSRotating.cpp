@@ -1627,14 +1627,16 @@ void MOSRotating::Update() {
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 
-    for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ++woundItr) {
+    for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
         AEmitter* wound = *woundItr;
+        ++woundItr
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         wound->Update();
     }
 
-    for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ++attachableItr) {
+    for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ) {
         Attachable* attachable = *attachableItr;
+        ++attachableItr;
         RTEAssert(attachable, "Broken Attachable in Update!");
         RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");

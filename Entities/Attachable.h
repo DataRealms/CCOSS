@@ -421,6 +421,11 @@ namespace RTE {
 		bool HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) override;
 
 		/// <summary>
+		/// Updates scripts for this Attachable. Supposed to be done every frame.
+		/// </summary>
+		int UpdateScripts() override;
+
+		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.
 		///	NOTE - Attachable subclasses that do things before calling Attachable::Update should make sure to call Attachable::PreUpdate.
 		/// </summary>

@@ -66,15 +66,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each PathNode should represent.</param>
 		/// <param name="allocate">The block size that the PathNode cache is allocated from. Should be about a fourth of the total number of PathNodes.</param>
-		PathFinder(int nodeDimension, unsigned int allocate) { Clear(); Create(nodeDimension, allocate); }
+		PathFinder(int nodeDimension) { Clear(); Create(nodeDimension); }
 
 		/// <summary>
 		/// Makes the PathFinder object ready for use.
 		/// </summary>
 		/// <param name="nodeDimension">The width and height in scene pixels that of each PathNode should represent.</param>
-		/// <param name="allocate">The block size that the PathNode cache is allocated from. Should be about a fourth of the total number of PathNodes.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(int nodeDimension, unsigned int allocate);
+		int Create(int nodeDimension);
 #pragma endregion
 
 #pragma region Destruction
@@ -166,7 +165,11 @@ namespace RTE {
 		bool m_WrapsX; //!< Whether the pathing grid wraps on the X axis.
 		bool m_WrapsY; //!< Whether the pathing grid wraps on the Y axis.
 
-		float m_DigStrength; //!< What material strength the search is capable of digging through.
+		/// <summary>
+		/// Gets the pather for this thread. Lazily-initialized for each new thread that needs a pather.
+		/// </summary>
+		/// <returns>The pather for this thread.</returns>
+		MicroPather * GetPather();
 
 #pragma region Path Cost Updates
 		/// <summary>

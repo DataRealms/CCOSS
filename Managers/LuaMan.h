@@ -253,11 +253,31 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Lua State Handling
+		/// <summary>
+		/// Returns our master script state (where activies, global scripts etc run).
+		/// </summary>
+		/// <returns>The master script state.</returns>
 		LuaStateWrapper & GetMasterScriptState();
 
-		LuaStateWrapper & GetRandomThreadedScriptState();
-
+		/// <summary>
+		/// Returns our threaded script states which movable objects use.
+		/// </summary>
+		/// <returns>A list of threaded script states.</returns>
 		LuaStatesArray & GetThreadedScriptStates();
+
+		/// <summary>
+		/// Forces all new MOs created in this thread to be assigned to a particular lua state.
+		/// This is to ensure that objects created in threaded Lua environments can be safely used.
+		/// </summary>
+		/// <param name="luaState">The lua state to force objects to be assigned to.</returns>
+		void SetThreadLuaStateOverride(LuaStateWrapper* luaState);
+
+		/// <summary>
+		/// Returns a free threaded script states to assign a movableobject to.
+		/// This will be locked to our thread and safe to use - ensure that it'll be unlocked after use!
+		/// </summary>
+		/// <returns>A script state.</returns>
+		LuaStateWrapper * GetAndLockFreeScriptState();
 
 		/// <summary>
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().

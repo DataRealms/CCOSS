@@ -243,14 +243,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    LuaStateWrapper & LuaMan::GetRandomThreadedScriptState() {
-		return m_ScriptStates[RandomNum(0, c_NumThreadedLuaStates-1)];
-    }
+    LuaStatesArray & LuaMan::GetThreadedScriptStates() {
+		return m_ScriptStates;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    LuaStatesArray & LuaMan::GetThreadedScriptStates() {
-		return m_ScriptStates;
+	thread_local LuaStateWrapper * s_luaStateOverride = nullptr;
+	void LuaMan::SetThreadLuaStateOverride(LuaStateWrapper * luaState) {
+		s_luaStateOverride = luaState;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaStateWrapper * LuaMan::GetAndLockFreeScriptState() {
+		if (s_luaStateOverride) {
+			// We're creating this object in a multithreaded environment, ensure that it's assigned to the same script state as us
+			s_luaStateOverride->GetMutex().lock();
+			return s_luaStateOverride;
+		}
+
+		int i = RandomNum(0, c_NumThreadedLuaStates - 1);
+		LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+		while (true) {
+			i = (i + 1) % c_NumThreadedLuaStates;
+			if (luaStates[i].GetMutex().try_lock()) {
+				return &luaStates[i];
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -763,6 +783,9 @@ namespace RTE {
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.Update();
 		}
+
+		// Apply all deletions queued from lua
+    	LuabindObjectWrapper::ApplyQueuedDeletions();
 	}
 
 }

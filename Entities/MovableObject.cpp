@@ -520,15 +520,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	}
 
     if (m_OwningState == nullptr) {
-        int i = RandomNum(0, c_NumThreadedLuaStates-1);
-        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        while(true) {
-            i = (i + 1) % c_NumThreadedLuaStates;
-            if (luaStates[i].GetMutex().try_lock()) {
-                m_OwningState = &luaStates[i];
-                break;
-            }
-        }
+        m_OwningState = g_LuaMan.GetAndLockFreeScriptState();
     } else {
         m_OwningState->GetMutex().lock();
     }
@@ -603,15 +595,7 @@ int MovableObject::ReloadScripts() {
 
 int MovableObject::InitializeObjectScripts() {
     if (m_OwningState == nullptr) {
-        int i = RandomNum(0, c_NumThreadedLuaStates-1);
-        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        while(true) {
-            i = (i + 1) % c_NumThreadedLuaStates;
-            if (luaStates[i].GetMutex().try_lock()) {
-                m_OwningState = &luaStates[i];
-                break;
-            }
-        }
+        m_OwningState = g_LuaMan.GetAndLockFreeScriptState();
     } else {
         m_OwningState->GetMutex().lock();
     }

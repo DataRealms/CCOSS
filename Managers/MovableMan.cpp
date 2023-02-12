@@ -1987,11 +1987,13 @@ void MovableMan::UpdateControllers()
 
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
             [&](LuaStateWrapper &luaState) {
+                g_LuaMan.SetThreadLuaStateOverride(&luaState);
                 for (Actor *actor : m_Actors) {
                     if (actor->GetLuaState() == &luaState) {
                         actor->GetController()->Update();
                     }
                 }
+                g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);

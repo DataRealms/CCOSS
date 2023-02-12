@@ -91,10 +91,7 @@ namespace RTE {
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInBox(const Box &box, int ignoreTeam) const {
-		static std::vector<MovableObject *> s_MOList; // Note - This static vector exists to allow this data to be passed safely to Lua.
-		s_MOList.clear();
-
+	const std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInBox(const Box &box, int ignoreTeam) const {
 		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to SpatialPartitioningGrid::GetMOsInBox()!");
 
 		std::unordered_set<MOID> potentialMOIDs;
@@ -119,22 +116,21 @@ namespace RTE {
 
 		std::list<Box> wrappedBoxes;
 		g_SceneMan.WrapBox(box, wrappedBoxes);
+
+		std::vector<MovableObject *> MOList;
 		for (MOID moid : potentialMOIDs) {
 			MovableObject *mo = g_MovableMan.GetMOFromID(moid);
 			if (mo && std::any_of(wrappedBoxes.begin(), wrappedBoxes.end(), [&mo](const Box &wrappedBox) { return wrappedBox.IsWithinBox(mo->GetPos()); })) {
-				s_MOList.push_back(mo);
+				MOList.push_back(mo);
 			}
 		}
 
-		return s_MOList;
+		return MOList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<MovableObject *> & SpatialPartitionGrid::GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const {
-		static std::vector<MovableObject *> s_MOList; // Note - This static vector exists to allow this data to be passed safely to Lua.
-		s_MOList.clear();
-
+	const std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const {
 		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to SpatialPartitioningGrid::GetMOsInRadius()!");
 
 		std::unordered_set<MOID> potentialMOIDs;
@@ -154,14 +150,15 @@ namespace RTE {
 			}
 		}
 
+		std::vector<MovableObject *> MOList;
 		for (MOID moid : potentialMOIDs) {
 			MovableObject *mo = g_MovableMan.GetMOFromID(moid);
 			if (mo && !g_SceneMan.ShortestDistance(center, mo->GetPos()).MagnitudeIsGreaterThan(radius)) {
-				s_MOList.push_back(mo);
+				MOList.push_back(mo);
 			}
 		}
 
-		return s_MOList;
+		return MOList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -259,14 +259,17 @@ void MovableMan::UnregisterObject(MovableObject * mo)
     m_KnownObjects.erase(mo->GetUniqueID());
 }
 
-const std::vector<MovableObject *> &MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const
-{
-    return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); 
+const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam));
+    return vectorForLua;
 }
 
-const std::vector<MovableObject *> &MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const
+const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const
 {
-    return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam);
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam));
+    return vectorForLua;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

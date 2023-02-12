@@ -91,7 +91,7 @@ namespace RTE {
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInBox(const Box &box, int ignoreTeam) const {
+	std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInBox(const Box &box, int ignoreTeam) const {
 		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to SpatialPartitioningGrid::GetMOsInBox()!");
 
 		std::unordered_set<MOID> potentialMOIDs;
@@ -130,7 +130,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const {
+	std::vector<MovableObject *> SpatialPartitionGrid::GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const {
 		RTEAssert(ignoreTeam >= Activity::NoTeam && ignoreTeam < Activity::MaxTeamCount, "Invalid ignoreTeam given to SpatialPartitioningGrid::GetMOsInRadius()!");
 
 		std::unordered_set<MOID> potentialMOIDs;

@@ -63,7 +63,7 @@ namespace RTE {
 		/// <param name="box">The Box to get MovableObjects within.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
 		/// <returns>A vector of pointers to all MovableObjects within the given Box, who aren't of the ignored team.</returns>
-		const std::vector<MovableObject *> GetMOsInBox(const Box &box, int ignoreTeam) const;
+		std::vector<MovableObject *> GetMOsInBox(const Box &box, int ignoreTeam) const;
 
 		/// <summary>
 		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.
@@ -72,7 +72,7 @@ namespace RTE {
 		/// <param name="radius">The radius to get MovableObjects within.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
 		/// <returns>A vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.</returns>
-		const std::vector<MovableObject *> GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const;
+		std::vector<MovableObject *> GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const;
 
 		/// <summary>
 		/// Gets the MOIDs that are potentially overlapping the given X and Y Scene coordinates.

@@ -331,10 +331,15 @@ namespace RTE {
 
 		HitData hitData;
 
-		std::map<MOID, std::list<Atom *>> hitMOAtoms;
-		std::list<Atom *> hitTerrAtoms;
-		std::list<Atom *> penetratingAtoms;
-		std::list<Atom *> hitResponseAtoms;
+		// Thread locals for performance (avoid memory allocs)
+		thread_local std::unordered_map<MOID, std::vector<Atom *>> hitMOAtoms;
+		hitMOAtoms.clear();
+		thread_local std::vector<Atom *> hitTerrAtoms;
+		hitTerrAtoms.clear();
+		thread_local std::vector<Atom *> penetratingAtoms;
+		penetratingAtoms.clear();
+		thread_local std::vector<Atom *> hitResponseAtoms;
+		hitResponseAtoms.clear();
 
 		// Lock all bitmaps involved outside the loop - only relevant for video bitmaps so disabled at the moment.
 		//if (!scenePreLocked) { g_SceneMan.LockScene(); }
@@ -456,15 +461,7 @@ namespace RTE {
 								MovableObject *moCollidedWith = g_MovableMan.GetMOFromID(tempMOID);
 								if (moCollidedWith && moCollidedWith->HitWhatMOID() == g_NoMOID) { moCollidedWith->SetHitWhatMOID(m_OwnerMOSR->m_MOID); }
 
-								// See if we already have another Atom hitting this MO in this step. If not, then create a new list unique for that MO's ID and insert into the map of MO-hitting Atoms.
-								if (!(hitMOAtoms.count(tempMOID))) {
-									std::list<Atom *> newList;
-									newList.push_back(atom);
-									hitMOAtoms.insert({ tempMOID, newList });
-								} else {
-									// If another Atom of this group has already hit this same MO during this step, go ahead and add the new Atom to the corresponding map for that MOID.
-									hitMOAtoms.at(tempMOID).push_back(atom);
-								}
+								hitMOAtoms[tempMOID].push_back(atom);
 
 								// Add the hit MO to the ignore list of ignored MOIDs
 								//AddMOIDToIgnore(tempMOID);
@@ -774,11 +771,15 @@ namespace RTE {
 
 		HitData hitData;
 
-		std::map<MOID, std::set<Atom *>> MOIgnoreMap;
-		std::map<MOID, std::deque<std::pair<Atom *, Vector>>> hitMOAtoms;
-		std::deque<std::pair<Atom *, Vector>> hitTerrAtoms;
-		std::deque<std::pair<Atom *, Vector>> penetratingAtoms;
-		std::deque<std::pair<Vector, Vector>> impulseForces; // First Vector is the impulse force in kg * m/s, the second is force point, or its offset from the origin of the AtomGroup.
+		// Thread locals for performance reasons (avoid memory allocs)
+		thread_local std::unordered_map<MOID, std::unordered_set<Atom *>> MOIgnoreMap;
+		MOIgnoreMap.clear();
+		thread_local std::unordered_map<MOID, std::vector<std::pair<Atom *, Vector>>> hitMOAtoms;
+		hitMOAtoms.clear();
+		thread_local std::deque<std::pair<Atom *, Vector>> hitTerrAtoms;
+		hitTerrAtoms.clear();
+		thread_local std::deque<std::pair<Atom *, Vector>> penetratingAtoms;
+		penetratingAtoms.clear();
 
 		// Lock all bitmaps involved outside the loop - only relevant for video bitmaps so disabled at the moment.
 		//if (!scenePreLocked) { g_SceneMan.LockScene(); }
@@ -795,16 +796,7 @@ namespace RTE {
 				MOID tempMOID = g_SceneMan.GetMOIDPixel(intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY(), m_OwnerMOSR->GetTeam());
 
 				if (tempMOID != g_NoMOID) {
-					// Make the appropriate entry in the MO-Atom interaction ignore map
-					if (MOIgnoreMap.count(tempMOID) != 0) {
-						// Found an entry for this MOID, so add the Atom entry to it
-						MOIgnoreMap.at(tempMOID).insert(atom);
-					} else {
-						// There wasn't already an entry for this MOID, so create one and add the Atom to it.
-						std::set<Atom *> newSet;
-						newSet.insert(atom);
-						MOIgnoreMap.insert({ tempMOID, newSet });
-					}
+					MOIgnoreMap[tempMOID].insert(atom);
 				}
 			}
 		}
@@ -830,7 +822,6 @@ namespace RTE {
 
 			hitTerrAtoms.clear();
 			penetratingAtoms.clear();
-			impulseForces.clear();
 
 			int dom = 0;
 			int sub = 0;
@@ -906,15 +897,8 @@ namespace RTE {
 					}
 
 					if (hitMOs && tempMOID && !ignoreHit) {
-						// See if we already have another Atom hitting this MO in this step. If not, then create a new deque unique for that MO's ID and insert into the map of MO-hitting Atoms.
-						if (hitMOAtoms.count(tempMOID) == 0) {
-							std::deque<std::pair<Atom *, Vector>> newDeque;
-							newDeque.push_back({ atom, flippedOffset });
-							hitMOAtoms.insert({ tempMOID, newDeque });
-						} else {
-							// If another Atom of this group has already hit this same MO during this step, go ahead and add the new Atom to the corresponding deque for that MOID.
-							hitMOAtoms.at(tempMOID).push_back({ atom, flippedOffset });
-						}
+						hitMOAtoms[tempMOID].push_back({ atom, flippedOffset });
+
 						// Count the number of Atoms of this group that hit MOs this step. Used to properly distribute the mass of the owner MO in later collision responses during this step.
 						atomsHitMOsCount++;
 					// If no MO has ever been hit yet during this step, then keep checking for terrain hits.
@@ -969,7 +953,7 @@ namespace RTE {
 					//float hitorMass = mass / ((atomsHitMOsCount/* + hitTerrAtoms.size()*/) * (m_Resolution ? m_Resolution : 1));
 					//float hiteeMassDenom = 0;
 
-					for (const std::map<MOID, std::deque<std::pair<Atom *, Vector>>>::value_type &MOAtomMapEntry : hitMOAtoms) {
+					for (const auto &MOAtomMapEntry : hitMOAtoms) {
 						// The denominator that the MovableObject being hit should divide its mass with for each Atom of this AtomGroup that is colliding with it during this step.
 						hitData.ImpulseFactor[HITEE] = 1.0F / static_cast<float>(MOAtomMapEntry.second.size());
 
@@ -1036,7 +1020,8 @@ namespace RTE {
 								hitData.Body[HITEE]->CollideAtPoint(hitData);
 
 								// Save the impulse force resulting from the MO collision response calculation.
-								impulseForces.push_back(std::make_pair(hitData.ResImpulse[HITOR], atomOffset));
+								ownerVel += hitData.ResImpulse[HITOR] / mass;
+								returnPush += hitData.ResImpulse[HITOR];
 							}
 						}
 					}
@@ -1130,7 +1115,9 @@ namespace RTE {
 						}
 
 						// Compute and store this Atom's collision response impulse force.
-						impulseForces.push_back({ (newVel - forceVel) * massDistribution, atomOffset });
+						Vector impulse = (newVel - forceVel) * massDistribution;
+						ownerVel += impulse / mass;
+						returnPush += impulse;
 
 						// Extract the current Atom's offset from the int positions.
 						intPos[X] -= atomOffset.GetFloorIntX();
@@ -1156,7 +1143,8 @@ namespace RTE {
 					// Apply the collision response effects.
 					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDistribution, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
-							impulseForces.push_back({ forceVel * massDistribution * retardation, penetratingAtomsEntry.second });
+							ownerVel += (forceVel * massDistribution * retardation) / mass;
+							returnPush += penetratingAtomsEntry.second;
 						}
 					}
 				}
@@ -1169,13 +1157,6 @@ namespace RTE {
 					position += legProgress;
 					didWrap = didWrap || g_SceneMan.WrapPosition(position);
 
-					// Apply velocity averages to the final resulting velocity for this leg.
-					for (const std::pair<Vector, Vector> &impulseForcesEntry : impulseForces) {
-						// Cap the impulse to what the max push force is
-						//impulseForcesEntry.first.CapMagnitude(pushForce * (travelTime/* - timeLeft*/));
-						ownerVel += impulseForcesEntry.first / mass;
-						returnPush += impulseForcesEntry.first;
-					}
 					// Stunt travel time if there is no more velocity
 					if (ownerVel.IsZero()) { timeLeft = 0; }
 				}

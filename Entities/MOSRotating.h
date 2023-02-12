@@ -581,6 +581,11 @@ ClassInfoGetters;
 	void PostTravel() override;
 
 
+    /// <summary>
+    /// Updates scripts for this MOSRotating, and everything attached to us. Supposed to be done every frame.
+    /// </summary>
+    int UpdateScripts() override;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////

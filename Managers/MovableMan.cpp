@@ -1617,9 +1617,6 @@ void MovableMan::Update()
     }
     m_AddedAlarmEvents.clear();
 
-    // Pre-lock Scene for all the accesses to its bitmaps
-    g_SceneMan.LockScene();
-
     // Will use some common iterators
     std::deque<Actor *>::iterator aIt;
     std::deque<Actor *>::iterator amidIt;
@@ -1629,54 +1626,84 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator midIt;
 
     {
-        g_SceneMan.LockScene();
-
-        // Actors
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             for (Actor *actor : m_Actors) {
                 actor->Update();
-                actor->UpdateScripts();
-                actor->ApplyImpulses();
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
-        // Items
         {
-            int count = 0;
-            int itemLimit = m_Items.size() - m_MaxDroppedItems;
-            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
-            {
-                (*iIt)->Update();
-                (*iIt)->UpdateScripts();
-                (*iIt)->ApplyImpulses();
-                if (count <= itemLimit)
-                {
-                    (*iIt)->SetToSettle(true);
-                }
+            for (MovableObject* item : m_Items) {
+                item->Update();
             }
         }
 
-        // Particles
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         {
-            for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-            {
-                (*parIt)->Update();
-                (*parIt)->UpdateScripts();
-                (*parIt)->ApplyImpulses();
-                (*parIt)->RestDetection();
-                // Copy particles that are at rest to the terrain and mark them for deletion.
-                if ((*parIt)->IsAtRest())
-                {
-                    // Mark for settling after update loop.
-                    (*parIt)->SetToSettle(true);
-                }
+            for (MovableObject* particle : m_Particles) {
+                particle->Update();
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+
+        // Update all scripts for all objects
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+        {
+            LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+            // seq for now, until I add some mutexes on things ;)
+            std::for_each(std::execution::seq, luaStates.begin(), luaStates.end(),
+                [&](LuaStateWrapper& luaState) {
+                    g_LuaMan.SetThreadLuaStateOverride(&luaState);
+
+                    for (Actor* actor : m_Actors) {
+                        if (actor->GetLuaState() == &luaState) {
+                            actor->UpdateScripts();
+                        }
+                    }
+
+                    for (MovableObject* item : m_Items) {
+                        if (item->GetLuaState() == &luaState) {
+                            item->UpdateScripts();
+                        }
+                    }
+
+                    for (MovableObject* particle : m_Particles) {
+                        if (particle->GetLuaState() == &luaState) {
+                            particle->UpdateScripts();
+                        }
+                    }
+
+                    g_LuaMan.SetThreadLuaStateOverride(nullptr);
+                });
+        }
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+        // Apply impulses after scripts have been updated
+        for (Actor* actor : m_Actors) {
+            actor->ApplyImpulses();
+        }
+
+        int count = 0;
+        int itemLimit = m_Items.size() - m_MaxDroppedItems;
+        for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
+            (*iIt)->ApplyImpulses();
+            if (count <= itemLimit) {
+                (*iIt)->SetToSettle(true);
+            }
+        }
+
+        for (MovableObject* particle : m_Particles) {
+            particle->ApplyImpulses();
+            particle->RestDetection();
+            // Copy particles that are at rest to the terrain and mark them for deletion.
+            if (particle->IsAtRest()) {
+                particle->SetToSettle(true);
+            }
+        }
     }
+
 
     ///////////////////////////////////////////////////
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
@@ -1732,9 +1759,6 @@ void MovableMan::Update()
     // Copy (Settle) Pass
 
     {
-        g_SceneMan.UnlockScene();
-        acquire_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
-
         // DEATH //////////////////////////////////////////////////////////
         // Transfer dead actors from Actor list to particle list
         aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&Actor::IsDead)));
@@ -1855,8 +1879,6 @@ void MovableMan::Update()
 		}
 		m_Particles.erase(midIt, m_Particles.end());
 	}
-
-    release_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
@@ -1984,7 +2006,6 @@ void MovableMan::UpdateControllers()
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
             [&](LuaStateWrapper &luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);

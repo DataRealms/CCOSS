@@ -8,7 +8,7 @@
 
 namespace RTE {
 
-	const std::array<std::string, PerformanceMan::PerformanceCounters::PerfCounterCount> PerformanceMan::m_PerfCounterNames = { "Total", "Act AI", "Act Travel", "Act Update", "Prt Travel", "Prt Update", "Activity" };
+	const std::array<std::string, PerformanceMan::PerformanceCounters::PerfCounterCount> PerformanceMan::m_PerfCounterNames = { "Total", "Act AI", "Act Travel", "Act Update", "Prt Travel", "Prt Update", "Activity", "Scripts"};
 
 	thread_local std::array<uint64_t, PerformanceMan::PerformanceCounters::PerfCounterCount> s_PerfMeasureStart; //!< Current measurement start time in microseconds.
 	thread_local std::array<uint64_t, PerformanceMan::PerformanceCounters::PerfCounterCount> s_PerfMeasureStop; //!< Current measurement stop time in microseconds.
@@ -35,6 +35,9 @@ namespace RTE {
 
 	void PerformanceMan::Initialize() {
 		m_SimUpdateTimer = std::make_unique<Timer>();
+
+		m_IntermediateDrawBitmap = create_bitmap_ex(8, 280, 480);
+		m_ColorConversionBitmap = create_bitmap_ex(32, 280, 480);
 
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
 			for (int i = 0; i < c_MaxSamples; ++i) {

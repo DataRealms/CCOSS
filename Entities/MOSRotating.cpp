@@ -1764,6 +1764,7 @@ void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const {
+    MOIDs.reserve(GetMOIDFootprint());
     MOSprite::GetMOIDs(MOIDs);
     for (const Attachable *attachable : m_Attachables) {
         if (attachable->GetsHitByMOs()) { attachable->GetMOIDs(MOIDs); }

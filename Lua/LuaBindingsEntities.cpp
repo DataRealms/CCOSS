@@ -1227,7 +1227,7 @@ namespace RTE {
 
 		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
 
-		.def("ScenePath", &Scene::GetScenePath, luabind::return_stl_iterator)
+		.def("GetScenePath", &Scene::GetScenePath, luabind::return_stl_iterator)
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)

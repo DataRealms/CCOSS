@@ -48,6 +48,9 @@ namespace RTE {
 ConcreteClassInfo(Scene, Entity, 0);
 const std::string Scene::Area::c_ClassName = "Area";
 
+// Holds the path calculated by CalculateScenePath
+thread_local std::list<Vector> s_ScenePath;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -475,7 +478,6 @@ void Scene::Clear()
 	m_AreaList.clear();
     m_Locked = false;
     m_GlobalAcc.Reset();
-    m_ScenePath.clear();
 	m_SelectedAssemblies.clear();
     m_AssembliesCounts.clear();
 	m_pPreviewBitmap = 0;
@@ -3040,6 +3042,45 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     }
 
     return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          CalculateScenePath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Calculates the least difficult path between two points on
+//                  the current scene. Takes both distance and materials into account.
+//                  A list of waypoints can be retrived from s_ScenePath;
+//                  For exposing CalculatePath to Lua.
+
+int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength) {
+    int pathSize = -1;
+
+	if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(Activity::Teams::NoTeam)) {
+        float notUsed;
+        pathFinder->CalculatePath(start, end, s_ScenePath, notUsed, digStrength);
+
+        // Process the new path we now have, if any
+        if (!s_ScenePath.empty()) {
+            pathSize = s_ScenePath.size();
+            if (movePathToGround) {
+                // Smash all airborne waypoints down to just above the ground
+                for (auto itr = s_ScenePath.begin(), itrEnd = s_ScenePath.end(); itr != itrEnd; ++itr) {
+					(*itr) = g_SceneMan.MovePointToGround((*itr), 20, 15);
+				}
+            }
+        }
+    }
+
+    return pathSize;
+}
+
+int Scene::GetScenePathSize() const {
+    return s_ScenePath.size();
+}
+
+std::list<Vector>& Scene::GetScenePath() {
+    return s_ScenePath;
 }
 
 

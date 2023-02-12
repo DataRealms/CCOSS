@@ -1223,11 +1223,11 @@ namespace RTE {
 		.property("GlobalAcc", &Scene::GetGlobalAcc, &Scene::SetGlobalAcc)
 		.property("ScenePathSize", &Scene::GetScenePathSize)
 
-		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 
 		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
 
+		.def("ScenePath", &Scene::GetScenePath, luabind::return_stl_iterator)
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)

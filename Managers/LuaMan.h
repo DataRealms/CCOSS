@@ -212,7 +212,6 @@ namespace RTE {
 		// For example, an AI picks up an object. OnAttach() is triggered in Lua script, while the attachable may be in a separate Lua state!
 		// As such, if it's a seperate Lua state, we need to block. We could queue the call till later or something, but it's sufficiently rare that I don't care enough...
 		// If it's the same Lua state, we can immediately call it - but we've already acquired the mutex in a parent scope, therefore recursive to avoid a deadlock.
-		// TODO - Fix deadlock when Luastate A tries to construct an object in Luastate B while Luastate B is trying to construct an object in Luastate A
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.
 	};
 

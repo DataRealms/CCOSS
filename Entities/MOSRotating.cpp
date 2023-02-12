@@ -1629,7 +1629,7 @@ void MOSRotating::Update() {
 
     for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
         AEmitter* wound = *woundItr;
-        ++woundItr
+        ++woundItr;
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         wound->Update();
     }

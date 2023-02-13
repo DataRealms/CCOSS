@@ -52,7 +52,7 @@ namespace RTE {
 
 		for (int team = Activity::NoTeam; team < Activity::MaxTeamCount; ++team) {
 			if (team == Activity::NoTeam || activity->TeamActive(team)) {
-				for (const int &usedCellId : m_UsedCellIds) {
+				for (int usedCellId : m_UsedCellIds) {
 					m_Cells[team + 1][usedCellId].clear();
 					m_PhysicsCells[team + 1][usedCellId].clear();
 				}

@@ -348,11 +348,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Attachable::UpdateScripts() {
-		if (!m_Parent) {
-			return 0;
-		}
-
-		if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
+		if (m_Parent && !m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
 			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent });
 		}
 

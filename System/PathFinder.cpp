@@ -107,8 +107,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MicroPather * PathFinder::GetPather() {
-		if (!s_Pather) {
+		if (!s_Pather || s_Pather->GetGraph() != this) {
 			// First time this thread has asked for a pather, let's initialize it
+			delete s_Pather; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
 			
 			// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 			//int sceneArea = m_GridWidth * m_GridHeight;

@@ -487,6 +487,8 @@ namespace micropather
 		void StatesInPool( MP_VECTOR< void* >* stateVec );
 		void GetCacheData( CacheData* data );
 
+		Graph* GetGraph() { return graph; }
+
 	  private:
 		MicroPather( const MicroPather& );	// undefined and unsupported
 		void operator=( const MicroPather ); // undefined and unsupported

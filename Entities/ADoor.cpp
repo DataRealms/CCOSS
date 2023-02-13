@@ -37,12 +37,15 @@ namespace RTE {
 		m_DoorMaterialID = g_MaterialDoor;
 		m_DoorMaterialDrawn = false;
 		m_DoorMaterialTempErased = false;
+		m_DoorMaterialRedrawTimer.Reset();
+		m_DoorMaterialRedrawTimer.SetSimTimeLimitMS(10000);
+		// We need the door material layer to redraw right away when it's created, so set the door material redraw timer to be past its limit, thereby forcing an immediate redraw.
+		m_DoorMaterialRedrawTimer.SetElapsedSimTimeMS(m_DoorMaterialRedrawTimer.GetSimTimeLimitMS() + 1);
 		m_LastDoorMaterialPos.Reset();
 		m_DoorMoveStartSound = nullptr;
 		m_DoorMoveSound = nullptr;
 		m_DoorDirectionChangeSound = nullptr;
 		m_DoorMoveEndSound = nullptr;
-		m_RedrawAfterInit = true;
 
 		// NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
 		m_CanBeSquished = false;
@@ -75,11 +78,6 @@ namespace RTE {
 		m_DrawMaterialLayerWhenOpen = reference.m_DrawMaterialLayerWhenOpen;
 		m_DrawMaterialLayerWhenClosed = reference.m_DrawMaterialLayerWhenClosed;
 		m_DoorMaterialID = reference.m_DoorMaterialID;
-
-		// Don't copy these fields from reference, our door hasn't been drawn yet
-		m_DoorMaterialTempErased = false;
-		m_DoorMaterialDrawn = false;
-		m_RedrawAfterInit = true;
 
 		if (reference.m_DoorMoveStartSound) { m_DoorMoveStartSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorMoveStartSound->Clone())); }
 		if (reference.m_DoorMoveSound) { m_DoorMoveSound.reset(dynamic_cast<SoundContainer*>(reference.m_DoorMoveSound->Clone())); }
@@ -386,24 +384,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Update() {
-		// Unfortunately RTE engine doesn't give a callback after everything is initialized to let us fix up, so we need this property and to lazily do it in Update()
-		if (m_RedrawAfterInit) {
-			bool draw = (m_DrawMaterialLayerWhenOpen && m_DoorState == OPEN) ||
-						(m_DrawMaterialLayerWhenClosed && m_DoorState == CLOSED) ||
-						((m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) && m_DoorState == STOPPED);
-
-			if (draw) {
-				DrawDoorMaterial(true);
-			}
-
-			m_RedrawAfterInit = false;
-		}
-
 		if (m_Door) {
 			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
 				UpdateSensors(); 
 			}
 			UpdateDoorAttachableActions();
+
+			bool shouldDrawDoorMaterial = ((m_DrawMaterialLayerWhenOpen && m_DoorState == OPEN) ||
+				(m_DrawMaterialLayerWhenClosed && m_DoorState == CLOSED) ||
+				((m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) && m_DoorState == STOPPED)) &&
+				m_DoorMaterialRedrawTimer.IsPastSimTimeLimit();
+			if (shouldDrawDoorMaterial) {
+				DrawDoorMaterial(true);
+				m_DoorMaterialRedrawTimer.Reset();
+			}
 		}
 
 		Actor::Update();

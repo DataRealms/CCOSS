@@ -207,8 +207,6 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		bool m_RedrawAfterInit; //!< Forces the door material to redraw. Set after loading
-
 		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using LERP. For internal use only.
 
 		std::list<ADSensor> m_Sensors; //!< All the sensors for detecting Actors approaching the door.
@@ -244,6 +242,7 @@ namespace RTE {
 		unsigned char m_DoorMaterialID; //!< The ID of the door material drawn to the terrain.
 		bool m_DoorMaterialDrawn; //!< Whether the door material is currently drawn onto the material layer.
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
+		Timer m_DoorMaterialRedrawTimer; //!< Timer for redrawing the door material layer from time-to-time.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
 		std::unique_ptr<SoundContainer> m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
@@ -274,13 +273,14 @@ namespace RTE {
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.
 		/// </summary>
 		/// <param name="disallowErasingMaterialBeforeDrawing">Whether to disallow calling EraseDoorMaterial before drawing. Defaults to false, which means normal behaviour applies and this may erase the material before drawing it.</param>
+		/// <param name="updateMaterialArea">Whether to tell the Scene's Terrain that this door has modified the material layer.</param>
 		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false, bool updateMaterialArea = true);
 
 		/// <summary>
 		/// Flood-fills the material area under the last position of the door attachable that matches the material index of it.
 		/// This is to get rid of the material footprint made with DrawDoorMaterial when the door part starts to move.
 		/// </summary>
-		/// <param name="updateMaterialArea">Whether to update the MaterialArea after erasing or not. Used for DrawDoorMaterial().</param>
+		/// <param name="updateMaterialArea">Whether to tell the Scene's Terrain that this door has modified the material layer..</param>
 		/// <returns>Whether the fill erasure was successful (if the same material as the door was found and erased).</returns>
 		bool EraseDoorMaterial(bool updateMaterialArea = true);
 

@@ -1652,8 +1652,8 @@ void MovableMan::Update()
         g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
         {
             LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-            // seq for now, until I add some mutexes on things ;)
-            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
+            // seq for now, until we add the option to enable threading for lua scripts
+            std::for_each(std::execution::seq, luaStates.begin(), luaStates.end(),
                 [&](LuaStateWrapper& luaState) {
                     g_LuaMan.SetThreadLuaStateOverride(&luaState);
 

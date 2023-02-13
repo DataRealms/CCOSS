@@ -506,7 +506,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 #ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
 #else
-    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam, true);
     MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
 #endif
 

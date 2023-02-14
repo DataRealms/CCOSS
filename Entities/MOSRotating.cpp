@@ -1563,51 +1563,6 @@ void MOSRotating::PostTravel()
     }
 }
 
-int MOSRotating::UpdateScripts()
-{
-    // Update the scripts of whatever we own.
-    // Note, we check here to delete and tranfer forces, not in Update(), because we're called after update, and scripts can modify that stuff
-    for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
-        AEmitter* wound = *woundItr;
-        ++woundItr; // Need to update itr here instead of at the very end of the loop 'cause we may modify the list
-
-        wound->UpdateScripts();
-
-        if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
-            m_Wounds.remove(wound);
-            m_AttachableAndWoundMass -= wound->GetMass();
-            delete wound;
-        } else {
-            Vector totalImpulseForce;
-            for (const std::pair<Vector, Vector>& impulseForce : wound->GetImpulses()) {
-                totalImpulseForce += impulseForce.first;
-            }
-            totalImpulseForce *= wound->GetJointStiffness();
-
-            if (!totalImpulseForce.IsZero()) { 
-                AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector()); 
-            }
-
-            wound->ClearImpulseForces();
-        }
-    }
-
-    for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ) {
-        Attachable* attachable = *attachableItr;
-        ++attachableItr;
-
-        attachable->UpdateScripts();
-
-        if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
-            RemoveAttachable(attachable, true, true);
-        } else if (attachable->IsAttachedTo(this) && !attachable->IsSetToDelete()) {
-            TransferForcesFromAttachable(attachable);
-        }
-    }
-
-    return MOSprite::UpdateScripts();
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -1632,6 +1587,24 @@ void MOSRotating::Update() {
         ++woundItr;
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         wound->Update();
+
+        if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
+            m_Wounds.remove(wound);
+            m_AttachableAndWoundMass -= wound->GetMass();
+            delete wound;
+        } else {
+            Vector totalImpulseForce;
+            for (const std::pair<Vector, Vector>& impulseForce : wound->GetImpulses()) {
+                totalImpulseForce += impulseForce.first;
+            }
+            totalImpulseForce *= wound->GetJointStiffness();
+
+            if (!totalImpulseForce.IsZero()) {
+                AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector());
+            }
+
+            wound->ClearImpulseForces();
+        }
     }
 
     for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ) {
@@ -1641,6 +1614,12 @@ void MOSRotating::Update() {
         RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
         attachable->Update();
+
+        if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
+            RemoveAttachable(attachable, true, true);
+        } else if (attachable->IsAttachedTo(this) && !attachable->IsSetToDelete()) {
+            TransferForcesFromAttachable(attachable);
+        }
     }
 }
 

@@ -11,7 +11,7 @@ namespace RTE {
 		// Use a constant seed for determinism
 		// VERY IMPORTANT, DO NOT CHANGE THIS!...
 		// ...it's the name of my childhood pet ;)
-		constexpr std::string seedString("Bubble");
+		constexpr std::string_view seedString = "Bubble";
 
 		uint64_t seed = 0;
 		for(char c : seedString) {

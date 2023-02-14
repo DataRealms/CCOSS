@@ -467,6 +467,7 @@ namespace RTE {
 
 		static constexpr int c_NormalCheckCount = 16; //!< Array size for offsets to form circle in s_NormalChecks.
 
+		static std::mutex s_MemoryPoolMutex;
 		static std::vector<void *> s_AllocatedPool; //!< Pool of pre-allocated Atoms.
 		static int s_PoolAllocBlockCount; //!< The number of instances to fill up the pool of Atoms with each time it runs dry.
 		static int s_InstancesInUse; //!< The number of allocated instances passed out from the pool.

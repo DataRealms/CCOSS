@@ -78,6 +78,7 @@ void MovableObject::Clear()
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
+    m_IsTraveling = false;
     m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
     m_OwningState = nullptr;
@@ -110,6 +111,8 @@ void MovableObject::Clear()
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
+
+    m_LastCollisionSimFrameNumber = 0;
 
 	m_SimUpdatesBetweenScriptedUpdates = 1;
     m_SimUpdatesSinceLastScriptedUpdate = 0;

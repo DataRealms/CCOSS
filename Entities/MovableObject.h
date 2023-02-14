@@ -2004,7 +2004,7 @@ protected:
 	unsigned char m_TerrainMatHit;
 	// Unique ID of particle hit this MO
 	long int m_ParticleUniqueIDHit;
-	// Number of sim update frame when last collision was detcted
+	// Number of sim update frame when last collision was detected
 	unsigned int m_LastCollisionSimFrameNumber;
     int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
     int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.

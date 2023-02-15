@@ -48,12 +48,12 @@ namespace RTE {
 	/// <param name="alwaysIgnore">A reference to a bool that is used in an "Always ignore" functionality.</param>
 	extern void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore);
 
-	#define RTEAssert(expression, description) {								\
-		static bool alwaysIgnore = false;										\
-		bool success = expression;												\
-		if (!success && !alwaysIgnore) {										\
-			RTEAssertFunc(description, __FILE__, __LINE__, alwaysIgnore);		\
-		}																		\
+	#define RTEAssert(expression, description) {									\
+		static bool RTEASSERT_alwaysIgnore = false;									\
+		bool RTEASSERT_success = expression;										\
+		if (!RTEASSERT_success && !RTEASSERT_alwaysIgnore) {						\
+			RTEAssertFunc(description, __FILE__, __LINE__, RTEASSERT_alwaysIgnore);	\
+		}																			\
 	}
 }
 #endif

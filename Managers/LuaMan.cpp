@@ -210,10 +210,10 @@ namespace RTE {
 			"print = function(stringToPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(stringToPrint)); end"
 			"\n"
 			// Override random functions to appear global instead of under LuaMan
-			"SelectRand = function(lower, upper) LuaMan:SelectRand(lower, upper); end;\n"
-			"RangeRand = function(lower, upper) LuaMan:RangeRand(lower, upper); end;\n"
-			"PosRand = function() LuaMan:PosRand(); end;\n"
-			"NormalRand = function() LuaMan:NormalRand(); end;\n"
+			"SelectRand = function(lower, upper) return LuaMan:SelectRand(lower, upper); end;\n"
+			"RangeRand = function(lower, upper) return LuaMan:RangeRand(lower, upper); end;\n"
+			"PosRand = function() return LuaMan:PosRand(); end;\n"
+			"NormalRand = function() return LuaMan:NormalRand(); end;\n"
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
 			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return LuaMan:SelectRand(lower, upper); elseif lower ~= nil then return LuaMan:SelectRand(1, lower); else return LuaMan:PosRand(); end end"
 		);

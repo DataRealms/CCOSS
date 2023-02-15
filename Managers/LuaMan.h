@@ -354,6 +354,8 @@ namespace RTE {
 		LuaStateWrapper m_MasterScriptState;
 		LuaStatesArray m_ScriptStates;
 
+		int m_LastAssignedLuaState = 0;
+
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.
 		/// </summary>

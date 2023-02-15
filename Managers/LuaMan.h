@@ -3,6 +3,7 @@
 
 #include "Singleton.h"
 #include "Entity.h"
+#include "RTETools.h"
 
 #define g_LuaMan LuaMan::Instance()
 
@@ -187,6 +188,30 @@ namespace RTE {
 
 	private:
 		/// <summary>
+		/// Gets a random integer between minInclusive and maxInclusive.
+		/// </summary>
+		/// <returns>A random integer between minInclusive and maxInclusive.</returns>
+		int SelectRand(int minInclusive, int maxInclusive);
+
+		/// <summary>
+		/// Gets a random real between minInclusive and maxInclusive.
+		/// </summary>
+		/// <returns>A random real between minInclusive and maxInclusive.</returns>
+		double RangeRand(double minInclusive, double maxInclusive);
+
+		/// <summary>
+		/// Gets a random number between -1 and 1.
+		/// </summary>
+		/// <returns>A random number between -1 and 1.</returns>
+		double NormalRand();
+
+		/// <summary>
+		/// Gets a random number between 0 and 1.
+		/// </summary>
+		/// <returns>A random number between 0 and 1.</returns>
+		double PosRand();
+
+		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
 		/// </summary>
 		/// <returns>A string that describes the current state of the Lua stack.</returns>
@@ -202,11 +227,11 @@ namespace RTE {
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
 
-		// This needs to be a recursive Mutex, because we can have some interesting cross-thread behaviour in rare circumstances:
-		// For example, an AI picks up an object. OnAttach() is triggered in Lua script, while the attachable may be in a separate Lua state!
-		// As such, if it's a seperate Lua state, we need to block. We could queue the call till later or something, but it's sufficiently rare that I don't care enough...
-		// If it's the same Lua state, we can immediately call it - but we've already acquired the mutex in a parent scope, therefore recursive to avoid a deadlock.
+		// This mutex is more for safety, and with new script/AI architecture we shouldn't ever be locking on a mutex. As such we use this primarily to fire asserts.
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.
+
+		// For determinism, every Lua state has it's own random number generator.
+		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
 	static constexpr int c_NumThreadedLuaStates = 8;

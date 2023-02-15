@@ -554,25 +554,6 @@ namespace RTE {
 		static float GetPathFindingDefaultDigStrength();
 
 		/// <summary>
-		/// Gets a random number between -1 and 1.
-		/// </summary>
-		/// <returns>A random number between -1 and 1.</returns>
-		static double NormalRand();
-
-		/// <summary>
-		/// Gets a random number between 0 and 1.
-		/// </summary>
-		/// <returns>A random number between 0 and 1.</returns>
-		static double PosRand();
-
-		/// <summary>
-		/// Gets a random number between 1 and the passed in upper limit number. The limits are included in the available random range.
-		/// </summary>
-		/// <param name="upperLimitInclusive">The upper limit for the random number.</param>
-		/// <returns>A random number between 1 and the passed in number.</returns>
-		static double LuaRand(double upperLimitInclusive);
-
-		/// <summary>
 		/// Explicit deletion of any Entity instance that Lua owns. It will probably be handled by the GC, but this makes it instantaneous.
 		/// </summary>
 		/// <param name="entityToDelete">The Entity to delete.</param>

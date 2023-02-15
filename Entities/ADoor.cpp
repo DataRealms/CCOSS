@@ -510,8 +510,7 @@ namespace RTE {
 				}
 			} else {
 				Vector updatedOffset(Lerp(0, m_DoorMoveTime, startOffset.m_X, endOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), Lerp(0, m_DoorMoveTime, startOffset.m_Y, endOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
-				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle Lerp that properly handles the 2PI border and +- angles.
-				float updatedAngle = Lerp(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
+				float updatedAngle = Lerp(0, m_DoorMoveTime, Matrix(startAngle), Matrix(endAngle), m_DoorMoveTimer.GetElapsedSimTimeMS()).GetRadAngle();
 
 				m_Door->SetParentOffset(updatedOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));

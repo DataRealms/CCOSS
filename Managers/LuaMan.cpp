@@ -210,15 +210,12 @@ namespace RTE {
 			"print = function(stringToPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(stringToPrint)); end"
 			"\n"
 			// Override random functions to appear global instead of under LuaMan
-			"SelectRand = LuaMan.SelectRand;\n"
-			"RangeRand = LuaMan.RangeRand;\n"
-			"PosRand = LuaMan.PosRand;\n"
-			"NormalRand = LuaMan.NormalRand;\n"
+			"SelectRand = function(lower, upper) LuaMan:SelectRand(lower, upper); end;\n"
+			"RangeRand = function(lower, upper) LuaMan:RangeRand(lower, upper); end;\n"
+			"PosRand = function() LuaMan:PosRand(); end;\n"
+			"NormalRand = function() LuaMan:NormalRand(); end;\n"
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
-			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return SelectRand(lower, upper); elseif lower ~= nil then return SelectRand(1, lower); else return PosRand(); end end"
-			"\n"
-			// Override "dofile" to be able to account for Data/ or Mods/ directory.
-			"OriginalDoFile = dofile; dofile = function(filePath) filePath = PresetMan:GetFullModulePath(filePath); if filePath ~= '' then return OriginalDoFile(filePath); end end;"
+			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return LuaMan:SelectRand(lower, upper); elseif lower ~= nil then return LuaMan:SelectRand(1, lower); else return LuaMan:PosRand(); end end"
 		);
 	}
 

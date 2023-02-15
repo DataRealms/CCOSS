@@ -53,6 +53,10 @@ namespace RTE {
 		luabind::module(m_State)[luabind::class_<LuaStateWrapper>("LuaManager")
 				.property("TempEntity", &LuaStateWrapper::GetTempEntity)
 				.def("TempEntities", &LuaStateWrapper::GetTempEntityVector, luabind::return_stl_iterator)
+				.def("SelectRand", &LuaStateWrapper::SelectRand)
+				.def("RangeRand", &LuaStateWrapper::RangeRand)
+				.def("PosRand", &LuaStateWrapper::PosRand)
+				.def("NormalRand", &LuaStateWrapper::NormalRand)
 				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
 				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
 				.def("FileOpen", &LuaMan::FileOpen)
@@ -62,10 +66,6 @@ namespace RTE {
 				.def("FileEOF", &LuaMan::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			luabind::def("SelectRand", (int(*)(int, int)) & RandomNum),
-			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
-			luabind::def("PosRand", &LuaAdaptersUtility::PosRand),
-			luabind::def("NormalRand", &LuaAdaptersUtility::NormalRand),
 			luabind::def("LERP", &LERP),
 			luabind::def("EaseIn", &EaseIn),
 			luabind::def("EaseOut", &EaseOut),
@@ -196,6 +196,9 @@ namespace RTE {
 		luabind::globals(m_State)["LuaMan"] = this;
 		luabind::globals(m_State)["SettingsMan"] = &g_SettingsMan;
 
+		const uint64_t seed = RandomNum<uint64_t>(0, std::numeric_limits<uint64_t>::max());
+		m_RandomGenerator.Seed(seed);
+
 		luaL_dostring(m_State,
 			// Add package path to the defaults.
 			"package.path = package.path .. \";Base.rte/?.lua\";"
@@ -206,6 +209,11 @@ namespace RTE {
 			// Override "print" in the lua state to output to the console.
 			"print = function(stringToPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(stringToPrint)); end"
 			"\n"
+			// Override random functions to appear global instead of under LuaMan
+			"SelectRand = LuaMan.SelectRand;\n"
+			"RangeRand = LuaMan.RangeRand;\n"
+			"PosRand = LuaMan.PosRand;\n"
+			"NormalRand = LuaMan.NormalRand;\n"
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
 			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return SelectRand(lower, upper); elseif lower ~= nil then return SelectRand(1, lower); else return PosRand(); end end"
 			"\n"
@@ -218,6 +226,30 @@ namespace RTE {
 
 	void LuaStateWrapper::Destroy() {
 		lua_close(m_State);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaStateWrapper::SelectRand(int minInclusive, int maxInclusive) {
+		return m_RandomGenerator.RandomNum<int>(minInclusive, maxInclusive);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double LuaStateWrapper::RangeRand(double minInclusive, double maxInclusive) {
+		return m_RandomGenerator.RandomNum<double>(minInclusive, maxInclusive);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double LuaStateWrapper::NormalRand() {
+		return m_RandomGenerator.RandomNormalNum<double>();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double LuaStateWrapper::PosRand() {
+		return m_RandomGenerator.RandomNum<double>();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

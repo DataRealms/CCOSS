@@ -1662,7 +1662,8 @@ void MovableMan::Update()
 
         // seq for now, until we add the option to enable threading for lua scripts
         // todo - each lua state should keep a list of their owned instances
-        std::for_each(std::execution::seq, luaStates.begin(), luaStates.end(),
+        // Then we can also dynamically assign MOs to states with the least instances
+        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
             [&](LuaStateWrapper& luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 

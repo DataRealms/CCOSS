@@ -18,6 +18,7 @@
 #include "FrameMan.h"
 #include "ActivityMan.h"
 #include "UInputMan.h"
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PrimitiveMan.h"
 #include "SettingsMan.h"
@@ -44,34 +45,15 @@ namespace RTE
 const std::string SceneMan::c_ClassName = "SceneMan";
 std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool IntRect::IntersectionCut(const IntRect &rhs)
-{
-    if (Intersects(rhs))
-    {
-        m_Left = MAX(m_Left, rhs.m_Left);
-        m_Right = MIN(m_Right, rhs.m_Right);
-        m_Top = MAX(m_Top, rhs.m_Top);
-        m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
-        return true;
-    }
-
-    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";
-    m_pSceneToLoad = 0;
+    m_pSceneToLoad = nullptr;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
-    m_pCurrentScene = 0;
-    m_pMOColorLayer = 0;
-    m_pMOIDLayer = 0;
-    m_MOIDDrawings.clear();
+    m_pCurrentScene = nullptr;
+    m_pMOColorLayer = nullptr;
+    m_pMOIDLayer = nullptr;
     m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
@@ -83,20 +65,7 @@ void SceneMan::Clear()
 
 	m_MaterialCopiesVector.clear();
 
-    for (int i = 0; i < c_MaxScreenCount; ++i) {
-        m_Offset[i].Reset();
-        m_DeltaOffset[i].Reset();
-        m_ScrollTarget[i].Reset();
-        m_ScreenTeam[i] = Activity::NoTeam;
-        m_ScrollSpeed[i] = 0.1;
-        m_ScrollTimer[i].Reset();
-        m_ScreenOcclusion[i].Reset();
-        m_TargetWrapped[i] = false;
-        m_SeamCrossCount[i][X] = 0;
-        m_SeamCrossCount[i][Y] = 0;
-    }
-
-    m_pUnseenRevealSound = 0;
+    m_pUnseenRevealSound = nullptr;
     m_DrawRayCastVisualizations = false;
     m_DrawPixelCheckVisualizations = false;
     m_LastUpdatedScreen = 0;
@@ -204,7 +173,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_MaskColor);
-    m_pMOColorLayer = new SceneLayer();
+    m_pMOColorLayer = new SceneLayerTracked();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
@@ -212,9 +181,12 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     delete m_pMOIDLayer;
     pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
-    m_pMOIDLayer = new SceneLayer();
+    m_pMOIDLayer = new SceneLayerTracked();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
+
+	const int cellSize = 20;
+	m_MOIDsGrid = SpatialPartitionGrid(GetSceneWidth(), GetSceneHeight(), cellSize);
 
     // Create the Debug SceneLayer
     if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
@@ -519,19 +491,23 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
+MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 {
     WrapPosition(pixelX, pixelY);
 
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
-    if (pixelX < 0 ||
-       pixelX >= m_pMOIDLayer->GetBitmap()->w ||
-       pixelY < 0 ||
-       pixelY >= m_pMOIDLayer->GetBitmap()->h)
+    if (pixelX < 0 || pixelX >= m_pMOIDLayer->GetBitmap()->w || pixelY < 0 || pixelY >= m_pMOIDLayer->GetBitmap()->h) {
         return g_NoMOID;
+    }
 
+#ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+#else
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
+    MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
+#endif
+
 	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
@@ -539,9 +515,9 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 		} else {
 			return ColorKeys::g_NoMOID;
 		}
-	} else {
-		return moid;
 	}
+
+	return moid;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -565,156 +541,6 @@ Vector SceneMan::GetGlobalAcc() const
     RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
     return m_pCurrentScene->GetGlobalAcc();
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
-{
-    if (screen >= c_MaxScreenCount)
-        return;
-
-    m_Offset[screen].m_X = offsetX;
-    m_Offset[screen].m_Y = offsetY;
-    CheckOffset(screen);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SetScroll(const Vector &center, int screen)
-{
-    if (screen >= c_MaxScreenCount)
-        return;
-
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		m_Offset[screen].m_X = center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2);
-		m_Offset[screen].m_Y = center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2);
-	}
-	else
-	{
-		m_Offset[screen].m_X = center.GetFloorIntX() - (g_FrameMan.GetResX() / 2);
-		m_Offset[screen].m_Y = center.GetFloorIntY() - (g_FrameMan.GetResY() / 2);
-	}
-
-    CheckOffset(screen);
-
-// *** Temp hack
-//    m_OffsetX = -m_OffsetX;
-//    m_OffsetY = -m_OffsetY;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::SetScrollTarget(const Vector &targetCenter,
-                               float speed,
-                               bool targetWrapped,
-                               int screen)
-{
-    // See if it would make sense to automatically wrap
-    if (!targetWrapped)
-    {
-        SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-        // If the difference is more than half the scene width, then wrap
-        if ((pTerrain->WrapsX() && fabs(targetCenter.m_X - m_ScrollTarget[screen].m_X) > pTerrain->GetBitmap()->w / 2) ||
-            (pTerrain->WrapsY() && fabs(targetCenter.m_Y - m_ScrollTarget[screen].m_Y) > pTerrain->GetBitmap()->h / 2))
-            targetWrapped = true;
-    }
-
-    m_ScrollTarget[screen].m_X = targetCenter.m_X;
-    m_ScrollTarget[screen].m_Y = targetCenter.m_Y;
-    m_ScrollSpeed[screen] = speed;
-    // Don't override a set wrapping, it will be reset to false upon a drawn frame
-    m_TargetWrapped[screen] = m_TargetWrapped[screen] || targetWrapped;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const Vector & SceneMan::GetScrollTarget(int screen) const {
-	 const Vector & offsetTarget = (g_NetworkClient.IsConnectedAndRegistered()) ? g_NetworkClient.GetFrameTarget() : m_ScrollTarget[screen];
-	 return offsetTarget;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float SceneMan::TargetDistanceScalar(Vector point)
-{
-    if (!m_pCurrentScene)
-        return 0;
-
-    int screenCount = g_FrameMan.GetScreenCount();
-    float screenRadius = static_cast<float>(std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight())) / 2.0F;
-    float sceneRadius = static_cast<float>(std::max(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight())) / 2.0F;
-    // Avoid divide by zero problems if scene and screen radius are the same
-	if (screenRadius == sceneRadius) { sceneRadius += 100.0F; }
-
-    float distance = 0;
-    float scalar = 0;
-    float closestScalar = 1.0;
-
-    for (int screen = 0; screen < screenCount; ++screen)
-    {
-        distance = ShortestDistance(point, m_ScrollTarget[screen]).GetMagnitude();
-
-        // Check if we're off the screen and then fall off
-        if (distance > screenRadius)
-        {
-            // Get ratio of how close to the very opposite of the scene the point is
-            scalar = 0.5F + 0.5F * (distance - screenRadius) / (sceneRadius - screenRadius);
-        }
-        // Full audio if within the screen
-        else
-            scalar = 0.0F;
-
-        // See if this screen's distance scalar is the closest one yet
-        if (scalar < closestScalar)
-            closestScalar = scalar;
-    }
-
-    // Return the scalar that was shows the closest scroll target of any current screen to the point
-    return closestScalar;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::CheckOffset(int screen)
-{
-    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
-
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-    RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X < 0)
-        m_Offset[screen].m_X = 0;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y < 0)
-        m_Offset[screen].m_Y = 0;
-
-    int frameWidth = g_FrameMan.GetResX();
-    int frameHeight = g_FrameMan.GetResY();
-    frameWidth = frameWidth / (g_FrameMan.GetVSplit() ? 2 : 1);
-    frameHeight = frameHeight / (g_FrameMan.GetHSplit() ? 2 : 1);
-
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		frameWidth = g_FrameMan.GetPlayerFrameBufferWidth(screen);
-		frameHeight = g_FrameMan.GetPlayerFrameBufferHeight(screen);
-	}
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X >= pTerrain->GetBitmap()->w - frameWidth)
-        m_Offset[screen].m_X = pTerrain->GetBitmap()->w - frameWidth;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y >= pTerrain->GetBitmap()->h - frameHeight)
-        m_Offset[screen].m_Y = pTerrain->GetBitmap()->h - frameHeight;
-
-    if (!pTerrain->WrapsX() && m_Offset[screen].m_X >= pTerrain->GetBitmap()->w - frameWidth)
-        m_Offset[screen].m_X = pTerrain->GetBitmap()->w - frameWidth;
-
-    if (!pTerrain->WrapsY() && m_Offset[screen].m_Y >= pTerrain->GetBitmap()->h - frameHeight)
-        m_Offset[screen].m_Y = pTerrain->GetBitmap()->h - frameHeight;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -752,66 +578,38 @@ bool SceneMan::SceneIsLocked() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
-{
-    if (radius != 0)
-        RegisterMOIDDrawing(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius);
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
+    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+        m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
+    } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
+#ifdef DRAW_MOID_LAYER
+        m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
+#else
+        const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
+        RTEAssert(mo, "Trying to register a null MOID to the MOID grid! This is not allowed.")
+        IntRect rect(left, top, right, bottom);
+        m_MOIDsGrid.Add(rect, *mo);
+#endif
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearAllMOIDDrawings()
-{
-    for (std::list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
-        ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
-
-    m_MOIDDrawings.clear();
+void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius) {
+    if (radius != 0.0F) {
+		RegisterDrawing(bitmap, moid, static_cast<int>(std::floor(center.m_X - radius)), static_cast<int>(std::floor(center.m_Y - radius)), static_cast<int>(std::floor(center.m_X + radius)), static_cast<int>(std::floor(center.m_Y + radius)));
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::ClearMOIDRect(int left, int top, int right, int bottom)
-{
-    // Draw the first unwrapped rect
-    rectfill(m_pMOIDLayer->GetBitmap(), left, top, right, bottom, g_NoMOID);
-
-    // Draw wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-        {
-            int wrapLeft = left + sceneWidth;
-            int wrapRight = sceneWidth - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-        if (right >= sceneWidth)
-        {
-            int wrapLeft = 0;
-            int wrapRight = right - sceneWidth;
-            rectfill(m_pMOIDLayer->GetBitmap(), wrapLeft, top, wrapRight, bottom, g_NoMOID);
-        }
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-        {
-            int wrapTop = top + sceneHeight;
-            int wrapBottom = sceneHeight - 1;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-        if (bottom >= sceneHeight)
-        {
-            int wrapTop = 0;
-            int wrapBottom = bottom - sceneHeight;
-            rectfill(m_pMOIDLayer->GetBitmap(), left, wrapTop, right, wrapBottom, g_NoMOID);
-        }
-    }
+void SceneMan::ClearAllMOIDDrawings() {
+#ifdef DRAW_MOID_LAYER
+    m_pMOIDLayer->ClearBitmap(g_NoMOID);
+#else
+    m_MOIDsGrid.Reset();
+#endif
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1714,7 +1512,7 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
             // See if we found the looked-for pixel of the correct material,
             // Or an MO is blocking the way
             if (GetTerrMatter(intPos[X], intPos[Y]) != material ||
-                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]) != g_NoMOID))
+                (checkMOs && g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam) != g_NoMOID))
             {
                 // Save result and report success
                 foundPixel = true;
@@ -2214,9 +2012,10 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                 // Check if we're supposed to ignore the team of what we hit
                 if (ignoreTeam != Activity::NoTeam)
                 {
@@ -2236,6 +2035,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                 }
                 // Legit hit
                 else
+#endif
                 {
                     // Save last ray pos
                     m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
@@ -2337,7 +2137,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             // Detect MOIDs
-            hitMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            hitMOID = GetMOIDPixel(intPos[X], intPos[Y], Activity::NoTeam);
             if (hitMOID == targetMOID || g_MovableMan.GetRootMOID(hitMOID) == targetMOID)
             {
                 // Found target MOID, so save result and report success
@@ -2442,7 +2242,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
             g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
             unsigned char checkMat = GetTerrMatter(intPos[X], intPos[Y]);
-            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y]);
+            MOID checkMOID = GetMOIDPixel(intPos[X], intPos[Y], ignoreTeam);
 
             // Translate any found MOID into the root MOID of that hit MO
             if (checkMOID != g_NoMOID)
@@ -2451,14 +2251,17 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 if (pHitMO)
                 {
                     checkMOID = pHitMO->GetRootID();
+#ifdef DRAW_MOID_LAYER // Unnecessary with non-drawn MOIDs - they'll be culled out at the spatial partition level.
                     // Check if we're supposed to ignore the team of what we hit
                     if (ignoreTeam != Activity::NoTeam)
                     {
                         pHitMO = pHitMO->GetRootParent();
                         // We are indeed supposed to ignore this object because of its ignoring of its specific team
-                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam)
+                        if (pHitMO && pHitMO->IgnoresTeamHits() && pHitMO->GetTeam() == ignoreTeam) {
                             checkMOID = g_NoMOID;
+                        }
                     }
+#endif
                 }
             }
 
@@ -2755,7 +2558,7 @@ float SceneMan::ShortestDistanceY(float val1, float val2, bool checkBounds, int 
 
 bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
-    bool obscured = m_pMOIDLayer->GetPixel(x, y) != g_NoMOID || m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir;
+    bool obscured = m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir || GetMOIDPixel(x, y, Activity::NoTeam) != g_NoMOID;
 
     if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);
@@ -2890,74 +2693,48 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneMan::Update(int screen) {
+void SceneMan::Update(int screenId) {
 	if (!m_pCurrentScene) {
 		return;
 	}
-	m_LastUpdatedScreen = screen;
+
+	m_LastUpdatedScreen = screenId;
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
-	if (screen == 0) { m_pCurrentScene->Update(); }
+	if (screenId == 0) {
+		m_pCurrentScene->Update(); 
+	}
+
+    g_CameraMan.Update(screenId);
+
+    const Vector &offset = g_CameraMan.GetOffset(screenId);
+	m_pMOColorLayer->SetOffset(offset);
+	m_pMOIDLayer->SetOffset(offset);
+	if (m_pDebugLayer) { 
+        m_pDebugLayer->SetOffset(offset);
+    }
 
 	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
-
-	if (g_TimerMan.DrawnSimUpdate()) {
-		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
-		if (m_TargetWrapped[screen]) {
-			if (terrain->WrapsX()) {
-				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
-				m_Offset[screen].SetX(m_Offset[screen].GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
-				m_SeamCrossCount[screen][X] += wrappingScrollDirection;
-			}
-			if (terrain->WrapsY()) {
-				int wrappingScrollDirection = (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
-				m_Offset[screen].SetY(m_Offset[screen].GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
-				m_SeamCrossCount[screen][Y] += wrappingScrollDirection;
-			}
-		}
-		m_TargetWrapped[screen] = false;
-	}
-	Vector oldOffset(m_Offset[screen]);
-	Vector offsetTarget;
-
-	if (g_FrameMan.IsInMultiplayerMode()) {
-		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2));
-		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2));
-	} else {
-		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
-		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
-	}
-	// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
-	offsetTarget -= (m_ScreenOcclusion[screen] / 2);
-
-	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
-		Vector scrollVec(offsetTarget - m_Offset[screen]);
-		float scrollProgress = std::min(1.0F, static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F));
-		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
-	}
-
-	m_pMOColorLayer->SetOffset(m_Offset[screen]);
-	m_pMOIDLayer->SetOffset(m_Offset[screen]);
-	if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
-
-	terrain->SetOffset(m_Offset[screen]);
+	terrain->SetOffset(offset);
 	terrain->Update();
 
 	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
-	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
+    const Vector &unwrappedOffset = g_CameraMan.GetUnwrappedOffset(screenId);
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();
 	}
+
 	// Update the unseen obstruction layer for this team's screen view, if there is one.
-	if (SceneLayer *unseenLayer = (m_ScreenTeam[screen] != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(m_ScreenTeam[screen]) : nullptr) { unseenLayer->SetOffset(m_Offset[screen]); }
+    const int teamId = g_CameraMan.GetScreenTeam(screenId);
+	if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) {
+        unseenLayer->SetOffset(offset);
+    }
 
 	if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL) {
 		terrain->CleanAir();
 		m_CleanTimer.Reset();
 	}
-	m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
-	m_ScrollTimer[screen].Reset();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2984,9 +2761,11 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			terrain->SetLayerToDraw(SLTerrain::LayerType::MaterialLayer);
 			terrain->Draw(targetBitmap, targetBox);
 			break;
+#ifdef DRAW_MOID_LAYER
 		case LayerDrawMode::g_LayerMOID:
 			m_pMOIDLayer->Draw(targetBitmap, targetBox);
 			break;
+#endif
 		default:
 			if (!skipBackgroundLayers) {
 				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {
@@ -3003,16 +2782,20 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
 				terrain->Draw(targetBitmap, targetBox);
 			}
-			if (!g_FrameMan.IsInMultiplayerMode()) {
-				int team = m_ScreenTeam[m_LastUpdatedScreen];
-				if (SceneLayer *unseenLayer = (team != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(team) : nullptr) { unseenLayer->Draw(targetBitmap, targetBox); }
+            if (!g_FrameMan.IsInMultiplayerMode()) {
+                int teamId = g_CameraMan.GetScreenTeam(m_LastUpdatedScreen);
+				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) { 
+                    unseenLayer->Draw(targetBitmap, targetBox); 
+                }
 			}
 
 			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-			if (m_pDebugLayer) { m_pDebugLayer->Draw(targetBitmap, targetBox); }
+			if (m_pDebugLayer) { 
+                m_pDebugLayer->Draw(targetBitmap, targetBox); 
+            }
 
 			break;
 	}
@@ -3022,16 +2805,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 
 void SceneMan::ClearMOColorLayer()
 {
-    clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
-
-    if (m_pDebugLayer) { clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor); }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SceneMan::ClearMOIDLayer()
-{
-    clear_to_color(m_pMOIDLayer->GetBitmap(), g_NoMOID);
+    m_pMOColorLayer->ClearBitmap(g_MaskColor);
+    if (m_pDebugLayer) { m_pDebugLayer->ClearBitmap(g_MaskColor); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3062,5 +2837,4 @@ BITMAP * SceneMan::GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) c
 	}
 	return m_IntermediateSettlingBitmaps.back().second;
 }
-
 } // namespace RTE

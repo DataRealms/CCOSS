@@ -550,8 +550,14 @@
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\Gamepad.h">
+    <ClInclude Include="Managers\CameraMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Lua\LuaAdapterDefinitions.h">
       <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="System\SpatialPartitionGrid.h">
+      <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\GenericSavedData.h">
       <Filter>System</Filter>
@@ -1069,21 +1075,27 @@
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="System\ScreenShader.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\glad\gl.c">
       <Filter>System\glad</Filter>
     </ClCompile>
-=======
+    <ClCompile Include="Managers\CameraMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
     <ClCompile Include="System\GenericSavedData.cpp">
       <Filter>System</Filter>
     </ClCompile>
->>>>>>> origin/development
+    <ClCompile Include="System\SpatialPartitionGrid.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

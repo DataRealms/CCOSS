@@ -8,6 +8,7 @@
 #include "Controller.h"
 #include "AHuman.h"
 #include "HDFirearm.h"
+#include "Magazine.h"
 #include "Icon.h"
 
 #include "AllegroBitmap.h"
@@ -229,7 +230,7 @@ namespace RTE {
 		m_GUIOffhandEquippedItemButton->SetHorizontalOverflowScroll(true);
 		m_GUIReloadButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Reload"));
 		m_GUIReloadButton->SetText("");
-		m_GUIReloadButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Reload"));
+		m_GUIReloadButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Refresh"));
 		m_GUIDropButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Drop"));
 		m_GUIDropButton->SetText("");
 		m_GUIDropButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Drop"));
@@ -784,7 +785,11 @@ namespace RTE {
 					g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 					m_GUIInformationToggleButton->OnLoseFocus();
 				} else if (guiControl == m_GUIEquippedItemButton) {
-					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0, buttonHeld);
+					int equippedItemButtonIndexToUse = 0;
+					if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr); inventoryActorAsAHuman && !inventoryActorAsAHuman->GetFGArm() && !inventoryActorAsAHuman->GetEquippedBGItem()) {
+						equippedItemButtonIndexToUse = 1;
+					}
+					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, equippedItemButtonIndexToUse, buttonHeld);
 				} else if (guiControl == m_GUIOffhandEquippedItemButton) {
 					HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1, buttonHeld);
 					m_GUIOffhandEquippedItemButton->OnMouseLeave(0, 0, 0, 0);
@@ -849,7 +854,11 @@ namespace RTE {
 						m_GUIEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
+						int equippedItemButtonIndexToUse = 0;
+						if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr); inventoryActorAsAHuman && !inventoryActorAsAHuman->GetFGArm() && !inventoryActorAsAHuman->GetEquippedBGItem()) {
+							equippedItemButtonIndexToUse = 1;
+						}
+						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, equippedItemButtonIndexToUse);
 						m_GUIEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
@@ -1174,11 +1183,11 @@ namespace RTE {
 						const AHuman *inventoryActorAsAHuman = dynamic_cast<const AHuman *>(m_InventoryActor);
 						buttonObjectArm = buttonEquippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
 					}
-					if (selectedItemArm && buttonObjectArm) {
-						selectedItemArm->ReleaseHeldMO();
-						buttonObjectArm->ReleaseHeldMO();
-						selectedItemArm->SetHeldMO(buttonObject);
-						buttonObjectArm->SetHeldMO(m_GUISelectedItem->Object);
+					if (selectedItemArm && buttonObjectArm && dynamic_cast<HeldDevice *>(buttonObject) && dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object)) {
+						selectedItemArm->RemoveAttachable(selectedItemArm->GetHeldDevice());
+						buttonObjectArm->RemoveAttachable(buttonObjectArm->GetHeldDevice());
+						selectedItemArm->SetHeldDevice(dynamic_cast<HeldDevice *>(buttonObject));
+						buttonObjectArm->SetHeldDevice(dynamic_cast<HeldDevice *>(m_GUISelectedItem->Object));
 						m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 					} else {
 						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
@@ -1205,10 +1214,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex) {
+	bool InventoryMenuGUI::SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex) {
 		if (!m_InventoryActorIsHuman) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-			return;
+			return false;
 		}
 
 		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
@@ -1216,6 +1225,10 @@ namespace RTE {
 		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
 		
 		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
+		if (!inventoryItemToSwapIn && inventoryItemIndex < m_InventoryActor->GetInventorySize()) {
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+			return false;
+		}
 		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsDualWieldable() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
 		
 		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
@@ -1223,38 +1236,40 @@ namespace RTE {
 		
 		if (equippedItemIndex == 0 && !inventoryActorAsAHuman->GetFGArm()) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-			return;
+			return false;
 		}
 
 		Arm *equippedItemArm = equippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
-		equippedItemArm->SetHeldMO(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->ReleaseHeldMO(), inventoryItemIndex));
-		equippedItemArm->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+		equippedItemArm->SetHeldDevice(dynamic_cast<HeldDevice *>(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->RemoveAttachable(equippedItemArm->GetHeldDevice()), inventoryItemIndex)));
+		equippedItemArm->SetHandCurrentPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
 		if (!inventoryItemCanGoInOffhand && offhandEquippedItem) {
-			m_InventoryActor->AddInventoryItem(inventoryActorAsAHuman->GetBGArm()->ReleaseHeldMO());
-			inventoryActorAsAHuman->GetBGArm()->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+			m_InventoryActor->AddInventoryItem(inventoryActorAsAHuman->GetBGArm()->RemoveAttachable(inventoryActorAsAHuman->GetBGArm()->GetHeldDevice()));
+			inventoryActorAsAHuman->GetBGArm()->SetHandCurrentPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
 		}
 		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::ReloadSelectedItem() {
+	void InventoryMenuGUI::ReloadSelectedItem() { //for a in MovableMan.Actors do print(ToAHuman(a).EquippedBGItem:SetOneHanded(true)) end
 		if (!m_InventoryActorIsHuman) {
 			return;
 		}
-		const AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
+		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
 		if (m_GUISelectedItem == nullptr) {
 			inventoryActorAsAHuman->ReloadFirearms();
-		} else if (HDFirearm *selectedItemObjectAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {
-			if (m_GUISelectedItem->InventoryIndex > -1) {
-				if (!m_InventoryActorEquippedItems.empty() && m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size()) {
-					SwapEquippedItemAndInventoryItem(0, m_GUISelectedItem->InventoryIndex);
-				} else if (inventoryActorAsAHuman->GetFGArm() || inventoryActorAsAHuman->GetBGArm()) {
-					Arm *armToUse = inventoryActorAsAHuman->GetFGArm() ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
-					armToUse->SetHeldMO(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
-				}
+		} else if (const HDFirearm *selectedItemObjectAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {
+			bool selectedItemIsEquipped = m_GUISelectedItem->EquippedItemIndex > -1;
+			if (!selectedItemIsEquipped) {
+				int equippedItemIndexToUse = inventoryActorAsAHuman->GetFGArm() ? 0 : 1;
+				selectedItemIsEquipped = SwapEquippedItemAndInventoryItem(equippedItemIndexToUse, m_GUISelectedItem->InventoryIndex);
 			}
-			selectedItemObjectAsFirearm->Reload();
+			if (selectedItemIsEquipped) {
+				// Setting the round count to 0 then reloading firearms is a trick to try to make only selected firearm reload, even if the AHuman is dual-wielding, while also not break one-at-a-time reloading in the edge case where the AHuman is already reloading.
+				selectedItemObjectAsFirearm->GetMagazine()->SetRoundCount(0);
+				inventoryActorAsAHuman->ReloadFirearms(true);
+			}
 		}
 		ClearSelectedItem();
 		m_GUIReloadButton->OnLoseFocus();
@@ -1285,7 +1300,7 @@ namespace RTE {
 		};
 
 		if (m_GUISelectedItem->EquippedItemIndex > -1) {
-			LaunchInventoryItem(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->ReleaseHeldMO());
+			LaunchInventoryItem(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->RemoveAttachable(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->GetHeldDevice()));
 		} else {
 			LaunchInventoryItem(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
 		}
@@ -1333,7 +1348,7 @@ namespace RTE {
 		g_SceneMan.WrapRect(IntRect(drawPos.GetFloorIntX(), drawPos.GetFloorIntY(), drawPos.GetFloorIntX() + m_CarouselBitmap->w, drawPos.GetFloorIntY() + m_CarouselBitmap->h), wrappedRectangles);
 		for (const IntRect &wrappedRectangle : wrappedRectangles) {
 			if (m_CarouselBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
-				g_FrameMan.SetTransTable(MoreTrans);
+				g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
 				draw_trans_sprite(targetBitmap, m_CarouselBGBitmap.get(), wrappedRectangle.m_Left - m_CarouselBGBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBGBitmap->h / 2);
 				draw_sprite(targetBitmap, m_CarouselBitmap.get(), wrappedRectangle.m_Left - m_CarouselBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBitmap->h / 2);
 			} else {

@@ -11,10 +11,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
+#include "Actor.h"
 #include "UInputMan.h"
 #include "ActivityMan.h"
+#include "CameraMan.h"
 #include "GameActivity.h"
-#include "Actor.h"
 #include "ACrab.h"
 #include "ACraft.h"
 #include "AtomGroup.h"
@@ -101,6 +102,7 @@ void Actor::Clear() {
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
+	m_ReloadOffset.Reset();
     m_ViewPoint.Reset();
     m_Inventory.clear();
 	m_MaxInventoryMass = -1.0F;
@@ -228,6 +230,7 @@ int Actor::Create(const Actor &reference)
 	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
+	m_ReloadOffset = reference.m_ReloadOffset;
 
     for (std::deque<MovableObject*>::const_iterator itr = reference.m_Inventory.begin(); itr != reference.m_Inventory.end(); ++itr) {
         m_Inventory.push_back(dynamic_cast<MovableObject*>((*itr)->Clone()));
@@ -368,11 +371,13 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_CharHeight;
     else if (propName == "HolsterOffset")
         reader >> m_HolsterOffset;
+	else if (propName == "ReloadOffset")
+        reader >> m_ReloadOffset;
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
 		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
-        m_Inventory.push_back(pInvMO);
+        AddToInventoryBack(pInvMO);
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
@@ -454,6 +459,7 @@ int Actor::Save(Writer &writer) const
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
     writer << m_HolsterOffset;
+	writer.NewPropertyWithValue("ReloadOffset", m_ReloadOffset);
     for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
     {
         writer.NewProperty("AddInventory");
@@ -616,8 +622,15 @@ void Actor::SetTeam(int team)
 
 void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 {
+
+	Controller::InputMode previousControllerMode = m_Controller.GetInputMode();
+	int previousControllingPlayer = m_Controller.GetPlayer();
+
     m_Controller.SetInputMode(newMode);
     m_Controller.SetPlayer(newPlayer);
+
+	RunScriptedFunctionInAppropriateScripts("OnControllerInputModeChange", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
+
 
     // So the AI doesn't jerk around
     m_StuckTimer.Reset();
@@ -635,13 +648,7 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
 Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, int newPlayer)
 {
     Controller::InputMode returnMode = m_Controller.GetInputMode();
-    m_Controller.SetInputMode(newMode);
-    m_Controller.SetPlayer(newPlayer);
-
-    // So the AI doesn't jerk around
-    m_StuckTimer.Reset();
-
-    m_NewControlTmr.Reset();
+	SetControllerMode(newMode, newPlayer);
     return returnMode;
 }
 
@@ -752,7 +759,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
     if (pSwapIn)
     {
-        m_Inventory.push_back(pSwapIn);
+		pSwapIn->SetAsNoID();
+        AddToInventoryBack(pSwapIn);
         playSound = true;
     }
 
@@ -804,7 +812,8 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
     if (pSwapIn)
     {
-        m_Inventory.push_front(pSwapIn);
+		pSwapIn->SetAsNoID();
+        AddToInventoryFront(pSwapIn);
         playSound = true;
     }
 
@@ -831,9 +840,10 @@ MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, 
     if (!newInventoryItem) {
         return RemoveInventoryItemAtIndex(inventoryIndex);
     }
+	newInventoryItem->SetAsNoID();
 
     if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
-        m_Inventory.emplace_back(newInventoryItem);
+        AddToInventoryBack(newInventoryItem);
         return nullptr;
     }
     MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
@@ -925,6 +935,29 @@ void Actor::DropAllInventory()
     m_Inventory.clear();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryFront(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
+
+	m_Inventory.push_front(itemToAdd);
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::AddToInventoryBack(MovableObject *itemToAdd) {
+	// This function is called often to add stuff we just removed from our hands, which may be set to delete so we need to guard against that lest we crash.
+	if (!itemToAdd || itemToAdd->IsSetToDelete()) {
+		return false;
+	}
+
+	m_Inventory.push_back(itemToAdd);
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GibThis
@@ -1611,9 +1644,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
     m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible)
-        return;
-
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
@@ -1632,8 +1662,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 
-    // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-    if (!targetPos.IsZero())
+    // If we have something to draw, adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
+    if ((m_HUDVisible || m_PieMenu->IsVisible()) && !targetPos.IsZero())
     {
         // Spans vertical scene seam
         int sceneWidth = g_SceneMan.GetSceneWidth();
@@ -1667,6 +1697,15 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         }
     }
 
+	int actorScreen = g_ActivityMan.GetActivity() ? g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) : -1;
+	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && actorScreen == whichScreen))) {
+		m_PieMenu->Draw(pTargetBitmap, targetPos);
+	}
+
+	if (!m_HUDVisible) {
+		return;
+	}
+
     // Draw the selection arrow, if controlled and under the arrow's time limit
     if (m_Controller.IsPlayerControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < ARROWTIME)
     {
@@ -1682,7 +1721,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     {
         AllegroBitmap bitmapInt(pTargetBitmap);
 
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE))
+        if (!m_Controller.IsState(PIE_MENU_ACTIVE) || actorScreen != whichScreen)
         {
             // If we're still alive, show the team colors
             if (m_Health > 0)
@@ -1821,10 +1860,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)
         return;
 
-	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen))) {
-		m_PieMenu->Draw(pTargetBitmap, targetPos);
-	}
-
     // AI waypoints or points of interest
     if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))
     {
@@ -1899,7 +1934,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
 		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
 	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);

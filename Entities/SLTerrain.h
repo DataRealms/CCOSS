@@ -170,7 +170,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
 		/// <param name="materialID">The material index to set the pixel to.</param>
-		void SetMaterialPixel(int pixelX, int pixelY, int materialID) const { SetPixel(pixelX, pixelY, materialID); }
+		void SetMaterialPixel(int pixelX, int pixelY, int materialID) { SetPixel(pixelX, pixelY, materialID); }
 
 		/// <summary>
 		/// Indicates whether a terrain pixel is of Air or Cavity material.
@@ -193,18 +193,13 @@ namespace RTE {
 		/// Gets a deque of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedMaterialAreas().
 		/// </summary>
 		/// <returns>Reference to the deque that has been filled with Boxes which are unwrapped and may be out of bounds of the scene!</returns>
-		const std::deque<Box> & GetUpdatedMaterialAreas() const { return m_UpdatedMaterialAreas; }
+		std::deque<Box> & GetUpdatedMaterialAreas() { return m_UpdatedMaterialAreas; }
 
 		/// <summary>
 		/// Adds a notification that an area of the material terrain has been updated.
 		/// </summary>
 		/// <param name="newArea">The Box defining the newly updated material area that can be unwrapped and may be out of bounds of the scene.</param>
 		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMaterialAreas.emplace_back(newArea); }
-
-		/// <summary>
-		/// Clears the list of updated areas in the material layer (main bitmap).
-		/// </summary>
-		void ClearUpdatedMaterialAreas() { m_UpdatedMaterialAreas.clear(); }
 
 		/// <summary>
 		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer.

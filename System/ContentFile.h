@@ -88,13 +88,6 @@ namespace RTE {
 		void SetDataPath(const std::string &newDataPath);
 
 		/// <summary>
-		/// Sets the DataPath combined with the file and line it's being created from. This is used in cases we can't get the file and line from Serializable::Create(&reader).
-		/// For example when creating a ContentFile for the sound during the readSound lambda in SoundContainer::ReadAndGetSound.
-		/// </summary>
-		/// <param name="newPosition">The file and line that are currently being read.</param>
-		void SetFormattedReaderPosition(const std::string &newPosition);
-
-		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
 		/// This uses boost::hash for compiler independent hashing.
 		/// </summary>
@@ -107,6 +100,20 @@ namespace RTE {
 		/// <param name="hash">Hash value to get file path from.</param>
 		/// <returns>Path to ContentFile.</returns>
 		static std::string GetPathFromHash(size_t hash) { return (s_PathHashes.find(hash) == s_PathHashes.end()) ? "" : s_PathHashes[hash]; }
+#pragma endregion
+
+#pragma region Logging
+		/// <summary>
+		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// </summary>
+		/// <returns>A string containing the currently read file path and the line being read.</returns>
+		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }
+
+		/// <summary>
+		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// </summary>
+		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
+		void SetFormattedReaderPosition(const std::string &newPosition) override;
 #pragma endregion
 
 #pragma region Image Info Getters

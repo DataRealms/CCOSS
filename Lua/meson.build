@@ -8,4 +8,5 @@ sources += files(
 'LuaBindingsMisc.cpp',
 'LuaBindingsSDL.cpp',
 'LuaBindingsSystem.cpp',
+'LuaBindingsPrimitives.cpp'
 )

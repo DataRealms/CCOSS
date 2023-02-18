@@ -47,8 +47,18 @@ namespace RTE {
 		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
+		/// <param name="skipStartingObject>Skips notifying the Reader that a new object is being read in order to associate any subsequent reads with the currently read object. Special edge case for DataModules that use ScanFolderContents.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true);
+		int CreateSerializable(Reader &reader, bool checkType, bool doCreate, bool skipStartingObject);
+
+		/// <summary>
+		/// Makes the Serializable object ready for use.
+		/// </summary>
+		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
+		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
+		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return CreateSerializable(reader, checkType, doCreate, false); }
 #pragma endregion
 
 #pragma region Destruction
@@ -94,10 +104,12 @@ namespace RTE {
 
 #pragma region Logging
 		/// <summary>
-		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// Sets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// Because we're often used as a parent for basic types (i.e, Vector, Matrix, Color), where we don't want to spend any time doing string construction we don't actually store this data here.
+		/// This just acts as an abstract base for child classes to implement.
 		/// </summary>
-		/// <returns>A string containing the currently read file path and the line being read.</returns>
-		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }
+		/// <param name="newPosition">A string containing the currently read file path and the line being read.</returns>
+		virtual void SetFormattedReaderPosition(const std::string &newPosition) {}
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -143,8 +155,6 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
-		std::string m_FormattedReaderPosition; //!< A string containing the currently read file path and the line being read. Formatted to be used for logging.
 
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.

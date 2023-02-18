@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Box.h"
 #include "Singleton.h"
+#include "SpatialPartitionGrid.h"
 
 #include "ActivityMan.h"
 
@@ -28,6 +29,7 @@ namespace RTE
 
 class Scene;
 class SceneLayer;
+class SceneLayerTracked;
 class SLTerrain;
 class SceneObject;
 class TerrainObject;
@@ -41,45 +43,15 @@ enum LayerDrawMode
 {
     g_LayerNormal = 0,
     g_LayerTerrainMatter,
-    g_LayerMOID
+
+#ifdef DRAW_MOID_LAYER
+	g_LayerMOID
+#endif
 };
 
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Struct:          IntRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A simple rectangle with integer coordinates.
-// Parent(s):       None.
-// Class history:   8/4/2007 IntRect created.
-
-struct IntRect
-{
-    int m_Left;
-    int m_Top;
-    int m_Right;
-    int m_Bottom;
-
-    IntRect() { m_Left = m_Top = m_Right = m_Bottom = 0; }
-    IntRect(int left, int top, int right, int bottom) { m_Left = left; m_Top = top; m_Right = right; m_Bottom = bottom; }
-    bool Intersects(const IntRect &rhs) { return m_Left < rhs.m_Right && m_Right > rhs.m_Left && m_Top < rhs.m_Bottom && m_Bottom > rhs.m_Top; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IntersectionCut
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If this and the passed in IntRect intersect, this will be modified to
-//                  represent the boolean AND of the two. If it doens't intersect, nothing
-//                  happens and false is returned.
-// Arguments:       The other IntRect to cut against.
-// Return value:    Whether an intersection was detected and this was cut down to the AND.
-
-    bool IntersectionCut(const IntRect &rhs);
-
-
-};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -372,62 +344,6 @@ public:
 
     bool SceneWrapsY() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset (scroll position) of the terrain.
-// Arguments:       None.
-// Return value:    A Vector describing the offset (scroll) of the terrain in pixels.
-
-    Vector GetOffset(int screen = 0) const { return m_Offset[screen]/* - m_DeltaOffset*/; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetOffsetX
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the horizontal offset (scroll position) of the terrain.
-// Arguments:       None.
-// Return value:    A long describing the horizontal offset (scroll) of the terrain in
-//                  pixels.
-
-    long GetOffsetX(int screen = 0) const { return m_Offset[screen].m_X; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetOffsetY
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the vertical offset (scroll position) of the terrain.
-// Arguments:       None.
-// Return value:    A long describing the vertical offset (scroll) of the terrain in
-//                  pixels.
-
-    long GetOffsetY(int screen = 0) const { return m_Offset[screen].m_Y; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeltaOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the difference in current offset and that of the Update() before.
-// Arguments:       None.
-// Return value:    A Vector describing the delta offset in pixels.
-
-    const Vector & GetDeltaOffset(int screen = 0) const { return m_DeltaOffset[screen]; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScreenOcclusion
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount that a specific screen is occluded by a GUI panel or
-//                  something of the sort. This will affect how the scroll target
-//                  translates into the offset of the screen, in order to keep the target
-//                  centered on the screen.
-// Arguments:       Which screen you want to get the occlusion value of.
-// Return value:    A Vector that indicates the amount of occlusion of the screen.
-
-    Vector & GetScreenOcclusion(int screen = 0) { return m_ScreenOcclusion[screen]; }
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTerrain
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -506,15 +422,28 @@ public:
     unsigned char GetTerrMatter(int pixelX, int pixelY);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMOIDPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a MOID from pixel coordinates in the Scene. LockScene() must be
-//                  called before using this method.
-// Arguments:       The X and Y coordinates of screen Scene pixel to get the MO from.
-// Return value:    The MOID currently at the specified pixel location.
+	/// <summary>
+	/// Gets a MOID from pixel coordinates in the Scene. LockScene() must be called before using this method.
+	/// </summary>
+	/// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+	/// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <returns>The MOID currently at the specified pixel coordinates.</returns>
+    MOID GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam);
 
-    MOID GetMOIDPixel(int pixelX, int pixelY);
+    /// <summary>
+    /// Gets a MOID from pixel coordinates in the Scene. LockScene() must be called before using this method.
+    /// </summary>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+    /// <returns>The MOID currently at the specified pixel coordinates.</returns>
+    MOID GetMOIDPixel(int pixelX, int pixelY) { return GetMOIDPixel(pixelX, pixelY, Activity::NoTeam); }
+
+    /// <summary>
+    /// Gets this Scene's MOID SpatialPartitionGrid.
+    /// </summary>
+    /// <returns>This Scene's MOID SpatialPartitionGrid.</returns>
+    const SpatialPartitionGrid & GetMOIDGrid() const { return m_MOIDsGrid; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -561,168 +490,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset (scroll position) of the terrain.
-// Arguments:       Two longs that specify the new offset values.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetOffset(const long offsetX, const long offsetY, int screen = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset (scroll position) of the terrain.
-// Arguments:       A Vector that specifies the new offset.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetOffset(const Vector &offset, int screen = 0) { m_Offset[screen] = offset.GetFloored(); CheckOffset(screen); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOffsetX
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the horizontal offset (scroll position) of the terrain.
-// Arguments:       A long that specifies the new horizontal offset value.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetOffsetX(const long offsetX, int screen = 0) { m_Offset[screen].m_X = offsetX; CheckOffset(screen); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOffsetY
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the vertical offset (scroll position) of the terrain.
-// Arguments:       A long that specifies the new vertical offset value.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetOffsetY(const long offsetY, int screen = 0) { m_Offset[screen].m_Y = offsetY; CheckOffset(screen); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScroll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset (scroll position) of the terrain to center on
-//                  specific world coordinates. If the coordinate to center on is close
-//                  to the terrain border edges, the view will not scroll outside the
-//                  borders.
-// Arguments:       A Vector that specifies the coordinates to center the terrain scroll
-//                  on.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetScroll(const Vector &center, int screen = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScreenTeam
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the team associated with a specific screen
-// Arguments:       Which screen you want to set the team of.
-//                  The team to set it to.
-// Return value:    None.
-
-    void SetScreenTeam(int screen, int team) { m_ScreenTeam[screen] = team; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScreenOcclusion
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the amount that a specific screen is occluded by a GUI panel or
-//                  something of the sort. This will affect how the scroll target
-//                  translates into the offset of the screen, in order to keep the target
-//                  centered on the screen.
-// Arguments:       A Vector that specifies the amount of occlusion of the screen.
-//                  Which screen you want to set the occlusion of.
-// Return value:    None.
-
-    void SetScreenOcclusion(const Vector &occlusion, int screen = 0) { m_ScreenOcclusion[screen] = occlusion; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScrollTarget
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Interpolates a smooth scroll of the view from wherever it is now,
-//                  towards centering on a new scroll target over time.
-// Arguments:       The new target vector in *scene coordinates*.
-//                  The normalized speed at screen the view scrolls. 0 being no movement,
-//                  and 1.0 being instant movement to the target in one frame.
-//                  Whether the target was wrapped around the scene this frame or not.
-//                  Which screen you want to set the offset of.
-// Return value:    None.
-
-    void SetScrollTarget(const Vector &targetCenter,
-                         float speed = 0.1,
-                         bool targetWrapped = false,
-                         int screen = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScreenTeam
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the team associated with a specific screen
-// Arguments:       Which screen you want to get the team of.
-// Return value:    The team associated with that team.
-
-    int GetScreenTeam(int screen) { return m_ScreenTeam[screen]; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScrollTarget
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the currently set scroll target, screen is where the center of the
-//                  specific screen is trying to line up with.
-// Arguments:       Which screen to get the target for.
-// Return value:    Current target vector in *scene coordinates*.
-
-	const Vector & GetScrollTarget(int screen = 0) const;
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          TargetDistanceScalar
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates a scalar of how distant a certain point in the world is
-//                  from the currently closest scroll target of all active screens.
-// Arguments:       Which world coordinate point to check distance to/from.
-// Return value:    A normalized scalar representing the distance between the closest
-//                  scroll target of all active screens, to the passed in point. 0 means
-//                  it's the point is within half a screen's width of the target, and
-//                  1.0 means it's on the clear opposite side of the scene.
-
-    float TargetDistanceScalar(Vector point);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CheckOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure the current offset won't create a view of outside the scene.
-//                  If that is found to be the case, the offset is corrected so that the
-//                  view rectangle is as close to the old offset as possible, but still
-//                  entirely within the scene world.
-// Arguments:       Which screen you want to set the offset of.
-// Return value:    None.
-
-    void CheckOffset(int screen = 0);
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsScrolling
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether the view is currently doing a scroll interpolation
-//                  animation, or not.
-// Arguments:       None.
-// Return value:    Whether currently scrolling or not.
-
-    bool IsScrolling() { return m_ScrollTimeLeft != 0; }
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          LockScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Locks all dynamic internal scene bitmaps so that manipulaitons of the
@@ -758,29 +525,25 @@ public:
 
     bool SceneIsLocked() const;
 
+    /// <summary>
+    /// Registers an area to be drawn upon, so it can be tracked and cleared later.
+    /// </summary>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="left">The left boundary of the draw area.</param>
+    /// <param name="top">The top boundary of the drawn area.</param>
+    /// <param name="right">The right boundary of the draw area.</param>
+    /// <param name="bottom">The bottom boundary of the draw area.</param>
+    void RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The coordinates of the new area on the MOID layer to clear upon the
-//                  end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(int left, int top, int right, int bottom) { m_MOIDDrawings.push_back(IntRect(left, top, right, bottom)); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMOIDDrawing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers an area of the MOID layer to be cleared upon finishing this
-//                  sim update. Should be done every time anything is drawn the MOID layer.
-// Arguments:       The center coordinates and a radius around it of the new area on the
-//                  MOID layer to clear upon the end of this sim update.
-// Return value:    None.
-
-    void RegisterMOIDDrawing(const Vector &center, float radius);
+    /// <summary>
+    /// Registers an area of to be drawn upon, so it can be tracked and cleared later.
+    /// </summary>
+    /// <param name="bitmap">The bitmap being drawn upon.</param>
+    /// <param name="moid">The MOID, if we're drawing MOIDs.</param>
+    /// <param name="center">The centre position of the drawn area.</param>
+    /// <param name="radius">The radius of the drawn area.</param>
+    void RegisterDrawing(const BITMAP *bitmap, int moid, const Vector &center, float radius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -792,17 +555,6 @@ public:
 // Return value:    None.
 
     void ClearAllMOIDDrawings();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets a specific rectangle of the scene's MOID layer to not contain
-//                  any MOID data anymore. Sets it all to NoMOID. Will take care of wrapping.
-// Arguments:       The coordinates of the rectangle to be reset to NoMOID.
-// Return value:    None.
-
-    void ClearMOIDRect(int left, int top, int right, int bottom);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1575,7 +1327,7 @@ public:
 // Arguments:       Which screen to update for.
 // Return value:    None.
 
-    void Update(int screen = 0);
+    void Update(int screenId = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1600,16 +1352,6 @@ public:
 // Return value:    None.
 
     void ClearMOColorLayer();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDLayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the MOID layer. Should be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDLayer();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1676,11 +1418,11 @@ public:
     // Current scene being used
     Scene *m_pCurrentScene;
     // Color MO layer
-    SceneLayer *m_pMOColorLayer;
+    SceneLayerTracked *m_pMOColorLayer;
     // MovableObject ID layer
-    SceneLayer *m_pMOIDLayer;
-    // All the areas drawn within on the MOID layer since last Update
-    std::list<IntRect> m_MOIDDrawings;
+    SceneLayerTracked *m_pMOIDLayer;
+    // A spatial partitioning grid of MOIDs, used to optimize collision and distance queries
+    SpatialPartitionGrid m_MOIDsGrid;
 
     // Debug layer for seeing cast rays etc
     SceneLayer *m_pDebugLayer;
@@ -1698,28 +1440,6 @@ public:
 
 	// Non original materials added by inheritance
 	std::vector<Material *> m_MaterialCopiesVector;
-
-    // The position of the upper left corner of the view.
-    Vector m_Offset[c_MaxScreenCount];
-    // The difference in current offset and the Update() before.
-    Vector m_DeltaOffset[c_MaxScreenCount];
-    // The final offset target of the current scroll interpolation, in scene coordinates!
-    Vector m_ScrollTarget[c_MaxScreenCount];
-    // The team associated with each screen.
-    int m_ScreenTeam[c_MaxScreenCount];
-    // The amount screen a screen is occluded or covered by GUI, etc
-    Vector m_ScreenOcclusion[c_MaxScreenCount];
-    // The normalized speed at screen the view scrolls.
-    // 0 being no movement, and 1.0 being instant movement to the target in one frame.
-    float m_ScrollSpeed[c_MaxScreenCount];
-    // Scroll timer for making scrolling work framerate independently
-    Timer m_ScrollTimer[c_MaxScreenCount];
-    // Whether the ScrollTarget got wrapped around the world this frame or not.
-    bool m_TargetWrapped[c_MaxScreenCount];
-    // Keeps track of how many times and in screen directions the wrapping seam has been crossed.
-    // This is used fo keeping the background layers' scroll from jumping when wrapping around.
-    // X and Y
-    int m_SeamCrossCount[c_MaxScreenCount][2];
 
     // Sound of an unseen pixel on an unseen layer being revealed.
     SoundContainer *m_pUnseenRevealSound;

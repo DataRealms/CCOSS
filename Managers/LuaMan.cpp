@@ -162,7 +162,7 @@ namespace RTE {
 			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Keycode),
 			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Scancode),
 			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerButton),
-			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis)
+			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis),
 			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),

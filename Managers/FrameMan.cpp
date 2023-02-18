@@ -18,7 +18,6 @@
 #include "AllegroScreen.h"
 
 #include <SDL2/SDL.h>
-#include "ScreenShader.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_query.hpp"

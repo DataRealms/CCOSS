@@ -546,9 +546,6 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="System\ScreenShader.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\Gamepad.h">
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
@@ -1073,9 +1070,6 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\PieQuadrant.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="System\ScreenShader.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\glad\gl.c">

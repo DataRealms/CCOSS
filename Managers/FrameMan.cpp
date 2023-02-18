@@ -23,17 +23,21 @@
 
 namespace RTE {
 
-	void SdlWindowDeleter::operator()(SDL_Window* window) {
+	void SdlWindowDeleter::operator()(SDL_Window *window) {
 		SDL_DestroyWindow(window);
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SdlContextDeleter::operator()(SDL_GLContext context) {
-		SDL_GL_DeleteContext(context);
+	void SdlRendererDeleter::operator()(SDL_Renderer *renderer) {
+		SDL_DestroyRenderer(renderer);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SdlTextureDeleter::operator()(SDL_Texture *texture) {
+		SDL_DestroyTexture(texture);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::m_DisableFrameBufferFlip = false;
 
@@ -66,27 +70,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
-		m_ScreenVertices = {
-			1.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, -1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, 0.0f, 0.0f,
-			-1.0f, -1.0f, 0.0f, 1.0f,};
-		m_ScreenShader.reset();
-		m_WindowView.resize(1);
-		m_WindowView[0] = glm::mat4(1);
-		m_WindowTransforms.resize(1);
-		m_WindowTransforms[0] = glm::mat4(1);
-		m_WindowViewport.resize(1);
-		m_WindowViewport[0] = glm::vec4(1);
-		m_ScreenTexture = 0;
-		m_ScreenVBO = 0;
-		m_ScreenVAO = 0;
-		m_EnableVsync = -1;
-
-		// GL Context needs to be destroyed after all GL objects and before the main window.
-		m_GLContext.reset();
 		m_Window.reset();
 		m_MultiWindows.clear();
+		m_Renderer.reset();
+		m_ScreenTexture.reset();
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
@@ -273,7 +260,7 @@ namespace RTE {
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 
-		int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
@@ -294,7 +281,7 @@ namespace RTE {
 			    SDL_WINDOWPOS_CENTERED,
 			    c_DefaultResX,
 			    c_DefaultResY,
-			    SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN));
+			    SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN));
 
 			if (!m_Window) {
 				RTEAbort("Failed to create a window because: " + std::string(SDL_GetError()));
@@ -304,58 +291,19 @@ namespace RTE {
 			m_ResY = c_DefaultResY;
 		}
 
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		m_GLContext = std::unique_ptr<void, SdlContextDeleter>(static_cast<void *>(SDL_GL_CreateContext(m_Window.get())));
-		int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
-
-		if (version == 0 || (GLAD_VERSION_MAJOR(version) < 3 && GLAD_VERSION_MINOR(version) < 3)) {
-			RTEAbort("Failed to load OpenGL");
+		int renderFlags = SDL_RENDERER_ACCELERATED;
+		if (m_EnableVsync == 1) {
+			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
 		}
+		m_Renderer = std::unique_ptr<SDL_Renderer, SdlRendererDeleter>(SDL_CreateRenderer(m_Window.get(), -1, renderFlags));
+		SDL_RenderSetIntegerScale(m_Renderer.get(), SDL_TRUE);
 
-		if (SDL_GL_SetSwapInterval(m_EnableVsync)) {
-			g_ConsoleMan.PrintString("Unsupported Vsync value, falling back to basic Vsync.");
-			m_EnableVsync = 1;
-			SDL_GL_SetSwapInterval(1);
-		}
-
-		m_ScreenShader = std::make_unique<ScreenShader>();
-		GL_CHECK(glGenTextures(1, &m_ScreenTexture););
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
-		GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT););
-		GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT););
-		GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST););
-		GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST););
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0););
-
-		GL_CHECK(glGenBuffers(1, &m_ScreenVBO););
-		GL_CHECK(glGenVertexArrays(1, &m_ScreenVAO););
-		GL_CHECK(glBindVertexArray(m_ScreenVAO););
-		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_ScreenVBO););
-		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ScreenVertices.size(), m_ScreenVertices.data(), GL_STATIC_DRAW););
-		GL_CHECK(glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 4 * sizeof(float), 0););
-		GL_CHECK(glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 4 * sizeof(float), (void *)(2 * sizeof(float))););
-		GL_CHECK(glEnableVertexAttribArray(0););
-		GL_CHECK(glEnableVertexAttribArray(1););
-		GL_CHECK(glBindVertexArray(0););
-		set_color_depth(m_BPP);
-
-		int windowW = m_ResX * m_ResMultiplier;
-		int windowH = m_ResY * m_ResMultiplier;
 		if (m_Fullscreen) {
-			SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-		}
-		GL_CHECK(glViewport(0, 0, windowW, windowH););
-
-		m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
-		m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
-		m_WindowTransforms[0] = glm::mat4(1.0f);
-		
-		GL_CHECK(glEnable(GL_DEPTH_TEST););
-
-		if (m_NumScreens > 1 && m_Fullscreen) {
-			CreateFullscreenMultiWindows(m_ResX, m_ResY, m_ResMultiplier);
+			if (m_NumScreens == 1) {
+				SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+			} else {
+				SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier);
+			}
 		}
 
 		// Sets the allowed color conversions when loading bitmaps from files
@@ -428,9 +376,9 @@ namespace RTE {
 
 		m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
 
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
-		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_BackBuffer32->w, m_BackBuffer32->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL););
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0););
+		m_ScreenTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
+
+		SDL_RenderSetLogicalSize(m_Renderer.get(), m_BackBuffer32->w, m_BackBuffer32->h);
 
 		return 0;
 	}
@@ -472,7 +420,12 @@ namespace RTE {
 		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
 	}
 
-	bool FrameMan::CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier) {
+	bool FrameMan::SetWindowMultiFullscreen(int resX, int resY, int resMultiplier) {
+		int windowW = resX * resMultiplier;
+		int windowH = resY * resMultiplier;
+		int windowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
+		SDL_Rect windowDisplayBounds;
+		SDL_GetDisplayBounds(windowDisplay, &windowDisplayBounds);
 		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumScreens);
 		for (int i = 0; i < m_NumScreens; ++i) {
 			displayBounds[i].first = i;
@@ -480,68 +433,11 @@ namespace RTE {
 		}
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.x < right.second.x; });
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.y < right.second.y; });
-		// Move main window to primary display (at 0,0).
-		SDL_SetWindowFullscreen(m_Window.get(), 0);
-		SDL_SetWindowPosition(m_Window.get(), 0, 0);
-		SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-		int mainWindowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
-		int actualResX = 0;
-		int actualResY = 0;
-		int index = 0;
-		while (index < m_NumScreens && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier)) {
-			if (displayBounds[index].second.x > resX * resMultiplier || displayBounds[index].second.y > resY * resMultiplier) {
-				++index;
-				continue;
-			}
-			if (actualResX < displayBounds[index].second.x + displayBounds[index].second.w) {
-				actualResX = displayBounds[index].second.x + displayBounds[index].second.w;
-			}
-			if (actualResY < displayBounds[index].second.y + displayBounds[index].second.h) {
-				actualResY = displayBounds[index].second.y + displayBounds[index].second.h;
-			}
-
-			glm::mat4 projection = glm::ortho<float>(0.0f, displayBounds[index].second.w, 0.0f, displayBounds[index].second.h, -1.0f, 1.0f);
-			float width = resX * resMultiplier - displayBounds[index].second.x;
-			float height = resY * resMultiplier - displayBounds[index].second.y;
-
-			width = std::clamp<float>(width, 0.0f, displayBounds[index].second.w);
-			height = std::clamp<float>(height, 0.0f, displayBounds[index].second.h);
-
-			glm::mat4 uvTransform(1.0f);
-			uvTransform = glm::translate<float>(uvTransform, {displayBounds[index].second.x / static_cast<float>(resX * resMultiplier), displayBounds[index].second.y / static_cast<float>(resY * resMultiplier), 0.0f});
-			uvTransform = glm::scale(uvTransform, {width / static_cast<float>(resX * resMultiplier), height / static_cast<float>(resY * resMultiplier), 1.0f});
-
-			if (displayBounds[index].first != mainWindowDisplay) {
-				m_MultiWindows.emplace_back(SDL_CreateWindow("",
-				    displayBounds[index].second.x,
-				    displayBounds[index].second.y,
-				    displayBounds[index].second.w,
-				    displayBounds[index].second.h,
-				    SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
-				if (m_MultiWindows.back() == nullptr) {
-					actualResX = -1;
-					actualResY = -1;
-					break;
-				}
-
-				m_WindowView.emplace_back(projection);
-				m_WindowTransforms.emplace_back(uvTransform);
-				m_WindowViewport.emplace_back(glm::vec4(0.0f,0.0f,displayBounds[index].second.w, displayBounds[index].second.h));
-			} else {
-				m_WindowView[0] = projection;
-				m_WindowTransforms[0] = uvTransform;
-				m_WindowViewport[0] = glm::vec4(0.0f, 0.0f, displayBounds[index].second.w, displayBounds[index].second.h);
-			}
-			index++;
+		std::vector<std::pair<int, SDL_Rect>>::iterator displayPos = std::find_if(displayBounds.begin(), displayBounds.end(), [windowDisplay](auto display){return display.first == windowDisplay; });
+		if(displayPos->second.x + windowW > displayBounds.back().second.x + displayBounds.back().second.w) {
 		}
-		if (actualResX != -1 || actualResX != -1) {
-			return true;
-		}
-		m_MultiWindows.clear();
-		m_WindowView.resize(1);
-		m_WindowTransforms.resize(1);
-		m_WindowView[0] = glm::ortho<float>(0.0f, displayBounds[0].second.w, 0.0f, displayBounds[0].second.h, -1.0f, 1.0f);
-		m_WindowTransforms[0] = glm::mat4(1);
+
+
 		return false;
 	}
 
@@ -569,9 +465,6 @@ namespace RTE {
 		delete m_LargeFont;
 		delete m_SmallFont;
 
-		GL_CHECK(glDeleteTextures(1, &m_ScreenTexture););
-		GL_CHECK(glDeleteVertexArrays(1, &m_ScreenVAO););
-		GL_CHECK(glDeleteBuffers(1, &m_ScreenVBO););
 		Clear();
 	}
 
@@ -626,14 +519,11 @@ namespace RTE {
 		}
 
 		m_MultiWindows.clear();
-		m_WindowView.resize(1);
-		m_WindowTransforms.resize(1);
-		m_WindowViewport.resize(1);
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
 		if (m_Fullscreen) {
 			if (m_NumScreens > 1) {
-				if (!CreateFullscreenMultiWindows(m_ResX, m_ResY, newMultiplier)) {
+				if (!SetWindowMultiFullscreen(m_ResX, m_ResY, newMultiplier)) {
 					m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY);
 					SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 					if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -643,7 +533,7 @@ namespace RTE {
 					set_palette(m_Palette);
 					return;
 				}
-			} else if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+			} else if (SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
 				m_Fullscreen = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY);
 				SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 				if (SDL_SetWindowFullscreen(m_Window.get(), m_Fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
@@ -662,15 +552,6 @@ namespace RTE {
 		}
 		m_ResMultiplier = newMultiplier;
 
-		int windowW;
-		int windowH;
-		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-		GL_CHECK(glViewport(0, 0, windowW, windowH););
-		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
-			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
-			m_WindowTransforms[0] = glm::mat4(1.0f);
-		}
 		set_palette(m_Palette);
 		// RecreateBackBuffers();
 
@@ -690,9 +571,6 @@ namespace RTE {
 			return;
 		}
 		m_MultiWindows.clear();
-		m_WindowView.resize(1);
-		m_WindowTransforms.resize(1);
-		m_WindowViewport.resize(1);
 
 		if (!newFullscreen) {
 			SDL_RestoreWindow(m_Window.get());
@@ -701,7 +579,7 @@ namespace RTE {
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
 		if (newFullscreen &&
-		    ((m_NumScreens > 1 && !CreateFullscreenMultiWindows(newResX, newResY, newResMultiplier)) ||
+		    ((m_NumScreens > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) ||
 		        SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 
 			SDL_SetWindowSize(m_Window.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
@@ -727,11 +605,7 @@ namespace RTE {
 		int windowH = m_ResY * m_ResMultiplier;
 		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
 		if (!m_Fullscreen || m_MultiWindows.empty()) {
-			m_WindowViewport[0] = GetViewportLetterbox(m_ResX, m_ResY, windowW, windowH);
-			m_WindowView[0] = glm::ortho<float>(0.0f, m_WindowViewport[0].z, 0.0f, m_WindowViewport[0].w, -1.0f, 1.0f);
-			m_WindowTransforms[0] = glm::mat4(1.0f);
 		}
-		GL_CHECK(glViewport(0, 0, windowW, windowH););
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();
@@ -757,15 +631,6 @@ namespace RTE {
 			m_ResX = 640 / m_ResMultiplier;
 			m_ResY = 480 / m_ResMultiplier;
 		}
-
-		int windowW;
-		int windowH;
-		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-
-		m_WindowView[0] = glm::ortho<float>(0.0f, windowW, 0.0f, windowH, -1.0f, 1.0f);
-		m_WindowTransforms[0] = glm::mat4(1.0f);
-		m_WindowViewport[0] = glm::vec4(0, 0, windowW, windowH);
-		GL_CHECK(glViewport(0, 0, windowW, windowH););
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();
@@ -909,21 +774,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void FrameMan::ClearFrame() {
-		GL_CHECK(glClearColor(0.0, 0.0, 0.0, 1.0););
-		GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT););
-		for (auto &window: m_MultiWindows) {
-			SDL_GL_MakeCurrent(window.get(), m_GLContext.get());
-			GL_CHECK(glClearColor(0.0, 0.0, 0.0, 1.0););
-			GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT););
-		}
-		SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
 	}
 
 	void FrameMan::SwapWindow(){
-		SDL_GL_SwapWindow(m_Window.get());
-		for (const std::unique_ptr<SDL_Window, SdlWindowDeleter> &window: m_MultiWindows) {
-			SDL_GL_SwapWindow(window.get());
-		}
+		SDL_RenderPresent(m_Renderer.get());
 	}
 
 	void FrameMan::FlipFrameBuffers() {
@@ -935,49 +789,16 @@ namespace RTE {
 			SaveBitmap(ScreenDump, m_ScreenDumpName);
 			m_WantScreenDump = false;
 		}
-		GL_CHECK(glActiveTexture(GL_TEXTURE0););
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
-		GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, GL_RGBA, GL_UNSIGNED_BYTE, m_BackBuffer32->line[0]););
 
-		glm::mat4 preScaleProjection(1.0f);
-		if (m_MultiWindows.size() > 0) {
-			for (int i = 0; i < m_MultiWindows.size(); ++i) {
-				SDL_GL_MakeCurrent(m_MultiWindows[i].get(), m_GLContext.get());
-				GL_CHECK(glViewport(m_WindowViewport[i+1].x, m_WindowViewport[i+1].y, m_WindowViewport[i+1].z, m_WindowViewport[i+1].w););
+		void* texturePixels;
+		int texturePitch;
+		SDL_LockTexture(m_ScreenTexture.get(), NULL, &texturePixels, &texturePitch);
 
-				preScaleProjection = glm::translate(m_WindowView[i + 1], {m_WindowViewport[i+1].z / 2, m_WindowViewport[i+1].w / 2, 0.0f});
-				preScaleProjection = glm::scale<float>(preScaleProjection, {m_WindowViewport[i+1].z / 2,m_WindowViewport[i+1].w / 2, 1.0f});
+		std::memcpy(texturePixels, m_BackBuffer32->line[0], m_BackBuffer32->w * m_BackBuffer32->h * 4);
 
-				GL_CHECK(glActiveTexture(GL_TEXTURE0););
-				GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
+		SDL_UnlockTexture(m_ScreenTexture.get());
 
-				m_ScreenShader->Use();
-				m_ScreenShader->SetInt("rteTex0", 0);
-				m_ScreenShader->SetMatrix("rteUVTransform", m_WindowTransforms[i + 1]);
-				m_ScreenShader->SetMatrix("rteProjMatrix", preScaleProjection);
-
-				GL_CHECK(glBindVertexArray(m_ScreenVAO););
-				GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4););
-				SDL_GL_SwapWindow(m_MultiWindows[i].get());
-			}
-			SDL_GL_MakeCurrent(m_Window.get(), m_GLContext.get());
-		}
-
-		GL_CHECK(glViewport(m_WindowViewport[0].x, m_WindowViewport[0].y, m_WindowViewport[0].z, m_WindowViewport[0].w););
-		preScaleProjection = m_WindowView[0];
-		preScaleProjection = glm::translate(m_WindowView[0], {m_WindowViewport[0].z / 2, m_WindowViewport[0].w / 2, 0.0f});
-		preScaleProjection = glm::scale<float>(preScaleProjection, {m_WindowViewport[0].z / 2, m_WindowViewport[0].w / 2, 1.0f});
-
-		GL_CHECK(glActiveTexture(GL_TEXTURE0););
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenTexture););
-
-		m_ScreenShader->Use();
-		m_ScreenShader->SetInt("rteTex0", 0);
-		m_ScreenShader->SetMatrix("rteUVTransform", m_WindowTransforms[0]);
-		m_ScreenShader->SetMatrix("rteProjMatrix", preScaleProjection);
-
-		GL_CHECK(glBindVertexArray(m_ScreenVAO););
-		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4););
+		SDL_RenderCopy(m_Renderer.get(), m_ScreenTexture.get(), NULL, NULL);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

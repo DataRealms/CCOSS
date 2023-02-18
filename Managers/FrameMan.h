@@ -11,7 +11,8 @@
 
 extern "C" {
 	struct SDL_Window;
-	typedef void* SDL_GLContext;
+	struct SDL_Renderer;
+	struct SDL_Texture;
 }
 
 namespace RTE {
@@ -25,9 +26,14 @@ namespace RTE {
 		void operator()(SDL_Window *window);
 	};
 
-	struct SdlContextDeleter {
-		void operator()(SDL_GLContext context);
+	struct SdlRendererDeleter {
+		void operator()(SDL_Renderer *renderer);
 	};
+
+	struct SdlTextureDeleter {
+		void operator()(SDL_Texture *texture);
+	};
+
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
 	/// </summary>
@@ -113,7 +119,6 @@ namespace RTE {
 		/// </returns>
 		SDL_Window* GetWindow() const { return m_Window.get();}
 
-		SDL_GLContext GetContext() const { return m_GLContext.get(); }
 #pragma endregion
 
 #pragma region Display Switch Callbacks
@@ -590,17 +595,9 @@ namespace RTE {
 
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
 		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
-		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
-		std::vector<glm::vec4> m_WindowViewport; //!< The viewports for all windows, to allow for preserved aspect ratios.
-		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
-		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
-		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
-		std::unique_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
-		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
-		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
-		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
-
-		int m_EnableVsync; //!< Whether to enable Vsync, -1 enables adaptive sync;
+		std::unique_ptr<SDL_Renderer, SdlRendererDeleter> m_Renderer;
+		std::unique_ptr<SDL_Texture, SdlTextureDeleter> m_ScreenTexture;
+		int m_EnableVsync;
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
@@ -731,7 +728,7 @@ namespace RTE {
 		int CreateBackBuffers();
 
 		/// <summary>
-		/// Create additional windows for multi display fullscreen. Will create as many windows as necessary to fulfill resXxresY resolution.
+		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.
 		/// </summary>
 		/// <param name="resX">
 		/// Requested horizontal resolution (not including scaling).
@@ -745,7 +742,8 @@ namespace RTE {
 		/// <returns>
 		/// Whether all displays were created successfully.
 		/// </returns>
-		bool CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier);
+		bool SetWindowMultiFullscreen(int resX,int resY,int resMultiplier);
+
 #pragma endregion
 
 #pragma region Resolution Handling

@@ -3833,7 +3833,7 @@ void AHuman::Update()
 	/////////////////////////////////
 	// Arm swinging or device swaying walking animations
 
-	if (m_MoveState != MovementState::STAND && (m_ArmSwingRate > 0 || m_DeviceArmSwayRate > 0)) {
+	if (m_MoveState != MovementState::STAND && (m_ArmSwingRate != 0 || m_DeviceArmSwayRate != 0)) {
 		for (Arm *arm : { m_pFGArm, m_pBGArm }) {
 			if (arm && !arm->GetHeldDeviceThisArmIsTryingToSupport()) {
 				Leg *legToSwingWith = arm == m_pFGArm ? m_pBGLeg : m_pFGLeg;

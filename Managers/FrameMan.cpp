@@ -313,6 +313,10 @@ namespace RTE {
 			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
 		}
 		m_Renderer = std::unique_ptr<SDL_Renderer, SdlRendererDeleter>(SDL_CreateRenderer(m_Window.get(), -1, renderFlags));
+		if (!m_Renderer) {
+			m_Renderer = std::unique_ptr<SDL_Renderer, SdlRendererDeleter>(SDL_CreateRenderer(m_Window.get(), -1, SDL_RENDERER_SOFTWARE));
+		}
+		RTEAssert(m_Renderer.get(), "Failed to initialize Renderer, are you sure this is a computer?");
 		SDL_RenderSetIntegerScale(m_Renderer.get(), SDL_TRUE);
 
 		if (m_Fullscreen) {
@@ -323,6 +327,7 @@ namespace RTE {
 			}
 		}
 
+		set_color_depth(m_BPP);
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
 
@@ -389,7 +394,7 @@ namespace RTE {
 
 		m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
 
-		m_ScreenTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
+		m_ScreenTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
 
 		SDL_RenderSetLogicalSize(m_Renderer.get(), m_BackBuffer32->w, m_BackBuffer32->h);
 

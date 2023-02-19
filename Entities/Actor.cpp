@@ -944,17 +944,22 @@ void Actor::DropAllInventory()
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void Actor::DropAllGold() {
-	Material const *goldMaterial = g_SceneMan.GetMaterialFromID(g_MaterialGold);
+	const Material *goldMaterial = g_SceneMan.GetMaterialFromID(g_MaterialGold);
 	float velMin = 3.0F;
 	float velMax = velMin + std::sqrt(m_SpriteRadius);
-	for (int i = 0; i < m_GoldCarried; i++) {
+
+	for (int i = 0; i < static_cast<int>(std::floor(m_GoldCarried)); i++) {
 		Vector dropOffset(m_SpriteRadius * 0.3F * RandomNum(), 0);
 		dropOffset.RadRotate(c_PI * RandomNormalNum());
+		
+		Vector dropVelocity(dropOffset);
+		dropVelocity.SetMagnitude(RandomNum(velMin, velMax));
 
-		MOPixel *pixelMO = new MOPixel(goldMaterial->GetColor(), goldMaterial->GetPixelDensity(), m_Pos + dropOffset, dropOffset.SetMagnitude(RandomNum(velMin, velMax)), new Atom(Vector(), g_MaterialGold, 0, goldMaterial->GetColor(), 2), 0);
-		pixelMO->SetToHitMOs(false);
-		g_MovableMan.AddParticle(pixelMO);
-		pixelMO = nullptr;
+		Atom *goldMOPixelAtom = new Atom(Vector(), g_MaterialGold, nullptr, goldMaterial->GetColor(), 2);
+
+		MOPixel *goldMOPixel = new MOPixel(goldMaterial->GetColor(), goldMaterial->GetPixelDensity(), m_Pos + dropOffset, dropVelocity, goldMOPixelAtom);
+		goldMOPixel->SetToHitMOs(false);
+		g_MovableMan.AddParticle(goldMOPixel);
 	}
 	m_GoldCarried = 0;
 }

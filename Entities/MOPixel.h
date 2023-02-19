@@ -31,7 +31,7 @@ namespace RTE {
 		/// <param name="mass">A float specifying the object's mass in Kilograms (kg).</param>
 		/// <param name="position">A Vector specifying the initial position.</param>
 		/// <param name="velocity">A Vector specifying the initial velocity.</param>
-		/// <param name="atom">An Atom that will collide with the terrain.</param>
+		/// <param name="atom">An Atom that will collide with the terrain. Ownership IS transferred!</param>
 		/// <param name="lifetime">The amount of time in ms this MOPixel will exist. 0 means unlimited.</param>
 		MOPixel(Color color, const float mass, const Vector &position, const Vector &velocity, Atom *atom, const unsigned long lifetime = 0) { Clear(); Create(color, mass, position, velocity, atom, lifetime); }
 

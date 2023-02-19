@@ -264,7 +264,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    The current amount of carried gold, in Oz.
 
-    virtual float GetGoldCarried() const { return m_GoldCarried; }
+	float GetGoldCarried() const { return m_GoldCarried; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -546,18 +546,6 @@ ClassInfoGetters;
 
     virtual bool Look(float FOVSpread, float range);
 
-/* Old version, we don't let the actors carry gold anymore, goes directly to the team funds instead
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a certain amount of ounces of gold to teh currently carried
-//                  amount.
-// Arguments:       The amount in Oz with which to change the current gol dtally of this
-//                  Actor.
-// Return value:    None.
-
-    void AddGold(float goldOz) { m_GoldCarried += std::ceil(goldOz); m_GoldPicked = true; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddGold
@@ -923,6 +911,10 @@ ClassInfoGetters;
 
     virtual void DropAllInventory();
 
+	/// <summary>
+	/// Converts all of the Gold carried by this Actor into MovableObjects and ejects them into the Scene.
+	/// </summary>
+    virtual void DropAllGold();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetInventorySize

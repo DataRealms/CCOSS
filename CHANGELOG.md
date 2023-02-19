@@ -541,6 +541,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
 
+- New `Settings.ini` property `AutomaticGoldDeposit` which determines whether gold gathered by actors is automatically added into the team's funds. False means that gold needs to be manually transported into orbit via craft, the old school way. Enabled by default.  
+	A noteworthy change in comparison to previous logic is that gold is no longer converted into objects, and `GoldCarried` is now automatically transferred into craft upon entering them. This effectively allows the same actor to resume prospecting without having to return to orbit with the craft.  
+	Regardless of the setting, this behavior is always disabled for AI-only teams for the time being, until the actor AI is accommodated accordingly.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -75,7 +75,6 @@ void ACrab::Clear()
 //        m_StrideTimer[side].Reset();
     }
     m_Aiming = false;
-    m_GoldInInventoryChunk = 0;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -222,8 +221,6 @@ int ACrab::Create(const ACrab &reference) {
             m_Paths[side][BGROUND][i].Create(reference.m_Paths[side][BGROUND][i]);
         }
     }
-
-    m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
 
     m_DeviceState = reference.m_DeviceState;
     m_SweepState = reference.m_SweepState;

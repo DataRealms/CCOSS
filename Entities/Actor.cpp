@@ -703,15 +703,22 @@ bool Actor::Look(float FOVSpread, float range)
     return g_SceneMan.CastSeeRay(m_Team, aimPos, lookVector, ignored, 25, g_SceneMan.GetUnseenResolution(m_Team).GetSmallest() / 2);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a certain amount of ounces of gold to this' team's total funds.
-
-void Actor::AddGold(float goldOz)
-{
-    g_ActivityMan.GetActivity()->ChangeTeamFunds(goldOz, m_Team);
+void Actor::AddGold(float goldOz) {
+	bool isHumanTeam = g_ActivityMan.GetActivity()->IsHumanTeam(m_Team);
+	if (g_SettingsMan.GetAutomaticGoldDeposit() || !isHumanTeam) {
+		// TODO: Allow AI to reliably deliver gold via craft
+		g_ActivityMan.GetActivity()->ChangeTeamFunds(goldOz, m_Team);
+	} else {
+		m_GoldCarried += goldOz;
+		m_GoldPicked = true;
+		if (isHumanTeam) {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+				if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team && !g_GUISound.FundsChangedSound()->IsBeingPlayed()) { g_GUISound.FundsChangedSound()->Play(player); }
+			}
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -932,6 +939,24 @@ void Actor::DropAllInventory()
 
     // We have exhausted all teh inventory into the scene, passing ownership
     m_Inventory.clear();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Actor::DropAllGold() {
+	Material const *goldMaterial = g_SceneMan.GetMaterialFromID(g_MaterialGold);
+	float velMin = 3.0F;
+	float velMax = velMin + std::sqrt(m_SpriteRadius);
+	for (int i = 0; i < m_GoldCarried; i++) {
+		Vector dropOffset(m_SpriteRadius * 0.3F * RandomNum(), 0);
+		dropOffset.RadRotate(c_PI * RandomNormalNum());
+
+		MOPixel *pixelMO = new MOPixel(goldMaterial->GetColor(), goldMaterial->GetPixelDensity(), m_Pos + dropOffset, dropOffset.SetMagnitude(RandomNum(velMin, velMax)), new Atom(Vector(), g_MaterialGold, 0, goldMaterial->GetColor(), 2), 0);
+		pixelMO->SetToHitMOs(false);
+		g_MovableMan.AddParticle(pixelMO);
+		pixelMO = nullptr;
+	}
+	m_GoldCarried = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1493,33 +1518,7 @@ void Actor::Update()
     if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
 		if (m_Inventory.size() > 0) { DropAllInventory(); }
-
-        Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
-        int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
-        for (int i = 0; i < goldCount; i++)
-        {
-/*
-            MOPixel *pixelMO = dynamic_cast<MOPixel *>(MOPixel::InstanceFromPool());
-            pixelMO->Create(AuMat.color,
-                            AuMat.pixelDensity,
-                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                            Vector(4 * NormalRand(), RandomNum(-5, -7)),
-                            new Atom(Vector(), AuMat, 0, AuMat.color, 2),
-                            0);
-*/
-            MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
-                                           AuMat->GetPixelDensity(),
-                                           Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4.0F * RandomNormalNum(), RandomNum(-5.0F, -7.0F)),
-                                           new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
-                                           0);
-
-            pixelMO->SetToHitMOs(false);
-            pixelMO->SetToGetHitByMOs(false);
-            g_MovableMan.AddParticle(pixelMO);
-            pixelMO = 0;
-        }
-        m_GoldCarried = 0;
+		if (m_GoldCarried > 0) { DropAllGold(); }
     }
 
     ////////////////////////////////
@@ -1792,24 +1791,21 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
             m_HUDStack += -12;
 
-            // Gold
-            if (GetGoldCarried() > 0) {
-                str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
-                pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
-                pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
+			if (IsPlayerControlled()) {
+				if (GetGoldCarried() > 0) {
+					str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
+					pSymbolFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX() - 11, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
+					std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
+					pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 2, str, GUIFont::Left);
 
-                m_HUDStack += -11;
-            }
-
-			// Player name
-			if (IsPlayerControlled() && g_FrameMan.IsInMultiplayerMode())
-			{
-				GameActivity * pGameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-				if (pGameActivity)
-				{
-					pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, pGameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
-					m_HUDStack += -11;
+					m_HUDStack -= 11;
+				}
+				// Player name
+				if (g_FrameMan.IsInMultiplayerMode()) {
+					if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity())) {
+						pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 2, gameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
+						m_HUDStack -= 11;
+					}
 				}
 			}
 /* Obsolete

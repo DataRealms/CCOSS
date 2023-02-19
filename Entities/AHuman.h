@@ -157,16 +157,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGoldCarried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets how many ounces of gold this Actor is carrying.
-// Arguments:       None.
-// Return value:    The current amount of carried gold, in Oz.
-
-    float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total liquidation value of this Actor and all its carried
@@ -979,17 +969,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 protected:
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ChunkGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Converts an appropriate amount of gold tracked by Actor, and puts it
-//                  in a MovableObject which is put into inventory.
-// Arguments:       None.
-// Return value:    None.
-
-    void ChunkGold();
-
-
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.
 	/// </summary>
@@ -1058,8 +1037,6 @@ protected:
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart
     Timer m_StrideTimer;
-    // How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-    int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
 	// The duration it takes this AHuman to fully charge a throw.

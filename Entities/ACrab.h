@@ -136,15 +136,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGoldCarried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets how many ounces of gold this Actor is carrying.
-// Arguments:       None.
-// Return value:    The current amount of carried gold, in Oz.
-
-	float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEyePos
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the absoltue position of this' eye, or equivalent, where look
@@ -605,8 +596,6 @@ protected:
 	bool m_StrideStart[SIDECOUNT];
 	// Times the strides to make sure they get restarted if they end up too long
 	Timer m_StrideTimer[SIDECOUNT];
-	// How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-	int m_GoldInInventoryChunk;
 	// The maximum angle MountedMO can be aimed up, positive values only, in radians
 	float m_AimRangeUpperLimit;
 	// The maximum angle MountedMO can be aimed down, positive values only, in radians

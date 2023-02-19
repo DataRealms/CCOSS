@@ -31,6 +31,7 @@ namespace RTE {
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
 		m_ScrapCompactingHeight = 25;
+		m_AutomaticGoldDeposit = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -164,6 +165,8 @@ namespace RTE {
 			reader >> m_EnableSmartBuyMenuNavigation;
 		} else if (propName == "ScrapCompactingHeight") {
 			reader >> m_ScrapCompactingHeight;
+		} else if (propName == "AutomaticGoldDeposit") {
+			reader >> m_AutomaticGoldDeposit;
 		} else if (propName == "ScreenShakeStrength") {
 			reader >> g_CameraMan.m_ScreenShakeStrength;
 		} else if (propName == "ScreenShakeDecay") {
@@ -357,6 +360,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
 		writer.NewPropertyWithValue("ScrapCompactingHeight", m_ScrapCompactingHeight);
+		writer.NewPropertyWithValue("AutomaticGoldDeposit", m_AutomaticGoldDeposit);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

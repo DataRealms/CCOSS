@@ -77,7 +77,6 @@ void AHuman::Clear()
 	m_ActivateBGItem = false;
 	m_TriggerPulled = false;
 	m_WaitingToReloadOffhand = false;
-    m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
 	m_SharpAimRevertTimer.Reset();
@@ -212,8 +211,6 @@ int AHuman::Create(const AHuman &reference) {
         m_Paths[BGROUND][i].Create(reference.m_Paths[BGROUND][i]);
         m_RotAngleTargets[i] = reference.m_RotAngleTargets[i];
     }
-
-    m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
 
     m_DeviceState = reference.m_DeviceState;
     m_SweepState = reference.m_SweepState;
@@ -686,42 +683,6 @@ bool AHuman::CollideAtPoint(HitData &hd)
     m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
     m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) /
                     hd.MomInertia[HITEE];
-*/
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ChunkGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Converts an appropriate amount of gold tracked by Actor, and puts it
-//                  in a MovableObject which is put into inventory.
-
-void AHuman::ChunkGold()
-{
-    MovableObject *pGoldMO = 0;
-    if (m_GoldCarried >= 24) {
-        pGoldMO = dynamic_cast<MovableObject *>(
-            g_PresetMan.GetEntityPreset("MOSParticle", "24 oz Gold Brick")->Clone());
-        AddToInventoryFront(pGoldMO);
-        m_GoldCarried -= 24;
-        m_GoldInInventoryChunk = 24;
-    }
-    else if (m_GoldCarried >= 10) {
-        pGoldMO = dynamic_cast<MovableObject *>(
-//            g_PresetMan.GetEntityPreset("MOSRotating", "10 Gold Brick")->Clone());
-            g_PresetMan.GetEntityPreset("MOSParticle", "10 oz Gold Brick")->Clone());
-        AddToInventoryFront(pGoldMO);
-        m_GoldCarried -= 10;
-        m_GoldInInventoryChunk = 10;
-    }
-/*
-    else if (m_GoldCarried >= 1) {
-        pGoldMO = dynamic_cast<MovableObject *>(
-            g_PresetMan.GetEntityPreset("MOPixel", "Gold Particle")->Clone());
-        AddToInventoryFront(pGoldMO);
-        m_GoldCarried -= 1;
-        m_GoldInInventoryChunk = 1;
-    }
 */
 }
 
@@ -3423,12 +3384,6 @@ void AHuman::Update()
 							moAsHeldDevice->SetTeam(m_Team);
 							moAsHeldDevice->SetIgnoresTeamHits(true);
 							g_MovableMan.AddItem(moAsHeldDevice);
-						} else {
-							if (pMO->IsGold()) {
-								m_GoldInInventoryChunk = 0;
-								ChunkGold();
-							}
-							g_MovableMan.AddParticle(pMO);
 						}
 						pMO = 0;
 					}
@@ -3963,14 +3918,6 @@ void AHuman::Update()
 	// Add velocity also so the viewpoint moves ahead at high speeds
 	if (m_Vel.MagnitudeIsGreaterThan(10.0F)) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
-    /////////////////////////////////////////
-    // Gold Chunk inventroy management
-
-    if (m_GoldInInventoryChunk <= 0) {
-        ChunkGold();
-    }
-
-
     ////////////////////////////////////////
     // Balance stuff
 
@@ -4354,18 +4301,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             }
 
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-/*
-                // Display Gold tally if gold chunk is in hand
-                if (m_pFGArm->HoldsSomething() && m_pFGArm->GetHeldMO()->IsGold() && GetGoldCarried() > 0)
-                {
-                    str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
-                    pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                    std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
-                    m_HUDStack -= 11;
-                }
-*/
 				std::string equippedItemsString = (m_pFGArm && m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;

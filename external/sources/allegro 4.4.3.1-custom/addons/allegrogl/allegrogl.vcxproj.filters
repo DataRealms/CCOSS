@@ -86,9 +86,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\allegrogl\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Header Files">
       <UniqueIdentifier>{E2F320C8-A64A-31FE-B657-E4545F41B9CD}</UniqueIdentifier>
     </Filter>

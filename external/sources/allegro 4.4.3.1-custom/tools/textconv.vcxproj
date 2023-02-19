@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A513DE1D-C0E0-32BD-A5C2-EE4763C4BCA1}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>textconv</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">textconv.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">textconv</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">textconv.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">textconv</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">textconv.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">textconv</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\Debug\alleg-debug-static.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dinput8.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\ddraw.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dxguid.lib;winmm.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dsound.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/Debug/textconv.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/Debug/textconv.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\Release\alleg.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dinput8.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\ddraw.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dxguid.lib;winmm.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dsound.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/Release/textconv.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/Release/textconv.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\RelWithDebInfo\alleg.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dinput8.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\ddraw.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dxguid.lib;winmm.lib;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Lib\x86\dsound.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/RelWithDebInfo/textconv.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/RelWithDebInfo/textconv.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" "-BC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" --check-stamp-file "C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\plugins.tmp;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" "-BC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" --check-stamp-file "C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\plugins.tmp;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" "-BC:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom" --check-stamp-file "C:/Users/Max/Desktop/CCCP 1/Cortex-Command-Community-Project-Source/external/sources/allegro 4.4.3.1-custom/tools/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\plugins.tmp;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\textconv.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\ZERO_CHECK.vcxproj">
+      <Project>{28F522C4-9488-3A11-91C4-48CA316C3484}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\allegro.vcxproj">
+      <Project>{F13CE3E8-34B1-36D5-9813-AD56B7CB288A}</Project>
+      <Name>allegro</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

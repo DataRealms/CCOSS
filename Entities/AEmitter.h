@@ -445,7 +445,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    If it is possible to trigger a burst.
 
-    bool CanTriggerBurst() { if (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)) return true; return false; }
+	bool CanTriggerBurst() { return m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

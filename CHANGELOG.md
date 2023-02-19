@@ -732,6 +732,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - `Gib` property `InheritsVel` now works as a `float` scalar from 0 to 1, defining the portion of velocity inherited from the parent object.
 
+- Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
+	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

@@ -2133,7 +2133,7 @@ void ACrab::Update()
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(m_pJetpack->GetTotalBurstSize(), 2)) * (m_pJetpack->CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
 		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
             m_pJetpack->EnableEmission(true);
             // Jetpacks are noisy!

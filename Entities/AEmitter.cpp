@@ -449,8 +449,7 @@ void AEmitter::Update()
 		float throttleFactor = GetThrottleFactor();
 		m_FlashScale = throttleFactor;
         // Check burst triggering against whether the spacing is fulfilled
-        if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
-        {
+		if (m_BurstTriggered && CanTriggerBurst()) {
             // Play burst sound
 			if (m_BurstSound) { m_BurstSound->Play(m_Pos); }
             // Start timing until next burst

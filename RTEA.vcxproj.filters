@@ -547,6 +547,8 @@
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\Gamepad.h">
+      <Filter>System</Filter>
+    </ClInclude>
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
     </ClInclude>

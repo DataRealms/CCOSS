@@ -251,12 +251,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\tools\rgbmap.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\ZERO_CHECK.vcxproj">
-      <Project>{28F522C4-9488-3A11-91C4-48CA316C3484}</Project>
-      <Name>ZERO_CHECK</Name>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </ProjectReference>
     <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\allegro.vcxproj">
       <Project>{F13CE3E8-34B1-36D5-9813-AD56B7CB288A}</Project>
       <Name>allegro</Name>

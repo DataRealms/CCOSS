@@ -10,11 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "allegrogl", "allegrogl.vcxp
 		{F13CE3E8-34B1-36D5-9813-AD56B7CB288A} = {F13CE3E8-34B1-36D5-9813-AD56B7CB288A}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpgalleg", "jpgalleg.vcxproj", "{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F13CE3E8-34B1-36D5-9813-AD56B7CB288A} = {F13CE3E8-34B1-36D5-9813-AD56B7CB288A}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "loadpng", "loadpng.vcxproj", "{913D8BD7-013B-34EA-B816-D80C1566874C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F13CE3E8-34B1-36D5-9813-AD56B7CB288A} = {F13CE3E8-34B1-36D5-9813-AD56B7CB288A}
@@ -39,17 +34,14 @@ Global
 		{DAE34992-53D6-3C05-9DF2-674121AC7565}.Release|x64.Build.0 = Release|x64
 		{DAE34992-53D6-3C05-9DF2-674121AC7565}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{DAE34992-53D6-3C05-9DF2-674121AC7565}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.Debug|x64.ActiveCfg = Debug|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.Debug|x64.Build.0 = Debug|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.Release|x64.ActiveCfg = Release|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.Release|x64.Build.0 = Release|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{90341D8F-AB03-3E0D-8D2D-77E74EAA481B}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.Debug|x64.ActiveCfg = Debug|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.Debug|x64.Build.0 = Debug|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.Release|x64.ActiveCfg = Release|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.Release|x64.Build.0 = Release|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{913D8BD7-013B-34EA-B816-D80C1566874C}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

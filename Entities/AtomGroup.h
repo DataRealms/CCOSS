@@ -389,11 +389,10 @@ namespace RTE {
 
 		std::list<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
 
-		enum class AreaDistributionType : int {
-			Linear, // AtomGroup will distribute energy as if it's a 2d line.
-			Circle, // AtomGroup will distribute energy as if it's a circle.
-			Oval    // AtomGroup will distribute energy as if it's an oval, with a depth of half it's width.
-		};
+		/// <summary>
+		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line, Circle as a circle, and Oval treats its width as half of its length.
+		/// </summary>
+		enum class AreaDistributionType { Linear, Circle, Oval };
 
 		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup with distribute energy when it collides with something.
 

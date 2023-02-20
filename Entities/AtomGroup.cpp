@@ -130,9 +130,9 @@ namespace RTE {
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "AreaDistributionType") {
-			std::underlying_type_t<AreaDistributionType> type;
-			reader >> type;
-			m_AreaDistributionType = static_cast<AreaDistributionType>(type);
+			std::underlying_type_t<AreaDistributionType> areaDistributionType;
+			reader >> areaDistributionType;
+			m_AreaDistributionType = static_cast<AreaDistributionType>(areaDistributionType);
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}

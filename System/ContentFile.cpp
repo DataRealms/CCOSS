@@ -200,6 +200,7 @@ namespace RTE {
 		for (const auto &[filePath, oldBitmap] : s_LoadedBitmaps[BitDepths::Eight]) {
 			ReloadBitmap(filePath);
 		}
+		g_ConsoleMan.PrintString("SYSTEM: Sprites reloaded");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

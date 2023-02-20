@@ -9,7 +9,8 @@
 *.swp
 .tags
 
-_Bin/
+_Bin/*
+!_Bin/*.lib
 
 #cmake
 /build/

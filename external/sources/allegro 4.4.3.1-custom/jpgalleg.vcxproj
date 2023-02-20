@@ -50,16 +50,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpgalleg.dir\Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpgalleg-debug</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">jpgalleg.dir\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">jpgalleg</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\RelWithDebInfo\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">jpgalleg.dir\RelWithDebInfo\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">jpgalleg</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
   </PropertyGroup>
@@ -79,21 +79,9 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
@@ -112,23 +100,11 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
@@ -148,39 +124,29 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\decode.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\encode.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\error.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\init.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\io.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\src\jpgalleg.c" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\addons\jpgalleg\include\jpgalleg.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\allegro.vcxproj">
+    <ProjectReference Include="allegro.vcxproj">
       <Project>{F13CE3E8-34B1-36D5-9813-AD56B7CB288A}</Project>
       <Name>allegro</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\decode.c" />
+    <ClCompile Include="src\encode.c" />
+    <ClCompile Include="src\error.c" />
+    <ClCompile Include="src\init.c" />
+    <ClCompile Include="src\io.c" />
+    <ClCompile Include="src\jpgalleg.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\jpgalleg.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

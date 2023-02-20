@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <PreferredToolArchitecture>
+    </PreferredToolArchitecture>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -20,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F13CE3E8-34B1-36D5-9813-AD56B7CB288A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
     <ProjectName>allegro</ProjectName>
     <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
@@ -50,23 +51,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">allegro.dir\Debug\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">alleg-debug-static</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">allegro-debug-64</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">allegro.dir\Release\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">alleg</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">allegro-release-64</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\lib\RelWithDebInfo\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">allegro.dir\RelWithDebInfo\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">alleg</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">allegro-debug-release-64</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -79,29 +80,17 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;ALLEGRO_SRC;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;DEBUGMODE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;DEBUGMODE=1;ALLEGRO_SRC;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -112,31 +101,19 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;ALLEGRO_SRC;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;ALLEGRO_SRC;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include"</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;C:/Program Files (x86)/Microsoft DirectX SDK (August 2008)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>
@@ -148,244 +125,232 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;ALLEGRO_SRC;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;NDEBUG;ALLEGRO_SRC;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include;C:\Program Files (x86)\Microsoft DirectX SDK (August 2008)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\allegro.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\blit.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\bmp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\clip3d.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\clip3df.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\colblend.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\color.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\config.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\datafile.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\dataregi.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\digmid.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\dither.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\dispsw.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\drvlist.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\file.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fli.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\flood.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\font.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fontbios.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fontbmp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fontdat.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fontgrx.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fonttxt.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\fsel.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\gfx.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\glyph.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\graphics.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\gsprite.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\gui.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\guiproc.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\inline.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\joystick.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\keyboard.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\lbm.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\libc.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\lzss.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\math.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\math3d.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\midi.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\mixer.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\modesel.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\mouse.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\pcx.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\poly3d.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\polygon.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\quantize.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\quat.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\readbmp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\readfont.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\readsmp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\rle.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\rotate.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\rsfb.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\scene3d.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\sound.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\spline.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\stream.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\text.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\tga.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\timer.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\unicode.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable15.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\vtable8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cblit16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cblit24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cblit32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cblit8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\ccpu.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\ccsprite.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cgfx15.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cgfx16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cgfx24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cgfx32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cgfx8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cmisc.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cscan15.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cscan16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cscan24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cscan32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cscan8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cspr15.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cspr16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cspr24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cspr32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cspr8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\cstretch.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\czscan15.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\czscan16.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\czscan24.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\czscan32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\c\czscan8.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\misc\ccolconv.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\misc\colconv.c" />
-    <None Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\asmlock.s">
+    <ClCompile Include="src\allegro.c" />
+    <ClCompile Include="src\blit.c" />
+    <ClCompile Include="src\bmp.c" />
+    <ClCompile Include="src\clip3d.c" />
+    <ClCompile Include="src\clip3df.c" />
+    <ClCompile Include="src\colblend.c" />
+    <ClCompile Include="src\color.c" />
+    <ClCompile Include="src\config.c" />
+    <ClCompile Include="src\datafile.c" />
+    <ClCompile Include="src\dataregi.c" />
+    <ClCompile Include="src\digmid.c" />
+    <ClCompile Include="src\dither.c" />
+    <ClCompile Include="src\dispsw.c" />
+    <ClCompile Include="src\drvlist.c" />
+    <ClCompile Include="src\file.c" />
+    <ClCompile Include="src\fli.c" />
+    <ClCompile Include="src\flood.c" />
+    <ClCompile Include="src\font.c" />
+    <ClCompile Include="src\fontbios.c" />
+    <ClCompile Include="src\fontbmp.c" />
+    <ClCompile Include="src\fontdat.c" />
+    <ClCompile Include="src\fontgrx.c" />
+    <ClCompile Include="src\fonttxt.c" />
+    <ClCompile Include="src\fsel.c" />
+    <ClCompile Include="src\gfx.c" />
+    <ClCompile Include="src\glyph.c" />
+    <ClCompile Include="src\graphics.c" />
+    <ClCompile Include="src\gsprite.c" />
+    <ClCompile Include="src\gui.c" />
+    <ClCompile Include="src\guiproc.c" />
+    <ClCompile Include="src\inline.c" />
+    <ClCompile Include="src\joystick.c" />
+    <ClCompile Include="src\keyboard.c" />
+    <ClCompile Include="src\lbm.c" />
+    <ClCompile Include="src\libc.c" />
+    <ClCompile Include="src\lzss.c" />
+    <ClCompile Include="src\math.c" />
+    <ClCompile Include="src\math3d.c" />
+    <ClCompile Include="src\midi.c" />
+    <ClCompile Include="src\mixer.c" />
+    <ClCompile Include="src\modesel.c" />
+    <ClCompile Include="src\mouse.c" />
+    <ClCompile Include="src\pcx.c" />
+    <ClCompile Include="src\poly3d.c" />
+    <ClCompile Include="src\polygon.c" />
+    <ClCompile Include="src\quantize.c" />
+    <ClCompile Include="src\quat.c" />
+    <ClCompile Include="src\readbmp.c" />
+    <ClCompile Include="src\readfont.c" />
+    <ClCompile Include="src\readsmp.c" />
+    <ClCompile Include="src\rle.c" />
+    <ClCompile Include="src\rotate.c" />
+    <ClCompile Include="src\rsfb.c" />
+    <ClCompile Include="src\scene3d.c" />
+    <ClCompile Include="src\sound.c" />
+    <ClCompile Include="src\spline.c" />
+    <ClCompile Include="src\stream.c" />
+    <ClCompile Include="src\text.c" />
+    <ClCompile Include="src\tga.c" />
+    <ClCompile Include="src\timer.c" />
+    <ClCompile Include="src\unicode.c" />
+    <ClCompile Include="src\vtable.c" />
+    <ClCompile Include="src\vtable15.c" />
+    <ClCompile Include="src\vtable16.c" />
+    <ClCompile Include="src\vtable24.c" />
+    <ClCompile Include="src\vtable32.c" />
+    <ClCompile Include="src\vtable8.c" />
+    <ClCompile Include="src\c\cblit16.c" />
+    <ClCompile Include="src\c\cblit24.c" />
+    <ClCompile Include="src\c\cblit32.c" />
+    <ClCompile Include="src\c\cblit8.c" />
+    <ClCompile Include="src\c\ccpu.c" />
+    <ClCompile Include="src\c\ccsprite.c" />
+    <ClCompile Include="src\c\cgfx15.c" />
+    <ClCompile Include="src\c\cgfx16.c" />
+    <ClCompile Include="src\c\cgfx24.c" />
+    <ClCompile Include="src\c\cgfx32.c" />
+    <ClCompile Include="src\c\cgfx8.c" />
+    <ClCompile Include="src\c\cmisc.c" />
+    <ClCompile Include="src\c\cscan15.c" />
+    <ClCompile Include="src\c\cscan16.c" />
+    <ClCompile Include="src\c\cscan24.c" />
+    <ClCompile Include="src\c\cscan32.c" />
+    <ClCompile Include="src\c\cscan8.c" />
+    <ClCompile Include="src\c\cspr15.c" />
+    <ClCompile Include="src\c\cspr16.c" />
+    <ClCompile Include="src\c\cspr24.c" />
+    <ClCompile Include="src\c\cspr32.c" />
+    <ClCompile Include="src\c\cspr8.c" />
+    <ClCompile Include="src\c\cstretch.c" />
+    <ClCompile Include="src\c\czscan15.c" />
+    <ClCompile Include="src\c\czscan16.c" />
+    <ClCompile Include="src\c\czscan24.c" />
+    <ClCompile Include="src\c\czscan32.c" />
+    <ClCompile Include="src\c\czscan8.c" />
+    <ClCompile Include="src\misc\ccolconv.c" />
+    <ClCompile Include="src\misc\colconv.c" />
+    <None Include="src\win\asmlock.s">
     </None>
-    <ResourceCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\dllver.rc" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\gdi.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddaccel.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddbmp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddbmpl.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddraw.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddfull.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddlock.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddmode.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddovl.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wddwin.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wdsinput.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wdsndmix.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wdsound.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wsndwo.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wdxver.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wdispsw.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wfile.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wgdi.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wgfxdrv.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\winput.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wjoydrv.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wjoydx.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wjoyhelp.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wjoyw32.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wkeybd.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wmidi.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wmouse.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wsnddrv.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wsystem.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wthread.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wtimer.c" />
-    <ClCompile Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\src\win\wwnd.c" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alplatf.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\3d.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\3dmaths.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\alcompat.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\alinline.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\base.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\color.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\compiled.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\config.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\datafile.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\debug.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\digi.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\draw.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\file.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\fix.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\fixed.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\fli.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\fmaths.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\font.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\gfx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\graphics.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\gui.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\joystick.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\keyboard.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\lzss.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\matrix.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\midi.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\mouse.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\palette.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\quat.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\rle.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\sound.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\stream.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\system.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\text.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\timer.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\unicode.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\3dmaths.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\asm.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\color.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\draw.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\fix.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\fmaths.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\gfx.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\matrix.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\rle.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\inline\system.inl" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\internal\aintern.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\internal\aintvga.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\internal\alconfig.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintbeos.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintdos.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintlnx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintmac.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintosx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintpsp.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintqnx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintunix.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aintwin.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\al386gcc.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\al386vc.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\al386wat.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\albcc32.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\albecfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\albeos.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aldjgpp.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aldmc.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\aldos.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\almac.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\almaccfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\almngw32.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\almsvc.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alosx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alosxcfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alpsp.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alpspcfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alqnx.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alqnxcfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alucfg.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alunix.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alwatcom.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\alwin.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\astdint.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\allegro\platform\macdef.h" />
-    <ClInclude Include="C:\Users\Max\Desktop\CCCP 1\Cortex-Command-Community-Project-Source\external\sources\allegro 4.4.3.1-custom\include\winalleg.h" />
+    <ResourceCompile Include="src\win\dllver.rc" />
+    <ClCompile Include="src\win\gdi.c" />
+    <ClCompile Include="src\win\wddaccel.c" />
+    <ClCompile Include="src\win\wddbmp.c" />
+    <ClCompile Include="src\win\wddbmpl.c" />
+    <ClCompile Include="src\win\wddraw.c" />
+    <ClCompile Include="src\win\wddfull.c" />
+    <ClCompile Include="src\win\wddlock.c" />
+    <ClCompile Include="src\win\wddmode.c" />
+    <ClCompile Include="src\win\wddovl.c" />
+    <ClCompile Include="src\win\wddwin.c" />
+    <ClCompile Include="src\win\wdsinput.c" />
+    <ClCompile Include="src\win\wdsndmix.c" />
+    <ClCompile Include="src\win\wdsound.c" />
+    <ClCompile Include="src\win\wsndwo.c" />
+    <ClCompile Include="src\win\wdxver.c" />
+    <ClCompile Include="src\win\wdispsw.c" />
+    <ClCompile Include="src\win\wfile.c" />
+    <ClCompile Include="src\win\wgdi.c" />
+    <ClCompile Include="src\win\wgfxdrv.c" />
+    <ClCompile Include="src\win\winput.c" />
+    <ClCompile Include="src\win\wjoydrv.c" />
+    <ClCompile Include="src\win\wjoydx.c" />
+    <ClCompile Include="src\win\wjoyhelp.c" />
+    <ClCompile Include="src\win\wjoyw32.c" />
+    <ClCompile Include="src\win\wkeybd.c" />
+    <ClCompile Include="src\win\wmidi.c" />
+    <ClCompile Include="src\win\wmouse.c" />
+    <ClCompile Include="src\win\wsnddrv.c" />
+    <ClCompile Include="src\win\wsystem.c" />
+    <ClCompile Include="src\win\wthread.c" />
+    <ClCompile Include="src\win\wtimer.c" />
+    <ClCompile Include="src\win\wwnd.c" />
+    <ClInclude Include="include\allegro\platform\alplatf.h" />
+    <ClInclude Include="include\allegro.h" />
+    <ClInclude Include="include\allegro\3d.h" />
+    <ClInclude Include="include\allegro\3dmaths.h" />
+    <ClInclude Include="include\allegro\alcompat.h" />
+    <ClInclude Include="include\allegro\alinline.h" />
+    <ClInclude Include="include\allegro\base.h" />
+    <ClInclude Include="include\allegro\color.h" />
+    <ClInclude Include="include\allegro\compiled.h" />
+    <ClInclude Include="include\allegro\config.h" />
+    <ClInclude Include="include\allegro\datafile.h" />
+    <ClInclude Include="include\allegro\debug.h" />
+    <ClInclude Include="include\allegro\digi.h" />
+    <ClInclude Include="include\allegro\draw.h" />
+    <ClInclude Include="include\allegro\file.h" />
+    <ClInclude Include="include\allegro\fix.h" />
+    <ClInclude Include="include\allegro\fixed.h" />
+    <ClInclude Include="include\allegro\fli.h" />
+    <ClInclude Include="include\allegro\fmaths.h" />
+    <ClInclude Include="include\allegro\font.h" />
+    <ClInclude Include="include\allegro\gfx.h" />
+    <ClInclude Include="include\allegro\graphics.h" />
+    <ClInclude Include="include\allegro\gui.h" />
+    <ClInclude Include="include\allegro\joystick.h" />
+    <ClInclude Include="include\allegro\keyboard.h" />
+    <ClInclude Include="include\allegro\lzss.h" />
+    <ClInclude Include="include\allegro\matrix.h" />
+    <ClInclude Include="include\allegro\midi.h" />
+    <ClInclude Include="include\allegro\mouse.h" />
+    <ClInclude Include="include\allegro\palette.h" />
+    <ClInclude Include="include\allegro\quat.h" />
+    <ClInclude Include="include\allegro\rle.h" />
+    <ClInclude Include="include\allegro\sound.h" />
+    <ClInclude Include="include\allegro\stream.h" />
+    <ClInclude Include="include\allegro\system.h" />
+    <ClInclude Include="include\allegro\text.h" />
+    <ClInclude Include="include\allegro\timer.h" />
+    <ClInclude Include="include\allegro\unicode.h" />
+    <ClInclude Include="include\allegro\inline\3dmaths.inl" />
+    <ClInclude Include="include\allegro\inline\asm.inl" />
+    <ClInclude Include="include\allegro\inline\color.inl" />
+    <ClInclude Include="include\allegro\inline\draw.inl" />
+    <ClInclude Include="include\allegro\inline\fix.inl" />
+    <ClInclude Include="include\allegro\inline\fmaths.inl" />
+    <ClInclude Include="include\allegro\inline\gfx.inl" />
+    <ClInclude Include="include\allegro\inline\matrix.inl" />
+    <ClInclude Include="include\allegro\inline\rle.inl" />
+    <ClInclude Include="include\allegro\inline\system.inl" />
+    <ClInclude Include="include\allegro\internal\aintern.h" />
+    <ClInclude Include="include\allegro\internal\aintvga.h" />
+    <ClInclude Include="include\allegro\internal\alconfig.h" />
+    <ClInclude Include="include\allegro\platform\aintbeos.h" />
+    <ClInclude Include="include\allegro\platform\aintdos.h" />
+    <ClInclude Include="include\allegro\platform\aintlnx.h" />
+    <ClInclude Include="include\allegro\platform\aintmac.h" />
+    <ClInclude Include="include\allegro\platform\aintosx.h" />
+    <ClInclude Include="include\allegro\platform\aintpsp.h" />
+    <ClInclude Include="include\allegro\platform\aintqnx.h" />
+    <ClInclude Include="include\allegro\platform\aintunix.h" />
+    <ClInclude Include="include\allegro\platform\aintwin.h" />
+    <ClInclude Include="include\allegro\platform\al386gcc.h" />
+    <ClInclude Include="include\allegro\platform\al386vc.h" />
+    <ClInclude Include="include\allegro\platform\al386wat.h" />
+    <ClInclude Include="include\allegro\platform\albcc32.h" />
+    <ClInclude Include="include\allegro\platform\albecfg.h" />
+    <ClInclude Include="include\allegro\platform\albeos.h" />
+    <ClInclude Include="include\allegro\platform\aldjgpp.h" />
+    <ClInclude Include="include\allegro\platform\aldmc.h" />
+    <ClInclude Include="include\allegro\platform\aldos.h" />
+    <ClInclude Include="include\allegro\platform\almac.h" />
+    <ClInclude Include="include\allegro\platform\almaccfg.h" />
+    <ClInclude Include="include\allegro\platform\almngw32.h" />
+    <ClInclude Include="include\allegro\platform\almsvc.h" />
+    <ClInclude Include="include\allegro\platform\alosx.h" />
+    <ClInclude Include="include\allegro\platform\alosxcfg.h" />
+    <ClInclude Include="include\allegro\platform\alpsp.h" />
+    <ClInclude Include="include\allegro\platform\alpspcfg.h" />
+    <ClInclude Include="include\allegro\platform\alqnx.h" />
+    <ClInclude Include="include\allegro\platform\alqnxcfg.h" />
+    <ClInclude Include="include\allegro\platform\alucfg.h" />
+    <ClInclude Include="include\allegro\platform\alunix.h" />
+    <ClInclude Include="include\allegro\platform\alwatcom.h" />
+    <ClInclude Include="include\allegro\platform\alwin.h" />
+    <ClInclude Include="include\allegro\platform\astdint.h" />
+    <ClInclude Include="include\allegro\platform\macdef.h" />
+    <ClInclude Include="include\winalleg.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

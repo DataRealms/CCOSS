@@ -311,9 +311,11 @@ BITMAP *gfx_directx_make_bitmap_from_surface(DDRAW_SURFACE *surf, int w, int h, 
    BITMAP *bmp;
    int i;
 
-   bmp = (BITMAP *) _AL_MALLOC(sizeof(BITMAP) + sizeof(char *) * h);
+   bmp = _AL_MALLOC(sizeof(BITMAP));
    if (!bmp)
       return NULL;
+
+   bmp->line = _AL_MALLOC(sizeof(char *) * h);
 
    bmp->w =w;
    bmp->cr = w;

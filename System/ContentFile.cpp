@@ -212,6 +212,10 @@ namespace RTE {
 		const int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
 
+		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+			ReloadBitmap(dataPathToLoad, conversionMode);
+		}
+
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
 		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {

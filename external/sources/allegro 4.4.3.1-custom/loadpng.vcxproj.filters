@@ -9,19 +9,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="loadpng.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="regpng.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="savepng.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="loadpng.h">
+    <ClInclude Include="addons\loadpng\loadpng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="addons\loadpng\loadpng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\loadpng\regpng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\loadpng\savepng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

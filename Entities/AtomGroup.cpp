@@ -1144,7 +1144,7 @@ namespace RTE {
 					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDistribution, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
 							ownerVel += (forceVel * massDistribution * retardation) / mass;
-							returnPush += penetratingAtomsEntry.second;
+							returnPush += forceVel * massDistribution * retardation;
 						}
 					}
 				}

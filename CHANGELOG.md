@@ -531,6 +531,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Greatly reduce online multiplayer bandwidth usage.
 
+- Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
+
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 

@@ -106,9 +106,6 @@ namespace RTE {
 
 		set_write_alpha_blender();
 		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 
 		int starSmallBitmapCount = 4;
 		std::vector<BITMAP *> starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
@@ -554,6 +551,13 @@ namespace RTE {
 		m_Station.SetPos(m_PlanetPos + m_StationOffset);
 		m_Station.SetRotAngle(-c_HalfPI + m_StationOrbitRotation);
 		m_Station.Draw(g_FrameMan.GetBackBuffer32());
+
+		// This only needs to be done once, but bitmaps can be reloaded which effectively undoes this, so just do it all the time to not deal with flags and checks.
+		// Note that we skip doing this to m_PreGameLogoText here, because that is only relevant to the intro and if someone chooses to reload all the bitmaps during the intro that is their problem.
+		set_write_alpha_blender();
+		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

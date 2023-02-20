@@ -197,7 +197,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::ReloadAllBitmaps() {
-		for (const std::unordered_map<std::string, BITMAP *> bitmapCache : s_LoadedBitmaps) {
+		for (const std::unordered_map<std::string, BITMAP *> &bitmapCache : s_LoadedBitmaps) {
 			for (const auto &[filePath, oldBitmap] : bitmapCache) {
 				ReloadBitmap(filePath);
 			}

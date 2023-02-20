@@ -437,10 +437,12 @@ void GUIListPanel::OnMouseDown(int X, int Y, int Buttons, int Modifier) {
 void GUIListPanel::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	if (!m_MouseScroll) {
 		return;
-	} else if (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y)) {
+	} else if ((PointInsideList(x, y) && !m_MultiSelect) || (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y))) {
 		ScrollBarScrolling(mouseWheelChange);
-	} else if (PointInsideList(x, y) && !m_MultiSelect) {
-		SelectionListScrolling(mouseWheelChange);
+	}
+	
+	if (m_HotTracking && GetItem(x, y) != nullptr && (GetItem(x, y) != GetSelected())) {
+		SelectItem(x, y, modifier);
 	}
 }
 
@@ -723,7 +725,9 @@ void GUIListPanel::ScrollBarScrolling(int mouseWheelChange) {
 	if (mouseWheelChange < 0) {
 		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
 		int maxValue = GetStackHeight(lastItem) + GetItemHeight(lastItem) - m_VertScroll->GetPageSize();
-		newValue = std::clamp(newValue, maxValue, 0);
+		if (newValue > maxValue) {
+			newValue = maxValue;
+		}
 	} else {
 		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
 		if (newValue < 0) {

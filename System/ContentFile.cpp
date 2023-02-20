@@ -197,8 +197,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::ReloadAllBitmaps() {
-		for (const auto &[filePath, oldBitmap] : s_LoadedBitmaps[BitDepths::Eight]) {
-			ReloadBitmap(filePath);
+		for (const std::unordered_map<std::string, BITMAP *> bitmapCache : s_LoadedBitmaps) {
+			for (const auto &[filePath, oldBitmap] : bitmapCache) {
+				ReloadBitmap(filePath);
+			}
 		}
 		g_ConsoleMan.PrintString("SYSTEM: Sprites reloaded");
 	}

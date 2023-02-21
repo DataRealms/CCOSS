@@ -474,10 +474,39 @@ namespace RTE {
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.x < right.second.x; });
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.y < right.second.y; });
 		std::vector<std::pair<int, SDL_Rect>>::iterator displayPos = std::find_if(displayBounds.begin(), displayBounds.end(), [windowDisplay](auto display){return display.first == windowDisplay; });
+		// Move the window so that it fits within th screens
+		std::vector<std::pair<int, SDL_Rect>>::reverse_iterator topLeftDisplay = std::make_reverse_iterator(displayPos);
 		if(displayPos->second.x + windowW > displayBounds.back().second.x + displayBounds.back().second.w) {
+			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowW, displayBounds](auto display) {
+				return display->second.x + windowW <= displayBounds.back().second.x + displayBounds.back().second.w;
+			});
+			if (topLeftDisplay == displayBounds.rend()) {
+				return false;
+			}
+		}
+		if(topLeftDisplay->second.y + windowH > displayBounds.back().second.y + displayBounds.back().second.h) {
+			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowH, displayBounds](auto display) {
+				return display->second.y + windowH <= displayBounds.back().second.y + displayBounds.back().second.h;
+			});
+			if (topLeftDisplay == displayBounds.rend()) {
+				return false;
+			}
 		}
 
+		std::vector<std::pair<int, SDL_Rect>>::iterator bottomRightDisplay = std::find_if((topLeftDisplay+1).base(), displayBounds.end(), [topLeftDisplay, windowH](auto display){
+			return display.second.y + display.second.h >= topLeftDisplay->second.y + windowH;
+		});
+		bottomRightDisplay = std::find_if(bottomRightDisplay, displayBounds.end(), [topLeftDisplay, windowW](auto display){
+			return display.second.x + display.second.w >= topLeftDisplay->second.x + windowW;
+		});
 
+		int newWindowW = bottomRightDisplay->second.x + bottomRightDisplay->second.w - topLeftDisplay->second.x;
+		int newWindowH = bottomRightDisplay->second.y + bottomRightDisplay->second.h - topLeftDisplay->second.y;
+
+		SDL_RestoreWindow(m_Window.get());
+		SDL_SetWindowBordered(m_Window.get(), SDL_FALSE);
+		SDL_SetWindowPos(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
+		SDL_SetWindowSize(m_Window.get(), newWindowW, newWindowH);
 		return false;
 	}
 
@@ -562,16 +591,6 @@ namespace RTE {
 		if (newMultiplier <= 0 || newMultiplier > 4 || newMultiplier == m_ResMultiplier) {
 			return;
 		}
-
-#if 0
-		// This can be made to work but it doesn't really make any sense because regardless of the resolution or the multiplier it's still full screen.
-		// It just switches back and forth between a crisp upscaled image and a blurry badly interpolated by the monitor image (if the un-upscaled resolution is even supported).
-		// Windows only for now because Linux switches to dedicated fullscreen because lack of borderless and this won't allow it to switch back to windowed.
-		if (IsUsingDedicatedGraphicsDriver()) {
-			ShowMessageBox("Quick resolution multiplier change while running in dedicated fullscreen mode is not supported!\nNo change will be made!");
-			return;
-		}
-#endif
 
 		if (m_ResX > m_MaxResX / newMultiplier || m_ResY > m_MaxResY / newMultiplier) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");

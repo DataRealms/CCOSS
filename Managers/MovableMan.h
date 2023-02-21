@@ -264,7 +264,7 @@ public:
 	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
 	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
 	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
-	/// <param name="getDistance">A float to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
 	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
 	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>
 	Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *excludeThis = nullptr) { return GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, false, excludeThis); }
@@ -276,7 +276,7 @@ public:
 	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
 	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
 	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
-	/// <param name="getDistance">A float to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
 	/// <param name="onlyPlayerControllableActors">Whether to only get Actors that are flagged as player controllable.</param>
 	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
 	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>

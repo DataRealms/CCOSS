@@ -1,3 +1,4 @@
+project('RakNet', 'cpp')
 raknet_src = files('Base64Encoder.cpp',
 'BitStream.cpp',
 'CCRakNetSlidingWindow.cpp',
@@ -109,11 +110,10 @@ raknet_src = files('Base64Encoder.cpp',
 '_FindFirst.cpp',
 'gettimeofday.cpp')
 
-raknet = static_library('raknet', raknet_src, cpp_args:extra_args + ['-w'], dependencies: deps, include_directories:external_inc_dirs, override_options:['debug=false', 'optimization=3', 'cpp_std=c++03'])
-raknet_debug = static_library('raknet_debug', raknet_src, cpp_args:extra_args + ['-w'], dependencies: deps, include_directories:external_inc_dirs, override_options:['debug=true', 'optimization=g', 'cpp_std=c++03'])
+raknet_include = include_directories('.')
 
-if get_option('debug')
-  external_libs += [raknet_debug]
-else
-  external_libs += [raknet]
-endif
+raknet = static_library('raknet', raknet_src, cpp_args:['-w'], override_options:['cpp_std=c++03'])
+
+raknet_dep = declare_dependency(link_with: raknet, include_directories: raknet_include)
+
+meson.override_dependency('RakNet', raknet_dep)

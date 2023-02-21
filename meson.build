@@ -141,6 +141,8 @@ external_objects = []
 external_libs = []
 subdir('external')
 
+boost_dep = declare_dependency(include_directories: include_directories('external/include/common/boost_1_75'))
+meson.override_dependency('boost-175', boost_dep)
 install_rpath = prefix/get_option('fmod_dir')
 allegro_proj = subproject('allegro 4.4.3.1-custom')
 allegro_dep = dependency('allegro')

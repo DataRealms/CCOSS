@@ -308,6 +308,8 @@ namespace RTE {
 			m_ResY = c_DefaultResY;
 		}
 
+		SDL_SetWindowMinimumSize(m_Window.get(), 640, 480);
+
 		int renderFlags = SDL_RENDERER_ACCELERATED;
 		if (m_EnableVsync == 1) {
 			renderFlags |= SDL_RENDERER_PRESENTVSYNC;

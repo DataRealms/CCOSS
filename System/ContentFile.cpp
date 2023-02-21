@@ -33,7 +33,6 @@ namespace RTE {
 
 	int ContentFile::Create(const char *filePath) {
 		SetDataPath(filePath);
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		return 0;
 	}
@@ -82,7 +81,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::GetDataModuleID() const { return (m_DataModuleID < 0) ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID; }
+	int ContentFile::GetDataModuleID() const {
+		return (m_DataModuleID < 0) ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -204,7 +205,6 @@ namespace RTE {
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
 		dataPathToLoad = g_PresetMan.FullModulePath(dataPathToLoad);
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
@@ -240,7 +240,6 @@ namespace RTE {
 		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
 		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension);
 		vectorToFill.reserve(frameCount);
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		if (frameCount == 1) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
@@ -271,7 +270,6 @@ namespace RTE {
 			return nullptr;
 		}
 		const std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		BITMAP *returnBitmap = nullptr;
 

@@ -1,0 +1,479 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>
+    </PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\allegro.c" />
+    <ClCompile Include="src\blit.c" />
+    <ClCompile Include="src\bmp.c" />
+    <ClCompile Include="src\clip3d.c" />
+    <ClCompile Include="src\clip3df.c" />
+    <ClCompile Include="src\colblend.c" />
+    <ClCompile Include="src\color.c" />
+    <ClCompile Include="src\config.c" />
+    <ClCompile Include="src\c\cblit16.c" />
+    <ClCompile Include="src\c\cblit24.c" />
+    <ClCompile Include="src\c\cblit32.c" />
+    <ClCompile Include="src\c\cblit8.c" />
+    <ClCompile Include="src\c\ccpu.c" />
+    <ClCompile Include="src\c\ccsprite.c" />
+    <ClCompile Include="src\c\cgfx15.c" />
+    <ClCompile Include="src\c\cgfx16.c" />
+    <ClCompile Include="src\c\cgfx24.c" />
+    <ClCompile Include="src\c\cgfx32.c" />
+    <ClCompile Include="src\c\cgfx8.c" />
+    <ClCompile Include="src\c\cmisc.c" />
+    <ClCompile Include="src\c\cscan15.c" />
+    <ClCompile Include="src\c\cscan16.c" />
+    <ClCompile Include="src\c\cscan24.c" />
+    <ClCompile Include="src\c\cscan32.c" />
+    <ClCompile Include="src\c\cscan8.c" />
+    <ClCompile Include="src\c\cspr15.c" />
+    <ClCompile Include="src\c\cspr16.c" />
+    <ClCompile Include="src\c\cspr24.c" />
+    <ClCompile Include="src\c\cspr32.c" />
+    <ClCompile Include="src\c\cspr8.c" />
+    <ClCompile Include="src\c\cstretch.c" />
+    <ClCompile Include="src\c\czscan15.c" />
+    <ClCompile Include="src\c\czscan16.c" />
+    <ClCompile Include="src\c\czscan24.c" />
+    <ClCompile Include="src\c\czscan32.c" />
+    <ClCompile Include="src\c\czscan8.c" />
+    <ClCompile Include="src\datafile.c" />
+    <ClCompile Include="src\dataregi.c" />
+    <ClCompile Include="src\digmid.c" />
+    <ClCompile Include="src\dispsw.c" />
+    <ClCompile Include="src\dither.c" />
+    <ClCompile Include="src\drvlist.c" />
+    <ClCompile Include="src\file.c" />
+    <ClCompile Include="src\fli.c" />
+    <ClCompile Include="src\flood.c" />
+    <ClCompile Include="src\font.c" />
+    <ClCompile Include="src\fontbios.c" />
+    <ClCompile Include="src\fontbmp.c" />
+    <ClCompile Include="src\fontdat.c" />
+    <ClCompile Include="src\fontgrx.c" />
+    <ClCompile Include="src\fonttxt.c" />
+    <ClCompile Include="src\fsel.c" />
+    <ClCompile Include="src\gfx.c" />
+    <ClCompile Include="src\glyph.c" />
+    <ClCompile Include="src\graphics.c" />
+    <ClCompile Include="src\gsprite.c" />
+    <ClCompile Include="src\gui.c" />
+    <ClCompile Include="src\guiproc.c" />
+    <ClCompile Include="src\inline.c" />
+    <ClCompile Include="src\joystick.c" />
+    <ClCompile Include="src\keyboard.c" />
+    <ClCompile Include="src\lbm.c" />
+    <ClCompile Include="src\libc.c" />
+    <ClCompile Include="src\lzss.c" />
+    <ClCompile Include="src\math.c" />
+    <ClCompile Include="src\math3d.c" />
+    <ClCompile Include="src\midi.c" />
+    <ClCompile Include="src\misc\ccolconv.c" />
+    <ClCompile Include="src\misc\colconv.c" />
+    <ClCompile Include="src\mixer.c" />
+    <ClCompile Include="src\modesel.c" />
+    <ClCompile Include="src\mouse.c" />
+    <ClCompile Include="src\pcx.c" />
+    <ClCompile Include="src\poly3d.c" />
+    <ClCompile Include="src\polygon.c" />
+    <ClCompile Include="src\quantize.c" />
+    <ClCompile Include="src\quat.c" />
+    <ClCompile Include="src\readbmp.c" />
+    <ClCompile Include="src\readfont.c" />
+    <ClCompile Include="src\readsmp.c" />
+    <ClCompile Include="src\rle.c" />
+    <ClCompile Include="src\rotate.c" />
+    <ClCompile Include="src\rsfb.c" />
+    <ClCompile Include="src\scene3d.c" />
+    <ClCompile Include="src\sound.c" />
+    <ClCompile Include="src\spline.c" />
+    <ClCompile Include="src\stream.c" />
+    <ClCompile Include="src\text.c" />
+    <ClCompile Include="src\tga.c" />
+    <ClCompile Include="src\timer.c" />
+    <ClCompile Include="src\unicode.c" />
+    <ClCompile Include="src\vtable.c" />
+    <ClCompile Include="src\vtable15.c" />
+    <ClCompile Include="src\vtable16.c" />
+    <ClCompile Include="src\vtable24.c" />
+    <ClCompile Include="src\vtable32.c" />
+    <ClCompile Include="src\vtable8.c" />
+    <ClCompile Include="src\win\gdi.c" />
+    <ClCompile Include="src\win\wddaccel.c" />
+    <ClCompile Include="src\win\wddbmp.c" />
+    <ClCompile Include="src\win\wddbmpl.c" />
+    <ClCompile Include="src\win\wddfull.c" />
+    <ClCompile Include="src\win\wddlock.c" />
+    <ClCompile Include="src\win\wddmode.c" />
+    <ClCompile Include="src\win\wddovl.c" />
+    <ClCompile Include="src\win\wddraw.c" />
+    <ClCompile Include="src\win\wddwin.c" />
+    <ClCompile Include="src\win\wdispsw.c" />
+    <ClCompile Include="src\win\wdsinput.c" />
+    <ClCompile Include="src\win\wdsndmix.c" />
+    <ClCompile Include="src\win\wdsound.c" />
+    <ClCompile Include="src\win\wdxver.c" />
+    <ClCompile Include="src\win\wfile.c" />
+    <ClCompile Include="src\win\wgdi.c" />
+    <ClCompile Include="src\win\wgfxdrv.c" />
+    <ClCompile Include="src\win\winput.c" />
+    <ClCompile Include="src\win\wjoydrv.c" />
+    <ClCompile Include="src\win\wjoydx.c" />
+    <ClCompile Include="src\win\wjoyhelp.c" />
+    <ClCompile Include="src\win\wjoyw32.c" />
+    <ClCompile Include="src\win\wkeybd.c" />
+    <ClCompile Include="src\win\wmidi.c" />
+    <ClCompile Include="src\win\wmouse.c" />
+    <ClCompile Include="src\win\wsnddrv.c" />
+    <ClCompile Include="src\win\wsndwo.c" />
+    <ClCompile Include="src\win\wsystem.c" />
+    <ClCompile Include="src\win\wthread.c" />
+    <ClCompile Include="src\win\wtimer.c" />
+    <ClCompile Include="src\win\wwnd.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\allegro\inline\3dmaths.inl" />
+    <None Include="include\allegro\inline\asm.inl" />
+    <None Include="include\allegro\inline\color.inl" />
+    <None Include="include\allegro\inline\draw.inl" />
+    <None Include="include\allegro\inline\fix.inl" />
+    <None Include="include\allegro\inline\fmaths.inl" />
+    <None Include="include\allegro\inline\gfx.inl" />
+    <None Include="include\allegro\inline\matrix.inl" />
+    <None Include="include\allegro\inline\rle.inl" />
+    <None Include="include\allegro\inline\system.inl" />
+    <None Include="src\win\asmlock.s" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\allegro.h" />
+    <ClInclude Include="include\allegro\3d.h" />
+    <ClInclude Include="include\allegro\3dmaths.h" />
+    <ClInclude Include="include\allegro\alcompat.h" />
+    <ClInclude Include="include\allegro\alinline.h" />
+    <ClInclude Include="include\allegro\base.h" />
+    <ClInclude Include="include\allegro\color.h" />
+    <ClInclude Include="include\allegro\compiled.h" />
+    <ClInclude Include="include\allegro\config.h" />
+    <ClInclude Include="include\allegro\datafile.h" />
+    <ClInclude Include="include\allegro\debug.h" />
+    <ClInclude Include="include\allegro\digi.h" />
+    <ClInclude Include="include\allegro\draw.h" />
+    <ClInclude Include="include\allegro\file.h" />
+    <ClInclude Include="include\allegro\fix.h" />
+    <ClInclude Include="include\allegro\fixed.h" />
+    <ClInclude Include="include\allegro\fli.h" />
+    <ClInclude Include="include\allegro\fmaths.h" />
+    <ClInclude Include="include\allegro\font.h" />
+    <ClInclude Include="include\allegro\gfx.h" />
+    <ClInclude Include="include\allegro\graphics.h" />
+    <ClInclude Include="include\allegro\gui.h" />
+    <ClInclude Include="include\allegro\internal\aintern.h" />
+    <ClInclude Include="include\allegro\internal\aintvga.h" />
+    <ClInclude Include="include\allegro\internal\alconfig.h" />
+    <ClInclude Include="include\allegro\joystick.h" />
+    <ClInclude Include="include\allegro\keyboard.h" />
+    <ClInclude Include="include\allegro\lzss.h" />
+    <ClInclude Include="include\allegro\matrix.h" />
+    <ClInclude Include="include\allegro\midi.h" />
+    <ClInclude Include="include\allegro\mouse.h" />
+    <ClInclude Include="include\allegro\palette.h" />
+    <ClInclude Include="include\allegro\platform\aintbeos.h" />
+    <ClInclude Include="include\allegro\platform\aintdos.h" />
+    <ClInclude Include="include\allegro\platform\aintlnx.h" />
+    <ClInclude Include="include\allegro\platform\aintmac.h" />
+    <ClInclude Include="include\allegro\platform\aintosx.h" />
+    <ClInclude Include="include\allegro\platform\aintpsp.h" />
+    <ClInclude Include="include\allegro\platform\aintqnx.h" />
+    <ClInclude Include="include\allegro\platform\aintunix.h" />
+    <ClInclude Include="include\allegro\platform\aintwin.h" />
+    <ClInclude Include="include\allegro\platform\al386gcc.h" />
+    <ClInclude Include="include\allegro\platform\al386vc.h" />
+    <ClInclude Include="include\allegro\platform\al386wat.h" />
+    <ClInclude Include="include\allegro\platform\albcc32.h" />
+    <ClInclude Include="include\allegro\platform\albecfg.h" />
+    <ClInclude Include="include\allegro\platform\albeos.h" />
+    <ClInclude Include="include\allegro\platform\aldjgpp.h" />
+    <ClInclude Include="include\allegro\platform\aldmc.h" />
+    <ClInclude Include="include\allegro\platform\aldos.h" />
+    <ClInclude Include="include\allegro\platform\almac.h" />
+    <ClInclude Include="include\allegro\platform\almaccfg.h" />
+    <ClInclude Include="include\allegro\platform\almngw32.h" />
+    <ClInclude Include="include\allegro\platform\almsvc.h" />
+    <ClInclude Include="include\allegro\platform\alosx.h" />
+    <ClInclude Include="include\allegro\platform\alosxcfg.h" />
+    <ClInclude Include="include\allegro\platform\alplatf.h" />
+    <ClInclude Include="include\allegro\platform\alpsp.h" />
+    <ClInclude Include="include\allegro\platform\alpspcfg.h" />
+    <ClInclude Include="include\allegro\platform\alqnx.h" />
+    <ClInclude Include="include\allegro\platform\alqnxcfg.h" />
+    <ClInclude Include="include\allegro\platform\alucfg.h" />
+    <ClInclude Include="include\allegro\platform\alunix.h" />
+    <ClInclude Include="include\allegro\platform\alwatcom.h" />
+    <ClInclude Include="include\allegro\platform\alwin.h" />
+    <ClInclude Include="include\allegro\platform\astdint.h" />
+    <ClInclude Include="include\allegro\platform\macdef.h" />
+    <ClInclude Include="include\allegro\quat.h" />
+    <ClInclude Include="include\allegro\rle.h" />
+    <ClInclude Include="include\allegro\sound.h" />
+    <ClInclude Include="include\allegro\stream.h" />
+    <ClInclude Include="include\allegro\system.h" />
+    <ClInclude Include="include\allegro\text.h" />
+    <ClInclude Include="include\allegro\timer.h" />
+    <ClInclude Include="include\allegro\unicode.h" />
+    <ClInclude Include="include\winalleg.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F13CE3E8-34B1-36D5-9813-AD56B7CB288A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>allegro</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">allegro-debug-64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">allegro-debug</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">allegro-release-64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">allegro-release</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">allegro-debug-release-64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">allegro-debug-release</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>_Bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>_Bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <OutDir>_Bin\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;DEBUGMODE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;DEBUGMODE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;ALLEGRO_STATICLINK;ALLEGRO_SRC;ALLEGRO_NO_MAGIC_MAIN;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

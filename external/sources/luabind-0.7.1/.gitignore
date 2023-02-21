@@ -2,3 +2,6 @@
 **/bin/*
 doc/*.html
 doc/version.rst
+
+_Bin/*
+!_Bin/*.lib

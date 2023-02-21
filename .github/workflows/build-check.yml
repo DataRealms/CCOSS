@@ -56,12 +56,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson
+          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc ninja meson
 
       - name: Build
         env:
-          CC: "clang"
-          CXX: "clang++"
+          CC: "gcc"
+          CXX: "g++"
         run: |
           meson setup --buildtype=debug -Ddebug_type=full build
           meson compile -C build

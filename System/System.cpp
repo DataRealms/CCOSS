@@ -272,8 +272,11 @@ namespace RTE {
 			}
 		}
 		unzClose(zippedModule);
-		extractionProgressReport << "Successfully extracted Data Module from: " + zippedModuleName + " - Deleting zip file!\n";
-		std::remove((s_WorkingDirectory + zippedModuleName).c_str());
+
+		if (!abortExtract) {
+			extractionProgressReport << "Successfully extracted Data Module from: " + zippedModuleName + " - Deleting zip file!\n";
+			std::remove((s_WorkingDirectory + zippedModuleName).c_str());
+		}
 
 		return extractionProgressReport.str();
 	}

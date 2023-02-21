@@ -363,8 +363,7 @@ namespace RTE {
 	void ContentFile::ReloadBitmap(const std::string &filePath, int conversionMode) {
 		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 
-		std::unordered_map<std::string, BITMAP *>::iterator bmpItr = s_LoadedBitmaps[bitDepth].find(filePath);
-
+		auto bmpItr = s_LoadedBitmaps[bitDepth].find(filePath);
 		if (bmpItr == s_LoadedBitmaps[bitDepth].end()) {
 			return;
 		}

@@ -70,7 +70,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool DataModule::CreateOnDiskAsUserdata(const std::string &moduleName, const std::string_view &friendlyName, bool ignoreMissingItems, bool scanFolderContents) {
-		std::string moduleNameWithPackageExtension = System::GetUserdataDirectory() + "/" + moduleName + ((moduleName.find(System::GetModulePackageExtension()) == moduleName.length() - System::GetModulePackageExtension().length()) ? "" : System::GetModulePackageExtension());
+		std::string moduleNameWithPackageExtension = System::GetUserdataDirectory() + moduleName + ((moduleName.ends_with(System::GetModulePackageExtension()) ? "" : System::GetModulePackageExtension()));
 		if (Writer writer(moduleNameWithPackageExtension + "/Index.ini", false, true); writer.WriterOK()) {
 			DataModule newModule;
 			newModule.m_IsUserdata = true;

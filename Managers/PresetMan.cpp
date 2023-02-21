@@ -166,7 +166,7 @@ bool PresetMan::LoadAllDataModules() {
 		}
 	} else {
 		std::vector<std::filesystem::directory_entry> modDirectoryFolders;
-		const std::string modDirectory = System::GetWorkingDirectory() + System::GetModDirectory() + "/";
+		const std::string modDirectory = System::GetWorkingDirectory() + System::GetModDirectory();
 		std::copy_if(std::filesystem::directory_iterator(modDirectory), std::filesystem::directory_iterator(), std::back_inserter(modDirectoryFolders),
 			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
 		);
@@ -295,17 +295,21 @@ std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
     if (slashPos == std::string::npos) {
         slashPos = dataPath.find_first_of( '\\' );
     }
-    std::string moduleName = dataPath.substr( 0, slashPos );
+	// Include trailing slash in the substring range in case we need to match against the Data/Mods/Userdata directory
+    std::string moduleName = dataPath.substr( 0, slashPos + 1 );
 
     // Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
-    if (moduleName == "Data" || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
+    if (moduleName == "Data/" || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
         std::string shortenPath = dataPath.substr( slashPos + 1 );
         slashPos = shortenPath.find_first_of( '/' );
         if (slashPos == std::string::npos) {
             slashPos = shortenPath.find_first_of( '\\' );
         }
-        moduleName = shortenPath.substr( 0, slashPos );
+        moduleName = shortenPath.substr( 0, slashPos + 1 );
     }
+
+	// Remove trailing slash
+	moduleName.pop_back();
 
     return moduleName;
 }
@@ -344,7 +348,7 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) {
 std::string PresetMan::FullModulePath(std::string modulePath)
 {
     const std::string moduleName = GetModuleNameFromPath(modulePath);
-    const std::string moduleFolder = (IsModuleOfficial(moduleName) ? "Data" : IsModuleUserdata(moduleName) ? System::GetUserdataDirectory() : System::GetModDirectory()) + "/";
+    const std::string moduleFolder = (IsModuleOfficial(moduleName) ? "Data/" : IsModuleUserdata(moduleName) ? System::GetUserdataDirectory() : System::GetModDirectory());
     const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
     if (topFolder == moduleFolder) {
         return modulePath;
@@ -1169,9 +1173,9 @@ Actor * PresetMan::GetLoadout(std::string loadoutName, int moduleNumber, bool sp
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PresetMan::FindAndExtractZippedModules() const {
-	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + System::GetModDirectory())) {
 		std::string zippedModulePath = std::filesystem::path(directoryEntry).generic_string();
-		if (zippedModulePath.find(System::GetZippedModulePackageExtension()) == zippedModulePath.length() - System::GetZippedModulePackageExtension().length()) {
+		if (zippedModulePath.ends_with(System::GetZippedModulePackageExtension())) {
 			LoadingScreen::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
 			LoadingScreen::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
 		}

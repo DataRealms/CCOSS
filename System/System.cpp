@@ -15,11 +15,11 @@ namespace RTE {
 	std::vector<size_t> System::s_WorkingTree;
 	std::filesystem::file_time_type System::s_ProgramStartTime = std::filesystem::file_time_type::clock::now();
 	bool System::s_CaseSensitive = true;
-	const std::string System::s_ScreenshotDirectory = "ScreenShots";
-	const std::string System::s_ModDirectory = "Mods";
-	const std::string System::s_UserdataDirectory = "Userdata";
+	const std::string System::s_ScreenshotDirectory = "ScreenShots/";
+	const std::string System::s_ModDirectory = "Mods/";
+	const std::string System::s_UserdataDirectory = "Userdata/";
 	const std::string System::s_ModulePackageExtension = ".rte";
-	const std::string System::s_ZippedModulePackageExtension = ".rte.zip";
+	const std::string System::s_ZippedModulePackageExtension = ".zip";
 	const std::unordered_set<std::string> System::s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -483,11 +483,17 @@ ClassInfoGetters;
 	void RemoveOrDestroyAllAttachables(bool destroy);
 
 	/// <summary>
-	/// Gets the Attachable nearest to the passed in offset.
+	/// Gets a damage-transferring, impulse-vulnerable Attachable nearest to the passed in offset.
 	/// </summary>
 	/// <param name="offset">The offset that will be compared to each Attachable's ParentOffset.</param>
-	/// <returns>The nearest damage-transferring Attachable, or nullptr if none was found.</returns>
-	Attachable * GetNearestAttachableToOffset(const Vector &offset) const;
+	/// <returns>The nearest detachable Attachable, or nullptr if none was found.</returns>
+	Attachable * GetNearestDetachableAttachableToOffset(const Vector &offset) const;
+
+	/// <summary>
+	/// Gibs or detaches any Attachables that would normally gib or detach from the passed in impulses.
+	/// </summary>
+	/// <param name="impulseVector">The impulse vector which determines the Attachables to gib or detach. Will be filled out with the remainder of impulses.</param>
+	void DetachAttachablesFromImpulse(Vector &impulseVector);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

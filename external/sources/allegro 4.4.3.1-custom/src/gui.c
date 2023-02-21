@@ -571,13 +571,13 @@ static int obj_list_cmp(AL_CONST void *e1, AL_CONST void *e2)
  */
 static int cmp_tab(AL_CONST DIALOG *d1, AL_CONST DIALOG *d2)
 {
-   int ret = (int)((AL_CONST unsigned long)d2 - (AL_CONST unsigned long)d1);
+   ptrdiff_t ret = (AL_CONST uintptr_t)d2 - (AL_CONST uintptr_t)d1;
 
    /* Wrap around if d2 is before d1 in the dialog array. */
    if (ret < 0)
       ret += MAX_SIZE;
 
-   return ret;
+   return (int)ret;
 }
 
 
@@ -587,13 +587,13 @@ static int cmp_tab(AL_CONST DIALOG *d1, AL_CONST DIALOG *d2)
  */
 static int cmp_shift_tab(AL_CONST DIALOG *d1, AL_CONST DIALOG *d2)
 {
-   int ret = (int)((AL_CONST unsigned long)d1 - (AL_CONST unsigned long)d2);
+	ptrdiff_t ret = (AL_CONST uintptr_t)d1 - (AL_CONST uintptr_t)d2;
 
    /* Wrap around if d2 is after d1 in the dialog array. */
    if (ret < 0)
       ret += MAX_SIZE;
 
-   return ret;
+   return (int)ret;
 }
 
 

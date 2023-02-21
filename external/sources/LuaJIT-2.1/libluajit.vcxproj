@@ -120,7 +120,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
@@ -159,7 +159,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_DISABLE_GC64;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
@@ -196,7 +196,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
@@ -235,7 +235,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
@@ -275,7 +275,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
@@ -312,7 +312,7 @@
       <UndefinePreprocessorDefinitions>_FORTIFY_SOURCE</UndefinePreprocessorDefinitions>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>

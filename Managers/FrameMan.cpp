@@ -478,7 +478,7 @@ namespace RTE {
 		std::vector<std::pair<int, SDL_Rect>>::reverse_iterator topLeftDisplay = std::make_reverse_iterator(displayPos);
 		if(displayPos->second.x + windowW > displayBounds.back().second.x + displayBounds.back().second.w) {
 			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowW, displayBounds](auto display) {
-				return display->second.x + windowW <= displayBounds.back().second.x + displayBounds.back().second.w;
+				return display.second.x + windowW <= displayBounds.back().second.x + displayBounds.back().second.w;
 			});
 			if (topLeftDisplay == displayBounds.rend()) {
 				return false;
@@ -486,7 +486,7 @@ namespace RTE {
 		}
 		if(topLeftDisplay->second.y + windowH > displayBounds.back().second.y + displayBounds.back().second.h) {
 			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowH, displayBounds](auto display) {
-				return display->second.y + windowH <= displayBounds.back().second.y + displayBounds.back().second.h;
+				return display.second.y + windowH <= displayBounds.back().second.y + displayBounds.back().second.h;
 			});
 			if (topLeftDisplay == displayBounds.rend()) {
 				return false;
@@ -505,7 +505,7 @@ namespace RTE {
 
 		SDL_RestoreWindow(m_Window.get());
 		SDL_SetWindowBordered(m_Window.get(), SDL_FALSE);
-		SDL_SetWindowPos(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
+		SDL_SetWindowPosition(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
 		SDL_SetWindowSize(m_Window.get(), newWindowW, newWindowH);
 		return false;
 	}
@@ -679,12 +679,6 @@ namespace RTE {
 		m_ResX = newResX;
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
-
-		int windowW = m_ResX * m_ResMultiplier;
-		int windowH = m_ResY * m_ResMultiplier;
-		SDL_GL_GetDrawableSize(m_Window.get(), &windowW, &windowH);
-		if (!m_Fullscreen || m_MultiWindows.empty()) {
-		}
 
 		set_palette(m_Palette);
 		RecreateBackBuffers();

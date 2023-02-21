@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Addon libraries
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<center><h1><b>
+Addon libraries
+</b></h1></center>
+<hr>
+<i>
+This document contains general information about addon libraries that are
+distributed with Allegro. For more detailed info on API, usage and updates,
+refer to the documentation and web site of the specific addon library.
+</i>
+
+
+<p><br>
+<h1><a name="Contents">Contents</a></h1>
+
+<p>
+<ul>
+<li><a href="#Building addons">Building addons</a>
+<li><a href="#Available addons">Available addons</a>
+<ul>
+<li><a href="#AllegroGL">   AllegroGL</a> 
+<li><a href="#jpgalleg">   jpgalleg</a> 
+<li><a href="#loadpng">   loadpng</a> 
+<li><a href="#logg">   logg</a> 
+</ul>
+</ul>
+
+
+
+<p><br>
+<h1><a name="Building addons">Building addons</a></h1>
+
+<p>
+All available addons are built automatically if all the required dependencies
+are found. To disable building of the specific addon, set the appropriate CMake
+variables to off.  You can use ccmake to browse the list of options.
+
+
+<p><br>
+<h1><a name="Available addons">Available addons</a></h1>
+
+<p>
+Since Allegro 4.4, several addon libraries are bundled in the Allegro package.
+These are some of the most commonly used addons because they contain some
+handy features that Allegro lacks. Hopefully, with these addons you will need
+less additional libraries for your game.
+
+<p>
+One advantage of bundled addons is that their build system is integrated with
+Allegro's build system. Addons are automatically configured, built, installed
+and uninstalled with Allegro. However, you can perform these operations
+separately for each addon, if that will better suit your needs.
+
+<p>
+Finally, if you think that some addons, in your opinion, should be included,
+feel free to contact Allegro developers and we will consider your proposal.
+
+
+<p><br>
+<div class="al-api"><b><a name="AllegroGL">   AllegroGL</a></b></div><br>
+  AllegroGL is an Allegro add-on that allows you to use OpenGL alongside
+  Allegro -- you use OpenGL for your rendering to the screen, and Allegro for
+  miscellaneous tasks like gathering input, doing timers, getting
+  cross-platform portability, loading data, and drawing your textures. So
+  this library fills the same hole that things like GLUT do.
+
+<p>
+  AllegroGL also automatically exposes most, if not all, OpenGL extensions
+  available to user programs. This means you no longer have to manually load
+  them; extension management is already done for you.
+
+<p>
+  License: dual-licensed under GPL and zlib.
+
+<p>
+  More info:
+  <ul>
+    <li> website:<br>
+       <a href="http://allegrogl.sf.net/">http://allegrogl.sf.net/<a>
+    <li> docs:<br>
+       <a href="http://allegrogl.sourceforge.net/wiki/Documentation">http://allegrogl.sourceforge.net/wiki/Documentation<a><br>
+       <a href="http://wiki.allegro.cc/AllegroGL">http://wiki.allegro.cc/AllegroGL<a><br>
+       From allegro directory: addons/allegrogl/docs/html/index.html<br>
+    <li> examples:<br>
+       From allegro directory: addon/allegrogl/examples/
+  </ul>
+
+
+<p><br>
+<div class="al-api"><b><a name="loadpng">   loadpng</a></b></div><br>
+  PNG (Portable Network Graphics) is a cool raster image file format. libpng is
+  the reference library for working with PNG files. loadpng is some glue that
+  makes it easy to use libpng to load and save bitmaps from Allegro programs.
+
+<p>
+  loadpng depends on zlib and libpng libraries. Instructions for getting and
+  installing these can be found on loadpng webiste.
+
+<p>
+  License: public domain
+
+<p>
+  More info:
+  <ul>
+    <li> website:<br>
+       <a href="http://tjaden.strangesoft.net/loadpng/">http://tjaden.strangesoft.net/loadpng/<a><br>
+    <li> docs:<br>
+       <a href="http://tjaden.strangesoft.net/loadpng/README.txt">http://tjaden.strangesoft.net/loadpng/README.txt<a><br>
+       From allegro directory: addons/loadpng/README.txt<br>
+    <li> examples:<br>
+       From allegro directory: addon/loadpng/examples/<br>
+  </ul>
+
+<p><br>
+<div class="al-api"><b><a name="logg">   logg</a></b></div><br>
+  LOGG is an Allegro  add-on library for playing OGG/Vorbis audio files. It can
+  load OGG/Vorbis files as Allegro SAMPLE's, or it can stream them from disk to
+  save memory.
+  It depends on libogg and libvorbis, available from vorbis.com.
+
+<p>
+  License: MIT License. See addons/logg/LICENSE.TXT
+
+<p>
+  More info:
+  <ul>
+    <li> website:<br>
+       <a href="http://trent.gamblin.ca/logg/">http://trent.gamblin.ca/logg/<a>
+    <li> examples:<br>
+       From allegro directory: addon/loadpng/<br>
+  </ul>
+
+
+<p><br>
+<div class="al-api"><b><a name="jpgalleg">   jpgalleg</a></b></div><br>
+  This addon library lets you load baseline and progressive encoded JPG images,
+  and to save baseline JPGs. It is standalone (no dependencies except for
+  Allegro), compact (compiled lib weights 40K!) fast and standard compliant
+  (it'll load almost any JPG you'll throw at it!). Ships with sources,
+  documentation, examples and a Grabber plugin, and supports any platform
+  supported by Allegro.
+
+<p>
+  License: zlib/libpng. See addons/jpgalleg/license.txt.
+
+<p>
+  More info:
+  <ul>
+    <li> website:<br>
+       <a href="http://www.ecplusplus.com/index.php?page=projects&amp;pid=1">http://www.ecplusplus.com/index.php?page=projects&amp;pid=1<a><br>
+    <li> docs:<br>
+       From allegro directory: addons/jpgalleg/readme.txt<br>
+    <li> examples:<br>
+       From allegro directory: addon/jpgalleg/examples/<br>
+  </ul>
+
+
+</body>
+</html>

@@ -225,7 +225,7 @@ int MovableObject::Create(const MovableObject &reference)
     if (reference.m_pScreenEffect)
     {
         m_ScreenEffectFile = reference.m_ScreenEffectFile;
-        m_pScreenEffect = reference.m_pScreenEffect;
+        m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 
     }
 	m_EffectRotAngle = reference.m_EffectRotAngle;

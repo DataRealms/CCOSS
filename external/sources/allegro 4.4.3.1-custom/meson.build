@@ -5,7 +5,6 @@ allegro_defines = []
 if host_machine.system() in ['linux', 'darwin']
   allegro_defines += 'ALLEGRO_UNIX'
   aluconfig = configuration_data()
-  aluconfig.set10('ALLEGRO_NO_ASM', true)
   aluconfig.set('ALLEGRO_COLOR8', true)
   aluconfig.set('ALLEGRO_COLOR16', true)
   aluconfig.set('ALLEGRO_COLOR24', true)

@@ -1,5 +1,4 @@
 external_inc_dirs = [include_directories('common',
-                                         'common/RakNet',
                                          'common/boost_1_75',
                                          'common/fmod',)]
 if host_machine.system() in ['linux', 'darwin']

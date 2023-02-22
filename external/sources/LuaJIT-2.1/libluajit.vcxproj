@@ -124,6 +124,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -163,6 +164,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>/opt:ref /opt:icf %(AdditionalOptions)</AdditionalOptions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -202,6 +204,7 @@
       </DebugInformationFormat>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -241,6 +244,7 @@
       </DebugInformationFormat>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -278,6 +282,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -315,6 +320,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;LUAJIT_DISABLE_GC64;NDEBUG;LUAJIT_OS=LUAJIT_OS_WINDOWS;LUAJIT_UNWIND_EXTERNAL;LUA_MULTILIB="lib";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>

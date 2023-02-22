@@ -126,6 +126,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;BOOST_BIND_GLOBAL_PLACEHOLDERS=1;_ITERATOR_DEBUG_LEVEL=0;LUABIND_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -148,6 +149,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;BOOST_BIND_GLOBAL_PLACEHOLDERS=1;_ITERATOR_DEBUG_LEVEL=0;LUABIND_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -171,6 +173,7 @@
       <DebugInformationFormat>
       </DebugInformationFormat>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -193,6 +196,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -215,6 +219,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;BOOST_BIND_GLOBAL_PLACEHOLDERS=1;_ITERATOR_DEBUG_LEVEL=0;NDEBUG;LUABIND_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -236,6 +241,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;BOOST_BIND_GLOBAL_PLACEHOLDERS=1;_ITERATOR_DEBUG_LEVEL=0;NDEBUG;LUABIND_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>

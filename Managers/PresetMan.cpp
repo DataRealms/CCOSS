@@ -295,8 +295,9 @@ std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
     if (slashPos == std::string::npos) {
         slashPos = dataPath.find_first_of( '\\' );
     }
+
 	// Include trailing slash in the substring range in case we need to match against the Data/Mods/Userdata directory
-    std::string moduleName = dataPath.substr( 0, slashPos + 1 );
+	std::string moduleName = slashPos != std::string::npos ? dataPath.substr( 0, slashPos + 1 ) : dataPath;
 
     // Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
     if (moduleName == "Data/" || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
@@ -309,7 +310,9 @@ std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
     }
 
 	// Remove trailing slash
-	moduleName.pop_back();
+	if (!moduleName.empty() && moduleName.back() == '/') {
+		moduleName.pop_back();
+	}
 
     return moduleName;
 }

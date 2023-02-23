@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: RLE sprites
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="RLE sprites">RLE sprites</a></h1>
+
+<ul>
+<li><a href="#destroy_rle_sprite">destroy_rle_sprite</a> &mdash; Destroys an RLE sprite.
+<li><a href="#draw_lit_rle_sprite">draw_lit_rle_sprite</a> &mdash; Draws a tinted RLE sprite.
+<li><a href="#draw_rle_sprite">draw_rle_sprite</a> &mdash; Draws an RLE sprite.
+<li><a href="#draw_trans_rle_sprite">draw_trans_rle_sprite</a> &mdash; Draws a translucent RLE sprite.
+<li><a href="#get_rle_sprite">get_rle_sprite</a> &mdash; Creates an RLE sprite using a bitmap as source.
+</ul>
+
+<p>
+Because bitmaps can be used in so many different ways, the bitmap structure 
+is quite complicated, and it contains a lot of data. In many situations, 
+though, you will find yourself storing images that are only ever copied to 
+the screen, rather than being drawn onto or used as filling patterns, etc. 
+If this is the case you may be better off storing your images in RLE_SPRITE 
+(read chapter "Structures and types defined by Allegro" for an internal
+description of the RLE_SPRITE structure) or COMPILED_SPRITE (see next
+chapter) structures rather than regular bitmaps.
+
+<p>
+RLE sprites store the image in a simple run-length encoded format, where 
+repeated zero pixels are replaced by a single length count, and strings of 
+non-zero pixels are preceded by a counter giving the length of the solid 
+run. RLE sprites are usually much smaller than normal bitmaps, both because
+of the run length compression, and because they avoid most of the overhead 
+of the bitmap structure. They are often also faster than normal bitmaps, 
+because rather than having to compare every single pixel with zero to 
+determine whether it should be drawn, it is possible to skip over a whole 
+run of zeros with a single add, or to copy a long run of non-zero pixels 
+with fast string instructions.
+
+<p>
+Every silver lining has a cloud, though, and in the case of RLE sprites it 
+is a lack of flexibility. You can't draw onto them, and you can't flip them, 
+rotate them, or stretch them. In fact the only thing you can do with them is 
+to blast them onto a bitmap with the draw_rle_sprite() function, which is 
+equivalent to using draw_sprite() with a regular bitmap. You can convert 
+bitmaps into RLE sprites at runtime, or you can create RLE sprite structures 
+in grabber datafiles by making a new object of type 'RLE sprite'.
+
+<p><br>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#RLE_SPRITE" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *<a name="get_rle_sprite">get_rle_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap);</b></div><br>
+   Creates an RLE sprite based on the specified bitmap (which must be a 
+   memory bitmap). Remember to free this RLE sprite later to avoid memory
+   leaks. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#RLE_SPRITE" class="autotype" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *rle;
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+      ...
+      /* Create RLE sprite from an existent bitmap. */
+      rle = <a href="#get_rle_sprite" class="autotype" title="Creates an RLE sprite using a bitmap as source.">get_rle_sprite</a>(bmp);
+      if (!rle)
+         abort_on_error("Couldn't create RLE sprite!");
+         
+      /* We don't need the bitmap any more.*/
+      <a href="alleg009.html#destroy_bitmap" class="autotype" title="Destroys any type of created bitmap.">destroy_bitmap</a>(bmp);
+      
+      /* Use the RLE sprite. */
+      ...
+      /* Destroy it when we don't need it any more. */
+      <a href="#destroy_rle_sprite" class="autotype" title="Destroys an RLE sprite.">destroy_rle_sprite</a>(rle);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the created RLE sprite, or NULL if the RLE sprite
+   could not be created. Remember to free this RLE sprite later to avoid
+   memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_rle_sprite" title="Draws an RLE sprite.">draw_rle_sprite</a>,
+<a class="xref" href="#destroy_rle_sprite" title="Destroys an RLE sprite.">destroy_rle_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_rle_sprite">destroy_rle_sprite</a>(<a class="autotype" href="alleg001.html#RLE_SPRITE" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *sprite);</b></div><br>
+   Destroys an RLE sprite structure previously returned by get_rle_sprite().
+   If you pass a NULL pointer this function won't do anything. Use this once
+   you are done with an RLE sprite to avoid memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_rle_sprite" title="Creates an RLE sprite using a bitmap as source.">get_rle_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_rle_sprite">draw_rle_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, const <a class="autotype" href="alleg001.html#RLE_SPRITE" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *sprite,
+                     int x, int y);</b></div><br>
+   Draws an RLE sprite onto a bitmap at the specified position. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#RLE_SPRITE" class="autotype" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *rle_sprite;
+      ...
+      <a href="#draw_rle_sprite" class="autotype" title="Draws an RLE sprite.">draw_rle_sprite</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, rle_sprite, 100, 100);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_rle_sprite" title="Creates an RLE sprite using a bitmap as source.">get_rle_sprite</a>,
+<a class="xref" href="alleg014.html#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg016.html#draw_compiled_sprite" title="Draws a compiled sprite.">draw_compiled_sprite</a>,
+<a class="xref" href="#draw_trans_rle_sprite" title="Draws a translucent RLE sprite.">draw_trans_rle_sprite</a>,
+<a class="xref" href="#draw_lit_rle_sprite" title="Draws a tinted RLE sprite.">draw_lit_rle_sprite</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_trans_rle_sprite">draw_trans_rle_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, const <a class="autotype" href="alleg001.html#RLE_SPRITE" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *sprite,
+                           int x, int y);</b></div><br>
+   Translucent version of draw_rle_sprite(). See the description of 
+   draw_trans_sprite(). This must only be used after you have set up the 
+   color mapping table (for 256-color modes) or blender functions (for 
+   truecolor modes). The bitmap and sprite must normally be in the same 
+   color depth, but as a special case you can draw 32-bit RGBA format 
+   sprites onto any hicolor or truecolor bitmap, as long as you call 
+   set_alpha_blender() first. Example:
+<blockquote class="code"><pre>
+      /* Some one time initialisation code. */
+      <a href="alleg001.html#COLOR_MAP" class="autotype" title="Stores a color map to accelerate drawing.">COLOR_MAP</a> global_trans_table;
+      <a href="alleg020.html#create_trans_table" class="autotype" title="Fills a color mapping table for translucency effects.">create_trans_table</a>(&global_trans_table, my_palette,
+                         128, 128, 128, NULL);
+      ...
+      if (<a href="alleg008.html#get_color_depth" class="autotype" title="Returns the current pixel color depth.">get_color_depth</a>() == 8)
+         <a href="alleg020.html#color_map" class="autotype" title="Global pointer to the color mapping table.">color_map</a> = &global_trans_table;
+      else
+         <a href="alleg020.html#set_trans_blender" class="autotype" title="Enables a truecolor blender.">set_trans_blender</a>(128, 128, 128, 128);
+
+      <a href="#draw_trans_rle_sprite" class="autotype" title="Draws a translucent RLE sprite.">draw_trans_rle_sprite</a>(buffer, rle_ghost_sprite, x, y);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_rle_sprite" title="Draws an RLE sprite.">draw_rle_sprite</a>,
+<a class="xref" href="#draw_lit_rle_sprite" title="Draws a tinted RLE sprite.">draw_lit_rle_sprite</a>,
+<a class="xref" href="alleg014.html#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#set_trans_blender" title="Enables a truecolor blender.">set_trans_blender</a>,
+<a class="xref" href="alleg020.html#set_alpha_blender" title="Enables a special alpha-channel blending mode.">set_alpha_blender</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_lit_rle_sprite">draw_lit_rle_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, const <a class="autotype" href="alleg001.html#RLE_SPRITE" title="Stores the contents of an RLE sprite.">RLE_SPRITE</a> *sprite,
+                         int x, y, color);</b></div><br>
+   Tinted version of draw_rle_sprite(). See the description of
+   draw_lit_sprite(). This must only be used after you have set up the color 
+   mapping table (for 256-color modes) or blender functions (for truecolor 
+   modes). Example:
+<blockquote class="code"><pre>
+      /* Some one time initialisation code. */
+      <a href="alleg001.html#COLOR_MAP" class="autotype" title="Stores a color map to accelerate drawing.">COLOR_MAP</a> global_light_table;
+      <a href="alleg020.html#create_light_table" class="autotype" title="Fills a color mapping table for lighting effects.">create_light_table</a>(&global_trans_table, my_palette,
+                         10, 10, 60, NULL);
+      ...
+      if (<a href="alleg008.html#get_color_depth" class="autotype" title="Returns the current pixel color depth.">get_color_depth</a>() == 8)
+         <a href="alleg020.html#color_map" class="autotype" title="Global pointer to the color mapping table.">color_map</a> = &global_light_table;
+      else
+         <a href="alleg020.html#set_trans_blender" class="autotype" title="Enables a truecolor blender.">set_trans_blender</a>(40, 40, 255, 255);
+
+      /* Lit the cape with a blueish light. */
+      <a href="#draw_lit_rle_sprite" class="autotype" title="Draws a tinted RLE sprite.">draw_lit_rle_sprite</a>(buffer, rle_colored_cape, x, y, 64);</pre></blockquote>
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_rle_sprite" title="Draws an RLE sprite.">draw_rle_sprite</a>,
+<a class="xref" href="#draw_trans_rle_sprite" title="Draws a translucent RLE sprite.">draw_trans_rle_sprite</a>,
+<a class="xref" href="alleg014.html#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#set_trans_blender" title="Enables a truecolor blender.">set_trans_blender</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Drawing primitives
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Drawing primitives">Drawing primitives</a></h1>
+
+<ul>
+<li><a href="#_getpixel">_getpixel</a> &mdash; Faster specific version of getpixel().
+<li><a href="#_getpixel15">_getpixel15</a> &mdash; Faster specific version of getpixel().
+<li><a href="#_getpixel16">_getpixel16</a> &mdash; Faster specific version of getpixel().
+<li><a href="#_getpixel24">_getpixel24</a> &mdash; Faster specific version of getpixel().
+<li><a href="#_getpixel32">_getpixel32</a> &mdash; Faster specific version of getpixel().
+<li><a href="#_putpixel">_putpixel</a> &mdash; Faster specific version of putpixel().
+<li><a href="#_putpixel15">_putpixel15</a> &mdash; Faster specific version of putpixel().
+<li><a href="#_putpixel16">_putpixel16</a> &mdash; Faster specific version of putpixel().
+<li><a href="#_putpixel24">_putpixel24</a> &mdash; Faster specific version of putpixel().
+<li><a href="#_putpixel32">_putpixel32</a> &mdash; Faster specific version of putpixel().
+<li><a href="#arc">arc</a> &mdash; Draws a circular arc.
+<li><a href="#calc_spline">calc_spline</a> &mdash; Calculates a series of values along a Bezier spline.
+<li><a href="#circle">circle</a> &mdash; Draws a circle.
+<li><a href="#circlefill">circlefill</a> &mdash; Draws a filled circle.
+<li><a href="#clear_bitmap">clear_bitmap</a> &mdash; Clears the bitmap to color 0.
+<li><a href="#clear_to_color">clear_to_color</a> &mdash; Clears the bitmap to the specified color.
+<li><a href="#do_arc">do_arc</a> &mdash; Calculates all the points in a circular arc.
+<li><a href="#do_circle">do_circle</a> &mdash; Calculates all the points in a circle.
+<li><a href="#do_ellipse">do_ellipse</a> &mdash; Calculates all the points in an ellipse.
+<li><a href="#do_line">do_line</a> &mdash; Calculates all the points along a line.
+<li><a href="#ellipse">ellipse</a> &mdash; Draws an ellipse.
+<li><a href="#ellipsefill">ellipsefill</a> &mdash; Draws a filled ellipse.
+<li><a href="#fastline">fastline</a> &mdash; Faster version of line().
+<li><a href="#floodfill">floodfill</a> &mdash; Floodfills an enclosed area.
+<li><a href="#getpixel">getpixel</a> &mdash; Reads a pixel from a bitmap.
+<li><a href="#hline">hline</a> &mdash; Draws a horizontal line onto the bitmap.
+<li><a href="#line">line</a> &mdash; Draws a line onto the bitmap.
+<li><a href="#polygon">polygon</a> &mdash; Draws a filled polygon.
+<li><a href="#putpixel">putpixel</a> &mdash; Writes a pixel into a bitmap.
+<li><a href="#rect">rect</a> &mdash; Draws an outline rectangle.
+<li><a href="#rectfill">rectfill</a> &mdash; Draws a solid filled rectangle.
+<li><a href="#spline">spline</a> &mdash; Draws a Bezier spline using four control points.
+<li><a href="#triangle">triangle</a> &mdash; Draws a filled triangle.
+<li><a href="#vline">vline</a> &mdash; Draws a vertical line onto the bitmap.
+</ul>
+
+<p>
+Except for _putpixel(), all these routines are affected by the current 
+drawing mode and the clipping rectangle of the destination bitmap. Unless
+specified otherwise, all coordinates for drawing operations are inclusive,
+and they, as well as lengths, are specified in pixel units.
+
+<p><br>
+<div class="al-api"><b>void <a name="clear_bitmap">clear_bitmap</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap);</b></div><br>
+   Clears the bitmap to color 0.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#clear_to_color" title="Clears the bitmap to the specified color.">clear_to_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="clear_to_color">clear_to_color</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap, int color);</b></div><br>
+   Clears the bitmap to the specified color. Example:
+<blockquote class="code"><pre>
+      /* Clear the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a> to red. */
+      <a href="#clear_to_color" class="autotype" title="Clears the bitmap to the specified color.">clear_to_color</a>(bmp, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(255, 0, 0));</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#clear_bitmap" title="Clears the bitmap to color 0.">clear_bitmap</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="putpixel">putpixel</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+   Writes a pixel to the specified position in the bitmap, using the current 
+   drawing mode and the bitmap's clipping rectangle. Example: 
+<blockquote class="code"><pre>
+      <a href="#putpixel" class="autotype" title="Writes a pixel into a bitmap.">putpixel</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 10, 30, some_color);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#getpixel" title="Reads a pixel from a bitmap.">getpixel</a>,
+<a class="xref" href="#_putpixel" title="Faster specific version of putpixel().">_putpixel</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#exalpha" title="Creating and using 32 bit RGBA sprites.">exalpha</a>,
+<a class="eref" href="alleg045.html#exflame" title="How to write directly to video memory improving performance.">exflame</a>,
+<a class="eref" href="alleg045.html#exjoy" title="Detecting, calibrating and using joystick input.">exjoy</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>.</blockquote>
+<div class="al-api"><b>void <a name="_putpixel">_putpixel</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+<div class="al-api-cont"><b>void <a name="_putpixel15">_putpixel15</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+<div class="al-api-cont"><b>void <a name="_putpixel16">_putpixel16</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+<div class="al-api-cont"><b>void <a name="_putpixel24">_putpixel24</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+<div class="al-api-cont"><b>void <a name="_putpixel32">_putpixel32</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+   Like the regular putpixel(), but much faster because they are implemented 
+   as an inline assembler functions for specific color depths. These won't 
+   work in mode-X graphics modes, don't perform any clipping (they will 
+   crash if you try to draw outside the bitmap!), and ignore the drawing 
+   mode.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#putpixel" title="Writes a pixel into a bitmap.">putpixel</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+<div class="al-api"><b>int <a name="getpixel">getpixel</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+   Reads a pixel from point (x, y) in the bitmap.
+<p><b>Return value:</b>
+   Returns -1 if the point lies outside the bitmap (ignoring the clipping
+   rectangle), otherwise the value of the pixel in the color format of the
+   bitmap.
+
+<p>
+   Warning: -1 is also a valid value for pixels contained in 32-bit bitmaps
+   with alpha channel (when R,G,B,A are all equal to 255) so you can't use
+   the test against -1 as a predicate for such bitmaps. In this cases, the
+   only reliable predicate is is_inside_bitmap().
+
+<p>
+   To extract the individual color components, use the getr() / getg() /
+   getb() / geta() family of functions.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#putpixel" title="Writes a pixel into a bitmap.">putpixel</a>,
+<a class="xref" href="#_getpixel" title="Faster specific version of getpixel().">_getpixel</a>,
+<a class="xref" href="alleg009.html#is_inside_bitmap" title="Tells if a point is inside a bitmap.">is_inside_bitmap</a>,
+<a class="xref" href="alleg012.html#getr" title="Extract a color component from the current pixel format.">getr</a>,
+<a class="xref" href="alleg012.html#getg" title="Extract a color component from the current pixel format.">getg</a>,
+<a class="xref" href="alleg012.html#getb" title="Extract a color component from the current pixel format.">getb</a>,
+<a class="xref" href="alleg012.html#geta" title="Extract a color component from the current pixel format.">geta</a>,
+<a class="xref" href="alleg012.html#Truecolor pixel formats" title="">Truecolor pixel formats</a>,
+<a class="xref" href="alleg011.html#Palette routines" title="">Palette routines</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#exalpha" title="Creating and using 32 bit RGBA sprites.">exalpha</a>,
+<a class="eref" href="alleg045.html#exflame" title="How to write directly to video memory improving performance.">exflame</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>.</blockquote>
+<div class="al-api"><b>int <a name="_getpixel">_getpixel</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>int <a name="_getpixel15">_getpixel15</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>int <a name="_getpixel16">_getpixel16</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>int <a name="_getpixel24">_getpixel24</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>int <a name="_getpixel32">_getpixel32</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y);</b></div><br>
+   Faster inline versions of getpixel() for specific color depths. These 
+   won't work in mode-X, and don't do any clipping, so you must make sure 
+   the point lies inside the bitmap.
+<p><b>Return value:</b>
+   Returns the value of the pixel in the color format you specified.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#getpixel" title="Reads a pixel from a bitmap.">getpixel</a>.</blockquote>
+<div class="al-api"><b>void <a name="vline">vline</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y1, int y2, int color);</b></div><br>
+   Draws a vertical line onto the bitmap, from point (x, y1) to (x, y2).
+
+<p>
+   Note: vline() is implemented as an alias to another function.
+   See ALLEGRO_NO_VHLINE_ALIAS in the `Differences between platforms'
+   section for details.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#hline" title="Draws a horizontal line onto the bitmap.">hline</a>,
+<a class="xref" href="#line" title="Draws a line onto the bitmap.">line</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>,
+<a class="xref" href="alleg042.html#Differences between platforms" title="">Differences between platforms</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>,
+<a class="eref" href="alleg045.html#exscroll" title="Mode-X hardware scrolling and split screens.">exscroll</a>,
+<a class="eref" href="alleg045.html#extruec" title="Truecolor pixel format conversions.">extruec</a>.</blockquote>
+<div class="al-api"><b>void <a name="hline">hline</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, int y, int x2, int color);</b></div><br>
+   Draws a horizontal line onto the bitmap, from point (x1, y) to (x2, y).
+
+<p>
+   Note: hline() is implemented as an alias to another function.
+   See ALLEGRO_NO_VHLINE_ALIAS in the `Differences between platforms'
+   section for details.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#vline" title="Draws a vertical line onto the bitmap.">vline</a>,
+<a class="xref" href="#line" title="Draws a line onto the bitmap.">line</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>,
+<a class="xref" href="alleg042.html#Differences between platforms" title="">Differences between platforms</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="do_line">do_line</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, y1, x2, y2, int d, 
+             void (*proc)(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d));</b></div><br>
+   Calculates all the points along a line from point (x1, y1) to (x2, y2), 
+   calling the supplied function for each one. This will be passed a copy of 
+   the bmp parameter, the x and y position, and a copy of the d parameter, 
+   so it is suitable for use with putpixel(). Example:
+<blockquote class="code"><pre>
+      void draw_dust_particle(<a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d)
+      {
+         ...
+      }
+      
+         <a href="#do_line" class="autotype" title="Calculates all the points along a line.">do_line</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>-1, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>-2,
+                 dust_strength, draw_dust_particle);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#do_circle" title="Calculates all the points in a circle.">do_circle</a>,
+<a class="xref" href="#do_ellipse" title="Calculates all the points in an ellipse.">do_ellipse</a>,
+<a class="xref" href="#do_arc" title="Calculates all the points in a circular arc.">do_arc</a>,
+<a class="xref" href="#line" title="Draws a line onto the bitmap.">line</a>.</blockquote>
+<div class="al-api"><b>void <a name="line">line</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, int y1, int x2, int y2, int color);</b></div><br>
+   Draws a line onto the bitmap, from point (x1, y1) to (x2, y2).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fastline" title="Faster version of line().">fastline</a>,
+<a class="xref" href="#hline" title="Draws a horizontal line onto the bitmap.">hline</a>,
+<a class="xref" href="#vline" title="Draws a vertical line onto the bitmap.">vline</a>,
+<a class="xref" href="#do_line" title="Calculates all the points along a line.">do_line</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="fastline">fastline</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, int y1, int x2, int y2, int color);</b></div><br>
+   Faster version of the previous function. Note that pixel correctness is
+   not guaranteed for this function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#line" title="Draws a line onto the bitmap.">line</a>,
+<a class="xref" href="#hline" title="Draws a horizontal line onto the bitmap.">hline</a>,
+<a class="xref" href="#vline" title="Draws a vertical line onto the bitmap.">vline</a>,
+<a class="xref" href="#do_line" title="Calculates all the points along a line.">do_line</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="triangle">triangle</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, y1, x2, y2, x3, y3, int color);</b></div><br>
+   Draws a filled triangle between the three points.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#polygon" title="Draws a filled polygon.">polygon</a>,
+<a class="xref" href="alleg019.html#triangle3d" title="Draws a 3d triangle onto the specified bitmap.">triangle3d</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>void <a name="polygon">polygon</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int vertices, const int *points, int color);</b></div><br>
+   Draws a filled polygon with an arbitrary number of corners. Pass the 
+   number of vertices and an array containing a series of x, y points (a 
+   total of vertices*2 values). Example:
+<blockquote class="code"><pre>
+      int points[12] = { 50, 50,   100, 100,  100, 150,
+                         50, 200,  0,   150,  0,   100 };
+      ...
+      <a href="#clear_to_color" class="autotype" title="Clears the bitmap to the specified color.">clear_to_color</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(255, 255, 255));
+      <a href="#polygon" class="autotype" title="Draws a filled polygon.">polygon</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 6, points, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(0, 0, 0));</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#triangle" title="Draws a filled triangle.">triangle</a>,
+<a class="xref" href="alleg019.html#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>.</blockquote>
+<div class="al-api"><b>void <a name="rect">rect</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, int y1, int x2, int y2, int color);</b></div><br>
+   Draws an outline rectangle with the two points as its opposite corners.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rectfill" title="Draws a solid filled rectangle.">rectfill</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>.</blockquote>
+<div class="al-api"><b>void <a name="rectfill">rectfill</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x1, int y1, int x2, int y2, int color);</b></div><br>
+   Draws a solid, filled rectangle with the two points as its opposite 
+   corners.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rect" title="Draws an outline rectangle.">rect</a>,
+<a class="xref" href="#clear_bitmap" title="Clears the bitmap to color 0.">clear_bitmap</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exalpha" title="Creating and using 32 bit RGBA sprites.">exalpha</a>,
+<a class="eref" href="alleg045.html#excolmap" title="Creating graphical effects with color mapping tables.">excolmap</a>,
+<a class="eref" href="alleg045.html#exkeys" title="How to get input from the keyboard in different ways.">exkeys</a>,
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>,
+<a class="eref" href="alleg045.html#expat" title="Using patterned drawing modes and sub-bitmaps.">expat</a>,
+<a class="eref" href="alleg045.html#exscroll" title="Mode-X hardware scrolling and split screens.">exscroll</a>,
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>.</blockquote>
+<div class="al-api"><b>void <a name="do_circle">do_circle</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int radius, int d,
+               void (*proc)(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d));</b></div><br>
+   Calculates all the points in a circle around point (x, y) with radius r, 
+   calling the supplied function for each one. This will be passed a copy of 
+   the bmp parameter, the x and y position, and a copy of the d parameter, 
+   so it is suitable for use with putpixel(). Example:
+<blockquote class="code"><pre>
+      void draw_explosion_ring(<a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d)
+      {
+         ...
+      }
+      
+         <a href="#do_circle" class="autotype" title="Calculates all the points in a circle.">do_circle</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>/2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/2,
+                   <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/16, flame_color,
+                   draw_explosion_ring);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#do_ellipse" title="Calculates all the points in an ellipse.">do_ellipse</a>,
+<a class="xref" href="#do_arc" title="Calculates all the points in a circular arc.">do_arc</a>,
+<a class="xref" href="#do_line" title="Calculates all the points along a line.">do_line</a>,
+<a class="xref" href="#circle" title="Draws a circle.">circle</a>,
+<a class="xref" href="#circlefill" title="Draws a filled circle.">circlefill</a>.</blockquote>
+<div class="al-api"><b>void <a name="circle">circle</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int radius, int color);</b></div><br>
+   Draws a circle with the specified centre and radius.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#ellipse" title="Draws an ellipse.">ellipse</a>,
+<a class="xref" href="#arc" title="Draws a circular arc.">arc</a>,
+<a class="xref" href="#circlefill" title="Draws a filled circle.">circlefill</a>,
+<a class="xref" href="#do_circle" title="Calculates all the points in a circle.">do_circle</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exjoy" title="Detecting, calibrating and using joystick input.">exjoy</a>,
+<a class="eref" href="alleg045.html#exmem" title="Drawing onto memory bitmaps and then blitting them to the screen.">exmem</a>,
+<a class="eref" href="alleg045.html#exmouse" title="Getting input from the mouse.">exmouse</a>,
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>,
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="circlefill">circlefill</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int radius, int color);</b></div><br>
+   Draws a filled circle with the specified centre and radius.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#ellipsefill" title="Draws a filled ellipse.">ellipsefill</a>,
+<a class="xref" href="#circle" title="Draws a circle.">circle</a>,
+<a class="xref" href="#do_circle" title="Calculates all the points in a circle.">do_circle</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excolmap" title="Creating graphical effects with color mapping tables.">excolmap</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exdbuf" title="How to use double buffering to avoid flicker.">exdbuf</a>,
+<a class="eref" href="alleg045.html#exflip" title="Comparison of double buffering and page flipping.">exflip</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#expal" title="Palette effects and color cycling.">expal</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>.</blockquote>
+<div class="al-api"><b>void <a name="do_ellipse">do_ellipse</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int rx, ry, int d,
+                void (*proc)(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d));</b></div><br>
+   Calculates all the points in an ellipse around point (x, y) with radius 
+   rx and ry, calling the supplied function for each one. This will be 
+   passed a copy of the bmp parameter, the x and y position, and a copy of 
+   the d parameter, so it is suitable for use with putpixel(). Example:
+<blockquote class="code"><pre>
+      void draw_explosion_ring(<a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d)
+      {
+         ...
+      }
+      
+         <a href="#do_ellipse" class="autotype" title="Calculates all the points in an ellipse.">do_ellipse</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>/2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/2,
+                   <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/16, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/32, flame_color,
+                   draw_explosion_ring);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#do_circle" title="Calculates all the points in a circle.">do_circle</a>,
+<a class="xref" href="#do_arc" title="Calculates all the points in a circular arc.">do_arc</a>,
+<a class="xref" href="#do_line" title="Calculates all the points along a line.">do_line</a>,
+<a class="xref" href="#ellipse" title="Draws an ellipse.">ellipse</a>,
+<a class="xref" href="#ellipsefill" title="Draws a filled ellipse.">ellipsefill</a>.</blockquote>
+<div class="al-api"><b>void <a name="ellipse">ellipse</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int rx, int ry, int color);</b></div><br>
+   Draws an ellipse with the specified centre and radius.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#circle" title="Draws a circle.">circle</a>,
+<a class="xref" href="#arc" title="Draws a circular arc.">arc</a>,
+<a class="xref" href="#ellipsefill" title="Draws a filled ellipse.">ellipsefill</a>,
+<a class="xref" href="#do_ellipse" title="Calculates all the points in an ellipse.">do_ellipse</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+<div class="al-api"><b>void <a name="ellipsefill">ellipsefill</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int rx, int ry, int color);</b></div><br>
+   Draws a filled ellipse with the specified centre and radius.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#circlefill" title="Draws a filled circle.">circlefill</a>,
+<a class="xref" href="#ellipse" title="Draws an ellipse.">ellipse</a>,
+<a class="xref" href="#do_ellipse" title="Calculates all the points in an ellipse.">do_ellipse</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>.</blockquote>
+<div class="al-api"><b>void <a name="do_arc">do_arc</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> a1, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> a2, int r, int d,
+            void (*proc)(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d));</b></div><br>
+   Calculates all the points in a circular arc around point (x, y) with 
+   radius r, calling the supplied function for each one. This will be passed 
+   a copy of the bmp parameter, the x and y position, and a copy of the d
+   parameter, so it is suitable for use with putpixel(). The arc will be 
+   plotted in an anticlockwise direction starting from the angle a1 and 
+   ending when it reaches a2. These values are specified in 16.16 fixed 
+   point format, with 256 equal to a full circle, 64 a right angle, etc. 
+   Zero is to the right of the centre point, and larger values rotate 
+   anticlockwise from there. Example:
+<blockquote class="code"><pre>
+      void draw_explosion_ring(<a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int d)
+      {
+         ...
+      }
+         <a href="#do_arc" class="autotype" title="Calculates all the points in a circular arc.">do_arc</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>/2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/2,
+             <a href="alleg032.html#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-21), <a href="alleg032.html#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(43), 50, flame_color,
+             draw_explosion_ring);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#do_circle" title="Calculates all the points in a circle.">do_circle</a>,
+<a class="xref" href="#do_ellipse" title="Calculates all the points in an ellipse.">do_ellipse</a>,
+<a class="xref" href="#do_line" title="Calculates all the points along a line.">do_line</a>,
+<a class="xref" href="#arc" title="Draws a circular arc.">arc</a>.</blockquote>
+<div class="al-api"><b>void <a name="arc">arc</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> ang1, ang2, int r, int color);</b></div><br>
+   Draws a circular arc with centre x, y and radius r, in an anticlockwise 
+   direction starting from the angle a1 and ending when it reaches a2. These 
+   values are specified in 16.16 fixed point format, with 256 equal to a 
+   full circle, 64 a right angle, etc. Zero is to the right of the centre 
+   point, and larger values rotate anticlockwise from there. Example:
+<blockquote class="code"><pre>
+      /* Draw a black <a href="#arc" class="autotype" title="Draws a circular arc.">arc</a> from 4 to 1 o'clock. */
+      <a href="#arc" class="autotype" title="Draws a circular arc.">arc</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>/2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>/2,
+          <a href="alleg032.html#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-21), <a href="alleg032.html#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(43), 50, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(0, 0, 0));</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#circle" title="Draws a circle.">circle</a>,
+<a class="xref" href="#ellipse" title="Draws an ellipse.">ellipse</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+<div class="al-api"><b>void <a name="calc_spline">calc_spline</a>(const int points[8], int npts, int *x, int *y);</b></div><br>
+   Calculates a series of npts values along a Bezier spline, storing them in 
+   the output x and y arrays. The Bezier curve is specified by the four x/y 
+   control points in the points array: points[0] and points[1] contain the 
+   coordinates of the first control point, points[2] and points[3] are the 
+   second point, etc. Control points 0 and 3 are the ends of the spline, and 
+   points 1 and 2 are guides. The curve probably won't pass through points 1 
+   and 2, but they affect the shape of the curve between points 0 and 3 (the 
+   lines p0-p1 and p2-p3 are tangents to the spline). The easiest way to 
+   think of it is that the curve starts at p0, heading in the direction of 
+   p1, but curves round so that it arrives at p3 from the direction of p2. 
+   In addition to their role as graphics primitives, spline curves can be 
+   useful for constructing smooth paths around a series of control points, 
+   as in exspline.c.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#spline" title="Draws a Bezier spline using four control points.">spline</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>.</blockquote>
+<div class="al-api"><b>void <a name="spline">spline</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, const int points[8], int color);</b></div><br>
+   Draws a Bezier spline using the four control points specified in the 
+   points array. Read the description of calc_spline() for information on
+   how to build the points array.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#calc_spline" title="Calculates a series of values along a Bezier spline.">calc_spline</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>.</blockquote>
+<div class="al-api"><b>void <a name="floodfill">floodfill</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int x, int y, int color);</b></div><br>
+   Floodfills an enclosed area, starting at point (x, y), with the specified 
+   color.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

@@ -19,7 +19,7 @@
 /// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
 #include "allegro.h"
-#include "SDL2/SDL.h"
+#include "SDL.h"
 
 #include "GUI.h"
 #include "AllegroInput.h"

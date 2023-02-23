@@ -11,7 +11,7 @@
 #include "GameActivity.h"
 #include "NetworkServer.h"
 
-#include "SDL2/SDL.h"
+#include "SDL.h"
 
 namespace RTE {
 

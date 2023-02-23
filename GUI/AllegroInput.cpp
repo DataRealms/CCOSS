@@ -5,7 +5,7 @@
 #ifndef GUI_STANDALONE
 #include "FrameMan.h"
 #include "UInputMan.h"
-#include "SDL2/SDL.h"
+#include "SDL.h"
 #endif
 
 namespace RTE {

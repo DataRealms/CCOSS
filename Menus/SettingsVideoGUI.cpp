@@ -12,7 +12,7 @@
 #include "GUIComboBox.h"
 #include "GUITextBox.h"
 
-#include "SDL2/SDL_video.h"
+#include "SDL_video.h"
 
 namespace RTE {
 

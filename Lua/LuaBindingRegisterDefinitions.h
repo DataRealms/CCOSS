@@ -4,9 +4,9 @@
 #include "LuabindDefinitions.h"
 #include "LuaAdapterDefinitions.h"
 
-#include "SDL2/SDL_scancode.h"
-#include "SDL2/SDL_keycode.h"
-#include "SDL2/SDL_gamecontroller.h"
+#include "SDL_scancode.h"
+#include "SDL_keycode.h"
+#include "SDL_gamecontroller.h"
 
 namespace RTE {
 

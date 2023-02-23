@@ -152,7 +152,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string System::ExtractZippedDataModule(const std::string &zippedModulePath) {
-		std::string zippedModuleName = std::filesystem::path(zippedModulePath).filename().generic_string();
+		std::string zippedModuleName = System::GetModDirectory() + std::filesystem::path(zippedModulePath).filename().generic_string();
 
 		unzFile zippedModule = unzOpen(zippedModuleName.c_str());
 		std::stringstream extractionProgressReport;
@@ -186,7 +186,7 @@ namespace RTE {
 				extractionProgressReport << "\tSkipped: " + std::string(outputFileInfoData.data()) + " - Could not read file info!\n";
 				continue;
 			}
-			std::string outputFileName = outputFileInfoData.data();
+			std::string outputFileName = System::GetModDirectory() + outputFileInfoData.data();
 #ifdef _WIN32
 			// TODO: Windows 10 adds support for paths over 260 characters so investigate how to get Windows version and whether the setting is enabled at runtime.
 			// Windows doesn't support paths over 260 characters long.

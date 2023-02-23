@@ -147,7 +147,7 @@
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -198,7 +198,7 @@
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -248,7 +248,7 @@
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -354,7 +354,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <StringPooling>false</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -415,7 +415,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <StringPooling>false</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -473,7 +473,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>
@@ -532,7 +532,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <OmitDefaultLibName>false</OmitDefaultLibName>

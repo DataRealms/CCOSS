@@ -15,7 +15,7 @@ namespace RTE {
 		m_MaxLength = 0;
 		m_MoveSpeed = 0;
 
-		m_HandDefaultIdleOffset.Reset();
+		m_HandIdleOffset.Reset();
 		m_HandIdleRotation = 0;
 
 		m_HandCurrentOffset.Reset();
@@ -63,7 +63,7 @@ namespace RTE {
 		m_MaxLength = reference.m_MaxLength;
 		m_MoveSpeed = reference.m_MoveSpeed;
 
-		m_HandDefaultIdleOffset = reference.m_HandDefaultIdleOffset;
+		m_HandIdleOffset = reference.m_HandIdleOffset;
 		m_HandIdleRotation = reference.m_HandIdleRotation;
 
 		m_HandCurrentOffset = reference.m_HandCurrentOffset;
@@ -93,8 +93,8 @@ namespace RTE {
 			reader >> m_MaxLength;
 		} else if (propName == "MoveSpeed") {
 			reader >> m_MoveSpeed;
-		} else if (propName == "HandDefaultIdleOffset" || propName == "IdleOffset") {
-			reader >> m_HandDefaultIdleOffset;
+		} else if (propName == "HandIdleOffset" || propName == "IdleOffset") {
+			reader >> m_HandIdleOffset;
 		} else if (propName == "HandSprite" || propName == "Hand") {
 			reader >> m_HandSpriteFile;
 			m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
@@ -118,7 +118,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("MaxLength", m_MaxLength);
 		writer.NewPropertyWithValue("MoveSpeed", m_MoveSpeed);
-		writer.NewPropertyWithValue("HandDefaultIdleOffset", m_HandDefaultIdleOffset);
+		writer.NewPropertyWithValue("HandIdleOffset", m_HandIdleOffset);
 		writer.NewPropertyWithValue("HandSprite", m_HandSpriteFile);
 		writer.NewPropertyWithValue("GripStrength", m_GripStrength);
 		writer.NewPropertyWithValue("ThrowStrength", m_ThrowStrength);
@@ -129,7 +129,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Arm::SetHandCurrentPos(const Vector &newHandPos) {
+	void Arm::SetHandPos(const Vector &newHandPos) {
 		SetHandCurrentOffset(g_SceneMan.ShortestDistance(m_JointPos, newHandPos, g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()));
 	}
 
@@ -195,7 +195,7 @@ namespace RTE {
 			m_AngularVel = 0.0F;
 		}
 
-		if (m_HeldDeviceThisArmIsTryingToSupport && !m_HeldDeviceThisArmIsTryingToSupport->IsSupportable()) {
+		if (m_HeldDeviceThisArmIsTryingToSupport && (!m_HeldDeviceThisArmIsTryingToSupport->IsSupportable() || m_HeldDeviceThisArmIsTryingToSupport->GetSupportOffset().MagnitudeIsGreaterThan(m_MaxLength * 2.0F))) {
 			m_HeldDeviceThisArmIsTryingToSupport = nullptr;
 		}
 
@@ -238,12 +238,30 @@ namespace RTE {
 		if (armHasParent) {
 			Vector targetOffset;
 			if (m_HandTargets.empty()) {
-				if (bool parentIsStable = dynamic_cast<Actor *>(m_Parent)->IsStatus(Actor::Status::STABLE); parentIsStable && m_HeldDevice) {
+				if (m_HeldDevice) {
 					targetOffset = m_HeldDevice->GetStanceOffset();
-				} else if (parentIsStable && m_HeldDeviceThisArmIsTryingToSupport) {
+					if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(m_HeldDevice); heldFirearm && heldFirearm->GetReloadAngle() != 0) {
+						if (heldFirearm->IsReloading()) {
+							float reloadProgressSin = std::sin(heldFirearm->GetReloadProgress() * c_PI);
+							// TODO: There are a few values available for customization here, but they need clear property names. The following plays out well as a default.
+							// Currently, non-supported always move to the same angle relative to the body. Supported items move halfway between the aim angle and body rotation.
+							// What needs to be decided upon is the property name(s) for the rate at which both the two-handed and one-handed reload angles move between the aim angle and body rotation.
+							float noSupportFactor = std::min(std::abs(heldFirearm->GetReloadAngle()), 1.0F);
+							float inheritedBodyAngle = m_Rotation.GetRadAngle() * noSupportFactor;
+							// m_Rotation corresponds to the aim angle here, since the arm hasn't been adjusted yet.
+							float reloadAngle = (heldFirearm->GetReloadAngle() - inheritedBodyAngle * GetFlipFactor()) * reloadProgressSin;
+							heldFirearm->SetInheritedRotAngleOffset(reloadAngle);
+							targetOffset.RadRotate(reloadAngle * GetFlipFactor());
+							float retractionRate = 0.5F * noSupportFactor;	// Another value potentially open for customization.
+							targetOffset.SetMagnitude(targetOffset.GetMagnitude() * (1.0F - reloadProgressSin * retractionRate));
+						} else if (heldFirearm->DoneReloading()) {
+							heldFirearm->SetInheritedRotAngleOffset(0);
+						}
+					}
+				} else if (bool parentIsStable = dynamic_cast<Actor *>(m_Parent)->IsStatus(Actor::Status::STABLE); parentIsStable && m_HeldDeviceThisArmIsTryingToSupport) {
 					targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_HeldDeviceThisArmIsTryingToSupport->GetSupportPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY());
 				} else {
-					targetOffset = m_HandDefaultIdleOffset.GetXFlipped(m_Parent->IsHFlipped()).GetRadRotatedCopy(m_Parent->GetRotAngle());
+					targetOffset = m_HandIdleOffset.GetXFlipped(m_Parent->IsHFlipped()).GetRadRotatedCopy(m_Parent->GetRotAngle());
 				}
 				if (m_HandIdleRotation != 0) {
 					targetOffset.RadRotate(m_HandIdleRotation);
@@ -288,18 +306,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Arm::AccountForHeldDeviceRecoil(const HeldDevice *heldDevice, Vector &targetOffset) {
-		// TODO: Fine-tune this if needed.
 		if (!heldDevice->GetRecoilForce().IsZero()) {
 			float totalGripStrength = m_GripStrength * heldDevice->GetGripStrengthMultiplier();
 			if (totalGripStrength == 0) { totalGripStrength = heldDevice->GetJointStrength(); }
 			if (heldDevice->GetSupported()) {
 				const AHuman *rootParentAsAHuman = dynamic_cast<const AHuman *>(GetRootParent());
-				const Arm *rootParentAsHumanBGArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
-				if (rootParentAsHumanBGArm) {
-					if (rootParentAsHumanBGArm->GetGripStrength() < 0) {
+				const Arm *supportingArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
+				if (supportingArm) {
+					if (supportingArm->GetGripStrength() < 0) {
 						totalGripStrength = -1.0F;
-					} else if (rootParentAsHumanBGArm->GetGripStrength() > 0) {
-						totalGripStrength += (rootParentAsHumanBGArm->GetGripStrength() * heldDevice->GetGripStrengthMultiplier());
+					} else if (supportingArm->GetGripStrength() > 0) {
+						totalGripStrength += (supportingArm->GetGripStrength() * 0.5F * heldDevice->GetGripStrengthMultiplier());
 					} else {
 						totalGripStrength *= 1.5F;
 					}
@@ -308,7 +325,7 @@ namespace RTE {
 			if (totalGripStrength > 0) {
 				// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.
 				float rotAngleScalar = std::abs(std::cos(m_Parent->GetRotAngle()));
-				float recoilScalar = std::min((heldDevice->GetRecoilForce() / totalGripStrength).GetMagnitude() * 0.4F, 0.8F) * rotAngleScalar;
+				float recoilScalar = std::sqrt(std::min(heldDevice->GetRecoilForce().GetMagnitude() / totalGripStrength, 0.7F)) * rotAngleScalar;
 				targetOffset.SetX(targetOffset.GetX() * (1.0F - recoilScalar));
 
 				// Shift Y offset slightly so the device is more likely to go under the shoulder rather than over it, otherwise it looks goofy.

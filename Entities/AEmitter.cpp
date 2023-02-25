@@ -392,7 +392,6 @@ void AEmitter::SetFlash(Attachable *newFlash) {
 
         m_pFlash->SetDrawnNormallyByParent(false);
         m_pFlash->SetInheritsRotAngle(false);
-        m_pFlash->SetInheritsHFlipped(0);
         m_pFlash->SetDeleteWhenRemovedFromParent(true);
         m_pFlash->SetCollidesWithTerrainWhileAttached(false);
     }
@@ -421,8 +420,7 @@ void AEmitter::Update()
     // Update and show flash if there is one
     if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
         m_pFlash->SetParentOffset(m_EmissionOffset);
-        // Don't set the flipping for the flash because that is wasting resources when drawing, just handle the flipping of the rotation here.
-        m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+		m_pFlash->SetRotAngle(m_Rotation.GetRadAngle() + (m_HFlipped ? -m_EmitAngle.GetRadAngle() : m_EmitAngle.GetRadAngle()));
         m_pFlash->SetScale(m_FlashScale);
         m_pFlash->SetNextFrame();
     }
@@ -451,8 +449,7 @@ void AEmitter::Update()
 		float throttleFactor = GetThrottleFactor();
 		m_FlashScale = throttleFactor;
         // Check burst triggering against whether the spacing is fulfilled
-        if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
-        {
+		if (m_BurstTriggered && CanTriggerBurst()) {
             // Play burst sound
 			if (m_BurstSound) { m_BurstSound->Play(m_Pos); }
             // Start timing until next burst

@@ -391,6 +391,11 @@ public:
 	/// <returns>The height of the GUI icon bitmap.</returns>
 	int GetIconHeight() const { return GetGraphicalIcon()->h; }
 
+	/// <summary>
+	/// Forces this MOSprite out of resting conditions.
+	/// </summary>
+	void NotResting() override { MovableObject::NotResting(); m_AngOscillations = 0; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsTooFast
@@ -584,8 +589,7 @@ protected:
     // The precalculated maximum possible radius and diameter of this, in pixels
     float m_SpriteRadius;
     float m_SpriteDiameter;
-    // A counter to count the oscillations in rotation, in order to detect settling.
-    int m_AngOscillations;
+	int m_AngOscillations; //!< A counter for oscillations in rotation, in order to detect settling.
     // Whether to disable the settle material ID when this gets drawn as material
     bool m_SettleMaterialDisabled;
     // Entry wound template

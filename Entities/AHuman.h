@@ -157,16 +157,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGoldCarried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets how many ounces of gold this Actor is carrying.
-// Arguments:       None.
-// Return value:    The current amount of carried gold, in Oz.
-
-    float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total liquidation value of this Actor and all its carried
@@ -388,18 +378,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
-	/// <summary>
-	/// Gets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
-	/// </summary>
-	/// <returns>The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</returns>
-	float GetOneHandedReloadAngleOffset() const { return m_OneHandedReloadAngleOffset; }
-
-	/// <summary>
-	/// Sets the angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
-	/// </summary>
-	/// <param name="newValue">The new angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed.</param>
-	void SetOneHandedReloadAngleOffset(float newValue) { m_OneHandedReloadAngleOffset = newValue; }
-
 	/// Gets this AHuman's UpperBodyState.
 	/// </summary>
 	/// <returns>This AHuman's UpperBodyState.</returns>
@@ -615,7 +593,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <summary>
 	/// Unequips whatever is in either of the arms and puts them into the inventory.
 	/// </summary>
-	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
+	void UnequipArms() { UnequipBGArm(); UnequipFGArm(); }
 
 	/// <summary>
 	/// Gets the FG Arm's HeldDevice. Ownership is NOT transferred.
@@ -991,17 +969,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 protected:
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ChunkGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Converts an appropriate amount of gold tracked by Actor, and puts it
-//                  in a MovableObject which is put into inventory.
-// Arguments:       None.
-// Return value:    None.
-
-    void ChunkGold();
-
-
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.
 	/// </summary>
@@ -1043,8 +1010,9 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
+	bool m_ActivateBGItem; //!< A flag for whether or not the BG item is waiting to be activated separately. Used for dual-wielding. TODO: Should this be able to be toggled off per actor, device, or controller?
+	bool m_TriggerPulled; //!< Internal flag for whether this AHuman is currently holding down the trigger of a HDFirearm. Used for dual-wielding.
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
-	float m_OneHandedReloadAngleOffset; //!< The angle offset that should be added to this AHuman's HDFirearms when they're being reloaded one-handed, in addition to them rotating with the Arm holding them.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.
@@ -1069,8 +1037,6 @@ protected:
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart
     Timer m_StrideTimer;
-    // How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-    int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
 	// The duration it takes this AHuman to fully charge a throw.

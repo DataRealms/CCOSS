@@ -47,7 +47,7 @@ void MOSprite::Clear()
     m_PrevRotation.Reset();
     m_AngularVel = 0;
     m_PrevAngVel = 0;
-    m_AngOscillations = 0;
+	m_AngOscillations = 0;
     m_SettleMaterialDisabled = false;
     m_pEntryWound = 0;
     m_pExitWound = 0;

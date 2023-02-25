@@ -1,0 +1,636 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Keyboard routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Keyboard routines">Keyboard routines</a></h1>
+
+<ul>
+<li><a href="#clear_keybuf">clear_keybuf</a> &mdash; Clears the keyboard buffer.
+<li><a href="#install_keyboard">install_keyboard</a> &mdash; Installs the Allegro keyboard interrupt handler.
+<li><a href="#install_keyboard_hooks">install_keyboard_hooks</a> &mdash; Installs custom keyboard hooks.
+<li><a href="#key">key</a> &mdash; Array of flags indicating key state.
+<li><a href="#key_led_flag">key_led_flag</a> &mdash; Flag to prevent the keyboard LEDs from being updated.
+<li><a href="#key_shifts">key_shifts</a> &mdash; Bitmask containing the current state of modifier keys.
+<li><a href="#keyboard_callback">keyboard_callback</a> &mdash; User specified keyboard callback handler.
+<li><a href="#keyboard_lowlevel_callback">keyboard_lowlevel_callback</a> &mdash; User specified low level keyboard event handler.
+<li><a href="#keyboard_needs_poll">keyboard_needs_poll</a> &mdash; Tells if the keyboard needs polling.
+<li><a href="#keyboard_ucallback">keyboard_ucallback</a> &mdash; User specified unicode keyboard callback handler.
+<li><a href="#keypressed">keypressed</a> &mdash; Tells if there are keypresses waiting in the input buffer.
+<li><a href="#poll_keyboard">poll_keyboard</a> &mdash; Polls the keyboard.
+<li><a href="#readkey">readkey</a> &mdash; Returns the next character from the keyboard buffer.
+<li><a href="#remove_keyboard">remove_keyboard</a> &mdash; Removes the Allegro keyboard handler.
+<li><a href="#scancode_to_ascii">scancode_to_ascii</a> &mdash; Converts a scancode to an ASCII character.
+<li><a href="#scancode_to_name">scancode_to_name</a> &mdash; Converts a scancode to a key name.
+<li><a href="#set_keyboard_rate">set_keyboard_rate</a> &mdash; Sets the keyboard repeat rate.
+<li><a href="#set_leds">set_leds</a> &mdash; Sets the state of the keyboard LED indicators.
+<li><a href="#simulate_keypress">simulate_keypress</a> &mdash; Stuffs a key into the keyboard buffer.
+<li><a href="#simulate_ukeypress">simulate_ukeypress</a> &mdash; Stuffs an unicode key into the keyboard buffer.
+<li><a href="#three_finger_flag">three_finger_flag</a> &mdash; Flag to deactivate the emergency exit key combination.
+<li><a href="#ureadkey">ureadkey</a> &mdash; Returns the next unicode character from the keyboard buffer.
+</ul>
+
+<p>
+The Allegro keyboard handler provides both buffered input and a set of flags 
+storing the current state of each key. Note that it is not possible to 
+correctly detect every combination of keys, due to the design of the PC 
+keyboard. Up to two or three keys at a time will work fine, but if you press 
+more than that the extras are likely to be ignored (exactly which 
+combinations are possible seems to vary from one keyboard to another).
+
+<p>
+On DOS, Allegro requires the user to specify the language of the keyboard
+mapping because it is impossible to obtain this information from the OS,
+otherwise the default US keyboard mapping will be used. Allegro comes with a
+prepackaged <tt>`keyboard.dat'</tt> file which you can put along with your binary. If
+this file is present, Allegro will be able to extract the keyboard mapping
+information stored there. However, the end user still needs to select which
+keyboard mapping to use. This can be accomplished through the keyboard variable
+of the system section in a standard <tt>`allegro.cfg'</tt> configuration file. Read
+chapter "Configuration routines" for more information about this.
+
+<p><br>
+<div class="al-api"><b>int <a name="install_keyboard">install_keyboard</a>();</b></div><br>
+   Installs the Allegro keyboard interrupt handler. You must call this 
+   before using any of the keyboard input routines. Once you have set up the 
+   Allegro handler, you can no longer use operating system calls or C 
+   library functions to access the keyboard.
+
+<p>
+   Note that on some platforms the keyboard won't work unless you have set a
+   graphics mode, even if this function returns a success value before
+   calling set_gfx_mode. This can happen in environments with graphic
+   windowed modes, since Allegro usually reads the keyboard through the
+   graphical window (which appears after the set_gfx_mode call). Example:
+<blockquote class="code"><pre>
+      <a href="alleg000.html#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>();
+      <a href="alleg005.html#install_timer" class="autotype" title="Installs the Allegro timer interrupt handler.">install_timer</a>();
+      <a href="#install_keyboard" class="autotype" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>();
+      /* We are not 100% sure we can read the keyboard yet! */
+      if (<a href="alleg008.html#set_gfx_mode" class="autotype" title="Sets a graphic video mode.">set_gfx_mode</a>(GFX_AUTODETECT, 640, 480, 0, 0) != 0)
+         abort_on_error("Couldn't set graphic mode!");
+
+      /* Now we are guaranteed to be able to read the keyboard. */
+      <a href="#readkey" class="autotype" title="Returns the next character from the keyboard buffer.">readkey</a>();</pre></blockquote>
+<p><b>Return value:</b>
+   Returns zero on success, or a negative number on failure (but you may
+   decide not to check the return value as this function is very unlikely to
+   fail).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#remove_keyboard" title="Removes the Allegro keyboard handler.">remove_keyboard</a>,
+<a class="xref" href="#poll_keyboard" title="Polls the keyboard.">poll_keyboard</a>,
+<a class="xref" href="#key" title="Array of flags indicating key state.">key</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>,
+<a class="xref" href="#keyboard_callback" title="User specified keyboard callback handler.">keyboard_callback</a>,
+<a class="xref" href="#keyboard_ucallback" title="User specified unicode keyboard callback handler.">keyboard_ucallback</a>,
+<a class="xref" href="#keyboard_lowlevel_callback" title="User specified low level keyboard event handler.">keyboard_lowlevel_callback</a>,
+<a class="xref" href="#three_finger_flag" title="Flag to deactivate the emergency exit key combination.">three_finger_flag</a>,
+<a class="xref" href="#key_led_flag" title="Flag to prevent the keyboard LEDs from being updated.">key_led_flag</a>,
+<a class="xref" href="#set_leds" title="Sets the state of the keyboard LED indicators.">set_leds</a>,
+<a class="xref" href="#set_keyboard_rate" title="Sets the keyboard repeat rate.">set_keyboard_rate</a>,
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="alleg003.html#Standard config variables" title="">Standard config variables</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="remove_keyboard">remove_keyboard</a>();</b></div><br>
+   Removes the keyboard handler, returning control to the operating system. 
+   You don't normally need to bother calling this, because allegro_exit() 
+   will do it for you. However, you might want to call this during runtime if
+   you want to change the keyboard mapping on those platforms were keyboard
+   mappings are needed. You would first modify the configuration variable
+   holding the keyboard mapping and then reinstall the keyboard handler.
+   Example:
+<blockquote class="code"><pre>
+      <a href="#remove_keyboard" class="autotype" title="Removes the Allegro keyboard handler.">remove_keyboard</a>();
+      /* Switch to Spanish keyboard mapping. */
+      <a href="alleg003.html#set_config_string" class="autotype" title="Writes a string in the configuration file.">set_config_string</a>("system", "keyboard", "es");
+      <a href="#install_keyboard" class="autotype" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>();</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="alleg000.html#allegro_exit" title="Closes down the Allegro system.">allegro_exit</a>,
+<a class="xref" href="alleg003.html#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>.</blockquote>
+<div class="al-api"><b>void <a name="install_keyboard_hooks">install_keyboard_hooks</a>(int (*keypressed)(), int (*readkey)());</b></div><br>
+   You should only use this function if you *aren't* using the rest of the 
+   keyboard handler. It should be called in the place of install_keyboard(), 
+   and lets you provide callback routines to detect and read keypresses, 
+   which will be used by the main keypressed() and readkey() functions. This 
+   can be useful if you want to use Allegro's GUI code with a custom 
+   keyboard handler, as it provides a way for the GUI to get keyboard input 
+   from your own code, bypassing the normal Allegro input system.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>.</blockquote>
+<div class="al-api"><b>int <a name="poll_keyboard">poll_keyboard</a>();</b></div><br>
+   Wherever possible, Allegro will read the keyboard input asynchronously 
+   (ie. from inside an interrupt handler), but on some platforms that may 
+   not be possible, in which case you must call this routine at regular 
+   intervals to update the keyboard state variables.
+
+<p>
+   To help you test your keyboard polling code even if you are programming
+   on a platform that doesn't require it, after the first time that you
+   call this function Allegro will switch into polling mode, so from that
+   point onwards you will have to call this routine in order to get any
+   keyboard input at all, regardless of whether the current driver actually
+   needs to be polled or not.
+
+<p>
+   The keypressed(), readkey(), and ureadkey() functions call poll_keyboard()
+   automatically, so you only need to use this function when accessing the
+   key[] array and key_shifts variable.
+<p><b>Return value:</b>
+   Returns zero on success, or a negative number on failure (ie. no keyboard
+   driver installed).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#keyboard_needs_poll" title="Tells if the keyboard needs polling.">keyboard_needs_poll</a>,
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#key" title="Array of flags indicating key state.">key</a>,
+<a class="xref" href="#key_shifts" title="Bitmask containing the current state of modifier keys.">key_shifts</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>,
+<a class="eref" href="alleg045.html#exsample" title="Playing digital samples.">exsample</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>int <a name="keyboard_needs_poll">keyboard_needs_poll</a>();</b></div><br>
+   Returns TRUE if the current keyboard driver is operating in polling mode.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#poll_keyboard" title="Polls the keyboard.">poll_keyboard</a>,
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#key" title="Array of flags indicating key state.">key</a>.</blockquote>
+<div class="al-api"><b>extern volatile char <a name="key">key</a>[KEY_MAX];</b></div><br>
+   Array of flags indicating the state of each key, ordered by scancode. 
+   Wherever possible these values will be updated asynchronously, but if 
+   keyboard_needs_poll() returns TRUE, you must manually call 
+   poll_keyboard() to update them with the current input state. The 
+   scancodes are defined in allegro/keyboard.h as a series of KEY_*
+   constants (and are also listed below). For example, you could write:
+<blockquote class="code"><pre>
+      if (<a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>[KEY_SPACE])
+         printf("Space is pressed\n");</pre></blockquote>
+
+<p>
+   Note that the array is supposed to represent which keys are physically
+   held down and which keys are not, so it is semantically read-only.
+
+<p>
+   These are the keyboard scancodes:
+<blockquote class="text"><pre>
+      KEY_A ... KEY_Z,
+      KEY_0 ... KEY_9,
+      KEY_0_PAD ... KEY_9_PAD,
+      KEY_F1 ... KEY_F12,
+
+      KEY_ESC, KEY_TILDE, KEY_MINUS, KEY_EQUALS,
+      KEY_BACKSPACE, KEY_TAB, KEY_OPENBRACE, KEY_CLOSEBRACE,
+      KEY_ENTER, KEY_COLON, KEY_QUOTE, KEY_BACKSLASH,
+      KEY_BACKSLASH2, KEY_COMMA, KEY_STOP, KEY_SLASH,
+      KEY_SPACE,
+
+      KEY_INSERT, KEY_DEL, KEY_HOME, KEY_END, KEY_PGUP,
+      KEY_PGDN, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN,
+
+      KEY_SLASH_PAD, KEY_ASTERISK, KEY_MINUS_PAD,
+      KEY_PLUS_PAD, KEY_DEL_PAD, KEY_ENTER_PAD,
+
+      KEY_PRTSCR, KEY_PAUSE,
+
+      KEY_ABNT_C1, KEY_YEN, KEY_KANA, KEY_CONVERT, KEY_NOCONVERT,
+      KEY_AT, KEY_CIRCUMFLEX, KEY_COLON2, KEY_KANJI,
+
+      KEY_LSHIFT, KEY_RSHIFT,
+      KEY_LCONTROL, KEY_RCONTROL,
+      KEY_ALT, KEY_ALTGR,
+      KEY_LWIN, KEY_RWIN, KEY_MENU,
+      KEY_SCRLOCK, KEY_NUMLOCK, KEY_CAPSLOCK
+
+      KEY_EQUALS_PAD, KEY_BACKQUOTE, KEY_SEMICOLON, KEY_COMMAND</pre></blockquote>
+
+<p>
+   Finally, you may notice an <tt>`odd'</tt> behaviour of the KEY_PAUSE key. This key
+   only generates an interrupt when it is pressed, not when it is released.
+   For this reason, Allegro pretends the pause key is a <tt>`state'</tt> key, which
+   is the only way to make it usable.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#poll_keyboard" title="Polls the keyboard.">poll_keyboard</a>,
+<a class="xref" href="#key_shifts" title="Bitmask containing the current state of modifier keys.">key_shifts</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>extern volatile int <a name="key_shifts">key_shifts</a>;</b></div><br>
+   Bitmask containing the current state of shift/ctrl/alt, the special 
+   Windows keys, and the accent escape characters. Wherever possible this 
+   value will be updated asynchronously, but if keyboard_needs_poll() 
+   returns TRUE, you must manually call poll_keyboard() to update it with 
+   the current input state. This can contain any of the flags:
+<blockquote class="text"><pre>
+      KB_SHIFT_FLAG
+      KB_CTRL_FLAG
+      KB_ALT_FLAG
+      KB_LWIN_FLAG
+      KB_RWIN_FLAG
+      KB_MENU_FLAG
+      KB_COMMAND_FLAG
+      KB_SCROLOCK_FLAG
+      KB_NUMLOCK_FLAG
+      KB_CAPSLOCK_FLAG
+      KB_INALTSEQ_FLAG
+      KB_ACCENT1_FLAG
+      KB_ACCENT2_FLAG
+      KB_ACCENT3_FLAG
+      KB_ACCENT4_FLAG</pre></blockquote>
+
+<p>
+   Example:
+<blockquote class="code"><pre>
+      if (<a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>[KEY_W]) {
+         if (<a href="#key_shifts" class="autotype" title="Bitmask containing the current state of modifier keys.">key_shifts</a> &amp; KB_SHIFT_FLAG) {
+            /* User is pressing shift + W. */
+         } else {
+            /* Hmmm... lower case W then. */
+         }
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#poll_keyboard" title="Polls the keyboard.">poll_keyboard</a>,
+<a class="xref" href="#key" title="Array of flags indicating key state.">key</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>,
+<a class="eref" href="alleg045.html#exkeys" title="How to get input from the keyboard in different ways.">exkeys</a>.</blockquote>
+<div class="al-api"><b>int <a name="keypressed">keypressed</a>();</b></div><br>
+   Returns TRUE if there are keypresses waiting in the input buffer. You can
+   use this to see if the next call to readkey() is going to block or to 
+   simply wait for the user to press a key while you still update the screen
+   possibly drawing some animation. Example:
+<blockquote class="code"><pre>
+      while (!<a href="#keypressed" class="autotype" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>()) {
+         /* Show cool animated logo. */
+      }
+      /* So he skipped our title <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>. */</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>,
+<a class="xref" href="#clear_keybuf" title="Clears the keyboard buffer.">clear_keybuf</a>,
+<a class="xref" href="#simulate_keypress" title="Stuffs a key into the keyboard buffer.">simulate_keypress</a>,
+<a class="xref" href="#simulate_ukeypress" title="Stuffs an unicode key into the keyboard buffer.">simulate_ukeypress</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>int <a name="readkey">readkey</a>();</b></div><br>
+   Returns the next character from the keyboard buffer, in ASCII format. If 
+   the buffer is empty, it waits until a key is pressed. You can see if there
+   are queued keypresses with keypressed().
+
+<p>
+   The low byte of the return value contains the ASCII code of the key, and
+   the high byte the scancode. The scancode remains the same whatever the
+   state of the shift, ctrl and alt keys, while the ASCII code is affected by
+   shift and ctrl in the normal way (shift changes case, ctrl+letter gives
+   the position of that letter in the alphabet, eg. ctrl+A = 1, ctrl+B = 2,
+   etc). Pressing alt+key returns only the scancode, with a zero ASCII code
+   in the low byte. For example:
+<blockquote class="code"><pre>
+      int val;
+      ...
+      val = <a href="#readkey" class="autotype" title="Returns the next character from the keyboard buffer.">readkey</a>();
+      if ((val &amp; 0xff) == 'd')     /* by ASCII code */
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed 'd'\n");
+
+      if ((val &gt;&gt; 8) == KEY_SPACE) /* by scancode */
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed Space\n");
+
+      if ((val &amp; 0xff) == 3)       /* ctrl+letter */
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed Control+C\n");
+
+      if (val == (KEY_X &lt;&lt; 8))     /* alt+letter */
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed Alt+X\n");
+</pre></blockquote>
+   This function cannot return character values greater than 255. If you 
+   need to read Unicode input, use ureadkey() instead.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#clear_keybuf" title="Clears the keyboard buffer.">clear_keybuf</a>,
+<a class="xref" href="#simulate_keypress" title="Stuffs a key into the keyboard buffer.">simulate_keypress</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>int <a name="ureadkey">ureadkey</a>(int *scancode);</b></div><br>
+   Returns the next character from the keyboard buffer, in Unicode format. 
+   If the buffer is empty, it waits until a key is pressed. You can see if
+   there are queued keypresses with keypressed(). The return value contains
+   the Unicode value of the key, and if not NULL, the pointer argument will
+   be set to the scancode. Unlike readkey(), this function is able to return
+   character values greater than 255. Example:
+<blockquote class="code"><pre>
+      int val, scancode;
+      ...
+      val = <a href="#ureadkey" class="autotype" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>(&amp;scancode);
+      if (val == 0x00F1)
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed n with tilde\n");
+
+      if (val == 0x00DF)
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed sharp s\n");
+</pre></blockquote>
+   You should be able to find Unicode character maps at
+   <a href="http://www.unicode.org/">http://www.unicode.org/</a>. Remember that on DOS you must specify a custom
+   keyboard map (like those found in <tt>`keyboard.dat'</tt>) usually with the help of
+   a configuration file specifying the language mapping (keyboard variable in
+   system section of <tt>`allegro.cfg'</tt>), or you will get the default US keyboard
+   mapping.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#clear_keybuf" title="Clears the keyboard buffer.">clear_keybuf</a>,
+<a class="xref" href="#simulate_ukeypress" title="Stuffs an unicode key into the keyboard buffer.">simulate_ukeypress</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exkeys" title="How to get input from the keyboard in different ways.">exkeys</a>.</blockquote>
+<div class="al-api"><b>int <a name="scancode_to_ascii">scancode_to_ascii</a>(int scancode);</b></div><br>
+   Converts the given scancode to an ASCII character for that key (mangling
+   Unicode values), returning the unshifted uncapslocked result of pressing
+   the key, or zero if the key isn't a character-generating key or the lookup
+   can't be done. The lookup cannot be done for keys like the F1-F12 keys or the
+   cursor keys, and some drivers will only return approximate values. Generally,
+   if you want to display the name of a key to the user, you should use the
+   scancode_to_name function.
+
+<p>
+   Example:
+<blockquote class="code"><pre>
+      int ascii;
+      ...
+      ascii = <a href="#scancode_to_ascii" class="autotype" title="Converts a scancode to an ASCII character.">scancode_to_ascii</a>(scancode);
+      <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed '%c'\n", ascii);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#scancode_to_name" title="Converts a scancode to a key name.">scancode_to_name</a>.</blockquote>
+<div class="al-api"><b>const char *<a name="scancode_to_name">scancode_to_name</a>(int scancode);</b></div><br>
+   This function returns a string pointer containing the name of they key with
+   the given scancode. This is useful if you e.g. let the user choose a key for
+   some action, and want to display something more meaningful than just the
+   scancode. Example:
+<blockquote class="code"><pre>
+      char const *keyname = <a href="#scancode_to_name" class="autotype" title="Converts a scancode to a key name.">scancode_to_name</a>(scancode);
+      <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You pressed the %s <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>.", keyname);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#scancode_to_ascii" title="Converts a scancode to an ASCII character.">scancode_to_ascii</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exkeys" title="How to get input from the keyboard in different ways.">exkeys</a>.</blockquote>
+<div class="al-api"><b>void <a name="simulate_keypress">simulate_keypress</a>(int key);</b></div><br>
+   Stuffs a key into the keyboard buffer, just as if the user had pressed 
+   it. The parameter is in the same format returned by readkey(). Example:
+<blockquote class="code"><pre>
+      <a href="#simulate_keypress" class="autotype" title="Stuffs a key into the keyboard buffer.">simulate_keypress</a>(KEY_SPACE &lt;&lt; 8);
+      if (<a href="#readkey" class="autotype" title="Returns the next character from the keyboard buffer.">readkey</a>() == (KEY_SPACE &lt;&lt; 8))
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You simulated Alt+Space\n");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#simulate_ukeypress" title="Stuffs an unicode key into the keyboard buffer.">simulate_ukeypress</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>.</blockquote>
+<div class="al-api"><b>void <a name="simulate_ukeypress">simulate_ukeypress</a>(int key, int scancode);</b></div><br>
+   Stuffs a key into the keyboard buffer, just as if the user had pressed 
+   it. The parameter is in the same format returned by ureadkey(). Example:
+<blockquote class="code"><pre>
+      /* We ignore the scancode simulation. */
+      <a href="#simulate_ukeypress" class="autotype" title="Stuffs an unicode key into the keyboard buffer.">simulate_ukeypress</a>(0x00DF, 0);
+      if (<a href="#ureadkey" class="autotype" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>(&amp;scancode) == 0x00DF)
+         <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("You simulated sharp s\n");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#simulate_keypress" title="Stuffs a key into the keyboard buffer.">simulate_keypress</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>.</blockquote>
+<div class="al-api"><b>extern int (*<a name="keyboard_callback">keyboard_callback</a>)(int key);</b></div><br>
+   If set, this function is called by the keyboard handler in response to 
+   every keypress. It is passed a copy of the value that is about to be 
+   added into the input buffer, and can either return this value unchanged, 
+   return zero to cause the key to be ignored, or return a modified value to 
+   change what readkey() will later return. This routine executes in an 
+   interrupt context, so it must be in locked memory. Example:
+<blockquote class="code"><pre>
+      int enigma_scrambler(int <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>)
+      {
+         /* Add one to both the scancode and ascii values. */
+         return (((<a href="#key" class="autotype" title="Array of flags indicating key state.">key</a> >> 8) + 1) << 8) | ((<a href="#key" class="autotype" title="Array of flags indicating key state.">key</a> &amp; 0xff) + 1);
+      }
+      <a href="alleg005.html#END_OF_FUNCTION" class="autotype" title="Locks the code used by a timer.">END_OF_FUNCTION</a>(enigma_scrambler)
+      
+      ...
+      
+         <a href="alleg005.html#install_timer" class="autotype" title="Installs the Allegro timer interrupt handler.">install_timer</a>();
+         <a href="alleg005.html#LOCK_FUNCTION" class="autotype" title="Locks the memory of a function used by a timer.">LOCK_FUNCTION</a>(enigma_scrambler);
+         <a href="#install_keyboard" class="autotype" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>();
+         <a href="#keyboard_callback" class="autotype" title="User specified keyboard callback handler.">keyboard_callback</a> = enigma_scrambler;</pre></blockquote>
+
+<p>
+   Note that this callback will be ignored if you also set the unicode
+   keyboard callback.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>,
+<a class="xref" href="#keyboard_ucallback" title="User specified unicode keyboard callback handler.">keyboard_ucallback</a>,
+<a class="xref" href="#keyboard_lowlevel_callback" title="User specified low level keyboard event handler.">keyboard_lowlevel_callback</a>.</blockquote>
+<div class="al-api"><b>extern int (*<a name="keyboard_ucallback">keyboard_ucallback</a>)(int key, int *scancode);</b></div><br>
+   Unicode-aware version of keyboard_callback(). If set, this function is 
+   called by the keyboard handler in response to every keypress. It is 
+   passed the character value and scancode that are about to be added into 
+   the input buffer, can modify the scancode value, and returns a new or 
+   modified key code. If it both sets the scancode to zero and returns zero, 
+   the keypress will be ignored. This routine executes in an interrupt 
+   context, so it must be in locked memory. Example:
+<blockquote class="code"><pre>
+      int silence_g_key(int <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>, int *scancode)
+      {
+         if (<a href="#key" class="autotype" title="Array of flags indicating key state.">key</a> == 'g') {
+            *scancode = 0;
+            return 0;
+         }
+         return <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a>;
+      } <a href="alleg005.html#END_OF_FUNCTION" class="autotype" title="Locks the code used by a timer.">END_OF_FUNCTION</a>(silence_g_key)
+
+      ...
+      
+         <a href="alleg005.html#install_timer" class="autotype" title="Installs the Allegro timer interrupt handler.">install_timer</a>();
+         <a href="alleg005.html#LOCK_FUNCTION" class="autotype" title="Locks the memory of a function used by a timer.">LOCK_FUNCTION</a>(silence_g_key);
+         <a href="#install_keyboard" class="autotype" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>();
+         <a href="#keyboard_ucallback" class="autotype" title="User specified unicode keyboard callback handler.">keyboard_ucallback</a> = silence_g_key;</pre></blockquote>
+
+<p>
+   Note that this keyboard callback has priority over the non unicode
+   callback. If you set both, only the unicode one will work.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>,
+<a class="xref" href="#keyboard_callback" title="User specified keyboard callback handler.">keyboard_callback</a>,
+<a class="xref" href="#keyboard_lowlevel_callback" title="User specified low level keyboard event handler.">keyboard_lowlevel_callback</a>.</blockquote>
+<div class="al-api"><b>extern void (*<a name="keyboard_lowlevel_callback">keyboard_lowlevel_callback</a>)(int scancode);</b></div><br>
+   If set, this function is called by the keyboard handler in response to 
+   every keyboard event, both presses (including keyboard repeat rate) and
+   releases. It will be passed a raw keyboard scancode byte (scancodes are
+   7 bits long), with the top bit (8th bit) clear if the key has been
+   pressed or set if it was released. This routine executes in an interrupt
+   context, so it must be in locked memory. Example:
+<blockquote class="code"><pre>
+      volatile int key_down, key_up;
+      
+      void keypress_watcher(int scancode)
+      {
+         if (scancode &amp; 0x80) {
+            key_up = 1;
+         } else {
+            key_down = 1;
+         }
+      } <a href="alleg005.html#END_OF_FUNCTION" class="autotype" title="Locks the code used by a timer.">END_OF_FUNCTION</a>(keypress_watcher)
+
+      ...
+
+         <a href="alleg005.html#install_timer" class="autotype" title="Installs the Allegro timer interrupt handler.">install_timer</a>();
+         <a href="alleg005.html#LOCK_FUNCTION" class="autotype" title="Locks the memory of a function used by a timer.">LOCK_FUNCTION</a>(silence_g_key);
+         <a href="alleg005.html#LOCK_VARIABLE" class="autotype" title="Locks the memory of a variable used by a timer.">LOCK_VARIABLE</a>(key_down);
+         <a href="alleg005.html#LOCK_VARIABLE" class="autotype" title="Locks the memory of a variable used by a timer.">LOCK_VARIABLE</a>(key_up);
+         <a href="#install_keyboard" class="autotype" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>();
+         <a href="#keyboard_lowlevel_callback" class="autotype" title="User specified low level keyboard event handler.">keyboard_lowlevel_callback</a> = keypress_watcher;
+         /* Disable keyboard repeat to get typewriter effect. */
+         <a href="#set_keyboard_rate" class="autotype" title="Sets the keyboard repeat rate.">set_keyboard_rate</a>(0, 0);
+
+      ...
+
+         while (game_loop) {
+            if (key_down) {
+               key_down = 0;
+               /* Play sample of typewriter <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a> press. */
+            }
+            if (key_up) {
+               key_up = 0;
+               /* Play sample of typewriter <a href="#key" class="autotype" title="Array of flags indicating key state.">key</a> release. */
+            }
+         }</pre></blockquote>
+         
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#keyboard_callback" title="User specified keyboard callback handler.">keyboard_callback</a>,
+<a class="xref" href="#keyboard_ucallback" title="User specified unicode keyboard callback handler.">keyboard_ucallback</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exkeys" title="How to get input from the keyboard in different ways.">exkeys</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_leds">set_leds</a>(int leds);</b></div><br>
+   Overrides the state of the keyboard LED indicators. The parameter is a 
+   bitmask containing any of the values KB_SCROLOCK_FLAG, KB_NUMLOCK_FLAG, 
+   and KB_CAPSLOCK_FLAG, or -1 to restore the default behavior. Example:
+<blockquote class="code"><pre>
+      /* Cycle led indicators. */
+      <a href="#set_leds" class="autotype" title="Sets the state of the keyboard LED indicators.">set_leds</a>(KB_SCROLOCK_FLAG);
+      <a href="alleg005.html#rest" class="autotype" title="Waits a specified number of milliseconds or yields CPU.">rest</a>(1000);
+      <a href="#set_leds" class="autotype" title="Sets the state of the keyboard LED indicators.">set_leds</a>(KB_CAPSLOCK_FLAG);
+      <a href="alleg005.html#rest" class="autotype" title="Waits a specified number of milliseconds or yields CPU.">rest</a>(1000);
+      <a href="#set_leds" class="autotype" title="Sets the state of the keyboard LED indicators.">set_leds</a>(KB_NUMLOCK_FLAG);
+      <a href="alleg005.html#rest" class="autotype" title="Waits a specified number of milliseconds or yields CPU.">rest</a>(1000);
+      <a href="#set_leds" class="autotype" title="Sets the state of the keyboard LED indicators.">set_leds</a>(-1);
+</pre></blockquote>
+   Note that the led behaviour cannot be guaranteed on some platforms, some
+   leds might not react, or none at all. Therefore you shouldn't rely only on
+   them to communicate information to the user, just in case it doesn't get
+   through.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#key_led_flag" title="Flag to prevent the keyboard LEDs from being updated.">key_led_flag</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_keyboard_rate">set_keyboard_rate</a>(int delay, int repeat);</b></div><br>
+   Sets the keyboard repeat rate. Times are given in milliseconds. Passing 
+   zero times will disable the key repeat.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>.</blockquote>
+<div class="al-api"><b>void <a name="clear_keybuf">clear_keybuf</a>();</b></div><br>
+   Empties the keyboard buffer. Usually you want to use this in your program
+   before reading keys to avoid previously buffered keys to be returned by
+   calls to readkey() or ureadkey().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#keypressed" title="Tells if there are keypresses waiting in the input buffer.">keypressed</a>,
+<a class="xref" href="#readkey" title="Returns the next character from the keyboard buffer.">readkey</a>,
+<a class="xref" href="#ureadkey" title="Returns the next unicode character from the keyboard buffer.">ureadkey</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="three_finger_flag">three_finger_flag</a>;</b></div><br>
+   The DJGPP keyboard handler provides an 'emergency exit' sequence which
+   you can use to kill off your program. If you are running under DOS this 
+   is the three finger salute, ctrl+alt+del. Most multitasking OS's will 
+   trap this combination before it reaches the Allegro handler, in which 
+   case you can use the alternative ctrl+alt+end. If you want to disable 
+   this behaviour in release versions of your program, set this flag to 
+   FALSE.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="key_led_flag">key_led_flag</a>;</b></div><br>
+   By default, the capslock, numlock, and scroll-lock keys toggle the 
+   keyboard LED indicators when they are pressed. If you are using these 
+   keys for input in your game (eg. capslock to fire) this may not be 
+   desirable, so you can clear this flag to prevent the LED's being updated.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_keyboard" title="Installs the Allegro keyboard interrupt handler.">install_keyboard</a>,
+<a class="xref" href="#set_leds" title="Sets the state of the keyboard LED indicators.">set_leds</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

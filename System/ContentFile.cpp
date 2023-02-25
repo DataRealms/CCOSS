@@ -199,13 +199,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ContentFile::ReloadAllBitmaps() {
+		for (const std::unordered_map<std::string, BITMAP *> &bitmapCache : s_LoadedBitmaps) {
+			for (const auto &[filePath, oldBitmap] : bitmapCache) {
+				ReloadBitmap(filePath);
+			}
+		}
+		g_ConsoleMan.PrintString("SYSTEM: Sprites reloaded");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
 		BITMAP *returnBitmap = nullptr;
-		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		const int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
+
+		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+			ReloadBitmap(dataPathToLoad, conversionMode);
+		}
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
@@ -275,7 +290,7 @@ namespace RTE {
 		PALETTE currentPalette;
 		get_palette(currentPalette);
 
-		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
+		set_color_conversion((conversionMode == COLORCONV_NONE) ? COLORCONV_MOST : conversionMode);
 		returnBitmap = load_bitmap(dataPathToLoad.c_str(), currentPalette);
 		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
 
@@ -344,5 +359,30 @@ namespace RTE {
 			return returnSample;
 		}
 		return returnSample;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::ReloadBitmap(const std::string &filePath, int conversionMode) {
+		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+
+		auto bmpItr = s_LoadedBitmaps[bitDepth].find(filePath);
+		if (bmpItr == s_LoadedBitmaps[bitDepth].end()) {
+			return;
+		}
+
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+		set_color_conversion((conversionMode == COLORCONV_NONE) ? COLORCONV_MOST : conversionMode);
+
+		BITMAP *loadedBitmap = (*bmpItr).second;
+		BITMAP *newBitmap = load_bitmap(filePath.c_str(), currentPalette);
+		BITMAP swap;
+
+		std::memcpy(&swap, loadedBitmap, sizeof(BITMAP));
+		std::memcpy(loadedBitmap, newBitmap, sizeof(BITMAP));
+		std::memcpy(newBitmap, &swap, sizeof(BITMAP));
+
+		destroy_bitmap(newBitmap);
 	}
 }

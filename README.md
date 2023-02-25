@@ -28,8 +28,6 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 **Do Not** change the folder names unless you want to make trouble for yourself.
 
 3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\` into the **Data Repository**:
-* `lua51.dll`
-* `lua51-64.dll`
 * `fmod.dll`
 * `fmodL.dll`
 

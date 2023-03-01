@@ -380,14 +380,9 @@ namespace RTE {
 		void ClearFrame();
 
 		/// <summary>
-		/// Flips the frame buffers, draws the software backbuffer to the gl backbuffer. Draw other gl things (imgui) after this.
+		/// Copys the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
-		void FlipFrameBuffers();
-
-		/// <summary>
-		/// Present the window content.
-		/// </summary>
-		void SwapWindow();
+		void UploadFrame();
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.

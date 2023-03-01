@@ -504,9 +504,9 @@ namespace RTE {
 		int newWindowH = bottomRightDisplay->second.y + bottomRightDisplay->second.h - topLeftDisplay->second.y;
 
 		SDL_RestoreWindow(m_Window.get());
-		SDL_SetWindowBordered(m_Window.get(), SDL_FALSE);
-		SDL_SetWindowPosition(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
 		SDL_SetWindowSize(m_Window.get(), newWindowW, newWindowH);
+		SDL_SetWindowPosition(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
+		SDL_SetWindowBordered(m_Window.get(), SDL_FALSE);
 		return false;
 	}
 
@@ -847,10 +847,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void FrameMan::ClearFrame() {
-	}
-
-	void FrameMan::SwapWindow(){
-		SDL_RenderPresent(m_Renderer.get());
+		SDL_RenderClear(m_Renderer.get());
 	}
 
 	void FrameMan::FlipFrameBuffers() {
@@ -872,6 +869,7 @@ namespace RTE {
 		SDL_UnlockTexture(m_ScreenTexture.get());
 
 		SDL_RenderCopy(m_Renderer.get(), m_ScreenTexture.get(), NULL, NULL);
+		SDL_RenderPresent(m_Renderer.get());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

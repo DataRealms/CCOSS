@@ -358,8 +358,7 @@ namespace RTE {
 			m_ActivityNeedsResume = false;
 
 			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_FrameMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -373,8 +372,7 @@ namespace RTE {
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
 		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
-		g_FrameMan.SwapWindow();
+		g_FrameMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

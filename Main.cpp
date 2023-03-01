@@ -183,8 +183,7 @@ namespace RTE {
 
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_FrameMan.UploadFrame();
 		}
 	}
 
@@ -293,8 +292,7 @@ namespace RTE {
 			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_FrameMan.UploadFrame();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
 			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);

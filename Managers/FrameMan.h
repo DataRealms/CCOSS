@@ -165,6 +165,18 @@ namespace RTE {
 		int GetMaxResY() const { return m_MaxResY; }
 
 		/// <summary>
+		/// Gets the horizontal resolution of the primary display.
+		/// </summary>
+		/// <returns>The horizontal resolution of the primary display.</returns>
+		int GetPrimaryScreenResX() const { return m_PrimaryScreenResX; }
+
+		/// <summary>
+		/// Gets the vertical resolution of the primary display.
+		/// </summary>
+		/// <returns>The vertical resolution of the primary display.</returns>
+		int GetPrimaryScreenResY() const { return m_PrimaryScreenResY; }
+
+		/// <summary>
 		/// Gets the horizontal resolution of the screen.
 		/// </summary>
 		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>

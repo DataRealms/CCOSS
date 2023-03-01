@@ -231,14 +231,14 @@ namespace RTE {
 			case ResolutionQuickChangeType::Fullscreen:
 				m_NewFullscreen = true;
 				m_NewResUpscaled = false;
-				m_NewResX = g_FrameMan.GetMaxResX();
-				m_NewResY = g_FrameMan.GetMaxResY();
+				m_NewResX = g_FrameMan.GetPrimaryScreenResX();
+				m_NewResY = g_FrameMan.GetPrimaryScreenResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledFullscreen:
 				m_NewFullscreen = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = true;
-				m_NewResX = g_FrameMan.GetMaxResX() / 2;
-				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				m_NewResX = g_FrameMan.GetPrimaryScreenResX() / 2;
+				m_NewResY = g_FrameMan.GetPrimaryScreenResY() / 2;
 				break;
 			default:
 				RTEAbort("Invalid resolution quick change type passed to SettingsVideoGUI::ApplyQuickChangeResolution!")

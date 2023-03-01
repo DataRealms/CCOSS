@@ -715,7 +715,7 @@ namespace RTE {
 			}
 			if (e.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement += Vector(e.motion.xrel, e.motion.yrel);
-				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
+				m_AbsoluteMousePos.SetXY(e.motion.x * g_FrameMan.GetResMultiplier(), e.motion.y * g_FrameMan.GetResMultiplier());
 				if (g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					int x{0};
 					int y{0};

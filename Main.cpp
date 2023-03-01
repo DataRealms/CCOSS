@@ -316,7 +316,8 @@ int main(int argc, char **argv) {
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 #endif
 	SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetHint("SDL_ALLOW_TOPMOST", 0);
+	SDL_SetHint("SDL_ALLOW_TOPMOST", "0");
+	//SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SCALING, "0");
 
 	if (std::filesystem::exists("Base.rte/gamecontrollerdb.txt")) {
 		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");

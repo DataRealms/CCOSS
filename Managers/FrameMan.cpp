@@ -847,7 +847,7 @@ namespace RTE {
 		SDL_RenderClear(m_Renderer.get());
 	}
 
-	void FrameMan::FlipFrameBuffers() {
+	void FrameMan::UploadFrame() {
 		if (s_DisableFrameBufferFlip) {
 			return;
 		}

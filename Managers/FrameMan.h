@@ -13,6 +13,7 @@ extern "C" {
 	struct SDL_Window;
 	struct SDL_Renderer;
 	struct SDL_Texture;
+	struct SDL_Rect;
 }
 
 namespace RTE {
@@ -189,6 +190,14 @@ namespace RTE {
 		int GetResY() const { return m_ResY; }
 
 		/// <summary>
+		/// Gets whether Vsync is enabled.
+		/// </summary>
+		/// <returns>
+		/// Whether Vsync is enabled.
+		/// </returns>
+		int VsyncEnabled() { return m_EnableVsync; }
+
+		/// <summary>
 		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
 		/// <returns>What multiple the screen resolution is run in.</returns>
@@ -220,8 +229,8 @@ namespace RTE {
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
-		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
+		/// <param name="newFullscreen">Wheter to put the game into fullscreen mode.</param>
+		void ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen);
 
 		/// <summary>
 		/// Apply resolution change after window resize.
@@ -615,8 +624,11 @@ namespace RTE {
 
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
 		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
-		std::unique_ptr<SDL_Renderer, SdlRendererDeleter> m_Renderer;
+		std::unique_ptr<SDL_Renderer, SdlRendererDeleter> m_Renderer; //!< The Main Window Rendererer, draws to the main window.
+		std::vector<std::unique_ptr<SDL_Renderer, SdlRendererDeleter>> m_MultiRenderers; //!< Additional Renderers for multi display fullscreen.
 		std::unique_ptr<SDL_Texture, SdlTextureDeleter> m_ScreenTexture;
+		std::vector<std::unique_ptr<SDL_Texture, SdlTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
+		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multidisplay fullscreen.
 		int m_EnableVsync;
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
@@ -742,7 +754,7 @@ namespace RTE {
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
+		void ValidateResolution(int &resX, int &resY, int &resMultiplier, bool &newFullscreen) const;
 
 		/// <summary>
 		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
@@ -763,10 +775,10 @@ namespace RTE {
 		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.
 		/// </summary>
 		/// <param name="resX">
-		/// Requested horizontal resolution (not including scaling).
+		/// Requested horizontal resolution (not including scaling). May be adjusted to avoid letterboxing.
 		/// </param>
 		/// <param name="resY">
-		/// Requested vertical resolution (not including scaling).
+		/// Requested vertical resolution (not including scaling). May be adjusted to avoid letterboxing.
 		/// </param>
 		/// <param name="resMultiplier">
 		/// Requested resolution multiplier.
@@ -774,7 +786,7 @@ namespace RTE {
 		/// <returns>
 		/// Whether all displays were created successfully.
 		/// </returns>
-		bool SetWindowMultiFullscreen(int resX,int resY,int resMultiplier);
+		bool SetWindowMultiFullscreen(int &resX, int &resY,int resMultiplier);
 
 		/// <summary>
 		/// Creates the RGB lookup table and color table presets for drawing with transparency in indexed color mode. This is called during Initialize().

@@ -86,10 +86,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
+		m_ScreenTexture.reset();
+		m_MultiDisplayTextures.clear();
+		m_Renderer.reset();
+		m_MultiRenderers.clear();
 		m_Window.reset();
 		m_MultiWindows.clear();
-		m_Renderer.reset();
-		m_ScreenTexture.reset();
+		m_TextureOffsets.clear();
 
 		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
@@ -163,13 +166,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
+	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier, bool &newFullscreen) const {
 		bool settingsNeedOverwrite = false;
 
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
 			settingsNeedOverwrite = true;
 			resX = m_MaxResX / resMultiplier;
 			resY = m_MaxResY / resMultiplier;
+			newFullscreen = false;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 
 		}
@@ -180,20 +184,10 @@ namespace RTE {
 				resX = c_DefaultResX;
 				resY = c_DefaultResY;
 				resMultiplier = 1;
+				newFullscreen = false;
 				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
 			}
-		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
-			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) {
-				settingsNeedOverwrite = ValidateMultiScreenResolution(resX, resY, resMultiplier);
-			}
-		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
-			settingsNeedOverwrite = true;
-			resX = c_DefaultResX;
-			resY = c_DefaultResY;
-			resMultiplier = 1;
-			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 		}
-
 		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
 	}
 
@@ -275,7 +269,7 @@ namespace RTE {
 			}
 		}
 
-		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
+		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier, m_Fullscreen);
 
 		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (m_Fullscreen) {
@@ -396,10 +390,24 @@ namespace RTE {
 
 		m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
 
-		m_ScreenTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
+		if (m_TextureOffsets.empty()) {
+			m_ScreenTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
 
-		SDL_RenderSetLogicalSize(m_Renderer.get(), m_BackBuffer32->w, m_BackBuffer32->h);
-
+			SDL_RenderSetLogicalSize(m_Renderer.get(), m_BackBuffer32->w, m_BackBuffer32->h);
+		} else {
+			m_MultiDisplayTextures.resize(m_TextureOffsets.size());
+			for(size_t i = 0; i < m_MultiDisplayTextures.size(); ++i){
+				SDL_Renderer* renderer;
+				if (i == 0) {
+					renderer = m_Renderer.get();
+				} else {
+					renderer = m_MultiRenderers[i-1].get();
+				}
+				m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(
+				    SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_TextureOffsets[i].w, m_TextureOffsets[i].h));
+				SDL_RenderSetLogicalSize(renderer, m_TextureOffsets[i].w, m_TextureOffsets[i].h);
+			}
+		}
 		return 0;
 	}
 
@@ -460,7 +468,7 @@ namespace RTE {
 		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
 	}
 
-	bool FrameMan::SetWindowMultiFullscreen(int resX, int resY, int resMultiplier) {
+	bool FrameMan::SetWindowMultiFullscreen(int &resX, int &resY, int resMultiplier) {
 		int windowW = resX * resMultiplier;
 		int windowH = resY * resMultiplier;
 		int windowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
@@ -474,40 +482,75 @@ namespace RTE {
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.x < right.second.x; });
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.y < right.second.y; });
 		std::vector<std::pair<int, SDL_Rect>>::iterator displayPos = std::find_if(displayBounds.begin(), displayBounds.end(), [windowDisplay](auto display){return display.first == windowDisplay; });
-		// Move the window so that it fits within th screens
-		std::vector<std::pair<int, SDL_Rect>>::reverse_iterator topLeftDisplay = std::make_reverse_iterator(displayPos);
-		if(displayPos->second.x + windowW > displayBounds.back().second.x + displayBounds.back().second.w) {
-			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowW, displayBounds](auto display) {
-				return display.second.x + windowW <= displayBounds.back().second.x + displayBounds.back().second.w;
-			});
-			if (topLeftDisplay == displayBounds.rend()) {
-				return false;
-			}
-		}
-		if(topLeftDisplay->second.y + windowH > displayBounds.back().second.y + displayBounds.back().second.h) {
-			topLeftDisplay = std::find_if(topLeftDisplay, displayBounds.rend(), [windowH, displayBounds](auto display) {
-				return display.second.y + windowH <= displayBounds.back().second.y + displayBounds.back().second.h;
-			});
-			if (topLeftDisplay == displayBounds.rend()) {
-				return false;
-			}
+
+		int index = displayBounds.begin() - displayPos;
+
+		int actualResX = 0;
+		int actualResY = 0;
+		int topLeftX = windowDisplayBounds.x;
+		int topLeftY = windowDisplayBounds.y;
+
+		if (topLeftX + windowW > displayBounds.back().second.x + displayBounds.back().second.y || topLeftY + windowH > displayBounds.back().second.y) {
+			int maxResX = displayBounds.back().second.x - topLeftX + displayBounds.back().second.w;
+			int maxResY = displayBounds.back().second.y - topLeftY + displayBounds.back().second.h;
+			ShowMessageBox("Won't be able to fit the desired resolution onto the displays. Maximum resolution from here is: " + std::to_string(maxResX) + "x" + std::to_string(maxResY) + "\n Please move the window to the display you want to be the top left corner and try again.");
+			return false;
 		}
 
-		std::vector<std::pair<int, SDL_Rect>>::iterator bottomRightDisplay = std::find_if((topLeftDisplay+1).base(), displayBounds.end(), [topLeftDisplay, windowH](auto display){
-			return display.second.y + display.second.h >= topLeftDisplay->second.y + windowH;
-		});
-		bottomRightDisplay = std::find_if(bottomRightDisplay, displayBounds.end(), [topLeftDisplay, windowW](auto display){
-			return display.second.x + display.second.w >= topLeftDisplay->second.x + windowW;
-		});
+		for (; index < m_NumScreens && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier); ++index) {
+			if (displayBounds[index].second.x < topLeftX || displayBounds[index].second.y < topLeftY ||
+			    displayBounds[index].second.x - topLeftX > resX * resMultiplier || displayBounds[index].second.y - topLeftY > resY * resMultiplier) {
+				continue;
+			}
+			if (actualResX < topLeftX + displayBounds[index].second.x + displayBounds[index].second.w) {
+				actualResX = topLeftX + displayBounds[index].second.x + displayBounds[index].second.w;
+			}
+			if (actualResY < topLeftY + displayBounds[index].second.y + displayBounds[index].second.h) {
+				actualResY = topLeftY + displayBounds[index].second.y + displayBounds[index].second.h;
+			}
+			if (index != displayBounds.begin() - displayPos) {
+				m_MultiWindows.emplace_back(SDL_CreateWindow("",
+				    displayBounds[index].second.x,
+				    displayBounds[index].second.y,
+				    displayBounds[index].second.w,
+				    displayBounds[index].second.h,
+				    SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
+				if (!m_MultiWindows.back()) {
+					actualResX = -1;
+					actualResY = -1;
+					break;
+				}
+				m_MultiRenderers.emplace_back(SDL_CreateRenderer(
+				    m_MultiWindows.back().get(),
+				    -1,
+				    SDL_RENDERER_ACCELERATED));
+				if (!m_MultiRenderers.back()) {
+					actualResX = -1;
+					actualResY = -1;
+					break;
+				}
+			}
+			m_TextureOffsets.emplace_back(SDL_Rect{
+			    (displayBounds[index].second.x - topLeftX) / resMultiplier,
+			    (displayBounds[index].second.y - topLeftY) / resMultiplier,
+			    displayBounds[index].second.w / resMultiplier,
+			    displayBounds[index].second.h / resMultiplier});
+		}
+		//CBA to do figure out letterboxing for multiple displays, so just fix the resolution.
+		if (actualResX != resX*resMultiplier || actualResY != resY*resMultiplier) {
+			ShowMessageBox("Desired reolution would lead to letterboxing, adjusting to fill entire displays.");
+			resX = actualResX / resMultiplier;
+			resY = actualResY / resMultiplier;
+		}
 
-		int newWindowW = bottomRightDisplay->second.x + bottomRightDisplay->second.w - topLeftDisplay->second.x;
-		int newWindowH = bottomRightDisplay->second.y + bottomRightDisplay->second.h - topLeftDisplay->second.y;
+		if(actualResX == -1|| actualResY == -1) {
+			m_MultiWindows.clear();
+			m_MultiRenderers.clear();
+			m_TextureOffsets.clear();
+		}
+		SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-		SDL_RestoreWindow(m_Window.get());
-		SDL_SetWindowSize(m_Window.get(), newWindowW, newWindowH);
-		SDL_SetWindowPosition(m_Window.get(), topLeftDisplay->second.x, topLeftDisplay->second.y);
-		SDL_SetWindowBordered(m_Window.get(), SDL_FALSE);
-		return false;
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -625,6 +668,7 @@ namespace RTE {
 		} else {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_RestoreWindow(m_Window.get());
+			SDL_SetWindowBordered(m_Window.get(), SDL_TRUE);
 			SDL_SetWindowSize(m_Window.get(), m_ResX * newMultiplier, m_ResY * newMultiplier);
 			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
 			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
@@ -642,7 +686,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen) {
+	void FrameMan::ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen) {
 		int newResMultiplier = upscaled ? 2 : 1;
 
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_Fullscreen == newFullscreen) {
@@ -654,7 +698,7 @@ namespace RTE {
 			SDL_RestoreWindow(m_Window.get());
 		}
 
-		ValidateResolution(newResX, newResY, newResMultiplier);
+		ValidateResolution(newResX, newResY, newResMultiplier, newFullscreen);
 
 		if (newFullscreen &&
 		    ((m_NumScreens > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) ||
@@ -670,6 +714,7 @@ namespace RTE {
 		} else if (!newFullscreen) {
 			SDL_SetWindowFullscreen(m_Window.get(), 0);
 			SDL_RestoreWindow(m_Window.get());
+			SDL_SetWindowBordered(m_Window.get(), SDL_TRUE);
 			SDL_SetWindowSize(m_Window.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			int displayIndex = SDL_GetWindowDisplayIndex(m_Window.get());
 			SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
@@ -857,16 +902,29 @@ namespace RTE {
 			m_WantScreenDump = false;
 		}
 
-		void* texturePixels;
-		int texturePitch;
-		SDL_LockTexture(m_ScreenTexture.get(), NULL, &texturePixels, &texturePitch);
+		if (m_TextureOffsets.empty()){
+			SDL_UpdateTexture(m_ScreenTexture.get(), NULL, m_BackBuffer32->line[0], m_BackBuffer32->w * 4);
 
-		std::memcpy(texturePixels, m_BackBuffer32->line[0], m_BackBuffer32->w * m_BackBuffer32->h * 4);
+			SDL_RenderCopy(m_Renderer.get(), m_ScreenTexture.get(), NULL, NULL);
+			SDL_RenderPresent(m_Renderer.get());
+		} else {
+			SDL_Renderer *renderer;
+			for (size_t i = 0; i < m_TextureOffsets.size(); ++i) {
+				if(i == 0) {
+					renderer = m_Renderer.get();
+				} else {
+					renderer = m_MultiRenderers[i - 1].get();
+				}
 
-		SDL_UnlockTexture(m_ScreenTexture.get());
+				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(),
+				    NULL,
+				    m_BackBuffer32->line[0] + m_TextureOffsets[i].x + m_BackBuffer32->w * 4 * m_TextureOffsets[i].h,
+				    m_BackBuffer32->w * 4);
 
-		SDL_RenderCopy(m_Renderer.get(), m_ScreenTexture.get(), NULL, NULL);
-		SDL_RenderPresent(m_Renderer.get());
+				SDL_RenderCopy(renderer, m_MultiDisplayTextures[i].get(), NULL, NULL);
+				SDL_RenderPresent(renderer);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

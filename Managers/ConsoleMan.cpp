@@ -277,9 +277,9 @@ namespace RTE {
 
 		m_GUIControlManager->Update();
 
-		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDL_SCANCODE_DOWN)) {
+		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDLK_DOWN)) {
 			SetConsoleScreenSize(m_ConsoleScreenRatio + 0.05F);
-		} else if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDL_SCANCODE_UP)) {
+		} else if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDLK_UP)) {
 			SetConsoleScreenSize(m_ConsoleScreenRatio - 0.05F);
 		}
 
@@ -288,9 +288,9 @@ namespace RTE {
 			m_InputTextBox->SetFocus();
 
 			if (!m_InputLog.empty() && !g_UInputMan.FlagCtrlState()) {
-				if (g_UInputMan.KeyPressed(SDL_SCANCODE_UP)) {
+				if (g_UInputMan.KeyPressed(SDLK_UP)) {
 					LoadLoggedInput(false);
-				} else if (g_UInputMan.KeyPressed(SDL_SCANCODE_DOWN)) {
+				} else if (g_UInputMan.KeyPressed(SDLK_DOWN)) {
 					LoadLoggedInput(true);
 				}
 			}
@@ -302,7 +302,7 @@ namespace RTE {
 		}
 
 		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
-		if ((g_UInputMan.KeyPressed(SDLK_RETURN) || g_UInputMan.KeyPressed(SDL_SCANCODE_KP_ENTER)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
+		if ((g_UInputMan.KeyPressed(SDLK_RETURN) || g_UInputMan.KeyPressed(SDLK_KP_ENTER)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
 			FeedString(m_InputTextBox->GetText().empty() ? true : false);
 		}
 	}

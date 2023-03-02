@@ -91,6 +91,7 @@ namespace RTE {
 		ConvertKeyEvent(SDL_SCANCODE_BACKSPACE, Key_Backspace, keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_TAB, Key_Tab, keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_RETURN, Key_Enter, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_KP_ENTER, Key_Enter, keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_ESCAPE, Key_Escape, keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_LEFT, Key_LeftArrow, keyElapsedTime);
 		ConvertKeyEvent(SDL_SCANCODE_RIGHT, Key_RightArrow, keyElapsedTime);

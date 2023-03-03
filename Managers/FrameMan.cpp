@@ -319,7 +319,14 @@ namespace RTE {
 			if (m_NumScreens == 1) {
 				SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 			} else {
-				SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier);
+				if(!SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier)) {
+					SDL_SetWindowFullscreen(m_Window.get(), SDL_FALSE);
+					m_Fullscreen = false;
+					m_ResX = c_DefaultResX;
+					m_ResY = c_DefaultResY;
+					SDL_SetWindowSize(m_Window.get(), m_ResX, m_ResY);
+					SDL_SetWindowPosition(m_Window.get(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+				}
 			}
 		}
 
@@ -405,6 +412,9 @@ namespace RTE {
 				}
 				m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SdlTextureDeleter>(
 				    SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_TextureOffsets[i].w, m_TextureOffsets[i].h));
+				if (!m_MultiDisplayTextures[i]){
+					RTEAbort("Failed to create Texture for multidisplay: " + std::string(SDL_GetError()));
+				}
 				SDL_RenderSetLogicalSize(renderer, m_TextureOffsets[i].w, m_TextureOffsets[i].h);
 			}
 		}
@@ -469,6 +479,10 @@ namespace RTE {
 	}
 
 	bool FrameMan::SetWindowMultiFullscreen(int &resX, int &resY, int resMultiplier) {
+		m_MultiRenderers.clear();
+		m_MultiWindows.clear();
+		m_TextureOffsets.clear();
+
 		int windowW = resX * resMultiplier;
 		int windowH = resY * resMultiplier;
 		int windowDisplay = SDL_GetWindowDisplayIndex(m_Window.get());
@@ -483,32 +497,26 @@ namespace RTE {
 		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) { return left.second.y < right.second.y; });
 		std::vector<std::pair<int, SDL_Rect>>::iterator displayPos = std::find_if(displayBounds.begin(), displayBounds.end(), [windowDisplay](auto display){return display.first == windowDisplay; });
 
-		int index = displayBounds.begin() - displayPos;
+		int index = displayPos - displayBounds.begin();
 
 		int actualResX = 0;
 		int actualResY = 0;
 		int topLeftX = windowDisplayBounds.x;
 		int topLeftY = windowDisplayBounds.y;
 
-		if (topLeftX + windowW > displayBounds.back().second.x + displayBounds.back().second.y || topLeftY + windowH > displayBounds.back().second.y) {
-			int maxResX = displayBounds.back().second.x - topLeftX + displayBounds.back().second.w;
-			int maxResY = displayBounds.back().second.y - topLeftY + displayBounds.back().second.h;
-			ShowMessageBox("Won't be able to fit the desired resolution onto the displays. Maximum resolution from here is: " + std::to_string(maxResX) + "x" + std::to_string(maxResY) + "\n Please move the window to the display you want to be the top left corner and try again.");
-			return false;
-		}
 
 		for (; index < m_NumScreens && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier); ++index) {
 			if (displayBounds[index].second.x < topLeftX || displayBounds[index].second.y < topLeftY ||
 			    displayBounds[index].second.x - topLeftX > resX * resMultiplier || displayBounds[index].second.y - topLeftY > resY * resMultiplier) {
 				continue;
 			}
-			if (actualResX < topLeftX + displayBounds[index].second.x + displayBounds[index].second.w) {
-				actualResX = topLeftX + displayBounds[index].second.x + displayBounds[index].second.w;
+			if (actualResX < displayBounds[index].second.x - topLeftX + displayBounds[index].second.w) {
+				actualResX = displayBounds[index].second.x - topLeftX + displayBounds[index].second.w;
 			}
-			if (actualResY < topLeftY + displayBounds[index].second.y + displayBounds[index].second.h) {
-				actualResY = topLeftY + displayBounds[index].second.y + displayBounds[index].second.h;
+			if (actualResY < displayBounds[index].second.y - topLeftY + displayBounds[index].second.h) {
+				actualResY = displayBounds[index].second.y - topLeftY + displayBounds[index].second.h;
 			}
-			if (index != displayBounds.begin() - displayPos) {
+			if (index != displayPos - displayBounds.begin()) {
 				m_MultiWindows.emplace_back(SDL_CreateWindow("",
 				    displayBounds[index].second.x,
 				    displayBounds[index].second.y,
@@ -536,6 +544,17 @@ namespace RTE {
 			    displayBounds[index].second.w / resMultiplier,
 			    displayBounds[index].second.h / resMultiplier});
 		}
+		if (actualResX < resX * resMultiplier || actualResY < resY * resMultiplier ) {
+			int maxResX = displayBounds.back().second.x - topLeftX + displayBounds.back().second.w;
+			int maxResY = displayBounds.back().second.y - topLeftY + displayBounds.back().second.h;
+			ShowMessageBox("Won't be able to fit the desired resolution onto the displays. Maximum resolution from here is: " + std::to_string(maxResX) + "x" + std::to_string(maxResY) + "\n Please move the window to the display you want to be the top left corner and try again.");
+		}
+		if(actualResX == -1|| actualResY == -1) {
+			m_MultiWindows.clear();
+			m_MultiRenderers.clear();
+			m_TextureOffsets.clear();
+			return false;
+		}
 		//CBA to do figure out letterboxing for multiple displays, so just fix the resolution.
 		if (actualResX != resX*resMultiplier || actualResY != resY*resMultiplier) {
 			ShowMessageBox("Desired reolution would lead to letterboxing, adjusting to fill entire displays.");
@@ -543,11 +562,6 @@ namespace RTE {
 			resY = actualResY / resMultiplier;
 		}
 
-		if(actualResX == -1|| actualResY == -1) {
-			m_MultiWindows.clear();
-			m_MultiRenderers.clear();
-			m_TextureOffsets.clear();
-		}
 		SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 		return true;
@@ -640,7 +654,11 @@ namespace RTE {
 			return;
 		}
 
+		m_MultiDisplayTextures.clear();
+		m_TextureOffsets.clear();
+		m_MultiRenderers.clear();
 		m_MultiWindows.clear();
+
 		m_Fullscreen = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY);
 
 		if (m_Fullscreen) {
@@ -692,6 +710,9 @@ namespace RTE {
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_Fullscreen == newFullscreen) {
 			return;
 		}
+		m_MultiDisplayTextures.clear();
+		m_TextureOffsets.clear();
+		m_MultiRenderers.clear();
 		m_MultiWindows.clear();
 
 		if (!newFullscreen) {
@@ -918,7 +939,7 @@ namespace RTE {
 
 				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(),
 				    NULL,
-				    m_BackBuffer32->line[0] + m_TextureOffsets[i].x + m_BackBuffer32->w * 4 * m_TextureOffsets[i].h,
+				    m_BackBuffer32->line[0] + (m_TextureOffsets[i].x + m_BackBuffer32->w * m_TextureOffsets[i].y) * 4,
 				    m_BackBuffer32->w * 4);
 
 				SDL_RenderCopy(renderer, m_MultiDisplayTextures[i].get(), NULL, NULL);

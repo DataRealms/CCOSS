@@ -212,9 +212,15 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GripStrengthMultiplier;
     } else if (propName == "SharpLength")
         reader >> m_MaxSharpLength;
-    else if (propName == "Loudness")
+    else if (propName == "Loudness") {
         reader >> m_Loudness;
-    else
+	} else if (propName == "SpecialBehaviour_Activated") {
+		reader >> m_Activated;
+	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
+		double elapsedSimTimeMS;
+		reader >> elapsedSimTimeMS;
+		m_ActivationTimer.SetElapsedSimTimeMS(elapsedSimTimeMS);
+	} else
         return Attachable::ReadProperty(propName, reader);
 
     return 0;

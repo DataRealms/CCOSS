@@ -10,7 +10,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUIListBox.h"
@@ -65,7 +65,7 @@ namespace RTE {
 		m_Controller = controller;
 
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
-		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(controller->GetPlayer()); }
+		if (!m_GUIInput) { m_GUIInput = std::make_unique<GUIInputWrapper>(controller->GetPlayer()); }
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins", "DefaultSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 

@@ -8,7 +8,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUITextBox.h"
 #include "GUILabel.h"
@@ -41,7 +41,7 @@ namespace RTE {
 
 	int ConsoleMan::Initialize() {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32()); }
-		if (!m_GUIInput) { m_GUIInput = new AllegroInput(-1); }
+		if (!m_GUIInput) { m_GUIInput = new GUIInputWrapper(-1); }
 		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
 
 		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini")) {

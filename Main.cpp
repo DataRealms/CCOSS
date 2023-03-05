@@ -22,7 +22,7 @@
 #include "SDL.h"
 
 #include "GUI.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 

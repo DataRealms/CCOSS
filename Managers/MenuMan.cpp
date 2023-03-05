@@ -8,7 +8,7 @@
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 
 #include "Controller.h"
 #include "TitleScreen.h"
@@ -25,7 +25,7 @@ namespace RTE {
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
 
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-		m_GUIInput = std::make_unique<AllegroInput>(-1, g_UInputMan.GetJoystickCount() > 0);
+		m_GUIInput = std::make_unique<GUIInputWrapper>(-1, g_UInputMan.GetJoystickCount() > 0);
 
 		if (firstTimeInit) { g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get(), g_SettingsMan.GetLoadingScreenProgressReportDisabled()); }
 

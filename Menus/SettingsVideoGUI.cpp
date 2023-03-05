@@ -2,7 +2,7 @@
 #include "FrameMan.h"
 #include "ActivityMan.h"
 
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUI.h"
 #include "GUICollectionBox.h"
 #include "GUILabel.h"

@@ -26,7 +26,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUIComboBox.h"
@@ -367,7 +367,7 @@ int MetagameGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(-1, true);
+        m_pGUIInput = new GUIInputWrapper(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {

@@ -24,7 +24,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUITab.h"
@@ -146,7 +146,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(pController->GetPlayer());
+        m_pGUIInput = new GUIInputWrapper(pController->GetPlayer());
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {

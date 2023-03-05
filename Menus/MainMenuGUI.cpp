@@ -8,7 +8,7 @@
 
 #include "GUI.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
@@ -48,7 +48,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	void MainMenuGUI::Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_MainMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_MainMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuScreenSkin.ini");
 		m_MainMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");

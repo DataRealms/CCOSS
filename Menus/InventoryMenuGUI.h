@@ -7,7 +7,7 @@
 #include "GUI.h"
 #include "GUIControlManager.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 
 namespace RTE {
 
@@ -283,7 +283,7 @@ namespace RTE {
 		/// </summary>
 		std::unique_ptr<GUIControlManager> m_GUIControlManager;
 		std::unique_ptr<AllegroScreen> m_GUIScreen;
-		std::unique_ptr<AllegroInput> m_GUIInput;
+		std::unique_ptr<GUIInputWrapper> m_GUIInput;
 		GUICollectionBox *m_GUITopLevelBox;
 		GUILabel *m_GUIInformationText;
 		GUIButton *m_GUIInformationToggleButton;

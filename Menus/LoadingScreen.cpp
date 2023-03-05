@@ -6,7 +6,7 @@
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUIListBox.h"
 
@@ -23,7 +23,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, bool progressReportDisabled) {
+	void LoadingScreen::Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool progressReportDisabled) {
 		GUIControlManager loadingScreenManager;
 		RTEAssert(loadingScreenManager.Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
 		loadingScreenManager.Load("Base.rte/GUIs/LoadingGUI.ini");

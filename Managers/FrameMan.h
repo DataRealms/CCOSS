@@ -389,7 +389,7 @@ namespace RTE {
 		void ClearFrame();
 
 		/// <summary>
-		/// Copys the BackBuffer32 content to GPU and shows it on screen.
+		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
 		void UploadFrame();
 

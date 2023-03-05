@@ -16,8 +16,8 @@
 /// Data Realms, LLC - http://www.datarealms.com
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// Cortex Command Community Project Discord - https://discord.gg/TSU6StNQUG
-/// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
+
 #include "allegro.h"
 #include "SDL.h"
 
@@ -307,14 +307,15 @@ namespace RTE {
 /// </summary>
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
-	// allegro_init();
-	install_allegro(SYSTEM_NONE, &errno, atexit);
+	install_allegro(SYSTEM_NONE, &errno, std::atexit);
 	loadpng_init();
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER);
+
 #if SDL_MINOR_VERSION > 22
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 #endif
+
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_SetHint("SDL_ALLOW_TOPMOST", "0");
 
@@ -349,7 +350,6 @@ int main(int argc, char **argv) {
 		RunGameLoop();
 	}
 
-
 	DestroyManagers();
 
 	allegro_exit();
@@ -357,6 +357,7 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 }
+
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }
 #endif

@@ -1,15 +1,18 @@
 #include "RTEError.h"
 
-#include "SDL_messagebox.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "ActivityMan.h"
+
+#include "SDL_messagebox.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ShowMessageBox(const std::string &message) { SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "RTE Aborted *.*", message.c_str(), NULL); }
+	void ShowMessageBox(const std::string &message) {
+		SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_ERROR, "RTE Aborted! (x_x)", message.c_str(), nullptr);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,27 +32,30 @@ namespace RTE {
 
 			// Save out the screen bitmap, after making a copy of it, faster sometimes.
 			if (screen) {
-				BITMAP *abortScreenBuffer = create_bitmap(g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
-			    blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h);
+				int backbufferWidth = g_FrameMan.GetBackBuffer32()->w;
+				int backbufferHeight = g_FrameMan.GetBackBuffer32()->h;
+				BITMAP *abortScreenBuffer = create_bitmap(backbufferWidth, backbufferHeight);
+				blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, backbufferWidth, backbufferHeight);
 				save_bmp("AbortScreen.bmp", abortScreenBuffer, nullptr);
 				destroy_bitmap(abortScreenBuffer);
 			}
 
 			// Ditch the video mode so the message box appears without problems.
-		    if (g_FrameMan.GetWindow()) {
-			    SDL_SetWindowFullscreen(g_FrameMan.GetWindow(), 0);
-			    SDL_SetWindowTitle(g_FrameMan.GetWindow(), "RTE Aborted! (x_x)");
-		    }
+			if (g_FrameMan.GetWindow()) {
+				SDL_SetWindowFullscreen(g_FrameMan.GetWindow(), 0);
+			}
 
-		    // This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
+			// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
 			std::filesystem::path filePath = file;
 			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
 
-			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe game has attempted to save to 'AbortSave'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
-		    g_ConsoleMan.PrintString(abortMessage);
-		    g_ConsoleMan.SaveAllText("AbortLog.txt");
-		    System::PrintToCLI(abortMessage);
-		    ShowMessageBox(abortMessage);
+			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe game has attempted to save to 'AbortSave'.\nThe console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
+
+			g_ConsoleMan.PrintString(abortMessage);
+			g_ConsoleMan.SaveAllText("AbortLog.txt");
+			System::PrintToCLI(abortMessage);
+
+			ShowMessageBox(abortMessage);
 		}
 
 		currentAborting = false;

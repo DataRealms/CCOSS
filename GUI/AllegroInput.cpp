@@ -63,8 +63,8 @@ namespace RTE {
 		// Update the mouse position of this GUIInput, based on the Allegro mouse vars (which may have been altered by joystick or keyboard input)
 #ifndef GUI_STANDALONE
 		Vector mousePos = g_UInputMan.GetAbsoluteMousePosition();
-		m_MouseX = static_cast<int>(static_cast<float>(mousePos.m_X) / static_cast<float>(g_FrameMan.GetResMultiplier()));
-		m_MouseY = static_cast<int>(static_cast<float>(mousePos.m_Y) / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		m_MouseX = static_cast<int>(mousePos.GetX() / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		m_MouseY = static_cast<int>(mousePos.GetY() / static_cast<float>(g_FrameMan.GetResMultiplier()));
 #else
 		m_MouseX = mouse_x;
 		m_MouseY = mouse_y;

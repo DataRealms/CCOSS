@@ -99,10 +99,10 @@ namespace RTE {
 		m_Modifier = GUIInput::ModNone;
 		SDL_Keymod keyShifts = SDL_GetModState();
 
-		if (keyShifts & SDL_Keymod::KMOD_SHIFT) { m_Modifier |= GUIInput::ModShift; }
-		if (keyShifts & SDL_Keymod::KMOD_ALT) { m_Modifier |= GUIInput::ModAlt; }
-		if (keyShifts & SDL_Keymod::KMOD_CTRL) { m_Modifier |= GUIInput::ModCtrl; }
-		if (keyShifts & SDL_Keymod::KMOD_GUI) { m_Modifier |= GUIInput::ModCommand; }
+		if (keyShifts & KMOD_SHIFT) { m_Modifier |= GUIInput::ModShift; }
+		if (keyShifts & KMOD_ALT) { m_Modifier |= GUIInput::ModAlt; }
+		if (keyShifts & KMOD_CTRL) { m_Modifier |= GUIInput::ModCtrl; }
+		if (keyShifts & KMOD_GUI) { m_Modifier |= GUIInput::ModCommand; }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

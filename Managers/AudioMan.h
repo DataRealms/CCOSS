@@ -291,6 +291,11 @@ namespace RTE {
 		/// Stops all playback and clears the music playlist.
 		/// </summary>
 		void StopAll() { if (m_AudioEnabled) { m_MasterChannelGroup->stop(); } m_MusicPlayList.clear(); }
+
+		/// <summary>
+		/// Makes all sounds that are looping stop looping, allowing them to play once more then be finished.
+		/// </summary>
+		void FinishAllLoopingSounds();
 #pragma endregion
 
 #pragma region Music Playback and Handling

@@ -597,7 +597,7 @@ public:
 // Description:     Returns the name of the tech module selected for this team during scenario setup
 // Arguments:       Team to return tech module for
 // Return value:    Tech module name, for example Dummy.rte, or empty string if there is no team
-	std::string GetTeamTech(int team) { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
+	std::string GetTeamTech(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetTeamTech

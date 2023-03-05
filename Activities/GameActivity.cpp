@@ -259,6 +259,14 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_RequireClearPathToOrbitSwitchEnabled;
 	else if (propName == "BuyMenuEnabled") {
 		reader >> m_BuyMenuEnabled;
+	} else if (propName == "Team1Tech" || propName == "Team2Tech" || propName == "Team3Tech" || propName == "Team4Tech") {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+			if (propName == "Team" + std::to_string(team + 1) + "Tech") {
+				std::string techName;
+				reader >> techName;
+				SetTeamTech(team, techName);
+			}
+		}
 	} else
         return Activity::ReadProperty(propName, reader);
 
@@ -278,6 +286,10 @@ int GameActivity::Save(Writer &writer) const {
 	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
 	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 	writer.NewPropertyWithValue("BuyMenuEnabled", m_BuyMenuEnabled);
+
+	for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+		writer.NewPropertyWithValue("Team" + std::to_string(team + 1) + "Tech", GetTeamTech(team));
+	}
 
 	return 0;
 }

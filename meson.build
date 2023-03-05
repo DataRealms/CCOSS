@@ -121,6 +121,7 @@ source_inc_dirs = include_directories(
   'Activities',
   'Entities',
   'GUI',
+  'GUI/Wrappers',
   'Lua',
   'Managers',
   'Menus',

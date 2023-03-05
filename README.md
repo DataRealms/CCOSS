@@ -104,7 +104,6 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`
 
 **Arch Linux:**  
-<<<<<<< HEAD
 `sudo pacman -S allegro4 sdl2 boost flac luajit lua52 minizip lz4 libpng meson ninja base-devel`  
 
 **Ubuntu >=20.04:**  

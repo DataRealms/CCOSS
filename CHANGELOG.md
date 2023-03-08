@@ -523,6 +523,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
 
+- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

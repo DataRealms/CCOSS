@@ -302,7 +302,6 @@ namespace RTE {
 			std::snprintf(goldString.data(), goldString.size(), " %c Infinite", -58);
 		} else {
 			int startGold = m_StartingGoldSlider->GetValue();
-			startGold = startGold - (startGold % 500);
 			std::snprintf(goldString.data(), goldString.size(), " %c %d oz", -58, startGold);
 		}
 		m_StartingGoldLabel->SetText(goldString);

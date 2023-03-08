@@ -38,8 +38,8 @@ jobs:
 
       - name: Build
         env:
-          CC: "clang"
-          CXX: "clang++"
+          CC: "gcc"
+          CXX: "g++"
         run: |
           meson setup --buildtype=release -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=/usr/lib/ --prefix=/usr/ build
           meson compile -C build

@@ -40,8 +40,8 @@ jobs:
 
       - name: Build
         env:
-          CC: "clang"
-          CXX: "clang++"
+          CC: "gcc"
+          CXX: "g++"
         run: |
           meson setup --buildtype=debug -Ddebug_type=full build
           meson compile -C build

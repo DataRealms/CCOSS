@@ -73,7 +73,7 @@ For unspecified versions assume compatibility with the latest ubuntu LTS release
 
 3. Open a terminal in the Source Repository.
 
-4. `meson build` or `meson --buildtype=debug build` for debug build (default is release build)
+4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)
 
 5. `ninja -C build`
 

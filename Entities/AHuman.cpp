@@ -3364,10 +3364,10 @@ void AHuman::Update()
 					}
 					float throwProgress = GetThrowProgress();
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->AddHandTarget("Start Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + (thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + thrownDevice->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-					m_pFGArm->AddHandTarget("End Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
 					float maxThrowVel = thrownDevice->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->RemoveAttachable(thrownDevice)) {

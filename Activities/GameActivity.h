@@ -763,6 +763,13 @@ public:
 	int GetDefaultGoldNuts() const { return m_DefaultGoldNuts; }
 
 
+	/// <summary>
+	/// Gets the default gold for max difficulty.
+	/// </summary>
+	/// <returns>The default gold for max difficulty.</returns>
+	int GetDefaultGoldMaxDifficulty() const { return m_DefaultGoldMaxDifficulty; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1072,6 +1079,7 @@ protected:
 	int m_DefaultGoldMedium;
 	int m_DefaultGoldHard;
 	int m_DefaultGoldNuts;
+	int m_DefaultGoldMaxDifficulty;
 	// Whether those switches are enabled or disabled in scenario setup dialog, true by default
 	bool m_FogOfWarSwitchEnabled;
 	bool m_DeployUnitsSwitchEnabled;

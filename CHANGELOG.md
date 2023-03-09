@@ -525,6 +525,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
 
+- Added `GameActivity` INI property `DefaultGoldNuts!`, which lets you specify the default gold when the difficulty slider is maxed out.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

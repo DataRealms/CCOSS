@@ -527,6 +527,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `GameActivity` INI property `DefaultGoldNuts!`, which lets you specify the default gold when the difficulty slider is maxed out.
 
+- Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -713,6 +715,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	CheckOffset(screenId);
 	SetScroll(center, screenId);
 	```
+	
+- `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
 
 </details>
 

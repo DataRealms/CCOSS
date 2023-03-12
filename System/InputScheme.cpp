@@ -191,50 +191,50 @@ namespace RTE {
 		}
 		switch (m_SchemePreset) {
 			case InputPreset::PresetArrowKeys:
-				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_Scancode::SDL_SCANCODE_UP);
-				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_Scancode::SDL_SCANCODE_DOWN);
-				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_Scancode::SDL_SCANCODE_LEFT);
-				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_Scancode::SDL_SCANCODE_RIGHT);
-				m_InputMappings[InputElements::INPUT_FIRE].SetKey(SDL_Scancode::SDL_SCANCODE_KP_1);
-				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_Scancode::SDL_SCANCODE_KP_2);
-				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_Scancode::SDL_SCANCODE_UP);
-				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_Scancode::SDL_SCANCODE_DOWN);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_Scancode::SDL_SCANCODE_KP_3);
-				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_Scancode::SDL_SCANCODE_KP_ENTER);
-				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_Scancode::SDL_SCANCODE_KP_0);
-				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_KP_5);
-				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_KP_4);
-				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_Scancode::SDL_SCANCODE_KP_DECIMAL);
-				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_Scancode::SDL_SCANCODE_KP_6);
-				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_Scancode::SDL_SCANCODE_KP_9);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_KP_7);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_KP_8);
+				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_SCANCODE_UP);
+				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_SCANCODE_DOWN);
+				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_SCANCODE_LEFT);
+				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_SCANCODE_RIGHT);
+				m_InputMappings[InputElements::INPUT_FIRE].SetKey(SDL_SCANCODE_KP_1);
+				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_SCANCODE_KP_2);
+				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_SCANCODE_UP);
+				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_SCANCODE_DOWN);
+				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_SCANCODE_KP_3);
+				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_KP_ENTER);
+				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_KP_0);
+				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_KP_5);
+				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_SCANCODE_KP_4);
+				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_SCANCODE_KP_DECIMAL);
+				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_SCANCODE_KP_6);
+				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_SCANCODE_KP_9);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_SCANCODE_KP_7);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_SCANCODE_KP_8);
 				break;
 			case InputPreset::PresetWASDKeys:
-				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_Scancode::SDL_SCANCODE_W);
-				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_Scancode::SDL_SCANCODE_S);
-				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_Scancode::SDL_SCANCODE_A);
-				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_Scancode::SDL_SCANCODE_D);
-				m_InputMappings[InputElements::INPUT_FIRE].SetKey(SDL_Scancode::SDL_SCANCODE_H);
-				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_Scancode::SDL_SCANCODE_J);
-				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_Scancode::SDL_SCANCODE_W);
-				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_Scancode::SDL_SCANCODE_S);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_Scancode::SDL_SCANCODE_K);
-				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_Scancode::SDL_SCANCODE_L);
-				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_Scancode::SDL_SCANCODE_C);
-				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_U);
-				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_Y);
-				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_Scancode::SDL_SCANCODE_R);
-				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_Scancode::SDL_SCANCODE_F);
-				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_Scancode::SDL_SCANCODE_B);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_Q);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_E);
+				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_SCANCODE_W);
+				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_SCANCODE_S);
+				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_SCANCODE_A);
+				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_SCANCODE_D);
+				m_InputMappings[InputElements::INPUT_FIRE].SetKey(SDL_SCANCODE_H);
+				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_SCANCODE_J);
+				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_SCANCODE_W);
+				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_SCANCODE_S);
+				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_SCANCODE_K);
+				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_L);
+				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_C);
+				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_U);
+				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_SCANCODE_Y);
+				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_SCANCODE_R);
+				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_SCANCODE_F);
+				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_SCANCODE_B);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_SCANCODE_Q);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_SCANCODE_E);
 				break;
 			case InputPreset::PresetMouseWASDKeys:
-				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_Scancode::SDL_SCANCODE_W);
-				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_Scancode::SDL_SCANCODE_S);
-				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_Scancode::SDL_SCANCODE_A);
-				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_Scancode::SDL_SCANCODE_D);
+				m_InputMappings[InputElements::INPUT_L_UP].SetKey(SDL_SCANCODE_W);
+				m_InputMappings[InputElements::INPUT_L_DOWN].SetKey(SDL_SCANCODE_S);
+				m_InputMappings[InputElements::INPUT_L_LEFT].SetKey(SDL_SCANCODE_A);
+				m_InputMappings[InputElements::INPUT_L_RIGHT].SetKey(SDL_SCANCODE_D);
 				m_InputMappings[InputElements::INPUT_FIRE].SetMouseButton(MouseButtons::MOUSE_LEFT);
 				m_InputMappings[InputElements::INPUT_AIM].SetPresetDescription("Mouse Move");
 				m_InputMappings[InputElements::INPUT_AIM_UP].SetPresetDescription("Mouse Move");
@@ -242,15 +242,15 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM_LEFT].SetPresetDescription("Mouse Move");
 				m_InputMappings[InputElements::INPUT_AIM_RIGHT].SetPresetDescription("Mouse Move");
 				m_InputMappings[InputElements::INPUT_PIEMENU].SetMouseButton(MouseButtons::MOUSE_RIGHT);
-				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_Scancode::SDL_SCANCODE_W);
-				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_Scancode::SDL_SCANCODE_S);
-				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_E);
-				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_Q);
-				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_Scancode::SDL_SCANCODE_R);
-				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_Scancode::SDL_SCANCODE_F);
-				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_Scancode::SDL_SCANCODE_G);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_Scancode::SDL_SCANCODE_1);
-				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_Scancode::SDL_SCANCODE_2);
+				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_W);
+				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_S);
+				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_E);
+				m_InputMappings[InputElements::INPUT_PREV].SetKey(SDL_SCANCODE_Q);
+				m_InputMappings[InputElements::INPUT_WEAPON_RELOAD].SetKey(SDL_SCANCODE_R);
+				m_InputMappings[InputElements::INPUT_WEAPON_PICKUP].SetKey(SDL_SCANCODE_F);
+				m_InputMappings[InputElements::INPUT_WEAPON_DROP].SetKey(SDL_SCANCODE_G);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV].SetKey(SDL_SCANCODE_1);
+				m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT].SetKey(SDL_SCANCODE_2);
 				break;
 			case InputPreset::PresetGenericDPad:
 				// TODO: Don't have any SNES style controllers to test with so no idea what would work or make sense here.
@@ -436,9 +436,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InputScheme::CaptureKeyMapping(int whichInput) {
-		for (int whichKey = SDL_Scancode::SDL_SCANCODE_A; whichKey < SDL_NUM_SCANCODES; ++whichKey) {
+		for (int whichKey = SDL_SCANCODE_A; whichKey < SDL_NUM_SCANCODES; ++whichKey) {
 			// Don't allow mapping special keys used by UInputMan.
-			if (whichKey == SDL_Scancode::SDL_SCANCODE_ESCAPE || whichKey == SDL_Scancode::SDL_SCANCODE_GRAVE || whichKey == SDL_Scancode::SDL_SCANCODE_PRINTSCREEN || whichKey == SDL_Scancode::SDL_SCANCODE_F1 || whichKey == SDL_Scancode::SDL_SCANCODE_F2 || whichKey == SDL_Scancode::SDL_SCANCODE_F3 || whichKey == SDL_Scancode::SDL_SCANCODE_F4 || whichKey == SDL_Scancode::SDL_SCANCODE_F5) {
+			if (whichKey == SDL_SCANCODE_ESCAPE || whichKey == SDL_SCANCODE_GRAVE || whichKey == SDL_SCANCODE_PRINTSCREEN || whichKey == SDL_SCANCODE_F1 || whichKey == SDL_SCANCODE_F2 || whichKey == SDL_SCANCODE_F3 || whichKey == SDL_SCANCODE_F4 || whichKey == SDL_SCANCODE_F5) {
 				continue;
 			}
 			if (g_UInputMan.KeyReleased(static_cast<SDL_Scancode>(whichKey))) {

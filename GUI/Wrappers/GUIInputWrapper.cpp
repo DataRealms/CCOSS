@@ -79,27 +79,26 @@ namespace RTE {
 		}
 		m_HasTextInput = g_UInputMan.GetTextInput(m_TextInput);
 
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_SPACE, ' ', keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_BACKSPACE, GUIInput::Key_Backspace, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_TAB, GUIInput::Key_Tab, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_RETURN, GUIInput::Key_Enter, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_KP_ENTER, GUIInput::Key_Enter, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_ESCAPE, GUIInput::Key_Escape, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_LEFT, GUIInput::Key_LeftArrow, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_RIGHT, GUIInput::Key_RightArrow, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_UP, GUIInput::Key_UpArrow, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_DOWN, GUIInput::Key_DownArrow, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_INSERT, GUIInput::Key_Insert, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_DELETE, GUIInput::Key_Delete, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_HOME, GUIInput::Key_Home, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_END, GUIInput::Key_End, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_PAGEUP, GUIInput::Key_PageUp, keyElapsedTime);
-		ConvertKeyEvent(SDL_Scancode::SDL_SCANCODE_PAGEDOWN, GUIInput::Key_PageDown, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_SPACE, ' ', keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_BACKSPACE, GUIInput::Key_Backspace, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_TAB, GUIInput::Key_Tab, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_RETURN, GUIInput::Key_Enter, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_KP_ENTER, GUIInput::Key_Enter, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_ESCAPE, GUIInput::Key_Escape, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_LEFT, GUIInput::Key_LeftArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_RIGHT, GUIInput::Key_RightArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_UP, GUIInput::Key_UpArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_DOWN, GUIInput::Key_DownArrow, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_INSERT, GUIInput::Key_Insert, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_DELETE, GUIInput::Key_Delete, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_HOME, GUIInput::Key_Home, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_END, GUIInput::Key_End, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_PAGEUP, GUIInput::Key_PageUp, keyElapsedTime);
+		ConvertKeyEvent(SDL_SCANCODE_PAGEDOWN, GUIInput::Key_PageDown, keyElapsedTime);
 
 		m_Modifier = GUIInput::ModNone;
 		SDL_Keymod keyShifts = SDL_GetModState();
 
-		// Note that the SDL_Keymod enum values can't be qualified because outdated package on Ubuntu which has these defined as macros. Qualifying them will error with 'expected unqualified-id'.
 		if (keyShifts & KMOD_SHIFT) { m_Modifier |= GUIInput::ModShift; }
 		if (keyShifts & KMOD_ALT) { m_Modifier |= GUIInput::ModAlt; }
 		if (keyShifts & KMOD_CTRL) { m_Modifier |= GUIInput::ModCtrl; }

@@ -8,9 +8,11 @@
 #include "SDL_keyboard.h"
 
 #define g_UInputMan UInputMan::Instance()
+
 extern "C" {
-union SDL_Event;
+	union SDL_Event;
 }
+
 namespace RTE {
 
 	class GUIInput;

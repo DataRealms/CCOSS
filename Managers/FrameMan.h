@@ -4,10 +4,10 @@
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
+
 #include "glm/glm.hpp"
 
 #define g_FrameMan FrameMan::Instance()
-
 
 extern "C" {
 	struct SDL_Window;
@@ -115,11 +115,8 @@ namespace RTE {
 		/// <summary>
 		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
 		/// </summary>
-		/// <returns>
-		/// The pointer to the main window.
-		/// </returns>
-		SDL_Window* GetWindow() const { return m_Window.get();}
-
+		/// <returns>The pointer to the main window.</returns>
+		SDL_Window * GetWindow() const { return m_Window.get();}
 #pragma endregion
 
 #pragma region Display Switch Handling
@@ -133,11 +130,6 @@ namespace RTE {
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
 		/// </summary>
 		void DisplaySwitchIn();
-
-		/// <summary>
-		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
-		/// </summary>
-		void SetDisplaySwitchMode() const;
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -190,12 +182,10 @@ namespace RTE {
 		int GetResY() const { return m_ResY; }
 
 		/// <summary>
-		/// Gets whether Vsync is enabled.
+		/// Gets whether VSync is enabled.
 		/// </summary>
-		/// <returns>
-		/// Whether Vsync is enabled.
-		/// </returns>
-		int VsyncEnabled() { return m_EnableVsync; }
+		/// <returns>Whether VSync is enabled.</returns>
+		int VSyncEnabled() { return m_EnableVSync; }
 
 		/// <summary>
 		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
@@ -212,9 +202,7 @@ namespace RTE {
 		/// <summary>
 		/// Checks whether the game window is currently in fullscreen mode.
 		/// </summary>
-		/// <returns>
-		/// Whether the window is fullscreen.
-		/// </returns>
+		/// <returns>Whether the window is fullscreen.</returns>
 		bool IsWindowFullscreen() const { return m_Fullscreen; }
 
 		/// <summary>
@@ -229,18 +217,14 @@ namespace RTE {
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
-		/// <param name="newFullscreen">Wheter to put the game into fullscreen mode.</param>
+		/// <param name="newFullscreen">Whether to put the game into fullscreen mode.</param>
 		void ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen);
 
 		/// <summary>
 		/// Apply resolution change after window resize.
 		/// </summary>
-		/// <param name="newResX">
-		/// The new horizontal resolution.
-		/// </param>
-		/// <param name="newResY">
-		/// The new verticla resolution.
-		/// </param>
+		/// <param name="newResX">The new horizontal resolution.</param>
+		/// <param name="newResY">The new vertical resolution.</param>
 		void WindowResizedCallback(int newResX, int newResY);
 #pragma endregion
 
@@ -624,12 +608,12 @@ namespace RTE {
 
 		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
 		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
-		std::unique_ptr<SDL_Renderer, SdlRendererDeleter> m_Renderer; //!< The Main Window Rendererer, draws to the main window.
+		std::unique_ptr<SDL_Renderer, SdlRendererDeleter> m_Renderer; //!< The Main Window Renderer, draws to the main window.
 		std::vector<std::unique_ptr<SDL_Renderer, SdlRendererDeleter>> m_MultiRenderers; //!< Additional Renderers for multi display fullscreen.
 		std::unique_ptr<SDL_Texture, SdlTextureDeleter> m_ScreenTexture;
 		std::vector<std::unique_ptr<SDL_Texture, SdlTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multidisplay fullscreen.
-		int m_EnableVsync;
+		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multi-display fullscreen.
+		int m_EnableVSync;
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
@@ -744,11 +728,6 @@ namespace RTE {
 
 #pragma region Initialize Breakdown
 		/// <summary>
-		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Initialize().
-		/// </summary>
-		void SetInitialGraphicsDriver();
-
-		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Initialize().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
@@ -774,18 +753,10 @@ namespace RTE {
 		/// <summary>
 		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.
 		/// </summary>
-		/// <param name="resX">
-		/// Requested horizontal resolution (not including scaling). May be adjusted to avoid letterboxing.
-		/// </param>
-		/// <param name="resY">
-		/// Requested vertical resolution (not including scaling). May be adjusted to avoid letterboxing.
-		/// </param>
-		/// <param name="resMultiplier">
-		/// Requested resolution multiplier.
-		/// </param>
-		/// <returns>
-		/// Whether all displays were created successfully.
-		/// </returns>
+		/// <param name="resX">Requested horizontal resolution (not including scaling). May be adjusted to avoid letterboxing.</param>
+		/// <param name="resY">Requested vertical resolution (not including scaling). May be adjusted to avoid letterboxing.</param>
+		/// <param name="resMultiplier">Requested resolution multiplier.</param>
+		/// <returns>Whether all displays were created successfully.</returns>
 		bool SetWindowMultiFullscreen(int &resX, int &resY,int resMultiplier);
 
 		/// <summary>
@@ -804,18 +775,11 @@ namespace RTE {
 		/// <summary>
 		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
 		/// </summary>
-		/// <param name="resX">
-		/// Desired horizontal resolution.
-		/// </param>
-		/// <param name="resY">
-		/// Desired vertical resolution.
-		/// </param>
-		/// <param name="windowW">
-		/// Window horizontal resolution.
-		/// </param>
-		/// <param name="windowH">
-		/// Window vertical resolution.
-		/// </param>
+		/// <param name="resX">Desired horizontal resolution.</param>
+		/// <param name="resY">Desired vertical resolution.</param>
+		/// <param name="windowW">Window horizontal resolution.</param>
+		/// <param name="windowH">Window vertical resolution.</param>
+		/// <returns></returns>
 		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
@@ -864,7 +828,7 @@ namespace RTE {
 		/// </param>
 		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 or nullptr if not in SingleBitmap mode.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int SaveBitmap(SaveBitmapMode modeToSave, const std::string& nameBase, BITMAP *bitmapToSave = nullptr);
+		int SaveBitmap(SaveBitmapMode modeToSave, const std::string &nameBase, BITMAP *bitmapToSave = nullptr);
 
 		/// <summary>
 		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.

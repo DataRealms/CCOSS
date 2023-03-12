@@ -360,7 +360,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::HandleBackNavigation(bool backButtonPressed) {
-		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens[MenuScreen::QuitScreen]) && (backButtonPressed || g_UInputMan.KeyPressed(SDLK_ESCAPE))) {
+		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens[MenuScreen::QuitScreen]) && (backButtonPressed || g_UInputMan.KeyPressed(SDL_KeyCode::SDLK_ESCAPE))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) { m_SettingsMenu->RefreshActiveSettingsMenuScreen(); }
@@ -374,7 +374,7 @@ namespace RTE {
 			} else {
 				ShowQuitScreenOrQuit();
 			}
-		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
+		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDL_KeyCode::SDLK_ESCAPE)) {
 			m_SettingsMenu->CloseActiveDialogBox();
 		}
 	}

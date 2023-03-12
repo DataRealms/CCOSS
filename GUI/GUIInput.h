@@ -120,7 +120,7 @@ public:
 
 	unsigned char GetScanCodeState(unsigned char scancode) const;
 
-	bool GetTextInput(std::string_view& text) const {text = m_TextInput; return !m_TextInput.empty();}
+	bool GetTextInput(std::string_view &text) const {text = m_TextInput; return !m_TextInput.empty();}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -99,6 +99,7 @@ namespace RTE {
 		m_Modifier = GUIInput::ModNone;
 		SDL_Keymod keyShifts = SDL_GetModState();
 
+		// Note that the SDL_Keymod enum values can't be qualified because outdated package on Ubuntu which has these defined as macros. Qualifying them will error with 'expected unqualified-id'.
 		if (keyShifts & KMOD_SHIFT) { m_Modifier |= GUIInput::ModShift; }
 		if (keyShifts & KMOD_ALT) { m_Modifier |= GUIInput::ModAlt; }
 		if (keyShifts & KMOD_CTRL) { m_Modifier |= GUIInput::ModCtrl; }

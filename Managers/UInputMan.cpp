@@ -258,7 +258,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyStartPress(bool includeSpacebar) {
-		if (KeyPressed(SDLK_ESCAPE) || (includeSpacebar && KeyPressed(SDLK_SPACE))) {
+		if (KeyPressed(SDL_KeyCode::SDLK_ESCAPE) || (includeSpacebar && KeyPressed(SDL_KeyCode::SDLK_SPACE))) {
 			return true;
 		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
@@ -283,7 +283,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyKeyPress() const {
-		for (size_t testKey = SDL_SCANCODE_A; testKey < SDL_NUM_SCANCODES; ++testKey) {
+		for (size_t testKey = SDL_Scancode::SDL_SCANCODE_A; testKey < SDL_Scancode::SDL_NUM_SCANCODES; ++testKey) {
 			if (s_PrevKeyStates[testKey] && s_ChangedKeyStates[testKey]) {
 				return true;
 			}
@@ -830,7 +830,7 @@ namespace RTE {
 
 	void UInputMan::HandleSpecialInput() {
 		// If we launched into editor directly, skip the logic and quit quickly.
-		if (g_ActivityMan.IsSetToLaunchIntoEditor() && KeyPressed(SDLK_ESCAPE)) {
+		if (g_ActivityMan.IsSetToLaunchIntoEditor() && KeyPressed(SDL_KeyCode::SDLK_ESCAPE)) {
 			System::SetQuit();
 			return;
 		}
@@ -844,7 +844,7 @@ namespace RTE {
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
-				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDLK_r)) || AnyBackPress());
+				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDL_KeyCode::SDLK_r)) || AnyBackPress());
 			}
 			if (g_ActivityMan.ActivitySetToRestart()) {
 				return;
@@ -856,80 +856,92 @@ namespace RTE {
 		}
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
-			if (KeyHeld(SDLK_s)) {
+			if (KeyHeld(SDL_KeyCode::SDLK_s)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			// Ctrl+W to save a WorldDump
-			} else if (KeyPressed(SDLK_w)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_w)) {
 				g_FrameMan.SaveWorldToPNG("WorldDump");
 			// Ctrl+M to cycle draw modes
-			} else if (KeyPressed(SDLK_m)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_m)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
 			// Ctrl+P to toggle performance stats
-			} else if (KeyPressed(SDLK_p)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_p)) {
 				g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
 			// Ctrl+O to toggle one sim update per frame
-			} else if (KeyPressed(SDLK_o)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_o)) {
 				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
-			} else if (KeyPressed(SDLK_F2)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
-			} else if (KeyPressed(SDLK_F9)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F9)) {
 				g_ActivityMan.LoadAndLaunchGame("AutoSave");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
-				if (KeyHeld(SDLK_1)) {
+				if (KeyHeld(SDL_KeyCode::SDLK_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
-				} else if (KeyHeld(SDLK_3)) {
+				} else if (KeyHeld(SDL_KeyCode::SDLK_3)) {
 					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
-				} else if (KeyHeld(SDLK_5)) {
+				} else if (KeyHeld(SDL_KeyCode::SDLK_5)) {
 					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
 				}
 			}
 		} else if (!FlagCtrlState() && FlagAltState()) {
-			if (KeyPressed(SDLK_F2)) {
+			if (KeyPressed(SDL_KeyCode::SDLK_F2)) {
 				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
-			} else if (KeyPressed(SDLK_RETURN)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_RETURN)) {
 				g_FrameMan.ChangeResolutionMultiplier((g_FrameMan.GetResMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
-			} else if (KeyPressed(SDLK_w)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
-				if (KeyPressed(SDLK_p)) {
+				if (KeyPressed(SDL_KeyCode::SDLK_p)) {
 					g_PerformanceMan.ShowAdvancedPerformanceStats(!g_PerformanceMan.AdvancedPerformanceStatsEnabled());
 				}
 			}
 		} else {
 			// PrntScren to save a single ScreenDump
-			if (KeyPressed(SDLK_PRINTSCREEN)||KeyPressed(SDLK_F12)) {
+			if (KeyPressed(SDL_KeyCode::SDLK_PRINTSCREEN) || KeyPressed(SDL_KeyCode::SDLK_F12)) {
 				g_FrameMan.SaveScreenToPNG("ScreenDump");
-			} else if (KeyPressed(SDLK_F1)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F1)) {
 				g_ConsoleMan.ShowShortcuts();
-			} else if (KeyPressed(SDLK_F2)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F2)) {
 				g_PresetMan.ReloadAllScripts();
 				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
-			} else if (KeyPressed(SDLK_F3)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
-			} else if (KeyPressed(SDLK_F4)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
-			} else if (KeyPressed(SDLK_F5)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F5)) {
 				g_ActivityMan.SaveCurrentGame("QuickSave");
-			} else if (KeyPressed(SDLK_F9)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F9)) {
 				g_ActivityMan.LoadAndLaunchGame("QuickSave");
-			} else if (KeyPressed(SDLK_F10)) {
+			} else if (KeyPressed(SDL_KeyCode::SDLK_F10)) {
 				g_ConsoleMan.ClearLog();
 			}
 
 			if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				// Manipulate time scaling
-				if (KeyHeld(SDLK_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
-				if (KeyHeld(SDLK_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
+				if (KeyHeld(SDL_KeyCode::SDLK_2)) {
+					g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F);
+				}
+				if (KeyHeld(SDL_KeyCode::SDLK_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) {
+					g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F);
+				}
 
 				// Manipulate real to sim cap
-				if (KeyHeld(SDLK_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
-				if (KeyHeld(SDLK_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
+				if (KeyHeld(SDL_KeyCode::SDLK_4)) {
+					g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F);
+				}
+				if (KeyHeld(SDL_KeyCode::SDLK_3) && g_TimerMan.GetRealToSimCap() > 0) {
+					g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F);
+				}
 
 				// Manipulate DeltaTime
-				if (KeyHeld(SDLK_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
-				if (KeyHeld(SDLK_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
+				if (KeyHeld(SDL_KeyCode::SDLK_6)) {
+					g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F);
+				}
+				if (KeyHeld(SDL_KeyCode::SDLK_5) && g_TimerMan.GetDeltaTimeSecs() > 0) {
+					g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F);
+				}
 			}
 		}
 	}

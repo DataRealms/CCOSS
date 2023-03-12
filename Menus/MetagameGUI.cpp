@@ -2076,7 +2076,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 void MetagameGUI::UpdateInput()
 {
     // If esc pressed, show campaign dialog if applicable
-	if (g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
+	if (g_UInputMan.KeyPressed(SDL_KeyCode::SDLK_ESCAPE)) {
 		if (m_MenuScreen == MENUDIALOG) {
 			g_MetaMan.SetSuspend(false);
 			SwitchToScreen(ROOTBOX);

@@ -95,6 +95,7 @@ void GameActivity::Clear()
 	m_DefaultGoldMedium = -1;
 	m_DefaultGoldHard = -1;
 	m_DefaultGoldNuts = -1;
+	m_DefaultGoldMaxDifficulty = -1;
 	m_FogOfWarSwitchEnabled = true;
 	m_DeployUnitsSwitchEnabled = false;
 	m_GoldSwitchEnabled = true;
@@ -199,6 +200,7 @@ int GameActivity::Create(const GameActivity &reference)
 	m_DefaultGoldMedium = reference.m_DefaultGoldMedium;
 	m_DefaultGoldHard = reference.m_DefaultGoldHard;
 	m_DefaultGoldNuts = reference.m_DefaultGoldNuts;
+	m_DefaultGoldMaxDifficulty = reference.m_DefaultGoldMaxDifficulty;
 	m_FogOfWarSwitchEnabled = reference.m_FogOfWarSwitchEnabled;
 	m_DeployUnitsSwitchEnabled = reference.m_DeployUnitsSwitchEnabled;
 	m_GoldSwitchEnabled = reference.m_GoldSwitchEnabled;
@@ -249,6 +251,8 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DefaultGoldHard;
     else if (propName == "DefaultGoldNuts")
         reader >> m_DefaultGoldNuts;
+	else if (propName == "DefaultGoldNuts!")
+        reader >> m_DefaultGoldMaxDifficulty;
     else if (propName == "FogOfWarSwitchEnabled")
         reader >> m_FogOfWarSwitchEnabled;
     else if (propName == "DeployUnitsSwitchEnabled")

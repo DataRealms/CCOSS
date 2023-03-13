@@ -22,6 +22,7 @@ namespace RTE {
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
 		m_AreaDistributionType = AreaDistributionType::Circle;
+		m_AreaDistributionSurfaceAreaMultiplier = 0.5F; // Assume an oval of half our depth to width
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -57,6 +58,7 @@ namespace RTE {
 		m_Depth = reference.m_Depth;
 		m_JointOffset = reference.m_JointOffset;
 		m_AreaDistributionType = reference.m_AreaDistributionType;
+		m_AreaDistributionSurfaceAreaMultiplier = reference.m_AreaDistributionSurfaceAreaMultiplier;
 
 		m_Atoms.clear();
 		m_SubGroups.clear();
@@ -133,6 +135,8 @@ namespace RTE {
 			std::underlying_type_t<AreaDistributionType> areaDistributionType;
 			reader >> areaDistributionType;
 			m_AreaDistributionType = static_cast<AreaDistributionType>(areaDistributionType);
+		} else if (propName == "AreaDistributionSurfaceAreaMultiplier") {
+			reader >> m_AreaDistributionSurfaceAreaMultiplier;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -166,6 +170,8 @@ namespace RTE {
 
 		writer.NewProperty("AreaDistributionType");
 		writer << static_cast<std::underlying_type_t<AreaDistributionType>>(m_AreaDistributionType);
+		writer.NewProperty("AreaDistributionSurfaceAreaMultiplier");
+		writer << m_AreaDistributionSurfaceAreaMultiplier;
 
 		return 0;
 	}
@@ -1512,26 +1518,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetSurfaceArea(int pixelWidth) {
+		float distributionAmount;
+
 		switch (m_AreaDistributionType) {
 			case AreaDistributionType::Linear:
-				return static_cast<float>(pixelWidth);
+				distributionAmount = static_cast<float>(pixelWidth);
 
 			case AreaDistributionType::Circle: {
 				const float radius = static_cast<float>(pixelWidth) * 0.5F;
-				return c_PI * radius * radius;
-			}
-
-			case AreaDistributionType::Oval: {
-				const float majorRadius = static_cast<float>(pixelWidth) * 0.5F;
-				const float minorRadius = majorRadius * 0.5F;
-				return c_PI * minorRadius * majorRadius;
+				distributionAmount = c_PI * radius * radius;
 			}
 
 			default:
 				RTEAbort("Unexpected area distribution type!");
+				distributionAmount = 1.0F;
 		}
 
-		return 1.0F;
+		return distributionAmount * m_AreaDistributionSurfaceAreaMultiplier;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

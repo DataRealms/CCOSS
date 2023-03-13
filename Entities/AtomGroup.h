@@ -390,11 +390,18 @@ namespace RTE {
 		std::list<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
 
 		/// <summary>
-		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line, Circle as a circle, and Oval treats its width as half of its length.
+		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line whereas Circle acts as a pseudo-3d circle.
 		/// </summary>
-		enum class AreaDistributionType { Linear, Circle, Oval };
+		enum class AreaDistributionType { Linear, Circle };
 
-		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup with distribute energy when it collides with something.
+		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup will distribute energy when it collides with something.
+		
+		/// <summary>
+		/// A multipler to our surface area, i.e how blunt we are. 
+		/// A value of 0.5 would mean we dig into terrain twice as much (as the pressure applied back is halved), 
+		/// and 2.0 would mean we dig into terrain half as much (as the pressure applied back is doubled).
+		/// </summary>
+		float m_AreaDistributionSurfaceAreaMultiplier;
 
 	private:
 

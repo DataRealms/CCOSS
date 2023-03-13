@@ -390,9 +390,9 @@ namespace RTE {
 		std::list<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
 
 		/// <summary>
-		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line whereas Circle acts as a pseudo-3d circle.
+		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line whereas Circle/Square acts as a pseudo-3d circle/square.
 		/// </summary>
-		enum class AreaDistributionType { Linear, Circle };
+		enum class AreaDistributionType { Linear, Circle, Square };
 
 		static const std::unordered_map<std::string, AreaDistributionType> c_AreaDistributionTypeMap; //!< A map of strings to AreaDistributionTypes to support string parsing for the AreaDistributionType enum.
 		

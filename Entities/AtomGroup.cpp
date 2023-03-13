@@ -10,7 +10,8 @@ namespace RTE {
 
 	const std::unordered_map<std::string, AtomGroup::AreaDistributionType> AtomGroup::c_AreaDistributionTypeMap = {
 		{"Linear", AtomGroup::AreaDistributionType::Linear},
-		{"Circle", AtomGroup::AreaDistributionType::Circle}
+		{"Circle", AtomGroup::AreaDistributionType::Circle},
+		{"Square", AtomGroup::AreaDistributionType::Square}
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1540,6 +1541,10 @@ namespace RTE {
 			case AreaDistributionType::Circle: {
 				const float radius = static_cast<float>(pixelWidth) * 0.5F;
 				distributionAmount = c_PI * radius * radius;
+			}
+
+			case AreaDistributionType::Square: {
+				distributionAmount = static_cast<float>(pixelWidth * pixelWidth);
 			}
 
 			default:

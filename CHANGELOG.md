@@ -398,7 +398,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
-	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+	Also note that this will reload the `Entity`'s sprites (and of all other referenced entity presets), which will be reflected immediately in all existing copies of the `Entity`.
 	
 - New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
@@ -533,6 +533,13 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	
 	The default values are `AreaDistributionType = Circle` and `AreaDistributionSurfaceAreaMultiplier = 0.5`, meaning that an object is assumed to be an oval with a depth of half it's width.
 
+- Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
+
+- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
+
+- Added `GameActivity` INI property `DefaultGoldNuts!`, which lets you specify the default gold when the difficulty slider is maxed out.
+
+- Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
 
 </details>
 
@@ -541,6 +548,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
+
+- Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -718,6 +727,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	CheckOffset(screenId);
 	SetScroll(center, screenId);
 	```
+	
+- `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
 
 </details>
 

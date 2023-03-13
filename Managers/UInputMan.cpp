@@ -827,8 +827,10 @@ namespace RTE {
 				}
 			}
 		} else if (!FlagCtrlState() && FlagAltState()) {
+			if (KeyPressed(KEY_F2)) {
+				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
-			if (KeyPressed(KEY_ENTER)) {
+			} else if (KeyPressed(KEY_ENTER)) {
 				g_FrameMan.ChangeResolutionMultiplier((g_FrameMan.GetResMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {

@@ -1,0 +1,577 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Using Allegro
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Using Allegro">Using Allegro</a></h1>
+
+<ul>
+<li><a href="#AL_ID">AL_ID</a> &mdash; Converts four 8 bit values to a packed 32 bit integer ID.
+<li><a href="#ALLEGRO_DATE">ALLEGRO_DATE</a> &mdash; Defined to a number with the release date of Allegro.
+<li><a href="#ALLEGRO_DATE_STR">ALLEGRO_DATE_STR</a> &mdash; Defined to a string with the year Allegro was released.
+<li><a href="#allegro_error">allegro_error</a> &mdash; Stores the last Allegro error message.
+<li><a href="#allegro_exit">allegro_exit</a> &mdash; Closes down the Allegro system.
+<li><a href="#allegro_id">allegro_id</a> &mdash; String containing date and version number of Allegro.
+<li><a href="#allegro_init">allegro_init</a> &mdash; Macro to initialise the Allegro library.
+<li><a href="#allegro_message">allegro_message</a> &mdash; Used mainly to show error messages to users.
+<li><a href="#ALLEGRO_SUB_VERSION">ALLEGRO_SUB_VERSION</a> &mdash; Defined to the middle version of Allegro.
+<li><a href="#ALLEGRO_VERSION">ALLEGRO_VERSION</a> &mdash; Defined to the major version of Allegro.
+<li><a href="#ALLEGRO_VERSION_STR">ALLEGRO_VERSION_STR</a> &mdash; Defined to a string with the full Allegro version number.
+<li><a href="#ALLEGRO_WIP_VERSION">ALLEGRO_WIP_VERSION</a> &mdash; Defined to the minor version of Allegro.
+<li><a href="#check_cpu">check_cpu</a> &mdash; Detects the CPU type.
+<li><a href="#cpu_capabilities">cpu_capabilities</a> &mdash; Contains the capability flags of the CPU.
+<li><a href="#cpu_family">cpu_family</a> &mdash; Contains the CPU type.
+<li><a href="#cpu_model">cpu_model</a> &mdash; Contains the Intel CPU submodel.
+<li><a href="#cpu_vendor">cpu_vendor</a> &mdash; Contains the CPU vendor name.
+<li><a href="#desktop_color_depth">desktop_color_depth</a> &mdash; Finds out the desktop color depth.
+<li><a href="#END_OF_MAIN">END_OF_MAIN</a> &mdash; Macro to put after your main() function.
+<li><a href="#get_desktop_resolution">get_desktop_resolution</a> &mdash; Finds out the desktop resolution.
+<li><a href="#install_allegro">install_allegro</a> &mdash; Initialise the Allegro library.
+<li><a href="#MAKE_VERSION">MAKE_VERSION</a> &mdash; Create a 32 bit integer from the Allegro version
+<li><a href="#os_multitasking">os_multitasking</a> &mdash; Indicates if the OS is multitasking.
+<li><a href="#os_revision">os_revision</a> &mdash; Version of the OS currently running.
+<li><a href="#os_type">os_type</a> &mdash; Stores the detected type of the OS.
+<li><a href="#os_version">os_version</a> &mdash; Version of the OS currently running.
+<li><a href="#set_close_button_callback">set_close_button_callback</a> &mdash; Handles the user clicking on the close button of the window.
+<li><a href="#set_window_title">set_window_title</a> &mdash; Sets the window title of the Allegro program.
+</ul>
+
+<p>
+See <a href="readme.html">readme.txt</a> for a general introduction, copyright details, and 
+information about how to install Allegro and link your program with it.
+
+<p><br>
+<div class="al-api"><b>int <a name="install_allegro">install_allegro</a>(int system_id, int *errno_ptr, int (*atexit_ptr)());</b></div><br>
+   Initialises the Allegro library. You must call either this or 
+   allegro_init() before doing anything other than using the Unicode 
+   routines. If you want to use a text mode other than UTF-8, you can set
+   it with set_uformat() before you call this. The other functions that can
+   be called before this one will be marked explicitly in the documentation,
+   like set_config_file().
+
+<p>
+   The available system ID codes will vary from one platform to another, but
+   you will almost always want to pass SYSTEM_AUTODETECT. Alternatively,
+   SYSTEM_NONE installs a stripped down version of Allegro that won't even
+   try to touch your hardware or do anything platform specific: this can be
+   useful for situations where you only want to manipulate memory bitmaps,
+   such as the text mode datafile tools or the Windows GDI interfacing
+   functions.
+
+<p>
+   The <tt>`errno_ptr'</tt> and <tt>`atexit_ptr'</tt> parameters should point to the errno
+   variable and atexit function from your libc: these are required because
+   when Allegro is linked as a DLL, it doesn't have direct access to your
+   local libc data. <tt>`atexit_ptr'</tt> may be NULL, in which case it is your
+   responsibility to call allegro_exit() manually. Example:
+<blockquote class="code"><pre>
+      <a href="#install_allegro" class="autotype" title="Initialise the Allegro library.">install_allegro</a>(SYSTEM_AUTODETECT, &amp;errno, atexit);</pre></blockquote>
+<p><b>Return value:</b>
+   This function returns zero on success and non-zero on failure (e.g. no
+   system driver could be used). Note: in previous versions of Allegro this
+   function would abort on error.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>,
+<a class="xref" href="#allegro_exit" title="Closes down the Allegro system.">allegro_exit</a>,
+<a class="xref" href="alleg002.html#set_uformat" title="Set the global current text encoding format.">set_uformat</a>,
+<a class="xref" href="alleg003.html#set_config_file" title="Sets the configuration file.">set_config_file</a>.</blockquote>
+<div class="al-api"><b>int <a name="allegro_init">allegro_init</a>();</b></div><br>
+   Macro which initialises the Allegro library. This is the same thing as
+   calling install_allegro(SYSTEM_AUTODETECT, &amp;errno, atexit).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_allegro" title="Initialise the Allegro library.">install_allegro</a>,
+<a class="xref" href="#allegro_exit" title="Closes down the Allegro system.">allegro_exit</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="allegro_exit">allegro_exit</a>();</b></div><br>
+   Closes down the Allegro system. This includes returning the system to
+   text mode and removing whatever mouse, keyboard, and timer routines have
+   been installed. You don't normally need to bother making an explicit call
+   to this function, because allegro_init() installs it as an atexit()
+   routine so it will be called automatically when your program exits.
+
+<p>
+   Note that after you call this function, other functions like
+   destroy_bitmap() will most likely crash. This is a problem for C++ global
+   destructors, which usually get called after atexit(), so don't put Allegro
+   calls in them. You can write the destructor code in another method which
+   you can manually call before your program exits, avoiding this problem.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_allegro" title="Initialise the Allegro library.">install_allegro</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>,
+<a class="xref" href="alleg009.html#destroy_bitmap" title="Destroys any type of created bitmap.">destroy_bitmap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>,
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>,
+<a class="eref" href="alleg045.html#exxfade" title="Truecolor image loading and fades.">exxfade</a>,
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>Macro <a name="END_OF_MAIN">END_OF_MAIN</a>()</b></div><br>
+   In order to maintain cross-platform compatibility, you have to put this
+   macro at the very end of your main function. This macro uses some <tt>`magic'</tt>
+   to mangle your main procedure on platforms that need it like Windows,
+   some flavours of UNIX or MacOS X. On the other platforms this macro 
+   compiles to nothing, so you don't have to #ifdef around it. Example:
+<blockquote class="code"><pre>
+      int main(void)
+      {
+         <a href="#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>();
+         /* more stuff goes here */
+         ...
+         return 0;
+      }
+      <a href="#END_OF_MAIN" class="autotype" title="Macro to put after your main() function.">END_OF_MAIN</a>()</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg037.html#Windows specifics" title="">Windows specifics</a>,
+<a class="xref" href="alleg038.html#Unix specifics" title="">Unix specifics</a>,
+<a class="xref" href="alleg041.html#MacOS X specifics" title="">MacOS X specifics</a>,
+<a class="xref" href="alleg042.html#Differences between platforms" title="">Differences between platforms</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>extern char <a name="allegro_id">allegro_id</a>[];</b></div><br>
+   Text string containing a date and version number for the library, in case 
+   you want to display these somewhere.
+
+<p><br>
+<div class="al-api"><b>extern char <a name="allegro_error">allegro_error</a>[ALLEGRO_ERROR_SIZE];</b></div><br>
+   Text string used by set_gfx_mode(), install_sound() and other functions to
+   report error messages. If they fail and you want to tell the user why, this
+   is the place to look for a description of the problem. Example:
+<blockquote class="code"><pre>
+      void abort_on_error(const char *message)
+      {
+         if (<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a> != NULL)
+            <a href="alleg008.html#set_gfx_mode" class="autotype" title="Sets a graphic video mode.">set_gfx_mode</a>(GFX_TEXT, 0, 0, 0, 0);
+
+         <a href="#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("%s.\nLast Allegro error `%s'\n",
+                         message, <a href="#allegro_error" class="autotype" title="Stores the last Allegro error message.">allegro_error</a>);
+         exit(-1);
+      }
+      ...
+         if (some_allegro_function() == ERROR_CODE)
+            abort_on_error("Error calling some function!");</pre></blockquote>
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>#define <a name="ALLEGRO_VERSION">ALLEGRO_VERSION</a></b></div><br>
+   Defined to the major version of Allegro. From a version number like
+   4.1.16, this would be defined to the integer 4.
+   
+<p><br>
+<div class="al-api"><b>#define <a name="ALLEGRO_SUB_VERSION">ALLEGRO_SUB_VERSION</a></b></div><br>
+   Defined to the middle version of Allegro. From a version number like
+   4.1.16, this would be defined to the integer 1.
+   
+<p><br>
+<div class="al-api"><b>#define <a name="ALLEGRO_WIP_VERSION">ALLEGRO_WIP_VERSION</a></b></div><br>
+   Defined to the minor version of Allegro. From a version number like
+   4.1.16, this would be defined to the integer 16.
+   
+<p><br>
+<div class="al-api"><b>#define <a name="ALLEGRO_VERSION_STR">ALLEGRO_VERSION_STR</a></b></div><br>
+   Defined to a text string containing all version numbers and maybe some
+   additional text. This could be `4.2.1 (SVN)' for an Allegro version
+   obtained straight from the SVN repository.
+   
+<p><br>
+<div class="al-api"><b>#define <a name="ALLEGRO_DATE_STR">ALLEGRO_DATE_STR</a></b></div><br>
+   Defined to a text string containing the year this version of Allegro was
+   released, like <tt>`2004'</tt>.
+   
+<p><br>
+<div class="al-api"><b>#define <a name="ALLEGRO_DATE">ALLEGRO_DATE</a></b></div><br>
+   Defined to an integer containing the release date of Allegro in the packed
+   format <tt>`yyyymmdd'</tt>. Example:
+<blockquote class="code"><pre>
+      const int year = <a href="#ALLEGRO_DATE" class="autotype" title="Defined to a number with the release date of Allegro.">ALLEGRO_DATE</a> / 10000;
+      const int month = (<a href="#ALLEGRO_DATE" class="autotype" title="Defined to a number with the release date of Allegro.">ALLEGRO_DATE</a> / 100) % 100;
+      const int day = <a href="#ALLEGRO_DATE" class="autotype" title="Defined to a number with the release date of Allegro.">ALLEGRO_DATE</a> % 100;
+
+      <a href="#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("Year %d, month %d, day %d\n",
+         year, month, day);</pre></blockquote>
+
+<p><br>
+<div class="al-api"><b>Macro <a name="AL_ID">AL_ID</a>(a,b,c,d)</b></div><br>
+   This macro can be used to create a packed 32 bit integer from 8 bit
+   characters, on both 32 and 64 bit machines. These can be used for various 
+   things, like custom datafile objects or system IDs. Example:
+<blockquote class="code"><pre>
+      #define OSTYPE_LINUX       <a href="#AL_ID" class="autotype" title="Converts four 8 bit values to a packed 32 bit integer ID.">AL_ID</a>('T','U','X',' ')</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg031.html#DAT_ID" title="Makes an ID value from four letters.">DAT_ID</a>.</blockquote>
+<div class="al-api"><b>Macro <a name="MAKE_VERSION">MAKE_VERSION</a>(a, b, c)</b></div><br>
+   This macro can be used to check if some Allegro version is (binary)
+   compatible with the current version. It is safe to use &gt; and &lt; to
+   check if one version is more recent than another.
+   The third number is ignored if the second number is even, so
+   MAKE_VERSION(4, 2, 0) is equivalent to MAKE_VERSION(4, 2, 1).
+   This is because of our version numbering policy since 4.0.0:
+   the second number is even for stable releases, which must be
+   ABI-compatible with earlier versions of the same series.
+   This macro is mainly useful for addon packages and libraries. See the 
+   `ABI compatibility information' section of the manual for more detailed 
+   information. Example:
+<blockquote class="code"><pre>
+      /* Check if the current version is compatible with Allegro 4.2.0 */
+      #if (<a href="#MAKE_VERSION" class="autotype" title="Create a 32 bit integer from the Allegro version">MAKE_VERSION</a>(4, 2, 0) &lt;= <a href="#MAKE_VERSION" class="autotype" title="Create a 32 bit integer from the Allegro version">MAKE_VERSION</a>(<a href="#ALLEGRO_VERSION" class="autotype" title="Defined to the major version of Allegro.">ALLEGRO_VERSION</a>, \
+                         <a href="#ALLEGRO_SUB_VERSION" class="autotype" title="Defined to the middle version of Allegro.">ALLEGRO_SUB_VERSION</a>, <a href="#ALLEGRO_WIP_VERSION" class="autotype" title="Defined to the minor version of Allegro.">ALLEGRO_WIP_VERSION</a>))
+         /* Allegro 4.2.0 compatibility */
+      #else
+         /* Work-around */
+      #endif</pre></blockquote>
+   
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#ALLEGRO_VERSION" title="Defined to the major version of Allegro.">ALLEGRO_VERSION</a>,
+<a class="xref" href="#ALLEGRO_SUB_VERSION" title="Defined to the middle version of Allegro.">ALLEGRO_SUB_VERSION</a>,
+<a class="xref" href="#ALLEGRO_WIP_VERSION" title="Defined to the minor version of Allegro.">ALLEGRO_WIP_VERSION</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="os_type">os_type</a>;</b></div><br>
+   Set by allegro_init() to one of the values:
+<blockquote class="text"><pre>
+      OSTYPE_UNKNOWN    - unknown, or regular MSDOS
+      OSTYPE_WIN3       - Windows 3.1 or earlier
+      OSTYPE_WIN95      - Windows 95
+      OSTYPE_WIN98      - Windows 98
+      OSTYPE_WINME      - Windows ME
+      OSTYPE_WINNT      - Windows NT
+      OSTYPE_WIN2000    - Windows 2000
+      OSTYPE_WINXP      - Windows XP
+      OSTYPE_WIN2003    - Windows 2003
+      OSTYPE_WINVISTA   - Windows Vista
+      OSTYPE_OS2        - OS/2
+      OSTYPE_WARP       - OS/2 Warp 3
+      OSTYPE_DOSEMU     - Linux DOSEMU
+      OSTYPE_OPENDOS    - Caldera OpenDOS
+      OSTYPE_LINUX      - Linux
+      OSTYPE_SUNOS      - SunOS/Solaris
+      OSTYPE_FREEBSD    - FreeBSD
+      OSTYPE_NETBSD     - NetBSD
+      OSTYPE_IRIX       - IRIX
+      OSTYPE_DARWIN     - Darwin
+      OSTYPE_QNX        - QNX
+      OSTYPE_UNIX       - Unknown Unix variant
+      OSTYPE_BEOS       - BeOS
+      OSTYPE_MACOS      - MacOS
+      OSTYPE_MACOSX     - MacOS X</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>,
+<a class="xref" href="#os_version" title="Version of the OS currently running.">os_version</a>,
+<a class="xref" href="#os_multitasking" title="Indicates if the OS is multitasking.">os_multitasking</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="os_version">os_version</a>;</b></div><br>
+<div class="al-api-cont"><b>extern int <a name="os_revision">os_revision</a>;</b></div><br>
+   The major and minor version of the Operating System currently running.
+   Set by allegro_init(). If Allegro for some reason was not able to
+   retrieve the version of the Operating System, os_version and
+   os_revision will be set to -1. For example: Under Win98 SE (v4.10.2222)
+   os_version will be set to 4 and os_revision to 10.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#os_type" title="Stores the detected type of the OS.">os_type</a>,
+<a class="xref" href="#os_multitasking" title="Indicates if the OS is multitasking.">os_multitasking</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="os_multitasking">os_multitasking</a>;</b></div><br>
+   Set by allegro_init() to either TRUE or FALSE depending on whether your
+   Operating System is multitasking or not.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#os_type" title="Stores the detected type of the OS.">os_type</a>,
+<a class="xref" href="#os_version" title="Version of the OS currently running.">os_version</a>.</blockquote>
+<div class="al-api"><b>void <a name="allegro_message">allegro_message</a>(const char *text_format, ...);</b></div><br>
+   Outputs a message, using a printf() format string. Usually you want to
+   use this to report messages to the user in an OS independent way when some
+   Allegro subsystem cannot be initialised. But you must not use this function
+   if you are in a graphic mode, only before calling set_gfx_mode(), or after
+   a set_gfx_mode(GFX_TEXT). Also, this function depends on a system driver
+   being installed, which means that it won't display the message at all on
+   some platforms if Allegro has not been initialised correctly.
+
+<p>
+   On platforms featuring a windowing system, it will bring up a blocking GUI
+   message box. If there is no windowing system, it will try to print the
+   string to a text console, attempting to work around codepage differences
+   by reducing any accented characters to 7-bit ASCII approximations.
+   Example:
+<blockquote class="code"><pre>
+      if (<a href="#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>() != 0)
+         exit(1);
+
+      if (init_my_data() != 0) {
+         <a href="#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("Sorry, missing game data!\n");
+         exit(2);
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>,
+<a class="xref" href="#install_allegro" title="Initialise the Allegro library.">install_allegro</a>,
+<a class="xref" href="alleg002.html#set_uformat" title="Set the global current text encoding format.">set_uformat</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_window_title">set_window_title</a>(const char *name);</b></div><br>
+   On platforms that are capable of it, this routine alters the window title 
+   for your Allegro program. Note that Allegro cannot set the window title 
+   when running in a DOS box under Windows. Example:
+<blockquote class="code"><pre>
+      <a href="#set_window_title" class="autotype" title="Sets the window title of the Allegro program.">set_window_title</a>("Allegro rules!");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_close_button_callback" title="Handles the user clicking on the close button of the window.">set_close_button_callback</a>,
+<a class="xref" href="alleg002.html#set_uformat" title="Set the global current text encoding format.">set_uformat</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exunicod" title="Using Unicode string functions.">exunicod</a>.</blockquote>
+<div class="al-api"><b>int <a name="set_close_button_callback">set_close_button_callback</a>(void (*proc)(void));</b></div><br>
+   On platforms that have a close button, this routine installs a callback 
+   function to handle the close event. In other words, when the user clicks 
+   the close button on your program's window or any equivalent device, the
+   function you specify here will be called.
+
+<p>
+   This function should not generally attempt to exit the program or save 
+   any data itself. The function could be called at any time, and there is 
+   usually a risk of conflict with the main thread of the program. Instead, 
+   you should set a flag during this function, and test it on a regular 
+   basis in the main loop of the program.
+
+<p>
+   Pass NULL as the <tt>`proc'</tt> argument to this function to disable the close
+   button functionality, which is the default state.
+
+<p>
+   Note that Allegro cannot intercept the close button of a DOS box in 
+   Windows.
+   
+<p>
+   Also note that the supplied callback is also called under MacOS X when
+   the user hits Command-Q or selects "Quit" from the application menu.
+   Example:
+<blockquote class="code"><pre>
+      volatile int close_button_pressed = FALSE;
+
+      void close_button_handler(void)
+      {
+         close_button_pressed = TRUE;
+      }
+      <a href="alleg005.html#END_OF_FUNCTION" class="autotype" title="Locks the code used by a timer.">END_OF_FUNCTION</a>(close_button_handler)
+      ...
+      
+      <a href="#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>();
+      <a href="alleg005.html#LOCK_FUNCTION" class="autotype" title="Locks the memory of a function used by a timer.">LOCK_FUNCTION</a>(close_button_handler);
+      <a href="#set_close_button_callback" class="autotype" title="Handles the user clicking on the close button of the window.">set_close_button_callback</a>(close_button_handler);
+      ...
+         
+      while (!close_button_pressed)
+         do_stuff();</pre></blockquote>
+<p><b>Return value:</b>
+   Returns zero on success and non-zero on failure (e.g. the feature is not
+   supported by the platform).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_window_title" title="Sets the window title of the Allegro program.">set_window_title</a>.</blockquote>
+<div class="al-api"><b>int <a name="desktop_color_depth">desktop_color_depth</a>();</b></div><br>
+   Finds out the currently selected desktop color depth. You can use this
+   information to make your program use the same color depth as the desktop,
+   which will likely make it run faster because the graphic driver won't be
+   doing unnecessary color conversions behind your back.
+
+<p>
+   Under some OSes, switching to a full screen graphics mode may automatically
+   change the desktop color depth. You have, therefore, to call this function
+   before setting any graphics mode in order to retrieve the real desktop
+   color depth. Example:
+<blockquote class="code"><pre>
+      <a href="#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>();
+      ...
+      if ((depth = <a href="#desktop_color_depth" class="autotype" title="Finds out the desktop color depth.">desktop_color_depth</a>()) != 0) {
+         <a href="alleg008.html#set_color_depth" class="autotype" title="Sets the global pixel color depth.">set_color_depth</a>(depth);
+      }</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the color depth or zero on platforms where this information is not
+   available or does not apply.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_desktop_resolution" title="Finds out the desktop resolution.">get_desktop_resolution</a>,
+<a class="xref" href="alleg008.html#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>,
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_desktop_resolution">get_desktop_resolution</a>(int *width, int *height);</b></div><br>
+   Finds out the currently selected desktop resolution. You can use this
+   information to avoid creating windows bigger than the current resolution.
+   This is especially important for some windowed drivers which are unable
+   to create windows bigger than the desktop. Each parameter is a pointer
+   to an integer where one dimension of the screen will be stored.
+
+<p>
+   Under some OSes, switching to a full screen graphics mode may automatically
+   change the desktop resolution. You have, therefore, to call this function
+   before setting any graphics mode in order to retrieve the real desktop
+   resolution. Example:
+<blockquote class="code"><pre>
+      int width, height;
+      
+      <a href="#allegro_init" class="autotype" title="Macro to initialise the Allegro library.">allegro_init</a>();
+      ...
+      if (<a href="#get_desktop_resolution" class="autotype" title="Finds out the desktop resolution.">get_desktop_resolution</a>(&amp;width, &amp;height) == 0) {
+         /* Got the resolution correctly */
+      }</pre></blockquote>
+<p><b>Return value:</b>
+   Returns zero on success, or a negative number if this information is not
+   available or does not apply, in which case the values stored in the
+   variables you provided for <tt>`width'</tt> and <tt>`height'</tt> are undefined.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#desktop_color_depth" title="Finds out the desktop color depth.">desktop_color_depth</a>,
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>.</blockquote>
+<div class="al-api"><b>void <a name="check_cpu">check_cpu</a>();</b></div><br>
+   Detects the CPU type, setting the following global variables. You don't 
+   normally need to call this, because allegro_init() will do it for you.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#cpu_vendor" title="Contains the CPU vendor name.">cpu_vendor</a>,
+<a class="xref" href="#cpu_family" title="Contains the CPU type.">cpu_family</a>,
+<a class="xref" href="#cpu_model" title="Contains the Intel CPU submodel.">cpu_model</a>,
+<a class="xref" href="#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>.</blockquote>
+<div class="al-api"><b>extern char <a name="cpu_vendor">cpu_vendor</a>[];</b></div><br>
+   On Intel PCs, contains the CPU vendor name if known. On Mac OSX systems 
+   this contains the PPC subtype name. On other platforms, this may be an empty
+   string. You can read this variable after you have called check_cpu()
+   (which is automatically called by allegro_init()).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#check_cpu" title="Detects the CPU type.">check_cpu</a>,
+<a class="xref" href="#cpu_family" title="Contains the CPU type.">cpu_family</a>,
+<a class="xref" href="#cpu_model" title="Contains the Intel CPU submodel.">cpu_model</a>,
+<a class="xref" href="#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="cpu_family">cpu_family</a>;</b></div><br>
+   Contains the Intel type, where applicable. Allegro defines the following
+   CPU family types:
+<blockquote class="text"><pre>
+      CPU_FAMILY_UNKNOWN  - The type of processor is unknown
+      CPU_FAMILY_I386     - The processor is an Intel-compatible 386
+      CPU_FAMILY_I486     - The processor is an Intel-compatible 486
+      CPU_FAMILY_I586     - The processor is a Pentium or equivalent
+      CPU_FAMILY_I686     - The processor is a Pentium Pro, II, III
+                            or equivalent
+      CPU_FAMILY_ITANIUM  - The processor is an Itanium processor
+      CPU_FAMILY_POWERPC  - The processor is a PowerPC processor
+      CPU_FAMILY_EXTENDED - The processor type needs to be read
+                            from the cpu_model
+</pre></blockquote>
+   You can read this variable after you have called check_cpu()
+   (which is automatically called by allegro_init()).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#check_cpu" title="Detects the CPU type.">check_cpu</a>,
+<a class="xref" href="#cpu_vendor" title="Contains the CPU vendor name.">cpu_vendor</a>,
+<a class="xref" href="#cpu_model" title="Contains the Intel CPU submodel.">cpu_model</a>,
+<a class="xref" href="#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="cpu_model">cpu_model</a>;</b></div><br>
+   Contains the CPU submodel, where applicable. Allegro defines at least the 
+   following CPU family types (see include/allegro/system.h for a more 
+   complete list):
+<blockquote class="text"><pre>
+      CPU_FAMILY_I586:
+         CPU_MODEL_PENTIUM, CPU_MODEL_K5, CPU_MODEL_K6
+
+      CPU_FAMILY_I686:
+         CPU_MODEL_PENTIUMPRO, CPU_MODEL_PENTIUMII,
+         CPU_MODEL_PENTIUMIIIKATMAI, CPU_MODEL_PENTIUMIIICOPPERMINE,
+         CPU_MODEL_ATHLON, CPU_MODEL_DURON
+
+      CPU_FAMILY_EXTENDED:
+         CPU_MODEL_PENTIUMIV, CPU_MODEL_XEON,
+         CPU_MODEL_ATHLON64, CPU_MODEL_OPTERON
+
+      CPU_FAMILY_POWERPC:
+         CPU_MODEL_POWERPC_x, for x=601-604, 620, 750, 7400, 7450
+</pre></blockquote>
+   You can read this variable after you have called check_cpu() (which is 
+   automatically called by allegro_init()). Make sure you check the cpu_family
+   and cpu_vendor so you know which models make sense to check.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#check_cpu" title="Detects the CPU type.">check_cpu</a>,
+<a class="xref" href="#cpu_vendor" title="Contains the CPU vendor name.">cpu_vendor</a>,
+<a class="xref" href="#cpu_family" title="Contains the CPU type.">cpu_family</a>,
+<a class="xref" href="#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="cpu_capabilities">cpu_capabilities</a>;</b></div><br>
+   Contains CPU flags indicating what features are available on the current 
+   CPU. The flags can be any combination of these:
+<blockquote class="text"><pre>
+      CPU_ID       - Indicates that the "cpuid" instruction is
+                     available. If this is set, then all Allegro CPU
+                     variables are 100% reliable, otherwise there
+                     may be some mistakes.
+      CPU_FPU      - An FPU is available.
+      CPU_IA64     - Running on Intel 64 bit CPU
+      CPU_AMD64    - Running on AMD 64 bit CPU
+      CPU_MMX      - Intel MMX  instruction set is available.
+      CPU_MMXPLUS  - Intel MMX+ instruction set is available.
+      CPU_SSE      - Intel SSE  instruction set is available.
+      CPU_SSE2     - Intel SSE2 instruction set is available.
+      CPU_SSE3     - Intel SSE3 instruction set is available.
+      CPU_3DNOW    - AMD 3DNow! instruction set is available.
+      CPU_ENH3DNOW - AMD Enhanced 3DNow! instruction set is
+                     available.
+      CPU_CMOV     - Pentium Pro "cmov" instruction is available.
+</pre></blockquote>
+   You can check for multiple features by OR-ing the flags together.
+   For example, to check if the CPU has an FPU and MMX instructions
+   available, you'd do:
+<blockquote class="code"><pre>
+      if ((<a href="#cpu_capabilities" class="autotype" title="Contains the capability flags of the CPU.">cpu_capabilities</a> &amp; (CPU_FPU | CPU_MMX)) ==
+          (CPU_FPU | CPU_MMX)) {
+         printf("CPU has both an FPU and MMX instructions!\n");
+      }
+</pre></blockquote>
+   You can read this variable after you have called check_cpu() (which is
+   automatically called by allegro_init()).
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#check_cpu" title="Detects the CPU type.">check_cpu</a>,
+<a class="xref" href="#cpu_vendor" title="Contains the CPU vendor name.">cpu_vendor</a>,
+<a class="xref" href="#cpu_family" title="Contains the CPU type.">cpu_family</a>,
+<a class="xref" href="#cpu_model" title="Contains the Intel CPU submodel.">cpu_model</a>,
+<a class="xref" href="#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>,
+<a class="xref" href="#allegro_init" title="Macro to initialise the Allegro library.">allegro_init</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

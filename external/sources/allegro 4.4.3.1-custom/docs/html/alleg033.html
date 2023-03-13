@@ -1,0 +1,530 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: 3D math routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="3D math routines">3D math routines</a></h1>
+
+<ul>
+<li><a href="#apply_matrix">apply_matrix</a> &mdash; Multiplies a point by a transformation matrix.
+<li><a href="#apply_matrix_f">apply_matrix_f</a> &mdash; Multiplies a point by a transformation matrix.
+<li><a href="#cross_product">cross_product</a> &mdash; Calculates the cross product.
+<li><a href="#cross_product_f">cross_product_f</a> &mdash; Calculates the cross product.
+<li><a href="#dot_product">dot_product</a> &mdash; Calculates the dot product.
+<li><a href="#dot_product_f">dot_product_f</a> &mdash; Calculates the dot product.
+<li><a href="#get_align_matrix">get_align_matrix</a> &mdash; Rotates a matrix to align it along specified coordinate vectors.
+<li><a href="#get_align_matrix_f">get_align_matrix_f</a> &mdash; Floating point version of get_align_matrix().
+<li><a href="#get_camera_matrix">get_camera_matrix</a> &mdash; Constructs a camera matrix for perspective projection.
+<li><a href="#get_camera_matrix_f">get_camera_matrix_f</a> &mdash; Floating point version of get_camera_matrix().
+<li><a href="#get_rotation_matrix">get_rotation_matrix</a> &mdash; Constructs X, Y, Z rotation matrices.
+<li><a href="#get_rotation_matrix_f">get_rotation_matrix_f</a> &mdash; Constructs X, Y, Z rotation matrices.
+<li><a href="#get_scaling_matrix">get_scaling_matrix</a> &mdash; Constructs a scaling matrix.
+<li><a href="#get_scaling_matrix_f">get_scaling_matrix_f</a> &mdash; Constructs a scaling matrix.
+<li><a href="#get_transformation_matrix">get_transformation_matrix</a> &mdash; Constructs X, Y, Z rotation matrices with an angle and scaling.
+<li><a href="#get_transformation_matrix_f">get_transformation_matrix_f</a> &mdash; Floating point version of get_transformation_matrix().
+<li><a href="#get_translation_matrix">get_translation_matrix</a> &mdash; Constructs a translation matrix.
+<li><a href="#get_translation_matrix_f">get_translation_matrix_f</a> &mdash; Constructs a translation matrix.
+<li><a href="#get_vector_rotation_matrix">get_vector_rotation_matrix</a> &mdash; Constructs X, Y, Z rotation matrices with an angle.
+<li><a href="#get_vector_rotation_matrix_f">get_vector_rotation_matrix_f</a> &mdash; Constructs X, Y, Z rotation matrices with an angle.
+<li><a href="#get_x_rotate_matrix">get_x_rotate_matrix</a> &mdash; Construct X axis rotation matrices.
+<li><a href="#get_x_rotate_matrix_f">get_x_rotate_matrix_f</a> &mdash; Construct X axis rotation matrices.
+<li><a href="#get_y_rotate_matrix">get_y_rotate_matrix</a> &mdash; Construct Y axis rotation matrices.
+<li><a href="#get_y_rotate_matrix_f">get_y_rotate_matrix_f</a> &mdash; Construct Y axis rotation matrices.
+<li><a href="#get_z_rotate_matrix">get_z_rotate_matrix</a> &mdash; Construct Z axis rotation matrices.
+<li><a href="#get_z_rotate_matrix_f">get_z_rotate_matrix_f</a> &mdash; Construct Z axis rotation matrices.
+<li><a href="#identity_matrix">identity_matrix</a> &mdash; Global containing the identity matrix.
+<li><a href="#identity_matrix_f">identity_matrix_f</a> &mdash; Global containing the identity matrix.
+<li><a href="#matrix_mul">matrix_mul</a> &mdash; Multiplies two matrices.
+<li><a href="#matrix_mul_f">matrix_mul_f</a> &mdash; Multiplies two matrices.
+<li><a href="#normalize_vector">normalize_vector</a> &mdash; Converts the vector to a unit vector.
+<li><a href="#normalize_vector_f">normalize_vector_f</a> &mdash; Converts the vector to a unit vector.
+<li><a href="#persp_project">persp_project</a> &mdash; Projects a 3d point into 2d screen space.
+<li><a href="#persp_project_f">persp_project_f</a> &mdash; Projects a 3d point into 2d screen space.
+<li><a href="#polygon_z_normal">polygon_z_normal</a> &mdash; Finds the Z component of the normal vector to three vertices.
+<li><a href="#polygon_z_normal_f">polygon_z_normal_f</a> &mdash; Finds the Z component of the normal vector to three vertices.
+<li><a href="#qscale_matrix">qscale_matrix</a> &mdash; Optimised routine for scaling an already generated matrix.
+<li><a href="#qscale_matrix_f">qscale_matrix_f</a> &mdash; Optimised routine for scaling an already generated matrix.
+<li><a href="#qtranslate_matrix">qtranslate_matrix</a> &mdash; Optimised routine for translating an already generated matrix.
+<li><a href="#qtranslate_matrix_f">qtranslate_matrix_f</a> &mdash; Optimised routine for translating an already generated matrix.
+<li><a href="#set_projection_viewport">set_projection_viewport</a> &mdash; Sets the viewport used to scale the output of persp_project().
+<li><a href="#vector_length">vector_length</a> &mdash; Calculates the length of a vector.
+<li><a href="#vector_length_f">vector_length_f</a> &mdash; Calculates the length of a vector.
+</ul>
+
+<p>
+Allegro contains some 3d helper functions for manipulating vectors, 
+constructing and using transformation matrices, and doing perspective 
+projections from 3d space onto the screen. It is not, and never will be, a 
+fully fledged 3d library (the goal is to supply generic support routines,
+not shrink-wrapped graphics code :-) but these functions may be useful for 
+developing your own 3d code.
+
+<p>
+Allegro uses a right-handed coordinate system, i.e. if you point the thumb 
+of your right hand along the x axis, and the index finger along the y axis, 
+your middle finger points in the direction of the z axis.
+
+<p>
+Allegro's world coordinate system typically has the positive x axis right,
+the positive y axis up, and the positive z axis out of the screen.  What
+all this means is this: Assume, the viewer is located at the origin (0/0/0)
+in world space, looks along the negative z axis (0/0/-1), and is oriented
+so up is along the positive y axis (0/1/0). Then something located at
+(100/200/-300) will be 100 to the right, 200 above, and 300 in front of the
+viewer. Just like in OpenGL. (Of course, both OpenGL and Allegro allow to
+use a different system.) Here's a short piece of code demonstrating the
+transformation pipeline of a point from world space to the screen.
+
+<blockquote class="code"><pre>
+   /* First, set up the projection viewport. */
+   <a href="#set_projection_viewport" class="autotype" title="Sets the viewport used to scale the output of persp_project().">set_projection_viewport</a> (0, 0, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+  
+   /* Next, get a camera matrix, depending on the
+    * current viewer position and orientation.
+    */
+   <a href="#get_camera_matrix_f" class="autotype" title="Floating point version of get_camera_matrix().">get_camera_matrix_f</a> (&amp;m,
+      0, 0, 0,  /* Viewer position, in this case, 0/0/0. */
+      0, 0, -1, /* Viewer direction, in this case along negative z. */
+      0, 1, 0,  /* Up vector, in this case positive y. */
+      32,       /* The FOV, here 45°. */
+      (float)<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a> / (float)<a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>)); /* Aspect ratio. */
+  
+   /* Applying the matrix transforms the point 100/200/-300
+    * from world space into camera space. The transformation
+    * moves and rotates the point so it is relative to the
+    * camera, scales it according to the FOV and aspect
+    * parameters, and also flips up and front direction -
+    * ready to project the point to the viewport.
+    */
+   <a href="#apply_matrix_f" class="autotype" title="Multiplies a point by a transformation matrix.">apply_matrix_f</a> (&amp;m, 100, 200, -300, &amp;x, &amp;y, &amp;z);
+  
+   /* Finally, the point is projected from
+    * camera space to the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>.
+    */
+   <a href="#persp_project_f" class="autotype" title="Projects a 3d point into 2d screen space.">persp_project_f</a> (cx, cy, cz, &amp;sx, &amp;sy);</pre></blockquote>
+
+<p>
+For more details, look at the function descriptions of
+set_projection_viewport(), get_camera_matrix(), and persp_project(), as well
+as the relevant example programs.
+
+<p>
+All the 3d math functions are available in two versions: one which uses 
+fixed point arithmetic, and another which uses floating point. The syntax 
+for these is identical, but the floating point functions and structures are 
+postfixed with '_f', eg. the fixed point function cross_product() has a 
+floating point equivalent cross_product_f(). If you are programming in C++, 
+Allegro also overloads these functions for use with the 'fix' class.
+
+<p>
+3d transformations are accomplished by the use of a modelling matrix. This 
+is a 4x4 array of numbers that can be multiplied with a 3d point to produce 
+a different 3d point. By putting the right values into the matrix, it can be 
+made to do various operations like translation, rotation, and scaling. The 
+clever bit is that you can multiply two matrices together to produce a third 
+matrix, and this will have the same effect on points as applying the 
+original two matrices one after the other. For example, if you have one 
+matrix that rotates a point and another that shifts it sideways, you can 
+combine them to produce a matrix that will do the rotation and the shift in 
+a single step. You can build up extremely complex transformations in this 
+way, while only ever having to multiply each point by a single matrix.
+
+<p>
+Allegro actually cheats in the way it implements the matrix structure. 
+Rotation and scaling of a 3d point can be done with a simple 3x3 matrix, but 
+in order to translate it and project it onto the screen, the matrix must be 
+extended to 4x4, and the point extended into 4d space by the addition of an 
+extra coordinate, w=1. This is a bad thing in terms of efficiency, but 
+fortunately an optimisation is possible. Given the 4x4 matrix:
+<blockquote class="text"><pre>
+   ( a, b, c, d )
+   ( e, f, g, h )
+   ( i, j, k, l )
+   ( m, n, o, p )
+</pre></blockquote>
+a pattern can be observed in which parts of it do what. The top left 3x3 
+grid implements rotation and scaling. The three values in the top right 
+column (d, h, and l) implement translation, and as long as the matrix is 
+only used for affine transformations, m, n and o will always be zero and p 
+will always be 1. If you don't know what affine means, read Foley &amp; Van 
+Damme: basically it covers scaling, translation, and rotation, but not 
+projection. Since Allegro uses a separate function for projection, the 
+matrix functions only need to support affine transformations, which means 
+that there is no need to store the bottom row of the matrix. Allegro 
+implicitly assumes that it contains (0,0,0,1), and optimises the matrix 
+manipulation functions accordingly. Read chapter "Structures and types
+defined by Allegro" for an internal view of the MATRIX/_f structures.
+
+<p><br>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> <a name="identity_matrix">identity_matrix</a>;</b></div><br>
+<div class="al-api-cont"><b>extern <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> <a name="identity_matrix_f">identity_matrix_f</a>;</b></div><br>
+   Global variables containing the 'do nothing' identity matrix. Multiplying 
+   by the identity matrix has no effect.
+
+<p><br>
+<div class="al-api"><b>void <a name="get_translation_matrix">get_translation_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_translation_matrix_f">get_translation_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, float y, float z);</b></div><br>
+   Constructs a translation matrix, storing it in m. When applied to the 
+   point (px, py, pz), this matrix will produce the point (px+x, py+y, 
+   pz+z). In other words, it moves things sideways.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_transformation_matrix" title="Constructs X, Y, Z rotation matrices with an angle and scaling.">get_transformation_matrix</a>,
+<a class="xref" href="#qtranslate_matrix" title="Optimised routine for translating an already generated matrix.">qtranslate_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_scaling_matrix">get_scaling_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_scaling_matrix_f">get_scaling_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, float y, float z);</b></div><br>
+   Constructs a scaling matrix, storing it in m. When applied to the point 
+   (px, py, pz), this matrix will produce the point (px*x, py*y, pz*z). In 
+   other words, it stretches or shrinks things.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_transformation_matrix" title="Constructs X, Y, Z rotation matrices with an angle and scaling.">get_transformation_matrix</a>,
+<a class="xref" href="#qscale_matrix" title="Optimised routine for scaling an already generated matrix.">qscale_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_x_rotate_matrix">get_x_rotate_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> r);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_x_rotate_matrix_f">get_x_rotate_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float r);</b></div><br>
+   Construct X axis rotation matrices, storing them in m. When applied to a 
+   point, these matrices will rotate it about the X axis by the specified 
+   angle (given in binary, 256 degrees to a circle format).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_rotation_matrix" title="Constructs X, Y, Z rotation matrices.">get_rotation_matrix</a>,
+<a class="xref" href="#get_y_rotate_matrix" title="Construct Y axis rotation matrices.">get_y_rotate_matrix</a>,
+<a class="xref" href="#get_z_rotate_matrix" title="Construct Z axis rotation matrices.">get_z_rotate_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_y_rotate_matrix">get_y_rotate_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> r);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_y_rotate_matrix_f">get_y_rotate_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float r);</b></div><br>
+   Construct Y axis rotation matrices, storing them in m. When applied to a 
+   point, these matrices will rotate it about the Y axis by the specified 
+   angle (given in binary, 256 degrees to a circle format).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_rotation_matrix" title="Constructs X, Y, Z rotation matrices.">get_rotation_matrix</a>,
+<a class="xref" href="#get_x_rotate_matrix" title="Construct X axis rotation matrices.">get_x_rotate_matrix</a>,
+<a class="xref" href="#get_z_rotate_matrix" title="Construct Z axis rotation matrices.">get_z_rotate_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_z_rotate_matrix">get_z_rotate_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> r);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_z_rotate_matrix_f">get_z_rotate_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float r);</b></div><br>
+   Construct Z axis rotation matrices, storing them in m. When applied to a 
+   point, these matrices will rotate it about the Z axis by the specified 
+   angle (given in binary, 256 degrees to a circle format).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_rotation_matrix" title="Constructs X, Y, Z rotation matrices.">get_rotation_matrix</a>,
+<a class="xref" href="#get_x_rotate_matrix" title="Construct X axis rotation matrices.">get_x_rotate_matrix</a>,
+<a class="xref" href="#get_y_rotate_matrix" title="Construct Y axis rotation matrices.">get_y_rotate_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_rotation_matrix">get_rotation_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_rotation_matrix_f">get_rotation_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, float y, float z);</b></div><br>
+   Constructs a transformation matrix which will rotate points around all
+   three axes by the specified amounts (given in binary, 256 degrees to a
+   circle format). The direction of rotation can simply be found out with
+   the right-hand rule: Point the dumb of your right hand towards the
+   origin along the axis of rotation, and the fingers will curl in the
+   positive direction of rotation. E.g. if you rotate around the y axis,
+   and look at the scene from above, a positive angle will rotate in
+   clockwise direction.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_transformation_matrix" title="Constructs X, Y, Z rotation matrices with an angle and scaling.">get_transformation_matrix</a>,
+<a class="xref" href="#get_vector_rotation_matrix" title="Constructs X, Y, Z rotation matrices with an angle.">get_vector_rotation_matrix</a>,
+<a class="xref" href="#get_x_rotate_matrix" title="Construct X axis rotation matrices.">get_x_rotate_matrix</a>,
+<a class="xref" href="#get_y_rotate_matrix" title="Construct Y axis rotation matrices.">get_y_rotate_matrix</a>,
+<a class="xref" href="#get_z_rotate_matrix" title="Construct Z axis rotation matrices.">get_z_rotate_matrix</a>,
+<a class="xref" href="#get_align_matrix" title="Rotates a matrix to align it along specified coordinate vectors.">get_align_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_align_matrix">get_align_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> xfront, yfront, zfront, 
+                                 <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> xup, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> yup, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> zup);</b></div><br>
+   Rotates a matrix so that it is aligned along the specified coordinate 
+   vectors (they need not be normalized or perpendicular, but the up and 
+   front must not be equal). A front vector of 0,0,-1 and up vector of 0,1,0 
+   will return the identity matrix.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_camera_matrix" title="Constructs a camera matrix for perspective projection.">get_camera_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_align_matrix_f">get_align_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, float xfront, yfront, zfront, 
+                                   float xup, yup, zup);</b></div><br>
+   Floating point version of get_align_matrix().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_align_matrix" title="Rotates a matrix to align it along specified coordinate vectors.">get_align_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_vector_rotation_matrix">get_vector_rotation_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, y, z, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> a);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_vector_rotation_matrix_f">get_vector_rotation_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, y, z, float a);</b></div><br>
+   Constructs a transformation matrix which will rotate points around the 
+   specified x,y,z vector by the specified angle (given in binary, 256 
+   degrees to a circle format).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_rotation_matrix" title="Constructs X, Y, Z rotation matrices.">get_rotation_matrix</a>,
+<a class="xref" href="#get_align_matrix" title="Rotates a matrix to align it along specified coordinate vectors.">get_align_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_transformation_matrix">get_transformation_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale,
+                               <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> xrot, yrot, zrot, x, y, z);</b></div><br>
+   Constructs a transformation matrix which will rotate points around all 
+   three axes by the specified amounts (given in binary, 256 degrees to a 
+   circle format), scale the result by the specified amount (pass 1 for no 
+   change of scale), and then translate to the requested x, y, z position.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_rotation_matrix" title="Constructs X, Y, Z rotation matrices.">get_rotation_matrix</a>,
+<a class="xref" href="#get_scaling_matrix" title="Constructs a scaling matrix.">get_scaling_matrix</a>,
+<a class="xref" href="#get_translation_matrix" title="Constructs a translation matrix.">get_translation_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_transformation_matrix_f">get_transformation_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float scale,
+                                 float xrot, yrot, zrot, x, y, z);</b></div><br>
+   Floating point version of get_transformation_matrix().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_transformation_matrix" title="Constructs X, Y, Z rotation matrices with an angle and scaling.">get_transformation_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_camera_matrix">get_camera_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, y, z, xfront, yfront, zfront,
+                       <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> xup, yup, zup, fov, aspect);</b></div><br>
+   Constructs a camera matrix for translating world-space objects into a
+   normalised view space, ready for the perspective projection. The x, y,
+   and z parameters specify the camera position, xfront, yfront, and zfront
+   are the 'in front' vector specifying which way the camera is facing
+   (this can be any length: normalisation is not required), and xup, yup,
+   and zup are the 'up' direction vector.
+
+<p>
+   The fov parameter specifies the field of view (ie. width of the camera
+   focus) in binary, 256 degrees to the circle format. For typical
+   projections, a field of view in the region 32-48 will work well. 64
+   (90°) applies no extra scaling - so something which is one unit away
+   from the viewer will be directly scaled to the viewport. A bigger FOV
+   moves you closer to the viewing plane, so more objects will appear. A
+   smaller FOV moves you away from the viewing plane, which means you see a
+   smaller part of the world.
+
+<p>
+   Finally, the aspect ratio is used to scale the Y dimensions of the image
+   relative to the X axis, so you can use it to adjust the proportions of
+   the output image (set it to 1 for no scaling - but keep in mind that the
+   projection also performs scaling according to the viewport size).
+   Typically, you will pass (float)w/(float)h, where w and h are the
+   parameters you passed to set_projection_viewport.
+
+<p>
+   Note that versions prior to 4.1.0 multiplied this aspect ratio by 4/3.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>,
+<a class="xref" href="#get_align_matrix" title="Rotates a matrix to align it along specified coordinate vectors.">get_align_matrix</a>,
+<a class="xref" href="#set_projection_viewport" title="Sets the viewport used to scale the output of persp_project().">set_projection_viewport</a>,
+<a class="xref" href="#persp_project" title="Projects a 3d point into 2d screen space.">persp_project</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_camera_matrix_f">get_camera_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, y, z, xfront, yfront, zfront,
+                         float xup, yup, zup, fov, aspect);</b></div><br>
+   Floating point version of get_camera_matrix().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_camera_matrix" title="Constructs a camera matrix for perspective projection.">get_camera_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>,
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>.</blockquote>
+<div class="al-api"><b>void <a name="qtranslate_matrix">qtranslate_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z);</b></div><br>
+<div class="al-api-cont"><b>void <a name="qtranslate_matrix_f">qtranslate_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, float y, float z);</b></div><br>
+   Optimised routine for translating an already generated matrix: this 
+   simply adds in the translation offset, so there is no need to build two 
+   temporary matrices and then multiply them together.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_translation_matrix" title="Constructs a translation matrix.">get_translation_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="qscale_matrix">qscale_matrix</a>(<a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+<div class="al-api-cont"><b>void <a name="qscale_matrix_f">qscale_matrix_f</a>(<a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float scale);</b></div><br>
+   Optimised routine for scaling an already generated matrix: this simply 
+   adds in the scale factor, so there is no need to build two temporary 
+   matrices and then multiply them together.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_scaling_matrix" title="Constructs a scaling matrix.">get_scaling_matrix</a>.</blockquote>
+<div class="al-api"><b>void <a name="matrix_mul">matrix_mul</a>(const <a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m1, const <a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m2, <a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *out);</b></div><br>
+<div class="al-api-cont"><b>void <a name="matrix_mul_f">matrix_mul_f</a>(const <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m1, const <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m2, <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *out);</b></div><br>
+   Multiplies two matrices, storing the result in out (this may be a 
+   duplicate of one of the input matrices, but it is faster when the inputs 
+   and output are all different). The resulting matrix will have the same 
+   effect as the combination of m1 and m2, ie. when applied to a point p, (p 
+   * out) = ((p * m1) * m2). Any number of transformations can be 
+   concatenated in this way. Note that matrix multiplication is not 
+   commutative, ie. matrix_mul(m1, m2) != matrix_mul(m2, m1).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#apply_matrix" title="Multiplies a point by a transformation matrix.">apply_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>,
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="vector_length">vector_length</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z);</b></div><br>
+<div class="al-api-cont"><b>float <a name="vector_length_f">vector_length_f</a>(float x, float y, float z);</b></div><br>
+   Calculates the length of the vector (x, y, z), using that good 'ole 
+   Pythagoras theorem.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#normalize_vector" title="Converts the vector to a unit vector.">normalize_vector</a>.</blockquote>
+<div class="al-api"><b>void <a name="normalize_vector">normalize_vector</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> *x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> *y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> *z);</b></div><br>
+<div class="al-api-cont"><b>void <a name="normalize_vector_f">normalize_vector_f</a>(float *x, float *y, float *z);</b></div><br>
+   Converts the vector (*x, *y, *z) to a unit vector. This points in the 
+   same direction as the original vector, but has a length of one.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#vector_length" title="Calculates the length of a vector.">vector_length</a>,
+<a class="xref" href="#dot_product" title="Calculates the dot product.">dot_product</a>,
+<a class="xref" href="#cross_product" title="Calculates the cross product.">cross_product</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="dot_product">dot_product</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x1, y1, z1, x2, y2, z2);</b></div><br>
+<div class="al-api-cont"><b>float <a name="dot_product_f">dot_product_f</a>(float x1, y1, z1, x2, y2, z2);</b></div><br>
+   Calculates the dot product (x1, y1, z1) . (x2, y2, z2), returning the 
+   result.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#cross_product" title="Calculates the cross product.">cross_product</a>,
+<a class="xref" href="#normalize_vector" title="Converts the vector to a unit vector.">normalize_vector</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>void <a name="cross_product">cross_product</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x1, y1, z1, x2, y2, z2, *xout, *yout, *zout);</b></div><br>
+<div class="al-api-cont"><b>void <a name="cross_product_f">cross_product_f</a>(float x1, y1, z1, x2, y2, z2, *xout, *yout, *zout);</b></div><br>
+   Calculates the cross product (x1, y1, z1) x (x2, y2, z2), storing the 
+   result in (*xout, *yout, *zout). The cross product is perpendicular to 
+   both of the input vectors, so it can be used to generate polygon normals.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#dot_product" title="Calculates the dot product.">dot_product</a>,
+<a class="xref" href="#polygon_z_normal" title="Finds the Z component of the normal vector to three vertices.">polygon_z_normal</a>,
+<a class="xref" href="#normalize_vector" title="Converts the vector to a unit vector.">normalize_vector</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="polygon_z_normal">polygon_z_normal</a>(const <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *v1, const <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *v2, const <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *v3);</b></div><br>
+<div class="al-api-cont"><b>float <a name="polygon_z_normal_f">polygon_z_normal_f</a>(const <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *v1, const <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *v2, const <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *v3);</b></div><br>
+   Finds the Z component of the normal vector to the specified three 
+   vertices (which must be part of a convex polygon). This is used mainly in 
+   back-face culling. The back-faces of closed polyhedra are never visible 
+   to the viewer, therefore they never need to be drawn. This can cull on 
+   average half the polygons from a scene. If the normal is negative the 
+   polygon can safely be culled. If it is zero, the polygon is perpendicular 
+   to the screen.
+
+<p>
+   However, this method of culling back-faces must only be used once the X and
+   Y coordinates have been projected into screen space using persp_project()
+   (or if an orthographic (isometric) projection is being used). Note that
+   this function will fail if the three vertices are co-linear (they lie on
+   the same line) in 3D space.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#cross_product" title="Calculates the cross product.">cross_product</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>void <a name="apply_matrix">apply_matrix</a>(const <a class="autotype" href="alleg001.html#MATRIX" title="Fixed point matrix structure.">MATRIX</a> *m, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, y, z, *xout, *yout, *zout);</b></div><br>
+<div class="al-api-cont"><b>void <a name="apply_matrix_f">apply_matrix_f</a>(const <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, float x, y, z, *xout, *yout, *zout);</b></div><br>
+   Multiplies the point (x, y, z) by the transformation matrix m, storing 
+   the result in (*xout, *yout, *zout).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#matrix_mul" title="Multiplies two matrices.">matrix_mul</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_projection_viewport">set_projection_viewport</a>(int x, int y, int w, int h);</b></div><br>
+   Sets the viewport used to scale the output of the persp_project()
+   function. Pass the dimensions of the screen area you want to draw onto,
+   which will typically be 0, 0, SCREEN_W, and SCREEN_H. Also don't forget
+   to pass an appropriate aspect ratio to get_camera_matrix later. The
+   width and height you specify here will determine how big your viewport
+   is in 3d space. So if an object in your 3D space is w units wide, it
+   will fill the complete screen when you run into it (i.e., if it has a
+   distance of 1.0 after the camera matrix was applied. The fov and
+   aspect-ratio parameters to get_camera_matrix also apply some scaling
+   though, so this isn't always completely true). If you pass -1/-1/2/2 as
+   parameters, no extra scaling will be performed by the projection.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#persp_project" title="Projects a 3d point into 2d screen space.">persp_project</a>,
+<a class="xref" href="#get_camera_matrix" title="Constructs a camera matrix for perspective projection.">get_camera_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>,
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>,
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>void <a name="persp_project">persp_project</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> z, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> *xout, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> *yout);</b></div><br>
+<div class="al-api-cont"><b>void <a name="persp_project_f">persp_project_f</a>(float x, float y, float z, float *xout, float *yout);</b></div><br>
+   Projects the 3d point (x, y, z) into 2d screen space, storing the result 
+   in (*xout, *yout) and using the scaling parameters previously set by 
+   calling set_projection_viewport(). This function projects from the 
+   normalized viewing pyramid, which has a camera at the origin and facing 
+   along the positive z axis. The x axis runs left/right, y runs up/down, 
+   and z increases with depth into the screen. The camera has a 90 degree 
+   field of view, ie. points on the planes x=z and -x=z will map onto the 
+   left and right edges of the screen, and the planes y=z and -y=z map to 
+   the top and bottom of the screen. If you want a different field of view 
+   or camera location, you should transform all your objects with an 
+   appropriate viewing matrix, eg. to get the effect of panning the camera 
+   10 degrees to the left, rotate all your objects 10 degrees to the right.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_projection_viewport" title="Sets the viewport used to scale the output of persp_project().">set_projection_viewport</a>,
+<a class="xref" href="#get_camera_matrix" title="Constructs a camera matrix for perspective projection.">get_camera_matrix</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

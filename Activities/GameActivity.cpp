@@ -95,6 +95,7 @@ void GameActivity::Clear()
 	m_DefaultGoldMedium = -1;
 	m_DefaultGoldHard = -1;
 	m_DefaultGoldNuts = -1;
+	m_DefaultGoldMaxDifficulty = -1;
 	m_FogOfWarSwitchEnabled = true;
 	m_DeployUnitsSwitchEnabled = false;
 	m_GoldSwitchEnabled = true;
@@ -199,6 +200,7 @@ int GameActivity::Create(const GameActivity &reference)
 	m_DefaultGoldMedium = reference.m_DefaultGoldMedium;
 	m_DefaultGoldHard = reference.m_DefaultGoldHard;
 	m_DefaultGoldNuts = reference.m_DefaultGoldNuts;
+	m_DefaultGoldMaxDifficulty = reference.m_DefaultGoldMaxDifficulty;
 	m_FogOfWarSwitchEnabled = reference.m_FogOfWarSwitchEnabled;
 	m_DeployUnitsSwitchEnabled = reference.m_DeployUnitsSwitchEnabled;
 	m_GoldSwitchEnabled = reference.m_GoldSwitchEnabled;
@@ -249,6 +251,8 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DefaultGoldHard;
     else if (propName == "DefaultGoldNuts")
         reader >> m_DefaultGoldNuts;
+	else if (propName == "DefaultGoldNuts!")
+        reader >> m_DefaultGoldMaxDifficulty;
     else if (propName == "FogOfWarSwitchEnabled")
         reader >> m_FogOfWarSwitchEnabled;
     else if (propName == "DeployUnitsSwitchEnabled")
@@ -259,6 +263,14 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_RequireClearPathToOrbitSwitchEnabled;
 	else if (propName == "BuyMenuEnabled") {
 		reader >> m_BuyMenuEnabled;
+	} else if (propName == "Team1Tech" || propName == "Team2Tech" || propName == "Team3Tech" || propName == "Team4Tech") {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+			if (propName == "Team" + std::to_string(team + 1) + "Tech") {
+				std::string techName;
+				reader >> techName;
+				SetTeamTech(team, techName);
+			}
+		}
 	} else
         return Activity::ReadProperty(propName, reader);
 
@@ -278,6 +290,10 @@ int GameActivity::Save(Writer &writer) const {
 	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
 	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 	writer.NewPropertyWithValue("BuyMenuEnabled", m_BuyMenuEnabled);
+
+	for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+		writer.NewPropertyWithValue("Team" + std::to_string(team + 1) + "Tech", GetTeamTech(team));
+	}
 
 	return 0;
 }

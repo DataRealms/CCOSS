@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{E2F320C8-A64A-31FE-B657-E4545F41B9CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{552FE6F7-D7EA-368D-8D82-0A3949850124}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\wgl_ext_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\wgl_ext_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\wgl_ext_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\wgl_ext_alias.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\glx_ext_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\glx_ext_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\glx_ext_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\glx_ext_alias.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\gl_header_detect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\gl_ext_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\gl_ext_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\gl_ext_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\alleggl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\alleggl_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\gl_ext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\allegrogl\include\allegrogl\GLext\gl_ext_alias.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="addons\allegrogl\src\aglf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\alleggl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\fontconv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\glext.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\win.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\videovtb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\texture.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\scorer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\gui.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\allegrogl\src\glvtable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

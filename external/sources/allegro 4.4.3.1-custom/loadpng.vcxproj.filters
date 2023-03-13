@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{E2F320C8-A64A-31FE-B657-E4545F41B9CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{552FE6F7-D7EA-368D-8D82-0A3949850124}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="addons\loadpng\loadpng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="addons\loadpng\loadpng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\loadpng\regpng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\loadpng\savepng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,914 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Blitting and sprites
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Blitting and sprites">Blitting and sprites</a></h1>
+
+<ul>
+<li><a href="#blit">blit</a> &mdash; Copies a rectangular area from one bitmap to another.
+<li><a href="#draw_character_ex">draw_character_ex</a> &mdash; Draws non transparent pixels of the sprite with a color.
+<li><a href="#draw_gouraud_sprite">draw_gouraud_sprite</a> &mdash; Draws a sprite with gouraud shading.
+<li><a href="#draw_lit_sprite">draw_lit_sprite</a> &mdash; Draws a sprite tinted with a specific color.
+<li><a href="#draw_sprite">draw_sprite</a> &mdash; Draws a copy of the sprite onto the destination bitmap.
+<li><a href="#draw_sprite_ex">draw_sprite_ex</a> &mdash; Draws a optionally flipped/blended/tinted sprite on the bitmap.
+<li><a href="#draw_sprite_h_flip">draw_sprite_h_flip</a> &mdash; Draws the sprite transformed to the destination bitmap.
+<li><a href="#draw_sprite_v_flip">draw_sprite_v_flip</a> &mdash; Draws the sprite transformed to the destination bitmap.
+<li><a href="#draw_sprite_vh_flip">draw_sprite_vh_flip</a> &mdash; Draws the sprite transformed to the destination bitmap.
+<li><a href="#draw_trans_sprite">draw_trans_sprite</a> &mdash; Draws a sprite blending it with the destination.
+<li><a href="#masked_blit">masked_blit</a> &mdash; Copies a rectangle skipping pixels with the mask color.
+<li><a href="#masked_stretch_blit">masked_stretch_blit</a> &mdash; Scales a rectangular area skipping pixels with the mask color.
+<li><a href="#pivot_scaled_sprite">pivot_scaled_sprite</a> &mdash; Rotates and stretches a sprite around a specified point.
+<li><a href="#pivot_scaled_sprite_lit">pivot_scaled_sprite_lit</a> &mdash; Rotates and stretches a sprite around a specified point.
+<li><a href="#pivot_scaled_sprite_trans">pivot_scaled_sprite_trans</a> &mdash; Rotates and stretches a sprite around a specified point.
+<li><a href="#pivot_scaled_sprite_v_flip">pivot_scaled_sprite_v_flip</a> &mdash; Rotates, stretches and flips a sprite around a specified point.
+<li><a href="#pivot_scaled_sprite_v_flip_lit">pivot_scaled_sprite_v_flip_lit</a> &mdash; Rotates, stretches and flips a sprite around a specified point.
+<li><a href="#pivot_scaled_sprite_v_flip_trans">pivot_scaled_sprite_v_flip_trans</a> &mdash; Rotates, stretches and flips a sprite around a specified point.
+<li><a href="#pivot_sprite">pivot_sprite</a> &mdash; Rotates a sprite around a specified point.
+<li><a href="#pivot_sprite_lit">pivot_sprite_lit</a> &mdash; Rotates a sprite around a specified point.
+<li><a href="#pivot_sprite_trans">pivot_sprite_trans</a> &mdash; Rotates a sprite around a specified point.
+<li><a href="#pivot_sprite_v_flip">pivot_sprite_v_flip</a> &mdash; Rotates and flips a sprite around a specified point.
+<li><a href="#pivot_sprite_v_flip_lit">pivot_sprite_v_flip_lit</a> &mdash; Rotates and flips a sprite around a specified point.
+<li><a href="#pivot_sprite_v_flip_trans">pivot_sprite_v_flip_trans</a> &mdash; Rotates and flips a sprite around a specified point.
+<li><a href="#rotate_scaled_sprite">rotate_scaled_sprite</a> &mdash; Rotates and stretches a sprite.
+<li><a href="#rotate_scaled_sprite_lit">rotate_scaled_sprite_lit</a> &mdash; Rotates and stretches a sprite.
+<li><a href="#rotate_scaled_sprite_trans">rotate_scaled_sprite_trans</a> &mdash; Rotates and stretches a sprite.
+<li><a href="#rotate_scaled_sprite_v_flip">rotate_scaled_sprite_v_flip</a> &mdash; Rotates, stretches and flips a sprite.
+<li><a href="#rotate_scaled_sprite_v_flip_lit">rotate_scaled_sprite_v_flip_lit</a> &mdash; Rotates, stretches and flips a sprite.
+<li><a href="#rotate_scaled_sprite_v_flip_trans">rotate_scaled_sprite_v_flip_trans</a> &mdash; Rotates, stretches and flips a sprite.
+<li><a href="#rotate_sprite">rotate_sprite</a> &mdash; Rotates a sprite.
+<li><a href="#rotate_sprite_lit">rotate_sprite_lit</a> &mdash; Rotates a sprite.
+<li><a href="#rotate_sprite_trans">rotate_sprite_trans</a> &mdash; Rotates a sprite.
+<li><a href="#rotate_sprite_v_flip">rotate_sprite_v_flip</a> &mdash; Rotates and flips a sprite.
+<li><a href="#rotate_sprite_v_flip_lit">rotate_sprite_v_flip_lit</a> &mdash; Rotates and flips a sprite.
+<li><a href="#rotate_sprite_v_flip_trans">rotate_sprite_v_flip_trans</a> &mdash; Rotates and flips a sprite.
+<li><a href="#stretch_blit">stretch_blit</a> &mdash; Scales a rectangular area from one bitmap to another.
+<li><a href="#stretch_sprite">stretch_sprite</a> &mdash; Stretches a sprite to the destination bitmap.
+</ul>
+
+<p>
+As far as Allegro is concerned, a bitmap and a sprite are the same thing,
+but to many people the two words imply slightly different things.  The
+function draw_sprite() is called so rather than draw_bitmap() partly because
+it indicates that it uses a masked drawing mode (if it existed, you could
+expect draw_bitmap() to be a simple block copy), and partly for historical
+reasons. In Allegro 1.0 there were actually different structures for sprites
+and bitmaps, each with their own set of abilities. Allegro 2.0 merged these
+into a single more flexible structure, but retained some names like
+draw_sprite().
+
+<p>
+In wider (non-Allegro) terms, the two words can mean quite different things.
+Generally you can say that sprites are a subset of bitmaps, but even that
+isn't true in 100% of cases.
+
+<p>
+BITMAP: a widely accepted term that will be understood by anyone even
+remotely connected with computer graphics. It simply means an image built up
+from a grid of pixels, ie. just about any picture that you are likely to come
+across on a computer (vector graphics formats are the exception, but those
+must be rendered into a bitmap format before they can be displayed by most
+hardware). A more accurate term but slightly rarer term with the same meaning
+is "pixmap" (pixel-map).
+
+<p>
+SPRITE: a particular usage of bitmapped images, restricted to video games
+(other types of programmer probably won't be familiar with this term).
+Originally on machines like the C64, sprites were a hardware feature that
+allowed a number of small bitmap images to be loaded into special registers,
+and they could then be superimposed over the main graphics display and moved
+around just by modifying the position register. They were used for the moving
+objects (player and enemy characters), and enabled the C64 to do much more
+impressive things than would have been possible if all the drawing had to be
+done directly by the puny CPU.
+
+<p>
+Later on, a lot of old C64 programmers upgraded to machines like the Atari
+ST, which didn't have any special sprite hardware, but they carried on
+referring to their main moving objects as sprites (the routine to draw such a
+thing would obviously be called draw_sprite()).  A sprite is really just a
+bitmap graphic which is drawn onto the screen, but when you call it a sprite
+rather than a bitmap, this suggests it is a gameplay element that can move
+freely around the world rather than being a static part of the environment,
+and that it will be drawn in a masked overlay mode rather than as a solid
+rectangle (there is also a strong implication that a sprite will be animated
+by cycling through a number of frames, but that isn't always the case).
+
+<p>
+In recent years some people have started using "sprite" to refer to any
+character graphics, even if they are not in fact drawn as 2d bitmaps, eg.
+"this game uses 3d polygonal player sprites". This is a confusing misuse of
+the word (Doom uses sprites, Quake does not), but it does happen.
+
+<p>
+The origin of the term "blit" is also rather interesting. This was originally
+BitBlt, an abbreviation of BITmap BLock Transfer, which was a function
+designed (possibly) by the people at Xerox who did so much of the pioneering
+work on graphics display systems, and subsequently copied by virtually
+everybody doing computer graphics (the Microsoft Windows GDI still provides a
+BitBlt function with identical functionality to the original). This routine
+was a workhorse for all sorts of drawing operations, basically copying bitmap
+graphics from one place to another, but including a number of different ROP
+modes (Raster OPerations) for doing things like XOR, inverting pixels, etc.
+A whole family of related words grew up around the BitBlt function, but "blt"
+is impossible to speak (try saying "bltter" or "bltting" :-) so people added
+the vowel to make it easier to pronounce.
+
+<p>
+Therefore, the act of calling the BitBlt function came to be known as "doing a
+blit". The obvious next step was to rename the function itself to blit(),
+which generally took place at the same time as people decided to simplify the
+original, removing the different ROP modes on the grounds that they aren't
+needed for games coding and don't work well with anything higher than
+monochrome images in any case. This leaves us with a function called blit(),
+which is an abbreviation for "block transfer". A strong case could be made
+for calling this blot() instead, but somehow that just doesn't sound the
+same!
+
+<p>
+Anyway, all the routines in this chapter are affected by the
+clipping rectangle of the destination bitmap.
+
+<p><br>
+<div class="al-api"><b>void <a name="blit">blit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *source, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *dest, int source_x, int source_y,
+          int dest_x, int dest_y, int width, int height);</b></div><br>
+   Copies a rectangular area of the source bitmap to the destination bitmap. 
+   The source_x and source_y parameters are the top left corner of the area 
+   to copy from the source bitmap, and dest_x and dest_y are the 
+   corresponding position in the destination bitmap. This routine respects 
+   the destination clipping rectangle, and it will also clip if you try to 
+   blit from areas outside the source bitmap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+      ...
+      /* Blit src on the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>. */
+      <a href="#blit" class="autotype" title="Copies a rectangular area from one bitmap to another.">blit</a>(bmp, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0, 0, 0, bmp-&gt;w, bmp-&gt;h);
+      
+      /* Now copy a chunk to a corner, slightly outside. /*
+      <a href="#blit" class="autotype" title="Copies a rectangular area from one bitmap to another.">blit</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 100, 100, -10, -10, 25, 30);
+</pre></blockquote>
+   You can blit between any parts of any two bitmaps, even if the two memory 
+   areas overlap (ie. source and dest are the same, or one is sub-bitmap of 
+   the other). You should be aware, however, that a lot of SVGA cards don't 
+   provide separate read and write banks, which means that blitting from one 
+   part of the screen to another requires the use of a temporary bitmap in 
+   memory, and is therefore extremely slow. As a general rule you should 
+   avoid blitting from the screen onto itself in SVGA modes.
+
+<p>
+   In mode-X, on the other hand, blitting from one part of the screen to 
+   another can be significantly faster than blitting from memory onto the 
+   screen, as long as the source and destination are correctly aligned with 
+   each other. Copying between overlapping screen rectangles is slow, but if 
+   the areas don't overlap, and if they have the same plane alignment (ie. 
+   (source_x%4) == (dest_x%4)), the VGA latch registers can be used for a 
+   very fast data transfer. To take advantage of this, in mode-X it is often 
+   worth storing tile graphics in a hidden area of video memory (using a 
+   large virtual screen), and blitting them from there onto the visible part 
+   of the screen.
+
+<p>
+   If the GFX_HW_VRAM_BLIT bit in the gfx_capabilities flag is set, the 
+   current driver supports hardware accelerated blits from one part of the 
+   screen onto another. This is extremely fast, so when this flag is set it 
+   may be worth storing some of your more frequently used graphics in an 
+   offscreen portion of the video memory.
+
+<p>
+   Unlike most of the graphics routines, blit() allows the source and
+   destination bitmaps to be of different color depths, so it can be
+   used to convert images from one pixel format to another. In this
+   case, the behavior is affected by the COLORCONV_KEEP_TRANS and
+   COLORCONV_DITHER* flags of the current color conversion mode: see
+   set_color_conversion() for more information.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#masked_blit" title="Copies a rectangle skipping pixels with the mask color.">masked_blit</a>,
+<a class="xref" href="#stretch_blit" title="Scales a rectangular area from one bitmap to another.">stretch_blit</a>,
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg008.html#gfx_capabilities" title="Bitfield describing video hardware capabilities.">gfx_capabilities</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="stretch_blit">stretch_blit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *source, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *dest,
+                  int source_x, source_y, source_width, source_height,
+                  int dest_x, dest_y, dest_width, dest_height);</b></div><br>
+   Like blit(), except it can scale images (so the source and destination 
+   rectangles don't need to be the same size) and requires the source and 
+   destination bitmaps to be of the same color depth. This routine doesn't 
+   do as much safety checking as the regular blit(): in particular you must 
+   take care not to copy from areas outside the source bitmap, and you 
+   cannot blit between overlapping regions, ie. you must use different 
+   bitmaps for the source and the destination. Moreover, the source must 
+   be a memory bitmap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+      ...
+      /* Stretch bmp to fill the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>. */
+      <a href="#stretch_blit" class="autotype" title="Scales a rectangular area from one bitmap to another.">stretch_blit</a>(bmp, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0, bmp-&gt;w, bmp-&gt;h,
+                   0, 0, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#blit" title="Copies a rectangular area from one bitmap to another.">blit</a>,
+<a class="xref" href="#masked_stretch_blit" title="Scales a rectangular area skipping pixels with the mask color.">masked_stretch_blit</a>,
+<a class="xref" href="#stretch_sprite" title="Stretches a sprite to the destination bitmap.">stretch_sprite</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exalpha" title="Creating and using 32 bit RGBA sprites.">exalpha</a>,
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>,
+<a class="eref" href="alleg045.html#exscale" title="Loading PCX files and bitmap stretching.">exscale</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>,
+<a class="eref" href="alleg045.html#extrans2" title="Drawing flipped, translucent and tinted sprites.">extrans2</a>.</blockquote>
+<div class="al-api"><b>void <a name="masked_blit">masked_blit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *source, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *dest, int source_x, int source_y,
+                 int dest_x, int dest_y, int width, int height);</b></div><br>
+   Like blit(), but skips transparent pixels, which are marked by a zero in 
+   256-color modes or bright pink for truecolor data (maximum red and blue, 
+   zero green), and requires the source and destination bitmaps to be of 
+   the same color depth. The source and destination regions must not overlap.
+   Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *hud_overlay;
+      ...
+      /* Paint hud overlay on the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>. */
+      <a href="#masked_blit" class="autotype" title="Copies a rectangle skipping pixels with the mask color.">masked_blit</a>(hud_overlay, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0, 0, 0,
+                  hud_overlay-&gt;w, hud_overlay-&gt;h);</pre></blockquote>
+
+<p>
+   If the GFX_HW_VRAM_BLIT_MASKED bit in the gfx_capabilities flag is set, 
+   the current driver supports hardware accelerated masked blits from one 
+   part of the screen onto another. This is extremely fast, so when this 
+   flag is set it may be worth storing some of your more frequently used 
+   sprites in an offscreen portion of the video memory.
+
+<p>
+   Warning: if the hardware acceleration flag is not set, masked_blit() will 
+   not work correctly when used with a source image in system or video 
+   memory so the latter must be a memory bitmap.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#blit" title="Copies a rectangular area from one bitmap to another.">blit</a>,
+<a class="xref" href="#masked_stretch_blit" title="Scales a rectangular area skipping pixels with the mask color.">masked_stretch_blit</a>,
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#expat" title="Using patterned drawing modes and sub-bitmaps.">expat</a>.</blockquote>
+<div class="al-api"><b>void <a name="masked_stretch_blit">masked_stretch_blit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *source, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *dest,
+                         int source_x, source_y, source_w, source_h,
+                         int dest_x, dest_y, dest_w, dest_h);</b></div><br>
+   Like masked_blit(), except it can scale images (so the source and 
+   destination rectangles don't need to be the same size). This routine 
+   doesn't do as much safety checking as the regular masked_blit(): in 
+   particular you must take care not to copy from areas outside the source 
+   bitmap. Moreover, the source must be a memory bitmap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *hud_overlay;
+      ...
+      /* Stretch hud overlay over the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>. */
+      <a href="#masked_stretch_blit" class="autotype" title="Scales a rectangular area skipping pixels with the mask color.">masked_stretch_blit</a>(hud_overlay, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0,
+                          hud_overlay-&gt;w, hud_overlay-&gt;h,
+                          0, 0, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#blit" title="Copies a rectangular area from one bitmap to another.">blit</a>,
+<a class="xref" href="#masked_blit" title="Copies a rectangle skipping pixels with the mask color.">masked_blit</a>,
+<a class="xref" href="#stretch_blit" title="Scales a rectangular area from one bitmap to another.">stretch_blit</a>,
+<a class="xref" href="#stretch_sprite" title="Stretches a sprite to the destination bitmap.">stretch_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_sprite_ex">draw_sprite_ex</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                    int mode, int flip);</b></div><br>
+   Draws the sprite image onto the destination bitmap using the specified
+   mode argument, optionally flipping the sprite in the orientation specified
+   by flip argument.
+   The mode argument defines how is sprite going to be drawn on the
+   destination bitmap:
+<blockquote class="text"><pre>
+   DRAW_SPRITE_NORMAL     - draws a masked sprite, like draw_sprite()
+   DRAW_SPRITE_LIT        - draws a tinted sprite, like draw_lit_sprite()
+   DRAW_SPRITE_TRANS      - draws a blended sprite, like draw_trans_sprite()
+</pre></blockquote>
+
+<p>
+   The flip argument defines the flipping orientation:
+<blockquote class="text"><pre>
+   DRAW_SPRITE_NO_FLIP = 0    - do not perform flipping
+   DRAW_SPRITE_H_FLIP         - flip horizontally
+   DRAW_SPRITE_V_FLIP         - flip vertically
+   DRAW_SPRITE_VH_FLIP        - flip both vertically and horizontally
+</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#draw_sprite_v_flip" title="Draws the sprite transformed to the destination bitmap.">draw_sprite_v_flip</a>,
+<a class="xref" href="#draw_sprite_h_flip" title="Draws the sprite transformed to the destination bitmap.">draw_sprite_h_flip</a>,
+<a class="xref" href="#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>,
+<a class="xref" href="#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#extrans2" title="Drawing flipped, translucent and tinted sprites.">extrans2</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_sprite">draw_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y);</b></div><br>
+   Draws a copy of the sprite bitmap onto the destination bitmap at the 
+   specified position. This is almost the same as blit(sprite, bmp, 0, 0, x, 
+   y, sprite-&gt;w, sprite-&gt;h), but it uses a masked drawing mode where 
+   transparent pixels are skipped, so the background image will show through 
+   the masked parts of the sprite. Transparent pixels are marked by a zero 
+   in 256-color modes or bright pink for truecolor data (maximum red and 
+   blue, zero green). Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *spaceship;
+      ...
+      <a href="#draw_sprite" class="autotype" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, spaceship, x, y);</pre></blockquote>
+
+<p>
+   If the GFX_HW_VRAM_BLIT_MASKED bit in the gfx_capabilities flag is set, 
+   the current driver supports hardware accelerated sprite drawing when the 
+   source image is a video memory bitmap or a sub-bitmap of the screen. This 
+   is extremely fast, so when this flag is set it may be worth storing some 
+   of your more frequently used sprites in an offscreen portion of the video 
+   memory.
+
+<p>
+   Warning: if the hardware acceleration flag is not set, draw_sprite() will 
+   not work correctly when used with a sprite image in system or video 
+   memory so the latter must be a memory bitmap.
+
+<p>
+   Although generally not supporting graphics of mixed color depths, as a 
+   special case this function can be used to draw 256-color source images 
+   onto truecolor destination bitmaps, so you can use palette effects on 
+   specific sprites within a truecolor program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite_v_flip" title="Draws the sprite transformed to the destination bitmap.">draw_sprite_v_flip</a>,
+<a class="xref" href="#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>,
+<a class="xref" href="#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>,
+<a class="xref" href="#draw_gouraud_sprite" title="Draws a sprite with gouraud shading.">draw_gouraud_sprite</a>,
+<a class="xref" href="#stretch_sprite" title="Stretches a sprite to the destination bitmap.">stretch_sprite</a>,
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#draw_character_ex" title="Draws non transparent pixels of the sprite with a color.">draw_character_ex</a>,
+<a class="xref" href="alleg015.html#draw_rle_sprite" title="Draws an RLE sprite.">draw_rle_sprite</a>,
+<a class="xref" href="alleg016.html#draw_compiled_sprite" title="Draws a compiled sprite.">draw_compiled_sprite</a>,
+<a class="xref" href="#masked_blit" title="Copies a rectangle skipping pixels with the mask color.">masked_blit</a>,
+<a class="xref" href="#blit" title="Copies a rectangular area from one bitmap to another.">blit</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="stretch_sprite">stretch_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, int w, int h);</b></div><br>
+   Like draw_sprite(), except it can stretch the sprite image to the 
+   specified width and height and requires the sprite image and destination 
+   bitmap to be of the same color depth. Moreover, the sprite image must 
+   be a memory bitmap. Example:
+<blockquote class="code"><pre>
+      /* Create tunnel like effect. */
+      for (step = 1; step < 16; step++) {
+         int width = <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a> / step;
+         int height = <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a> / step;
+         <a href="#stretch_sprite" class="autotype" title="Stretches a sprite to the destination bitmap.">stretch_sprite</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, image, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a> / 2 - width / 2,
+                        <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a> / 2 - height / 2, width, height);
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#stretch_blit" title="Scales a rectangular area from one bitmap to another.">stretch_blit</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_sprite_v_flip">draw_sprite_v_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>void <a name="draw_sprite_h_flip">draw_sprite_h_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y);</b></div><br>
+<div class="al-api-cont"><b>void <a name="draw_sprite_vh_flip">draw_sprite_vh_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y);</b></div><br>
+   These are like draw_sprite(), but they additionally flip the image
+   vertically, horizontally, or both, respectively. Flipping vertically
+   means that the y-axis is reversed, while flipping horizontally means
+   that the x-axis is reversed, between the source and the destination.
+   This produces exact mirror images, which is not the same as rotating the
+   sprite (and it is a lot faster than the rotation routine). The sprite
+   must be a memory bitmap. Example:
+<blockquote class="code"><pre>
+      if (<a href="alleg006.html#key" class="autotype" title="Array of flags indicating key state.">key</a>[KEY_RIGHT])
+         <a href="#draw_sprite" class="autotype" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, hero_right, pos_x, pos_y);
+      else if (<a href="alleg006.html#key" class="autotype" title="Array of flags indicating key state.">key</a>[KEY_LEFT])
+         <a href="#draw_sprite_h_flip" class="autotype" title="Draws the sprite transformed to the destination bitmap.">draw_sprite_h_flip</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, hero_right, pos_x, pos_y);
+      else
+         <a href="#draw_sprite" class="autotype" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, hero_idle, pos_x, pos_y);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_trans_sprite">draw_trans_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y);</b></div><br>
+   Uses the global color_map table or truecolor blender functions to overlay
+   the sprite on top of the existing image. This must only be used after you 
+   have set up the color mapping table (for 256-color modes) or blender 
+   functions (for truecolor modes). Because it involves reading as well as 
+   writing the bitmap memory, translucent drawing is very slow if you draw 
+   directly to video RAM, so wherever possible you should use a memory 
+   bitmap instead. Example:
+<blockquote class="code"><pre>
+      /* Some one time initialisation code. */
+      <a href="alleg001.html#COLOR_MAP" class="autotype" title="Stores a color map to accelerate drawing.">COLOR_MAP</a> global_trans_table;
+      <a href="alleg020.html#create_trans_table" class="autotype" title="Fills a color mapping table for translucency effects.">create_trans_table</a>(&global_trans_table, my_palette,
+                         128, 128, 128, NULL);
+      ...
+      if (<a href="alleg008.html#get_color_depth" class="autotype" title="Returns the current pixel color depth.">get_color_depth</a>() == 8)
+         <a href="alleg020.html#color_map" class="autotype" title="Global pointer to the color mapping table.">color_map</a> = &global_trans_table;
+      else
+         <a href="alleg020.html#set_trans_blender" class="autotype" title="Enables a truecolor blender.">set_trans_blender</a>(128, 128, 128, 128);
+
+      <a href="#draw_trans_sprite" class="autotype" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>(buffer, ghost_sprite, x, y);</pre></blockquote>
+
+<p>
+   The bitmap and sprite must normally be in the same color depth, but as a
+   special case you can draw 32 bit RGBA format sprites onto any hicolor or
+   truecolor bitmap, as long as you call set_alpha_blender() first, and you
+   can draw 8-bit alpha images onto a 32-bit RGBA destination, as long as you
+   call set_write_alpha_blender() first. As draw_sprite() this function skips
+   transparent pixels, except if the source sprite is an 8-bit image; if this
+   is the case, you should pay attention to properly set up your color map
+   table for index 0.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>,
+<a class="xref" href="alleg015.html#draw_trans_rle_sprite" title="Draws a translucent RLE sprite.">draw_trans_rle_sprite</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#set_trans_blender" title="Enables a truecolor blender.">set_trans_blender</a>,
+<a class="xref" href="alleg020.html#set_alpha_blender" title="Enables a special alpha-channel blending mode.">set_alpha_blender</a>,
+<a class="xref" href="alleg020.html#set_write_alpha_blender" title="Enables the special alpha-channel editing mode.">set_write_alpha_blender</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exalpha" title="Creating and using 32 bit RGBA sprites.">exalpha</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exrotscl" title="Demonstrates rotate_scaled_sprite functions.">exrotscl</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>,
+<a class="eref" href="alleg045.html#exxfade" title="Truecolor image loading and fades.">exxfade</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_lit_sprite">draw_lit_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, int color);</b></div><br>
+   In 256-color modes, uses the global color_map table to tint the sprite
+   image to the specified color or to light it to the level specified by
+   'color', depending on the function which was used to build the table
+   (create_trans_table or create_light_table), and draws the resulting image
+   to the destination bitmap. In truecolor modes, uses the blender functions
+   to light the sprite image using the alpha level specified by 'color' (the
+   alpha level which was passed to the blender functions is ignored) and
+   draws the resulting image to the destination bitmap. The 'color' parameter
+   must be in the range [0-255] whatever its actual meaning is. This must
+   only be used after you have set up the color mapping table (for 256-color
+   modes) or blender functions (for truecolor modes). Example:
+<blockquote class="code"><pre>
+      /* Some one time initialisation code. */
+      <a href="alleg001.html#COLOR_MAP" class="autotype" title="Stores a color map to accelerate drawing.">COLOR_MAP</a> global_light_table;
+      <a href="alleg020.html#create_light_table" class="autotype" title="Fills a color mapping table for lighting effects.">create_light_table</a>(&global_trans_table, my_palette,
+                         10, 10, 60, NULL);
+      ...
+      if (<a href="alleg008.html#get_color_depth" class="autotype" title="Returns the current pixel color depth.">get_color_depth</a>() == 8)
+         <a href="alleg020.html#color_map" class="autotype" title="Global pointer to the color mapping table.">color_map</a> = &global_light_table;
+      else
+         <a href="alleg020.html#set_trans_blender" class="autotype" title="Enables a truecolor blender.">set_trans_blender</a>(40, 40, 255, 255);
+
+      /* Lit the cape with a blueish light. */
+      <a href="#draw_lit_sprite" class="autotype" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>(buffer, colored_cape, x, y, 64);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>,
+<a class="xref" href="#draw_gouraud_sprite" title="Draws a sprite with gouraud shading.">draw_gouraud_sprite</a>,
+<a class="xref" href="alleg015.html#draw_lit_rle_sprite" title="Draws a tinted RLE sprite.">draw_lit_rle_sprite</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#set_trans_blender" title="Enables a truecolor blender.">set_trans_blender</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_gouraud_sprite">draw_gouraud_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int c1, int c2, int c3, int c4);</b></div><br>
+   More sophisticated version of draw_lit_sprite(): the 'color' parameter is
+   not constant across the sprite image anymore but interpolated between the
+   four specified corner colors. The corner values passed to this function
+   indicate the strength of the color applied on them, ranging from 0 (no
+   strength) to 255 (full strength). Example:
+<blockquote class="code"><pre>
+      /* Some one time initialisation code. */
+      <a href="alleg001.html#COLOR_MAP" class="autotype" title="Stores a color map to accelerate drawing.">COLOR_MAP</a> global_light_table;
+      <a href="alleg020.html#create_light_table" class="autotype" title="Fills a color mapping table for lighting effects.">create_light_table</a>(&global_trans_table, my_palette,
+                         0, 0, 0, NULL);
+      ...
+      if (<a href="alleg008.html#get_color_depth" class="autotype" title="Returns the current pixel color depth.">get_color_depth</a>() == 8)
+         <a href="alleg020.html#color_map" class="autotype" title="Global pointer to the color mapping table.">color_map</a> = &global_light_table;
+      else
+         <a href="alleg020.html#set_trans_blender" class="autotype" title="Enables a truecolor blender.">set_trans_blender</a>(0, 0, 0, 128);
+
+      /* Enemies are in shadow unless lit by torch. */
+      <a href="#draw_gouraud_sprite" class="autotype" title="Draws a sprite with gouraud shading.">draw_gouraud_sprite</a>(buffer, menacing_spy, x, y,
+                          light_strength_on_corner_1,
+                          light_strength_on_corner_2,
+                          light_strength_on_corner_3,
+                          light_strength_on_corner_4);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#set_trans_blender" title="Enables a truecolor blender.">set_trans_blender</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exshade" title="Gouraud shaded sprites.">exshade</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_character_ex">draw_character_ex</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                       color, bg);</b></div><br>
+   Draws a copy of the sprite bitmap onto the destination bitmap at the 
+   specified position, drawing transparent pixels in the background color
+   (or skipping them if the background color is -1) and setting all other
+   pixels to the specified color. Transparent pixels are marked by a zero
+   in 256-color modes or bright pink for truecolor data (maximum red and
+   blue, zero green). The sprite must be an 8-bit image, even if the
+   destination is a truecolor bitmap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *logo;
+      ...
+      /* Draw the logo silhouette in red. */
+      <a href="#draw_character_ex" class="autotype" title="Draws non transparent pixels of the sprite with a color.">draw_character_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, logo, <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a> / 2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a> / 2,
+                        <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(255, 0, 0), -1);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite">rotate_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Draws the sprite image onto the bitmap. It is placed with its top left
+   corner at the specified position, then rotated by the specified angle
+   around its centre. The angle is a fixed point 16.16 number in the same
+   format used by the fixed point trig routines, with 256 equal to a full
+   circle, 64 a right angle, etc. All rotation functions can draw between any
+   two bitmaps, even screen bitmaps or bitmaps of different color depth.
+
+<p>
+   Positive increments of the angle will make the sprite rotate clockwise
+   on the screen, as demonstrated by the Allegro example.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite" title="Rotates and stretches a sprite.">rotate_scaled_sprite</a>,
+<a class="xref" href="#rotate_sprite_v_flip" title="Rotates and flips a sprite.">rotate_sprite_v_flip</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip</a>,
+<a class="xref" href="#pivot_sprite" title="Rotates a sprite around a specified point.">pivot_sprite</a>,
+<a class="xref" href="#pivot_sprite_v_flip" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip</a>,
+<a class="xref" href="#pivot_scaled_sprite" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip</a>,
+<a class="xref" href="alleg032.html#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="alleg032.html#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite_v_flip">rotate_sprite_v_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite, but flips the image vertically before rotating it. To
+   flip horizontally, use this routine but add itofix(128) to the angle. To
+   flip in both directions, use rotate_sprite() and add itofix(128) to its
+   angle.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip</a>,
+<a class="xref" href="#pivot_sprite_v_flip" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite">rotate_scaled_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                          <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_sprite(), but stretches or shrinks the image at the same time 
+   as rotating it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip</a>,
+<a class="xref" href="#pivot_scaled_sprite" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exrotscl" title="Demonstrates rotate_scaled_sprite functions.">exrotscl</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite_v_flip">rotate_scaled_sprite_v_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                                 <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Draws the sprite, similar to rotate_scaled_sprite() except that it flips
+   the sprite vertically first.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite" title="Rotates and stretches a sprite.">rotate_scaled_sprite</a>,
+<a class="xref" href="#rotate_sprite_v_flip" title="Rotates and flips a sprite.">rotate_sprite_v_flip</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite">pivot_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                  int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite(), but aligns the point in the sprite given by (cx, cy)
+   to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#pivot_scaled_sprite" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite</a>,
+<a class="xref" href="#pivot_sprite_v_flip" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite_v_flip">pivot_sprite_v_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_v_flip(), but aligns the point in the sprite given by
+   (cx, cy) to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_sprite_v_flip" title="Rotates and flips a sprite.">rotate_sprite_v_flip</a>,
+<a class="xref" href="#pivot_sprite" title="Rotates a sprite around a specified point.">pivot_sprite</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite">pivot_scaled_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite(), but aligns the point in the sprite given by
+   (cx, cy) to (x, y) in the bitmap, then rotates and scales around this
+   point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite" title="Rotates and stretches a sprite.">rotate_scaled_sprite</a>,
+<a class="xref" href="#pivot_sprite" title="Rotates a sprite around a specified point.">pivot_sprite</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite_v_flip">pivot_scaled_sprite_v_flip</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                                int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite_v_flip(), but aligns the point in the sprite
+   given by (cx, cy) to (x, y) in the bitmap, then rotates and scales around
+   this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite" title="Rotates a sprite.">rotate_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip</a>,
+<a class="xref" href="#rotate_sprite_v_flip" title="Rotates and flips a sprite.">rotate_sprite_v_flip</a>,
+<a class="xref" href="#pivot_sprite" title="Rotates a sprite around a specified point.">pivot_sprite</a>,
+<a class="xref" href="#pivot_scaled_sprite" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite_trans">rotate_sprite_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,</b></div><br>
+<div class="al-api-cont"><b>                          int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Draws the sprite image onto the bitmap. It is placed with its top left
+   corner at the specified position, then rotated by the specified angle
+   around its centre. The angle is a fixed point 16.16 number in the same
+   format used by the fixed point trig routines, with 256 equal to a full
+   circle, 64 a right angle, etc. All rotation functions can draw between any
+   two bitmaps, even screen bitmaps or bitmaps of different color depth.
+
+<p>
+   Positive increments of the angle will make the sprite rotate clockwise
+   on the screen, as demonstrated by the Allegro example.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite_trans" title="Rotates and stretches a sprite.">rotate_scaled_sprite_trans</a>,
+<a class="xref" href="#rotate_sprite_v_flip_trans" title="Rotates and flips a sprite.">rotate_sprite_v_flip_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_sprite_trans" title="Rotates a sprite around a specified point.">pivot_sprite_trans</a>,
+<a class="xref" href="#pivot_sprite_v_flip_trans" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_trans" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_trans</a>,
+<a class="xref" href="alleg032.html#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="alleg032.html#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite_v_flip_trans">rotate_sprite_v_flip_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_trans, but flips the image vertically before rotating it.
+   To flip horizontally, use this routine but add itofix(128) to the angle. To
+   flip in both directions, use rotate_sprite() and add itofix(128) to its
+   angle.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_sprite_v_flip_trans" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_trans</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite_trans">rotate_scaled_sprite_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                          <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_sprite_trans(), but stretches or shrinks the image at the same
+   time as rotating it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_trans" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_trans</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exrotscl" title="Demonstrates rotate_scaled_sprite functions.">exrotscl</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite_v_flip_trans">rotate_scaled_sprite_v_flip_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,
+                                 int x, int y,</b></div><br>
+<div class="al-api-cont"><b>                                 <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Draws the sprite, similar to rotate_scaled_sprite_trans() except that it
+   flips the sprite vertically first.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_trans" title="Rotates and stretches a sprite.">rotate_scaled_sprite_trans</a>,
+<a class="xref" href="#rotate_sprite_v_flip_trans" title="Rotates and flips a sprite.">rotate_sprite_v_flip_trans</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite_trans">pivot_sprite_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                  int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_trans(), but aligns the point in the sprite given by
+   (cx, cy) to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_trans" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_trans</a>,
+<a class="xref" href="#pivot_sprite_v_flip_trans" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_trans</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite_v_flip_trans">pivot_sprite_v_flip_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_v_flip_trans(), but aligns the point in the sprite given
+   by (cx, cy) to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_sprite_v_flip_trans" title="Rotates and flips a sprite.">rotate_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_sprite_trans" title="Rotates a sprite around a specified point.">pivot_sprite_trans</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite_trans">pivot_scaled_sprite_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite_trans(), but aligns the point in the sprite given
+   by (cx, cy) to (x, y) in the bitmap, then rotates and scales around this
+   point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_trans" title="Rotates and stretches a sprite.">rotate_scaled_sprite_trans</a>,
+<a class="xref" href="#pivot_sprite_trans" title="Rotates a sprite around a specified point.">pivot_sprite_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_trans</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite_v_flip_trans">pivot_scaled_sprite_v_flip_trans</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,
+                                int x, int y,</b></div><br>
+<div class="al-api-cont"><b>                                int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite_v_flip_trans(), but aligns the point in the sprite
+   given by (cx, cy) to (x, y) in the bitmap, then rotates and scales around
+   this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_trans" title="Rotates a sprite.">rotate_sprite_trans</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_trans" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_trans</a>,
+<a class="xref" href="#rotate_sprite_v_flip_trans" title="Rotates and flips a sprite.">rotate_sprite_v_flip_trans</a>,
+<a class="xref" href="#pivot_sprite_trans" title="Rotates a sprite around a specified point.">pivot_sprite_trans</a>,
+<a class="xref" href="#pivot_scaled_sprite_trans" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_trans</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite_lit">rotate_sprite_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,</b></div><br>
+<div class="al-api-cont"><b>                          int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Draws the sprite image onto the bitmap. It is placed with its top left
+   corner at the specified position, then rotated by the specified angle
+   around its centre. The angle is a fixed point 16.16 number in the same
+   format used by the fixed point trig routines, with 256 equal to a full
+   circle, 64 a right angle, etc. All rotation functions can draw between any
+   two bitmaps, even screen bitmaps or bitmaps of different color depth.
+
+<p>
+   Positive increments of the angle will make the sprite rotate clockwise
+   on the screen, as demonstrated by the Allegro example.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_lit_sprite" title="Draws a sprite tinted with a specific color.">draw_lit_sprite</a>,
+<a class="xref" href="#rotate_scaled_sprite_lit" title="Rotates and stretches a sprite.">rotate_scaled_sprite_lit</a>,
+<a class="xref" href="#rotate_sprite_v_flip_lit" title="Rotates and flips a sprite.">rotate_sprite_v_flip_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_sprite_lit" title="Rotates a sprite around a specified point.">pivot_sprite_lit</a>,
+<a class="xref" href="#pivot_sprite_v_flip_lit" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_lit" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_lit</a>,
+<a class="xref" href="alleg032.html#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="alleg032.html#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_sprite_v_flip_lit">rotate_sprite_v_flip_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_lit, but flips the image vertically before rotating it.
+   To flip horizontally, use this routine but add itofix(128) to the angle. To
+   flip in both directions, use rotate_sprite() and add itofix(128) to its
+   angle.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_sprite_v_flip_lit" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_lit</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite_lit">rotate_scaled_sprite_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                          <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_sprite_lit(), but stretches or shrinks the image at the same
+   time as rotating it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_lit" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_lit</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exrotscl" title="Demonstrates rotate_scaled_sprite functions.">exrotscl</a>.</blockquote>
+<div class="al-api"><b>void <a name="rotate_scaled_sprite_v_flip_lit">rotate_scaled_sprite_v_flip_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,
+                                 int x, int y,</b></div><br>
+<div class="al-api-cont"><b>                                 <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Draws the sprite, similar to rotate_scaled_sprite_lit() except that it
+   flips the sprite vertically first.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_lit" title="Rotates and stretches a sprite.">rotate_scaled_sprite_lit</a>,
+<a class="xref" href="#rotate_sprite_v_flip_lit" title="Rotates and flips a sprite.">rotate_sprite_v_flip_lit</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite_lit">pivot_sprite_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                  int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_lit(), but aligns the point in the sprite given by
+   (cx, cy) to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_lit" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_lit</a>,
+<a class="xref" href="#pivot_sprite_v_flip_lit" title="Rotates and flips a sprite around a specified point.">pivot_sprite_v_flip_lit</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_sprite_v_flip_lit">pivot_sprite_v_flip_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle);</b></div><br>
+   Like rotate_sprite_v_flip_lit(), but aligns the point in the sprite given
+   by (cx, cy) to (x, y) in the bitmap, then rotates around this point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_sprite_v_flip_lit" title="Rotates and flips a sprite.">rotate_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_sprite_lit" title="Rotates a sprite around a specified point.">pivot_sprite_lit</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite_lit">pivot_scaled_sprite_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite, int x, int y,
+                         int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite_lit(), but aligns the point in the sprite given
+   by (cx, cy) to (x, y) in the bitmap, then rotates and scales around this
+   point.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_lit" title="Rotates and stretches a sprite.">rotate_scaled_sprite_lit</a>,
+<a class="xref" href="#pivot_sprite_lit" title="Rotates a sprite around a specified point.">pivot_sprite_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite around a specified point.">pivot_scaled_sprite_v_flip_lit</a>.</blockquote>
+<div class="al-api"><b>void <a name="pivot_scaled_sprite_v_flip_lit">pivot_scaled_sprite_v_flip_lit</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *sprite,
+                                int x, int y,</b></div><br>
+<div class="al-api-cont"><b>                                int cx, int cy, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> angle, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> scale);</b></div><br>
+   Like rotate_scaled_sprite_v_flip_lit(), but aligns the point in the sprite
+   given by (cx, cy) to (x, y) in the bitmap, then rotates and scales around
+   this point.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rotate_sprite_lit" title="Rotates a sprite.">rotate_sprite_lit</a>,
+<a class="xref" href="#rotate_scaled_sprite_v_flip_lit" title="Rotates, stretches and flips a sprite.">rotate_scaled_sprite_v_flip_lit</a>,
+<a class="xref" href="#rotate_sprite_v_flip_lit" title="Rotates and flips a sprite.">rotate_sprite_v_flip_lit</a>,
+<a class="xref" href="#pivot_sprite_lit" title="Rotates a sprite around a specified point.">pivot_sprite_lit</a>,
+<a class="xref" href="#pivot_scaled_sprite_lit" title="Rotates and stretches a sprite around a specified point.">pivot_scaled_sprite_lit</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

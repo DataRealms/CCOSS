@@ -377,7 +377,7 @@ namespace RTE {
 		/// Gets the list of groups this is member of.
 		/// </summary>
 		/// <returns>A pointer to a list of strings which describes the groups this is added to. Ownership is NOT transferred!</returns>
-		const std::list<std::string> * GetGroupList() { return &m_Groups; }
+		const std::list<std::string> * GetGroupList() const { return &m_Groups; }
 
 		/// <summary>
 		/// Shows whether this is part of a specific group or not.

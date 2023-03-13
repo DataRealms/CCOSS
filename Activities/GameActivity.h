@@ -597,7 +597,7 @@ public:
 // Description:     Returns the name of the tech module selected for this team during scenario setup
 // Arguments:       Team to return tech module for
 // Return value:    Tech module name, for example Dummy.rte, or empty string if there is no team
-	std::string GetTeamTech(int team) { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
+	std::string GetTeamTech(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetTeamTech
@@ -761,6 +761,13 @@ public:
 // Arguments:       None.
 // Return value:	
 	int GetDefaultGoldNuts() const { return m_DefaultGoldNuts; }
+
+
+	/// <summary>
+	/// Gets the default gold for max difficulty.
+	/// </summary>
+	/// <returns>The default gold for max difficulty.</returns>
+	int GetDefaultGoldMaxDifficulty() const { return m_DefaultGoldMaxDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1072,6 +1079,7 @@ protected:
 	int m_DefaultGoldMedium;
 	int m_DefaultGoldHard;
 	int m_DefaultGoldNuts;
+	int m_DefaultGoldMaxDifficulty;
 	// Whether those switches are enabled or disabled in scenario setup dialog, true by default
 	bool m_FogOfWarSwitchEnabled;
 	bool m_DeployUnitsSwitchEnabled;

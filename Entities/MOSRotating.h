@@ -744,6 +744,18 @@ ClassInfoGetters;
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
     virtual float RemoveWounds(int numberOfWoundsToRemove, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
 
+	/// <summary>
+	/// Gets a const reference to this MOSRotating's map of string values.
+	/// </summary>
+	/// <returns>A const reference to this MOSRotating's map of string values.</returns>
+	const std::map<std::string, std::string> & GetStringValueMap() const { return m_StringValueMap; }
+
+	/// <summary>
+	/// Gets a const reference to this MOSRotating's map of number values.
+	/// </summary>
+	/// <returns>A const reference to this MOSRotating's map of number values.</returns>
+	const std::map<std::string, double> &GetNumberValueMap() const { return m_NumberValueMap; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////

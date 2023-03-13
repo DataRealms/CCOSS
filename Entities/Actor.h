@@ -685,7 +685,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    The furthest set AI waypoint of this.
 
-	Vector GetLastAIWaypoint() { if (!m_Waypoints.empty()) { return m_Waypoints.back().first; } else if (!m_MovePath.empty()) { return m_MovePath.back(); } return m_Pos; }
+	Vector GetLastAIWaypoint() const { if (!m_Waypoints.empty()) { return m_Waypoints.back().first; } else if (!m_MovePath.empty()) { return m_MovePath.back(); } return m_Pos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -695,8 +695,13 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-	MOID GetAIMOWaypointID();
+	MOID GetAIMOWaypointID() const;
 
+	/// <summary>
+	/// Gets the list of waypoints for this Actor.
+	/// </summary>
+	/// <returns>The list of waypoints for this Actor.</returns>
+	const std::list<std::pair<Vector, const MovableObject *>> & GetWaypointList() const { return m_Waypoints; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetWaypointsSize
@@ -740,6 +745,12 @@ ClassInfoGetters;
 
 	void AddToMovePathEnd(Vector newCoordinate) { m_MovePath.push_back(newCoordinate); }
 
+	/// <summary>
+	/// Gets the last position in this Actor's move path.
+	/// </summary>
+	/// <returns>The last position in this Actor's move path.</returns>
+	Vector GetMovePathEnd() const { return m_MovePath.back(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  RemoveMovePathBeginning
@@ -763,6 +774,12 @@ ClassInfoGetters;
 //                  is empty.
 
 	bool RemoveMovePathEnd() { if (!m_MovePath.empty()) { m_MovePath.pop_back(); return true; } return false; }
+
+	/// <summary>
+	/// Gets a pointer to the MovableObject move target of this Actor.
+	/// </summary>
+	/// <returns>A pointer to the MovableObject move target of this Actor.</returns>
+	const MovableObject * GetMOMoveTarget() const { return m_pMOMoveTarget; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -140,7 +140,7 @@ namespace RTE {
 		} else if (propName == "AreaDistributionType") {
 			std::string areaDistributionTypeString = reader.ReadPropValue();
 			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
-			if (itr != c_IconSeparatorModeMap.end()) {
+			if (itr != c_AreaDistributionTypeMap.end()) {
 				m_AreaDistributionType = itr->second;
 			} else {
 				try {

@@ -206,6 +206,7 @@ namespace RTE {
 
 		.def(luabind::constructor<>())
 
+		.property("PlayerControllable", &Actor::IsPlayerControllable, &Actor::SetPlayerControllable)
 		.property("BodyHitSound", &Actor::GetBodyHitSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetBodyHitSound)
 		.property("AlarmSound", &Actor::GetAlarmSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetAlarmSound)
 		.property("PainSound", &Actor::GetPainSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPainSound)
@@ -258,6 +259,7 @@ namespace RTE {
 		.def("HasObject", &Actor::HasObject)
 		.def("HasObjectInGroup", &Actor::HasObjectInGroup)
 		.def("IsWithinRange", &Actor::IsWithinRange)
+		.def("AddGold", &Actor::AddGold)
 		.def("AddHealth", &Actor::AddHealth)
 		.def("IsStatus", &Actor::IsStatus)
 		.def("IsDead", &Actor::IsDead)
@@ -278,6 +280,7 @@ namespace RTE {
 		.def("SwapNextInventory", &Actor::SwapNextInventory)
 		.def("SwapPrevInventory", &Actor::SwapPrevInventory)
 		.def("DropAllInventory", &Actor::DropAllInventory)
+		.def("DropAllGold", &Actor::DropAllGold)
 		.def("IsInventoryEmpty", &Actor::IsInventoryEmpty)
 		.def("FlashWhite", &Actor::FlashWhite)
 		.def("DrawWaypoints", &Actor::DrawWaypoints)
@@ -427,7 +430,6 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
-		.property("OneHandedReloadAngleOffset", &AHuman::GetOneHandedReloadAngleOffset, &AHuman::SetOneHandedReloadAngleOffset)
 		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
@@ -547,9 +549,9 @@ namespace RTE {
 			.property("MaxLength", &Arm::GetMaxLength)
 			.property("MoveSpeed", &Arm::GetMoveSpeed, &Arm::SetMoveSpeed)
 
-			.property("HandDefaultIdleOffset", &Arm::GetHandDefaultIdleOffset, &Arm::SetHandDefaultIdleOffset)
+			.property("HandIdleOffset", &Arm::GetHandIdleOffset, &Arm::SetHandIdleOffset)
 
-			.property("HandCurrentPos", &Arm::GetHandCurrentPos, &Arm::SetHandCurrentPos)
+			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos)
 			.property("HasAnyHandTargets", &Arm::HasAnyHandTargets)
 			.property("NumberOfHandTargets", &Arm::GetNumberOfHandTargets)
 			.property("NextHandTargetDescription", &Arm::GetNextHandTargetDescription)
@@ -579,6 +581,7 @@ namespace RTE {
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
 		.property("JointPos", &Attachable::GetJointPos)
 		.property("DeleteWhenRemovedFromParent", &Attachable::GetDeleteWhenRemovedFromParent, &Attachable::SetDeleteWhenRemovedFromParent)
+		.property("GibWhenRemovedFromParent", &Attachable::GetGibWhenRemovedFromParent, &Attachable::SetGibWhenRemovedFromParent)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &LuaAdaptersPropertyOwnershipSafetyFaker::AttachableSetParentBreakWound)
@@ -587,6 +590,7 @@ namespace RTE {
 		.property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
 		.property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
 		.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
+		.property("IgnoresParticlesWhileAttached", &Attachable::GetIgnoresParticlesWhileAttached, &Attachable::SetIgnoresParticlesWhileAttached)
 		.property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain)
 		.property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
 		.property("InheritsFrame", &Attachable::InheritsFrame, &Attachable::SetInheritsFrame)
@@ -667,6 +671,7 @@ namespace RTE {
 		return ConcreteTypeLuaClassDefinition(HDFirearm, HeldDevice)
 
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
+		.property("MSPerRound", &HDFirearm::GetMSPerRound)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
 		.property("Reloadable", &HDFirearm::IsReloadable, &HDFirearm::SetReloadable)
 		.property("DualReloadable", &HDFirearm::IsDualReloadable, &HDFirearm::SetDualReloadable)
@@ -685,7 +690,8 @@ namespace RTE {
 		.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &LuaAdaptersPropertyOwnershipSafetyFaker::HDFirearmSetReloadEndSound)
 		.property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
 		.property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
-		.property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
+		.property("BaseReloadTime", &HDFirearm::GetBaseReloadTime, &HDFirearm::SetBaseReloadTime)
+		.property("ReloadTime", &HDFirearm::GetReloadTime)
 		.property("ReloadProgress", &HDFirearm::GetReloadProgress)
 		.property("ShakeRange", &HDFirearm::GetShakeRange, &HDFirearm::SetShakeRange)
 		.property("SharpShakeRange", &HDFirearm::GetSharpShakeRange, &HDFirearm::SetSharpShakeRange)
@@ -694,6 +700,7 @@ namespace RTE {
 		.property("ShellVelVariation", &HDFirearm::GetShellVelVariation, &HDFirearm::SetShellVelVariation)
 		.property("FiredOnce", &HDFirearm::FiredOnce)
 		.property("FiredFrame", &HDFirearm::FiredFrame)
+		.property("CanFire", &HDFirearm::CanFire)
 		.property("RoundsFired", &HDFirearm::RoundsFired)
 		.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
 		.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness)
@@ -1168,7 +1175,8 @@ namespace RTE {
 		.def("RemovePieSlice", &PieMenu::RemovePieSlice, luabind::adopt(luabind::return_value))
 		.def("RemovePieSlicesByPresetName", &PieMenu::RemovePieSlicesByPresetName)
 		.def("RemovePieSlicesByType", &PieMenu::RemovePieSlicesByType)
-		.def("RemovePieSlicesByOriginalSource", &PieMenu::RemovePieSlicesByOriginalSource);
+		.def("RemovePieSlicesByOriginalSource", &PieMenu::RemovePieSlicesByOriginalSource)
+		.def("ReplacePieSlice", &PieMenu::ReplacePieSlice, luabind::adopt(luabind::result) + luabind::adopt(_3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

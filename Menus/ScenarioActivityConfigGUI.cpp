@@ -292,8 +292,10 @@ namespace RTE {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
 			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
-			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MaxDifficulty && m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMaxDifficulty());
+			} else if (m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMaxDifficulty());
 			} else {
 				m_StartingGoldSlider->SetValue(2000);
 			}
@@ -303,7 +305,6 @@ namespace RTE {
 			std::snprintf(goldString.data(), goldString.size(), " %c Infinite", -58);
 		} else {
 			int startGold = m_StartingGoldSlider->GetValue();
-			startGold = startGold - (startGold % 500);
 			std::snprintf(goldString.data(), goldString.size(), " %c %d oz", -58, startGold);
 		}
 		m_StartingGoldLabel->SetText(goldString);

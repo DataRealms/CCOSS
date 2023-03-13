@@ -1,0 +1,562 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Fonts
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Fonts">Fonts</a></h1>
+
+<ul>
+<li><a href="#destroy_font">destroy_font</a> &mdash; Frees the memory being used by a font structure.
+<li><a href="#extract_font_range">extract_font_range</a> &mdash; Extracts a range of characters from a font.
+<li><a href="#font_has_alpha">font_has_alpha</a> &mdash; Search all pixels of a font for alpha values.
+<li><a href="#get_font_range_begin">get_font_range_begin</a> &mdash; Returns the start of a character range in a font.
+<li><a href="#get_font_range_end">get_font_range_end</a> &mdash; Returns the last character of a character range in a font.
+<li><a href="#get_font_ranges">get_font_ranges</a> &mdash; Returns the number of character ranges in a font.
+<li><a href="#grab_font_from_bitmap">grab_font_from_bitmap</a> &mdash; Grabs a font from a bitmap
+<li><a href="#is_color_font">is_color_font</a> &mdash; Returns TRUE if a font is a color font.
+<li><a href="#is_compatible_font">is_compatible_font</a> &mdash; Check if two fonts are of the same type.
+<li><a href="#is_mono_font">is_mono_font</a> &mdash; Returns TRUE if a font is a monochrome font.
+<li><a href="#is_trans_font">is_trans_font</a> &mdash; Returns TRUE if a font uses transparency.
+<li><a href="#load_bios_font">load_bios_font</a> &mdash; Loads a 8x8 or 8x16 BIOS format font.
+<li><a href="#load_bitmap_font">load_bitmap_font</a> &mdash; Grabs a font from a bitmap file.
+<li><a href="#load_dat_font">load_dat_font</a> &mdash; Loads a FONT from an Allegro datafile.
+<li><a href="#load_font">load_font</a> &mdash; Loads a font from a file.
+<li><a href="#load_grx_font">load_grx_font</a> &mdash; Loads a GRX format font.
+<li><a href="#load_grx_or_bios_font">load_grx_or_bios_font</a> &mdash; Loads either a BIOS or GRX format font.
+<li><a href="#load_txt_font">load_txt_font</a> &mdash; Loads a font script.
+<li><a href="#make_trans_font">make_trans_font</a> &mdash; Makes a font use transparency.
+<li><a href="#merge_fonts">merge_fonts</a> &mdash; Merges two fonts into one font.
+<li><a href="#register_font_file_type">register_font_file_type</a> &mdash; Register a new font loading function.
+<li><a href="#transpose_font">transpose_font</a> &mdash; Transposes all characters in a font.
+</ul>
+
+<p>
+Allegro provides routines for loading fonts directly from GRX format .fnt
+files, 8x8 or 8x16 BIOS format .fnt files, from bitmap images, from datafiles
+or you can import a multiple-range Unicode font by writing a .txt script that
+specifies a number of different source files for each range of characters.
+
+<p>
+By default, Allegro can only use bitmapped (non-scalable) fonts. If you want
+to use TrueType fonts, you will need to use an add-on library which allows
+you to load them on the fly (like AllegTTF or Glyph Keeper, listed among
+others at <a href="http://www.allegro.cc/">http://www.allegro.cc/</a>) and render them directly, or generate a
+bitmapped version of a TrueType font with tools like TTF2PCX
+(<a href="http://www.talula.demon.co.uk/ttf2pcx/index.html">http://www.talula.demon.co.uk/ttf2pcx/index.html</a>).
+
+<p><br>
+<div class="al-api"><b>void <a name="register_font_file_type">register_font_file_type</a>(const char *ext,
+          <a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *(*load)(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param));</b></div><br>
+   Informs the load_font() functions of a new file type, providing a routine 
+   to read fonts in this format. The function you supply must follow the 
+   following prototype:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *load_my_font(const char *filename, <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> *pal, void *param)
+      {
+         ...
+      }
+</pre></blockquote>
+   The pal parameter can optionally be used to return a palette for the FONT.
+   The parameter param can be anything you like: you can use this to pass
+   information to your loading routine, such as for instance the font height,
+   the character range to load or the index number of a font in a datafile.
+   If you choose to write your own font loading code, your function should be
+   prepared to deal with a value of NULL for either of these parameters.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_font">load_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param);</b></div><br>
+   Loads a font from a file. At present, this supports loading fonts from
+   a GRX format .fnt file, a 8x8 or 8x16 BIOS format .fnt file, a datafile or
+   any bitmap format that can be loaded by load_bitmap().
+   
+<p>
+   If the font contains palette information, then the palette is returned in
+   the second parameter, which should be an array of 256 RGB structures 
+   (a PALETTE). The pal argument may be NULL. In this case, the palette data,
+   if present, is simply not returned.
+   
+<p>
+   The third parameter can be used to pass specific information to a custom
+   loader routine. Normally, you can just leave this as NULL. Note that
+   another way of loading fonts is embedding them into a datafile and using
+   the datafile related functions.
+
+<p>
+   Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *myfont;
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> palette;
+      ...
+      myfont = <a href="#load_font" class="autotype" title="Loads a font from a file.">load_font</a>("my_font.pcx", palette, NULL);
+      if (!myfont)
+         abort_on_error("Couldn't load <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>!");
+      ...
+      <a href="alleg018.html#textout_centre_ex" class="autotype" title="Writes a centered string on a bitmap.">textout_centre_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, myfont, "This is my own pretty <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>!",
+                        <a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a> / 2, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a> / 2, white, black);
+      ...
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(myfont);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="alleg010.html#load_bitmap" title="Loads any supported bitmap from a file.">load_bitmap</a>,
+<a class="xref" href="#load_dat_font" title="Loads a FONT from an Allegro datafile.">load_dat_font</a>,
+<a class="xref" href="#load_bios_font" title="Loads a 8x8 or 8x16 BIOS format font.">load_bios_font</a>,
+<a class="xref" href="#load_grx_font" title="Loads a GRX format font.">load_grx_font</a>,
+<a class="xref" href="#load_grx_or_bios_font" title="Loads either a BIOS or GRX format font.">load_grx_or_bios_font</a>,
+<a class="xref" href="#load_bitmap_font" title="Grabs a font from a bitmap file.">load_bitmap_font</a>,
+<a class="xref" href="#load_txt_font" title="Loads a font script.">load_txt_font</a>,
+<a class="xref" href="#destroy_font" title="Frees the memory being used by a font structure.">destroy_font</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfont" title="Loading and manipulating fonts.">exfont</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_font">destroy_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f);</b></div><br>
+   Frees the memory being used by a font structure. Don't use this on the
+   default global Allegro font or any text routines using it could crash. You
+   should use this only on fonts you have loaded manually after you are done
+   with them, to prevent memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg031.html#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfont" title="Loading and manipulating fonts.">exfont</a>.</blockquote>
+<div class="al-api"><b>void <a name="make_trans_font">make_trans_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f);</b></div><br>
+   This function converts a font to use transparency for drawing. That is, each
+   glyph in the font will be drawn with draw_trans_sprite, so you can use the
+   same blenders as with draw_trans_sprite to draw the font. One common use of
+   this is to load a bitmap font with an alpha channel, and therefore get
+   anti-aliased text output by using Allegro's alpha blender. Here's an example
+   how to do that:
+
+   <blockquote class="code"><pre>
+   <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *f = <a href="#load_font" class="autotype" title="Loads a font from a file.">load_font</a>("alphafont.tga", NULL, NULL);
+   <a href="#make_trans_font" class="autotype" title="Makes a font use transparency.">make_trans_font</a>(f);
+   <a href="alleg020.html#set_alpha_blender" class="autotype" title="Enables a special alpha-channel blending mode.">set_alpha_blender</a>();
+   <a href="alleg018.html#textprintf_centre_ex" class="autotype" title="Formatted centered output of a string.">textprintf_centre_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, f, 320, 240, -1, -1, "Anti-aliased Font!");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>,
+<a class="xref" href="alleg020.html#set_alpha_blender" title="Enables a special alpha-channel blending mode.">set_alpha_blender</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>,
+<a class="xref" href="alleg014.html#draw_trans_sprite" title="Draws a sprite blending it with the destination.">draw_trans_sprite</a>.</blockquote>
+<div class="al-api"><b>int <a name="is_trans_font">is_trans_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f)</b></div><br>
+   This function checks if the given font is a color font using
+   draw_trans_sprite to render glyphs.
+<p><b>Return value:</b>
+   Returns TRUE if the font uses transparency, FALSE if it does not.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#make_trans_font" title="Makes a font use transparency.">make_trans_font</a>,
+<a class="xref" href="#is_color_font" title="Returns TRUE if a font is a color font.">is_color_font</a>,
+<a class="xref" href="#is_mono_font" title="Returns TRUE if a font is a monochrome font.">is_mono_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="is_color_font">is_color_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f)</b></div><br>
+   This function checks if the given font is a color font, as opposed to a
+   monochrome font.
+<p><b>Return value:</b>
+   Returns TRUE if the font is a color font, FALSE if it is not.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>,
+<a class="xref" href="#is_mono_font" title="Returns TRUE if a font is a monochrome font.">is_mono_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="is_mono_font">is_mono_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f)</b></div><br>
+   This function checks if the given font is a mono font, as opposed to a
+   color font.
+<p><b>Return value:</b>
+   Returns TRUE if the font is a monochrome font, FALSE if it is not.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>,
+<a class="xref" href="#is_color_font" title="Returns TRUE if a font is a color font.">is_color_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="font_has_alpha">font_has_alpha</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f)</b></div><br>
+   This function goes through all pixels of all glyphs in the font and looks for
+   alpha values.
+<p><b>Return value:</b>
+   Returns TRUE if any alpha pixels are found, else FALSE.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>.</blockquote>
+<div class="al-api"><b>int *<a name="is_compatible_font">is_compatible_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f1, <a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f2)</b></div><br>
+   This function compares the two fonts, which you can use to find out if
+   Allegro is capable of merging them.
+<p><b>Return value:</b>
+   Returns TRUE if the two fonts are of the same general type (both are color
+   fonts or both are monochrome fonts, for instance).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#merge_fonts" title="Merges two fonts into one font.">merge_fonts</a>,
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>,
+<a class="xref" href="#is_color_font" title="Returns TRUE if a font is a color font.">is_color_font</a>,
+<a class="xref" href="#is_mono_font" title="Returns TRUE if a font is a monochrome font.">is_mono_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_font_ranges">get_font_ranges</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f)</b></div><br>
+   Use this function to find out the number of character ranges in a font. You
+   should query each of these ranges with get_font_range_begin() and
+   get_font_range_end() to find out what characters are available in the
+   font. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *f;
+      int range;
+      int n;
+      ...
+      
+      range = <a href="#get_font_ranges" class="autotype" title="Returns the number of character ranges in a font.">get_font_ranges</a>(f);
+      printf("The <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> has %d character ranges:\n", range);
+      for (n = 0; n &lt; range; n++)
+         printf("Range %d from 0x%03x - 0x%03x\n",
+                <a href="#get_font_range_begin" class="autotype" title="Returns the start of a character range in a font.">get_font_range_begin</a>(f, n),
+                <a href="#get_font_range_end" class="autotype" title="Returns the last character of a character range in a font.">get_font_range_end</a>(f, n));</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the number of continuous character ranges in a font, or -1 if that
+   information is not available.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_font_range_begin" title="Returns the start of a character range in a font.">get_font_range_begin</a>,
+<a class="xref" href="#get_font_range_end" title="Returns the last character of a character range in a font.">get_font_range_end</a>,
+<a class="xref" href="#transpose_font" title="Transposes all characters in a font.">transpose_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_font_range_begin">get_font_range_begin</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f, int range)</b></div><br>
+   This function allows you to find out the start of a specific character
+   range for a font. You can pass -1 for the <tt>`range'</tt> parameter if you want to
+   know the start of the whole font range, or a number from 0 to (but not
+   including) get_font_ranges(f) to get the start of a specific character
+   range in the font. Example:
+<blockquote class="code"><pre>
+      printf("The <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> has a character range of %d - %d\n",
+             <a href="#get_font_range_begin" class="autotype" title="Returns the start of a character range in a font.">get_font_range_begin</a>(<a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, -1),
+             <a href="#get_font_range_end" class="autotype" title="Returns the last character of a character range in a font.">get_font_range_end</a>(<a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, -1));</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the first character in the font range, or -1 if that information
+   is not available.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_font_ranges" title="Returns the number of character ranges in a font.">get_font_ranges</a>,
+<a class="xref" href="#get_font_range_end" title="Returns the last character of a character range in a font.">get_font_range_end</a>,
+<a class="xref" href="#transpose_font" title="Transposes all characters in a font.">transpose_font</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_font_range_end">get_font_range_end</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f, int range)</b></div><br>
+   This function allows you to find out the index to the last character of a
+   character range for a font. You can pass -1 for the range parameter if you
+   want to know the start of the whole font range, or a number from 0 to (but
+   not including) get_font_ranges(f) to get the start of a specific character
+   range in the font. You should check the start and end of all font ranges to
+   see if a specific character is actually available in the font. Not all
+   characters in the range returned by get_font_range_begin(f, -1) and
+   get_font_range_end(f, -1) need to be available! Example:
+<blockquote class="code"><pre>
+      printf("The <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> has a character range of %d - %d\n",
+             <a href="#get_font_range_begin" class="autotype" title="Returns the start of a character range in a font.">get_font_range_begin</a>(<a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, -1),
+             <a href="#get_font_range_end" class="autotype" title="Returns the last character of a character range in a font.">get_font_range_end</a>(<a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, -1));</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the last character in the font range, or -1 if that information is
+   not available.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_font_ranges" title="Returns the number of character ranges in a font.">get_font_ranges</a>,
+<a class="xref" href="#get_font_range_begin" title="Returns the start of a character range in a font.">get_font_range_begin</a>,
+<a class="xref" href="#transpose_font" title="Transposes all characters in a font.">transpose_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="extract_font_range">extract_font_range</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f, int begin, int end)</b></div><br>
+   This function extracts a character range from a font and returns a new font
+   that contains only the range of characters selected by this function. You
+   can pass -1 for either the lower or upper bound if you want to select all
+   characters from the start or to the end of the font.
+   Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *myfont;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *capitals;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *fontcopy;
+      ...
+      /* Create a <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> of only capital letters */
+      capitals = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfont, 'A', 'Z');
+
+      /* Create a copy of the <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> */
+      fontcopy = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfont, -1, -1);
+      ...
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(capitals);
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(fontcopy);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the new font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_font_range_begin" title="Returns the start of a character range in a font.">get_font_range_begin</a>,
+<a class="xref" href="#get_font_range_end" title="Returns the last character of a character range in a font.">get_font_range_end</a>,
+<a class="xref" href="#merge_fonts" title="Merges two fonts into one font.">merge_fonts</a>,
+<a class="xref" href="#transpose_font" title="Transposes all characters in a font.">transpose_font</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfont" title="Loading and manipulating fonts.">exfont</a>.</blockquote>
+<div class="al-api"><b>int <a name="transpose_font">transpose_font</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f, int drange)</b></div><br>
+   This function transposes all characters in a font, effectively remapping the
+   font. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *myfont;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *capitals;
+      ...
+      /* Create a <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> of only capital letters */
+      capitals = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfont, 'A', 'Z');
+
+      /* Now transpose the characters in the <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> so that they will be used */
+      /*  for the lower case letters a-z */
+      <a href="#transpose_font" class="autotype" title="Transposes all characters in a font.">transpose_font</a>(capitals, 'a'-'A');
+      <a href="alleg018.html#textout_ex" class="autotype" title="Writes a string on a bitmap.">textout_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, capitals, "allcaps",
+                 100, 100, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(255,255,255), 0);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns 0 on success, -1 on failure.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_font_range_begin" title="Returns the start of a character range in a font.">get_font_range_begin</a>,
+<a class="xref" href="#get_font_range_end" title="Returns the last character of a character range in a font.">get_font_range_end</a>,
+<a class="xref" href="#merge_fonts" title="Merges two fonts into one font.">merge_fonts</a>,
+<a class="xref" href="#extract_font_range" title="Extracts a range of characters from a font.">extract_font_range</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="merge_fonts">merge_fonts</a>(<a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f1, <a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *f2)</b></div><br>
+   This function merges the character ranges from two fonts and returns a new
+   font containing all characters in the old fonts. In general, you cannot
+   merge fonts of different types (eg, TrueType fonts and bitmapped fonts),
+   but as a special case, this function can promote a monochrome bitmapped
+   font to a color font and merge those. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *myfont;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *myfancy_font;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *lower_range;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *upper_range;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *capitals;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *combined_font;
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *tempfont;
+      ...
+      /* Create a <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> that contains the capitals from  */
+      /* the fancy <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a> but other characters from myfont */
+      lower_range = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfont, -1, 'A'-1);
+      upper_range = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfont, 'Z'+1, -1);
+      capitals = <a href="#extract_font_range" class="autotype" title="Extracts a range of characters from a font.">extract_font_range</a>(myfancy_font, 'A', 'Z');
+
+      tempfont = <a href="#merge_fonts" class="autotype" title="Merges two fonts into one font.">merge_fonts</a>(lower_range, capitals);
+      combined_font = <a href="#merge_fonts" class="autotype" title="Merges two fonts into one font.">merge_fonts</a>(tempfont, upper_range);
+
+      /* Clean up temporary fonts */
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(lower_range);
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(upper_range);
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(capitals);
+      <a href="#destroy_font" class="autotype" title="Frees the memory being used by a font structure.">destroy_font</a>(tempfont);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the new font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#extract_font_range" title="Extracts a range of characters from a font.">extract_font_range</a>,
+<a class="xref" href="#is_trans_font" title="Returns TRUE if a font uses transparency.">is_trans_font</a>,
+<a class="xref" href="#is_color_font" title="Returns TRUE if a font is a color font.">is_color_font</a>,
+<a class="xref" href="#is_mono_font" title="Returns TRUE if a font is a monochrome font.">is_mono_font</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfont" title="Loading and manipulating fonts.">exfont</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_dat_font">load_dat_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   Loads a FONT from an Allegro datafile. You can set param parameter to
+   point to an array that holds two strings that identify the font and the 
+   palette in the datafile by name.
+   The first string in this list is the name of the font. You can pass NULL
+   here to just load the first font found in the datafile. The second string
+   can be used to specify the name of the palette associated with the font.
+   This is only returned if the pal parameter is not NULL. If you pass NULL
+   for the name of the palette, the last palette found before the font was
+   found is returned.
+   You can also pass NULL for param, which is treated as if you had passed
+   NULL for both strings separately. In this case, the function will simply
+   load the first font it finds from the datafile and the palette that
+   precedes it.
+
+<p>
+   For example, suppose you have a datafile named <tt>`fonts.dat'</tt> with the
+   following contents:
+<blockquote class="text"><pre>
+      FONT  FONT_1_DATA
+      FONT  FONT_2_DATA
+      FONT  FONT_3_DATA
+      PAL   FONT_1_PALETTE
+      PAL   FONT_2_PALETTE
+</pre></blockquote>
+   Then the following code will load FONT_1_DATA as a FONT and return
+   FONT_1_PALETTE as the palette:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *f;
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> pal;
+      char *names[] = { "FONT_1_DATA", "FONT_1_PALETTE" }
+      
+      f = <a href="#load_dat_font" class="autotype" title="Loads a FONT from an Allegro datafile.">load_dat_font</a>("fonts.dat", pal, names);
+</pre></blockquote>
+   If instead you want to load the second font, FONT_2, from the datafile,
+   you would use:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *f;
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> pal;
+      char *names[] = { "FONT_2_DATA", "FONT_2_PALETTE" }
+      
+      f = <a href="#load_dat_font" class="autotype" title="Loads a FONT from an Allegro datafile.">load_dat_font</a>("fonts.dat", pal, names);
+</pre></blockquote>
+   If you want to load the third font, but not bother with a palette, use:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *f;
+      char *names[] = { "FONT_3_DATA", NULL }
+      
+      f = <a href="#load_dat_font" class="autotype" title="Loads a FONT from an Allegro datafile.">load_dat_font</a>("fonts.dat", NULL, names);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_bios_font">load_bios_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   Loads a 8x8 or 8x16 BIOS format font. You shouldn't normally call this 
+   routine directly.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_grx_font">load_grx_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   Loads a GRX format font. You shouldn't normally call this routine
+   directly.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_grx_or_bios_font">load_grx_or_bios_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   Loads either a BIOS or GRX format font. You shouldn't normally call this 
+   routine directly.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_bitmap_font">load_bitmap_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   Tries to grab a font from a bitmap. The bitmap can be in any format that
+   load_bitmap understands.
+
+<p>
+   The size of each character is determined by the layout of the image, which
+   should be a rectangular grid containing all the ASCII characters from
+   space (32) up to the tilde (126). The way the characters are separated
+   depends on the color depth of the image file:
+<ul><li>
+   paletted (8 bit) image file
+      Use color 0 for the transparent portions of the characters and fill the 
+      spaces between each letter with color 255.  
+<li>
+   High (15/16 bit) and true (24/32 bit) color image file
+      Use bright pink (maximum red and blue, zero green) for the transparent
+      portions of the characters and fill the spaces between each letter with
+      bright yellow (maximum red and green, zero blue).
+</ul>
+   
+<p>
+   Note that in each horizontal row the bounding boxes around the characters 
+   should align and have the same height.
+   
+<p>
+   Probably the easiest way to get to grips with how this works is to load up 
+   the <tt>`demo.dat'</tt> file and export the TITLE_FONT into a PCX file. Have a look
+   at the resulting picture in your paint program: that is the format a font
+   should be in.
+
+<p>
+   Take care with high and true color fonts: Allegro will convert these to the
+   current color depth when you load the font. If you try to use a font on
+   a bitmap with a different color depth Allegro will do color conversions on
+   the fly, which will be rather slow. For optimal performance you should
+   set the color depth to the color depth you want to use before loading any
+   fonts.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>,
+<a class="xref" href="alleg010.html#load_bitmap" title="Loads any supported bitmap from a file.">load_bitmap</a>,
+<a class="xref" href="alleg008.html#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>,
+<a class="xref" href="#grab_font_from_bitmap" title="Grabs a font from a bitmap">grab_font_from_bitmap</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="grab_font_from_bitmap">grab_font_from_bitmap</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp)</b></div><br>
+   This function is the work-horse of load_bitmap_font, and can be used to
+   grab a font from a bitmap in memory. You can use this if you want to
+   generate or modify a font at runtime. The bitmap should follow the layout
+   described for load_bitmap_font.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_bitmap_font" title="Grabs a font from a bitmap file.">load_bitmap_font</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#FONT" title="Stores an Allegro font.">FONT</a> *<a name="load_txt_font">load_txt_font</a>(const char *filename, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *pal, void *param)</b></div><br>
+   This function can be used to load scripted fonts. The script file
+   contains a number of lines in the format "filename start end", which
+   specify the source file for that range of characters, the Unicode value of
+   the first character in the range, and the end character in the range
+   (optional, if left out, the entire input file will be grabbed). If the
+   filename is replaced by a hyphen, more characters will be grabbed from the
+   previous input file.
+   For example, the script:
+   <blockquote class="text"><pre>
+      ascii.fnt 0x20 0x7F
+      - 0xA0 0xFF
+      dingbats.fnt 0x1000
+   </pre></blockquote>
+   would import the first 96 characters from ascii.fnt as the range
+   0x20-0x7F, the next 96 characters from ascii.fnt as the range 0xA0-0xFF,
+   and the entire contents of dingbats.fnt starting at Unicode position
+   0x1000.
+<p><b>Return value:</b>
+   Returns a pointer to the font or NULL on error. Remember that you are
+   responsible for destroying the font when you are finished with it to
+   avoid memory leaks.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_font_file_type" title="Register a new font loading function.">register_font_file_type</a>,
+<a class="xref" href="#load_font" title="Loads a font from a file.">load_font</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

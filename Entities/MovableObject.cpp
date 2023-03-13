@@ -72,7 +72,7 @@ void MovableObject::Clear()
     m_HasEverBeenAddedToMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
-    m_VelOscillations = 0;
+	m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
@@ -229,7 +229,7 @@ int MovableObject::Create(const MovableObject &reference)
     if (reference.m_pScreenEffect)
     {
         m_ScreenEffectFile = reference.m_ScreenEffectFile;
-        m_pScreenEffect = reference.m_pScreenEffect;
+        m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 
     }
 	m_EffectRotAngle = reference.m_EffectRotAngle;
@@ -721,10 +721,14 @@ float MovableObject::GetAltitude(int max, int accuracy)
     return g_SceneMan.FindAltitude(m_Pos, max, accuracy);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MovableObject::AddAbsForce(const Vector &force, const Vector &absPos)
 {
     m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
 {
@@ -735,53 +739,30 @@ void MovableObject::AddAbsImpulseForce(const Vector &impulse, const Vector &absP
 		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableObject::RestDetection()
-{
-    if (m_PinStrength)
-        return;
-
-    // Translational settling detection
-    if ((m_Vel.Dot(m_PrevVel) < 0)) {
-        if (m_VelOscillations >= 2 && m_RestThreshold >= 0)
-            m_ToSettle = true;
-        else
-            ++m_VelOscillations;
-    }
-    else
-        m_VelOscillations = 0;
-
-//    if (fabs(m_Vel.m_X) >= 0.25 || fabs(m_Vel.m_Y) >= 0.25)
-//        m_RestTimer.Reset();
-
-    if (fabs(m_Pos.m_X - m_PrevPos.m_X) >= 1.0f || fabs(m_Pos.m_Y - m_PrevPos.m_Y) >= 1.0f)
-        m_RestTimer.Reset();
+void MovableObject::RestDetection() {
+	// Translational settling detection.
+	if (m_Vel.Dot(m_PrevVel) < 0) {
+		++m_VelOscillations;
+	} else {
+		m_VelOscillations = 0;
+	}
+	if ((m_Pos - m_PrevPos).MagnitudeIsGreaterThan(1.0F)) { m_RestTimer.Reset(); }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for
-//                  more than one (1) second.
-
-bool MovableObject::IsAtRest()
-{
-    if (m_PinStrength)
-        return false;
-
-    if (m_RestThreshold < 0)
-        return false;
-    else
-        return m_RestTimer.IsPastSimMS(m_RestThreshold);
+bool MovableObject::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength) {
+		return false;
+	} else {
+		if (m_VelOscillations > 2) {
+			return true;
+		}
+		return m_RestTimer.IsPastSimMS(m_RestThreshold);
+	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  OnMOHit
@@ -815,6 +796,16 @@ void MovableObject::SetHitWhatTerrMaterial(unsigned char matID)
     RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Vector MovableObject::GetTotalForce() {
+	Vector totalForceVector;
+	for (const auto &[force, forceOffset] : m_Forces) {
+		totalForceVector += force;
+	}
+	return totalForceVector;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ApplyForces
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -842,13 +833,11 @@ void MovableObject::ApplyForces()
     if (m_AirResistance > 0 && m_Vel.GetLargest() >= m_AirThreshold)
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
-    // Apply the translational effects of all the forces accumulated during the Update()
-    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
-    {
-        // Continuous force application to transformational velocity.
-        // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime);
-    }
+	// Apply the translational effects of all the forces accumulated during the Update().
+	if (m_Forces.size() > 0) {
+		// Continuous force application to transformational velocity (F = m * a -> a = F / m).
+		m_Vel += GetTotalForce() / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime;
+	}
 
     // Clear out the forces list
     m_Forces.clear();

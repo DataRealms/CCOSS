@@ -24,6 +24,7 @@ namespace RTE {
 		.def("PlayerActive", &Activity::PlayerActive)
 		.def("PlayerHuman", &Activity::PlayerHuman)
 		.def("TeamActive", &Activity::TeamActive)
+		.def("ForceSetTeamAsActive", &Activity::ForceSetTeamAsActive)
 		.def("GetTeamOfPlayer", &Activity::GetTeamOfPlayer)
 		.def("SetTeamOfPlayer", &Activity::SetTeamOfPlayer)
 		.def("PlayersInTeamCount", &Activity::PlayersInTeamCount)

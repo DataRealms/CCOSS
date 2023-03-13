@@ -445,7 +445,10 @@ static void gfx_directx_ovl_exit(struct BITMAP *bmp)
    /* destroy the overlay surface */
    if (overlay_surface) {
       hide_overlay();
-      SetClassLong(allegro_wnd, GCL_HBRBACKGROUND, (LONG) NULL);
+      //SetClassLong(allegro_wnd, GCL_HBRBACKGROUND, (LONG_PTR) NULL);
+	  // Some stupidity with GCL_HBRBACKGROUND remaining unidentified even though it's clearly there in WinUser.h and doesn't work even if including the header here, so just slap the value directly.
+	  // In the grand scheme it doesn't matter because we don't use the overlay driver and it doesn't actually seem to work anyway.
+      SetClassLong(allegro_wnd, (-10), (LONG_PTR)NULL);
       DeleteObject(overlay_brush);
       gfx_directx_destroy_surface(overlay_surface);
       overlay_surface = NULL;

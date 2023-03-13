@@ -1046,12 +1046,7 @@ BITMAP *create_bitmap_ex(int color_depth, int width, int height)
    if (!vtable)
       return NULL;
 
-   /* We need at least two pointers when drawing, otherwise we get crashes with
-    * Electric Fence.  We think some of the assembly code assumes a second line
-    * pointer is always available.
-    */
-   nr_pointers = MAX(2, height);
-   bitmap = _AL_MALLOC(sizeof(BITMAP) + (sizeof(char *) * nr_pointers));
+   bitmap = _AL_MALLOC(sizeof(BITMAP));
    if (!bitmap)
       return NULL;
 
@@ -1062,6 +1057,18 @@ BITMAP *create_bitmap_ex(int color_depth, int width, int height)
 
    bitmap->dat = _AL_MALLOC_ATOMIC(width * height * BYTES_PER_PIXEL(color_depth) + padding);
    if (!bitmap->dat) {
+      _AL_FREE(bitmap);
+      return NULL;
+   }
+
+   /* We need at least two pointers when drawing, otherwise we get crashes with
+      * Electric Fence.  We think some of the assembly code assumes a second line
+      * pointer is always available.
+      */
+   nr_pointers = MAX(2, height);
+   bitmap->line = _AL_MALLOC(sizeof(char *) * nr_pointers);
+   if (!bitmap->line) {
+      _AL_FREE(bitmap->dat);
       _AL_FREE(bitmap);
       return NULL;
    }
@@ -1135,10 +1142,7 @@ BITMAP *create_sub_bitmap(BITMAP *parent, int x, int y, int width, int height)
    if (system_driver->create_sub_bitmap)
       return system_driver->create_sub_bitmap(parent, x, y, width, height);
 
-   /* get memory for structure and line pointers */
-   /* (see create_bitmap for the reason we need at least two) */
-   nr_pointers = MAX(2, height);
-   bitmap = _AL_MALLOC(sizeof(BITMAP) + (sizeof(char *) * nr_pointers));
+   bitmap = _AL_MALLOC(sizeof(BITMAP));
    if (!bitmap)
       return NULL;
 
@@ -1179,6 +1183,14 @@ BITMAP *create_sub_bitmap(BITMAP *parent, int x, int y, int width, int height)
    x *= BYTES_PER_PIXEL(bitmap_color_depth(bitmap));
 
    /* setup line pointers: each line points to a line in the parent bitmap */
+   /* (see create_bitmap for the reason we need at least two) */
+   nr_pointers = MAX(2, height);
+   bitmap->line = _AL_MALLOC(sizeof(char *) * nr_pointers);
+   if (!bitmap->line) {
+      _AL_FREE(bitmap);
+      return NULL;
+   }
+
    for (i=0; i<height; i++)
       bitmap->line[i] = parent->line[y+i] + x;
 
@@ -1484,9 +1496,8 @@ void destroy_bitmap(BITMAP *bitmap)
 	    return;
       }
 
-      if (bitmap->dat)
-	 _AL_FREE(bitmap->dat);
-
+      _AL_FREE(bitmap->line);
+      _AL_FREE(bitmap->dat);
       _AL_FREE(bitmap);
    }
 }

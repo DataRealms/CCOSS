@@ -17,6 +17,7 @@ namespace RTE {
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
 		m_DeleteWhenRemovedFromParent = false;
+		m_GibWhenRemovedFromParent = false;
 		m_ApplyTransferredForcesAtOffset = true;
 
 		m_GibWithParentChance = 0.0F;
@@ -40,6 +41,7 @@ namespace RTE {
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
+		m_IgnoresParticlesWhileAttached = false;
 
 		m_PieSlices.clear();
 
@@ -68,6 +70,7 @@ namespace RTE {
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
 		m_DeleteWhenRemovedFromParent = reference.m_DeleteWhenRemovedFromParent;
+		m_GibWhenRemovedFromParent = reference.m_GibWhenRemovedFromParent;
 		m_ApplyTransferredForcesAtOffset = reference.m_ApplyTransferredForcesAtOffset;
 
 		m_GibWithParentChance = reference.m_GibWithParentChance;
@@ -91,6 +94,7 @@ namespace RTE {
 
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
+		m_IgnoresParticlesWhileAttached = reference.m_IgnoresParticlesWhileAttached;
 
 		for (const std::unique_ptr<PieSlice> &pieSlice : reference.m_PieSlices) {
 			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(pieSlice->Clone())));
@@ -110,6 +114,8 @@ namespace RTE {
 			reader >> m_DrawAfterParent;
 		} else if (propName == "DeleteWhenRemovedFromParent") {
 			reader >> m_DeleteWhenRemovedFromParent;
+		} else if (propName == "GibWhenRemovedFromParent") {
+			reader >> m_GibWhenRemovedFromParent;
 		} else if (propName == "ApplyTransferredForcesAtOffset") {
 			reader >> m_ApplyTransferredForcesAtOffset;
 		} else if (propName == "GibWithParentChance") {
@@ -142,6 +148,8 @@ namespace RTE {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
+		} else if (propName == "IgnoresParticlesWhileAttached") {
+			reader >> m_IgnoresParticlesWhileAttached;
 		} else if (propName == "AddPieSlice") {
 			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
@@ -159,6 +167,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ParentOffset", m_ParentOffset);
 		writer.NewPropertyWithValue("DrawAfterParent", m_DrawAfterParent);
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", m_DeleteWhenRemovedFromParent);
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", m_GibWhenRemovedFromParent);
 		writer.NewPropertyWithValue("ApplyTransferredForcesAtOffset", m_ApplyTransferredForcesAtOffset);
 
 		writer.NewPropertyWithValue("JointStrength", m_JointStrength);
@@ -173,6 +182,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
 		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
+		writer.NewPropertyWithValue("IgnoresParticlesWhileAttached", m_IgnoresParticlesWhileAttached);
 
 		for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
 			writer.NewPropertyWithValue("AddPieSlice", pieSlice.get());
@@ -191,12 +201,7 @@ namespace RTE {
 			return true;
 		}
 
-		Vector totalForce;
-		for (const auto &[force, forceOffset] : m_Forces) {
-			totalForce += force;
-		}
-
-		jointForces += totalForce;
+		jointForces += GetTotalForce();
 		m_Forces.clear();
 		return true;
 	}
@@ -285,6 +290,18 @@ namespace RTE {
 			if (const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent())) { return parentAsAttachable->CanCollideWithTerrain(); }
 		}
 		return m_CollidesWithTerrainWhileAttached;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Attachable::CollideAtPoint(HitData &hd) {
+		if (m_IgnoresParticlesWhileAttached && m_Parent && !m_Parent->ToDelete()) {
+			MOSRotating *hitorAsMOSR = dynamic_cast<MOSRotating *>(hd.Body[HITOR]);
+			if (!hitorAsMOSR) {
+				return false;
+			}
+		}
+		return MOSRotating::CollideAtPoint(hd);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

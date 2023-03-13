@@ -8,6 +8,12 @@ namespace RTE {
 
 	ConcreteClassInfo(AtomGroup, Entity, 500);
 
+	const std::unordered_map<std::string, AtomGroup::AreaDistributionType> AtomGroup::c_AreaDistributionTypeMap = {
+		{"Linear", AtomGroup::AreaDistributionType::Linear},
+		{"Circle", AtomGroup::AreaDistributionType::Circle},
+		{"Square", AtomGroup::AreaDistributionType::Square}
+	};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AtomGroup::Clear() {
@@ -22,6 +28,7 @@ namespace RTE {
 		m_LimbPos.Reset();
 		m_MomentOfInertia = 0;
 		m_AreaDistributionType = AreaDistributionType::Circle;
+		m_AreaDistributionSurfaceAreaMultiplier = 0.5F; // Assume an oval of half our depth to width
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -57,6 +64,7 @@ namespace RTE {
 		m_Depth = reference.m_Depth;
 		m_JointOffset = reference.m_JointOffset;
 		m_AreaDistributionType = reference.m_AreaDistributionType;
+		m_AreaDistributionSurfaceAreaMultiplier = reference.m_AreaDistributionSurfaceAreaMultiplier;
 
 		m_Atoms.clear();
 		m_SubGroups.clear();
@@ -134,9 +142,19 @@ namespace RTE {
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "AreaDistributionType") {
-			std::underlying_type_t<AreaDistributionType> type;
-			reader >> type;
-			m_AreaDistributionType = static_cast<AreaDistributionType>(type);
+			std::string areaDistributionTypeString = reader.ReadPropValue();
+			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
+			if (itr != c_AreaDistributionTypeMap.end()) {
+				m_AreaDistributionType = itr->second;
+			} else {
+				try {
+					m_AreaDistributionType = static_cast<AreaDistributionType>(std::stoi(areaDistributionTypeString));
+				} catch (const std::invalid_argument &) {
+					reader.ReportError("AreaDistributionType " + areaDistributionTypeString + " is invalid.");
+				}
+			}
+		} else if (propName == "AreaDistributionSurfaceAreaMultiplier") {
+			reader >> m_AreaDistributionSurfaceAreaMultiplier;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -170,6 +188,8 @@ namespace RTE {
 
 		writer.NewProperty("AreaDistributionType");
 		writer << static_cast<std::underlying_type_t<AreaDistributionType>>(m_AreaDistributionType);
+		writer.NewProperty("AreaDistributionSurfaceAreaMultiplier");
+		writer << m_AreaDistributionSurfaceAreaMultiplier;
 
 		return 0;
 	}
@@ -1146,7 +1166,7 @@ namespace RTE {
 					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDistribution, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
 							ownerVel += (forceVel * massDistribution * retardation) / mass;
-							returnPush += penetratingAtomsEntry.second;
+							returnPush += forceVel * massDistribution * retardation;
 						}
 					}
 				}
@@ -1519,26 +1539,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetSurfaceArea(int pixelWidth) {
+		float distributionAmount;
+
 		switch (m_AreaDistributionType) {
 			case AreaDistributionType::Linear:
-				return static_cast<float>(pixelWidth);
+				distributionAmount = static_cast<float>(pixelWidth);
 
 			case AreaDistributionType::Circle: {
 				const float radius = static_cast<float>(pixelWidth) * 0.5F;
-				return c_PI * radius * radius;
+				distributionAmount = c_PI * radius * radius;
 			}
 
-			case AreaDistributionType::Oval: {
-				const float majorRadius = static_cast<float>(pixelWidth) * 0.5F;
-				const float minorRadius = majorRadius * 0.5F;
-				return c_PI * minorRadius * majorRadius;
+			case AreaDistributionType::Square: {
+				distributionAmount = static_cast<float>(pixelWidth * pixelWidth);
 			}
 
 			default:
 				RTEAbort("Unexpected area distribution type!");
+				distributionAmount = 1.0F;
 		}
 
-		return 1.0F;
+		return distributionAmount * m_AreaDistributionSurfaceAreaMultiplier;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

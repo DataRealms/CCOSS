@@ -1,0 +1,291 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Unix specifics
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Unix specifics">Unix specifics</a></h1>
+
+<ul>
+<li><a href="#allegro_icon">allegro_icon</a> &mdash; Pointer to the Allegro X11 icon.
+<li><a href="#DIGI_*/Unix">DIGI_*/Unix</a> &mdash; Supported Unix digital sound drivers.
+<li><a href="#GFX_*/Linux">GFX_*/Linux</a> &mdash; Supported Linux console graphic drivers.
+<li><a href="#GFX_*/X">GFX_*/X</a> &mdash; Supported X graphic drivers.
+<li><a href="#JOY_TYPE_*/Linux">JOY_TYPE_*/Linux</a> &mdash; Supported Linux joystick drivers.
+<li><a href="#MIDI_*/Unix">MIDI_*/Unix</a> &mdash; Supported Unix MIDI sound drivers.
+<li><a href="#xwin_set_window_name">xwin_set_window_name</a> &mdash; Specify the window name and group (or class).
+</ul>
+
+<p>
+Under Unix you usually have two ways of redistributing your binaries. You
+either pack everything in a single directory, even providing Allegro in
+binary or source form for the user to compile. Or your program is being
+packaged separately from Allegro and stored in different paths. For the
+first case of redistribution, read section "Files shared by Allegro" from
+the "Dos specifics" chapter to learn more about this.
+
+<p>
+For the second type, you can ignore redistributing the setup, keyboard
+mappings and language datafiles, because they will be already installed in
+the system. This, however, is problematic if you are using get_config_text()
+to localise your program's text strings.
+
+<p>
+The problem is that on other platforms you usually mix your program's text
+strings with those of Allegro (found in the <tt>`resources'</tt> directory) to create
+a special language.dat. And it is likely that the Allegro library installed
+on the user's system already contains a datafile.dat. You can go ahead and
+still provide your own language.dat file, but this will mean that if Allegro
+is updated, your language.dat file may not contain all the text strings used
+by the new version.
+
+<p>
+Given the slow paced release cycle of Allegro, this might not be a concern.
+However, if you want to make it easy on system administrators, instead of
+providing your own <tt>`language.dat'</tt>, you should provide the separate
+<tt>`xxtext.cfg'</tt> files it in a separate directory. Then, before showing the
+strings to the user you can detect the language setting and use
+override_config_file() with the appropriate localisation file and call
+reload_config_texts().
+
+<p>
+In order to locate things like the config and translation files, Allegro
+needs to know the path to your executable. Since there is no standard way to 
+find that, it needs to capture a copy of your argv[] parameter, and it does 
+this with some preprocessor macro trickery. Unfortunately it can't quite 
+pull this off without a little bit of your help, so you will have to write 
+END_OF_MAIN() right after your main() function. Pretty easy, really, and if 
+you forget, you'll get a nice linker error about a missing _mangled_main 
+function to remind you :-)
+
+<p>
+Under Unix resources are searched for in many different paths (see above).
+When a configuration resource is looked for, it is usually tried with the
+variations <tt>`name.cfg'</tt> or <tt>`.namerc'</tt> in multiple paths: the current directory,
+the directory pointed to by the ALLEGRO environment variable, the user's home
+directory, one or more global system directories which usually only the
+root user has access to and any custom paths set up with
+set_allegro_resource_path(). Text files, like the main allegro config file or
+a language text translation files are looked for in the following places:
+<blockquote class="text"><pre>
+   ./allegro.cfg
+   $ALLEGRO/allegro.cfg
+   ~/allegro.cfg
+   ~/.allegrorc
+   /etc/allegro.cfg
+   /etc/allegrorc
+</pre></blockquote>
+Binary resources like the language translation files packfile (language.dat)
+are looked for in:
+<blockquote class="text"><pre>
+   ./language.dat
+   $ALLEGRO/language.dat
+   ~/language.dat
+   /etc/language.dat
+   /usr/share/allegro/language.dat
+   /usr/local/share/allegro/language.dat
+</pre></blockquote>
+Note that if you have installed Allegro from the source distribution with
+the typical `<tt>make install</tt>', global files like <tt>`language.dat'</tt> and
+<tt>`allegro.cfg'</tt> will not have been installed. As a system administrator you are
+required to install them manually wherever you prefer to have them. If you
+suspect that an Allegro program is somehow not finding the correct
+configuration file, you could try using the following command:
+<blockquote class="text"><pre>
+   strace program 2>&amp;1|egrep "(open|stat)"
+</pre></blockquote>
+The strace program traces system calls and signals. By default it outputs
+the information to stderr, so that's why we redirect it to stdin with `<tt>2>&amp;1</tt>'.
+Since we are interested only in files being (un)successfully opened, we
+restrict the output of the log to stat or open calls with the extended grep
+command. You could add another grep to filter only lines with text like
+<tt>`language'</tt> or <tt>`allegro'</tt>.
+
+<p><br>
+<div class="al-api"><b>Drivers <a name="JOY_TYPE_*/Linux">JOY_TYPE_*/Linux</a></b></div><br>
+   The Linux library supports the following type parameters for the 
+   install_joystick() function:
+<ul><li>
+   JOY_TYPE_AUTODETECT<br>
+      Attempts to autodetect your joystick hardware. It will use information 
+      from the configuration file if one is available (this can be created 
+      using the setup utility or by calling the save_joystick_data()
+      function), so you can always use JOY_TYPE_AUTODETECT in your code and
+      then select the exact hardware type from the setup program.
+<li>
+   JOY_TYPE_NONE<br>
+      Dummy driver for machines without any joystick.
+<li>
+   JOY_TYPE_LINUX_ANALOGUE<br>
+      Regular joystick interface. Joystick support needs to be enabled in your
+      kernel.
+</ul>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg007.html#install_joystick" title="Initialises the joystick.">install_joystick</a>.</blockquote>
+<div class="al-api"><b>Drivers <a name="GFX_*/Linux">GFX_*/Linux</a></b></div><br>
+   When running in Linux console mode, Allegro supports the following card 
+   parameters for the set_gfx_mode() function:
+<ul><li>
+   GFX_TEXT<br>
+      Return to text mode.
+<li>
+   GFX_AUTODETECT<br>
+      Let Allegro pick an appropriate graphics driver.
+<li>
+   GFX_AUTODETECT_FULLSCREEN<br>
+      Autodetects a graphics driver, but will only use fullscreen drivers,
+      failing if these are not available on current platform.
+<li>
+   GFX_AUTODETECT_WINDOWED<br>
+      Same as above, but uses only windowed drivers. This will always fail
+      under Linux console mode.
+<li>
+   GFX_SAFE<br>
+      Special driver for when you want to reliably set a graphics mode and 
+      don't really care what resolution or color depth you get. See the
+      set_gfx_mode() documentation for details.
+<li>
+   GFX_FBCON<br>
+      Use the framebuffer device (eg. /dev/fb0). This requires you to have 
+      framebuffer support compiled into your kernel, and correctly 
+      configured for your hardware. It is currently the only console mode 
+      driver that will work without root permissions, unless you are using
+      a development version of SVGAlib.
+<li>
+   GFX_VBEAF<br>
+      Use a VBE/AF driver (vbeaf.drv), assuming that you have installed one 
+      which works under Linux (currently only two of the FreeBE/AF project 
+      drivers are capable of this: I don't know about the SciTech ones). 
+      VBE/AF requires root permissions, but is currently the only Linux 
+      driver which supports hardware accelerated graphics.
+<li>
+   GFX_SVGALIB<br>
+      Use the SVGAlib library for graphics output. This requires root
+      permissions if your version of SVGAlib requires them.
+<li>
+   GFX_VGA<br>
+   GFX_MODEX<br>
+      Use direct hardware access to set standard VGA or mode-X resolutions, 
+      supporting the same modes as in the DOS versions of these drivers. 
+      Requires root permissions.
+</ul>
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#GFX_*/X" title="Supported X graphic drivers.">GFX_*/X</a>.</blockquote>
+<div class="al-api"><b>Drivers <a name="GFX_*/X">GFX_*/X</a></b></div><br>
+   When running in X mode, Allegro supports the following card parameters 
+   for the set_gfx_mode() function:
+<ul><li>
+   GFX_TEXT<br>
+      This closes any graphics mode previously opened with set_gfx_mode.
+<li>
+   GFX_AUTODETECT<br>
+      Let Allegro pick an appropriate graphics driver.
+<li>
+   GFX_AUTODETECT_FULLSCREEN<br>
+      Autodetects a graphics driver, but will only use fullscreen drivers,
+      failing if these are not available on current platform.
+<li>
+   GFX_AUTODETECT_WINDOWED<br>
+      Same as above, but uses only windowed drivers.
+<li>
+   GFX_SAFE<br>
+      Special driver for when you want to reliably set a graphics mode and 
+      don't really care what resolution or color depth you get. See the
+      set_gfx_mode() documentation for details.
+<li>
+   GFX_XWINDOWS<br>
+      The standard X graphics driver. This should work on any Unix system, 
+      and can operate remotely. It does not require root permissions.
+      If the ARGB cursor extension is available, this driver is capable
+      of displaying a hardware cursor. This needs to be enabled by calling
+      enable_hardware_cursor() because it cannot be used reliably alongside
+      get_mouse_mickeys().
+<li>
+   GFX_XWINDOWS_FULLSCREEN<br>
+      The same as above, but while GFX_XWINDOWS runs windowed, this one uses
+      the XF86VidMode extension to make it run in fullscreen mode even
+      without root permissions. You're still using the standard X protocol
+      though, so expect the same low performances as with the windowed
+      driver version.
+      If the ARGB cursor extension is available, this driver is capable
+      of displaying a hardware cursor. This needs to be enabled by calling
+      enable_hardware_cursor() because it cannot be used reliably alongside
+      get_mouse_mickeys().
+<li>
+   GFX_XDGA2<br>
+      Use new DGA 2.0 extension provided by XFree86 4.0.x. This will work
+      in fullscreen mode, and it will support hardware acceleration if
+      available. This driver requires root permissions.
+<li>
+   GFX_XDGA2_SOFT<br>
+      The same as GFX_XDGA2, but turns off hardware acceleration support.
+      This driver requires root permissions.
+</ul>
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#GFX_*/Linux" title="Supported Linux console graphic drivers.">GFX_*/Linux</a>.</blockquote>
+<div class="al-api"><b>Drivers <a name="DIGI_*/Unix">DIGI_*/Unix</a></b></div><br>
+   The Unix sound functions support the following digital sound cards:
+<blockquote class="text"><pre>
+      DIGI_AUTODETECT      - let Allegro pick a digital sound driver
+      DIGI_NONE            - no digital sound
+      DIGI_OSS             - Open Sound System
+      DIGI_ESD             - Enlightened Sound Daemon
+      DIGI_ARTS            - aRts (Analog Real-Time Synthesizer)
+      DIGI_ALSA            - ALSA sound driver
+      DIGI_JACK            - JACK sound driver</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#detect_digi_driver" title="Detects whether the specified digital sound device is available.">detect_digi_driver</a>,
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="alleg029.html#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>.</blockquote>
+<div class="al-api"><b>Drivers <a name="MIDI_*/Unix">MIDI_*/Unix</a></b></div><br>
+   The Unix sound functions support the following MIDI sound cards:
+<blockquote class="text"><pre>
+      MIDI_AUTODETECT      - let Allegro pick a MIDI sound driver
+      MIDI_NONE            - no MIDI sound
+      MIDI_OSS             - Open Sound System
+      MIDI_DIGMID          - sample-based software wavetable player
+      MIDI_ALSA            - ALSA RawMIDI driver</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#detect_midi_driver" title="Detects whether the specified MIDI sound device is available.">detect_midi_driver</a>,
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="alleg029.html#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>.</blockquote>
+<br><center><h2><a name="Unix integration routines">Unix integration routines</a></h2></center><p>
+
+<p><br>
+<div class="al-api"><b>void <a name="xwin_set_window_name">xwin_set_window_name</a>(const char *name, const char *group);</b></div><br>
+   This function is only available under X. It lets you to specify the
+   window name and group (or class). They are important because they allow
+   the window manager to remember the window attributes (position, layer,
+   etc). Note that the name and the title of the window are two different
+   things: the title is what appears in the title bar of the window, but
+   usually has no other effects on the behaviour of the application.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg000.html#set_window_title" title="Sets the window title of the Allegro program.">set_window_title</a>.</blockquote>
+<div class="al-api"><b>extern void *<a name="allegro_icon">allegro_icon</a>;</b></div><br>
+   This is a pointer to the Allegro X11 icon, which is in the format of 
+   standard .xpm bitmap data.
+   You do not normally have to bother with this at all: you can use the
+   xfixicon.sh utility from the tools/x11 directory to convert a true 
+   colour bitmap to a C file that you only need to link with your own code
+   to set the icon.
+
+
+
+<p><br>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

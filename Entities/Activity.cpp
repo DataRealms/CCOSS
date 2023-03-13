@@ -38,6 +38,7 @@ void Activity::Clear() {
 			m_IsHuman[player] = player == Players::PlayerOne;
 			m_PlayerScreen[player] = (player == Players::PlayerOne) ? Players::PlayerOne : Players::NoPlayer;
 			m_ViewState[player] = ViewState::Normal;
+			m_DeathTimer[player].Reset();
 			m_Team[player] = Teams::TeamOne;
 			m_TeamFundsShare[player] = 1.0F;
 			m_FundsContribution[player] = 0;
@@ -331,6 +332,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
+		g_AudioMan.FinishAllLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
@@ -725,7 +727,7 @@ void Activity::Clear() {
 		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return false;
 		}
-		if (!actor || !g_MovableMan.IsActor(actor)) {
+		if (!actor || !g_MovableMan.IsActor(actor) || !actor->IsPlayerControllable()) {
 			return false;
 		}
 		if ((actor != m_Brain[player] && actor->IsPlayerControlled()) || IsOtherPlayerBrain(actor, player)) {
@@ -757,6 +759,20 @@ void Activity::Clear() {
 		m_ViewState[player] = Normal;
 
 		return true;
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	void Activity::LoseControlOfActor(int player) {
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			if (Actor *actor = m_ControlledActor[player]; actor && g_MovableMan.IsActor(actor)) {
+				actor->SetControllerMode(Controller::CIM_AI);
+				actor->GetController()->SetDisabled(false);
+			}
+			m_ControlledActor[player] = nullptr;
+			m_ViewState[player] = ViewState::DeathWatch;
+			m_DeathTimer[player].Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

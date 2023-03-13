@@ -53,12 +53,14 @@ void HDFirearm::Clear()
     m_DeactivationDelay = 0;
     m_Reloading = false;
     m_DoneReloading = false;
-    m_ReloadTime = 0;
+    m_BaseReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
 	m_Reloadable = true;
 	m_DualReloadable = false;
-	m_OneHandedReloadTimeMultiplier = 1.0F;
+	m_OneHandedReloadTimeMultiplier = 1.5F;
+	m_ReloadAngle = -0.5F;
+	m_OneHandedReloadAngle = -1.0F;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -132,7 +134,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_DeactivationDelay = reference.m_DeactivationDelay;
     m_Reloading = reference.m_Reloading;
     m_DoneReloading = reference.m_DoneReloading;
-    m_ReloadTime = reference.m_ReloadTime;
+    m_BaseReloadTime = reference.m_BaseReloadTime;
 	m_LastFireTmr = reference.m_LastFireTmr;
 	m_ReloadTmr = reference.m_ReloadTmr;
     m_FullAuto = reference.m_FullAuto;
@@ -140,6 +142,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_Reloadable = reference.m_Reloadable;
 	m_DualReloadable = reference.m_DualReloadable;
 	m_OneHandedReloadTimeMultiplier = reference.m_OneHandedReloadTimeMultiplier;
+	m_ReloadAngle = reference.m_ReloadAngle;
+	m_OneHandedReloadAngle = reference.m_OneHandedReloadAngle;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -205,8 +209,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_ActivationDelay;
     } else if (propName == "DeactivationDelay") {
         reader >> m_DeactivationDelay;
-	} else if (propName == "ReloadTime") {
-		reader >> m_ReloadTime;
+	} else if (propName == "BaseReloadTime" || propName == "ReloadTime") {
+		reader >> m_BaseReloadTime;
     } else if (propName == "FullAuto") {
         reader >> m_FullAuto;
     } else if (propName == "FireIgnoresThis") {
@@ -217,6 +221,10 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_DualReloadable;
 	} else if (propName == "OneHandedReloadTimeMultiplier") {
 		reader >> m_OneHandedReloadTimeMultiplier;
+	} else if (propName == "ReloadAngle") {
+		reader >> m_ReloadAngle;
+	} else if (propName == "OneHandedReloadAngle") {
+		reader >> m_OneHandedReloadAngle;
     } else if (propName == "RecoilTransmission") {
         reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
@@ -295,7 +303,7 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("DeactivationDelay");
     writer << m_DeactivationDelay;
     writer.NewProperty("ReloadTime");
-    writer << m_ReloadTime;
+    writer << m_BaseReloadTime;
     writer.NewProperty("FullAuto");
     writer << m_FullAuto;
     writer.NewProperty("FireIgnoresThis");
@@ -303,6 +311,8 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("Reloadable");
 	writer.NewPropertyWithValue("DualReloadable", m_DualReloadable);
 	writer.NewPropertyWithValue("OneHandedReloadTimeMultiplier", m_OneHandedReloadTimeMultiplier);
+	writer.NewPropertyWithValue("ReloadAngle", m_ReloadAngle);
+	writer.NewPropertyWithValue("OneHandedReloadAngle", m_OneHandedReloadAngle);
     writer << m_Reloadable;
     writer.NewProperty("RecoilTransmission");
     writer << m_JointStiffness;
@@ -625,22 +635,13 @@ Vector HDFirearm::GetMuzzlePos() const
     return m_Pos + RotateOffset(m_MuzzleOff);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void HDFirearm::RestDetection() {
+	HeldDevice::RestDetection();
 
-void HDFirearm::RestDetection()
-{
-    HeldDevice::RestDetection();
-
-    if (m_FiredOnce)
-        m_RestTimer.Reset();
+	if (m_FiredOnce) { m_RestTimer.Reset(); }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Activate
@@ -808,34 +809,24 @@ void HDFirearm::Update()
     {
         if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
 
-            // Full auto
-            if (m_FullAuto)
-            {
-                // ms per Round.
-                double mspr = (long double)60000 / (long double)m_RateOfFire;
-                // First round should fly as soon as activated and the delays are taken into account
-                if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_DeactivationDelay - m_ActivationDelay) > mspr)
-                {
-                    roundsFired = 1;
-                    // Wind back the last fire timer appropriately for the first round, but not farther back than 0
-                    m_LastFireTmr.SetElapsedSimTimeMS(MAX(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
-                }
-                // How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
-                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay))
-                    roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
-                else
-                    roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / mspr;
-            }
-            // Semi-auto
-            else
-            {
-                double mspr = (long double)60000 / (long double)m_RateOfFire;
-// TODO: Confirm that the delays work properly in semi-auto!
-                if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_ActivationDelay - m_DeactivationDelay) > mspr)
-                    roundsFired = 1;
-                else
-                    roundsFired = 0;
-            }
+			double msPerRound = GetMSPerRound();
+			if (m_FullAuto) {
+				// First round should fly as soon as activated and the delays are taken into account
+				if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_DeactivationDelay - m_ActivationDelay) > msPerRound) {
+					roundsFired = 1;
+					// Wind back the last fire timer appropriately for the first round, but not farther back than 0
+					m_LastFireTmr.SetElapsedSimTimeMS(std::max(m_LastFireTmr.GetElapsedSimTimeMS() - msPerRound, (double)0));
+				}
+				// How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
+				if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay)) {
+					roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / msPerRound;
+				} else {
+					roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / msPerRound;
+				}
+            } else {
+				// TODO: Confirm that the delays work properly in semi-auto!
+				roundsFired = !m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_ActivationDelay - m_DeactivationDelay) > msPerRound ? 1 : 0;
+			}
 
             if (roundsFired >= 1)
             {
@@ -1015,6 +1006,9 @@ void HDFirearm::Update()
     //////////////////////////////////////////////
     // Recoil and other activation effects logic.
 
+	// TODO: don't use arbitrary numbers?
+	m_RecoilForce.SetMagnitude(std::max(m_RecoilForce.GetMagnitude() * 0.7F - 1.0F, 0.0F));
+
     if (roundsFired > 0) {
         // Alternate to get that shake effect!
         m_Recoiled = !m_Recoiled;
@@ -1028,7 +1022,7 @@ void HDFirearm::Update()
 
             // Set up the recoil shake offset
             m_RecoilOffset = m_RecoilForce;
-			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
+			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.0F));
         }
 
         // Screen shake
@@ -1066,12 +1060,6 @@ void HDFirearm::Update()
 		if (m_Loudness > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness)); }
     } else {
         m_Recoiled = false;
-		// TODO: don't use arbitrary numbers? (see Arm.cpp)
-		if (m_RecoilForce.MagnitudeIsGreaterThan(0.01F)) {
-			m_RecoilForce *= 0.6F;
-		} else {
-			m_RecoilForce.Reset();
-		}
 		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 

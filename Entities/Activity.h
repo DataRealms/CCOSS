@@ -408,6 +408,12 @@ namespace RTE {
 		bool TeamActive(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamActive[team] : false; }
 
 		/// <summary>
+		/// Sets the given team as active, even if it shouldn't be considered as such normally. Useful for Activities that don't want to define/show all used teams.
+		/// </summary>
+		/// <param name="team">The team to force as active.</param>
+		void ForceSetTeamAsActive(int team) { if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) { m_TeamActive[team] = true; } }
+
+		/// <summary>
 		/// Indicates whether a team is player controlled or not.
 		/// </summary>
 		/// <param name="team">The team number to check.</param>
@@ -658,6 +664,12 @@ namespace RTE {
 		virtual void SwitchToNextActor(int player, int team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
 
 		/// <summary>
+		/// Forces player to lose control of the currently selected Actor, as if it had died.
+		/// </summary>
+		/// <param name="player">Which player to lose control of their selected Actor.</param>
+		virtual void LoseControlOfActor(int player);
+
+		/// <summary>
 		/// Handles when an ACraft has left the game scene and entered orbit, though does not delete it. Ownership is NOT transferred, as the ACraft's inventory is just 'unloaded'.
 		/// </summary>
 		/// <param name="orbitedCraft">The ACraft instance that entered orbit. Ownership is NOT transferred!</param>
@@ -715,6 +727,7 @@ namespace RTE {
 
 		int m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
 		ViewState m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
+		Timer m_DeathTimer[Players::MaxPlayerCount]; //!< Timers for measuring death view delays.
 
 		std::string m_TeamNames[Teams::MaxTeamCount]; //!< Names for each team.
 		Icon m_TeamIcons[Teams::MaxTeamCount]; //!< Icons for each team.

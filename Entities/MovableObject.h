@@ -1152,40 +1152,20 @@ enum MOType
 
 	virtual void ResetAllTimers() {}
 
+	/// <summary>
+	/// Does the calculations necessary to detect whether this MovableObject is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	virtual void RestDetection();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
+	/// <summary>
+	/// Forces this MovableObject out of resting conditions.
+	/// </summary>
+	virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; m_VelOscillations = 0; }
 
-    virtual void RestDetection();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NotResting
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO reset its tiemr that keeps track of how long it's been
-//                  at rest, effectively delaying it.
-// Arguments:       None.
-// Return value:    None.
-
-	void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for more
-//                  than one (1) second.
-// Arguments:       None.
-// Return value:    Wheter the MovableObject has been at rest for more than one full second.
-
-	bool IsAtRest();
-
+	/// <summary>
+	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
+	virtual bool IsAtRest();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsUpdated
@@ -1374,6 +1354,11 @@ enum MOType
 
 	Vector GetForceVector(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].first; else return Vector(0, 0); }
 
+	/// <summary>
+	/// Gets the total sum of all forces applied to this MovableObject in a single Vector.
+	/// </summary>
+	/// <returns>The total sum of all forces applied to this MovableObject.</returns>
+	virtual Vector GetTotalForce();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetForceOffset()
@@ -1466,7 +1451,7 @@ enum MOType
     int GetSimUpdatesBetweenScriptedUpdates() const { return m_SimUpdatesBetweenScriptedUpdates; }
 
     /// <summary>
-    /// sets the number of Sim updates that run between each script update for this MovableObject.
+    /// Sets the number of Sim updates that run between each script update for this MovableObject.
     /// </summary>
     /// <param name="newSimUpdatesBetweenScriptedUpdates">The new number of Sim updates that run between each script update for this MovableObject.</param>
     void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
@@ -1937,8 +1922,7 @@ protected:
     bool m_HasEverBeenAddedToMovableMan;
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
-    // A counter to count the oscillations in translational velocity, in order to detect settling.
-    int m_VelOscillations;
+	int m_VelOscillations; //!< A counter for oscillations in translational velocity, in order to detect settling.
     // Mark to have the MovableMan copy this the terrain layers at the end
     // of update.
     bool m_ToSettle;

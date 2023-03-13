@@ -101,6 +101,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
+- New `Settings.ini` and `SettingsMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
+
 - New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
 	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
 	Only has a noticeable effect when the "Allow purchases from other factions" (`Settings.ini` `ShowForeignItems`) gameplay setting is disabled.
@@ -160,9 +162,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PieSlice`s with no preset name will always be added by this.
 
 	**`RemovePieSlice(pieSliceToRemove)`** - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.  
-	**`RemovePieSlicesByPresetName()`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByType()`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByOriginalSource()`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
+	**`RemovePieSlicesByPresetName(presetNameToRemoveBy)`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByType(pieSliceTypeToRemoveBy)`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByOriginalSource(originalSource)`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	
+	**`ReplacePieSlice`(pieSliceToReplace, replacementPieSlice)`** - Replaces the specified `PieSlice` to replace, if it exists in the `PieMenu`, with the replacement `PieSlice` and returns the replaced `PieSlice` for use (e.g. for adding to a different `PieMenu`). The replacement `PieSlice` takes the replaced `PieSlice`'s original source, direction, middle slice eligibility, angles and slot count, so it seamlessly replaces it.
 
 - `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:  
 
@@ -407,7 +411,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
-	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+	Also note that this will reload the `Entity`'s sprites (and of all other referenced entity presets), which will be reflected immediately in all existing copies of the `Entity`.
 	
 - New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
@@ -516,11 +520,15 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added Lua convenience function `RoundToNearestMultiple(num, multiple)` which returns a number rounded to the nearest specified multiple.  
 	Note that this operates on integers, so fractional parts will be truncated towards zero by type conversion.
 
+- Added `Actor` INI and Lua property (R/W) `PlayerControllable`, that determines whether the `Actor` can be swapped to by human players. Note that Lua can probably break this, by forcing the `Controller`s of `Actor`s that aren't `PlayerControllable` to the `CIM_PLAYER` input mode.
+
+- Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
+
+- New `Attachable` INI and Lua property `IgnoresParticlesWhileAttached`, which determines whether the `Attachable` should ignore collisions (and penetrations) with single-atom particles. Useful for preventing `HeldDevice`s from being destroyed by bullets while equipped.
+
 - Added `AHuman` INI and Lua (R/W) property `DeviceArmSwayRate`, that defines how much `HeldDevices` will sway when walking. 0 is no sway, 1 directly couples sway with leg movement, >1 may be funny. Defaults to 0.75.
 
-- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`. A non-zero value is reqiured for `OneHandedReloadAngle` to be used.
-
-- Added `AHuman` INI and Lua (R/W) property `OneHandedReloadAngleOffset`, that defines the angle in radians that should be added to `HeldDevice`s when reloading with only one hand (i.e. the `HeldDevice` is one-handed, or the `AHuman` no longer has their bg`Arm`), in addition to the `Arm`'s rotation. Note that this will only be used if the `AHuman` has a non-zero `ReloadOffset`.
+- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`.
 
 - Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
 
@@ -538,6 +546,46 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
+- New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
+
+- New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+
+- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+
+- New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
+
+- New `Settings.ini` property `AutomaticGoldDeposit` which determines whether gold gathered by actors is automatically added into the team's funds. False means that gold needs to be manually transported into orbit via craft, the old school way. Enabled by default.  
+	A noteworthy change in comparison to previous logic is that gold is no longer converted into objects, and `GoldCarried` is now automatically transferred into craft upon entering them. This effectively allows the same actor to resume prospecting without having to return to orbit with the craft.  
+	Regardless of the setting, this behavior is always disabled for AI-only teams for the time being, until the actor AI is accommodated accordingly.
+
+- New `Actor` Lua function `AddGold(goldOz)` which adds the passed-in amount of gold either to the team's funds, or the `GoldCarried` of the actor in question, depending on whether automatic gold depositing is enabled. This effectively simulates the actor collecting gold.
+
+- New `Actor` Lua function `DropAllGold()` which converts all of the actor's `GoldCarried` into particles and spews them on the ground.
+
+- Ground pressure calculations revamp. Ground pressure, by default, is now calculated using a pseudo-3d model which takes into account the depth of an object colliding with terrain. This means actors cause much less terrain deformation from walking, especially large actors walking on smooth ground.
+
+	New `AtomGroup` INI property `AreaDistributionType`, with the following options: 
+	```
+	Linear // Legacy CC behaviour. This is best for long but flat objects, like guns.
+	Circle // Calculates ground pressure assuming objects are cylindrical with a diameter equal to the object's width. This is best for roundish objects, like feet.
+	Square // Similar to Circle, but instead assuming that the object is a cuboid with a depth equal to the object's width.
+	```
+	New `AtomGroup` INI propery `AreaDistributionSurfaceAreaMultiplier`. This is a multiplier to the calculated surface area, i.e how "blunt" an object is. Large values lead to objects having lower ground pressure, and so dig into the terrain less. 
+	
+	The default values are `AreaDistributionType = Circle` and `AreaDistributionSurfaceAreaMultiplier = 0.5`, meaning that an object is assumed to be an oval with a depth of half it's width.
+
+- Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
+
+- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
+
+- Added `GameActivity` INI property `DefaultGoldNuts!`, which lets you specify the default gold when the difficulty slider is maxed out.
+
+- Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -545,6 +593,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
+
+- Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -697,7 +747,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	MaxLength - The max length of the Arm in pixels.
 	MoveSpeed - How quickly the Arm moves between targets. 0 means no movement, 1 means instant movement.
-	HandDefaultIdleOffset - The idle offset this Arm will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
+	HandIdleOffset - The idle offset this Arm's hand will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
 	HandSprite - The sprite file for this Arm's hand. Hand is also allowed for compatibility.
 	GripStrength - The Arm's grip strength when holding HeldDevices. Further described below, in the entry where it was added.
 	ThrowStrength - The Arm's throw strength when throwing ThrownDevices. Further described below, in the entry where it was added.
@@ -706,8 +756,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	They now have the following Lua properties and functions:  
 	**`MaxLength`** (R) - Allows getting the `Arm`'s maximum length.  
 	**`MoveSpeed`** (R/W) - Allows getting and setting the `Arm`'s movement speed. 0 means no movement, 1 means instant movement.  
-	**`HandDefaultIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
-	**`HandCurrentPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
+	**`HandIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
+	**`HandPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
 	**`HasAnyHandTargets`** (R) - Gets whether or not this `Arm` has any hand targets, i.e. any positions the `Arm` is supposed to try to move its hand to.  
 	**`NumberOfHandTargets`** (R) - Gets the number of hand targets this `Arm` has.  
 	**`NextHandTargetDescription`** (R/W) - Gets the description of the next target this `Arm`'s hand is moving to, or an empty string if there are no targets.  
@@ -733,6 +783,13 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	CheckOffset(screenId);
 	SetScroll(center, screenId);
 	```
+	
+- `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
+
+- `Gib` property `InheritsVel` now works as a `float` scalar from 0 to 1, defining the portion of velocity inherited from the parent object.
+
+- Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
+	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
 
 </details>
 
@@ -749,6 +806,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
 - Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+
+- Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
 
 </details>
 

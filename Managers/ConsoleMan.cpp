@@ -230,6 +230,7 @@ namespace RTE {
 		PrintString("CTRL + O - Toggle one sim update per frame");
 		PrintString("----------------");
 		PrintString("F2 - Reload all Lua scripts");
+		PrintString("ALT  + F2 - Reload all sprites");
 		PrintString("CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset");
 		PrintString("F3 - Save console log");
 		PrintString("F4 - Save console user input log");

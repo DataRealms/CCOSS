@@ -483,11 +483,17 @@ ClassInfoGetters;
 	void RemoveOrDestroyAllAttachables(bool destroy);
 
 	/// <summary>
-	/// Gets the Attachable nearest to the passed in offset.
+	/// Gets a damage-transferring, impulse-vulnerable Attachable nearest to the passed in offset.
 	/// </summary>
 	/// <param name="offset">The offset that will be compared to each Attachable's ParentOffset.</param>
-	/// <returns>The nearest damage-transferring Attachable, or nullptr if none was found.</returns>
-	Attachable * GetNearestAttachableToOffset(const Vector &offset) const;
+	/// <returns>The nearest detachable Attachable, or nullptr if none was found.</returns>
+	Attachable * GetNearestDetachableAttachableToOffset(const Vector &offset) const;
+
+	/// <summary>
+	/// Gibs or detaches any Attachables that would normally gib or detach from the passed in impulses.
+	/// </summary>
+	/// <param name="impulseVector">The impulse vector which determines the Attachables to gib or detach. Will be filled out with the remainder of impulses.</param>
+	void DetachAttachablesFromImpulse(Vector &impulseVector);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -501,18 +507,15 @@ ClassInfoGetters;
 
     void ResetAllTimers() override;
 
+	/// <summary>
+	/// Does the calculations necessary to detect whether this MOSRotating is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	void RestDetection() override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    void RestDetection() override;
-
+	/// <summary>
+	/// Indicates whether this MOSRotating has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
+	bool IsAtRest() override;
 
     /// <summary>
     /// Indicates whether this MOSRotating's current graphical representation, including its Attachables, overlaps a point in absolute scene coordinates.
@@ -740,6 +743,18 @@ ClassInfoGetters;
     /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
     virtual float RemoveWounds(int numberOfWoundsToRemove, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
+
+	/// <summary>
+	/// Gets a const reference to this MOSRotating's map of string values.
+	/// </summary>
+	/// <returns>A const reference to this MOSRotating's map of string values.</returns>
+	const std::map<std::string, std::string> & GetStringValueMap() const { return m_StringValueMap; }
+
+	/// <summary>
+	/// Gets a const reference to this MOSRotating's map of number values.
+	/// </summary>
+	/// <returns>A const reference to this MOSRotating's map of number values.</returns>
+	const std::map<std::string, double> &GetNumberValueMap() const { return m_NumberValueMap; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetStringValue

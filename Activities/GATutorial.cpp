@@ -89,6 +89,7 @@ void GATutorial::Clear()
     for (int stage = 0; stage < FIGHTSTAGECOUNT; ++stage)
         m_FightTriggers[stage].Reset();
 
+	m_EnemyCount = 0;
     m_CurrentFightStage = NOFIGHT;
     m_pCPUBrain = 0;
 }
@@ -143,6 +144,7 @@ int GATutorial::Create(const GATutorial &reference)
     for (int stage = 0; stage < FIGHTSTAGECOUNT; ++stage)
         m_FightTriggers[stage] = reference.m_FightTriggers[stage];
 
+	m_EnemyCount = reference.m_EnemyCount;
     m_CurrentFightStage = reference.m_CurrentFightStage;
 // DOn't, owned and need to make deep copy in that case
 //    m_pCPUBrain;
@@ -295,6 +297,7 @@ int GATutorial::Start()
                     pOtherBrain = 0;
                 }
             }
+			m_EnemyCount = g_MovableMan.GetTeamRoster(m_CPUTeam)->size();
         }
         // Give the player some scratch
         else
@@ -769,23 +772,19 @@ void GATutorial::Update()
     ////////////////////////
     // FIGHT LOGIC
 
-    if (m_ControlledActor[m_TutorialPlayer])
-    {
-        // Triggered defending stage
-        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
-        {
-            // Take over control of screen messages
-            m_MessageTimer[m_TutorialPlayer].Reset();
-            // Display the text of the current step
-            g_FrameMan.ClearScreenText(ScreenOfPlayer(m_TutorialPlayer));
-            g_FrameMan.SetScreenText("DEFEND YOUR BRAIN AGAINST THE INCOMING FORCES!", ScreenOfPlayer(m_TutorialPlayer), 500, 8000, true);
-            // This will make all the enemy team AI's go into brain hunt mode
-            GameActivity::InitAIs();
-            DisableAIs(false, Teams::TeamTwo);
+    // Triggered defending stage
+	if (m_CurrentFightStage == NOFIGHT && ((m_ControlledActor[m_TutorialPlayer] && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos())) || g_MovableMan.GetTeamRoster(m_CPUTeam)->size() < m_EnemyCount)) {
+        // Take over control of screen messages
+        m_MessageTimer[m_TutorialPlayer].Reset();
+        // Display the text of the current step
+        g_FrameMan.ClearScreenText(ScreenOfPlayer(m_TutorialPlayer));
+        g_FrameMan.SetScreenText("DEFEND YOUR BRAIN AGAINST THE INCOMING FORCES!", ScreenOfPlayer(m_TutorialPlayer), 500, 8000, true);
+        // This will make all the enemy team AI's go into brain hunt mode
+        GameActivity::InitAIs();
+        DisableAIs(false, Teams::TeamTwo);
 
-            // Advance the stage
-            m_CurrentFightStage = DEFENDING;
-        }
+        // Advance the stage
+        m_CurrentFightStage = DEFENDING;
     }
 
     ///////////////////////////////////////////
@@ -1045,7 +1044,7 @@ void GATutorial::SetupAreas()
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Missions.rte/Objects/Tutorial/Funds.png", 2, 250));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Missions.rte/Objects/Tutorial/Funds.png", 1, 333));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up-left to 'Buy Menu'", 6000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point upper-left to 'Buy Menu'", 6000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 2, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Missions.rte/Objects/Tutorial/BuyMenuCargo.png", 1, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Missions.rte/Objects/Tutorial/BuyMenuCargo.png", 2, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Missions.rte/Objects/Tutorial/BuyMenuBuy.png", 2, 500));
@@ -1064,12 +1063,12 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFEAST].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFEAST].clear();
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right to 'Form Squad'", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point bottom-right to 'Form Squad'", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Missions.rte/Objects/Tutorial/TeamSelect.png", 4, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Missions.rte/Objects/Tutorial/TeamFollow.png", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with weapons similar to the leader's will fire in unison with him.", 4000, "Missions.rte/Objects/Tutorial/TeamFollow.png", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right again to disband squad", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can go to the east for a TRIAL BATTLE!", 8000, "Missions.rte/Objects/Tutorial/ArrowRight.png", 2));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with similar weapons will fire in unison with the leader", 4000, "Missions.rte/Objects/Tutorial/TeamFollow.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point bottom-right again to disband squad", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can head east for a TRIAL BATTLE!", 8000, "Missions.rte/Objects/Tutorial/ArrowRight.png", 2));
 
     m_AreaTimer.Reset();
     m_StepTimer.Reset();

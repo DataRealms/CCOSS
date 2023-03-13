@@ -1,0 +1,308 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Music routines (MIDI)
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Music routines (MIDI)">Music routines (MIDI)</a></h1>
+
+<ul>
+<li><a href="#destroy_midi">destroy_midi</a> &mdash; Destroys a MIDI structure when you are done with it.
+<li><a href="#get_midi_length">get_midi_length</a> &mdash; Determines the total playing time of a midi, in seconds.
+<li><a href="#load_ibk">load_ibk</a> &mdash; Reads in a .IBK patch definition file for the Adlib driver.
+<li><a href="#load_midi">load_midi</a> &mdash; Loads a MIDI file.
+<li><a href="#load_midi_patches">load_midi_patches</a> &mdash; Forces the MIDI driver to load a set of patches.
+<li><a href="#lock_midi">lock_midi</a> &mdash; Locks all the memory used by a MIDI file.
+<li><a href="#midi_loop_end">midi_loop_end</a> &mdash; Loop start and end points, set by play_looped_midi().
+<li><a href="#midi_loop_start">midi_loop_start</a> &mdash; Loop start and end points, set by play_looped_midi().
+<li><a href="#midi_meta_callback">midi_meta_callback</a> &mdash; Hook functions allowing you to intercept MIDI player events.
+<li><a href="#midi_msg_callback">midi_msg_callback</a> &mdash; Hook functions allowing you to intercept MIDI player events.
+<li><a href="#midi_out">midi_out</a> &mdash; Streams a block of MIDI commands into the player.
+<li><a href="#midi_pause">midi_pause</a> &mdash; Pauses the MIDI player.
+<li><a href="#midi_pos">midi_pos</a> &mdash; Stores the current position in the MIDI file.
+<li><a href="#midi_resume">midi_resume</a> &mdash; Resumes playback of a paused MIDI file.
+<li><a href="#midi_seek">midi_seek</a> &mdash; Seeks to the given midi_pos in the current MIDI file.
+<li><a href="#midi_sysex_callback">midi_sysex_callback</a> &mdash; Hook functions allowing you to intercept MIDI player events.
+<li><a href="#midi_time">midi_time</a> &mdash; The current position in the MIDI file, in seconds.
+<li><a href="#play_looped_midi">play_looped_midi</a> &mdash; Starts playing a MIDI file with a user-defined loop position.
+<li><a href="#play_midi">play_midi</a> &mdash; Starts playing the specified MIDI file.
+<li><a href="#stop_midi">stop_midi</a> &mdash; Stops whatever music is currently playing.
+</ul>
+
+<p>
+Allegro allows you to play MIDI files. MIDI files basically contain notes and
+the type of instrument that is meant to play them, so they are usually very
+small in size. However, it's up to the sound card of the end user to play the
+notes, and sound cards have been historically known to have poor MIDI
+performance (at least those oriented to the consumer market). Few consumer
+cards feature decent MIDI playback. Still, as a game creator you can never be
+sure if the music of your game will be played as you meant it, because it
+totally depends on the hardware of the user.
+
+<p>
+For this reason Allegro also provides a DIGMID driver. This is a software
+implementation of the so called Wavetable synthesis. Sound cards featuring this
+store digital samples of real instruments at different pitches, interpolating
+those that are not recorded, thus achieving a high sound quality. Implementing
+this in software makes you sure that the quality you hear on your computer is
+that which will be heard by end users using the same driver.
+
+<p>
+The disadvantage of the DIGMID driver is that it uses more CPU than simple
+MIDI playback, and it steals some hardware voices from the sound card, which
+might be more critical for the end user experience than the background music.
+At the Allegro homepage (<a href="http://alleg.sourceforge.net/">http://alleg.sourceforge.net/</a>) you can find more
+information about DIGMID and where to download digital samples for your MIDI
+files.
+
+<p><br>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *<a name="load_midi">load_midi</a>(const char *filename);</b></div><br>
+   Loads a MIDI file (handles both format 0 and format 1). Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#MIDI" class="autotype" title="Stores MIDI data.">MIDI</a> *music;
+      music = <a href="#load_midi" class="autotype" title="Loads a MIDI file.">load_midi</a>("backmus.mid");
+      if (!music)
+         abort_on_error("Couldn't load background music!");</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to a MIDI structure, or NULL on error. Remember to free
+   this MIDI file later to avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#destroy_midi" title="Destroys a MIDI structure when you are done with it.">destroy_midi</a>,
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#get_midi_length" title="Determines the total playing time of a midi, in seconds.">get_midi_length</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_midi">destroy_midi</a>(<a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *midi);</b></div><br>
+   Destroys a MIDI structure when you are done with it. It is safe to call 
+   this even when the MIDI file might be playing, because it checks and will 
+   kill it off if it is active. Use this to avoid memory leaks in your
+   program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_midi" title="Loads a MIDI file.">load_midi</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>void <a name="lock_midi">lock_midi</a>(<a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *midi);</b></div><br>
+   Under DOS, locks all the memory used by a MIDI file. You don't normally 
+   need to call this function because load_midi() does it for you.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_midi" title="Loads a MIDI file.">load_midi</a>.</blockquote>
+<div class="al-api"><b>int <a name="play_midi">play_midi</a>(<a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *midi, int loop);</b></div><br>
+   Starts playing the specified MIDI file, first stopping whatever music was 
+   previously playing. If the loop flag is set to non-zero, the data will be
+   repeated until replaced with something else, otherwise it will stop at the
+   end of the file. Passing a NULL pointer will stop whatever music is
+   currently playing.
+<p><b>Return value:</b>
+   Returns non-zero if an error occurs (this may happen if a patch-caching
+   wavetable driver is unable to load the required samples, or at least it
+   might in the future when somebody writes some patch-caching wavetable
+   drivers :-)
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="#load_midi" title="Loads a MIDI file.">load_midi</a>,
+<a class="xref" href="#play_looped_midi" title="Starts playing a MIDI file with a user-defined loop position.">play_looped_midi</a>,
+<a class="xref" href="#stop_midi" title="Stops whatever music is currently playing.">stop_midi</a>,
+<a class="xref" href="#midi_pause" title="Pauses the MIDI player.">midi_pause</a>,
+<a class="xref" href="#midi_seek" title="Seeks to the given midi_pos in the current MIDI file.">midi_seek</a>,
+<a class="xref" href="#midi_pos" title="Stores the current position in the MIDI file.">midi_pos</a>,
+<a class="xref" href="#midi_time" title="The current position in the MIDI file, in seconds.">midi_time</a>,
+<a class="xref" href="#midi_msg_callback" title="Hook functions allowing you to intercept MIDI player events.">midi_msg_callback</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>int <a name="play_looped_midi">play_looped_midi</a>(<a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *midi, int loop_start, int loop_end);</b></div><br>
+   Starts playing a MIDI file with a user-defined loop position. When the 
+   player reaches the loop end position or the end of the file (loop_end may 
+   be -1 to only loop at EOF), it will wind back to the loop start point. 
+   Both positions are specified in the same beat number format as the 
+   midi_pos variable.
+<p><b>Return value:</b>
+   The return value has the same meaning as that of play_midi(): non-zero if
+   an error occurs, zero otherwise.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#midi_pos" title="Stores the current position in the MIDI file.">midi_pos</a>,
+<a class="xref" href="#midi_loop_start" title="Loop start and end points, set by play_looped_midi().">midi_loop_start</a>.</blockquote>
+<div class="al-api"><b>void <a name="stop_midi">stop_midi</a>();</b></div><br>
+   Stops whatever music is currently playing. This is the same thing as 
+   calling play_midi(NULL, FALSE).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#midi_pause" title="Pauses the MIDI player.">midi_pause</a>.</blockquote>
+<div class="al-api"><b>void <a name="midi_pause">midi_pause</a>();</b></div><br>
+   Pauses the MIDI player.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#stop_midi" title="Stops whatever music is currently playing.">stop_midi</a>,
+<a class="xref" href="#midi_resume" title="Resumes playback of a paused MIDI file.">midi_resume</a>,
+<a class="xref" href="#midi_seek" title="Seeks to the given midi_pos in the current MIDI file.">midi_seek</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>void <a name="midi_resume">midi_resume</a>();</b></div><br>
+   Resumes playback of a paused MIDI file.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#midi_pause" title="Pauses the MIDI player.">midi_pause</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>int <a name="midi_seek">midi_seek</a>(int target);</b></div><br>
+   Seeks to the given midi_pos in the current MIDI file. If the target is 
+   earlier in the file than the current midi_pos it seeks from the 
+   beginning; otherwise it seeks from the current position.
+<p><b>Return value:</b>
+   Returns zero if it could successfully seek to the requested position.
+   Otherwise, a return value of 1 means it stopped playing, and midi_pos is
+   set to the negative length of the MIDI file (so you can use this function
+   to determine the length of a MIDI file). A return value of 2 means the
+   MIDI file looped back to the start.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#midi_pos" title="Stores the current position in the MIDI file.">midi_pos</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_midi_length">get_midi_length</a>(<a class="autotype" href="alleg001.html#MIDI" title="Stores MIDI data.">MIDI</a> *midi);</b></div><br>
+   This function will simulate playing the given MIDI, from start to end, to
+   determine how long it takes to play. After calling this function, midi_pos
+   will contain the negative number of beats, and midi_time the length of the
+   midi, in seconds.
+
+<p>
+   Note that any currently playing midi is stopped when you call this function.
+   Usually you would call it before play_midi, to get the length of the midi to
+   be played, like in this example:
+<blockquote class="code"><pre>
+      length = <a href="#get_midi_length" class="autotype" title="Determines the total playing time of a midi, in seconds.">get_midi_length</a>(my_midi);
+      <a href="#play_midi" class="autotype" title="Starts playing the specified MIDI file.">play_midi</a>(my_midi);
+      do {
+         pos = <a href="#midi_time" class="autotype" title="The current position in the MIDI file, in seconds.">midi_time</a>;
+         <a href="alleg018.html#textprintf_ex" class="autotype" title="Formatted output of a string.">textprintf_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, 0, 0, c, -1, "%d:%02d / %d:%02d\n",
+            pos / 60, pos % 60, length / 60, length % 60);
+         <a href="alleg005.html#rest" class="autotype" title="Waits a specified number of milliseconds or yields CPU.">rest</a>(100);
+      } while(pos &lt;= length);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the value of midi_time, the length of the midi.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_midi" title="Loads a MIDI file.">load_midi</a>,
+<a class="xref" href="#midi_time" title="The current position in the MIDI file, in seconds.">midi_time</a>,
+<a class="xref" href="#midi_pos" title="Stores the current position in the MIDI file.">midi_pos</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>void <a name="midi_out">midi_out</a>(unsigned char *data, int length);</b></div><br>
+   Streams a block of MIDI commands into the player in real-time, allowing 
+   you to trigger notes, jingles, etc, over the top of whatever MIDI file is 
+   currently playing.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="#load_midi_patches" title="Forces the MIDI driver to load a set of patches.">load_midi_patches</a>,
+<a class="xref" href="alleg029.html#midi_recorder" title="Hook notifying you when new MIDI data becomes available.">midi_recorder</a>.</blockquote>
+<div class="al-api"><b>int <a name="load_midi_patches">load_midi_patches</a>();</b></div><br>
+   Forces the MIDI driver to load the entire set of patches ready for use. 
+   You will not normally need to call this, because Allegro automatically 
+   loads whatever data is required for the current MIDI file, but you must 
+   call it before sending any program change messages via the midi_out() 
+   command.
+<p><b>Return value:</b>
+   Returns non-zero if an error occurred.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="#midi_out" title="Streams a block of MIDI commands into the player.">midi_out</a>.</blockquote>
+<div class="al-api"><b>extern volatile long <a name="midi_pos">midi_pos</a>;</b></div><br>
+   Stores the current position (beat number) in the MIDI file, or contains 
+   a negative number if no music is currently playing. Useful for 
+   synchronising animations with the music, and for checking whether a MIDI 
+   file has finished playing.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#midi_msg_callback" title="Hook functions allowing you to intercept MIDI player events.">midi_msg_callback</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>extern volatile long <a name="midi_time">midi_time</a>;</b></div><br>
+   Contains the position in seconds in the currently playing midi. This is
+   useful if you want to display the current song position in seconds, not as
+   beat number.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>,
+<a class="xref" href="#midi_pos" title="Stores the current position in the MIDI file.">midi_pos</a>,
+<a class="xref" href="#get_midi_length" title="Determines the total playing time of a midi, in seconds.">get_midi_length</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>.</blockquote>
+<div class="al-api"><b>extern long <a name="midi_loop_start">midi_loop_start</a>;</b></div><br>
+<div class="al-api-cont"><b>extern long <a name="midi_loop_end">midi_loop_end</a>;</b></div><br>
+   The loop start and end points, set by the play_looped_midi() function. 
+   These may safely be altered while the music is playing, but you should be 
+   sure they are always set to sensible values (start &lt; end). If you are 
+   changing them both at the same time, make sure to alter them in the right 
+   order in case a MIDI interrupt happens to occur in between your two 
+   writes! Setting these values to -1 represents the start and end of the 
+   file respectively.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_looped_midi" title="Starts playing a MIDI file with a user-defined loop position.">play_looped_midi</a>.</blockquote>
+<div class="al-api"><b>extern void (*<a name="midi_msg_callback">midi_msg_callback</a>)(int msg, int byte1, int byte2);</b></div><br>
+<div class="al-api-cont"><b>extern void (*<a name="midi_meta_callback">midi_meta_callback</a>)(int type, const unsigned char *data, int length);</b></div><br>
+<div class="al-api-cont"><b>extern void (*<a name="midi_sysex_callback">midi_sysex_callback</a>)(const unsigned char *data, int length);</b></div><br>
+   Hook functions allowing you to intercept MIDI player events. If set to 
+   anything other than NULL, these routines will be called for each MIDI 
+   message, meta-event, and system exclusive data block respectively. They 
+   will execute in an interrupt handler context, so all the code and data 
+   they use should be locked, and they must not call any operating system 
+   functions. In general you just use these routines to set some flags and 
+   respond to them later in your mainline code.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_midi" title="Starts playing the specified MIDI file.">play_midi</a>.</blockquote>
+<div class="al-api"><b>int <a name="load_ibk">load_ibk</a>(char *filename, int drums);</b></div><br>
+   Reads in a .IBK patch definition file for use by the Adlib driver. If 
+   drums is set, it will load it as a percussion patch set, otherwise it 
+   will use it as a replacement set of General MIDI instruments. You may 
+   call this before or after initialising the sound code, or can simply set 
+   the ibk_file and ibk_drum_file variables in the configuration file to 
+   have the data loaded automatically. Note that this function has no effect 
+   on any drivers other than the Adlib one!
+<p><b>Return value:</b>
+   Returns non-zero on error.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

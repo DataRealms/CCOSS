@@ -313,6 +313,7 @@ protected:
     TutorialRoom m_CurrentRoom;
     // Trigger box for the subsequent fight
     Box m_FightTriggers[FIGHTSTAGECOUNT];
+	int m_EnemyCount; //!< The amount of enemy actors at the start of the activity.
     // The current fight stage
     FightStage m_CurrentFightStage;
     // The CPU opponent brain; not owned!

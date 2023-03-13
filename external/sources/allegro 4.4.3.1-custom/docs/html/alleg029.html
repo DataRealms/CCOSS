@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Recording routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Recording routines">Recording routines</a></h1>
+
+<ul>
+<li><a href="#digi_recorder">digi_recorder</a> &mdash; Hook notifying you when a new sample buffer becomes available.
+<li><a href="#get_sound_input_cap_bits">get_sound_input_cap_bits</a> &mdash; Checks which audio input sample formats are supported.
+<li><a href="#get_sound_input_cap_parm">get_sound_input_cap_parm</a> &mdash; Detects if the specified recording parameters are supported.
+<li><a href="#get_sound_input_cap_rate">get_sound_input_cap_rate</a> &mdash; Returns the maximum sample frequency for recording.
+<li><a href="#get_sound_input_cap_stereo">get_sound_input_cap_stereo</a> &mdash; Tells if the input driver is capable of stereo recording.
+<li><a href="#install_sound_input">install_sound_input</a> &mdash; Initialises the sound recorder module.
+<li><a href="#midi_recorder">midi_recorder</a> &mdash; Hook notifying you when new MIDI data becomes available.
+<li><a href="#read_sound_input">read_sound_input</a> &mdash; Retrieves the last recorded audio buffer.
+<li><a href="#remove_sound_input">remove_sound_input</a> &mdash; Cleans up after you are finished with the sound input routines.
+<li><a href="#set_sound_input_source">set_sound_input_source</a> &mdash; Selects the audio input source.
+<li><a href="#start_sound_input">start_sound_input</a> &mdash; Starts recording in the specified format.
+<li><a href="#stop_sound_input">stop_sound_input</a> &mdash; Stops audio recording.
+</ul>
+
+<p>
+Allegro provides routines to capture sound from the sound card, be it digital
+samples or MIDI notes. Ideally this would allow you to create games where
+basic speech recognition could be implemented, or voice messages in
+multiplayer games over a network. However, many old sound cards are not full
+duplex. This means, that the sound device can only be playing or recording,
+but not both at the same time.
+
+<p>
+Any Windows 2000 or better machine comes with a full duplex sound card and
+updated drivers. All MacOS X machines allow full duplex recording. Under Unix
+your mileage may vary: you can have the right hardware for the task, but the
+drivers might not support this feature. Under DOS you should forget about full
+duplex altogether.
+
+<p>
+To find out if your system allows this feature, use the akaitest program,
+distributed along with Allegro, in the <tt>`tests'</tt> directory.
+
+<p><br>
+<div class="al-api"><b>int <a name="install_sound_input">install_sound_input</a>(int digi, int midi);</b></div><br>
+   Initialises the sound recorder module. You must install the normal sound
+   playback system before calling this routine. The two card parameters should
+   use the same constants as install_sound(), including DIGI_NONE and
+   MIDI_NONE to disable parts of the module, or DIGI_AUTODETECT and
+   MIDI_AUTODETECT to guess the hardware.
+<p><b>Return value:</b>
+   This function returns zero on success, and any other value if the machine
+   or driver doesn't support sound recording.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg024.html#install_sound" title="Initialises the sound module.">install_sound</a>,
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>,
+<a class="xref" href="#midi_recorder" title="Hook notifying you when new MIDI data becomes available.">midi_recorder</a>,
+<a class="xref" href="alleg003.html#Standard config variables" title="">Standard config variables</a>,
+<a class="xref" href="alleg036.html#DIGI_*/DOS" title="Supported DOS digital sound drivers.">DIGI_*/DOS</a>,
+<a class="xref" href="alleg037.html#DIGI_*/Windows" title="Supported Windows digital sound drivers.">DIGI_*/Windows</a>,
+<a class="xref" href="alleg038.html#DIGI_*/Unix" title="Supported Unix digital sound drivers.">DIGI_*/Unix</a>,
+<a class="xref" href="alleg039.html#DIGI_*/BeOS" title="Supported BeOS digital sound drivers.">DIGI_*/BeOS</a>,
+<a class="xref" href="alleg040.html#DIGI_*/QNX" title="Supported QNX digital sound drivers.">DIGI_*/QNX</a>,
+<a class="xref" href="alleg041.html#DIGI_*/MacOSX" title="Supported MacOSX digital sound drivers.">DIGI_*/MacOSX</a>,
+<a class="xref" href="alleg036.html#MIDI_*/DOS" title="Supported DOS MIDI sound drivers.">MIDI_*/DOS</a>,
+<a class="xref" href="alleg037.html#MIDI_*/Windows" title="Supported Windows MIDI sound drivers.">MIDI_*/Windows</a>,
+<a class="xref" href="alleg038.html#MIDI_*/Unix" title="Supported Unix MIDI sound drivers.">MIDI_*/Unix</a>,
+<a class="xref" href="alleg039.html#MIDI_*/BeOS" title="Supported BeOS MIDI sound drivers.">MIDI_*/BeOS</a>,
+<a class="xref" href="alleg040.html#MIDI_*/QNX" title="Supported QNX MIDI sound drivers.">MIDI_*/QNX</a>,
+<a class="xref" href="alleg041.html#MIDI_*/MacOSX" title="Supported MacOSX MIDI sound drivers.">MIDI_*/MacOSX</a>.</blockquote>
+<div class="al-api"><b>void <a name="remove_sound_input">remove_sound_input</a>();</b></div><br>
+   Cleans up after you are finished with the sound input routines. You don't 
+   normally need to call this, because remove_sound() and/or allegro_exit() 
+   will do it for you.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>,
+<a class="xref" href="alleg024.html#remove_sound" title="Cleans up after you are finished with the sound routines.">remove_sound</a>,
+<a class="xref" href="alleg000.html#allegro_exit" title="Closes down the Allegro system.">allegro_exit</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_sound_input_cap_bits">get_sound_input_cap_bits</a>();</b></div><br>
+   Checks which sample formats are supported by the current audio input 
+   driver, returning one of the bitfield values:
+<blockquote class="text"><pre>
+      0 = audio input not supported
+      8 = eight bit audio input is supported
+      16 = sixteen bit audio input is supported
+      24 = both eight and sixteen bit audio input are supported</pre></blockquote>
+   Example:
+<blockquote class="code"><pre>
+      cap = <a href="#get_sound_input_cap_bits" class="autotype" title="Checks which audio input sample formats are supported.">get_sound_input_cap_bits</a>();
+      if (cap == 0) {
+         /* Ugh, no audio input supported? */
+      } else {
+         if (cap &amp; 8) {
+            /* We have eight bit audio input. */
+         }
+         if (cap &amp; 16) {
+            /* We have sixteen bit audio input. */
+         }
+      }</pre></blockquote>
+      
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>,
+<a class="xref" href="#get_sound_input_cap_parm" title="Detects if the specified recording parameters are supported.">get_sound_input_cap_parm</a>,
+<a class="xref" href="#get_sound_input_cap_rate" title="Returns the maximum sample frequency for recording.">get_sound_input_cap_rate</a>,
+<a class="xref" href="#get_sound_input_cap_stereo" title="Tells if the input driver is capable of stereo recording.">get_sound_input_cap_stereo</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_sound_input_cap_stereo">get_sound_input_cap_stereo</a>();</b></div><br>
+   Checks whether the current audio input driver is capable of stereo 
+   recording.
+<p><b>Return value:</b>
+   Returns non-zero if the driver is capable of stereo recording.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>,
+<a class="xref" href="#get_sound_input_cap_parm" title="Detects if the specified recording parameters are supported.">get_sound_input_cap_parm</a>,
+<a class="xref" href="#get_sound_input_cap_bits" title="Checks which audio input sample formats are supported.">get_sound_input_cap_bits</a>,
+<a class="xref" href="#get_sound_input_cap_rate" title="Returns the maximum sample frequency for recording.">get_sound_input_cap_rate</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_sound_input_cap_rate">get_sound_input_cap_rate</a>(int bits, int stereo);</b></div><br>
+   Returns the maximum possible sample frequency for recording in the 
+   specified format, or zero if these settings are not supported. The bits
+   parameter is the number of bits of the audio, and stereo is a boolean
+   parameter. Pass zero for mono, non-zero for stereo input. Example:
+<blockquote class="code"><pre>
+      int max_freq;
+      ...
+      /* What frequency can we record 8 bits mono at? */
+      max_freq = <a href="#get_sound_input_cap_rate" class="autotype" title="Returns the maximum sample frequency for recording.">get_sound_input_cap_rate</a>(8, 0);
+      if (max_freq > 22000) {
+         /* Ok, 22KHz and above is good enough. */
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>,
+<a class="xref" href="#get_sound_input_cap_parm" title="Detects if the specified recording parameters are supported.">get_sound_input_cap_parm</a>,
+<a class="xref" href="#get_sound_input_cap_bits" title="Checks which audio input sample formats are supported.">get_sound_input_cap_bits</a>,
+<a class="xref" href="#get_sound_input_cap_stereo" title="Tells if the input driver is capable of stereo recording.">get_sound_input_cap_stereo</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_sound_input_cap_parm">get_sound_input_cap_parm</a>(int rate, int bits, int stereo);</b></div><br>
+   Checks whether the specified recording frequency, number of bits, and 
+   mono/stereo mode are supported (and how) by the current audio driver.
+<p><b>Return value:</b>
+   The function returns one of the following possible values:
+<blockquote class="text"><pre>
+      0  = It is impossible to record in this format.
+      1  = Recording is possible, but audio output
+           will be suspended.
+      2  = Recording is possible at the same time as
+           playing other sounds (full duplex sound card).
+      -n = Sampling rate not supported, but rate 'n'
+           would work instead.</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>,
+<a class="xref" href="#get_sound_input_cap_bits" title="Checks which audio input sample formats are supported.">get_sound_input_cap_bits</a>,
+<a class="xref" href="#get_sound_input_cap_rate" title="Returns the maximum sample frequency for recording.">get_sound_input_cap_rate</a>,
+<a class="xref" href="#get_sound_input_cap_stereo" title="Tells if the input driver is capable of stereo recording.">get_sound_input_cap_stereo</a>.</blockquote>
+<div class="al-api"><b>int <a name="set_sound_input_source">set_sound_input_source</a>(int source);</b></div><br>
+   Selects the audio input source. The parameter should be one of the values:
+<blockquote class="text"><pre>
+      SOUND_INPUT_MIC
+      SOUND_INPUT_LINE
+      SOUND_INPUT_CD</pre></blockquote>
+<p><b>Return value:</b>
+   The function returns zero on success, or -1 if the hardware does not
+   provide an input select register (ie. you have no control over the input
+   source).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>.</blockquote>
+<div class="al-api"><b>int <a name="start_sound_input">start_sound_input</a>(int rate, int bits, int stereo);</b></div><br>
+   Starts recording in the specified format, suspending audio playback as 
+   necessary if the card is not full duplex.
+<p><b>Return value:</b>
+   Returns the buffer size in bytes if successful, or zero on error.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>,
+<a class="xref" href="#read_sound_input" title="Retrieves the last recorded audio buffer.">read_sound_input</a>,
+<a class="xref" href="#stop_sound_input" title="Stops audio recording.">stop_sound_input</a>,
+<a class="xref" href="#digi_recorder" title="Hook notifying you when a new sample buffer becomes available.">digi_recorder</a>,
+<a class="xref" href="#set_sound_input_source" title="Selects the audio input source.">set_sound_input_source</a>,
+<a class="xref" href="#get_sound_input_cap_parm" title="Detects if the specified recording parameters are supported.">get_sound_input_cap_parm</a>,
+<a class="xref" href="#get_sound_input_cap_bits" title="Checks which audio input sample formats are supported.">get_sound_input_cap_bits</a>,
+<a class="xref" href="#get_sound_input_cap_rate" title="Returns the maximum sample frequency for recording.">get_sound_input_cap_rate</a>,
+<a class="xref" href="#get_sound_input_cap_stereo" title="Tells if the input driver is capable of stereo recording.">get_sound_input_cap_stereo</a>.</blockquote>
+<div class="al-api"><b>void <a name="stop_sound_input">stop_sound_input</a>();</b></div><br>
+   Stops audio recording, switching the card back into the normal playback 
+   mode.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>.</blockquote>
+<div class="al-api"><b>int <a name="read_sound_input">read_sound_input</a>(void *buffer);</b></div><br>
+   Retrieves the most recently recorded audio buffer into the specified 
+   location. The buffer size can be obtained by checking the return value
+   from start_sound_input(). You must be sure to call this
+   function at regular intervals during the recording (typically around 100 
+   times a second), or some data will be lost. If you are unable to do this 
+   often enough from the mainline code, use the digi_recorder() callback to 
+   store the waveform into a larger buffer of your own.
+
+<p>
+   Note: many cards produce a click or popping sound when switching between
+   record and playback modes, so it is often a good idea to discard the
+   first buffer after you start a recording. The waveform is always stored
+   in unsigned format, with stereo data consisting of alternate left/right
+   samples.
+<p><b>Return value:</b>
+   The function will return non-zero if a buffer has been copied or zero if
+   no new data is yet available (you were too fast checking the input).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>.</blockquote>
+<div class="al-api"><b>extern void (*<a name="digi_recorder">digi_recorder</a>)();</b></div><br>
+   If set, this function is called by the input driver whenever a new sample 
+   buffer becomes available, at which point you can use read_sound_input() 
+   to copy the data into a more permanent location. It runs in an interrupt
+   context, so it must execute very quickly, the code and all memory that it
+   touches must be locked, and you cannot call any operating system routines
+   or access disk files. This currently works only under DOS.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>,
+<a class="xref" href="#start_sound_input" title="Starts recording in the specified format.">start_sound_input</a>.</blockquote>
+<div class="al-api"><b>extern void (*<a name="midi_recorder">midi_recorder</a>)(unsigned char data);</b></div><br>
+   If set, this function is called by the MIDI input driver whenever a new 
+   byte of MIDI data becomes available. It runs in an interrupt context, so 
+   it must execute very quickly and all the code/data must be locked. This
+   currently works only under DOS and Windows.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#install_sound_input" title="Initialises the sound recorder module.">install_sound_input</a>,
+<a class="xref" href="alleg027.html#midi_out" title="Streams a block of MIDI commands into the player.">midi_out</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

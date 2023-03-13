@@ -629,11 +629,22 @@ void ACraft::AddInventoryItem(MovableObject *pItemToAdd)
     {
         // If the hatch is open, then only add the new item to the intermediate new inventory list
         // so that it doesn't get chucked out right away again
-        if (m_HatchState == OPEN || m_HatchState == OPENING)
-            m_CollectedInventory.push_back(pItemToAdd);
-        // If doors are already closed, it's safe to put the item directly the regular inventory
-        else
-            AddToInventoryBack(pItemToAdd);
+		if (m_HatchState == OPEN || m_HatchState == OPENING) {
+			m_CollectedInventory.push_back(pItemToAdd);
+		} else {
+			// If doors are already closed, it's safe to put the item directly the regular inventory
+			AddToInventoryBack(pItemToAdd);
+		}
+		if (Actor *itemAsActor = dynamic_cast<Actor*>(pItemToAdd); itemAsActor && itemAsActor->GetGoldCarried() > 0) {
+			m_GoldCarried += itemAsActor->GetGoldCarried();
+			itemAsActor->SetGoldCarried(0);
+			m_GoldPicked = true;
+			if (g_ActivityMan.GetActivity()->IsHumanTeam(m_Team)) {
+				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+					if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team && !g_GUISound.FundsChangedSound()->IsBeingPlayed()) { g_GUISound.FundsChangedSound()->Play(player); }
+				}
+			}
+		}
     }
 }
 

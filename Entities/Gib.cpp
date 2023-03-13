@@ -16,7 +16,7 @@ namespace RTE {
 		m_MinVelocity = 0;
 		m_MaxVelocity = 0;
 		m_LifeVariation = 0.1F;
-		m_InheritsVel = true;
+		m_InheritsVel = 1.0F;
 		m_IgnoresTeamHits = false;
 		m_SpreadMode = SpreadMode::SpreadRandom;
 	}

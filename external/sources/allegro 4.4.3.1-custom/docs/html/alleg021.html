@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Converting between color formats
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Converting between color formats">Converting between color formats</a></h1>
+
+<ul>
+<li><a href="#bestfit_color">bestfit_color</a> &mdash; Finds a palette color fitting the requested RGB values.
+<li><a href="#create_rgb_table">create_rgb_table</a> &mdash; Generates an RGB mapping table with lookup data for a palette.
+<li><a href="#hsv_to_rgb">hsv_to_rgb</a> &mdash; Converts color values between the HSV and RGB color spaces.
+<li><a href="#rgb_map">rgb_map</a> &mdash; Look up table to speed up reducing RGB values to palette colors.
+<li><a href="#rgb_to_hsv">rgb_to_hsv</a> &mdash; Converts color values between the HSV and RGB color spaces.
+</ul>
+
+<p>
+In general, Allegro is designed to be used in only one color depth at a 
+time, so you will call set_color_depth() once and then store all your 
+bitmaps in the same format. If you want to mix several different pixel 
+formats, you can use create_bitmap_ex() in place of create_bitmap(), and 
+call bitmap_color_depth() to query the format of a specific image. Most of 
+the graphics routines require all their input parameters to be in the same 
+format (eg. you cannot stretch a 15-bit source bitmap onto a 24-bit 
+destination), but there are some exceptions:
+<ul><li>
+   blit() and the rotation routines can copy between bitmaps of any format,
+   converting the data as required.
+<li>
+   draw_sprite() can draw 256-color source images onto destinations of any
+   format.
+<li>
+   draw_character_ex() _always_ uses a 256-color source bitmap, whatever the
+   format of the destination.
+<li>
+   The draw_trans_sprite() and draw_trans_rle_sprite() functions are able to
+   draw 32-bit RGBA images onto any hicolor or truecolor destination, as long
+   as you call set_alpha_blender() first.
+<li>
+   The draw_trans_sprite() function is able to draw an 8-bit alpha channel
+   image over the top of an existing 32-bit image, as long as you call
+   set_write_alpha_blender() first.
+</ul>
+Expanding a 256-color source onto a truecolor destination is fairly fast 
+(obviously you must set the correct palette before doing this conversion!). 
+Converting between different truecolor formats is slightly slower, and 
+reducing truecolor images to a 256-color destination is very slow (it can be 
+sped up significantly if you set up the global rgb_map table before doing 
+the conversion).
+
+<p><br>
+<div class="al-api"><b>int <a name="bestfit_color">bestfit_color</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> pal, int r, int g, int b);</b></div><br>
+   Searches the specified palette for the closest match to the requested 
+   color, which are specified in the VGA hardware 0-63 format. Normally you 
+   should call makecol8() instead, but this lower level function may be 
+   useful if you need to use a palette other than the currently selected 
+   one, or specifically don't want to use the rgb_map lookup table.
+<p><b>Return value:</b>
+   Returns the index of the palette for the closest match to the requested
+   color.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg012.html#makecol8" title="Converts an RGB value into a display dependent pixel format.">makecol8</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#RGB_MAP" title="Stores an rgb map to accelerate conversions.">RGB_MAP</a> *<a name="rgb_map">rgb_map</a>;</b></div><br>
+   To speed up reducing RGB values to 8-bit paletted colors, Allegro uses a 
+   32k lookup table (5 bits for each color component). You must set up this 
+   table before using the gouraud shading routines, and if present the table 
+   will also vastly accelerate the makecol8() and some create_*_table()
+   functions. RGB tables can be precalculated with the rgbmap utility, or
+   generated at runtime with create_rgb_table().
+      
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_rgb_table" title="Generates an RGB mapping table with lookup data for a palette.">create_rgb_table</a>,
+<a class="xref" href="alleg012.html#makecol8" title="Converts an RGB value into a display dependent pixel format.">makecol8</a>,
+<a class="xref" href="alleg020.html#create_trans_table" title="Fills a color mapping table for translucency effects.">create_trans_table</a>,
+<a class="xref" href="alleg020.html#create_light_table" title="Fills a color mapping table for lighting effects.">create_light_table</a>,
+<a class="xref" href="alleg020.html#create_color_table" title="Fills a color mapping table for customised effects.">create_color_table</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#excolmap" title="Creating graphical effects with color mapping tables.">excolmap</a>,
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>,
+<a class="eref" href="alleg045.html#exshade" title="Gouraud shaded sprites.">exshade</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>.</blockquote>
+<div class="al-api"><b>void <a name="create_rgb_table">create_rgb_table</a>(<a class="autotype" href="alleg001.html#RGB_MAP" title="Stores an rgb map to accelerate conversions.">RGB_MAP</a> *table, const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> pal,
+                      void (*callback)(int pos));</b></div><br>
+   Fills the specified RGB mapping table with lookup data for the specified 
+   palette. If the callback function is not NULL, it will be called 256 
+   times during the calculation, allowing you to display a progress 
+   indicator. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#RGB_MAP" class="autotype" title="Stores an rgb map to accelerate conversions.">RGB_MAP</a> rgb_table;
+      
+      <a href="#create_rgb_table" class="autotype" title="Generates an RGB mapping table with lookup data for a palette.">create_rgb_table</a>(&amp;rgb_table, palette, NULL);
+      <a href="#rgb_map" class="autotype" title="Look up table to speed up reducing RGB values to palette colors.">rgb_map</a> = &amp;rgb_table;</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#rgb_map" title="Look up table to speed up reducing RGB values to palette colors.">rgb_map</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#excolmap" title="Creating graphical effects with color mapping tables.">excolmap</a>,
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>,
+<a class="eref" href="alleg045.html#exshade" title="Gouraud shaded sprites.">exshade</a>,
+<a class="eref" href="alleg045.html#extrans" title="Lighting and translucency effects.">extrans</a>.</blockquote>
+<div class="al-api"><b>void <a name="hsv_to_rgb">hsv_to_rgb</a>(float h, float s, float v, int *r, int *g, int *b);</b></div><br>
+<div class="al-api-cont"><b>void <a name="rgb_to_hsv">rgb_to_hsv</a>(int r, int g, int b, float *h, float *s, float *v);</b></div><br>
+   Convert color values between the HSV and RGB color spaces. The RGB values 
+   range from 0 to 255, hue is from 0 to 360, and saturation and value are 
+   from 0 to 1. Example:
+<blockquote class="code"><pre>
+      int r, g, b;
+      float hue, saturation, value;
+      ...
+      /* Convert a reddish color to HSV format. */
+      <a href="#rgb_to_hsv" class="autotype" title="Converts color values between the HSV and RGB color spaces.">rgb_to_hsv</a>(255, 0, 128, &amp;hue, &amp;saturation, &amp;value);
+      
+      /* Now put our tin foil hat, and verify that. */
+      <a href="#hsv_to_rgb" class="autotype" title="Converts color values between the HSV and RGB color spaces.">hsv_to_rgb</a>(hue, saturation, value, &amp;r, &g, &amp;b);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(r == 255);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(g == 0);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(b == 128);</pre></blockquote>
+
+
+
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

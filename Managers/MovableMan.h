@@ -256,24 +256,30 @@ public:
 
     Actor * GetPrevTeamActor(int team = 0, Actor *pBeforeThis = 0);
 
+	/// <summary>
+	/// Get a pointer to an Actor in the internal Actor list that is of a specifc team and closest to a specific scene point.
+	/// </summary>
+	/// <param name="team">Which team to try to get an Actor for. 0 means first team, 1 means 2nd.</param>
+	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
+	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
+	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
+	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>
+	Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *excludeThis = nullptr) { return GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, false, excludeThis); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetClosestTeamActor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to an Actor in the internal Actor list that is of a
-//                  specifc team and closest to a specific scene point.
-// Arguments:       Which team to try to get an Actor for. 0 means first team, 1 means 2nd.
-//                  The player to get the Actor for. This affects which brain can be marked.
-//                  The Scene point to search for the closest to.
-//                  The maximum radius around that scene point to search.
-//                  A float to be filled out with the distance of the returned closest to
-//                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
-// Return value:    An Actor pointer to the requested team's Actor closest to the Scene
-//                  point, but not outside the max radius. If no Actor other than the
-//                  excluded one was found within the radius of the point, 0 is returned.
-
-    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
+	/// <summary>
+	/// Get a pointer to an Actor in the internal Actor list that is of a specifc team and closest to a specific scene point.
+	/// </summary>
+	/// <param name="team">Which team to try to get an Actor for. 0 means first team, 1 means 2nd.</param>
+	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
+	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
+	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="onlyPlayerControllableActors">Whether to only get Actors that are flagged as player controllable.</param>
+	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
+	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>
+	Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, bool onlyPlayerControllableActors, const Actor *excludeThis = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

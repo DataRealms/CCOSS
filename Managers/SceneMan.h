@@ -668,6 +668,14 @@ public:
 					  int maxArea,
 					  bool remove = false);
 
+	/// <summary>
+	/// Removes a pixel from the terrain and adds it to MovableMan.
+	/// </summary>
+	/// <param name="posX">The X coordinate of the terrain pixel.</param>
+	/// <param name="posX">The Y coordinate of the terrain pixel.</param>
+	/// <returns>The newly dislodged pixel, if one was found.</returns>
+	MovableObject * DislodgePixel(int posX, int posY);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          MakeAllUnseen
 //////////////////////////////////////////////////////////////////////////////////////////

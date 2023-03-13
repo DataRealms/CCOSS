@@ -75,6 +75,7 @@
 #include <vector>
 #include <cassert>
 
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/bind.hpp>

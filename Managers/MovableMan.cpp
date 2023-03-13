@@ -597,7 +597,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 // Description:     Get a pointer to an Actor in the internal Actor list that is of a
 //                  specifc team and closest to a specific scene point.
 
-Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis)
+Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, bool onlyPlayerControllableActors, const Actor *excludeThis)
 {
     if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() || m_ActorRoster[team].empty())
         return 0;
@@ -612,7 +612,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (std::deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam) {
+            if ((*aIt) == excludeThis || (*aIt)->GetTeam() != Activity::NoTeam || (onlyPlayerControllableActors && !(*aIt)->IsPlayerControllable())) {
                 continue;
             }
 
@@ -630,7 +630,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (std::list<Actor *>::iterator aIt = m_ActorRoster[team].begin(); aIt != m_ActorRoster[team].end(); ++aIt)
         {
-			if ((*aIt) == pExcludeThis || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
+			if ((*aIt) == excludeThis || (onlyPlayerControllableActors && !(*aIt)->IsPlayerControllable()) || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
 				continue;
 			}
 
@@ -733,7 +733,7 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
 
 Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) const
 {
-    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_ActorRoster[team].empty())
         return 0;
 
     float sqrShortestDistance = std::numeric_limits<float>::infinity();
@@ -1059,6 +1059,8 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 	if (!pActor) {
 		return;
     }
+
+	if (pActor->IsPlayerControlled()) { g_ActivityMan.GetActivity()->LoseControlOfActor(pActor->GetController()->GetPlayer()); }
 
 	RemoveActorFromTeamRoster(pActor);
 	pActor->SetTeam(team);

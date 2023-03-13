@@ -125,7 +125,8 @@ namespace RTE {
 		.def("GetPrevActorInGroup", &MovableMan::GetPrevActorInGroup)
 		.def("GetNextTeamActor", &MovableMan::GetNextTeamActor)
 		.def("GetPrevTeamActor", &MovableMan::GetPrevTeamActor)
-		.def("GetClosestTeamActor", &MovableMan::GetClosestTeamActor)
+		.def("GetClosestTeamActor", (Actor * (MovableMan::*)(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *excludeThis))&MovableMan::GetClosestTeamActor)
+		.def("GetClosestTeamActor", (Actor * (MovableMan::*)(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, bool onlyPlayerControllableActors, const Actor *excludeThis))&MovableMan::GetClosestTeamActor)
 		.def("GetClosestEnemyActor", &MovableMan::GetClosestEnemyActor)
 		.def("GetFirstTeamActor", &MovableMan::GetFirstTeamActor)
 		.def("GetClosestActor", &MovableMan::GetClosestActor)
@@ -322,7 +323,8 @@ namespace RTE {
 		.def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
 		.def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
 		.def("AddSceneObject", &SceneMan::AddSceneObject, luabind::adopt(_2))
-		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans);
+		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
+		.def("DislodgePixel", &SceneMan::DislodgePixel);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +353,9 @@ namespace RTE {
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
 		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
-		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
+		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD)
+		.property("ScrapCompactingHeight", &SettingsMan::GetScrapCompactingHeight, &SettingsMan::SetScrapCompactingHeight)
+		.property("AutomaticGoldDeposit", &SettingsMan::GetAutomaticGoldDeposit);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

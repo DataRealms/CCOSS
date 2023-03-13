@@ -40,6 +40,7 @@
 #include "ACDropShip.h"
 #include "HDFirearm.h"
 #include "Magazine.h"
+#include "ThrownDevice.h"
 
 namespace RTE {
 
@@ -1495,20 +1496,25 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
+	for (const std::string &group : *sceneObjectToSave->GetGroupList()) {
+		writer.NewPropertyWithValue("AddToGroup", group);
+	}
+
+	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
+	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
 	if (!isChildAttachable) {
-		writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
-		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
 	}
 
 	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
-	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
+	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
 		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
 		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
+		writer.NewPropertyWithValue("PinStrength", movableObjectToSave->GetPinStrength());
 	}
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
@@ -1538,12 +1544,27 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewProperty("SpecialBehaviour_AddWound");
 			SaveSceneObject(writer, wound, true);
 		}
+
+		for (auto &[key, value] : mosRotatingToSave->GetStringValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("StringValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
+		}
+
+		for (auto &[key, value] : mosRotatingToSave->GetNumberValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("NumberValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
+		}
 	}
 
 	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
 		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", attachableToSave->GetGibWhenRemovedFromParent());
 		writer.NewPropertyWithValue("JointStrength", attachableToSave->GetJointStrength());
 		writer.NewPropertyWithValue("JointStiffness", attachableToSave->GetJointStiffness());
 		writer.NewPropertyWithValue("JointOffset", attachableToSave->GetJointOffset());
@@ -1585,6 +1606,11 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			}
 		}
 
+		if (const HeldDevice *heldDeviceToSave = dynamic_cast<const HeldDevice *>(sceneObjectToSave)) {
+			writer.NewPropertyWithValue("SpecialBehaviour_Activated", heldDeviceToSave->IsActivated());
+			writer.NewPropertyWithValue("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", heldDeviceToSave->GetActivationTimer().GetElapsedSimTimeMS());
+		}
+
 		if (const HDFirearm *hdFirearmToSave = dynamic_cast<const HDFirearm *>(sceneObjectToSave)) {
 			WriteHardcodedAttachableOrNone("Magazine", hdFirearmToSave->GetMagazine());
 			WriteHardcodedAttachableOrNone("Flash", hdFirearmToSave->GetFlash());
@@ -1596,8 +1622,26 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
 		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
+		int aiModeToSave = actorToSave->GetAIMode() == Actor::AIMode::AIMODE_SQUAD ? Actor::AIMode::AIMODE_GOTO : actorToSave->GetAIMode();
+		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO && (!actorToSave->GetMOMoveTarget() && g_SceneMan.ShortestDistance(actorToSave->GetMovePathEnd(), actorToSave->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(1.0F))) {
+			aiModeToSave = Actor::AIMode::AIMODE_SENTRY;
+		}
+		writer.NewPropertyWithValue("AIMode", aiModeToSave);
+		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO) {
+			const std::string addWaypointPropertyName = "SpecialBehaviour_AddAISceneWaypoint";
+			if (const MovableObject *actorToSaveMOMoveTarget = actorToSave->GetMOMoveTarget()) {
+				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSaveMOMoveTarget->GetPos());
+			} else {
+				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSave->GetMovePathEnd());
+				for (auto &[waypointPosition, waypointObject] : actorToSave->GetWaypointList()) {
+					writer.NewPropertyWithValue(addWaypointPropertyName, waypointPosition);
+				}
+			}
+		}
+
 		if (actorToSave->GetDeploymentID()) {
 			writer.NewPropertyWithValue("DeploymentID", actorToSave->GetDeploymentID());
 		}

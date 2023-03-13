@@ -104,12 +104,6 @@ namespace RTE {
 		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
 		m_Nebula.SetScrollRatio(Vector(-1.0F, 1.0F / 3.0F));
 
-		set_write_alpha_blender();
-		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
-		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
-
 		int starSmallBitmapCount = 4;
 		std::vector<BITMAP *> starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
 
@@ -510,7 +504,7 @@ namespace RTE {
 			} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= IntroSequence::ShowSlide8) {
 				DrawSlideshowSlide();
 			} else if (m_IntroSequenceState == IntroSequence::SlideshowEnd) {
-				m_PreGameLogoText.Draw(g_FrameMan.GetBackBuffer32(), Vector(), DrawMode::g_DrawAlpha);
+				m_PreGameLogoText.Draw(g_FrameMan.GetBackBuffer32());
 				int blendAmount = 220 + RandomNum(-35, 35);
 				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 				m_PreGameLogoTextGlow.Draw(g_FrameMan.GetBackBuffer32(), Vector(), DrawMode::g_DrawTrans);
@@ -554,12 +548,17 @@ namespace RTE {
 		m_Station.SetPos(m_PlanetPos + m_StationOffset);
 		m_Station.SetRotAngle(-c_HalfPI + m_StationOrbitRotation);
 		m_Station.Draw(g_FrameMan.GetBackBuffer32());
+
+		// This only needs to be done once, but bitmaps can be reloaded which effectively undoes this, so just do it all the time to not deal with flags and checks.
+		set_write_alpha_blender();
+		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::DrawGameLogo() {
-		m_GameLogo.Draw(g_FrameMan.GetBackBuffer32(), Vector(), DrawMode::g_DrawAlpha);
+		m_GameLogo.Draw(g_FrameMan.GetBackBuffer32());
 		m_GameLogoGlow.SetPos(m_GameLogo.GetPos());
 		int glowIntensity = 220 + RandomNum(-35, 35);
 		set_screen_blender(glowIntensity, glowIntensity, glowIntensity, glowIntensity);

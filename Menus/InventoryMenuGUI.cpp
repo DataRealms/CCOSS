@@ -1241,10 +1241,10 @@ namespace RTE {
 
 		Arm *equippedItemArm = equippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
 		equippedItemArm->SetHeldDevice(dynamic_cast<HeldDevice *>(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->RemoveAttachable(equippedItemArm->GetHeldDevice()), inventoryItemIndex)));
-		equippedItemArm->SetHandCurrentPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+		equippedItemArm->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
 		if (!inventoryItemCanGoInOffhand && offhandEquippedItem) {
 			m_InventoryActor->AddInventoryItem(inventoryActorAsAHuman->GetBGArm()->RemoveAttachable(inventoryActorAsAHuman->GetBGArm()->GetHeldDevice()));
-			inventoryActorAsAHuman->GetBGArm()->SetHandCurrentPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+			inventoryActorAsAHuman->GetBGArm()->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
 		}
 		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 		return true;
@@ -1412,7 +1412,7 @@ namespace RTE {
 			}
 		});
 
-		std::string massString = RoundFloatToPrecision(std::fminf(999, totalItemMass), 0) + (totalItemMass > 999 ? "+ " : " ") + "KG";
+		std::string massString = totalItemMass < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(std::fminf(999, totalItemMass), (totalItemMass < 9.95F ? 1 : 0)) + (totalItemMass > 999 ? "+ " : " ") + "kg";
 		m_SmallFont->DrawAligned(carouselAllegroBitmap, itemBoxToDraw.IconCenterPosition.GetFloorIntX(), itemBoxToDraw.IconCenterPosition.GetFloorIntY() - ((itemBoxToDraw.CurrentSize.GetFloorIntY() + m_SmallFont->GetFontHeight()) / 2) + 1, massString.c_str(), GUIFont::Centre);
 	}
 

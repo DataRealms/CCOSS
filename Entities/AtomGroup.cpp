@@ -8,6 +8,11 @@ namespace RTE {
 
 	ConcreteClassInfo(AtomGroup, Entity, 500);
 
+	const std::unordered_map<std::string, AtomGroup::AreaDistributionType> AtomGroup::c_AreaDistributionTypeMap = {
+		{"Linear", AtomGroup::AreaDistributionType::Linear},
+		{"Circle", AtomGroup::AreaDistributionType::Circle}
+	};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AtomGroup::Clear() {
@@ -132,9 +137,17 @@ namespace RTE {
 		} else if (propName == "JointOffset") {
 			reader >> m_JointOffset;
 		} else if (propName == "AreaDistributionType") {
-			std::underlying_type_t<AreaDistributionType> areaDistributionType;
-			reader >> areaDistributionType;
-			m_AreaDistributionType = static_cast<AreaDistributionType>(areaDistributionType);
+			std::string areaDistributionTypeString = reader.ReadPropValue();
+			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
+			if (itr != c_IconSeparatorModeMap.end()) {
+				m_AreaDistributionType = itr->second;
+			} else {
+				try {
+					m_AreaDistributionType = static_cast<AreaDistributionType>(std::stoi(areaDistributionTypeString));
+				} catch (const std::invalid_argument &) {
+					reader.ReportError("AreaDistributionType " + areaDistributionTypeString + " is invalid.");
+				}
+			}
 		} else if (propName == "AreaDistributionSurfaceAreaMultiplier") {
 			reader >> m_AreaDistributionSurfaceAreaMultiplier;
 		} else {

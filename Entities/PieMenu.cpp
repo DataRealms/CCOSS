@@ -173,8 +173,9 @@ namespace RTE {
 	int PieMenu::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "IconSeparatorMode") {
 			std::string iconSeparatorModeString = reader.ReadPropValue();
-			if (c_IconSeparatorModeMap.find(iconSeparatorModeString) != c_IconSeparatorModeMap.end()) {
-				m_IconSeparatorMode = c_IconSeparatorModeMap.find(iconSeparatorModeString)->second;
+			auto itr = c_IconSeparatorModeMap.find(iconSeparatorModeString);
+			if (itr != c_IconSeparatorModeMap.end()) {
+				m_IconSeparatorMode = itr->second;
 			} else {
 				try {
 					m_IconSeparatorMode = static_cast<IconSeparatorMode>(std::stoi(iconSeparatorModeString));

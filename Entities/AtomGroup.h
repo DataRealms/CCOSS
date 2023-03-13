@@ -394,6 +394,8 @@ namespace RTE {
 		/// </summary>
 		enum class AreaDistributionType { Linear, Circle };
 
+		static const std::unordered_map<std::string, AreaDistributionType> c_AreaDistributionTypeMap; //!< A map of strings to AreaDistributionTypes to support string parsing for the AreaDistributionType enum.
+		
 		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup will distribute energy when it collides with something.
 		
 		/// <summary>

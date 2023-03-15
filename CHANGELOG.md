@@ -551,6 +551,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
 
+- New `MovableObject` Lua (R) property `DistanceTravelled` which returns the amount of pixels the object has travelled since its creation.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

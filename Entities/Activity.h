@@ -408,6 +408,12 @@ namespace RTE {
 		bool TeamActive(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamActive[team] : false; }
 
 		/// <summary>
+		/// Sets the given team as active, even if it shouldn't be considered as such normally. Useful for Activities that don't want to define/show all used teams.
+		/// </summary>
+		/// <param name="team">The team to force as active.</param>
+		void ForceSetTeamAsActive(int team) { if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) { m_TeamActive[team] = true; } }
+
+		/// <summary>
 		/// Indicates whether a team is player controlled or not.
 		/// </summary>
 		/// <param name="team">The team number to check.</param>

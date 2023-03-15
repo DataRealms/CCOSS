@@ -597,7 +597,7 @@ public:
 // Description:     Returns the name of the tech module selected for this team during scenario setup
 // Arguments:       Team to return tech module for
 // Return value:    Tech module name, for example Dummy.rte, or empty string if there is no team
-	std::string GetTeamTech(int team) { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
+	std::string GetTeamTech(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetTeamTech
@@ -724,7 +724,7 @@ public:
 // Description:     
 // Arguments:       None.
 // Return value:	
-	int GetDefaultGoldCake() const { return m_DefaultGoldCake; }
+	int GetDefaultGoldCakeDifficulty() const { return m_DefaultGoldCakeDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -733,7 +733,7 @@ public:
 // Description:     
 // Arguments:       None.
 // Return value:	
-	int GetDefaultGoldEasy() const { return m_DefaultGoldEasy; }
+	int GetDefaultGoldEasyDifficulty() const { return m_DefaultGoldEasyDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -742,7 +742,7 @@ public:
 // Description:     
 // Arguments:       None.
 // Return value:	
-	int GetDefaultGoldMedium() const { return m_DefaultGoldMedium; }
+	int GetDefaultGoldMediumDifficulty() const { return m_DefaultGoldMediumDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -751,7 +751,7 @@ public:
 // Description:     
 // Arguments:       None.
 // Return value:	
-	int GetDefaultGoldHard() const { return m_DefaultGoldHard; }
+	int GetDefaultGoldHardDifficulty() const { return m_DefaultGoldHardDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -760,7 +760,14 @@ public:
 // Description:     
 // Arguments:       None.
 // Return value:	
-	int GetDefaultGoldNuts() const { return m_DefaultGoldNuts; }
+	int GetDefaultGoldNutsDifficulty() const { return m_DefaultGoldNutsDifficulty; }
+
+
+	/// <summary>
+	/// Gets the default gold for max difficulty.
+	/// </summary>
+	/// <returns>The default gold for max difficulty.</returns>
+	int GetDefaultGoldMaxDifficulty() const { return m_DefaultGoldMaxDifficulty; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1065,11 +1072,12 @@ protected:
 	// Default deploy units swutch value, default -1 (unspecified)
 	int m_DefaultDeployUnits;
 	// Default gold amount for different difficulties, defalt -1 (unspecified)
-	int m_DefaultGoldCake;
-	int m_DefaultGoldEasy;
-	int m_DefaultGoldMedium;
-	int m_DefaultGoldHard;
-	int m_DefaultGoldNuts;
+	int m_DefaultGoldCakeDifficulty;
+	int m_DefaultGoldEasyDifficulty;
+	int m_DefaultGoldMediumDifficulty;
+	int m_DefaultGoldHardDifficulty;
+	int m_DefaultGoldNutsDifficulty;
+	int m_DefaultGoldMaxDifficulty;
 	// Whether those switches are enabled or disabled in scenario setup dialog, true by default
 	bool m_FogOfWarSwitchEnabled;
 	bool m_DeployUnitsSwitchEnabled;

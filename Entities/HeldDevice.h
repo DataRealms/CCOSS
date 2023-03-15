@@ -494,6 +494,12 @@ ClassInfoGetters;
 
     virtual bool IsActivated() const { return m_Activated; }
 
+	/// <summary>
+	/// Gets the activation Timer for this HeldDevice.
+	/// </summary>
+	/// <returns>The activation Timer for this HeldDevice.</returns>
+	const Timer & GetActivationTimer() const { return m_ActivationTimer;}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsReloading

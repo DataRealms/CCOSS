@@ -244,7 +244,46 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
+    void AudioMan::FinishAllLoopingSounds() {
+		if (m_AudioEnabled) {
+			int numberOfPlayingChannels;
+			FMOD::Channel *soundChannel;
+
+			FMOD_RESULT result = m_MobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing mobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+				return;
+			}
+
+			for (int i = 0; i < numberOfPlayingChannels; i++) {
+				result = m_MobileSoundChannelGroup->getChannel(i, &soundChannel);
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: Failed to get mobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+					return;
+				}
+				soundChannel->setLoopCount(0);
+			}
+
+			result = m_ImmobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing immobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+				return;
+			}
+
+			for (int i = 0; i < numberOfPlayingChannels; i++) {
+				result = m_ImmobileSoundChannelGroup->getChannel(i, &soundChannel);
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: Failed to get immobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+					return;
+				}
+				soundChannel->setLoopCount(0);
+			}
+		}
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
 			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops); }
 

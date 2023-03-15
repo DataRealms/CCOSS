@@ -278,12 +278,15 @@ int Actor::Create(const Actor &reference)
     m_PassengerSlots = reference.m_PassengerSlots;
 
     m_AIMode = reference.m_AIMode;
-//    m_Waypoints = reference.m_Waypoints;
+    m_Waypoints = reference.m_Waypoints;
     m_DrawWaypoints = reference.m_DrawWaypoints;
     m_MoveTarget = reference.m_MoveTarget;
     m_pMOMoveTarget = reference.m_pMOMoveTarget;
     m_PrevPathTarget = reference.m_PrevPathTarget;
     m_MoveVector = reference.m_MoveVector;
+	if (!m_Waypoints.empty()) {
+		UpdateMovePath();
+	}
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
@@ -385,11 +388,14 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
-    else if (propName == "AIMode")
-    {
-        int mode;
-        reader >> mode;
-        m_AIMode = static_cast<AIMode>(mode);
+	else if (propName == "AIMode") {
+		int mode;
+		reader >> mode;
+		m_AIMode = static_cast<AIMode>(mode);
+	} else if (propName == "SpecialBehaviour_AddAISceneWaypoint") {
+		Vector waypointToAdd;
+		reader >> waypointToAdd;
+		AddAISceneWaypoint(waypointToAdd);
 	} else if (propName == "PieMenu") {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
@@ -1197,7 +1203,7 @@ BITMAP * Actor::GetAIModeIcon()
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-MOID Actor::GetAIMOWaypointID()
+MOID Actor::GetAIMOWaypointID() const
 {
 	if (g_MovableMan.ValidMO(m_pMOMoveTarget))
 		return m_pMOMoveTarget->GetID();

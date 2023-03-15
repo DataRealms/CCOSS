@@ -82,9 +82,6 @@ namespace RTE {
 		// Delete any existing objects from our scene - we don't want to replace broken doors or repair any stuff when we load.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
 
-		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
-		modifiableScene->RetrieveSceneObjects(false);
-
 		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
 		modifiableScene->SetPresetName(fileName);
 		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
@@ -93,6 +90,11 @@ namespace RTE {
 		// Block the main thread for a bit to let the Writer access the relevant data.
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
+
+		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
+		// This is done after the activity is saved, in case the activity wants to add anything to the scene while saving.
+		modifiableScene->RetrieveSceneObjects(false);
+
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
@@ -304,7 +306,7 @@ namespace RTE {
 		if (const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName)) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
 			if (GameActivity *newActivityAsGameActivity = dynamic_cast<GameActivity *>(newActivity)) {
-				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMedium());
+				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMediumDifficulty());
 				if (newActivityAsGameActivity->GetStartingGold() <= 0) {
 					newActivityAsGameActivity->SetStartingGold(static_cast<int>(newActivityAsGameActivity->GetTeamFunds(0)));
 				} else {

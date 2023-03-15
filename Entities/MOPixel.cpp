@@ -12,8 +12,7 @@ namespace RTE {
 	void MOPixel::Clear() {
 		m_Atom = 0;
 		m_Color.Reset();
-		m_DistanceTraveled = 0;
-		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / c_MPP;
+		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight());
 		m_MinLethalRange = 1;
 		m_MaxLethalRange = 1;
 		m_LethalSharpness = 1;
@@ -128,9 +127,6 @@ namespace RTE {
 	void MOPixel::SetLethalRange(float range) {
 		m_LethalRange = range;
 		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RandomNum(m_MinLethalRange, m_MaxLethalRange); }
-
-		// convert to meters
-		m_LethalRange /= c_PPM;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,8 +203,7 @@ namespace RTE {
 
 		// TODO: Rework this once we figure out how we want to handle it
 		if (m_HitsMOs && m_Sharpness > 0) {
-			m_DistanceTraveled += m_Vel.GetLargest() * g_TimerMan.GetDeltaTimeSecs();
-			if (m_DistanceTraveled > m_LethalRange) {
+			if (m_DistanceTravelled > m_LethalRange) {
 				if (m_Sharpness < m_LethalSharpness) {
 					m_Sharpness = std::max(m_Sharpness * (1.0F - (20.0F * g_TimerMan.GetDeltaTimeSecs())) - 0.1F, 0.0F);
 					if (m_LethalRange > 0) {

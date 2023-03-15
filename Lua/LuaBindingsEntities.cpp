@@ -964,6 +964,7 @@ namespace RTE {
 		.property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)
 		.property("PrevPos", &MovableObject::GetPrevPos)
 		.property("PrevVel", &MovableObject::GetPrevVel)
+		.property("DistanceTravelled", &MovableObject::GetDistanceTravelled)
 		.property("AngularVel", &MovableObject::GetAngularVel, &MovableObject::SetAngularVel)
 		.property("Radius", &MovableObject::GetRadius)
 		.property("Diameter", &MovableObject::GetDiameter)

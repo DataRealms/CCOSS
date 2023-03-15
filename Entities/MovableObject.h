@@ -271,6 +271,12 @@ enum MOType
 	/// <returns>A Vector describing the previous velocity vector.</returns>
 	const Vector & GetPrevVel() const { return m_PrevVel; }
 
+	/// <summary>
+	/// Gets the amount of distance this MO has travelled since its creation, in pixels.	
+	/// </summary>
+	/// <returns>The amount of distance this MO has travelled, in pixels.</returns>
+	float GetDistanceTravelled() const { return m_DistanceTravelled; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAngularVel
@@ -1860,6 +1866,7 @@ protected:
     Vector m_Vel; // In meters per second (m/s).
     Vector m_PrevPos; // Previous frame's position.
     Vector m_PrevVel; // Previous frame's velocity.
+	float m_DistanceTravelled; //!< An estimate of how many pixels this MO has travelled since its creation.
     float m_Scale; // The scale that this MovableObject's representation will be drawn in. 1.0 being 1:1;
     // How this is affected by global effects, from +1.0 to -1.0. Something with a negative value will 'float' upward
     float m_GlobalAccScalar;

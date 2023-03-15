@@ -525,7 +525,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
 
-- Added `GameActivity` INI property `DefaultGoldNuts!`, which lets you specify the default gold when the difficulty slider is maxed out.
+- Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.
 
 - Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
 
@@ -721,6 +721,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	
 - `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
+
+- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is: `DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
 
 </details>
 

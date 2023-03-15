@@ -90,11 +90,11 @@ void GameActivity::Clear()
 	m_DefaultFogOfWar = -1;
 	m_DefaultRequireClearPathToOrbit = -1;
 	m_DefaultDeployUnits = 1;
-	m_DefaultGoldCake = -1;
-	m_DefaultGoldEasy = -1;
-	m_DefaultGoldMedium = -1;
-	m_DefaultGoldHard = -1;
-	m_DefaultGoldNuts = -1;
+	m_DefaultGoldCakeDifficulty = -1;
+	m_DefaultGoldEasyDifficulty = -1;
+	m_DefaultGoldMediumDifficulty = -1;
+	m_DefaultGoldHardDifficulty = -1;
+	m_DefaultGoldNutsDifficulty = -1;
 	m_DefaultGoldMaxDifficulty = -1;
 	m_FogOfWarSwitchEnabled = true;
 	m_DeployUnitsSwitchEnabled = false;
@@ -195,11 +195,11 @@ int GameActivity::Create(const GameActivity &reference)
 	m_DefaultFogOfWar = reference.m_DefaultFogOfWar;
 	m_DefaultRequireClearPathToOrbit = reference.m_DefaultRequireClearPathToOrbit;
 	m_DefaultDeployUnits = reference.m_DefaultDeployUnits;
-	m_DefaultGoldCake = reference.m_DefaultGoldCake;
-	m_DefaultGoldEasy = reference.m_DefaultGoldEasy;
-	m_DefaultGoldMedium = reference.m_DefaultGoldMedium;
-	m_DefaultGoldHard = reference.m_DefaultGoldHard;
-	m_DefaultGoldNuts = reference.m_DefaultGoldNuts;
+	m_DefaultGoldCakeDifficulty = reference.m_DefaultGoldCakeDifficulty;
+	m_DefaultGoldEasyDifficulty = reference.m_DefaultGoldEasyDifficulty;
+	m_DefaultGoldMediumDifficulty = reference.m_DefaultGoldMediumDifficulty;
+	m_DefaultGoldHardDifficulty = reference.m_DefaultGoldHardDifficulty;
+	m_DefaultGoldNutsDifficulty = reference.m_DefaultGoldNutsDifficulty;
 	m_DefaultGoldMaxDifficulty = reference.m_DefaultGoldMaxDifficulty;
 	m_FogOfWarSwitchEnabled = reference.m_FogOfWarSwitchEnabled;
 	m_DeployUnitsSwitchEnabled = reference.m_DeployUnitsSwitchEnabled;
@@ -241,17 +241,17 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DefaultRequireClearPathToOrbit;
     else if (propName == "DefaultDeployUnits")
         reader >> m_DefaultDeployUnits;
-    else if (propName == "DefaultGoldCake")
-        reader >> m_DefaultGoldCake;
-    else if (propName == "DefaultGoldEasy")
-        reader >> m_DefaultGoldEasy;
-    else if (propName == "DefaultGoldMedium")
-        reader >> m_DefaultGoldMedium;
-    else if (propName == "DefaultGoldHard")
-        reader >> m_DefaultGoldHard;
-    else if (propName == "DefaultGoldNuts")
-        reader >> m_DefaultGoldNuts;
-	else if (propName == "DefaultGoldNuts!")
+    else if (propName == "DefaultGoldCakeDifficulty")
+        reader >> m_DefaultGoldCakeDifficulty;
+    else if (propName == "DefaultGoldEasyDifficulty")
+        reader >> m_DefaultGoldEasyDifficulty;
+    else if (propName == "DefaultGoldMediumDifficulty")
+        reader >> m_DefaultGoldMediumDifficulty;
+    else if (propName == "DefaultGoldHardDifficulty")
+        reader >> m_DefaultGoldHardDifficulty;
+    else if (propName == "DefaultGoldNutsDifficulty")
+        reader >> m_DefaultGoldNutsDifficulty;
+	else if (propName == "DefaultGoldMaxDifficulty")
         reader >> m_DefaultGoldMaxDifficulty;
     else if (propName == "FogOfWarSwitchEnabled")
         reader >> m_FogOfWarSwitchEnabled;

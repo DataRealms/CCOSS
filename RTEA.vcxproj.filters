@@ -1041,7 +1041,7 @@
     <ClCompile Include="Lua\LuaBindingsMisc.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
-    <ClCompile Include="Lua\LuaBindingsSDL.cpp">
+    <ClCompile Include="Lua\LuaBindingsInput.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
     <ClCompile Include="Lua\LuaBindingsActivities.cpp">

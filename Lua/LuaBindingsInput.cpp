@@ -1,8 +1,112 @@
+// Make sure that binding definition files are always set to NOT use pre-compiled headers and conformance mode (/permissive) otherwise everything will be on fire!
+
 #include "LuaBindingRegisterDefinitions.h"
+
+#include "SDL_scancode.h"
+#include "SDL_keycode.h"
+#include "SDL_gamecontroller.h"
+
 namespace RTE {
 
-	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_Keycode) {
-		return luabind::class_<sdl_keycodes>("Key")
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, InputDevice) {
+		return luabind::class_<input_device>("InputDevice")
+
+		.enum_("InputDevice")[
+			luabind::value("DEVICE_KEYB_ONLY", InputDevice::DEVICE_KEYB_ONLY),
+			luabind::value("DEVICE_MOUSE_KEYB", InputDevice::DEVICE_MOUSE_KEYB),
+			luabind::value("DEVICE_GAMEPAD_1", InputDevice::DEVICE_GAMEPAD_1),
+			luabind::value("DEVICE_GAMEPAD_2", InputDevice::DEVICE_GAMEPAD_2),
+			luabind::value("DEVICE_GAMEPAD_3", InputDevice::DEVICE_GAMEPAD_3),
+			luabind::value("DEVICE_GAMEPAD_4", InputDevice::DEVICE_GAMEPAD_4),
+			luabind::value("DEVICE_COUNT", InputDevice::DEVICE_COUNT)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, InputElements) {
+		return luabind::class_<input_elements>("InputElements")
+
+		.enum_("InputElements")[
+			luabind::value("INPUT_L_UP", InputElements::INPUT_L_UP),
+			luabind::value("INPUT_L_DOWN", InputElements::INPUT_L_DOWN),
+			luabind::value("INPUT_L_LEFT", InputElements::INPUT_L_LEFT),
+			luabind::value("INPUT_L_RIGHT", InputElements::INPUT_L_RIGHT),
+			luabind::value("INPUT_R_UP", InputElements::INPUT_R_UP),
+			luabind::value("INPUT_R_DOWN", InputElements::INPUT_R_DOWN),
+			luabind::value("INPUT_R_LEFT", InputElements::INPUT_R_LEFT),
+			luabind::value("INPUT_R_RIGHT", InputElements::INPUT_R_RIGHT),
+			luabind::value("INPUT_FIRE", InputElements::INPUT_FIRE),
+			luabind::value("INPUT_AIM", InputElements::INPUT_AIM),
+			luabind::value("INPUT_AIM_UP", InputElements::INPUT_AIM_UP),
+			luabind::value("INPUT_AIM_DOWN", InputElements::INPUT_AIM_DOWN),
+			luabind::value("INPUT_AIM_LEFT", InputElements::INPUT_AIM_LEFT),
+			luabind::value("INPUT_AIM_RIGHT", InputElements::INPUT_AIM_RIGHT),
+			luabind::value("INPUT_PIEMENU", InputElements::INPUT_PIEMENU),
+			luabind::value("INPUT_JUMP", InputElements::INPUT_JUMP),
+			luabind::value("INPUT_CROUCH", InputElements::INPUT_CROUCH),
+			luabind::value("INPUT_NEXT", InputElements::INPUT_NEXT),
+			luabind::value("INPUT_PREV", InputElements::INPUT_PREV),
+			luabind::value("INPUT_START", InputElements::INPUT_START),
+			luabind::value("INPUT_BACK", InputElements::INPUT_BACK),
+			luabind::value("INPUT_COUNT", InputElements::INPUT_COUNT)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, MouseButtons) {
+		return luabind::class_<mouse_buttons>("MouseButtons")
+
+		.enum_("MouseButtons")[
+			luabind::value("MOUSE_NONE", MouseButtons::MOUSE_NONE),
+			luabind::value("MOUSE_LEFT", MouseButtons::MOUSE_LEFT),
+			luabind::value("MOUSE_RIGHT", MouseButtons::MOUSE_RIGHT),
+			luabind::value("MOUSE_MIDDLE", MouseButtons::MOUSE_MIDDLE),
+			luabind::value("MAX_MOUSE_BUTTONS", MouseButtons::MAX_MOUSE_BUTTONS)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, JoyButtons) {
+		return luabind::class_<joy_buttons>("JoyButtons")
+
+		.enum_("JoyButtons")[
+			luabind::value("JOY_NONE", JoyButtons::JOY_NONE),
+			luabind::value("JOY_1", JoyButtons::JOY_1),
+			luabind::value("JOY_2", JoyButtons::JOY_2),
+			luabind::value("JOY_3", JoyButtons::JOY_3),
+			luabind::value("JOY_4", JoyButtons::JOY_4),
+			luabind::value("JOY_5", JoyButtons::JOY_5),
+			luabind::value("JOY_6", JoyButtons::JOY_6),
+			luabind::value("JOY_7", JoyButtons::JOY_7),
+			luabind::value("JOY_8", JoyButtons::JOY_8),
+			luabind::value("JOY_9", JoyButtons::JOY_9),
+			luabind::value("JOY_10", JoyButtons::JOY_10),
+			luabind::value("JOY_11", JoyButtons::JOY_11),
+			luabind::value("JOY_12", JoyButtons::JOY_12),
+			luabind::value("MAX_JOY_BUTTONS", JoyButtons::MAX_JOY_BUTTONS)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, JoyDirections) {
+		return luabind::class_<joy_directions>("JoyDirections")
+
+		.enum_("JoyDirections")[
+			luabind::value("JOYDIR_ONE", JoyDirections::JOYDIR_ONE),
+			luabind::value("JOYDIR_TWO", JoyDirections::JOYDIR_TWO)
+		];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_Keycode) {
+		return luabind::class_<key_codes>("Key")
 
 		.enum_("Key")[luabind::value("UNKNOWN", SDLK_UNKNOWN),
 			luabind::value("RETURN", SDLK_RETURN),
@@ -239,11 +343,14 @@ namespace RTE {
 			luabind::value("KBDILLUMDOWN", SDLK_KBDILLUMDOWN),
 			luabind::value("KBDILLUMUP", SDLK_KBDILLUMUP),
 			luabind::value("EJECT", SDLK_EJECT),
-			luabind::value("SLEEP", SDLK_SLEEP)];
+			luabind::value("SLEEP", SDLK_SLEEP)
+		];
 	}
 
-	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_Scancode) {
-		return luabind::class_<sdl_scancodes>("Scancode")
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_Scancode) {
+		return luabind::class_<scan_codes>("Scancode")
 
 		.enum_("Scancode")[
 			luabind::value("UNKNOWN", SDL_SCANCODE_UNKNOWN),
@@ -489,11 +596,14 @@ namespace RTE {
 			luabind::value("APP2", SDL_SCANCODE_APP2),
 			luabind::value("AUDIOREWIND", SDL_SCANCODE_AUDIOREWIND),
 			luabind::value("AUDIOFASTFORWARD", SDL_SCANCODE_AUDIOFASTFORWARD),
-			luabind::value("ODES", SDL_NUM_SCANCODES)];
+			luabind::value("ODES", SDL_NUM_SCANCODES)
+		];
 	}
 
-	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_GameControllerButton) {
-		return luabind::class_<sdl_gamepadbuttons>("GamepadButton")
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_GameControllerButton) {
+		return luabind::class_<gamepad_buttons>("GamepadButton")
 		.enum_("GamepadButton")[
 			luabind::value("INVALID", SDL_CONTROLLER_BUTTON_INVALID),
 			luabind::value("A", SDL_CONTROLLER_BUTTON_A),
@@ -511,11 +621,14 @@ namespace RTE {
 			luabind::value("DPAD_DOWN", SDL_CONTROLLER_BUTTON_DPAD_DOWN),
 			luabind::value("DPAD_LEFT", SDL_CONTROLLER_BUTTON_DPAD_LEFT),
 			luabind::value("DPAD_RIGHT", SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
-			luabind::value("MAX", SDL_CONTROLLER_BUTTON_MAX)];
+			luabind::value("MAX", SDL_CONTROLLER_BUTTON_MAX)
+		];
 	}
 
-	LuaBindingRegisterFunctionDefinitionForType(SDLLuaBindings, SDL_GameControllerAxis) {
-		return luabind::class_<sdl_gamepadaxis>("GamepadAxis")
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_GameControllerAxis) {
+		return luabind::class_<gamepad_axis>("GamepadAxis")
 		.enum_("GamepadAxis")[
 			luabind::value("INVALID", SDL_CONTROLLER_AXIS_INVALID),
 			luabind::value("LEFTX", SDL_CONTROLLER_AXIS_LEFTX),
@@ -524,6 +637,7 @@ namespace RTE {
 			luabind::value("RIGHTY", SDL_CONTROLLER_AXIS_RIGHTY),
 			luabind::value("TRIGGERLEFT", SDL_CONTROLLER_AXIS_TRIGGERLEFT),
 			luabind::value("TRIGGERRIGHT", SDL_CONTROLLER_AXIS_TRIGGERRIGHT),
-			luabind::value("MAX", SDL_CONTROLLER_AXIS_MAX)];
+			luabind::value("MAX", SDL_CONTROLLER_AXIS_MAX)
+		];
 	}
-} // namespace RTE
+}

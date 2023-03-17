@@ -194,12 +194,6 @@ namespace RTE {
 			m_ConfiguringPlayerInputScheme->ClearMapping(m_InputElementCapturingInput);
 			inputCaptured = true;
 		}
-		if (g_UInputMan.KeyReleased(SDLK_ESCAPE)) {
-			g_GUISound.ExitMenuSound()->Play();
-			inputCaptured = true;
-			HideInputMappingCaptureBox();
-			return;
-		}
 		if (!inputCaptured) {
 			InputDevice inputDevice = m_ConfiguringPlayerInputScheme->GetDevice();
 			if (inputDevice == InputDevice::DEVICE_KEYB_ONLY || inputDevice == InputDevice::DEVICE_MOUSE_KEYB) {

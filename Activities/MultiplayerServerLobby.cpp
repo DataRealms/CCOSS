@@ -445,33 +445,33 @@ namespace RTE {
 		// Set gold slider value if activity sepcifies default gold amounts for difficulties
 		if (m_pDifficultySlider->GetValue() < DifficultySetting::CakeDifficulty)
 		{
-			if (pSelectedGA->GetDefaultGoldCake() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldCake());
+			if (pSelectedGA->GetDefaultGoldCakeDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldCakeDifficulty());
 		}
 		else if (m_pDifficultySlider->GetValue() < DifficultySetting::EasyDifficulty)
 		{
-			if (pSelectedGA->GetDefaultGoldEasy() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldEasy());
+			if (pSelectedGA->GetDefaultGoldEasyDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldEasyDifficulty());
 		}
 		else if (m_pDifficultySlider->GetValue() < DifficultySetting::MediumDifficulty)
 		{
-			if (pSelectedGA->GetDefaultGoldMedium() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldMedium());
+			if (pSelectedGA->GetDefaultGoldMediumDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldMediumDifficulty());
 		}
 		else if (m_pDifficultySlider->GetValue() < DifficultySetting::HardDifficulty)
 		{
-			if (pSelectedGA->GetDefaultGoldHard() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldHard());
+			if (pSelectedGA->GetDefaultGoldHardDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldHardDifficulty());
 		}
 		else if (m_pDifficultySlider->GetValue() < DifficultySetting::NutsDifficulty)
 		{
-			if (pSelectedGA->GetDefaultGoldNuts() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
+			if (pSelectedGA->GetDefaultGoldNutsDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNutsDifficulty());
 		}
 		else
 		{
-			if (pSelectedGA->GetDefaultGoldNuts() > -1)
-				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
+			if (pSelectedGA->GetDefaultGoldNutsDifficulty() > -1)
+				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNutsDifficulty());
 		}
 		m_pGoldSlider->SetEnabled(pSelectedGA->GetGoldSwitchEnabled());
 	}

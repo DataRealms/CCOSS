@@ -108,7 +108,9 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_Keycode) {
 		return luabind::class_<key_codes>("Key")
 
-		.enum_("Key")[luabind::value("UNKNOWN", SDLK_UNKNOWN),
+		// Make sure to update https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua#key-codes if any changes are made.
+		.enum_("Key")[
+			luabind::value("UNKNOWN", SDLK_UNKNOWN),
 			luabind::value("RETURN", SDLK_RETURN),
 			luabind::value("ESCAPE", SDLK_ESCAPE),
 			luabind::value("BACKSPACE", SDLK_BACKSPACE),
@@ -352,6 +354,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_Scancode) {
 		return luabind::class_<scan_codes>("Scancode")
 
+		// Make sure to update https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua#scan-codes if any changes are made.
 		.enum_("Scancode")[
 			luabind::value("UNKNOWN", SDL_SCANCODE_UNKNOWN),
 			luabind::value("A", SDL_SCANCODE_A),
@@ -596,7 +599,7 @@ namespace RTE {
 			luabind::value("APP2", SDL_SCANCODE_APP2),
 			luabind::value("AUDIOREWIND", SDL_SCANCODE_AUDIOREWIND),
 			luabind::value("AUDIOFASTFORWARD", SDL_SCANCODE_AUDIOFASTFORWARD),
-			luabind::value("ODES", SDL_NUM_SCANCODES)
+			luabind::value("NUM_SCANCODES", SDL_NUM_SCANCODES)
 		];
 	}
 
@@ -604,6 +607,7 @@ namespace RTE {
 
 	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_GameControllerButton) {
 		return luabind::class_<gamepad_buttons>("GamepadButton")
+
 		.enum_("GamepadButton")[
 			luabind::value("INVALID", SDL_CONTROLLER_BUTTON_INVALID),
 			luabind::value("A", SDL_CONTROLLER_BUTTON_A),
@@ -629,6 +633,7 @@ namespace RTE {
 
 	LuaBindingRegisterFunctionDefinitionForType(InputLuaBindings, SDL_GameControllerAxis) {
 		return luabind::class_<gamepad_axis>("GamepadAxis")
+
 		.enum_("GamepadAxis")[
 			luabind::value("INVALID", SDL_CONTROLLER_AXIS_INVALID),
 			luabind::value("LEFTX", SDL_CONTROLLER_AXIS_LEFTX),

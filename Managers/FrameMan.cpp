@@ -24,8 +24,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::s_DisableFrameBufferFlip = false;
-
 	const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> FrameMan::c_BlenderSetterFunctions = {
 		nullptr, // NoBlend obviously has no blender, but we want to keep the indices matching with the enum.
 		&set_burn_blender,
@@ -480,10 +478,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::UploadFrame() {
-		if (s_DisableFrameBufferFlip) {
-			return;
-		}
-
 		if(m_WantScreenDump) {
 			SaveBitmap(ScreenDump, m_ScreenDumpName);
 			m_WantScreenDump = false;

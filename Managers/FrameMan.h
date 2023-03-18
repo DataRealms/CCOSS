@@ -555,16 +555,6 @@ namespace RTE {
 		/// </summary>
 		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
-		/// <summary>
-		/// Stupid Windows-only problems:
-		/// Allowing execution to continue in the background while in dedicated fullscreen mode requires using a display switch mode which clears out the screen's video memory when the process window is not in focus.
-		/// Trying to access the screen BITMAP to figure out if it was cleared does not seem to work because the pointer isn't getting nulled, and trying to read dimensions/anything returns valid values,
-		/// but then everything implodes when the blit happens because there's actually nothing to blit to (and of course when everything has already imploded it does report that dimensions are 0 and everything is cleared. Very helpful indeed).
-		/// This flag does the job. While true blitting the backbuffer to the screen will be skipped during FlipFrameBuffers().
-		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
-		/// </summary>
-		static bool s_DisableFrameBufferFlip;
-
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		/// <summary>

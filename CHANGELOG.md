@@ -533,6 +533,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
 
+- Added new `Timer` constructors `timer = Timer(elapsedSimTimeMS)` and `timer = Timer(elapsedSimTimeMS, simTimeLimitMS)` that let you setup `Timer`s more cleanly.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

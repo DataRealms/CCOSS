@@ -52,7 +52,7 @@ namespace RTE {
 		/// <summary>
 		///
 		/// </summary>
-		void CreateTextures();
+		void CreateTexture();
 #pragma endregion
 
 #pragma region Destruction
@@ -197,17 +197,10 @@ namespace RTE {
 	private:
 
 		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_PrimaryWindow; //!< The main Window.
-		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiScreenWindows; //!< Additional windows for multi display fullscreen.
-
 		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
-		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiScreenRenderers; //!< Additional Renderers for multi display fullscreen.
-
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture;
-		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiScreenTextures; //!< Additional Textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_MultiScreenTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
-		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		int m_NumScreens; //!< Number of physical screens.
 		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).

@@ -533,6 +533,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
 
+- - New `Settings.ini` property `EnableVSync` to enable vertical syncronization. Enabled by default.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -774,6 +776,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	No longer used or meaningful.
 
 - Removed `UInputMan` Lua function `WhichKeyHeld`.
+
+- Dedicated fullscreen has been removed (again) along with the following `Settings.ini` properties:
+	`ForceVirtualFullScreenGfxDriver`, `ForceDedicatedFullScreenGfxDriver`
 
 </details>
 

@@ -134,6 +134,8 @@ namespace RTE {
 		return luabind::class_<Timer>("Timer")
 
 		.def(luabind::constructor<>())
+		.def(luabind::constructor<double>())
+		.def(luabind::constructor<double, double>())
 
 		.property("StartRealTimeMS", &Timer::GetStartRealTimeMS, &Timer::SetStartRealTimeMS)
 		.property("ElapsedRealTimeS", &Timer::GetElapsedRealTimeS, &Timer::SetElapsedRealTimeS)

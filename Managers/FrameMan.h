@@ -78,11 +78,6 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Prints the selected graphics driver message to the console. Has to be done after all managers initialization because ConsoleMan does not exist during FrameMan initialization.
-		/// </summary>
-		void PrintForcedGfxDriverMessage() const;
-
-		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
 		/// </summary>
 		void Update();
@@ -615,7 +610,7 @@ namespace RTE {
 		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multi-display fullscreen.
 		int m_EnableVSync;
 
-		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
+
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 

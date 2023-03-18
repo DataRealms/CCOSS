@@ -95,8 +95,6 @@ namespace RTE {
 		m_Window.reset();
 		m_MultiWindows.clear();
 		m_TextureOffsets.clear();
-
-		m_GfxDriverMessage.clear();
 		m_Fullscreen = false;
 		m_DisableMultiScreenResolutionValidation = false;
 		m_NumScreens = SDL_GetNumVideoDisplays();
@@ -158,12 +156,6 @@ namespace RTE {
 				m_TempNetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::PrintForcedGfxDriverMessage() const {
-		if (!m_GfxDriverMessage.empty()) { g_ConsoleMan.PrintString(m_GfxDriverMessage); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

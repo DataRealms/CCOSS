@@ -1,5 +1,6 @@
 #include "MenuMan.h"
 #include "SettingsMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "PresetMan.h"
@@ -200,7 +201,7 @@ namespace RTE {
 		g_FrameMan.ClearBackBuffer32();
 
 		// Early return when changing resolution so screen remains black while everything is being recreated instead of being stuck showing a badly aligned title screen.
-		if (g_FrameMan.ResolutionChanged()) {
+		if (g_WindowMan.ResolutionChanged()) {
 			return;
 		}
 
@@ -236,7 +237,7 @@ namespace RTE {
 					int matchedDevice = InputDevice::DEVICE_GAMEPAD_1 + playerIndex;
 					if (matchedDevice != device) {
 						BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
-						if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25); }
+						if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_WindowMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_WindowMan.GetResY() - 25); }
 					}
 				}
 			}

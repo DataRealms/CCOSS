@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "AreaEditor.h"
+
+#include "WindowMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
@@ -165,7 +167,7 @@ int AreaEditor::Start()
     // Resize the invisible root container so it matches the screen rez
     GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));
     if (pRootBox)
-        pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+        pRootBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pNewDialogBox)
@@ -188,7 +190,7 @@ int AreaEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
-	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_WindowMan.GetResY() / 2));
 	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + m_pLoadNameCombo->GetDropHeight()); // Make sure the dropdown can fit, no matter how tall it is.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
@@ -256,7 +258,7 @@ void AreaEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }
@@ -589,7 +591,7 @@ void AreaEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
 void AreaEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 {
-    EditorActivity::Draw(pTargetBitmap, targetPos);    
+    EditorActivity::Draw(pTargetBitmap, targetPos);
 }
 
 

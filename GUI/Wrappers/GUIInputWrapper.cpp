@@ -1,5 +1,6 @@
 #include "GUI.h"
 #include "GUIInputWrapper.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "Timer.h"
@@ -59,8 +60,8 @@ namespace RTE {
 
 		// Update the mouse position of this GUIInput, based on the SDL mouse vars (which may have been altered by joystick or keyboard input).
 		Vector mousePos = g_UInputMan.GetAbsoluteMousePosition();
-		m_MouseX = static_cast<int>(mousePos.GetX() / static_cast<float>(g_FrameMan.GetResMultiplier()));
-		m_MouseY = static_cast<int>(mousePos.GetY() / static_cast<float>(g_FrameMan.GetResMultiplier()));
+		m_MouseX = static_cast<int>(mousePos.GetX() / static_cast<float>(g_WindowMan.GetResMultiplier()));
+		m_MouseY = static_cast<int>(mousePos.GetY() / static_cast<float>(g_WindowMan.GetResMultiplier()));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +197,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void GUIInputWrapper::UpdateKeyJoyMouseInput(float keyElapsedTime) {
-		int mouseDenominator = g_FrameMan.GetResMultiplier();
+		int mouseDenominator = g_WindowMan.GetResMultiplier();
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
 
 		// See how much to accelerate the joystick input based on how long the stick has been pushed around
@@ -212,8 +213,8 @@ namespace RTE {
 		newMousePos.m_X = std::max(0.0f, newMousePos.m_X);
 		newMousePos.m_Y = std::max(0.0f, newMousePos.m_Y);
 		// Pull in a bit so cursor doesn't completely disappear
-		newMousePos.m_X = std::min(static_cast<float>(g_FrameMan.GetResX() * mouseDenominator) - 3.0F, newMousePos.m_X);
-		newMousePos.m_Y = std::min(static_cast<float>(g_FrameMan.GetResY() * mouseDenominator) - 3.0F, newMousePos.m_Y);
+		newMousePos.m_X = std::min(static_cast<float>(g_WindowMan.GetResX() * mouseDenominator) - 3.0F, newMousePos.m_X);
+		newMousePos.m_Y = std::min(static_cast<float>(g_WindowMan.GetResY() * mouseDenominator) - 3.0F, newMousePos.m_Y);
 
 		g_UInputMan.SetAbsoluteMousePosition(newMousePos);
 

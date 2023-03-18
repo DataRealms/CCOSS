@@ -1,5 +1,6 @@
 #include "InventoryMenuGUI.h"
 
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "MovableMan.h"
@@ -209,7 +210,7 @@ namespace RTE {
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(m_MenuController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(m_MenuController->GetPlayer()));
 		} else {
-			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 		}
 
 		m_GUITopLevelBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBox_InventoryMenuGUI"));
@@ -1223,17 +1224,17 @@ namespace RTE {
 		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
 		MovableObject *equippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first : nullptr;
 		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
-		
+
 		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
 		if (!inventoryItemToSwapIn && inventoryItemIndex < m_InventoryActor->GetInventorySize()) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 			return false;
 		}
 		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsDualWieldable() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
-		
+
 		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
 		MovableObject *equippedItemToSwapOut = equippedItemIndex == 0 ? equippedItem : offhandEquippedItem;
-		
+
 		if (equippedItemIndex == 0 && !inventoryActorAsAHuman->GetFGArm()) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 			return false;

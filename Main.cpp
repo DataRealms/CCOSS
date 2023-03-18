@@ -37,6 +37,7 @@
 #include "UInputMan.h"
 #include "PerformanceMan.h"
 #include "MetaMan.h"
+#include "WindowMan.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
@@ -59,6 +60,7 @@ namespace RTE {
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
 		g_PerformanceMan.Initialize();
+		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
 
@@ -167,7 +169,7 @@ namespace RTE {
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
 
-			if (g_FrameMan.ResolutionChanged()) {
+			if (g_WindowMan.ResolutionChanged()) {
 				g_MenuMan.Reinitialize();
 				g_ConsoleMan.Destroy();
 				g_ConsoleMan.Initialize();

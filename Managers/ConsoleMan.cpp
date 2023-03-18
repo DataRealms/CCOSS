@@ -2,6 +2,7 @@
 
 #include "LuaMan.h"
 #include "UInputMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 
@@ -52,7 +53,7 @@ namespace RTE {
 		m_GUIControlManager->EnableMouse(false);
 
 		// Stretch the invisible root box to fill the screen
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
 		if (!m_ParentBox) {
 			m_ParentBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConsoleGUIBox"));
@@ -67,7 +68,7 @@ namespace RTE {
 		m_ParentBox->SetEnabled(false);
 		m_ParentBox->SetVisible(false);
 
-		if (!g_FrameMan.ResolutionChanged()) { m_OutputLog.emplace_back("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------"); }
+		if (!g_WindowMan.ResolutionChanged()) { m_OutputLog.emplace_back("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------"); }
 
 		return 0;
 	}
@@ -75,13 +76,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Destroy() {
-		if (!g_FrameMan.ResolutionChanged()) { SaveAllText("LogConsole.txt"); }
+		if (!g_WindowMan.ResolutionChanged()) { SaveAllText("LogConsole.txt"); }
 
 		delete m_GUIControlManager;
 		delete m_GUIInput;
 		delete m_GUIScreen;
 
-		if (g_FrameMan.ResolutionChanged()) {
+		if (g_WindowMan.ResolutionChanged()) {
 			m_GUIScreen = nullptr;
 			m_GUIInput = nullptr;
 			m_GUIControlManager = nullptr;
@@ -124,7 +125,7 @@ namespace RTE {
 			return;
 		}
 
-		m_ParentBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY() * m_ConsoleScreenRatio);
+		m_ParentBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY() * m_ConsoleScreenRatio);
 		m_ConsoleText->SetSize(m_ParentBox->GetWidth() - 4, m_ParentBox->GetHeight() - m_InputTextBox->GetHeight() - 2);
 		m_ConsoleTextMaxNumLines = 5 + (m_ConsoleText->GetHeight() / m_GUIControlManager->GetSkin()->GetFont("FontSmall.png")->GetFontHeight());
 		m_InputTextBox->SetPositionRel(m_InputTextBox->GetRelXPos(), m_ConsoleText->GetHeight());

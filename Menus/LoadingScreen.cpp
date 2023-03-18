@@ -1,4 +1,6 @@
 #include "LoadingScreen.h"
+
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "SceneLayer.h"
 #include "Writer.h"
@@ -35,13 +37,13 @@ namespace RTE {
 		}
 		SceneLayer loadingSplash;
 		loadingSplash.Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png").GetAsBitmap(COLORCONV_NONE, false), false, Vector(), true, false, Vector(1.0F, 0));
-		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset), 0));
+		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_WindowMan.GetResX()) / 2) + loadingSplashOffset), 0));
 
-		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
+		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_WindowMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_WindowMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
 		if (!progressReportDisabled) { draw_sprite(g_FrameMan.GetBackBuffer32(), m_ProgressListboxBitmap, m_ProgressListboxPosX, m_ProgressListboxPosY); }
-		
+
 		g_FrameMan.ClearFrame();
 		g_FrameMan.UploadFrame();
 
@@ -57,13 +59,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::CreateProgressReportListbox(GUIControlManager *parentControlManager) {
-		dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("root"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 		GUIListBox *listBox = dynamic_cast<GUIListBox *>(parentControlManager->GetControl("ProgressBox"));
 
 		// Make the box a bit bigger if there's room in higher, HD resolutions.
-		if (g_FrameMan.GetResX() >= c_DefaultResX) { listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight()); }
+		if (g_WindowMan.GetResX() >= c_DefaultResX) { listBox->Resize((g_WindowMan.GetResX() / 3) - 12, listBox->GetHeight()); }
 
-		listBox->SetPositionRel(g_FrameMan.GetResX() - listBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (listBox->GetHeight() / 2));
+		listBox->SetPositionRel(g_WindowMan.GetResX() - listBox->GetWidth() - 12, (g_WindowMan.GetResY() / 2) - (listBox->GetHeight() / 2));
 		listBox->ClearList();
 
 		if (!m_ProgressListboxBitmap) {

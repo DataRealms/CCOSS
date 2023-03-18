@@ -2,6 +2,7 @@
 #include "ConsoleMan.h"
 #include "CameraMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "AudioMan.h"
@@ -101,17 +102,17 @@ namespace RTE {
 		if (propName == "PaletteFile") {
 			reader >> g_FrameMan.m_PaletteFile;
 		} else if (propName == "ResolutionX") {
-			reader >> g_FrameMan.m_ResX;
+			reader >> g_WindowMan.m_ResX;
 		} else if (propName == "ResolutionY") {
-			reader >> g_FrameMan.m_ResY;
+			reader >> g_WindowMan.m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
-			reader >> g_FrameMan.m_ResMultiplier;
+			reader >> g_WindowMan.m_ResMultiplier;
 		} else if (propName == "Fullscreen") {
-			reader >> g_FrameMan.m_Fullscreen;
+			reader >> g_WindowMan.m_Fullscreen;
 		} else if (propName == "EnableVsync") {
-			reader >> g_FrameMan.m_EnableVSync;
+			reader >> g_WindowMan.m_EnableVSync;
 		} else if (propName == "DisableMultiScreenResolutionValidation") {
-			reader >> g_FrameMan.m_DisableMultiScreenResolutionValidation;
+			reader >> g_WindowMan.m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
 		} else if (propName == "MasterVolume") {
@@ -311,12 +312,12 @@ namespace RTE {
 		writer.NewLineString("// Display Settings", false);
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("PaletteFile", g_FrameMan.m_PaletteFile);
-		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_ResX);
-		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_ResY);
-		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
-		writer.NewPropertyWithValue("Fullscreen", g_FrameMan.m_Fullscreen);
-		writer.NewPropertyWithValue("EnableVsync", g_FrameMan.m_EnableVSync);
-		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
+		writer.NewPropertyWithValue("ResolutionX", g_WindowMan.m_ResX);
+		writer.NewPropertyWithValue("ResolutionY", g_WindowMan.m_ResY);
+		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
+		writer.NewPropertyWithValue("Fullscreen", g_WindowMan.m_Fullscreen);
+		writer.NewPropertyWithValue("EnableVsync", g_WindowMan.m_EnableVSync);
+		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_WindowMan.m_DisableMultiScreenResolutionValidation);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);

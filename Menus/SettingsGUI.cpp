@@ -1,5 +1,5 @@
 #include "SettingsGUI.h"
-#include "FrameMan.h"
+#include "WindowMan.h"
 
 #include "GUI.h"
 #include "AllegroScreen.h"
@@ -18,7 +18,7 @@ namespace RTE {
 		m_GUIControlManager->Load("Base.rte/GUIs/SettingsGUI.ini");
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		rootBox->Resize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
 		m_SettingsTabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
 		m_SettingsTabberBox->SetPositionAbs((rootBox->GetWidth() - m_SettingsTabberBox->GetWidth()) / 2, 140);

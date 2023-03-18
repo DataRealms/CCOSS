@@ -1,6 +1,7 @@
 #include "CameraMan.h"
 
 #include "Activity.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
@@ -56,7 +57,7 @@ namespace RTE {
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2)));
 		} else {
-			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetResY() / 2)));
+			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_WindowMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_WindowMan.GetResY() / 2)));
 		}
 		CheckOffset(screenId);
 	}
@@ -156,8 +157,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector CameraMan::GetFrameSize(int screenId) {
-		int frameWidth = g_FrameMan.GetResX();
-		int frameHeight = g_FrameMan.GetResY();
+		int frameWidth = g_WindowMan.GetResX();
+		int frameHeight = g_WindowMan.GetResY();
 
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			frameWidth = g_FrameMan.GetPlayerFrameBufferWidth(screenId);
@@ -245,8 +246,8 @@ namespace RTE {
 			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2));
 			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2));
 		} else {
-			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
-			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
+			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_WindowMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
+			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_WindowMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
 		}
 		// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
 		offsetTarget -= (screen.ScreenOcclusion / 2);

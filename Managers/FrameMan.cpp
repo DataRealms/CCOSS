@@ -148,30 +148,33 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::CreateBackBuffers() {
+		int resX = g_WindowMan.GetResX();
+		int resY = g_WindowMan.GetResY();
+
 		// Create the back buffer, this is still in 8bpp, we will do any post-processing on the PostProcessing bitmap
-		m_BackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
+		m_BackBuffer8 = create_bitmap_ex(8, resX, resY);
 		ClearBackBuffer8();
 
 		// Create the post-processing buffer, it'll be used for glow effects etc
-		m_BackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		m_BackBuffer32 = create_bitmap_ex(32, resX, resY);
 		ClearBackBuffer32();
 
-		m_OverlayBitmap32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		m_OverlayBitmap32 = create_bitmap_ex(32, resX, resY);
 		clear_to_color(m_OverlayBitmap32, 0);
 
 		// Create all the network 8bpp back buffers
 		for (int i = 0; i < c_MaxScreenCount; i++) {
 			for (int f = 0; f < 2; f++) {
-				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
 
-				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
 
-				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferFinal8[f][i], m_BlackColor);
 
-				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferFinalGUI8[f][i], g_MaskColor);
 			}
 		}
@@ -181,7 +184,7 @@ namespace RTE {
 
 		// Create the splitscreen buffer
 		if (m_HSplit || m_VSplit) {
-			m_PlayerScreen = create_bitmap_ex(8, m_ResX / (m_VSplit ? 2 : 1), m_ResY / (m_HSplit ? 2 : 1));
+			m_PlayerScreen = create_bitmap_ex(8, resX / (m_VSplit ? 2 : 1), resY / (m_HSplit ? 2 : 1));
 			clear_to_color(m_PlayerScreen, m_BlackColor);
 			set_clip_state(m_PlayerScreen, 1);
 
@@ -306,7 +309,7 @@ namespace RTE {
 			}
 		}
 
-		m_ResChanged = false;
+		//m_ResChanged = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,7 +355,7 @@ namespace RTE {
 
 		// Create the splitscreen buffer
 		if (m_HSplit || m_VSplit) {
-			m_PlayerScreen = create_bitmap_ex(8, g_FrameMan.GetResX() / (m_VSplit ? 2 : 1), g_FrameMan.GetResY() / (m_HSplit ? 2 : 1));
+			m_PlayerScreen = create_bitmap_ex(8, g_WindowMan.GetResX() / (m_VSplit ? 2 : 1), g_WindowMan.GetResY() / (m_HSplit ? 2 : 1));
 			clear_to_color(m_PlayerScreen, m_BlackColor);
 			set_clip_state(m_PlayerScreen, 1);
 
@@ -375,7 +378,7 @@ namespace RTE {
 		Vector middleOfPlayerScreen;
 
 		if (whichPlayer == -1 || IsInMultiplayerMode()) {
-			middleOfPlayerScreen.SetXY(static_cast<float>(m_ResX / 2), static_cast<float>(m_ResY / 2));
+			middleOfPlayerScreen.SetXY(static_cast<float>(g_WindowMan.GetResX() / 2), static_cast<float>(g_WindowMan.GetResY() / 2));
 		} else {
 			int playerScreen = g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer);
 
@@ -395,7 +398,7 @@ namespace RTE {
 	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				int width = GetResX();
+				int width = g_WindowMan.GetResX();
 				for (int i = 0; i < c_MaxScreenCount; i++) {
 					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < width)) {
 						width = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
@@ -416,7 +419,7 @@ namespace RTE {
 	int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				int height = GetResY();
+				int height = g_WindowMan.GetResY();
 				for (int i = 0; i < c_MaxScreenCount; i++) {
 					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) {
 						height = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
@@ -848,19 +851,19 @@ namespace RTE {
 			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
 				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
-					screenOffset.SetXY(GetResX() / 2, 0);
+					screenOffset.SetXY(g_WindowMan.GetResX() / 2, 0);
 				} else {
 					// If only HSplit, then lower left quadrant
-					screenOffset.SetXY(0, GetResY() / 2);
+					screenOffset.SetXY(0, g_WindowMan.GetResY() / 2);
 				}
 				break;
 			case Players::PlayerThree:
 				// Always lower left quadrant
-				screenOffset.SetXY(0, GetResY() / 2);
+				screenOffset.SetXY(0, g_WindowMan.GetResY() / 2);
 				break;
 			case Players::PlayerFour:
 				// Always lower right quadrant
-				screenOffset.SetXY(GetResX() / 2, GetResY() / 2);
+				screenOffset.SetXY(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				break;
 			default:
 				// Always upper left corner
@@ -1022,7 +1025,7 @@ namespace RTE {
 
 				int screenOcclusionOffsetX = g_CameraMan.GetScreenOcclusion(playerScreen).GetRoundIntX();
 				// If there's really no room to offset the text into, then don't
-				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
+				if (GetPlayerScreenWidth() <= g_WindowMan.GetResX() / 2) { screenOcclusionOffsetX = 0; }
 
 				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
 				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {

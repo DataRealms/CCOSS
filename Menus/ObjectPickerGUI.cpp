@@ -1,6 +1,7 @@
 #include "ObjectPickerGUI.h"
 
 #include "CameraMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -80,7 +81,7 @@ namespace RTE {
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(controller->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(controller->GetPlayer()));
 		} else {
-			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 		}
 
 		if (!m_ParentBox) { m_ParentBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("PickerGUIBox")); }

@@ -2,6 +2,7 @@
 #include "SceneMan.h"
 #include "ActivityMan.h"
 #include "MetaMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
@@ -340,7 +341,7 @@ namespace RTE {
 	void UInputMan::SetMousePos(const Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), newPos.GetFloorIntX(), newPos.GetFloorIntY());
+			SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), newPos.GetFloorIntX(), newPos.GetFloorIntY());
 		}
 	}
 
@@ -372,7 +373,7 @@ namespace RTE {
 		if (m_GameHasAnyFocus && !m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			int limitX = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_X), x, x + width);
 			int limitY = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_Y), y, y + height);
-			SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), limitX, limitY);
+			SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
 		}
 	}
 
@@ -380,8 +381,8 @@ namespace RTE {
 
 	void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer) const {
 		if (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
-			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * g_FrameMan.GetResMultiplier();
-			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * g_FrameMan.GetResMultiplier();
+			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * g_WindowMan.GetResMultiplier();
+			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * g_WindowMan.GetResMultiplier();
 
 			switch (g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer)) {
 				case 0:
@@ -433,7 +434,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int UInputMan::WhichJoyButtonPressed(int whichJoy) const {
-		if (whichJoy >=0 && whichJoy < s_PrevJoystickStates.size()) {
+		if (whichJoy >= 0 && whichJoy < s_PrevJoystickStates.size()) {
 			for (int button = 0; button < s_PrevJoystickStates[whichJoy].m_Buttons.size(); ++button) {
 				if (s_PrevJoystickStates[whichJoy].m_Buttons[button] && s_ChangedJoystickStates[whichJoy].m_Buttons[button]) {
 					return button;
@@ -705,8 +706,8 @@ namespace RTE {
 			}
 			if (sdlEvent.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement += Vector(sdlEvent.motion.xrel, sdlEvent.motion.yrel);
-				m_AbsoluteMousePos.SetXY(sdlEvent.motion.x * g_FrameMan.GetResMultiplier(), sdlEvent.motion.y * g_FrameMan.GetResMultiplier());
-				if (g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				m_AbsoluteMousePos.SetXY(sdlEvent.motion.x * g_WindowMan.GetResMultiplier(), sdlEvent.motion.y * g_WindowMan.GetResMultiplier());
+				if (g_WindowMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					int x{ 0 };
 					int y{ 0 };
 					SDL_GetWindowPosition(SDL_GetWindowFromID(sdlEvent.motion.windowID), &x, &y);
@@ -726,24 +727,24 @@ namespace RTE {
 			}
 			if (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
 				if (!m_FrameLostFocus)
-					g_FrameMan.DisplaySwitchIn();
+					g_WindowMan.DisplaySwitchIn();
 				m_GameHasAnyFocus = true;
 			}
 			if (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 				m_GameHasAnyFocus = false;
 				m_FrameLostFocus = true;
-				g_FrameMan.DisplaySwitchOut();
+				g_WindowMan.DisplaySwitchOut();
 			}
 			if (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_ENTER) {
-				if (m_GameHasAnyFocus && g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_GameHasAnyFocus && g_WindowMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(sdlEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(sdlEvent.window.windowID));
 					m_GameHasAnyFocus = true;
 				}
 			}
 			if (sdlEvent.type == SDL_WINDOWEVENT && (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED)) {
-				if (!g_FrameMan.IsWindowFullscreen()) {
-					g_FrameMan.WindowResizedCallback(sdlEvent.window.data1, sdlEvent.window.data2);
+				if (!g_WindowMan.IsWindowFullscreen()) {
+					g_WindowMan.WindowResizedCallback(sdlEvent.window.data1, sdlEvent.window.data2);
 				}
 			}
 			if (sdlEvent.type == SDL_CONTROLLERAXISMOTION || sdlEvent.type == SDL_JOYAXISMOTION) {
@@ -879,7 +880,7 @@ namespace RTE {
 				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
-				g_FrameMan.ChangeResolutionMultiplier((g_FrameMan.GetResMultiplier() >= 2) ? 1 : 2);
+				g_WindowMan.ChangeResolutionMultiplier((g_WindowMan.GetResMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
@@ -980,7 +981,7 @@ namespace RTE {
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos && m_GameHasAnyFocus) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					// SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					// SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);
@@ -989,9 +990,9 @@ namespace RTE {
 
 			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
 			// won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
-			int mousePosX = m_AbsoluteMousePos.m_X / g_FrameMan.GetResMultiplier();
-			int mousePosY = m_AbsoluteMousePos.m_Y / g_FrameMan.GetResMultiplier();
-			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_FrameMan.GetResX() && mousePosY >= 0 && mousePosY < g_FrameMan.GetResY())) {
+			int mousePosX = m_AbsoluteMousePos.m_X / g_WindowMan.GetResMultiplier();
+			int mousePosY = m_AbsoluteMousePos.m_Y / g_WindowMan.GetResMultiplier();
+			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_WindowMan.GetResX() && mousePosY >= 0 && mousePosY < g_WindowMan.GetResY())) {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
 			}
 		}

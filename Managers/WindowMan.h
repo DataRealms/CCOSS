@@ -91,14 +91,6 @@ namespace RTE {
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
 		void ValidateResolution(int &resX, int &resY, int &resMultiplier, bool &newFullscreen) const;
 
-		/// <summary>
-		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
-		/// </summary>
-		/// <param name="resX">Game window width to check.</param>
-		/// <param name="resY">Game window height to check.</param>
-		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		/// <returns>Whether multi-screen validation performed any overrides to settings.</returns>
-		bool ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
 
 
 
@@ -226,7 +218,6 @@ namespace RTE {
 
 		bool m_EnableVSync; //!<
 		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
-		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
 		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
 

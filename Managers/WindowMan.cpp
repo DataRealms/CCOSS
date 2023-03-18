@@ -435,57 +435,7 @@ namespace RTE {
 		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const {
-#if 0
-		POINT pointOnScreen;
-		HMONITOR screenHandle;
-		MONITORINFO screenInfo = { sizeof(MONITORINFO) };
-
-		pointOnScreen = { -1 , 0 };
-		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
-		if (screenHandle != NULL) {
-			resX = m_PrimaryScreenResX / resMultiplier;
-			resY = m_PrimaryScreenResY / resMultiplier;
-
-			std::string leftNotPrimaryMessage = {
-				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
-				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
-				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
-			};
-			ShowMessageBox(leftNotPrimaryMessage);
-			return true;
-		}
-
-		pointOnScreen = { m_PrimaryScreenResX + 1 , 0 };
-		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
-		GetMonitorInfo(screenHandle, &screenInfo);
-
-		if (m_PrimaryScreenResY != screenInfo.rcMonitor.bottom) {
-			resX = m_PrimaryScreenResX / resMultiplier;
-			resY = m_PrimaryScreenResY / resMultiplier;
-			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-			return true;
-		}
-
-		if (m_NumScreens == 3) {
-			pointOnScreen = { screenInfo.rcMonitor.right + 1 , 0 };
-			screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
-			screenInfo = { sizeof(MONITORINFO) };
-			GetMonitorInfo(screenHandle, &screenInfo);
-
-			if (m_PrimaryScreenResY != screenInfo.rcMonitor.bottom) {
-				resX = (m_MaxResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
-				resY = m_PrimaryScreenResY / resMultiplier;
-				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-				return true;
-			}
-		}
-#endif
-
-		return false;
-	}
 
 
 

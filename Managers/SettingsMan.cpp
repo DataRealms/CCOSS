@@ -111,8 +111,6 @@ namespace RTE {
 			reader >> g_WindowMan.m_Fullscreen;
 		} else if (propName == "EnableVsync") {
 			reader >> g_WindowMan.m_EnableVSync;
-		} else if (propName == "DisableMultiScreenResolutionValidation") {
-			reader >> g_WindowMan.m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
 		} else if (propName == "MasterVolume") {
@@ -317,7 +315,6 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
 		writer.NewPropertyWithValue("Fullscreen", g_WindowMan.m_Fullscreen);
 		writer.NewPropertyWithValue("EnableVsync", g_WindowMan.m_EnableVSync);
-		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_WindowMan.m_DisableMultiScreenResolutionValidation);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);

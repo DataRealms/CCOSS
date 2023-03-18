@@ -35,6 +35,9 @@ namespace RTE {
 		m_TwoPlayerSplitscreenVSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenVert"));
 		m_TwoPlayerSplitscreenVSplitRadioButton->SetCheck(g_FrameMan.GetTwoPlayerVSplit());
 
+		m_EnableVSyncCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnableVSync"));
+		m_EnableVSyncCheckbox->SetCheck(g_WindowMan.GetVSyncEnabled());
+
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
@@ -315,7 +318,11 @@ namespace RTE {
 				m_VideoSettingsBox->SetFocus();
 			}
 
-			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+			if (guiEvent.GetMsg() == GUICheckbox::Changed) {
+				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
+					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
+				}
+			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					g_FrameMan.SetTwoPlayerVSplit(false);

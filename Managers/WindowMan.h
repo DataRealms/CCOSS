@@ -114,7 +114,13 @@ namespace RTE {
 		/// Gets whether VSync is enabled.
 		/// </summary>
 		/// <returns>Whether VSync is enabled.</returns>
-		bool VSyncEnabled() const { return m_EnableVSync; }
+		bool GetVSyncEnabled() const { return m_EnableVSync; }
+
+		/// <summary>
+		/// Sets whether VSync is enabled or not.
+		/// </summary>
+		/// <param name="enable">Whether to enable VSync.</param>
+		void SetVSyncEnabled(bool enable);
 
 		/// <summary>
 		/// Gets whether the game window resolution was changed.

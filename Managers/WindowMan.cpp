@@ -108,7 +108,7 @@ namespace RTE {
 
 	void WindowMan::CreateRenderers(int backbufferWidth, int backbufferHeight) {
 		int renderFlags = SDL_RENDERER_ACCELERATED;
-		if (g_WindowMan.VSyncEnabled()) {
+		if (g_WindowMan.GetVSyncEnabled()) {
 			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
 		}
 
@@ -166,6 +166,31 @@ namespace RTE {
 			}
 		}
 		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::SetVSyncEnabled(bool enable) {
+		m_EnableVSync = enable;
+
+		int sdlEnable = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
+		int result = -1;
+
+		if (!m_MultiRenderers.empty()) {
+			for (const auto &renderer : m_MultiRenderers) {
+				result = SDL_RenderSetVSync(renderer.get(), sdlEnable);
+
+				if (result != 0) {
+					break;
+				}
+			}
+		} else {
+			result = SDL_RenderSetVSync(m_Renderer.get(), sdlEnable);
+		}
+
+		if (result != 0) {
+			g_ConsoleMan.PrintString("SYSTEM: Unable to change VSync mode at runtime! The change will be applied after restarting!");
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -109,7 +109,7 @@ namespace RTE {
 			reader >> g_WindowMan.m_ResMultiplier;
 		} else if (propName == "Fullscreen") {
 			reader >> g_WindowMan.m_Fullscreen;
-		} else if (propName == "EnableVsync") {
+		} else if (propName == "EnableVSync") {
 			reader >> g_WindowMan.m_EnableVSync;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
@@ -314,7 +314,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionY", g_WindowMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
 		writer.NewPropertyWithValue("Fullscreen", g_WindowMan.m_Fullscreen);
-		writer.NewPropertyWithValue("EnableVsync", g_WindowMan.m_EnableVSync);
+		writer.NewPropertyWithValue("EnableVSync", g_WindowMan.m_EnableVSync);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);

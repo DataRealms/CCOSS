@@ -163,7 +163,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
+			g_WindowMan.ClearFrame();
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -183,7 +183,7 @@ namespace RTE {
 
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
-			g_FrameMan.UploadFrame();
+			g_WindowMan.UploadFrame();
 		}
 	}
 
@@ -207,7 +207,7 @@ namespace RTE {
 		long long drawTotalTime = 0;
 
 		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
+			g_WindowMan.ClearFrame();
 			bool serverUpdated = false;
 
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
@@ -292,7 +292,7 @@ namespace RTE {
 			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
-			g_FrameMan.UploadFrame();
+			g_WindowMan.UploadFrame();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
 			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);

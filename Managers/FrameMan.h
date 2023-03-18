@@ -7,12 +7,6 @@
 
 #define g_FrameMan FrameMan::Instance()
 
-extern "C" {
-	struct SDL_Renderer;
-	struct SDL_Texture;
-	struct SDL_Rect;
-}
-
 namespace RTE {
 
 	class AllegroScreen;
@@ -20,19 +14,12 @@ namespace RTE {
 	class GUIFont;
 	class ScreenShader;
 
-	struct SDLRendererDeleter {
-		void operator()(SDL_Renderer *renderer) const;
-	};
-
-	struct SDLTextureDeleter {
-		void operator()(SDL_Texture *texture) const;
-	};
-
 	/// <summary>
-	/// The singleton manager over the composition and display of frames.
+	/// The singleton manager over the composition of frames.
 	/// </summary>
 	class FrameMan : public Singleton<FrameMan> {
 		friend class SettingsMan;
+		friend class WindowMan;
 
 	public:
 
@@ -42,7 +29,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a FrameMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
-		FrameMan();
+		FrameMan() { Clear(); }
 
 		/// <summary>
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
@@ -55,7 +42,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		~FrameMan();
+		~FrameMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
@@ -240,16 +227,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Drawing
-		/// <summary>
-		/// Clear the GL backbuffer to start a new frame.
-		/// </summary>
-		void ClearFrame();
-
-		/// <summary>
-		/// Copies the BackBuffer32 content to GPU and shows it on screen.
-		/// </summary>
-		void UploadFrame();
-
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
@@ -478,13 +455,6 @@ namespace RTE {
 	protected:
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
-
-		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_Renderer; //!< The Main Window Renderer, draws to the main window.
-		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiRenderers; //!< Additional Renderers for multi display fullscreen.
-
-		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_ScreenTexture;
-		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.

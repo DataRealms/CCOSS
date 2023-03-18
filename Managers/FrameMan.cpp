@@ -18,8 +18,6 @@
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
 
-#include "SDL.h"
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,12 +40,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
-		m_Renderer.reset();
-		m_MultiRenderers.clear();
-		m_ScreenTexture.reset();
-		m_MultiDisplayTextures.clear();
-		m_TextureOffsets.clear();
-
 		m_HSplit = false;
 		m_VSplit = false;
 		m_TwoPlayerVSplit = false;
@@ -104,25 +96,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FrameMan::FrameMan() {
-		Clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int FrameMan::Initialize() {
-		int renderFlags = SDL_RENDERER_ACCELERATED;
-		if (g_WindowMan.VSyncEnabled()) {
-			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
-		}
-
-		m_Renderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(g_WindowMan.GetWindow(), -1, renderFlags));
-		if (!m_Renderer) {
-			m_Renderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(g_WindowMan.GetWindow(), -1, SDL_RENDERER_SOFTWARE));
-		}
-		RTEAssert(m_Renderer.get(), "Failed to initialize renderer, are you sure this is a computer?");
-		SDL_RenderSetIntegerScale(m_Renderer.get(), SDL_TRUE);
-
 		set_color_depth(m_BPP);
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
@@ -135,7 +109,7 @@ namespace RTE {
 		CreatePresetColorTables();
 		SetTransTableFromPreset(TransparencyPreset::HalfTrans);
 		CreateBackBuffers();
-		ClearFrame();
+		g_WindowMan.CreateRenderers(m_BackBuffer32->w, m_BackBuffer32->h);
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
@@ -193,27 +167,6 @@ namespace RTE {
 
 		m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
 
-		if (m_TextureOffsets.empty()) {
-			m_ScreenTexture = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_Renderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_BackBuffer32->w, m_BackBuffer32->h));
-
-			SDL_RenderSetLogicalSize(m_Renderer.get(), m_BackBuffer32->w, m_BackBuffer32->h);
-		} else {
-			m_MultiDisplayTextures.resize(m_TextureOffsets.size());
-			for(size_t i = 0; i < m_MultiDisplayTextures.size(); ++i){
-				SDL_Renderer* renderer;
-				if (i == 0) {
-					renderer = m_Renderer.get();
-				} else {
-					renderer = m_MultiRenderers[i-1].get();
-				}
-				m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(
-				    SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_TextureOffsets[i].w, m_TextureOffsets[i].h));
-				if (!m_MultiDisplayTextures[i]){
-					RTEAbort("Failed to create Texture for multidisplay: " + std::string(SDL_GetError()));
-				}
-				SDL_RenderSetLogicalSize(renderer, m_TextureOffsets[i].w, m_TextureOffsets[i].h);
-			}
-		}
 		return 0;
 	}
 
@@ -255,12 +208,6 @@ namespace RTE {
 		if (m_HSplit || m_VSplit) { m_TempPlayerScreen = m_PlayerScreen; }
 
 		CreateBackBuffers();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	FrameMan::~FrameMan() {
-		Destroy();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,45 +413,6 @@ namespace RTE {
 			m_TextDuration[whichScreen] = -1;
 			m_TextDurationTimer[whichScreen].Reset();
 			m_TextBlinking[whichScreen] = 0;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::ClearFrame() {
-		SDL_RenderClear(m_Renderer.get());
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::UploadFrame() {
-		if(m_WantScreenDump) {
-			SaveBitmap(ScreenDump, m_ScreenDumpName);
-			m_WantScreenDump = false;
-		}
-
-		if (m_TextureOffsets.empty()){
-			SDL_UpdateTexture(m_ScreenTexture.get(), NULL, m_BackBuffer32->line[0], m_BackBuffer32->w * 4);
-
-			SDL_RenderCopy(m_Renderer.get(), m_ScreenTexture.get(), NULL, NULL);
-			SDL_RenderPresent(m_Renderer.get());
-		} else {
-			SDL_Renderer *renderer;
-			for (size_t i = 0; i < m_TextureOffsets.size(); ++i) {
-				if(i == 0) {
-					renderer = m_Renderer.get();
-				} else {
-					renderer = m_MultiRenderers[i - 1].get();
-				}
-
-				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(),
-				    NULL,
-				    m_BackBuffer32->line[0] + (m_TextureOffsets[i].x + m_BackBuffer32->w * m_TextureOffsets[i].y) * 4,
-				    m_BackBuffer32->w * 4);
-
-				SDL_RenderCopy(renderer, m_MultiDisplayTextures[i].get(), NULL, NULL);
-				SDL_RenderPresent(renderer);
-			}
 		}
 	}
 
@@ -1168,15 +1076,5 @@ namespace RTE {
 		// Rendering complete, we can finally mark current frame as ready. This is needed to make rendering look totally atomic for the server pulling data in separate threads.
 		m_NetworkFrameReady = m_NetworkFrameCurrent;
 		m_NetworkFrameCurrent = (m_NetworkFrameCurrent == 0) ? 1 : 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SDLRendererDeleter::operator()(SDL_Renderer *renderer) const {
-		SDL_DestroyRenderer(renderer);
-	}
-
-	void SDLTextureDeleter::operator()(SDL_Texture *texture) const {
-		SDL_DestroyTexture(texture);
 	}
 }

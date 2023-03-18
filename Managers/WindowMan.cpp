@@ -420,11 +420,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() {
-		//if (m_WantScreenDump) {
-		//	SaveBitmap(ScreenDump, m_ScreenDumpName);
-		//	m_WantScreenDump = false;
-		//}
-
 		if (m_MultiDisplayTextureOffsets.empty()) {
 			SDL_UpdateTexture(m_ScreenTexture.get(), NULL, g_FrameMan.GetBackBuffer32()->line[0], g_FrameMan.GetBackBuffer32()->w * 4);
 

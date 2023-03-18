@@ -216,7 +216,7 @@ namespace RTE {
 		PrintString("--- SHORTCUTS ---");
 		PrintString("CTRL + ~ - Console in read-only mode without input capture");
 		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
-		PrintString("CTRL + S / PrintScrn - Make a screenshot");
+		PrintString("CTRL + S - Make contiguous screenshots while the keys are held");
 		PrintString("CTRL + W - Make a screenshot of the entire level");
 		PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		PrintString("CTRL + P - Show performance stats");
@@ -234,6 +234,7 @@ namespace RTE {
 		PrintString("F9 - Load latest quick-save");
 		PrintString("CTRL + F9 - Load latest auto-save");
 		PrintString("F10 - Clear Console log");
+		PrintString("F12 - Make a single screenshot");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

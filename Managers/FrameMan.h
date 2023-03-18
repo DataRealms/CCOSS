@@ -429,7 +429,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToPNG(const char *nameBase) { m_WantScreenDump = true; m_ScreenDumpName = nameBase; return 0; } // return SaveBitmap(ScreenDump, nameBase); }
+		int SaveScreenToPNG(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
 		/// Dumps a bitmap of everything on the scene to a PNG file.
@@ -488,7 +488,6 @@ namespace RTE {
 		bool m_FlashedLastFrame[c_MaxScreenCount]; //!< Whether we flashed last frame or not.
 		Timer m_FlashTimer[c_MaxScreenCount]; //!< Flash screen timer.
 
-		bool m_WantScreenDump; //!< Whether to save a screenshot at the end of the frame.
 		std::string m_ScreenDumpName; //!< The filename of the screenshot to save.
 		BITMAP *m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.

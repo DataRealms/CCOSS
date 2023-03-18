@@ -735,6 +735,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
 
+- Replace `PrintScreen` with `F12` for dumping a single screenshot. Printscreen is being unreliable.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

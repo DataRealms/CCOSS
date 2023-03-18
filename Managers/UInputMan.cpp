@@ -889,10 +889,7 @@ namespace RTE {
 				}
 			}
 		} else {
-			// PrntScren to save a single ScreenDump
-			if (KeyPressed(SDLK_PRINTSCREEN) || KeyPressed(SDLK_F12)) {
-				g_FrameMan.SaveScreenToPNG("ScreenDump");
-			} else if (KeyPressed(SDLK_F1)) {
+			if (KeyPressed(SDLK_F1)) {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.ReloadAllScripts();
@@ -907,6 +904,9 @@ namespace RTE {
 				g_ActivityMan.LoadAndLaunchGame("QuickSave");
 			} else if (KeyPressed(SDLK_F10)) {
 				g_ConsoleMan.ClearLog();
+			// F12 to save a single ScreenDump - Note that F12 triggers a breakpoint when the VS debugger is attached, regardless of config - this is by design. Thanks Microsoft.
+			} else if (KeyPressed(SDLK_F12)) {
+				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			}
 
 			if (g_PerformanceMan.IsShowingPerformanceStats()) {

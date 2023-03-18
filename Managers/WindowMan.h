@@ -67,7 +67,7 @@ namespace RTE {
 		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
 		/// </summary>
 		/// <returns>The pointer to the main window.</returns>
-		SDL_Window * GetWindow() const { return m_Window.get(); }
+		SDL_Window * GetWindow() const { return m_PrimaryWindow.get(); }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
@@ -185,7 +185,7 @@ namespace RTE {
 		/// <summary>
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
-		void UploadFrame();
+		void UploadFrame() const;
 
 		/// <summary>
 		///
@@ -196,15 +196,15 @@ namespace RTE {
 
 	private:
 
-		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_Window; //!< The main Window.
-		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
+		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_PrimaryWindow; //!< The main Window.
+		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiScreenWindows; //!< Additional windows for multi display fullscreen.
 
-		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_Renderer; //!< The Main Window Renderer, draws to the main window.
-		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiRenderers; //!< Additional Renderers for multi display fullscreen.
+		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
+		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiScreenRenderers; //!< Additional Renderers for multi display fullscreen.
 
-		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_ScreenTexture;
-		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
+		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture;
+		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiScreenTextures; //!< Additional Textures when drawing to multiple displays.
+		std::vector<SDL_Rect> m_MultiScreenTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
 		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.

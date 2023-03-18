@@ -129,8 +129,6 @@ namespace RTE {
 		GUITextBox *m_CustomResolutionWidthTextBox;
 		GUITextBox *m_CustomResolutionHeightTextBox;
 		GUICheckbox *m_CustomResolutionUpscaledCheckbox;
-		GUIRadioButton *m_CustomResolutionBorderlessRadioButton;
-		GUIRadioButton *m_CustomResolutionDedicatedRadioButton;
 		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;

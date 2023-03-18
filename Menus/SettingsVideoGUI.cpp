@@ -41,7 +41,7 @@ namespace RTE {
 		m_ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
 		m_ResolutionChangeDialogBox->SetVisible(false);
 
-		GUICollectionBox *settingsRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+		const GUICollectionBox *settingsRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
 		m_ResolutionChangeDialogBox->SetPositionAbs(settingsRootBox->GetXPos() + ((settingsRootBox->GetWidth() - m_ResolutionChangeDialogBox->GetWidth()) / 2), settingsRootBox->GetYPos() + ((settingsRootBox->GetHeight() - m_ResolutionChangeDialogBox->GetHeight()) / 2));
 
 		m_ResolutionChangeConfirmButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
@@ -64,12 +64,8 @@ namespace RTE {
 		m_PresetResolutionComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboPresetResolution"));
 		m_PresetResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyPresetResolution"));
 		m_PresetResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPresetResolutonValidation"));
+		m_PresetResolutionMessageLabel->SetVisible(false);
 
-		if (g_WindowMan.GetMaxResX() == 1366 && g_WindowMan.GetMaxResY() == 768) {
-			m_PresetResolutionMessageLabel->SetText("1366x768 is not supported by the borderless driver for reasons unknown to man.\nPlease use the custom resolution controls with the dedicated driver to set it.");
-		} else {
-			m_PresetResolutionMessageLabel->SetVisible(false);
-		}
 		PopulateResolutionsComboBox();
 	}
 
@@ -94,8 +90,6 @@ namespace RTE {
 		m_CustomResolutionUpscaledCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxCustomUpscaled"));
 		m_CustomResolutionUpscaledCheckbox->SetCheck(m_NewResUpscaled);
 
-		m_CustomResolutionBorderlessRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioWindowedDriver"));
-		m_CustomResolutionDedicatedRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioFullscreenDriver"));
 		m_CustomResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyCustomResolution"));
 		m_CustomResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelCustomResolutionValidation"));
 		m_CustomResolutionMessageLabel->SetVisible(false);
@@ -167,7 +161,7 @@ namespace RTE {
 			modeList.push_back(mode);
 		}
 
-		if (modeList.size() == 0) {
+		if (modeList.empty()) {
 			m_PresetResolutionComboBox->SetVisible(false);
 			m_PresetResolutionApplyButton->SetVisible(false);
 
@@ -227,7 +221,7 @@ namespace RTE {
 				m_NewResY = g_WindowMan.GetPrimaryScreenResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledFullscreen:
-				m_NewFullscreen = true; //(resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				m_NewFullscreen = true;
 				m_NewResUpscaled = true;
 				m_NewResX = g_WindowMan.GetPrimaryScreenResX() / 2;
 				m_NewResY = g_WindowMan.GetPrimaryScreenResY() / 2;
@@ -266,7 +260,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewFullscreen = m_CustomResolutionDedicatedRadioButton->GetCheck();
+		m_NewFullscreen = m_NewResX == g_WindowMan.GetMaxResX() && m_NewResY == g_WindowMan.GetMaxResY();
 
 		bool invalidResolution = false;
 
@@ -336,13 +330,6 @@ namespace RTE {
 					g_GUISound.ButtonPressSound()->Play();
 					m_PresetResolutionBox->SetVisible(false);
 					m_CustomResolutionBox->SetVisible(true);
-				} else if (guiEvent.GetControl() == m_CustomResolutionBorderlessRadioButton) {
-					g_GUISound.ButtonPressSound()->Play();
-					m_CustomResolutionMessageLabel->SetVisible(false);
-				} else if (guiEvent.GetControl() == m_CustomResolutionDedicatedRadioButton) {
-					g_GUISound.ButtonPressSound()->Play();
-					m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
-					m_CustomResolutionMessageLabel->SetVisible(true);
 				}
 			}
 		}

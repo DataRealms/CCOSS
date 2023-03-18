@@ -149,7 +149,14 @@ namespace RTE {
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
-		if (SDL_RenderSetVSync(m_PrimaryRenderer.get(), m_EnableVSync ? SDL_TRUE : SDL_FALSE) != 0) {
+		int result = -1;
+
+#if	SDL_MINOR_VERSION > 0 || (SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 18)
+		// Setting VSync per renderer is introduced in 2.0.18. Check minor version >0 as well because numbering scheme changed with the release of 2.24.0 (would be 2.0.24 with the previous scheme).
+		result = SDL_RenderSetVSync(m_PrimaryRenderer.get(), m_EnableVSync ? SDL_TRUE : SDL_FALSE);
+#endif
+
+		if (result != 0) {
 			g_ConsoleMan.PrintString("ERROR: Unable to change VSync mode at runtime! The change will be applied after restarting!");
 		}
 	}

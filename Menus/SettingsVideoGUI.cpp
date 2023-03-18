@@ -49,15 +49,10 @@ namespace RTE {
 		CreatePresetResolutionBox();
 		CreateCustomResolutionBox();
 
-		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 || g_FrameMan.IsUsingDedicatedGraphicsDriver()) {
+		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0) {
 			m_CustomResolutionRadioButton->SetCheck(true);
 			m_PresetResolutionBox->SetVisible(false);
 			m_CustomResolutionBox->SetVisible(true);
-			if (g_FrameMan.IsUsingDedicatedGraphicsDriver()) {
-				m_CustomResolutionDedicatedRadioButton->SetCheck(true);
-				m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
-				m_CustomResolutionMessageLabel->SetVisible(true);
-			}
 		}
 	}
 
@@ -138,10 +133,6 @@ namespace RTE {
 		if ((width >= 640 && height >= 450) && (width <= g_FrameMan.GetMaxResX() && height <= g_FrameMan.GetMaxResY())) {
 			// Disallow wacky resolutions that are taller than wide and some other dumb ones.
 			if ((height > width) || (width == 1152 && height == 864) || (width == 1176 && height == 664)) {
-				return false;
-			}
-			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode.
-			if (!g_FrameMan.IsUsingDedicatedGraphicsDriver() && (width % 4 != 0)) {
 				return false;
 			}
 			return true;

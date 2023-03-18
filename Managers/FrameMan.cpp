@@ -206,6 +206,9 @@ namespace RTE {
 		}
 		if (m_HSplit || m_VSplit) { m_TempPlayerScreen = m_PlayerScreen; }
 
+		destroy_bitmap(m_ScreenDumpBuffer);
+		m_ScreenDumpBuffer = nullptr;
+
 		CreateBackBuffers();
 	}
 
@@ -545,11 +548,7 @@ namespace RTE {
 				}
 				break;
 			case ScreenDump:
-				if (m_BackBuffer32) {
-					if (!m_ScreenDumpBuffer) {
-						destroy_bitmap(m_ScreenDumpBuffer);
-						m_ScreenDumpBuffer = create_bitmap_ex(24, m_BackBuffer32->w, m_BackBuffer32->h);
-					}
+				if (m_BackBuffer32 && m_ScreenDumpBuffer) {
 					blit(m_BackBuffer32, m_ScreenDumpBuffer, 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
 					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {

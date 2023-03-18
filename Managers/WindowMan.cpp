@@ -219,6 +219,11 @@ namespace RTE {
 			return;
 		}
 
+		m_MultiScreenTextureOffsets.clear();
+		m_MultiScreenTextures.clear();
+		m_MultiScreenRenderers.clear();
+		m_MultiScreenWindows.clear();
+
 		ClearFrame();
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
@@ -257,6 +262,11 @@ namespace RTE {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
+
+		m_MultiScreenTextureOffsets.clear();
+		m_MultiScreenTextures.clear();
+		m_MultiScreenRenderers.clear();
+		m_MultiScreenWindows.clear();
 
 		ClearFrame();
 

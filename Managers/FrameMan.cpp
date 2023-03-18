@@ -109,7 +109,7 @@ namespace RTE {
 		CreatePresetColorTables();
 		SetTransTableFromPreset(TransparencyPreset::HalfTrans);
 		CreateBackBuffers();
-		g_WindowMan.CreateRenderers(m_BackBuffer32->w, m_BackBuffer32->h);
+		g_WindowMan.CreateTextures();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
@@ -253,8 +253,6 @@ namespace RTE {
 				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
-
-		//m_ResChanged = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

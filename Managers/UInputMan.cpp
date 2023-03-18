@@ -707,7 +707,7 @@ namespace RTE {
 			if (sdlEvent.type == SDL_MOUSEMOTION) {
 				m_RawMouseMovement += Vector(sdlEvent.motion.xrel, sdlEvent.motion.yrel);
 				m_AbsoluteMousePos.SetXY(sdlEvent.motion.x * g_WindowMan.GetResMultiplier(), sdlEvent.motion.y * g_WindowMan.GetResMultiplier());
-				if (g_WindowMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (g_WindowMan.IsFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					int x{ 0 };
 					int y{ 0 };
 					SDL_GetWindowPosition(SDL_GetWindowFromID(sdlEvent.motion.windowID), &x, &y);
@@ -736,7 +736,7 @@ namespace RTE {
 				g_WindowMan.DisplaySwitchOut();
 			}
 			if (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_ENTER) {
-				if (m_GameHasAnyFocus && g_WindowMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_GameHasAnyFocus && g_WindowMan.IsFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(sdlEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(sdlEvent.window.windowID));
 					m_GameHasAnyFocus = true;
@@ -875,7 +875,7 @@ namespace RTE {
 				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
-				g_WindowMan.ChangeResolutionMultiplier((g_WindowMan.GetResMultiplier() >= 2) ? 1 : 2);
+				g_WindowMan.ChangeResolutionMultiplier();
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");

@@ -173,7 +173,7 @@ namespace RTE {
 				g_MenuMan.Reinitialize();
 				g_ConsoleMan.Destroy();
 				g_ConsoleMan.Initialize();
-				g_FrameMan.DestroyTempBackBuffers();
+				g_WindowMan.CompleteResolutionChange();
 			}
 
 			if (g_MenuMan.Update()) {

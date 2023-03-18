@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_NewFullscreen = g_WindowMan.GetGraphicsDriver();
+		m_NewFullscreen = g_WindowMan.IsFullscreen();
 		m_NewResX = g_WindowMan.GetResX();
 		m_NewResY = g_WindowMan.GetResY();
 		m_NewResUpscaled = g_WindowMan.GetResMultiplier() > 1;
@@ -263,7 +263,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewFullscreen = m_NewResX == g_WindowMan.GetMaxResX() && m_NewResY == g_WindowMan.GetMaxResY();
+		m_NewFullscreen = m_NewResX * newMultiplier == g_WindowMan.GetMaxResX() && m_NewResY * newMultiplier == g_WindowMan.GetMaxResY();
 
 		bool invalidResolution = false;
 

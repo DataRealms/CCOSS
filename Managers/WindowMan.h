@@ -49,9 +49,7 @@ namespace RTE {
 		/// <summary>
 		///
 		/// </summary>
-		/// <param name="backbufferWidth"></param>
-		/// <param name="backbufferHeight"></param>
-		void CreateRenderers(int backbufferWidth, int backbufferHeight);
+		void CreateTextures();
 #pragma endregion
 
 #pragma region Destruction
@@ -132,7 +130,7 @@ namespace RTE {
 		/// Checks whether the game window is currently in fullscreen mode.
 		/// </summary>
 		/// <returns>Whether the window is fullscreen.</returns>
-		bool IsWindowFullscreen() const { return m_Fullscreen; }
+		bool IsFullscreen() const { return (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
 #pragma endregion
 
 #pragma region Display Switch Handling
@@ -148,7 +146,7 @@ namespace RTE {
 		void DisplaySwitchIn() const;
 #pragma endregion
 
-#pragma region Concrete Methods
+#pragma region Resolution Handling
 		/// <summary>
 		/// Switches the game window resolution to the specified dimensions.
 		/// </summary>
@@ -161,29 +159,25 @@ namespace RTE {
 		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
-		/// <param name="newMultiplier">The multiplier to switch to.</param>
-		void ChangeResolutionMultiplier(int newMultiplier = 1);
+		void ChangeResolutionMultiplier();
 
+		/// <summary>
+		///
+		/// </summary>
+		void CompleteResolutionChange();
+#pragma endregion
+
+#pragma region Concrete Methods
 		/// <summary>
 		/// Clear the GL backbuffer to start a new frame.
 		/// </summary>
-		void ClearFrame();
+		void ClearFrame() const;
 
 		/// <summary>
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
 		void UploadFrame();
 #pragma endregion
-
-
-
-		/// <summary>
-		/// Gets the graphics driver that is used for rendering.
-		/// </summary>
-		/// <returns>The graphics driver that is used for rendering.</returns>
-		int GetGraphicsDriver() const { return m_Fullscreen; }
-
-
 
 	private:
 
@@ -195,7 +189,7 @@ namespace RTE {
 
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_ScreenTexture;
 		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_TextureOffsets; //!< Texture offsets for multi-display fullscreen.
+		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		int m_NumScreens; //!< Number of physical screens.
 		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).
@@ -207,19 +201,24 @@ namespace RTE {
 		int m_ResY; //!< Game window height.
 		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
 
-		bool m_EnableVSync; //!<
-		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
+		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 
 		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
 
-#pragma region Initialize Breakdown
+#pragma region Resolution Handling
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Initialize().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateResolution(int &resX, int &resY, int &resMultiplier, bool &newFullscreen) const;
+		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		bool AttemptToRevertToPreviousResolution() const;
 #pragma endregion
 
 #pragma region Multi Display Handling

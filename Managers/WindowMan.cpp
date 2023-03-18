@@ -100,6 +100,8 @@ namespace RTE {
 		RTEAssert(m_Renderer.get(), "Failed to initialize renderer!\nAre you sure this is a computer?");
 		SDL_RenderSetIntegerScale(m_Renderer.get(), SDL_TRUE);
 
+		CreateTextures();
+
 		if (IsFullscreen()) {
 			if (m_NumScreens == 1) {
 				SDL_SetWindowFullscreen(m_Window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -186,7 +188,7 @@ namespace RTE {
 		}
 
 		if (result != 0) {
-			g_ConsoleMan.PrintString("SYSTEM: Unable to change VSync mode at runtime! The change will be applied after restarting!");
+			g_ConsoleMan.PrintString("ERROR: Unable to change VSync mode at runtime! The change will be applied after restarting!");
 		}
 	}
 
@@ -295,9 +297,6 @@ namespace RTE {
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
 		m_ResChanged = false;
 	}
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

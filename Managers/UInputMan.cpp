@@ -658,7 +658,7 @@ namespace RTE {
 				case InputState::Released:
 					return axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
 				default:
-					RTEAbort("Undefined InputState value passed in. See InputState enumeration");https://www.youtube.com/
+					RTEAbort("Undefined InputState value passed in. See InputState enumeration");
 					return false;
 			}
 		}
@@ -679,10 +679,10 @@ namespace RTE {
 
 		std::fill(s_ChangedKeyStates.begin(), s_ChangedKeyStates.end(), false);
 		std::fill(s_ChangedMouseButtonStates.begin(), s_ChangedMouseButtonStates.end(), false);
-		for (Gamepad& pad : s_ChangedJoystickStates) {
-			std::fill(pad.m_Buttons.begin(), pad.m_Buttons.end(), false);
-			std::fill(pad.m_Axis.begin(), pad.m_Axis.end(), 0);
-			std::fill(pad.m_DigitalAxis.begin(), pad.m_DigitalAxis.end(), 0);
+		for (Gamepad &gamepad : s_ChangedJoystickStates) {
+			std::fill(gamepad.m_Buttons.begin(), gamepad.m_Buttons.end(), false);
+			std::fill(gamepad.m_Axis.begin(), gamepad.m_Axis.end(), 0);
+			std::fill(gamepad.m_DigitalAxis.begin(), gamepad.m_DigitalAxis.end(), 0);
 		}
 		m_TextInput.clear();
 		m_MouseWheelChange = 0;

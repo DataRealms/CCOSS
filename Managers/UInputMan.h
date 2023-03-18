@@ -651,7 +651,7 @@ namespace RTE {
 		void ClearNetworkAccumulatedStates();
 #pragma endregion
 
-	protected:
+	private:
 
 		/// <summary>
 		/// Enumeration for the different states an input element or button can be in.
@@ -710,8 +710,6 @@ namespace RTE {
 		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
 
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
-
-	private:
 
 #pragma region Input State Handling
 		/// <summary>

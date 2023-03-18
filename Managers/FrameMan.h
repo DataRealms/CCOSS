@@ -446,9 +446,16 @@ namespace RTE {
 		int SaveWorldPreviewToPNG(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
-	protected:
+	private:
+
+		/// <summary>
+		/// Enumeration with different settings for the SaveBitmap() method.
+		/// </summary>
+		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
+
+		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -510,15 +517,6 @@ namespace RTE {
 		int m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
 		std::mutex m_NetworkBitmapLock[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
-
-	private:
-
-		/// <summary>
-		/// Enumeration with different settings for the SaveBitmap() method.
-		/// </summary>
-		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
-
-		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.

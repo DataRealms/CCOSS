@@ -216,7 +216,7 @@ namespace RTE {
 		PrintString("--- SHORTCUTS ---");
 		PrintString("CTRL + ~ - Console in read-only mode without input capture");
 		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
-		PrintString("CTRL + S - Make contiguous screenshots while the keys are held");
+		PrintString("CTRL + S - Make continuous screenshots while the keys are held");
 		PrintString("CTRL + W - Make a screenshot of the entire level");
 		PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		PrintString("CTRL + P - Show performance stats");

@@ -21,6 +21,9 @@ namespace RTE {
 		m_MultiDisplayTextures.clear();
 		m_MultiDisplayTextureOffsets.clear();
 
+		m_AnyWindowHasFocus = false;
+		m_FrameLostFocus = false;
+
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = 0;
 		m_MaxResY = 0;
@@ -441,6 +444,35 @@ namespace RTE {
 				SDL_RenderPresent(renderer);
 			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::HandleWindowEvent(const SDL_Event &windowEvent) {
+		switch (windowEvent.window.event) {
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				if (!m_FrameLostFocus) {
+					DisplaySwitchIn();
+				}
+				m_AnyWindowHasFocus = true;
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				m_AnyWindowHasFocus = false;
+				m_FrameLostFocus = true;
+				DisplaySwitchOut();
+				break;
+			case SDL_WINDOWEVENT_ENTER:
+				if (m_AnyWindowHasFocus && IsFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
+					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
+					m_AnyWindowHasFocus = true;
+				}
+				break;
+			default:
+				break;
+		}
+
+		m_FrameLostFocus = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

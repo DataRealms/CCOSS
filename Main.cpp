@@ -156,6 +156,44 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
+	///
+	/// </summary>
+	void PollEvents() {
+		SDL_Event sdlEvent;
+		while (SDL_PollEvent(&sdlEvent)) {
+			switch (sdlEvent.type) {
+				case SDL_QUIT:
+					System::SetQuit(true);
+					break;
+				case SDL_WINDOWEVENT:
+					g_WindowMan.HandleWindowEvent(sdlEvent);
+					break;
+				case SDL_KEYUP:
+				case SDL_KEYDOWN:
+				case SDL_TEXTINPUT:
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEBUTTONUP:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEWHEEL:
+				case SDL_CONTROLLERAXISMOTION:
+				case SDL_JOYAXISMOTION:
+				case SDL_CONTROLLERBUTTONDOWN:
+				case SDL_CONTROLLERBUTTONUP:
+				case SDL_JOYBUTTONDOWN:
+				case SDL_JOYBUTTONUP:
+				case SDL_JOYDEVICEADDED:
+				case SDL_JOYDEVICEREMOVED:
+					g_UInputMan.QueueInputEvent(sdlEvent);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
 	/// Game menus loop.
 	/// </summary>
 	void RunMenuLoop() {
@@ -164,6 +202,9 @@ namespace RTE {
 
 		while (!System::IsSetToQuit()) {
 			g_WindowMan.ClearFrame();
+
+			PollEvents();
+
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -207,15 +248,18 @@ namespace RTE {
 		long long drawTotalTime = 0;
 
 		while (!System::IsSetToQuit()) {
-			g_WindowMan.ClearFrame();
 			bool serverUpdated = false;
-
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
+
+			g_WindowMan.ClearFrame();
+
 			g_TimerMan.Update();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
+
+				PollEvents();
 
 				g_PerformanceMan.NewPerformanceSample();
 				g_PerformanceMan.UpdateMSPSU();

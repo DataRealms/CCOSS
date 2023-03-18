@@ -6,12 +6,9 @@
 #include "InputScheme.h"
 #include "Gamepad.h"
 #include "SDL_keyboard.h"
+#include "SDL_events.h"
 
 #define g_UInputMan UInputMan::Instance()
-
-extern "C" {
-	union SDL_Event;
-}
 
 namespace RTE {
 
@@ -60,6 +57,12 @@ namespace RTE {
 		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.
 		/// </summary>
 		void LoadDeviceIcons();
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="inputEvent"></param>
+		void QueueInputEvent(const SDL_Event &inputEvent);
 
 		/// <summary>
 		/// Updates the state of this UInputMan. Supposed to be done every frame.
@@ -665,6 +668,8 @@ namespace RTE {
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
 
+		std::queue<SDL_Event> m_EventQueue; //!<
+
 		bool m_SkipHandlingSpecialInput; //!< Whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 
 		int m_NumJoysticks; //!< The number of currently connected gamepads.
@@ -675,9 +680,6 @@ namespace RTE {
 
 		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
-
-		bool m_GameHasAnyFocus; //!< Whether any game window might have focus.
-		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.

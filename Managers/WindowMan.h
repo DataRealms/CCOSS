@@ -11,6 +11,9 @@ extern "C" {
 	struct SDL_Renderer;
 	struct SDL_Texture;
 	struct SDL_Rect;
+
+	union SDL_Event;
+	typedef SDL_Event SDL_Event;
 }
 
 namespace RTE {
@@ -109,6 +112,12 @@ namespace RTE {
 		int GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
+		/// Checks whether the game window is currently in fullscreen mode.
+		/// </summary>
+		/// <returns>Whether the window is fullscreen.</returns>
+		bool IsFullscreen() const { return (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+
+		/// <summary>
 		/// Gets whether VSync is enabled.
 		/// </summary>
 		/// <returns>Whether VSync is enabled.</returns>
@@ -127,10 +136,10 @@ namespace RTE {
 		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
-		/// Checks whether the game window is currently in fullscreen mode.
+		///
 		/// </summary>
-		/// <returns>Whether the window is fullscreen.</returns>
-		bool IsFullscreen() const { return (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+		/// <returns></returns>
+		bool AnyWindowHasFocus() const { return m_AnyWindowHasFocus; }
 #pragma endregion
 
 #pragma region Display Switch Handling
@@ -177,6 +186,12 @@ namespace RTE {
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
 		void UploadFrame();
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="windowEvent"></param>
+		void HandleWindowEvent(const SDL_Event &windowEvent);
 #pragma endregion
 
 	private:
@@ -190,6 +205,9 @@ namespace RTE {
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_ScreenTexture;
 		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional Textures when drawing to multiple displays.
 		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
+
+		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
+		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		int m_NumScreens; //!< Number of physical screens.
 		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).

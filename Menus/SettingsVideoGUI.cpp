@@ -273,8 +273,8 @@ namespace RTE {
 		if (m_NewResY > m_NewResX) {
 			m_CustomResolutionMessageLabel->SetText("Resolution that is taller than wide is not supported.");
 			invalidResolution = true;
-		} else if (m_NewResX * newMultiplier < 640 || m_NewResY * newMultiplier < 384) {
-			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (640x384) is not supported.");
+		} else if (m_NewResX * newMultiplier < c_MinResX || m_NewResY * newMultiplier < c_MinResY) {
+			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (" + std::to_string(c_MinResX) + "x" + std::to_string(c_MinResY) + ") is not supported.");
 			invalidResolution = true;
 		}
 		g_GUISound.ButtonPressSound()->Play();

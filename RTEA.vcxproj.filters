@@ -564,6 +564,9 @@
     <ClInclude Include="GUI\Wrappers\AllegroBitmap.h">
       <Filter>GUI\Wrappers</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\WindowMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1094,6 +1097,9 @@
     </ClCompile>
     <ClCompile Include="GUI\Wrappers\AllegroBitmap.cpp">
       <Filter>GUI\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\WindowMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

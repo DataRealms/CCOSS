@@ -533,7 +533,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
 
-- - New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
+- Added new `Timer` constructors `timer = Timer(elapsedSimTimeMS)` and `timer = Timer(elapsedSimTimeMS, simTimeLimitMS)` that let you setup `Timer`s more cleanly.
+
+- New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
 
 </details>
 

@@ -502,6 +502,7 @@ namespace RTE {
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
 		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
+		BITMAP *m_ScreenDumpNameBaseDummy; //!< Dummy BITMAP for keeping naming continuity when saving ScreenDumps with multi-threading.
 
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.

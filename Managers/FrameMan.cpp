@@ -49,6 +49,7 @@ namespace RTE {
 		m_ScreenDumpBuffer = nullptr;
 		m_WorldDumpBuffer = nullptr;
 		m_ScenePreviewDumpGradient = nullptr;
+		m_ScreenDumpNameBaseDummy = nullptr;
 		m_BackBuffer8 = nullptr;
 		m_BackBuffer32 = nullptr;
 		m_OverlayBitmap32 = nullptr;
@@ -112,6 +113,9 @@ namespace RTE {
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
+
+		m_ScreenDumpNameBaseDummy = create_bitmap_ex(24, 1, 1);
+		clear_bitmap(m_ScreenDumpNameBaseDummy);
 
 		return 0;
 	}
@@ -222,6 +226,7 @@ namespace RTE {
 		destroy_bitmap(m_ScreenDumpBuffer);
 		destroy_bitmap(m_WorldDumpBuffer);
 		destroy_bitmap(m_ScenePreviewDumpGradient);
+		destroy_bitmap(m_ScreenDumpNameBaseDummy);
 
 		for (int i = 0; i < c_MaxScreenCount; i++) {
 			for (int f = 0; f < 2; f++) {
@@ -518,7 +523,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const std::string& nameBase, BITMAP *bitmapToSave) {
+	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const std::string &nameBase, BITMAP *bitmapToSave) {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
@@ -550,9 +555,24 @@ namespace RTE {
 			case ScreenDump:
 				if (m_BackBuffer32 && m_ScreenDumpBuffer) {
 					blit(m_BackBuffer32, m_ScreenDumpBuffer, 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
-					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
-					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
-						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
+
+					if (save_png(fullFileName, m_ScreenDumpNameBaseDummy, nullptr) == 0) {
+						auto saveScreenDump = [fullFileName](BITMAP *screenDumpBuffer) {
+							// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
+							BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(screenDumpBuffer), screenDumpBuffer->w, screenDumpBuffer->h);
+							blit(screenDumpBuffer, outputBitmap, 0, 0, 0, 0, screenDumpBuffer->w, screenDumpBuffer->h);
+							// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
+							if (save_png(fullFileName, outputBitmap, nullptr) == 0) {
+								g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
+							} else {
+								g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
+							}
+							destroy_bitmap(outputBitmap);
+						};
+						std::thread saveThread(saveScreenDump, m_ScreenDumpBuffer);
+						// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
+						saveThread.detach();
+
 						saveSuccess = true;
 					}
 				}

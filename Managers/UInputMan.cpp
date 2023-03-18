@@ -6,7 +6,6 @@
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "PerformanceMan.h"
-#include "GUIInput.h"
 #include "Icon.h"
 #include "GameActivity.h"
 #include "NetworkServer.h"
@@ -14,8 +13,6 @@
 #include "SDL.h"
 
 namespace RTE {
-
-	GUIInput *UInputMan::s_GUIInputInstanceToCaptureKeyStateFrom = nullptr;
 
 	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_PrevKeyStates;
 	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_ChangedKeyStates;
@@ -30,6 +27,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::Clear() {
+		m_SkipHandlingSpecialInput = false;
 		m_TextInput = "";
 		m_NumJoysticks = 0;
 		m_OverrideInput = false;
@@ -134,12 +132,6 @@ namespace RTE {
 		for (int gamepad = InputDevice::DEVICE_GAMEPAD_1; gamepad < InputDevice::DEVICE_COUNT; gamepad++) {
 			m_DeviceIcons[gamepad] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad " + std::to_string(gamepad - 1)));
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *inputClass) const {
-		s_GUIInputInstanceToCaptureKeyStateFrom = inputClass;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -573,7 +565,7 @@ namespace RTE {
 			case InputState::Held:
 				return s_PrevKeyStates[scancodeToTest];
 			case InputState::Pressed:
-				return s_GUIInputInstanceToCaptureKeyStateFrom ? (s_GUIInputInstanceToCaptureKeyStateFrom->GetScanCodeState(scancodeToTest) == GUIInput::Pushed) : (s_PrevKeyStates[scancodeToTest] && s_ChangedKeyStates[scancodeToTest]);
+				return s_PrevKeyStates[scancodeToTest] && s_ChangedKeyStates[scancodeToTest];
 			case InputState::Released:
 				return !s_PrevKeyStates[scancodeToTest] && s_ChangedKeyStates[scancodeToTest];
 			default:
@@ -848,10 +840,11 @@ namespace RTE {
 				return;
 			}
 		}
-		// If InputClass is set for input capture pressing F1 will open console and hard-lock during manual input configuration, so just skip processing all special input until it's nullptr again.
-		if (s_GUIInputInstanceToCaptureKeyStateFrom) {
+
+		if (m_SkipHandlingSpecialInput) {
 			return;
 		}
+
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(SDLK_s)) {

@@ -15,7 +15,6 @@ extern "C" {
 
 namespace RTE {
 
-	class GUIInput;
 	class Icon;
 
 	/// <summary>
@@ -71,10 +70,10 @@ namespace RTE {
 
 #pragma region Control Scheme and Input Mapping Handling
 		/// <summary>
-		/// Sets the GUIInput instance to capture key state from. This is used for better key detection during input mapping input capture.
+		/// Sets whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 		/// </summary>
-		/// <param name="guiInputInstance">Pointer to the GUIInput instance to capture key state from, or nullptr if using UInputMan input capture.</param>
-		void SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *guiInputInstance) const;
+		/// <param name="skip">Whether to skip handling special input or not.</param>
+		void SetSkipHandlingSpecialInput(bool skip) { m_SkipHandlingSpecialInput = skip; }
 
 		/// <summary>
 		/// Gets the currently used input device of the specified player.
@@ -656,8 +655,6 @@ namespace RTE {
 		/// </summary>
 		enum InputState { Held, Pressed, Released, InputStateCount };
 
-		static GUIInput *s_GUIInputInstanceToCaptureKeyStateFrom; //!< Pointer to the GUIInput instance to capture key state from, if any. This is used for better key detection during input mapping input capture.
-
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_PrevKeyStates; //!< Key states as they were the previous update.
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_ChangedKeyStates; //!< Key states that have changed.
 
@@ -667,6 +664,8 @@ namespace RTE {
 
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
+
+		bool m_SkipHandlingSpecialInput; //!< Whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 
 		int m_NumJoysticks; //!< The number of currently connected gamepads.
 

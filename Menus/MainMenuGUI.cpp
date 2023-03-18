@@ -374,7 +374,7 @@ namespace RTE {
 			} else {
 				ShowQuitScreenOrQuit();
 			}
-		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyReleased(SDLK_ESCAPE)) {
+		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 			m_SettingsMenu->CloseActiveDialogBox();
 		}
 	}

@@ -183,12 +183,6 @@ namespace RTE {
 		/// <param name="newFullscreen">Whether to put the game into fullscreen mode.</param>
 		void ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen);
 
-		/// <summary>
-		/// Apply resolution change after window resize.
-		/// </summary>
-		/// <param name="newResX">The new horizontal resolution.</param>
-		/// <param name="newResY">The new vertical resolution.</param>
-		void WindowResizedCallback(int newResX, int newResY);
 
 
 

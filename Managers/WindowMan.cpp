@@ -60,7 +60,7 @@ namespace RTE {
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier, m_Fullscreen);
 
-		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+		int windowFlags = SDL_WINDOW_SHOWN;
 		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
@@ -81,7 +81,7 @@ namespace RTE {
 				SDL_WINDOWPOS_CENTERED,
 				c_DefaultResX,
 				c_DefaultResY,
-				SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN));
+				SDL_WINDOW_SHOWN));
 
 			if (!m_Window) {
 				RTEAbort("Failed to create a window because: " + std::string(SDL_GetError()));

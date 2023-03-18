@@ -742,11 +742,6 @@ namespace RTE {
 					m_GameHasAnyFocus = true;
 				}
 			}
-			if (sdlEvent.type == SDL_WINDOWEVENT && (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED)) {
-				if (!g_WindowMan.IsWindowFullscreen()) {
-					g_WindowMan.WindowResizedCallback(sdlEvent.window.data1, sdlEvent.window.data2);
-				}
-			}
 			if (sdlEvent.type == SDL_CONTROLLERAXISMOTION || sdlEvent.type == SDL_JOYAXISMOTION) {
 				SDL_JoystickID id = sdlEvent.type == SDL_CONTROLLERAXISMOTION ? sdlEvent.caxis.which : sdlEvent.jaxis.which;
 				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);

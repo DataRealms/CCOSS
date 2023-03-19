@@ -20,7 +20,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_NewFullscreen = g_WindowMan.ResSettingsCoverPrimaryFullscreen();
 		m_NewResX = g_WindowMan.GetResX();
 		m_NewResY = g_WindowMan.GetResY();
 		m_NewResUpscaled = g_WindowMan.GetResMultiplier() > 1;
@@ -203,7 +202,7 @@ namespace RTE {
 		} else {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
-			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewFullscreen);
+			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled);
 		}
 	}
 
@@ -212,22 +211,19 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
-				m_NewFullscreen = false;
 				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetMaxResX() / 2;
-				m_NewResY = g_WindowMan.GetMaxResY() / 2;
-				break;
-			case ResolutionQuickChangeType::Fullscreen:
-				m_NewFullscreen = true;
-				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetPrimaryScreenResX();
-				m_NewResY = g_WindowMan.GetPrimaryScreenResY();
-				break;
-			case ResolutionQuickChangeType::UpscaledFullscreen:
-				m_NewFullscreen = true;
-				m_NewResUpscaled = true;
 				m_NewResX = g_WindowMan.GetPrimaryScreenResX() / 2;
 				m_NewResY = g_WindowMan.GetPrimaryScreenResY() / 2;
+				break;
+			case ResolutionQuickChangeType::Fullscreen:
+				m_NewResUpscaled = false;
+				m_NewResX = g_WindowMan.GetMaxResX();
+				m_NewResY = g_WindowMan.GetMaxResY();
+				break;
+			case ResolutionQuickChangeType::UpscaledFullscreen:
+				m_NewResUpscaled = true;
+				m_NewResX = g_WindowMan.GetMaxResX() / 2;
+				m_NewResY = g_WindowMan.GetMaxResY() / 2;
 				break;
 			default:
 				RTEAbort("Invalid resolution quick change type passed to SettingsVideoGUI::ApplyQuickChangeResolution!")
@@ -247,7 +243,6 @@ namespace RTE {
 			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
-			m_NewFullscreen = (m_NewResX * newResMultiplier == g_WindowMan.GetMaxResX() && m_NewResY * newResMultiplier == g_WindowMan.GetMaxResY());
 
 			g_GUISound.ButtonPressSound()->Play();
 			ApplyNewResolution();
@@ -263,7 +258,6 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-		m_NewFullscreen = m_NewResX * newMultiplier == g_WindowMan.GetMaxResX() && m_NewResY * newMultiplier == g_WindowMan.GetMaxResY();
 
 		bool invalidResolution = false;
 

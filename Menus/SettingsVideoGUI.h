@@ -108,7 +108,6 @@ namespace RTE {
 
 		std::vector<PresetResolutionRecord> m_PresetResolutions; //!< Contains PresetResolutionRecords for all the supported preset resolutions.
 
-		int m_NewFullscreen; //!< The new graphics driver to use when changing resolution.
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
 		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.

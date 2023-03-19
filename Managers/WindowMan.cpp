@@ -76,15 +76,17 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryWindow() {
 		const char *windowTitle = "Cortex Command Community Project";
-		int windowPos = SDL_WINDOWPOS_CENTERED;
+		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryScreenResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+		int windowPosY = SDL_WINDOWPOS_CENTERED;
 
 		if (ResSettingsCoverPrimaryFullscreen() || ResSettingsCoverMultiScreenFullscreen()) {
 			// SDL_WINDOWPOS_UNDEFINED gives us the same result SDL_WINDOWPOS_CENTERED, so use 0 for proper top left corner of primary screen.
 			// TODO: This is temp cause this won't work for any setup where the leftmost screen is not primary.
-			windowPos = 0;
+			windowPosX = (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+			windowPosY = (m_MaxResY - (m_ResY * m_ResMultiplier)) / 2;
 		}
 
-		m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, windowPos, windowPos, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
+		m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, windowPosX, windowPosY, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
 		if (!m_PrimaryWindow) {
 			ShowMessageBox("Unable to create window because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
 
@@ -188,7 +190,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen) {
+	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled) {
 		int newResMultiplier = upscaled ? 2 : 1;
 
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
@@ -199,20 +201,19 @@ namespace RTE {
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		if (newFullscreen && ((m_NumScreens > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
-			if (!AttemptToRevertToPreviousResolution()) {
-				RTEAbort("Unable to revert to previous resolution because:\n" + std::string(SDL_GetError()) + "!");
-			}
-			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
-			return;
-		} else if (!newFullscreen) {
-			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
-			SDL_RestoreWindow(m_PrimaryWindow.get());
-			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
+		bool newResSettingsCoverPrimaryFullscreen = (newResX * newResMultiplier == m_PrimaryScreenResX) && (newResY * newResMultiplier == m_PrimaryScreenResY);
+		bool newResSettingsCoverMultiScreenFullscreen = (m_NumScreens > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+
+		if (newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen) {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
-			int displayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), 0, 0);
+		} else  {
+			int windowPosX = (newResX * newResMultiplier <= m_PrimaryScreenResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (newResX * newResMultiplier)) / 2;
+
+			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED);
 		}
+
 		m_ResX = newResX;
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
@@ -236,33 +237,24 @@ namespace RTE {
 
 		ClearFrame();
 
-		if (m_ResX * newResMultiplier == m_MaxResX && m_ResY * newResMultiplier == m_MaxResY) {
-			if ((m_NumScreens > 1 && !SetWindowMultiFullscreen(m_ResX, m_ResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
-				if (!AttemptToRevertToPreviousResolution()) {
-					RTEAbort("Unable to set back to previous windowed mode multiplier because:\n" + std::string(SDL_GetError()) + "!");
-				}
-				g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
-				return;
-			}
-		} else {
-			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
-			SDL_RestoreWindow(m_PrimaryWindow.get());
-			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
+		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryScreenResX) && (m_ResY * newResMultiplier == m_PrimaryScreenResY);
+		bool newResSettingsCoverMultiScreenFullscreen = (m_NumScreens > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
+
+		if (newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen) {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
-			int displayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), 0, 0);
+		} else {
+			int windowPosX = (m_ResX * newResMultiplier <= m_PrimaryScreenResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
+
+			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED);
 		}
+
 		m_ResMultiplier = newResMultiplier;
+
 		g_SettingsMan.UpdateSettingsFile();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool WindowMan::AttemptToRevertToPreviousResolution() const {
-		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-		return SDL_SetWindowFullscreen(m_PrimaryWindow.get(), ResSettingsCoverPrimaryFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

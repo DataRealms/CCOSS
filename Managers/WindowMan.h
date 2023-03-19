@@ -163,8 +163,7 @@ namespace RTE {
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
-		/// <param name="newFullscreen">Whether to put the game into fullscreen mode.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, bool newFullscreen);
+		void ChangeResolution(int newResX, int newResY, bool upscaled);
 
 		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
@@ -242,12 +241,6 @@ namespace RTE {
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
 		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <returns></returns>
-		bool AttemptToRevertToPreviousResolution() const;
 #pragma endregion
 
 #pragma region Multi Display Handling

@@ -1922,7 +1922,6 @@ void AHuman::UpdateAI()
         {
 			// Stay still and switch to sentry mode if we're close enough to the final destination.
 			if (m_Waypoints.empty() && m_MovePath.empty() && std::abs(m_MoveVector.m_X) < 10.0F) {
-
 				m_LateralMoveState = LAT_STILL;
 				m_DeviceState = SCANNING;
 				if (!m_pMOMoveTarget) { m_AIMode = AIMODE_SENTRY; }
@@ -3310,7 +3309,6 @@ void AHuman::Update()
 	ThrownDevice *thrownDevice = nullptr;
 	if (HeldDevice *device = GetEquippedItem(); device && m_Status != INACTIVE) {
 		if (!dynamic_cast<ThrownDevice *>(device)) {
-
 			device->SetSharpAim(m_SharpAimProgress);
 
 			if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {

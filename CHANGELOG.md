@@ -533,7 +533,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
 
-- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
 
 - New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
 
@@ -552,7 +552,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
 
 - New `MovableObject` Lua (R) property `DistanceTravelled` which returns the amount of pixels the object has travelled since its creation.
-=======
+
 - Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
 
 - Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.

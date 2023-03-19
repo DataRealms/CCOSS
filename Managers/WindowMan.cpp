@@ -67,22 +67,47 @@ namespace RTE {
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 
-		const char *windowTitle = "Cortex Command Community Project";
+		CreatePrimaryWindow();
+		CreatePrimaryRenderer();
+		CreatePrimaryTexture();
+	}
 
-		m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::CreatePrimaryWindow() {
+		const char *windowTitle = "Cortex Command Community Project";
+		int windowPos = SDL_WINDOWPOS_CENTERED;
+
+		if (ResSettingsCoverPrimaryFullscreen() || ResSettingsCoverMultiScreenFullscreen()) {
+			// SDL_WINDOWPOS_UNDEFINED gives us the same result SDL_WINDOWPOS_CENTERED, so use 0 for proper top left corner of primary screen.
+			// TODO: This is temp cause this won't work for any setup where the leftmost screen is not primary.
+			windowPos = 0;
+		}
+
+		m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, windowPos, windowPos, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
 		if (!m_PrimaryWindow) {
-			ShowMessageBox("Unable to create window because: " + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
+			ShowMessageBox("Unable to create window because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
 
 			m_ResX = c_DefaultResX;
 			m_ResY = c_DefaultResY;
 			m_ResMultiplier = 1;
+			g_SettingsMan.SetSettingsNeedOverwrite();
 
 			m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
 			if (!m_PrimaryWindow) {
-				RTEAbort("Failed to create window because: " + std::string(SDL_GetError()));
+				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
 
+		// TODO: Windows seems to switch to the borderless driver properly without us having to explicitly set it. Test on Linux.
+		//if (ResSettingsCoverPrimaryFullscreen() || ResSettingsCoverMultiScreenFullscreen()) {
+		//	SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+		//}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::CreatePrimaryRenderer() {
 		int renderFlags = SDL_RENDERER_ACCELERATED;
 		if (m_EnableVSync) {
 			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
@@ -90,32 +115,20 @@ namespace RTE {
 
 		m_PrimaryRenderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, renderFlags));
 		if (!m_PrimaryRenderer) {
+			ShowMessageBox("Unable to create hardware accelerated renderer because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to software rendering!");
 			m_PrimaryRenderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, SDL_RENDERER_SOFTWARE));
-		}
-		RTEAssert(m_PrimaryRenderer.get(), "Failed to initialize renderer!\nAre you sure this is a computer?");
-		SDL_RenderSetIntegerScale(m_PrimaryRenderer.get(), SDL_TRUE);
 
-		CreateTexture();
-
-		if (IsFullscreen()) {
-			if (m_NumScreens == 1) {
-				SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-			} else {
-				if (!SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier)) {
-					SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_FALSE);
-					m_ResX = c_DefaultResX;
-					m_ResY = c_DefaultResY;
-					m_ResMultiplier = 1;
-					SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX, m_ResY);
-					SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
-				}
+			if (!m_PrimaryRenderer) {
+				RTEAbort("Failed to initialize renderer!\nAre you sure this is a computer?");
 			}
 		}
+
+		SDL_RenderSetIntegerScale(m_PrimaryRenderer.get(), SDL_TRUE);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::CreateTexture() {
+	void WindowMan::CreatePrimaryTexture() {
 		m_PrimaryTexture = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_PrimaryRenderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_ResX, m_ResY));
 		SDL_RenderSetLogicalSize(m_PrimaryRenderer.get(), m_ResX, m_ResY);
 	}
@@ -188,7 +201,7 @@ namespace RTE {
 
 		if (newFullscreen && ((m_NumScreens > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			if (!AttemptToRevertToPreviousResolution()) {
-				RTEAbort("Unable to revert to previous resolution because: " + std::string(SDL_GetError()) + "!");
+				RTEAbort("Unable to revert to previous resolution because:\n" + std::string(SDL_GetError()) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
 			return;
@@ -208,7 +221,7 @@ namespace RTE {
 		g_SettingsMan.UpdateSettingsFile();
 
 		g_FrameMan.RecreateBackBuffers();
-		CreateTexture();
+		CreatePrimaryTexture();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +239,7 @@ namespace RTE {
 		if (m_ResX * newResMultiplier == m_MaxResX && m_ResY * newResMultiplier == m_MaxResY) {
 			if ((m_NumScreens > 1 && !SetWindowMultiFullscreen(m_ResX, m_ResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
 				if (!AttemptToRevertToPreviousResolution()) {
-					RTEAbort("Unable to set back to previous windowed mode multiplier because: " + std::string(SDL_GetError()) + "!");
+					RTEAbort("Unable to set back to previous windowed mode multiplier because:\n" + std::string(SDL_GetError()) + "!");
 				}
 				g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
 				return;
@@ -249,7 +262,7 @@ namespace RTE {
 
 	bool WindowMan::AttemptToRevertToPreviousResolution() const {
 		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-		return SDL_SetWindowFullscreen(m_PrimaryWindow.get(), IsFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
+		return SDL_SetWindowFullscreen(m_PrimaryWindow.get(), ResSettingsCoverPrimaryFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -405,7 +418,7 @@ namespace RTE {
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				if (m_AnyWindowHasFocus && IsFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_AnyWindowHasFocus && ResSettingsCoverPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
 					m_AnyWindowHasFocus = true;

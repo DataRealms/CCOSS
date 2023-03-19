@@ -48,11 +48,6 @@ namespace RTE {
 		/// Makes the WindowMan object ready for use, which is to be used with SettingsMan first.
 		/// </summary>
 		void Initialize();
-
-		/// <summary>
-		///
-		/// </summary>
-		void CreateTexture();
 #pragma endregion
 
 #pragma region Destruction
@@ -112,10 +107,16 @@ namespace RTE {
 		int GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
-		/// Checks whether the game window is currently in fullscreen mode.
+		/// Checks whether the current resolution settings fully cover the primary screen.
 		/// </summary>
-		/// <returns>Whether the window is fullscreen.</returns>
-		bool IsFullscreen() const { return (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+		/// <returns>Whether the current resolution settings fully cover the primary screen.</returns>
+		bool ResSettingsCoverPrimaryFullscreen() const { return (m_ResX * m_ResMultiplier == m_PrimaryScreenResX) && (m_ResY * m_ResMultiplier == m_PrimaryScreenResY); }
+
+		/// <summary>
+		/// Checks whether the current resolution settings fully cover all the available screens.
+		/// </summary>
+		/// <returns>Whether the current resolution settings fully cover all the available screens.</returns>
+		bool ResSettingsCoverMultiScreenFullscreen() const { return m_NumScreens > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
 
 		/// <summary>
 		/// Gets whether VSync is enabled.
@@ -215,6 +216,23 @@ namespace RTE {
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 
 		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
+
+#pragma region Initialize Breakdown
+		/// <summary>
+		///
+		/// </summary>
+		void CreatePrimaryWindow();
+
+		/// <summary>
+		///
+		/// </summary>
+		void CreatePrimaryRenderer();
+
+		/// <summary>
+		///
+		/// </summary>
+		void CreatePrimaryTexture();
+#pragma endregion
 
 #pragma region Resolution Handling
 		/// <summary>

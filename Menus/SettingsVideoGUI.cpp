@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_NewFullscreen = g_WindowMan.IsFullscreen();
+		m_NewFullscreen = g_WindowMan.ResSettingsCoverPrimaryFullscreen();
 		m_NewResX = g_WindowMan.GetResX();
 		m_NewResY = g_WindowMan.GetResY();
 		m_NewResUpscaled = g_WindowMan.GetResMultiplier() > 1;

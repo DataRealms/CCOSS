@@ -17,7 +17,7 @@ namespace RTE {
 		m_PrimaryRenderer.reset();
 		m_PrimaryTexture.reset();
 
-		m_AnyWindowHasFocus = false;
+		m_WindowHasFocus = false;
 
 		m_NumScreens = SDL_GetNumVideoDisplays();
 		m_MaxResX = 0;
@@ -403,17 +403,17 @@ namespace RTE {
 		switch (windowEvent.window.event) {
 			case SDL_WINDOWEVENT_FOCUS_GAINED:
 				DisplaySwitchIn();
-				m_AnyWindowHasFocus = true;
+				m_WindowHasFocus = true;
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
-				m_AnyWindowHasFocus = false;
+				m_WindowHasFocus = false;
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				if (m_AnyWindowHasFocus && ResSettingsCoverPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_WindowHasFocus && ResSettingsCoverPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
-					m_AnyWindowHasFocus = true;
+					m_WindowHasFocus = true;
 				}
 				break;
 			default:

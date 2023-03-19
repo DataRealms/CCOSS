@@ -140,7 +140,7 @@ namespace RTE {
 		///
 		/// </summary>
 		/// <returns></returns>
-		bool AnyWindowHasFocus() const { return m_AnyWindowHasFocus; }
+		bool WindowHasFocus() const { return m_WindowHasFocus; }
 #pragma endregion
 
 #pragma region Display Switch Handling
@@ -200,7 +200,7 @@ namespace RTE {
 		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture;
 
-		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
+		bool m_WindowHasFocus; //!< Whether any game window might have focus.
 
 		int m_NumScreens; //!< Number of physical screens.
 		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).

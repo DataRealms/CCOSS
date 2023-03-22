@@ -146,16 +146,6 @@ namespace RTE {
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 		}
-		if (m_NumScreens == 1) {
-			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
-			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
-				settingsNeedOverwrite = true;
-				resX = c_DefaultResX;
-				resY = c_DefaultResY;
-				resMultiplier = 1;
-				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
-			}
-		}
 		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
 	}
 

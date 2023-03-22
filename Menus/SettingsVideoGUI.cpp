@@ -128,7 +128,7 @@ namespace RTE {
 
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= 640 && height >= 450) && (width <= g_WindowMan.GetMaxResX() && height <= g_WindowMan.GetMaxResY())) {
-			// Disallow wacky resolutions that are taller than wide and some other dumb ones.
+			// Filter wacky resolutions that are taller than wide and some other dumb ones.
 			if ((height > width) || (width == 1152 && height == 864) || (width == 1176 && height == 664)) {
 				return false;
 			}
@@ -261,10 +261,7 @@ namespace RTE {
 
 		bool invalidResolution = false;
 
-		if (m_NewResY > m_NewResX) {
-			m_CustomResolutionMessageLabel->SetText("Resolution that is taller than wide is not supported.");
-			invalidResolution = true;
-		} else if (m_NewResX * newMultiplier < c_MinResX || m_NewResY * newMultiplier < c_MinResY) {
+		if (m_NewResX * newMultiplier < c_MinResX || m_NewResY * newMultiplier < c_MinResY) {
 			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (" + std::to_string(c_MinResX) + "x" + std::to_string(c_MinResY) + ") is not supported.");
 			invalidResolution = true;
 		}

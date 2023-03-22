@@ -205,6 +205,8 @@ namespace RTE {
 
 			PollEvents();
 
+			g_WindowMan.Update();
+
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -260,6 +262,8 @@ namespace RTE {
 				serverUpdated = false;
 
 				PollEvents();
+
+				g_WindowMan.Update();
 
 				g_PerformanceMan.NewPerformanceSample();
 				g_PerformanceMan.UpdateMSPSU();

@@ -192,15 +192,27 @@ namespace RTE {
 		/// </summary>
 		/// <param name="windowEvent"></param>
 		void HandleWindowEvent(const SDL_Event &windowEvent);
+
+		/// <summary>
+		///
+		/// </summary>
+		void Update();
 #pragma endregion
 
 	private:
 
 		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_PrimaryWindow; //!< The main Window.
+		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiScreenWindows; //!< Additional windows for multi display fullscreen.
+
 		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
+		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiScreenRenderers; //!< Additional Renderers for multi display fullscreen.
+
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture;
+		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiScreenTextures; //!< Additional Textures when drawing to multiple displays.
+		std::vector<SDL_Rect> m_MultiScreenTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		bool m_WindowHasFocus; //!< Whether any game window might have focus.
+		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		int m_NumScreens; //!< Number of physical screens.
 		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).
@@ -241,6 +253,13 @@ namespace RTE {
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
 		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="revertToDefaults"></param>
+		/// <returns></returns>
+		void AttemptToRevertToPreviousResolution(bool revertToDefaults = false);
 #pragma endregion
 
 #pragma region Multi Display Handling

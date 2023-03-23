@@ -309,6 +309,14 @@ namespace RTE {
 				m_VideoSettingsBox->SetFocus();
 			}
 
+			if (guiEvent.GetControl() == m_PresetResolutionComboBox) {
+				if (guiEvent.GetMsg() == GUIComboBox::Dropped) {
+					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 165);
+				} else if (guiEvent.GetMsg() == GUIComboBox::Closed) {
+					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 60);
+				}
+			}
+
 			if (guiEvent.GetMsg() == GUICheckbox::Changed) {
 				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());

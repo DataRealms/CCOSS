@@ -147,7 +147,7 @@ namespace RTE {
 		std::vector<SDL_DisplayMode> modeList;
 
 		std::set<PresetResolutionRecord> resRecords;
-		int dpIndex= SDL_GetWindowDisplayIndex(g_WindowMan.GetWindow());
+		int dpIndex= SDL_GetWindowDisplayIndex(g_WindowMan.GetPrimaryWindow());
 		for (int i = 0; i < SDL_GetNumDisplayModes(dpIndex); ++i) {
 			SDL_DisplayMode mode;
 			if (SDL_GetDisplayMode(dpIndex, i, &mode) != 0) {
@@ -212,8 +212,8 @@ namespace RTE {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetPrimaryScreenResX() / 2;
-				m_NewResY = g_WindowMan.GetPrimaryScreenResY() / 2;
+				m_NewResX = g_WindowMan.GetPrimaryDisplayResX() / 2;
+				m_NewResY = g_WindowMan.GetPrimaryDisplayResY() / 2;
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
 				m_NewResUpscaled = false;

@@ -10,6 +10,10 @@
 
 namespace RTE {
 
+	void SDLWindowDeleter::operator()(SDL_Window *window) const { SDL_DestroyWindow(window); }
+	void SDLRendererDeleter::operator()(SDL_Renderer *renderer) const { SDL_DestroyRenderer(renderer); }
+	void SDLTextureDeleter::operator()(SDL_Texture *texture) const { SDL_DestroyTexture(texture); }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Clear() {
@@ -21,21 +25,18 @@ namespace RTE {
 		m_MultiScreenTextures.clear();
 		m_MultiScreenTextureOffsets.clear();
 
-		m_WindowHasFocus = false;
-		m_FrameLostFocus = false;
-
-		m_NumScreens = SDL_GetNumVideoDisplays();
+		m_NumDisplays = 0;
+		m_PrimaryDisplayResX = 0;
+		m_PrimaryDisplayResY = 0;
 		m_MaxResX = 0;
 		m_MaxResY = 0;
-		m_PrimaryScreenResX = 0;
-		m_PrimaryScreenResY = 0;
+		m_AnyWindowHasFocus = false;
+		m_FrameLostFocus = false;
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
-
-		m_EnableVSync = true;
-
 		m_ResChanged = false;
+		m_EnableVSync = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,15 +48,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Initialize() {
-		m_NumScreens = SDL_GetNumVideoDisplays();
+		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		SDL_Rect primaryDisplayBounds;
 		SDL_GetDisplayBounds(0, &primaryDisplayBounds);
 
-		m_PrimaryScreenResX = primaryDisplayBounds.w;
-		m_PrimaryScreenResY = primaryDisplayBounds.h;
+		m_PrimaryDisplayResX = primaryDisplayBounds.w;
+		m_PrimaryDisplayResY = primaryDisplayBounds.h;
 
-		for (int i = 0; i < m_NumScreens; ++i) {
+		for (int i = 0; i < m_NumDisplays; ++i) {
 			SDL_Rect res;
 			if (SDL_GetDisplayBounds(i, &res) != 0) {
 				g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(i));
@@ -81,15 +82,15 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryWindow() {
 		const char *windowTitle = "Cortex Command Community Project";
-		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryScreenResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryDisplayResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN;
 
-		if (ResSettingsCoverPrimaryFullscreen()) {
+		if (CoversPrimaryFullscreen()) {
 			// SDL_WINDOWPOS_UNDEFINED gives us the same result SDL_WINDOWPOS_CENTERED, so use 0 for proper top left corner of primary screen.
 			// TODO: This is temp cause this won't work for any setup where the leftmost screen is not primary.
-			windowPosX = (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
-			windowPosY = (m_MaxResY - (m_ResY * m_ResMultiplier)) / 2;
+			//windowPosX = (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+			//windowPosY = (m_MaxResY - (m_ResY * m_ResMultiplier)) / 2;
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -108,7 +109,7 @@ namespace RTE {
 			}
 		}
 
-		if (ResSettingsCoverMultiScreenFullscreen()) {
+		if (CoversMultiDisplayFullscreen()) {
 			SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier);
 		}
 	}
@@ -224,7 +225,7 @@ namespace RTE {
 	void WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
 		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 
-		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), ResSettingsCoverPrimaryFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
+		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), CoversPrimaryFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
 
 		if (!revertToDefaults && result != 0) {
 			ShowMessageBox("Failed to switch to new resolution, reverted back to previous setting! Attempting to revert to defaults!");
@@ -258,11 +259,11 @@ namespace RTE {
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResSettingsCoverPrimaryFullscreen = (newResX * newResMultiplier == m_PrimaryScreenResX) && (newResY * newResMultiplier == m_PrimaryScreenResY);
-		bool newResSettingsCoverMultiScreenFullscreen = (m_NumScreens > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+		bool newResSettingsCoverPrimaryFullscreen = (newResX * newResMultiplier == m_PrimaryDisplayResX) && (newResY * newResMultiplier == m_PrimaryDisplayResY);
+		bool newResSettingsCoverMultiScreenFullscreen = (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 		bool switchToFullscreen = newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen;
 
-		if (switchToFullscreen && ((m_NumScreens > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+		if (switchToFullscreen && ((m_NumDisplays > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			AttemptToRevertToPreviousResolution();
 			return;
 		} else if (!switchToFullscreen) {
@@ -302,14 +303,14 @@ namespace RTE {
 
 		ClearFrame();
 
-		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryScreenResX) && (m_ResY * newResMultiplier == m_PrimaryScreenResY);
-		bool newResSettingsCoverMultiScreenFullscreen = (m_NumScreens > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
+		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryDisplayResX) && (m_ResY * newResMultiplier == m_PrimaryDisplayResY);
+		bool newResSettingsCoverMultiScreenFullscreen = (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
 
 		if (newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen) {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), 0, 0);
 		} else {
-			int windowPosX = (m_ResX * newResMultiplier <= m_PrimaryScreenResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
+			int windowPosX = (m_ResX * newResMultiplier <= m_PrimaryDisplayResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
 
 			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED);
@@ -361,8 +362,8 @@ namespace RTE {
 		SDL_Rect windowDisplayBounds;
 		SDL_GetDisplayBounds(windowDisplay, &windowDisplayBounds);
 
-		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumScreens);
-		for (int i = 0; i < m_NumScreens; ++i) {
+		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumDisplays);
+		for (int i = 0; i < m_NumDisplays; ++i) {
 			displayBounds[i].first = i;
 			SDL_GetDisplayBounds(i, &displayBounds[i].second);
 		}
@@ -384,7 +385,7 @@ namespace RTE {
 		int topLeftX = windowDisplayBounds.x;
 		int topLeftY = windowDisplayBounds.y;
 
-		for (; index < m_NumScreens && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier); ++index) {
+		for (; index < m_NumDisplays && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier); ++index) {
 			if (displayBounds[index].second.x < topLeftX || displayBounds[index].second.y < topLeftY || displayBounds[index].second.x - topLeftX > resX * resMultiplier || displayBounds[index].second.y - topLeftY > resY * resMultiplier) {
 				continue;
 			}
@@ -444,6 +445,39 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void WindowMan::Update() {
+		m_FrameLostFocus = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::HandleWindowEvent(const SDL_Event &windowEvent) {
+		switch (windowEvent.window.event) {
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				if (!m_FrameLostFocus) {
+					DisplaySwitchIn();
+				}
+				m_AnyWindowHasFocus = true;
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				m_AnyWindowHasFocus = false;
+				m_FrameLostFocus = true;
+				DisplaySwitchOut();
+				break;
+			case SDL_WINDOWEVENT_ENTER:
+				if (m_AnyWindowHasFocus && CoversPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
+					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
+					m_AnyWindowHasFocus = true;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void WindowMan::ClearFrame() const {
 		SDL_RenderClear(m_PrimaryRenderer.get());
 	}
@@ -467,52 +501,5 @@ namespace RTE {
 				SDL_RenderPresent(renderer);
 			}
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::HandleWindowEvent(const SDL_Event &windowEvent) {
-		switch (windowEvent.window.event) {
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				if (!m_FrameLostFocus) {
-					DisplaySwitchIn();
-				}
-				m_WindowHasFocus = true;
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				m_WindowHasFocus = false;
-				m_FrameLostFocus = true;
-				DisplaySwitchOut();
-				break;
-			case SDL_WINDOWEVENT_ENTER:
-				if (m_WindowHasFocus && ResSettingsCoverPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
-					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
-					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
-					m_WindowHasFocus = true;
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::Update() {
-		m_FrameLostFocus = false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SDLWindowDeleter::operator()(SDL_Window *window) const {
-		SDL_DestroyWindow(window);
-	}
-
-	void SDLRendererDeleter::operator()(SDL_Renderer *renderer) const {
-		SDL_DestroyRenderer(renderer);
-	}
-
-	void SDLTextureDeleter::operator()(SDL_Texture *texture) const {
-		SDL_DestroyTexture(texture);
 	}
 }

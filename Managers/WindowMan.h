@@ -11,9 +11,7 @@ extern "C" {
 	struct SDL_Renderer;
 	struct SDL_Texture;
 	struct SDL_Rect;
-
 	union SDL_Event;
-	typedef SDL_Event SDL_Event;
 }
 
 namespace RTE {
@@ -45,7 +43,7 @@ namespace RTE {
 		WindowMan();
 
 		/// <summary>
-		/// Makes the WindowMan object ready for use, which is to be used with SettingsMan first.
+		/// Makes the WindowMan object ready for use.
 		/// </summary>
 		void Initialize();
 #pragma endregion
@@ -57,12 +55,18 @@ namespace RTE {
 		~WindowMan() = default;
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Display Getters and Setters
 		/// <summary>
-		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
+		/// Gets the horizontal resolution of the primary display.
 		/// </summary>
-		/// <returns>The pointer to the main window.</returns>
-		SDL_Window * GetWindow() const { return m_PrimaryWindow.get(); }
+		/// <returns>The horizontal resolution of the primary display.</returns>
+		int GetPrimaryDisplayResX() const { return m_PrimaryDisplayResX; }
+
+		/// <summary>
+		/// Gets the vertical resolution of the primary display.
+		/// </summary>
+		/// <returns>The vertical resolution of the primary display.</returns>
+		int GetPrimaryDisplayResY() const { return m_PrimaryDisplayResY; }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
@@ -75,48 +79,56 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The maximum vertical resolution the game window can be (desktop height).</returns>
 		int GetMaxResY() const { return m_MaxResY; }
+#pragma endregion
+
+#pragma region Game Window Getters and Setters
+		/// <summary>
+		/// Gets the primary game window pointer. OWNERSHIP IS NOT TRANSFERRED!
+		/// </summary>
+		/// <returns>Pointer to the primary game window.</returns>
+		SDL_Window * GetPrimaryWindow() const { return m_PrimaryWindow.get(); }
 
 		/// <summary>
-		/// Gets the horizontal resolution of the primary display.
+		/// Gets whether any of the game windows is currently in focus.
 		/// </summary>
-		/// <returns>The horizontal resolution of the primary display.</returns>
-		int GetPrimaryScreenResX() const { return m_PrimaryScreenResX; }
+		/// <returns>Whether any of the game windows is currently in focus.</returns>
+		bool AnyWindowHasFocus() const { return m_AnyWindowHasFocus; }
 
 		/// <summary>
-		/// Gets the vertical resolution of the primary display.
+		/// Gets the current horizontal resolution of the game window.
 		/// </summary>
-		/// <returns>The vertical resolution of the primary display.</returns>
-		int GetPrimaryScreenResY() const { return m_PrimaryScreenResY; }
-
-		/// <summary>
-		/// Gets the horizontal resolution of the screen.
-		/// </summary>
-		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>
+		/// <returns>The current horizontal resolution of the window, in pixels.</returns>
 		int GetResX() const { return m_ResX; }
 
 		/// <summary>
-		/// Gets the vertical resolution of the screen.
+		/// Gets the current vertical resolution of the game window.
 		/// </summary>
-		/// <returns>An int describing the vertical resolution of the screen in pixels.</returns>
+		/// <returns>The current vertical resolution of the window, in pixels.</returns>
 		int GetResY() const { return m_ResY; }
 
 		/// <summary>
-		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
+		/// Gets how many times the window resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
-		/// <returns>What multiple the screen resolution is run in.</returns>
+		/// <returns>What multiple the window resolution is run in.</returns>
 		int GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
-		/// Checks whether the current resolution settings fully cover the primary screen.
+		/// Gets whether the window resolution was changed.
 		/// </summary>
-		/// <returns>Whether the current resolution settings fully cover the primary screen.</returns>
-		bool ResSettingsCoverPrimaryFullscreen() const { return (m_ResX * m_ResMultiplier == m_PrimaryScreenResX) && (m_ResY * m_ResMultiplier == m_PrimaryScreenResY); }
+		/// <returns>Whether the window resolution was changed.</returns>
+		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
-		/// Checks whether the current resolution settings fully cover all the available screens.
+		/// Checks whether the current resolution settings fully cover the primary display.
 		/// </summary>
-		/// <returns>Whether the current resolution settings fully cover all the available screens.</returns>
-		bool ResSettingsCoverMultiScreenFullscreen() const { return m_NumScreens > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+		/// <returns>Whether the current resolution settings fully cover the primary display.</returns>
+		bool CoversPrimaryFullscreen() const { return (m_ResX * m_ResMultiplier == m_PrimaryDisplayResX) && (m_ResY * m_ResMultiplier == m_PrimaryDisplayResY); }
+
+		/// <summary>
+		/// Checks whether the current resolution settings fully cover all the available displays.
+		/// </summary>
+		/// <returns>Whether the current resolution settings fully cover all the available displays.</returns>
+		bool CoversMultiDisplayFullscreen() const { return m_NumDisplays > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
 
 		/// <summary>
 		/// Gets whether VSync is enabled.
@@ -129,29 +141,17 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable VSync.</param>
 		void SetVSyncEnabled(bool enable);
-
-		/// <summary>
-		/// Gets whether the game window resolution was changed.
-		/// </summary>
-		/// <returns>Whether the game window resolution was changed.</returns>
-		bool ResolutionChanged() const { return m_ResChanged; }
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <returns></returns>
-		bool WindowHasFocus() const { return m_WindowHasFocus; }
 #pragma endregion
 
 #pragma region Display Switch Handling
 		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
-		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
+		/// Handles focus loss when switching away from the game window.
+		/// Will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
 		/// </summary>
 		void DisplaySwitchOut() const;
 
 		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
+		/// Handles focus gain when switching back to the game window.
 		/// </summary>
 		void DisplaySwitchIn() const;
 #pragma endregion
@@ -166,17 +166,28 @@ namespace RTE {
 		void ChangeResolution(int newResX, int newResY, bool upscaled);
 
 		/// <summary>
-		/// Sets and switches to a new windowed mode resolution multiplier.
+		/// Sets and switches to a new resolution multiplier.
 		/// </summary>
 		void ChangeResolutionMultiplier();
 
 		/// <summary>
-		///
+		/// Completes the resolution change by clearing the temporary backbuffers and resetting the resolution change flag.
 		/// </summary>
 		void CompleteResolutionChange();
 #pragma endregion
 
 #pragma region Concrete Methods
+		/// <summary>
+		///
+		/// </summary>
+		void Update();
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="windowEvent"></param>
+		void HandleWindowEvent(const SDL_Event &windowEvent);
+
 		/// <summary>
 		/// Clear the GL backbuffer to start a new frame.
 		/// </summary>
@@ -186,17 +197,6 @@ namespace RTE {
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
 		void UploadFrame() const;
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="windowEvent"></param>
-		void HandleWindowEvent(const SDL_Event &windowEvent);
-
-		/// <summary>
-		///
-		/// </summary>
-		void Update();
 #pragma endregion
 
 	private:
@@ -211,22 +211,21 @@ namespace RTE {
 		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiScreenTextures; //!< Additional Textures when drawing to multiple displays.
 		std::vector<SDL_Rect> m_MultiScreenTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
-		bool m_WindowHasFocus; //!< Whether any game window might have focus.
-		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
+		int m_NumDisplays; //!< Number of physical displays.
+		int m_PrimaryDisplayResX; //!< Width of the primary physical display only.
+		int m_PrimaryDisplayResY; //!< Height of the primary physical display only.
+		int m_MaxResX; //!< Maximum width the game window can be (desktop width).
+		int m_MaxResY; //!< Maximum height the game window can be (desktop height).
 
-		int m_NumScreens; //!< Number of physical screens.
-		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).
-		int m_MaxResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
-		int m_PrimaryScreenResX; //!< Width of the primary physical screen only.
-		int m_PrimaryScreenResY; //!< Height of the primary physical screen only.
+		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
+		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
 		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
-
-		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
 
 #pragma region Initialize Breakdown
 		/// <summary>

@@ -122,6 +122,9 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryTexture() {
 		m_PrimaryTexture = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_PrimaryRenderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_ResX, m_ResY));
+		if (!m_PrimaryTexture) {
+			RTEAbort("Failed to create texture because:\n" + std::string(SDL_GetError()));
+		}
 		SDL_RenderSetLogicalSize(m_PrimaryRenderer.get(), m_ResX, m_ResY);
 	}
 
@@ -132,7 +135,7 @@ namespace RTE {
 		for (size_t i = 0; i < m_MultiScreenTextures.size(); ++i) {
 			m_MultiScreenTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiScreenRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h));
 			if (!m_MultiScreenTextures[i]) {
-				RTEAbort("Failed to create texture for multi-display: " + std::string(SDL_GetError()));
+				RTEAbort("Failed to create texture for multi-display because:\n" + std::string(SDL_GetError()));
 			}
 			SDL_RenderSetLogicalSize(m_MultiScreenRenderers[i].get(), m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h);
 		}

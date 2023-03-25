@@ -201,11 +201,11 @@ namespace RTE {
 
 	private:
 
-		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_PrimaryWindow; //!< The main Window.
-		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiScreenWindows; //!< Additional windows for multi display fullscreen.
+		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main Window.
+		std::vector<std::shared_ptr<SDL_Window>> m_MultiScreenWindows; //!< Additional windows for multi display fullscreen.
 
-		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
-		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiScreenRenderers; //!< Additional Renderers for multi display fullscreen.
+		std::shared_ptr<SDL_Renderer> m_PrimaryRenderer; //!< The Main Window Renderer, draws to the main window.
+		std::vector<std::shared_ptr<SDL_Renderer>> m_MultiScreenRenderers; //!< Additional Renderers for multi display fullscreen.
 
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture;
 		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiScreenTextures; //!< Additional Textures when drawing to multiple displays.

@@ -81,7 +81,7 @@ namespace RTE {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
-		m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, windowPosX, windowPosY, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowFlags));
+		m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle, windowPosX, windowPosY, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowFlags), SDLWindowDeleter());
 		if (!m_PrimaryWindow) {
 			ShowMessageBox("Unable to create window because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
 
@@ -90,7 +90,7 @@ namespace RTE {
 			m_ResMultiplier = 1;
 			g_SettingsMan.SetSettingsNeedOverwrite();
 
-			m_PrimaryWindow = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN));
+			m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN), SDLWindowDeleter());
 			if (!m_PrimaryWindow) {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
@@ -109,10 +109,10 @@ namespace RTE {
 			renderFlags |= SDL_RENDERER_PRESENTVSYNC;
 		}
 
-		m_PrimaryRenderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, renderFlags));
+		m_PrimaryRenderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, renderFlags), SDLRendererDeleter());
 		if (!m_PrimaryRenderer) {
 			ShowMessageBox("Unable to create hardware accelerated renderer because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to software rendering!");
-			m_PrimaryRenderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, SDL_RENDERER_SOFTWARE));
+			m_PrimaryRenderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, SDL_RENDERER_SOFTWARE), SDLRendererDeleter());
 
 			if (!m_PrimaryRenderer) {
 				RTEAbort("Failed to initialize renderer!\nAre you sure this is a computer?");

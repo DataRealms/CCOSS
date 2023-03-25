@@ -74,10 +74,6 @@ namespace RTE {
 		int windowFlags = SDL_WINDOW_SHOWN;
 
 		if (CoversPrimaryFullscreen()) {
-			// SDL_WINDOWPOS_UNDEFINED gives us the same result SDL_WINDOWPOS_CENTERED, so use 0 for proper top left corner of primary screen.
-			// TODO: This is temp cause this won't work for any setup where the leftmost screen is not primary.
-			//windowPosX = (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
-			//windowPosY = (m_MaxResY - (m_ResY * m_ResMultiplier)) / 2;
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -158,7 +154,9 @@ namespace RTE {
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 		}
-		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
+		if (settingsNeedOverwrite) {
+			g_SettingsMan.SetSettingsNeedOverwrite();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,8 +167,8 @@ namespace RTE {
 		int sdlEnable = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
 		int result = -1;
 
-#if	SDL_MINOR_VERSION > 0 || (SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 18)
-		// Setting VSync per renderer is introduced in 2.0.18. Check minor version >0 as well because numbering scheme changed with the release of 2.24.0 (would be 2.0.24 with the previous scheme).
+#if	SDL_VERSION_ATLEAST(2, 0, 18)
+		// Setting VSync per renderer is introduced in 2.0.18.
 		if (!m_MultiScreenRenderers.empty()) {
 			for (const auto &renderer : m_MultiScreenRenderers) {
 				result = SDL_RenderSetVSync(renderer.get(), sdlEnable);
@@ -380,7 +378,7 @@ namespace RTE {
 
 		bool mappingErrorOrOnlyOneDisplay = false;
 
-		if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() < 2) {
+		if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() > 1) {
 			std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
 				[](auto left, auto right) {
 					return left.second.x < right.second.x;

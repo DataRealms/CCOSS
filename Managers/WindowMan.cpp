@@ -465,7 +465,7 @@ namespace RTE {
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				if (m_AnyWindowHasFocus && CoversPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
+				if (m_AnyWindowHasFocus && CoversMultiDisplayFullscreen()) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
 					m_AnyWindowHasFocus = true;

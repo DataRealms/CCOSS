@@ -474,6 +474,11 @@ namespace RTE {
 					m_AnyWindowHasFocus = true;
 				}
 				break;
+			case SDL_WINDOWEVENT_MOVED:
+				if (windowEvent.window.windowID == SDL_GetWindowID(m_PrimaryWindow.get())) {
+					m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+				}
+				break;
 			default:
 				break;
 		}

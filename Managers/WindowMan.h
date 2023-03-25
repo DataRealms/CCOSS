@@ -216,7 +216,13 @@ namespace RTE {
 		int m_PrimaryDisplayResY; //!< Height of the primary physical display only.
 		int m_MaxResX; //!< Maximum width the game window can be (desktop width).
 		int m_MaxResY; //!< Maximum height the game window can be (desktop height).
+		bool m_CanMultiDisplayFullscreen; //!<
+		int m_LeftMostDisplayIndex; //!<
+		int m_LeftMostOffset; //!<
+		int m_TopMostOffset; //!<
+		std::vector<std::pair<int, SDL_Rect>> m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen; //!<
 
+		int m_PrimaryWindowDisplayIndex; //!<
 		bool m_AnyWindowHasFocus; //!< Whether any game window might have focus.
 		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
@@ -271,6 +277,11 @@ namespace RTE {
 		/// <param name="windowH">Window vertical resolution.</param>
 		/// <returns></returns>
 		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
+
+		/// <summary>
+		///
+		/// </summary>
+		void MapDisplays();
 
 		/// <summary>
 		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.

@@ -30,6 +30,12 @@ namespace RTE {
 		m_PrimaryDisplayResY = 0;
 		m_MaxResX = 0;
 		m_MaxResY = 0;
+		m_CanMultiDisplayFullscreen = false;
+		m_LeftMostDisplayIndex = -1;
+		m_LeftMostOffset = -1;
+		m_LeftMostOffset = -1;
+		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+		m_PrimaryWindowDisplayIndex = 0;
 		m_AnyWindowHasFocus = false;
 		m_FrameLostFocus = false;
 		m_ResX = c_DefaultResX;
@@ -48,34 +54,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Initialize() {
-		m_NumDisplays = SDL_GetNumVideoDisplays();
-
-		SDL_Rect primaryDisplayBounds;
-		SDL_GetDisplayBounds(0, &primaryDisplayBounds);
-
-		m_PrimaryDisplayResX = primaryDisplayBounds.w;
-		m_PrimaryDisplayResY = primaryDisplayBounds.h;
-
-		for (int i = 0; i < m_NumDisplays; ++i) {
-			SDL_Rect res;
-			if (SDL_GetDisplayBounds(i, &res) != 0) {
-				g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(i));
-				continue;
-			}
-
-			if (res.x + res.w > m_MaxResX) {
-				m_MaxResX = res.x + res.w;
-			}
-			if (res.y + res.h > m_MaxResY) {
-				m_MaxResY = res.y + res.h;
-			}
-		}
+		MapDisplays();
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 
 		CreatePrimaryWindow();
 		CreatePrimaryRenderer();
 		CreatePrimaryTexture();
+
+		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,12 +338,94 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void WindowMan::MapDisplays() {
+		m_NumDisplays = SDL_GetNumVideoDisplays();
 
+		SDL_Rect primaryDisplayBounds;
+		SDL_GetDisplayBounds(0, &primaryDisplayBounds);
 
+		m_PrimaryDisplayResX = primaryDisplayBounds.w;
+		m_PrimaryDisplayResY = primaryDisplayBounds.h;
 
+		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+
+		int leftMostOffset = 0;
+		int topMostOffset = 0;
+		int maxHeight = 0;
+		int maxUsableHeight = m_ResY;
+		int minHeightDisplayIndex = -1;
+		int totalWidth = 0;
+
+		for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
+			SDL_Rect displayBounds;
+			if (SDL_GetDisplayBounds(displayIndex, &displayBounds) == 0) {
+				m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.emplace_back(displayIndex, displayBounds);
+
+				leftMostOffset = std::min(leftMostOffset, displayBounds.x);
+				topMostOffset = std::min(topMostOffset, displayBounds.y);
+				maxHeight = std::max(maxHeight, displayBounds.h);
+
+				int prevMinHeight = maxUsableHeight;
+				maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
+
+				if (maxUsableHeight < prevMinHeight) {
+					minHeightDisplayIndex = displayIndex;
+				}
+
+				totalWidth += displayBounds.w;
+			} else {
+				g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(displayIndex));
 			}
+		}
+
+		bool mappingErrorOrOnlyOneDisplay = false;
+
+		if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() < 2) {
+			std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
+				[](auto left, auto right) {
+					return left.second.x < right.second.x;
+				}
+			);
+
+			// TODO: Probably need this for vertical setups, but that's more headache to deal with. Currently a vertical arrangement works but extends horizontally so it's useless.
+			//std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
+			//	[](auto left, auto right) {
+			//		return left.second.y < right.second.y;
+			//	}
+			//);
+
+			for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+				SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
+				if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
+					m_LeftMostDisplayIndex = displayIndex;
+					break;
+				}
 			}
+			if (m_LeftMostDisplayIndex >= 0) {
+					m_CanMultiDisplayFullscreen = true;
+					m_VerticalMultiDisplay = verticalDisplaySetup;
+					m_MaxResX = totalWidth;
+					m_MaxResY = maxHeight;
+					m_LeftMostOffset = leftMostOffset;
+					m_TopMostOffset = topMostOffset;
+			} else {
+				mappingErrorOrOnlyOneDisplay = true;
 			}
+		} else {
+			mappingErrorOrOnlyOneDisplay = true;
+		}
+
+		if (mappingErrorOrOnlyOneDisplay) {
+			m_CanMultiDisplayFullscreen = false;
+			m_MaxResX = m_PrimaryDisplayResX;
+			m_MaxResY = m_PrimaryDisplayResY;
+			m_LeftMostOffset = -1;
+			m_TopMostOffset = -1;
+			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+			g_ConsoleMan.PrintString("");
+			return;
+		}
+	}
 				}
 					break;
 				}

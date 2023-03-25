@@ -201,8 +201,6 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
-			g_WindowMan.ClearFrame();
-
 			PollEvents();
 
 			g_WindowMan.Update();
@@ -252,8 +250,6 @@ namespace RTE {
 		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
-
-			g_WindowMan.ClearFrame();
 
 			g_TimerMan.Update();
 

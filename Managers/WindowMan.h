@@ -189,9 +189,9 @@ namespace RTE {
 		void HandleWindowEvent(const SDL_Event &windowEvent);
 
 		/// <summary>
-		/// Clear the GL backbuffer to start a new frame.
+		/// Clear the primary renderer, or all the renderers if in multi-display fullscreen.
 		/// </summary>
-		void ClearFrame() const;
+		void ClearRenderer() const;
 
 		/// <summary>
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.

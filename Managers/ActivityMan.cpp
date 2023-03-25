@@ -360,7 +360,7 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer8();
+			g_FrameMan.ClearBackBuffer32();
 			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
@@ -374,7 +374,7 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer8();
+		g_FrameMan.ClearBackBuffer32();
 		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();

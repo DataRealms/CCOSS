@@ -235,7 +235,6 @@ namespace RTE {
 		m_MultiScreenRenderers.clear();
 		m_MultiScreenWindows.clear();
 
-		ClearFrame();
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
@@ -286,7 +285,6 @@ namespace RTE {
 		m_MultiScreenRenderers.clear();
 		m_MultiScreenWindows.clear();
 
-		ClearFrame();
 
 		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryDisplayResX) && (m_ResY * newResMultiplier == m_PrimaryDisplayResY);
 		bool newResSettingsCoverMultiScreenFullscreen = (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
@@ -543,7 +541,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ClearFrame() const {
+	void WindowMan::ClearRenderer() const {
 		if (m_MultiScreenRenderers.empty()) {
 			SDL_RenderClear(m_PrimaryRenderer.get());
 		} else {

@@ -63,6 +63,10 @@ namespace RTE {
 		CreatePrimaryTexture();
 
 		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+
+		if (CoversMultiDisplayFullscreen()) {
+			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +94,6 @@ namespace RTE {
 			if (!m_PrimaryWindow) {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
-		}
-
-		if (CoversMultiDisplayFullscreen()) {
-			SetWindowMultiFullscreen(m_ResX, m_ResY, m_ResMultiplier);
 		}
 	}
 

@@ -424,13 +424,65 @@ namespace RTE {
 			return;
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resX, int resY, int resMultiplier) {
+		MapDisplays();
+
+		if (!m_CanMultiDisplayFullscreen) {
+			return false;
+		}
+
+		int windowPrevPositionX = 0;
+		int windowPrevPositionY = 0;
+		SDL_GetWindowPosition(m_PrimaryWindow.get(), &windowPrevPositionX, &windowPrevPositionY);
+
+		// Move the window to the detected leftmost display to avoid all the headaches.
+		if (m_PrimaryWindowDisplayIndex != m_LeftMostDisplayIndex) {
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex));
+		}
+
+		m_MultiScreenTextureOffsets.clear();
+		m_MultiScreenTextures.clear();
+		m_MultiScreenRenderers.clear();
+		m_MultiScreenWindows.clear();
+
+		bool errorSettingFullscreen = false;
+
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+			int displayOffsetX = displayBounds.x;
+			int displayOffsetY = displayBounds.y;
+			int displayWidth = displayBounds.w;
+			int displayHeight = displayBounds.h;
+
+			if (displayIndex == m_PrimaryWindowDisplayIndex) {
+				m_MultiScreenWindows.emplace_back(m_PrimaryWindow);
+				m_MultiScreenRenderers.emplace_back(m_PrimaryRenderer);
+			} else {
+				m_MultiScreenWindows.emplace_back(SDL_CreateWindow(nullptr, displayOffsetX, displayOffsetY, displayWidth, displayHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR), SDLWindowDeleter());
+				if (m_MultiScreenWindows.back()) {
+					m_MultiScreenRenderers.emplace_back(SDL_CreateRenderer(m_MultiScreenWindows.back().get(), -1, SDL_RENDERER_ACCELERATED), SDLRendererDeleter());
+					if (!m_MultiScreenRenderers.back()) {
+						errorSettingFullscreen = true;
+					}
+				} else {
+					errorSettingFullscreen = true;
 				}
+				if (errorSettingFullscreen) {
 					break;
 				}
 			}
-
+			m_MultiScreenTextureOffsets.emplace_back(SDL_Rect {
+				(m_LeftMostOffset + displayOffsetX) / resMultiplier,
+				(m_TopMostOffset + displayOffsetY) / resMultiplier,
+				displayWidth / resMultiplier,
+				displayHeight / resMultiplier
+			});
 		}
 
+		if (errorSettingFullscreen) {
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPrevPositionX, windowPrevPositionY);
 			m_MultiScreenWindows.clear();
 			m_MultiScreenRenderers.clear();
 			m_MultiScreenTextures.clear();
@@ -438,8 +490,15 @@ namespace RTE {
 			return false;
 		}
 
-
+		CreateMultiDisplayTextures();
 		SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+		// CBA to do figure out letterboxing for multiple displays, so just fix the resolution.
+		//if (actualResX != resX * resMultiplier || actualResY != resY * resMultiplier) {
+		//	ShowMessageBox("Desired reolution would lead to letterboxing, adjusting to fill entire displays.");
+		//	resX = actualResX / resMultiplier;
+		//	resY = actualResY / resMultiplier;
+		//}
 
 		return true;
 	}
@@ -499,7 +558,8 @@ namespace RTE {
 			SDL_RenderPresent(m_PrimaryRenderer.get());
 		} else {
 			for (size_t i = 0; i < m_MultiScreenTextureOffsets.size(); ++i) {
-				SDL_UpdateTexture(m_MultiScreenTextures[i].get(), nullptr, backbuffer->line[0] + (m_MultiScreenTextureOffsets[i].x + backbuffer->w * m_MultiScreenTextureOffsets[i].y) * 4, backbuffer->w * 4);
+				int displayOffsetAdjustment = m_MultiScreenTextureOffsets[i].x * 4;
+				SDL_UpdateTexture(m_MultiScreenTextures[i].get(), nullptr, backbuffer->line[0] + displayOffsetAdjustment, backbuffer->w * 4);
 				SDL_RenderCopy(m_MultiScreenRenderers[i].get(), m_MultiScreenTextures[i].get(), nullptr, nullptr);
 				SDL_RenderPresent(m_MultiScreenRenderers[i].get());
 			}

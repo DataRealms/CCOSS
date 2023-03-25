@@ -295,7 +295,7 @@ namespace RTE {
 		/// <param name="resY">Requested vertical resolution (not including scaling). May be adjusted to avoid letterboxing.</param>
 		/// <param name="resMultiplier">Requested resolution multiplier.</param>
 		/// <returns>Whether all displays were created successfully.</returns>
-		bool SetWindowMultiFullscreen(int &resX, int &resY, int resMultiplier);
+		bool ChangeResolutionToMultiDisplayFullscreen(int resX, int resY, int resMultiplier);
 #pragma endregion
 
 		/// <summary>

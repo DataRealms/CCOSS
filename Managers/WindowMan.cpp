@@ -558,8 +558,8 @@ namespace RTE {
 			SDL_RenderPresent(m_PrimaryRenderer.get());
 		} else {
 			for (size_t i = 0; i < m_MultiScreenTextureOffsets.size(); ++i) {
-				int displayOffsetAdjustment = m_MultiScreenTextureOffsets[i].x * 4;
-				SDL_UpdateTexture(m_MultiScreenTextures[i].get(), nullptr, backbuffer->line[0] + displayOffsetAdjustment, backbuffer->w * 4);
+				int displayOffsetX = m_MultiScreenTextureOffsets[i].x * 4;
+				SDL_UpdateTexture(m_MultiScreenTextures[i].get(), nullptr, backbuffer->line[m_MultiScreenTextureOffsets[i].y] + displayOffsetX, backbuffer->w * 4);
 				SDL_RenderCopy(m_MultiScreenRenderers[i].get(), m_MultiScreenTextures[i].get(), nullptr, nullptr);
 				SDL_RenderPresent(m_MultiScreenRenderers[i].get());
 			}

@@ -248,6 +248,11 @@ namespace RTE {
 		///
 		/// </summary>
 		void CreatePrimaryTexture();
+
+		/// <summary>
+		///
+		/// </summary>
+		void CreateMultiDisplayTextures();
 #pragma endregion
 
 #pragma region Resolution Handling

@@ -121,25 +121,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::CreatePrimaryTexture() {
-		if (m_MultiScreenTextureOffsets.empty()) {
-			m_PrimaryTexture = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_PrimaryRenderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_ResX, m_ResY));
-			SDL_RenderSetLogicalSize(m_PrimaryRenderer.get(), m_ResX, m_ResY);
-		} else {
-			m_MultiScreenTextures.resize(m_MultiScreenTextureOffsets.size());
-			for (size_t i = 0; i < m_MultiScreenTextures.size(); ++i) {
-				SDL_Renderer *renderer;
-				if (i == 0) {
-					renderer = m_PrimaryRenderer.get();
-				} else {
-					renderer = m_MultiScreenRenderers[i - 1].get();
-				}
-				m_MultiScreenTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(
-					SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h));
-				if (!m_MultiScreenTextures[i]) {
-					RTEAbort("Failed to create texture for multi-display: " + std::string(SDL_GetError()));
-				}
-				SDL_RenderSetLogicalSize(renderer, m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h);
+		m_PrimaryTexture = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_PrimaryRenderer.get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_ResX, m_ResY));
+		SDL_RenderSetLogicalSize(m_PrimaryRenderer.get(), m_ResX, m_ResY);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::CreateMultiDisplayTextures() {
+		m_MultiScreenTextures.resize(m_MultiScreenTextureOffsets.size());
+		for (size_t i = 0; i < m_MultiScreenTextures.size(); ++i) {
+			m_MultiScreenTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiScreenRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h));
+			if (!m_MultiScreenTextures[i]) {
+				RTEAbort("Failed to create texture for multi-display: " + std::string(SDL_GetError()));
 			}
+			SDL_RenderSetLogicalSize(m_MultiScreenRenderers[i].get(), m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h);
 		}
 	}
 
@@ -268,7 +263,12 @@ namespace RTE {
 		g_SettingsMan.UpdateSettingsFile();
 
 		g_FrameMan.RecreateBackBuffers();
-		CreatePrimaryTexture();
+
+		if (newResSettingsCoverMultiScreenFullscreen) {
+			CreateMultiDisplayTextures();
+		} else {
+			CreatePrimaryTexture();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

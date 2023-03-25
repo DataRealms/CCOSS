@@ -11,8 +11,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ShowMessageBox(const std::string &message) {
-		SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_ERROR, "RTE Aborted! (x_x)", message.c_str(), nullptr);
+	void ShowMessageBox(const std::string &message, bool abortMessage) {
+		const char *messageBoxTitle = "RTE Warning! (>_<)";
+		int messageBoxFlags = SDL_MESSAGEBOX_WARNING;
+
+		if (abortMessage) {
+			messageBoxTitle = "RTE Aborted! (x_x)";
+			messageBoxFlags = SDL_MESSAGEBOX_ERROR;
+		}
+
+		SDL_ShowSimpleMessageBox(messageBoxFlags, messageBoxTitle, message.c_str(), nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +64,7 @@ namespace RTE {
 			g_ConsoleMan.SaveAllText("AbortLog.txt");
 			System::PrintToCLI(abortMessage);
 
-			ShowMessageBox(abortMessage);
+			ShowMessageBox(abortMessage, true);
 		}
 
 		currentAborting = false;

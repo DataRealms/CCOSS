@@ -351,79 +351,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::SetWindowMultiFullscreen(int &resX, int &resY, int resMultiplier) {
-		m_MultiScreenTextureOffsets.clear();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenRenderers.clear();
-		m_MultiScreenWindows.clear();
 
-		int windowDisplay = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
-		SDL_Rect windowDisplayBounds;
-		SDL_GetDisplayBounds(windowDisplay, &windowDisplayBounds);
 
-		std::vector<std::pair<int, SDL_Rect>> displayBounds(m_NumDisplays);
-		for (int i = 0; i < m_NumDisplays; ++i) {
-			displayBounds[i].first = i;
-			SDL_GetDisplayBounds(i, &displayBounds[i].second);
-		}
-		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) {
-			return left.second.x < right.second.x;
-		});
-		std::stable_sort(displayBounds.begin(), displayBounds.end(), [](auto left, auto right) {
-			return left.second.y < right.second.y;
-		});
-
-		std::vector<std::pair<int, SDL_Rect>>::iterator displayPos = std::find_if(displayBounds.begin(), displayBounds.end(), [windowDisplay](auto display) {
-			return display.first == windowDisplay;
-		});
-
-		int index = displayPos - displayBounds.begin();
-
-		int actualResX = 0;
-		int actualResY = 0;
-		int topLeftX = windowDisplayBounds.x;
-		int topLeftY = windowDisplayBounds.y;
-
-		for (; index < m_NumDisplays && (actualResY < resY * resMultiplier || actualResX < resX * resMultiplier); ++index) {
-			if (displayBounds[index].second.x < topLeftX || displayBounds[index].second.y < topLeftY || displayBounds[index].second.x - topLeftX > resX * resMultiplier || displayBounds[index].second.y - topLeftY > resY * resMultiplier) {
-				continue;
 			}
-			if (actualResX < displayBounds[index].second.x - topLeftX + displayBounds[index].second.w) {
-				actualResX = displayBounds[index].second.x - topLeftX + displayBounds[index].second.w;
 			}
-			if (actualResY < displayBounds[index].second.y - topLeftY + displayBounds[index].second.h) {
-				actualResY = displayBounds[index].second.y - topLeftY + displayBounds[index].second.h;
 			}
-			if (index != displayPos - displayBounds.begin()) {
-				m_MultiScreenWindows.emplace_back(SDL_CreateWindow("", displayBounds[index].second.x, displayBounds[index].second.y, displayBounds[index].second.w, displayBounds[index].second.h, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR));
-				if (!m_MultiScreenWindows.back()) {
-					actualResX = -1;
-					actualResY = -1;
-					break;
 				}
-				m_MultiScreenRenderers.emplace_back(SDL_CreateRenderer(m_MultiScreenWindows.back().get(), -1, SDL_RENDERER_ACCELERATED));
-				if (!m_MultiScreenRenderers.back()) {
-					actualResX = -1;
-					actualResY = -1;
 					break;
 				}
 			}
-			m_MultiScreenTextureOffsets.emplace_back(SDL_Rect {
-				(displayBounds[index].second.x - topLeftX) / resMultiplier,
-				(displayBounds[index].second.y - topLeftY) / resMultiplier,
-				displayBounds[index].second.w / resMultiplier,
-				displayBounds[index].second.h / resMultiplier
-			});
+
 		}
 
-		if (actualResX < resX * resMultiplier || actualResY < resY * resMultiplier) {
-			int maxResX = displayBounds.back().second.x - topLeftX + displayBounds.back().second.w;
-			int maxResY = displayBounds.back().second.y - topLeftY + displayBounds.back().second.h;
-			ShowMessageBox("Won't be able to fit the desired resolution onto the displays. Maximum resolution from here is: " + std::to_string(maxResX) + "x" + std::to_string(maxResY) + "\n Please move the window to the display you want to be the top left corner and try again.");
-		}
-
-		if (actualResX == -1 || actualResY == -1) {
 			m_MultiScreenWindows.clear();
 			m_MultiScreenRenderers.clear();
 			m_MultiScreenTextures.clear();
@@ -431,12 +371,6 @@ namespace RTE {
 			return false;
 		}
 
-		// CBA to do figure out letterboxing for multiple displays, so just fix the resolution.
-		if (actualResX != resX * resMultiplier || actualResY != resY * resMultiplier) {
-			ShowMessageBox("Desired reolution would lead to letterboxing, adjusting to fill entire displays.");
-			resX = actualResX / resMultiplier;
-			resY = actualResY / resMultiplier;
-		}
 
 		SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 

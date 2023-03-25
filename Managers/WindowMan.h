@@ -291,11 +291,9 @@ namespace RTE {
 		/// <summary>
 		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.
 		/// </summary>
-		/// <param name="resX">Requested horizontal resolution (not including scaling). May be adjusted to avoid letterboxing.</param>
-		/// <param name="resY">Requested vertical resolution (not including scaling). May be adjusted to avoid letterboxing.</param>
 		/// <param name="resMultiplier">Requested resolution multiplier.</param>
 		/// <returns>Whether all displays were created successfully.</returns>
-		bool ChangeResolutionToMultiDisplayFullscreen(int resX, int resY, int resMultiplier);
+		bool ChangeResolutionToMultiDisplayFullscreen(int resMultiplier);
 #pragma endregion
 
 		/// <summary>

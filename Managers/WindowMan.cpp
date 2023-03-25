@@ -427,7 +427,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resX, int resY, int resMultiplier) {
+	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resMultiplier) {
 		MapDisplays();
 
 		if (!m_CanMultiDisplayFullscreen) {

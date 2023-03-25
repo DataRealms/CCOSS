@@ -711,13 +711,13 @@ namespace RTE {
 					break;
 				}
 				case SDL_MOUSEMOTION:
-					m_RawMouseMovement += Vector(inputEvent.motion.xrel, inputEvent.motion.yrel);
-					m_AbsoluteMousePos.SetXY(inputEvent.motion.x * g_WindowMan.GetResMultiplier(), inputEvent.motion.y * g_WindowMan.GetResMultiplier());
-					if (g_WindowMan.CoversPrimaryFullscreen() && SDL_GetNumVideoDisplays() > 1) {
-						int x{ 0 };
-						int y{ 0 };
-						SDL_GetWindowPosition(SDL_GetWindowFromID(inputEvent.motion.windowID), &x, &y);
-						Vector windowCoord(x, y);
+					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
+					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
+					if (g_WindowMan.CoversMultiDisplayFullscreen()) {
+						int windowPosX = 0;
+						int windowPosY = 0;
+						SDL_GetWindowPosition(SDL_GetWindowFromID(inputEvent.motion.windowID), &windowPosX, &windowPosY);
+						Vector windowCoord(static_cast<float>(windowPosX), static_cast<float>(windowPosY));
 						m_AbsoluteMousePos += windowCoord;
 					}
 					break;

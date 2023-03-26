@@ -1002,6 +1002,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
 
+- Added `Area` Lua property `area.FirstBox` that returns the first `Box` in this `Area`. Useful for `Areas` that only have one `Box`.
+
+- Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
+
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
 - New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.

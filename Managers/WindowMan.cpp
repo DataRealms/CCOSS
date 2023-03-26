@@ -38,7 +38,7 @@ namespace RTE {
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
-		m_ResChanged = false;
+		m_ResolutionChanged = false;
 		m_EnableVSync = true;
 		m_IgnoreMultiDisplays = false;
 	}
@@ -274,7 +274,7 @@ namespace RTE {
 			}
 			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		} else {
-			m_ResChanged = true;
+			m_ResolutionChanged = true;
 			g_FrameMan.RecreateBackBuffers();
 
 			if (newResFullyCoversAllDisplays) {
@@ -300,10 +300,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::CompleteResolutionChange() {
-		g_FrameMan.DestroyTempBackBuffers();
-
+		m_ResolutionChanged = false;
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
-		m_ResChanged = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

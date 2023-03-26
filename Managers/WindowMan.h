@@ -113,10 +113,10 @@ namespace RTE {
 		int GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
-		/// Gets whether the window resolution was changed.
+		/// Gets whether the game resolution was changed.
 		/// </summary>
-		/// <returns>Whether the window resolution was changed.</returns>
-		bool ResolutionChanged() const { return m_ResChanged; }
+		/// <returns>Whether the game resolution was changed.</returns>
+		bool ResolutionChanged() const { return m_ResolutionChanged; }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover the display the window is positioned at.
@@ -171,7 +171,7 @@ namespace RTE {
 		void ChangeResolutionMultiplier();
 
 		/// <summary>
-		/// Completes the resolution change by clearing the temporary backbuffers and resetting the resolution change flag.
+		/// Completes the resolution change by resetting the flag.
 		/// </summary>
 		void CompleteResolutionChange();
 #pragma endregion
@@ -228,7 +228,7 @@ namespace RTE {
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
 		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
+		bool m_ResolutionChanged; //!< Whether the resolution was changed through the settings.
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 

@@ -552,12 +552,6 @@ namespace RTE {
 		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
 		/// </summary>
 		void RecreateBackBuffers();
-
-		/// <summary>
-		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten and allocated new memory addresses.
-		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
-		/// </summary>
-		void DestroyTempBackBuffers();
 #pragma endregion
 
 #pragma region Draw Breakdown

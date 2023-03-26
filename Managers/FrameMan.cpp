@@ -128,12 +128,25 @@ namespace RTE {
 		m_BackBuffer8 = create_bitmap_ex(8, resX, resY);
 		ClearBackBuffer8();
 
+		// Destroy temp backbuffers created during resolution change as we create new ones to not have to expose this to be dealt with in a separate step elsewhere.
+		if (m_TempBackBuffer8) {
+			destroy_bitmap(m_TempBackBuffer8);
+		}
+
 		// Create the post-processing buffer, it'll be used for glow effects etc
 		m_BackBuffer32 = create_bitmap_ex(32, resX, resY);
 		ClearBackBuffer32();
 
+		if (m_TempBackBuffer32) {
+			destroy_bitmap(m_TempBackBuffer32);
+		}
+
 		m_OverlayBitmap32 = create_bitmap_ex(32, resX, resY);
 		clear_to_color(m_OverlayBitmap32, 0);
+
+		if (m_TempOverlayBitmap32) {
+			destroy_bitmap(m_TempOverlayBitmap32);
+		}
 
 		// Create all the network 8bpp back buffers
 		for (int i = 0; i < c_MaxScreenCount; i++) {
@@ -141,14 +154,30 @@ namespace RTE {
 				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
 
+				if (m_TempNetworkBackBufferIntermediate8[f][i]) {
+					destroy_bitmap(m_TempNetworkBackBufferIntermediate8[f][i]);
+				}
+
 				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
+
+				if (m_TempNetworkBackBufferIntermediateGUI8[f][i]) {
+					destroy_bitmap(m_TempNetworkBackBufferIntermediateGUI8[f][i]);
+				}
 
 				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferFinal8[f][i], m_BlackColor);
 
+				if (m_TempNetworkBackBufferFinal8[f][i]) {
+					destroy_bitmap(m_TempNetworkBackBufferFinal8[f][i]);
+				}
+
 				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, resX, resY);
 				clear_to_color(m_NetworkBackBufferFinalGUI8[f][i], g_MaskColor);
+
+				if (m_TempNetworkBackBufferFinalGUI8[f][i]) {
+					destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
+				}
 			}
 		}
 
@@ -160,6 +189,10 @@ namespace RTE {
 			m_PlayerScreen = create_bitmap_ex(8, resX / (m_VSplit ? 2 : 1), resY / (m_HSplit ? 2 : 1));
 			clear_to_color(m_PlayerScreen, m_BlackColor);
 			set_clip_state(m_PlayerScreen, 1);
+
+			if (m_TempPlayerScreen) {
+				destroy_bitmap(m_TempPlayerScreen);
+			}
 
 			// Update these to represent the split screens
 			m_PlayerScreenWidth = m_PlayerScreen->w;
@@ -240,24 +273,6 @@ namespace RTE {
 		delete m_SmallFont;
 
 		Clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::DestroyTempBackBuffers() {
-		destroy_bitmap(m_TempBackBuffer8);
-		destroy_bitmap(m_TempBackBuffer32);
-		destroy_bitmap(m_TempOverlayBitmap32);
-		destroy_bitmap(m_TempPlayerScreen);
-
-		for (int i = 0; i < c_MaxScreenCount; i++) {
-			for (int f = 0; f < 2; f++) {
-				destroy_bitmap(m_TempNetworkBackBufferIntermediate8[f][i]);
-				destroy_bitmap(m_TempNetworkBackBufferIntermediateGUI8[f][i]);
-				destroy_bitmap(m_TempNetworkBackBufferFinal8[f][i]);
-				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
-			}
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

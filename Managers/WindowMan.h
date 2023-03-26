@@ -274,6 +274,11 @@ namespace RTE {
 
 #pragma region Multi Display Handling
 		/// <summary>
+		///
+		/// </summary>
+		void ClearMultiDisplayData();
+
+		/// <summary>
 		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
 		/// </summary>
 		/// <param name="resX">Desired horizontal resolution.</param>

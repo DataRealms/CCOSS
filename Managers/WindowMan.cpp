@@ -18,12 +18,10 @@ namespace RTE {
 
 	void WindowMan::Clear() {
 		m_PrimaryWindow.reset();
-		m_MultiScreenWindows.clear();
 		m_PrimaryRenderer.reset();
-		m_MultiScreenRenderers.clear();
 		m_PrimaryTexture.reset();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenTextureOffsets.clear();
+
+		ClearMultiDisplayData();
 
 		m_NumDisplays = 0;
 		m_PrimaryDisplayResX = 0;
@@ -43,6 +41,15 @@ namespace RTE {
 		m_ResMultiplier = 1;
 		m_ResChanged = false;
 		m_EnableVSync = true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::ClearMultiDisplayData() {
+		m_MultiScreenTextureOffsets.clear();
+		m_MultiScreenTextures.clear();
+		m_MultiScreenRenderers.clear();
+		m_MultiScreenWindows.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,11 +240,7 @@ namespace RTE {
 			return;
 		}
 
-		m_MultiScreenTextureOffsets.clear();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenRenderers.clear();
-		m_MultiScreenWindows.clear();
-
+		ClearMultiDisplayData();
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
@@ -283,10 +286,7 @@ namespace RTE {
 			return;
 		}
 
-		m_MultiScreenTextureOffsets.clear();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenRenderers.clear();
-		m_MultiScreenWindows.clear();
+		ClearMultiDisplayData();
 
 
 		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryDisplayResX) && (m_ResY * newResMultiplier == m_PrimaryDisplayResY);
@@ -444,11 +444,6 @@ namespace RTE {
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex));
 		}
 
-		m_MultiScreenTextureOffsets.clear();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenRenderers.clear();
-		m_MultiScreenWindows.clear();
-
 		bool errorSettingFullscreen = false;
 
 		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
@@ -484,10 +479,7 @@ namespace RTE {
 
 		if (errorSettingFullscreen) {
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPrevPositionX, windowPrevPositionY);
-			m_MultiScreenWindows.clear();
-			m_MultiScreenRenderers.clear();
-			m_MultiScreenTextures.clear();
-			m_MultiScreenTextureOffsets.clear();
+			ClearMultiDisplayData();
 			return false;
 		}
 

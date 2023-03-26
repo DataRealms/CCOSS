@@ -537,6 +537,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
 
+- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution via quick toggles or custom values.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

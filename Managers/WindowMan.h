@@ -233,6 +233,8 @@ namespace RTE {
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 
+		bool m_IgnoreMultiDisplays; //!<
+
 #pragma region Initialize Breakdown
 		/// <summary>
 		///

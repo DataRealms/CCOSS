@@ -109,6 +109,8 @@ namespace RTE {
 			reader >> g_WindowMan.m_ResMultiplier;
 		} else if (propName == "EnableVSync") {
 			reader >> g_WindowMan.m_EnableVSync;
+		} else if (propName == "IgnoreMultiDisplays") {
+			reader >> g_WindowMan.m_IgnoreMultiDisplays;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
 		} else if (propName == "MasterVolume") {
@@ -312,6 +314,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionY", g_WindowMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
 		writer.NewPropertyWithValue("EnableVSync", g_WindowMan.m_EnableVSync);
+		writer.NewPropertyWithValue("IgnoreMultiDisplays", g_WindowMan.m_IgnoreMultiDisplays);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);

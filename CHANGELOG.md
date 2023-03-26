@@ -586,10 +586,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
 
-- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:  
+- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenuOwner, pieMenu, pieSlice)`. The details for these are as follows:  
+	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.  
 	`pieSlice` - The `PieSlice` that has been activated to call this function.  
-	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 
 - `OnPieMenu(self)` event function has been changed to `WhilePieMenuOpen(self, openedPieMenu)` and will run as long as the `PieMenu` is open.
 

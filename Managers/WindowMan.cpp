@@ -240,6 +240,8 @@ namespace RTE {
 			return;
 		}
 
+		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (m_ResMultiplier != newResMultiplier);
+
 		ClearMultiDisplayData();
 
 		bool canMultiDisplayFullscreen = MapDisplays();
@@ -255,24 +257,32 @@ namespace RTE {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
-			int displayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
+
+			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex) : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
 		}
 
 		m_ResX = newResX;
 		m_ResY = newResY;
 		m_ResMultiplier = newResMultiplier;
-		m_ResChanged = true;
 
 		g_SettingsMan.UpdateSettingsFile();
 
-		g_FrameMan.RecreateBackBuffers();
+		if (onlyResMultiplierChange) {
+			if (!newResFullyCoversAllDisplays) {
+				CreatePrimaryTexture();
+			}
+			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		} else {
+			m_ResChanged = true;
+			g_FrameMan.RecreateBackBuffers();
 
-		if (newResFullyCoversAllDisplays) {
-			CreateMultiDisplayTextures();
-			return;
+			if (newResFullyCoversAllDisplays) {
+				CreateMultiDisplayTextures();
+			} else {
+				CreatePrimaryTexture();
+			}
 		}
-		CreatePrimaryTexture();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,38 +290,11 @@ namespace RTE {
 	void WindowMan::ChangeResolutionMultiplier() {
 		int newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
 
-		if (m_MaxResX / newResMultiplier < m_ResX || m_MaxResY / newResMultiplier < m_ResY) {
+		if (m_MaxResX < m_ResX * newResMultiplier || m_MaxResY < m_ResY * newResMultiplier ) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
-
-		ClearMultiDisplayData();
-
-		bool canMultiDisplayFullscreen = MapDisplays();
-
-		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (m_ResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (m_ResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
-		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
-
-		if (newResFullyCoversDisplayPrimaryWindowIsAtOnly) {
-			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), 0, 0);
-		} else if (newResFullyCoversAllDisplays) {
-			ChangeResolutionToMultiDisplayFullscreen(newResMultiplier);
-		} else {
-			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
-
-			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
-
-			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED);
-		}
-
-		m_ResMultiplier = newResMultiplier;
-
-		g_SettingsMan.UpdateSettingsFile();
-
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

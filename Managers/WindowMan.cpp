@@ -24,8 +24,8 @@ namespace RTE {
 		ClearMultiDisplayData();
 
 		m_NumDisplays = 0;
-		m_PrimaryDisplayResX = 0;
-		m_PrimaryDisplayResY = 0;
+		m_DisplayPrimaryWindowIsAtResX = 0;
+		m_DisplayPrimaryWindowIsAtResY = 0;
 		m_MaxResX = 0;
 		m_MaxResY = 0;
 		m_CanMultiDisplayFullscreen = false;
@@ -72,7 +72,7 @@ namespace RTE {
 
 		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
-		if (CoversMultiDisplayFullscreen()) {
+		if (FullyCoversAllDisplays()) {
 			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
 		}
 	}
@@ -81,11 +81,11 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryWindow() {
 		const char *windowTitle = "Cortex Command Community Project";
-		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryDisplayResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+		int windowPosX = (m_ResX * m_ResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN;
 
-		if (CoversPrimaryFullscreen()) {
+		if (FullyCoversDisplayPrimaryWindowIsAtOnly()) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -245,14 +245,12 @@ namespace RTE {
 
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResSettingsCoverPrimaryFullscreen = (newResX * newResMultiplier == m_PrimaryDisplayResX) && (newResY * newResMultiplier == m_PrimaryDisplayResY);
-		bool newResSettingsCoverMultiScreenFullscreen = (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
-		bool switchToFullscreen = newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen;
+		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (newResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
+		bool newResFullyCoversAllDisplays = (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
-		if (switchToFullscreen && ((m_NumDisplays > 1 && !SetWindowMultiFullscreen(newResX, newResY, newResMultiplier)) || SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			AttemptToRevertToPreviousResolution();
-			return;
-		} else if (!switchToFullscreen) {
+		} else if (!newResFullyCoversDisplayPrimaryWindowIsAtOnly && !newResFullyCoversAllDisplays) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());
@@ -270,11 +268,11 @@ namespace RTE {
 
 		g_FrameMan.RecreateBackBuffers();
 
-		if (newResSettingsCoverMultiScreenFullscreen) {
+		if (newResFullyCoversAllDisplays) {
 			CreateMultiDisplayTextures();
-		} else {
-			CreatePrimaryTexture();
+			return;
 		}
+		CreatePrimaryTexture();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,14 +288,19 @@ namespace RTE {
 		ClearMultiDisplayData();
 
 
-		bool newResSettingsCoverPrimaryFullscreen = (m_ResX * newResMultiplier == m_PrimaryDisplayResX) && (m_ResY * newResMultiplier == m_PrimaryDisplayResY);
-		bool newResSettingsCoverMultiScreenFullscreen = (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
+		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (m_ResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (m_ResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
+		bool newResFullyCoversAllDisplays = (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
 
-		if (newResSettingsCoverPrimaryFullscreen || newResSettingsCoverMultiScreenFullscreen) {
+		if (newResFullyCoversDisplayPrimaryWindowIsAtOnly) {
+			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), 0, 0);
+		} else if (newResFullyCoversAllDisplays) {
+			ChangeResolutionToMultiDisplayFullscreen(newResMultiplier);
 		} else {
-			int windowPosX = (m_ResX * newResMultiplier <= m_PrimaryDisplayResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
+			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
+
+			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
 
 			SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * newResMultiplier, m_ResY * newResMultiplier);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED);
@@ -341,11 +344,11 @@ namespace RTE {
 	void WindowMan::MapDisplays() {
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
-		SDL_Rect primaryDisplayBounds;
-		SDL_GetDisplayBounds(0, &primaryDisplayBounds);
+		SDL_Rect currentDisplayBounds;
+		SDL_GetDisplayBounds(0, &currentDisplayBounds);
 
-		m_PrimaryDisplayResX = primaryDisplayBounds.w;
-		m_PrimaryDisplayResY = primaryDisplayBounds.h;
+		m_DisplayPrimaryWindowIsAtResX = currentDisplayBounds.w;
+		m_DisplayPrimaryWindowIsAtResY = currentDisplayBounds.h;
 
 		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 
@@ -417,8 +420,8 @@ namespace RTE {
 
 		if (mappingErrorOrOnlyOneDisplay) {
 			m_CanMultiDisplayFullscreen = false;
-			m_MaxResX = m_PrimaryDisplayResX;
-			m_MaxResY = m_PrimaryDisplayResY;
+			m_MaxResX = m_DisplayPrimaryWindowIsAtResX;
+			m_MaxResY = m_DisplayPrimaryWindowIsAtResY;
 			m_LeftMostOffset = -1;
 			m_TopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
@@ -519,7 +522,7 @@ namespace RTE {
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				if (m_AnyWindowHasFocus && CoversMultiDisplayFullscreen()) {
+				if (m_AnyWindowHasFocus && FullyCoversAllDisplays()) {
 					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
 					m_AnyWindowHasFocus = true;

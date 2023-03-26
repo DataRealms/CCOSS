@@ -212,8 +212,8 @@ namespace RTE {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetPrimaryDisplayResX() / 2;
-				m_NewResY = g_WindowMan.GetPrimaryDisplayResY() / 2;
+				m_NewResX = g_WindowMan.GetDisplayPrimaryWindowIsAtResX() / 2;
+				m_NewResY = g_WindowMan.GetDisplayPrimaryWindowIsAtResY() / 2;
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
 				m_NewResUpscaled = false;

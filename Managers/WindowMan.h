@@ -57,16 +57,16 @@ namespace RTE {
 
 #pragma region Display Getters and Setters
 		/// <summary>
-		/// Gets the horizontal resolution of the primary display.
+		/// Gets the horizontal resolution of the display the primary window is positioned at.
 		/// </summary>
-		/// <returns>The horizontal resolution of the primary display.</returns>
-		int GetPrimaryDisplayResX() const { return m_PrimaryDisplayResX; }
+		/// <returns>The horizontal resolution of the display the primary window is positioned at.</returns>
+		int GetDisplayPrimaryWindowIsAtResX() const { return m_DisplayPrimaryWindowIsAtResX; }
 
 		/// <summary>
-		/// Gets the vertical resolution of the primary display.
+		/// Gets the vertical resolution of the display the primary window is positioned at.
 		/// </summary>
-		/// <returns>The vertical resolution of the primary display.</returns>
-		int GetPrimaryDisplayResY() const { return m_PrimaryDisplayResY; }
+		/// <returns>The vertical resolution of the display the primary window is positioned at.</returns>
+		int GetDisplayPrimaryWindowIsAtResY() const { return m_DisplayPrimaryWindowIsAtResY; }
 
 		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
@@ -119,16 +119,16 @@ namespace RTE {
 		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
-		/// Checks whether the current resolution settings fully cover the primary display.
+		/// Checks whether the current resolution settings fully cover the display the window is positioned at.
 		/// </summary>
-		/// <returns>Whether the current resolution settings fully cover the primary display.</returns>
-		bool CoversPrimaryFullscreen() const { return (m_ResX * m_ResMultiplier == m_PrimaryDisplayResX) && (m_ResY * m_ResMultiplier == m_PrimaryDisplayResY); }
+		/// <returns>Whether the current resolution settings fully cover the display the window is positioned at.</returns>
+		bool FullyCoversDisplayPrimaryWindowIsAtOnly() const { return (m_ResX * m_ResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (m_ResY * m_ResMultiplier == m_DisplayPrimaryWindowIsAtResY); }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover all the available displays.
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover all the available displays.</returns>
-		bool CoversMultiDisplayFullscreen() const { return m_NumDisplays > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+		bool FullyCoversAllDisplays() const { return m_NumDisplays > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
 
 		/// <summary>
 		/// Gets whether VSync is enabled.
@@ -212,8 +212,8 @@ namespace RTE {
 		std::vector<SDL_Rect> m_MultiScreenTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		int m_NumDisplays; //!< Number of physical displays.
-		int m_PrimaryDisplayResX; //!< Width of the primary physical display only.
-		int m_PrimaryDisplayResY; //!< Height of the primary physical display only.
+		int m_DisplayPrimaryWindowIsAtResX; //!< Width of the display the primary window is currently positioned at.
+		int m_DisplayPrimaryWindowIsAtResY; //!< Height of the display the primary window is currently positioned at.
 		int m_MaxResX; //!< Maximum width the game window can be (desktop width).
 		int m_MaxResY; //!< Maximum height the game window can be (desktop height).
 		bool m_CanMultiDisplayFullscreen; //!<

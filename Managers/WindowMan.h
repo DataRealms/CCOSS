@@ -216,7 +216,6 @@ namespace RTE {
 		int m_DisplayPrimaryWindowIsAtResY; //!< Height of the display the primary window is currently positioned at.
 		int m_MaxResX; //!< Maximum width the game window can be (desktop width).
 		int m_MaxResY; //!< Maximum height the game window can be (desktop height).
-		bool m_CanMultiDisplayFullscreen; //!<
 		int m_LeftMostDisplayIndex; //!<
 		int m_LeftMostOffset; //!<
 		int m_TopMostOffset; //!<
@@ -293,7 +292,8 @@ namespace RTE {
 		/// <summary>
 		///
 		/// </summary>
-		void MapDisplays();
+		/// <returns></returns>
+		bool MapDisplays();
 
 		/// <summary>
 		/// Resize the window to enable fullscreen on multiple monitors. This will fill as many screens as necessary to fulfill resX*resY*resMultiplier resolution.

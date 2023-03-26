@@ -28,7 +28,6 @@ namespace RTE {
 		m_DisplayPrimaryWindowIsAtResY = 0;
 		m_MaxResX = 0;
 		m_MaxResY = 0;
-		m_CanMultiDisplayFullscreen = false;
 		m_LeftMostDisplayIndex = -1;
 		m_LeftMostOffset = -1;
 		m_LeftMostOffset = -1;
@@ -243,10 +242,11 @@ namespace RTE {
 
 		ClearMultiDisplayData();
 
+		bool canMultiDisplayFullscreen = MapDisplays();
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
 		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (newResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
-		bool newResFullyCoversAllDisplays = (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
 		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			AttemptToRevertToPreviousResolution();
@@ -287,9 +287,10 @@ namespace RTE {
 
 		ClearMultiDisplayData();
 
+		bool canMultiDisplayFullscreen = MapDisplays();
 
 		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (m_ResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (m_ResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
-		bool newResFullyCoversAllDisplays = (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
+		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (m_ResX * newResMultiplier == m_MaxResX) && (m_ResY * newResMultiplier == m_MaxResY);
 
 		if (newResFullyCoversDisplayPrimaryWindowIsAtOnly) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -341,7 +342,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::MapDisplays() {
+	bool WindowMan::MapDisplays() {
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		SDL_Rect currentDisplayBounds;
@@ -405,12 +406,10 @@ namespace RTE {
 				}
 			}
 			if (m_LeftMostDisplayIndex >= 0) {
-					m_CanMultiDisplayFullscreen = true;
-					m_VerticalMultiDisplay = verticalDisplaySetup;
-					m_MaxResX = totalWidth;
-					m_MaxResY = maxHeight;
-					m_LeftMostOffset = leftMostOffset;
-					m_TopMostOffset = topMostOffset;
+				m_MaxResX = totalWidth;
+				m_MaxResY = maxHeight;
+				m_LeftMostOffset = leftMostOffset;
+				m_TopMostOffset = topMostOffset;
 			} else {
 				mappingErrorOrOnlyOneDisplay = true;
 			}
@@ -419,23 +418,22 @@ namespace RTE {
 		}
 
 		if (mappingErrorOrOnlyOneDisplay) {
-			m_CanMultiDisplayFullscreen = false;
 			m_MaxResX = m_DisplayPrimaryWindowIsAtResX;
 			m_MaxResY = m_DisplayPrimaryWindowIsAtResY;
+			m_NumDisplays = 1;
 			m_LeftMostOffset = -1;
 			m_TopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
-			g_ConsoleMan.PrintString("");
-			return;
+			ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
+			return false;
 		}
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resMultiplier) {
-		MapDisplays();
-
-		if (!m_CanMultiDisplayFullscreen) {
+		if (!MapDisplays()) {
 			return false;
 		}
 

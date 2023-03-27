@@ -275,7 +275,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		} else {
 			m_ResolutionChanged = true;
-			g_FrameMan.RecreateBackBuffers();
+			g_FrameMan.CreateBackBuffers();
 
 			if (newResFullyCoversAllDisplays) {
 				CreateMultiDisplayTextures();

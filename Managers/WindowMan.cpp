@@ -188,80 +188,84 @@ namespace RTE {
 		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
 		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
 
-		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
-
-		int leftMostOffset = 0;
-		int topMostOffset = 0;
-		int maxHeight = 0;
-		int maxUsableHeight = m_ResY;
-		int minHeightDisplayIndex = -1;
-		int totalWidth = 0;
-
-		for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
-			SDL_Rect displayBounds;
-			if (SDL_GetDisplayBounds(displayIndex, &displayBounds) == 0) {
-				m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.emplace_back(displayIndex, displayBounds);
-
-				leftMostOffset = std::min(leftMostOffset, displayBounds.x);
-				topMostOffset = std::min(topMostOffset, displayBounds.y);
-				maxHeight = std::max(maxHeight, displayBounds.h);
-
-				int prevMinHeight = maxUsableHeight;
-				maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
-
-				if (maxUsableHeight < prevMinHeight) {
-					minHeightDisplayIndex = displayIndex;
-				}
-
-				totalWidth += displayBounds.w;
-			} else {
-				g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(displayIndex));
-			}
-		}
-
 		bool mappingErrorOrOnlyOneDisplay = false;
 
-		if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() > 1) {
-			std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
-				[](auto left, auto right) {
-					return left.second.x < right.second.x;
-				}
-			);
+		if (!m_IgnoreMultiDisplays) {
+			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 
-			// TODO: Probably need this for vertical setups, but that's more headache to deal with. Currently a vertical arrangement works but extends horizontally so it's useless.
-			//std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
-			//	[](auto left, auto right) {
-			//		return left.second.y < right.second.y;
-			//	}
-			//);
+			int leftMostOffset = 0;
+			int topMostOffset = 0;
+			int maxHeight = 0;
+			int maxUsableHeight = m_ResY;
+			int minHeightDisplayIndex = -1;
+			int totalWidth = 0;
 
-			for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
-				SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
-				if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
-					m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
-					break;
+			for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
+				SDL_Rect displayBounds;
+				if (SDL_GetDisplayBounds(displayIndex, &displayBounds) == 0) {
+					m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.emplace_back(displayIndex, displayBounds);
+
+					leftMostOffset = std::min(leftMostOffset, displayBounds.x);
+					topMostOffset = std::min(topMostOffset, displayBounds.y);
+					maxHeight = std::max(maxHeight, displayBounds.h);
+
+					int prevMinHeight = maxUsableHeight;
+					maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
+
+					if (maxUsableHeight < prevMinHeight) {
+						minHeightDisplayIndex = displayIndex;
+					}
+
+					totalWidth += displayBounds.w;
+				} else {
+					g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(displayIndex));
 				}
 			}
-			if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
-				m_MaxResX = totalWidth;
-				m_MaxResY = maxHeight;
-				m_DisplayArrangementLeftMostOffset = leftMostOffset;
-				m_DisplayArrangementTopMostOffset = topMostOffset;
+
+			if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() > 1) {
+				std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
+					[](auto left, auto right) {
+						return left.second.x < right.second.x;
+					}
+				);
+
+				// TODO: Probably need this for vertical setups, but that's more headache to deal with. Currently a vertical arrangement works but extends horizontally so it's useless.
+				//std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
+				//	[](auto left, auto right) {
+				//		return left.second.y < right.second.y;
+				//	}
+				//);
+
+				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+					SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
+					if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
+						m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
+						break;
+					}
+				}
+				if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
+					m_MaxResX = totalWidth;
+					m_MaxResY = maxHeight;
+					m_DisplayArrangementLeftMostOffset = leftMostOffset;
+					m_DisplayArrangementTopMostOffset = topMostOffset;
+				} else {
+					mappingErrorOrOnlyOneDisplay = true;
+				}
 			} else {
 				mappingErrorOrOnlyOneDisplay = true;
 			}
-		} else {
-			mappingErrorOrOnlyOneDisplay = true;
 		}
 
-		if (mappingErrorOrOnlyOneDisplay) {
+		if (m_IgnoreMultiDisplays || mappingErrorOrOnlyOneDisplay) {
 			m_MaxResX = m_DisplayWidthPrimaryWindowIsAt;
 			m_MaxResY = m_DisplayHeightPrimaryWindowIsAt;
 			m_NumDisplays = 1;
 			m_DisplayArrangementLeftMostOffset = -1;
 			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
-			ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
+			if (!m_IgnoreMultiDisplays) {
+				ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
+			}
 			return false;
 		}
 		return true;

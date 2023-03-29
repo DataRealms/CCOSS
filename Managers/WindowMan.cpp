@@ -20,25 +20,26 @@ namespace RTE {
 		m_PrimaryWindow.reset();
 		m_PrimaryRenderer.reset();
 		m_PrimaryTexture.reset();
-
 		ClearMultiDisplayData();
 
+		m_AnyWindowHasFocus = false;
+		m_FocusLostDueToMovingBetweenGameWindows = false;
+		m_ResolutionChanged = false;
+
 		m_NumDisplays = 0;
-		m_DisplayPrimaryWindowIsAtResX = 0;
-		m_DisplayPrimaryWindowIsAtResY = 0;
 		m_MaxResX = 0;
 		m_MaxResY = 0;
-		m_LeftMostDisplayIndex = -1;
-		m_LeftMostOffset = -1;
-		m_LeftMostOffset = -1;
 		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
-		m_PrimaryWindowDisplayIndex = 0;
-		m_AnyWindowHasFocus = false;
-		m_FrameLostFocus = false;
+		m_DisplayArrangmentLeftMostDisplayIndex = -1;
+		m_DisplayArrangementLeftMostOffset = -1;
+		m_DisplayArrangementLeftMostOffset = -1;
+
+		m_DisplayIndexPrimaryWindowIsAt = 0;
+		m_DisplayWidthPrimaryWindowIsAt = 0;
+		m_DisplayHeightPrimaryWindowIsAt = 0;
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
-		m_ResolutionChanged = false;
 		m_EnableVSync = true;
 		m_IgnoreMultiDisplays = false;
 	}
@@ -46,10 +47,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::ClearMultiDisplayData() {
-		m_MultiScreenTextureOffsets.clear();
-		m_MultiScreenTextures.clear();
-		m_MultiScreenRenderers.clear();
-		m_MultiScreenWindows.clear();
+		m_MultiDisplayTextureOffsets.clear();
+		m_MultiDisplayTextures.clear();
+		m_MultiDisplayRenderers.clear();
+		m_MultiDisplayWindows.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +70,7 @@ namespace RTE {
 		CreatePrimaryRenderer();
 		CreatePrimaryTexture();
 
-		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+		m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		if (FullyCoversAllDisplays()) {
 			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
@@ -80,11 +81,11 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryWindow() {
 		const char *windowTitle = "Cortex Command Community Project";
-		int windowPosX = (m_ResX * m_ResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+		int windowPosX = (m_ResX * m_ResMultiplier <= m_DisplayWidthPrimaryWindowIsAt) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN;
 
-		if (FullyCoversDisplayPrimaryWindowIsAtOnly()) {
+		if (FullyCoversDisplayWindowIsAtOnly()) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -138,29 +139,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::CreateMultiDisplayTextures() {
-		m_MultiScreenTextures.resize(m_MultiScreenTextureOffsets.size());
-		for (size_t i = 0; i < m_MultiScreenTextures.size(); ++i) {
-			m_MultiScreenTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiScreenRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h));
-			if (!m_MultiScreenTextures[i]) {
+		m_MultiDisplayTextures.resize(m_MultiDisplayTextureOffsets.size());
+		for (size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
+			m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiDisplayRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h));
+			if (!m_MultiDisplayTextures[i]) {
 				RTEAbort("Failed to create texture for multi-display because:\n" + std::string(SDL_GetError()));
 			}
-			SDL_RenderSetLogicalSize(m_MultiScreenRenderers[i].get(), m_MultiScreenTextureOffsets[i].w, m_MultiScreenTextureOffsets[i].h);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
-		bool settingsNeedOverwrite = false;
-
-		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
-			settingsNeedOverwrite = true;
-			resX = m_MaxResX / resMultiplier;
-			resY = m_MaxResY / resMultiplier;
-			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
-		}
-		if (settingsNeedOverwrite) {
-			g_SettingsMan.SetSettingsNeedOverwrite();
+			SDL_RenderSetLogicalSize(m_MultiDisplayRenderers[i].get(), m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h);
 		}
 	}
 
@@ -174,8 +159,8 @@ namespace RTE {
 
 #if	SDL_VERSION_ATLEAST(2, 0, 18)
 		// Setting VSync per renderer is introduced in 2.0.18.
-		if (!m_MultiScreenRenderers.empty()) {
-			for (const auto &renderer : m_MultiScreenRenderers) {
+		if (!m_MultiDisplayRenderers.empty()) {
+			for (const auto &renderer : m_MultiDisplayRenderers) {
 				result = SDL_RenderSetVSync(renderer.get(), sdlEnable);
 
 				if (result != 0) {
@@ -194,143 +179,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::DisplaySwitchOut() const {
-		g_UInputMan.DisableMouseMoving(true);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::DisplaySwitchIn() const {
-		g_UInputMan.DisableMouseMoving(false);
-		if (!m_MultiScreenWindows.empty()) {
-			SDL_RaiseWindow(m_PrimaryWindow.get());
-			for (auto &window : m_MultiScreenWindows) {
-				SDL_RaiseWindow(window.get());
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
-		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-
-		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), CoversPrimaryFullscreen() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
-
-		if (!revertToDefaults && result != 0) {
-			ShowMessageBox("Failed to switch to new resolution, reverted back to previous setting! Attempting to revert to defaults!");
-
-			m_ResX = c_DefaultResX;
-			m_ResY = c_DefaultResY;
-			m_ResMultiplier = 1;
-			g_SettingsMan.UpdateSettingsFile();
-
-			AttemptToRevertToPreviousResolution(true);
-		} else if (result != 0) {
-			RTEAbort("Unable to revert to previous resolution or defaults because : \n" + std::string(SDL_GetError()) + "!");
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled) {
-		int newResMultiplier = upscaled ? 2 : 1;
-
-		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
-			return;
-		}
-
-		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (m_ResMultiplier != newResMultiplier);
-
-		ClearMultiDisplayData();
-
-		bool canMultiDisplayFullscreen = MapDisplays();
-		ValidateResolution(newResX, newResY, newResMultiplier);
-
-		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayPrimaryWindowIsAtResX) && (newResY * newResMultiplier == m_DisplayPrimaryWindowIsAtResY);
-		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
-
-		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
-			AttemptToRevertToPreviousResolution();
-		} else if (!newResFullyCoversDisplayPrimaryWindowIsAtOnly && !newResFullyCoversAllDisplays) {
-			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
-			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
-			SDL_RestoreWindow(m_PrimaryWindow.get());
-			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
-
-			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayPrimaryWindowIsAtResX) ? SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex) : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
-		}
-
-		m_ResX = newResX;
-		m_ResY = newResY;
-		m_ResMultiplier = newResMultiplier;
-
-		g_SettingsMan.UpdateSettingsFile();
-
-		if (onlyResMultiplierChange) {
-			if (!newResFullyCoversAllDisplays) {
-				CreatePrimaryTexture();
-			}
-			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
-		} else {
-			m_ResolutionChanged = true;
-			g_FrameMan.CreateBackBuffers();
-
-			if (newResFullyCoversAllDisplays) {
-				CreateMultiDisplayTextures();
-			} else {
-				CreatePrimaryTexture();
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::ChangeResolutionMultiplier() {
-		int newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
-
-		if (m_MaxResX < m_ResX * newResMultiplier || m_MaxResY < m_ResY * newResMultiplier ) {
-			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
-			return;
-		}
-		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::CompleteResolutionChange() {
-		m_ResolutionChanged = false;
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	glm::vec4 WindowMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
-		float aspectRatio = resX / static_cast<float>(resY);
-		int width = windowW;
-		int height = width / aspectRatio + 0.5F;
-
-		if (height > windowH) {
-			height = windowH;
-			width = height * aspectRatio + 0.5F;
-		}
-
-		int offsetX = (windowW / 2) - (width / 2);
-		int offsetY = (windowH / 2) - (height / 2);
-		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool WindowMan::MapDisplays() {
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		SDL_Rect currentDisplayBounds;
-		SDL_GetDisplayBounds(0, &currentDisplayBounds);
+		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
 
-		m_DisplayPrimaryWindowIsAtResX = currentDisplayBounds.w;
-		m_DisplayPrimaryWindowIsAtResY = currentDisplayBounds.h;
+		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
+		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
 
 		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 
@@ -382,15 +238,15 @@ namespace RTE {
 			for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 				SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
 				if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
-					m_LeftMostDisplayIndex = displayIndex;
+					m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
 					break;
 				}
 			}
-			if (m_LeftMostDisplayIndex >= 0) {
+			if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
 				m_MaxResX = totalWidth;
 				m_MaxResY = maxHeight;
-				m_LeftMostOffset = leftMostOffset;
-				m_TopMostOffset = topMostOffset;
+				m_DisplayArrangementLeftMostOffset = leftMostOffset;
+				m_DisplayArrangementTopMostOffset = topMostOffset;
 			} else {
 				mappingErrorOrOnlyOneDisplay = true;
 			}
@@ -399,16 +255,120 @@ namespace RTE {
 		}
 
 		if (mappingErrorOrOnlyOneDisplay) {
-			m_MaxResX = m_DisplayPrimaryWindowIsAtResX;
-			m_MaxResY = m_DisplayPrimaryWindowIsAtResY;
+			m_MaxResX = m_DisplayWidthPrimaryWindowIsAt;
+			m_MaxResY = m_DisplayHeightPrimaryWindowIsAt;
 			m_NumDisplays = 1;
-			m_LeftMostOffset = -1;
-			m_TopMostOffset = -1;
+			m_DisplayArrangementLeftMostOffset = -1;
+			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 			ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
 			return false;
 		}
 		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
+		bool settingsNeedOverwrite = false;
+
+		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
+			settingsNeedOverwrite = true;
+			resX = m_MaxResX / resMultiplier;
+			resY = m_MaxResY / resMultiplier;
+			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
+		}
+		if (settingsNeedOverwrite) {
+			g_SettingsMan.SetSettingsNeedOverwrite();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
+		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+
+		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), FullyCoversDisplayWindowIsAtOnly() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
+
+		if (!revertToDefaults && result != 0) {
+			ShowMessageBox("Failed to switch to new resolution, reverted back to previous setting! Attempting to revert to defaults!");
+
+			m_ResX = c_DefaultResX;
+			m_ResY = c_DefaultResY;
+			m_ResMultiplier = 1;
+			g_SettingsMan.UpdateSettingsFile();
+
+			AttemptToRevertToPreviousResolution(true);
+		} else if (result != 0) {
+			RTEAbort("Unable to revert to previous resolution or defaults because : \n" + std::string(SDL_GetError()) + "!");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled) {
+		int newResMultiplier = upscaled ? 2 : 1;
+
+		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
+			return;
+		}
+
+		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (m_ResMultiplier != newResMultiplier);
+
+		ClearMultiDisplayData();
+
+		bool canMultiDisplayFullscreen = MapDisplays();
+		ValidateResolution(newResX, newResY, newResMultiplier);
+
+		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (newResY * newResMultiplier == m_DisplayHeightPrimaryWindowIsAt);
+		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+
+		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+			AttemptToRevertToPreviousResolution();
+		} else if (!newResFullyCoversDisplayPrimaryWindowIsAtOnly && !newResFullyCoversAllDisplays) {
+			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
+			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
+			SDL_RestoreWindow(m_PrimaryWindow.get());
+			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
+
+			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayWidthPrimaryWindowIsAt) ? SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt) : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
+		}
+
+		m_ResX = newResX;
+		m_ResY = newResY;
+		m_ResMultiplier = newResMultiplier;
+
+		g_SettingsMan.UpdateSettingsFile();
+
+		if (onlyResMultiplierChange) {
+			if (!newResFullyCoversAllDisplays) {
+				CreatePrimaryTexture();
+			}
+			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		} else {
+			m_ResolutionChanged = true;
+			g_FrameMan.CreateBackBuffers();
+
+			if (newResFullyCoversAllDisplays) {
+				CreateMultiDisplayTextures();
+			} else {
+				CreatePrimaryTexture();
+			}
+
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::ChangeResolutionMultiplier() {
+		int newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
+
+		if (m_MaxResX < m_ResX * newResMultiplier || m_MaxResY < m_ResY * newResMultiplier ) {
+			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
+			return;
+		}
+		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -423,8 +383,8 @@ namespace RTE {
 		SDL_GetWindowPosition(m_PrimaryWindow.get(), &windowPrevPositionX, &windowPrevPositionY);
 
 		// Move the window to the detected leftmost display to avoid all the headaches.
-		if (m_PrimaryWindowDisplayIndex != m_LeftMostDisplayIndex) {
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_LeftMostDisplayIndex));
+		if (m_DisplayIndexPrimaryWindowIsAt != m_DisplayArrangmentLeftMostDisplayIndex) {
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex));
 		}
 
 		bool errorSettingFullscreen = false;
@@ -435,14 +395,14 @@ namespace RTE {
 			int displayWidth = displayBounds.w;
 			int displayHeight = displayBounds.h;
 
-			if (displayIndex == m_PrimaryWindowDisplayIndex) {
-				m_MultiScreenWindows.emplace_back(m_PrimaryWindow);
-				m_MultiScreenRenderers.emplace_back(m_PrimaryRenderer);
+			if (displayIndex == m_DisplayIndexPrimaryWindowIsAt) {
+				m_MultiDisplayWindows.emplace_back(m_PrimaryWindow);
+				m_MultiDisplayRenderers.emplace_back(m_PrimaryRenderer);
 			} else {
-				m_MultiScreenWindows.emplace_back(SDL_CreateWindow(nullptr, displayOffsetX, displayOffsetY, displayWidth, displayHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR), SDLWindowDeleter());
-				if (m_MultiScreenWindows.back()) {
-					m_MultiScreenRenderers.emplace_back(SDL_CreateRenderer(m_MultiScreenWindows.back().get(), -1, SDL_RENDERER_ACCELERATED), SDLRendererDeleter());
-					if (!m_MultiScreenRenderers.back()) {
+				m_MultiDisplayWindows.emplace_back(SDL_CreateWindow(nullptr, displayOffsetX, displayOffsetY, displayWidth, displayHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR), SDLWindowDeleter());
+				if (m_MultiDisplayWindows.back()) {
+					m_MultiDisplayRenderers.emplace_back(SDL_CreateRenderer(m_MultiDisplayWindows.back().get(), -1, SDL_RENDERER_ACCELERATED), SDLRendererDeleter());
+					if (!m_MultiDisplayRenderers.back()) {
 						errorSettingFullscreen = true;
 					}
 				} else {
@@ -452,12 +412,12 @@ namespace RTE {
 					break;
 				}
 			}
-			m_MultiScreenTextureOffsets.emplace_back(SDL_Rect {
-				(m_LeftMostOffset + displayOffsetX) / resMultiplier,
-				(m_TopMostOffset + displayOffsetY) / resMultiplier,
+			m_MultiDisplayTextureOffsets.emplace_back(SDL_Rect{
+				(m_DisplayArrangementLeftMostOffset + displayOffsetX) / resMultiplier,
+				(m_DisplayArrangementTopMostOffset + displayOffsetY) / resMultiplier,
 				displayWidth / resMultiplier,
 				displayHeight / resMultiplier
-			});
+				});
 		}
 
 		if (errorSettingFullscreen) {
@@ -481,8 +441,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::Update() {
-		m_FrameLostFocus = false;
+	void WindowMan::CompleteResolutionChange() {
+		m_ResolutionChanged = false;
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::DisplaySwitchIn() const {
+		g_UInputMan.DisableMouseMoving(false);
+		if (!m_MultiDisplayWindows.empty()) {
+			SDL_RaiseWindow(m_PrimaryWindow.get());
+			for (auto &window : m_MultiDisplayWindows) {
+				SDL_RaiseWindow(window.get());
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void WindowMan::DisplaySwitchOut() const {
+		g_UInputMan.DisableMouseMoving(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,14 +469,14 @@ namespace RTE {
 	void WindowMan::HandleWindowEvent(const SDL_Event &windowEvent) {
 		switch (windowEvent.window.event) {
 			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				if (!m_FrameLostFocus) {
+				if (!m_FocusLostDueToMovingBetweenGameWindows) {
 					DisplaySwitchIn();
 				}
 				m_AnyWindowHasFocus = true;
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
 				m_AnyWindowHasFocus = false;
-				m_FrameLostFocus = true;
+				m_FocusLostDueToMovingBetweenGameWindows = true;
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
@@ -509,7 +488,7 @@ namespace RTE {
 				break;
 			case SDL_WINDOWEVENT_MOVED:
 				if (windowEvent.window.windowID == SDL_GetWindowID(m_PrimaryWindow.get())) {
-					m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+					m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 				}
 				break;
 			default:
@@ -519,11 +498,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void WindowMan::Update() {
+		m_FocusLostDueToMovingBetweenGameWindows = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void WindowMan::ClearRenderer() const {
-		if (m_MultiScreenRenderers.empty()) {
+		if (m_MultiDisplayRenderers.empty()) {
 			SDL_RenderClear(m_PrimaryRenderer.get());
 		} else {
-			for (const auto &renderer : m_MultiScreenRenderers) {
+			for (const auto &renderer : m_MultiDisplayRenderers) {
 				SDL_RenderClear(renderer.get());
 			}
 		}
@@ -534,17 +519,75 @@ namespace RTE {
 	void WindowMan::UploadFrame() const {
 		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
 
-		if (m_MultiScreenTextureOffsets.empty()) {
+		if (m_MultiDisplayTextureOffsets.empty()) {
 			SDL_UpdateTexture(m_PrimaryTexture.get(), nullptr, backbuffer->line[0], backbuffer->w * 4);
 			SDL_RenderCopy(m_PrimaryRenderer.get(), m_PrimaryTexture.get(), nullptr, nullptr);
 			SDL_RenderPresent(m_PrimaryRenderer.get());
 		} else {
-			for (size_t i = 0; i < m_MultiScreenTextureOffsets.size(); ++i) {
-				int displayOffsetX = m_MultiScreenTextureOffsets[i].x * 4;
-				SDL_UpdateTexture(m_MultiScreenTextures[i].get(), nullptr, backbuffer->line[m_MultiScreenTextureOffsets[i].y] + displayOffsetX, backbuffer->w * 4);
-				SDL_RenderCopy(m_MultiScreenRenderers[i].get(), m_MultiScreenTextures[i].get(), nullptr, nullptr);
-				SDL_RenderPresent(m_MultiScreenRenderers[i].get());
+			for (size_t i = 0; i < m_MultiDisplayTextureOffsets.size(); ++i) {
+				int displayOffsetX = m_MultiDisplayTextureOffsets[i].x * 4;
+				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(), nullptr, backbuffer->line[m_MultiDisplayTextureOffsets[i].y] + displayOffsetX, backbuffer->w * 4);
+				SDL_RenderCopy(m_MultiDisplayRenderers[i].get(), m_MultiDisplayTextures[i].get(), nullptr, nullptr);
+				SDL_RenderPresent(m_MultiDisplayRenderers[i].get());
 			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	glm::vec4 WindowMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
+		float aspectRatio = resX / static_cast<float>(resY);
+		int width = windowW;
+		int height = width / aspectRatio + 0.5F;
+
+		if (height > windowH) {
+			height = windowH;
+			width = height * aspectRatio + 0.5F;
+		}
+
+		int offsetX = (windowW / 2) - (width / 2);
+		int offsetY = (windowH / 2) - (height / 2);
+		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
+	}
+}
+
+
+
+
+
+
+
+
+
+/*
+
+	int WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
+		int revertResult = -1;
+
+		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), FullyCoversDisplayWindowIsAtOnly() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+
+		if (result == 0) {
+			std::string whichSettings = "previous";
+			std::string previousSettingsFailed = "";
+			revertResult = 0;
+			if (revertToDefaults) {
+				whichSettings = "default";
+				previousSettingsFailed = " after failing to revert to the previous settings";
+				revertResult = 1;
+			}
+			ShowMessageBox("Failed to switch to new resolution!\nSuccessfully reverted to " + whichSettings + " resolution" + previousSettingsFailed + "!");
+		} else if (!revertToDefaults && result != 0) {
+			ClearMultiDisplayData();
+			m_ResX = c_DefaultResX;
+			m_ResY = c_DefaultResY;
+			m_ResMultiplier = 1;
+
+			revertResult = AttemptToRevertToPreviousResolution(true);
+		} else if (result != 0) {
+			RTEAbort("Unable to revert to previous resolution or defaults because:\n" + std::string(SDL_GetError()) + "!");
+		}
+
+		return revertResult;
 	}
 }

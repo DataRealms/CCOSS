@@ -50,8 +50,8 @@ namespace RTE {
 			}
 
 			// Ditch the video mode so the message box appears without problems.
-			if (g_WindowMan.GetPrimaryWindow()) {
-				SDL_SetWindowFullscreen(g_WindowMan.GetPrimaryWindow(), 0);
+			if (g_WindowMan.GetWindow()) {
+				SDL_SetWindowFullscreen(g_WindowMan.GetWindow(), 0);
 			}
 
 			// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.

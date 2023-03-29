@@ -142,25 +142,25 @@ namespace RTE {
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 		m_PresetResolutions.clear();
 
-		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
-
+		// Get a list of modes from the graphics deriver. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
 		std::vector<SDL_DisplayMode> modeList;
-
 		std::set<PresetResolutionRecord> resRecords;
-		int dpIndex= SDL_GetWindowDisplayIndex(g_WindowMan.GetPrimaryWindow());
-		for (int i = 0; i < SDL_GetNumDisplayModes(dpIndex); ++i) {
-			SDL_DisplayMode mode;
-			if (SDL_GetDisplayMode(dpIndex, i, &mode) != 0) {
-				(void)SDL_GetError();
-				continue;
-			}
 
-			if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
-				if (IsSupportedResolution(mode.w, mode.h)) {
-					resRecords.emplace(mode.w, mode.h, false);
+		int displayIndex = SDL_GetWindowDisplayIndex(g_WindowMan.GetWindow());
+
+		for (int i = 0; i < SDL_GetNumDisplayModes(displayIndex); ++i) {
+			SDL_DisplayMode mode;
+			if (SDL_GetDisplayMode(displayIndex, i, &mode) == 0) {
+				modeList.push_back(mode);
+
+				if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
+					if (IsSupportedResolution(mode.w, mode.h)) {
+						resRecords.emplace(mode.w, mode.h, false);
+					}
 				}
+			} else {
+				(void)SDL_GetError();
 			}
-			modeList.push_back(mode);
 		}
 
 		if (modeList.empty()) {
@@ -212,8 +212,8 @@ namespace RTE {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetDisplayPrimaryWindowIsAtResX() / 2;
-				m_NewResY = g_WindowMan.GetDisplayPrimaryWindowIsAtResY() / 2;
+				m_NewResX = g_WindowMan.GetWidthOfDisplayWindowIsAt() / 2;
+				m_NewResY = g_WindowMan.GetHeightOfDisplayWindowIsAt() / 2;
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
 				m_NewResUpscaled = false;

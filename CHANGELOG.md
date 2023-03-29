@@ -549,6 +549,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
 
+- Swapped to SDL2 for window management and input handling.
+
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
@@ -744,6 +746,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- 1366x768 is not longer a troublesome resolution and all restrictions from using it are removed.
+
+- Multi-display fullscreen now works regardless of window position or which screen in the arrangment is set as primary.
 
 - Controller hot-plug and disconnect is now porperly detected at any point and will attempt to reconnect devices to the same gamepad slot.
 

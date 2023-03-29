@@ -486,6 +486,12 @@ ClassInfoGetters;
 
     void SetRotation(const Matrix &rotation) { m_Rotation = rotation; m_Rotation.SetXFlipped(m_HFlipped); }
 
+    /// <summary>
+	/// Sets the new rotation offset.
+	/// </summary>
+    /// <param name="rotationOffset">The new rotation offset, in local space.</param>
+    void SetRotationOffset(const Vector& rotationOffset) { m_RotationOffset = rotationOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FrameDone
@@ -587,6 +593,12 @@ ClassInfoGetters;
 
     bool IsStaticPoint() const { return m_Segments.empty(); }
 
+    /// <summary>
+	/// Returns the lowest point of the walk path, centred.
+	/// </summary>
+    /// <param name="rotationOffset">The new rotation offset, in local space.</param>
+    /// <returns>The lowest point, centred.</returns>
+    Vector GetBottomMiddle() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  Draw
@@ -643,8 +655,10 @@ protected:
     Vector m_JointPos;
     // The latest known velocity of the owning actor's joint in world coordinates.
     Vector m_JointVel;
-    // The latest known rotation of the owning actor in world coordinates.
+    // The rotation applied to this walkpath.
     Matrix m_Rotation;
+    // The point we should be rotated around, in local space.
+    Vector m_RotationOffset;
 
     // If GetNextTimeSeg() couldn't use up all frame time because the current segment
     // ended,this var stores the remainder of time that should be used to progress
@@ -679,6 +693,13 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+	/// Rotates a point to match our rotation and rotation offset.
+	/// </summary>
+    /// <param name="point">The point to rotate.</param>
+    /// <returns>The rotated point.</returns>
+    Vector RotatePoint(const Vector &point) const;
 
 };
 

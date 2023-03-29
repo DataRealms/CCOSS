@@ -1,4 +1,6 @@
 #include "AtomGroup.h"
+
+#include "Actor.h"
 #include "SLTerrain.h"
 #include "MOSRotating.h"
 #include "LimbPath.h"
@@ -1135,10 +1137,10 @@ namespace RTE {
 						impulseForces.push_back({ (newVel - forceVel) * massDist, atomOffset });
 
 						// Extract the current Atom's offset from the int positions.
-						intPos[X] -= atomOffset.GetFloorIntX();
-						intPos[Y] -= atomOffset.GetFloorIntY();
-						hitPos[X] -= atomOffset.GetFloorIntX();
-						hitPos[Y] -= atomOffset.GetFloorIntY();
+intPos[X] -= atomOffset.GetFloorIntX();
+intPos[Y] -= atomOffset.GetFloorIntY();
+hitPos[X] -= atomOffset.GetFloorIntX();
+hitPos[Y] -= atomOffset.GetFloorIntY();
 					}
 				}
 
@@ -1156,7 +1158,7 @@ namespace RTE {
 					massDist = mass / static_cast<float>(penetratingAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Apply the collision response effects.
-					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
+					for (const std::pair<Atom*, Vector>& penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDist, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
 							impulseForces.push_back({ forceVel * massDist * retardation, penetratingAtomsEntry.second });
 						}
@@ -1172,7 +1174,7 @@ namespace RTE {
 					didWrap = didWrap || g_SceneMan.WrapPosition(position);
 
 					// Apply velocity averages to the final resulting velocity for this leg.
-					for (const std::pair<Vector, Vector> &impulseForcesEntry : impulseForces) {
+					for (const std::pair<Vector, Vector>& impulseForcesEntry : impulseForces) {
 						// Cap the impulse to what the max push force is
 						//impulseForcesEntry.first.CapMagnitude(pushForce * (travelTime/* - timeLeft*/));
 						ownerVel += impulseForcesEntry.first / mass;
@@ -1197,9 +1199,9 @@ namespace RTE {
 		return returnPush;
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation) {
+	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation, Vector rotationOffset) {
 		RTEAssert(m_OwnerMOSR, "Tried to push-as-limb an AtomGroup that has no parent!");
 
 		bool didWrap = false;
@@ -1208,6 +1210,7 @@ namespace RTE {
 		limbPath.SetJointPos(jointPos);
 		limbPath.SetJointVel(velocity);
 		limbPath.SetRotation(rotation);
+		limbPath.SetRotationOffset(rotationOffset);
 		limbPath.SetFrameTime(travelTime);
 
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
@@ -1234,6 +1237,19 @@ namespace RTE {
 		} while (!limbPath.FrameDone() && !limbPath.PathEnded());
 
 		if (pushImpulse.GetLargest() > 10000.0F) { pushImpulse.Reset(); }
+
+		Actor* owner = dynamic_cast<Actor*>(m_OwnerMOSR);
+		if (owner) {
+			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
+			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
+			if (againstTravelDirection) {
+				// Filter most of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
+				// Translate it into to upwards motion to step over what we're walking into instead ;)
+				const float againstIntendedDirectionMultiplier = 0.1F;
+				pushImpulse.m_Y -= std::abs(pushImpulse.m_X * (1.0F - againstIntendedDirectionMultiplier));
+				pushImpulse.m_X *= againstIntendedDirectionMultiplier;
+			}
+		}
 
 		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), jointPos) * c_MPP) : Vector());
 

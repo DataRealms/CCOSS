@@ -288,8 +288,9 @@ namespace RTE {
 		/// <param name="travelTime">The amount of time in seconds that this AtomGroup is supposed to travel.</param>
 		/// <param name="restarted">Pointer to a bool which gets set to true if the LimbPath got restarted during this push. It does NOT get initialized to false!</param>
 		/// <param name="affectRotation">Whether the forces created by this should have rotational leverage on the owner or only have translational effect.</param>
+		/// <param name="rotationOffset">The position, relative to the owning actor's position, that we should rotate around.</param>
 		/// <returns>Whether the LimbPath passed in could start free of terrain or not.</returns>
-		bool PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted = nullptr, bool affectRotation = true);
+		bool PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted = nullptr, bool affectRotation = true, Vector rotationOffset = Vector());
 
 		/// <summary>
 		/// Makes this AtomGroup travel as a lifeless limb, constrained to a radius around the joint pin in the center.

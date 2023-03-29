@@ -94,6 +94,14 @@ namespace RTE {
 		void EnableIdle(bool idle = true) { m_WillIdle = idle; }
 #pragma endregion
 
+#pragma region Concrete Methods
+		/// <summary>
+		/// Gets a copy of this Leg's foot AtomGroup to be used as an Actor's FootGroup.
+		/// </summary>
+		/// <returns>A copy of this Leg's foot AtomGroup to be used as an Actor's FootGroup. OWNERSHIP IS TRANSFERRED!</returns>
+		AtomGroup * GetFootGroupFromFootAtomGroup();
+#pragma endregion
+
 #pragma region Override Methods
 		/// <summary>
 		/// Updates this Leg. Supposed to be done every frame.

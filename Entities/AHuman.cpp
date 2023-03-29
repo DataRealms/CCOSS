@@ -3553,10 +3553,11 @@ void AHuman::Update()
     // Ground angle walkpath rotation logic, for walking up hills or stairs
 
     // Cast a ray down from the left and right of us, to determine our angle of ascent
+    Vector unused;
     Vector hitPosLeft = m_Pos + Vector(-10.0F, 0.0F);
     Vector hitPosRight = m_Pos + Vector(10.0F, 0.0F);
-    g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0.0F, m_CharHeight * 0.5F), 1.0F, hitPosLeft);
-    g_SceneMan.CastStrengthRay(hitPosRight, Vector(0.0F, m_CharHeight * 0.5F), 1.0F, hitPosRight);
+    g_SceneMan.CastObstacleRay(hitPosLeft, Vector(0.0F, m_CharHeight * 0.5F), unused, hitPosLeft, GetRootID(), IgnoresWhichTeam(), g_MaterialGrass);
+    g_SceneMan.CastObstacleRay(hitPosRight, Vector(0.0F, m_CharHeight * 0.5F), unused, hitPosRight, GetRootID(), IgnoresWhichTeam(), g_MaterialGrass);
 
     // Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
     const float maxAngleDegrees = 35.0F;

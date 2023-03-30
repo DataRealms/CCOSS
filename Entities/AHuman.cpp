@@ -1811,6 +1811,7 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 		}
 
 		// Cast a ray down from the left and right of us, to determine our angle of ascent
+		//TODO Don't use a magic number here, calculate something based on stride length and maybe footgroup width.
 		Vector hitPosLeft = hipPos + Vector(-10.0F, 0);
 		Vector hitPosRight = hipPos + Vector(10.0F, 0);
 		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);

@@ -487,8 +487,8 @@ ClassInfoGetters;
     void SetRotation(const Matrix &rotation) { m_Rotation = rotation; m_Rotation.SetXFlipped(m_HFlipped); }
 
     /// <summary>
-	/// Sets the new rotation offset.
-	/// </summary>
+    /// Sets the new rotation offset.
+    /// </summary>
     /// <param name="rotationOffset">The new rotation offset, in local space.</param>
     void SetRotationOffset(const Vector& rotationOffset) { m_RotationOffset = rotationOffset; }
 
@@ -594,8 +594,8 @@ ClassInfoGetters;
     bool IsStaticPoint() const { return m_Segments.empty(); }
 
     /// <summary>
-	/// Returns the lowest point of the walk path, centred.
-	/// </summary>
+    /// Returns the lowest point of the walk path, centred.
+    /// </summary>
     /// <param name="rotationOffset">The new rotation offset, in local space.</param>
     /// <returns>The lowest point, centred.</returns>
     Vector GetBottomMiddle() const;

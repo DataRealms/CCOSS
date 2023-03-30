@@ -1137,10 +1137,10 @@ namespace RTE {
 						impulseForces.push_back({ (newVel - forceVel) * massDist, atomOffset });
 
 						// Extract the current Atom's offset from the int positions.
-intPos[X] -= atomOffset.GetFloorIntX();
-intPos[Y] -= atomOffset.GetFloorIntY();
-hitPos[X] -= atomOffset.GetFloorIntX();
-hitPos[Y] -= atomOffset.GetFloorIntY();
+						intPos[X] -= atomOffset.GetFloorIntX();
+						intPos[Y] -= atomOffset.GetFloorIntY();
+						hitPos[X] -= atomOffset.GetFloorIntX();
+						hitPos[Y] -= atomOffset.GetFloorIntY();
 					}
 				}
 
@@ -1158,7 +1158,7 @@ hitPos[Y] -= atomOffset.GetFloorIntY();
 					massDist = mass / static_cast<float>(penetratingAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Apply the collision response effects.
-					for (const std::pair<Atom*, Vector>& penetratingAtomsEntry : penetratingAtoms) {
+					for (const std::pair<Atom*, Vector> &penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDist, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
 							impulseForces.push_back({ forceVel * massDist * retardation, penetratingAtomsEntry.second });
 						}
@@ -1174,7 +1174,7 @@ hitPos[Y] -= atomOffset.GetFloorIntY();
 					didWrap = didWrap || g_SceneMan.WrapPosition(position);
 
 					// Apply velocity averages to the final resulting velocity for this leg.
-					for (const std::pair<Vector, Vector>& impulseForcesEntry : impulseForces) {
+					for (const std::pair<Vector, Vector> &impulseForcesEntry : impulseForces) {
 						// Cap the impulse to what the max push force is
 						//impulseForcesEntry.first.CapMagnitude(pushForce * (travelTime/* - timeLeft*/));
 						ownerVel += impulseForcesEntry.first / mass;
@@ -1199,7 +1199,7 @@ hitPos[Y] -= atomOffset.GetFloorIntY();
 		return returnPush;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation, Vector rotationOffset) {
 		RTEAssert(m_OwnerMOSR, "Tried to push-as-limb an AtomGroup that has no parent!");

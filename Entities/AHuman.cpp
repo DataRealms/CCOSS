@@ -24,7 +24,6 @@
 #include "PresetMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"
-#include "PrimitiveMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
@@ -1811,18 +1810,18 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
 		}
 
-        // Cast a ray down from the left and right of us, to determine our angle of ascent
-        Vector hitPosLeft = hipPos + Vector(-10.0F, 0.0F);
-        Vector hitPosRight = hipPos + Vector(10.0F, 0.0F);
-        g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0.0F, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
-        g_SceneMan.CastStrengthRay(hitPosRight, Vector(0.0F, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
+		// Cast a ray down from the left and right of us, to determine our angle of ascent
+		Vector hitPosLeft = hipPos + Vector(-10.0F, 0.0F);
+		Vector hitPosRight = hipPos + Vector(10.0F, 0.0F);
+		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0.0F, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
+		g_SceneMan.CastStrengthRay(hitPosRight, Vector(0.0F, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
 
-        // Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
-        const float maxAngleDegrees = 40.0F;
-        float terrainRotationDegs = std::clamp((hitPosRight - hitPosLeft).GetAbsDegAngle(), -maxAngleDegrees, maxAngleDegrees);
+		// Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
+		const float maxAngleDegrees = 40.0F;
+		float terrainRotationDegs = std::clamp((hitPosRight - hitPosLeft).GetAbsDegAngle(), -maxAngleDegrees, maxAngleDegrees);
 
-        Matrix walkAngle;
-        walkAngle.SetDegAngle(terrainRotationDegs);
+		Matrix walkAngle;
+		walkAngle.SetDegAngle(terrainRotationDegs);
 		m_WalkAngle[whichLayer] = walkAngle;
 	}
 }

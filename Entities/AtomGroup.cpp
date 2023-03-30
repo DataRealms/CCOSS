@@ -1243,9 +1243,9 @@ hitPos[Y] -= atomOffset.GetFloorIntY();
 			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
 			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
 			if (againstTravelDirection) {
-				// Filter most of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
+				// Filter some of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
 				// Translate it into to upwards motion to step over what we're walking into instead ;)
-				const float againstIntendedDirectionMultiplier = 0.1F;
+				const float againstIntendedDirectionMultiplier = 0.5F;
 				pushImpulse.m_Y -= std::abs(pushImpulse.m_X * (1.0F - againstIntendedDirectionMultiplier));
 				pushImpulse.m_X *= againstIntendedDirectionMultiplier;
 			}

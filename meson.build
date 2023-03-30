@@ -43,7 +43,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
 
     if get_option('sane_warnings')
-      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual']
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-unused-variable', '-Wno-unused-function']
       if compiler.get_id() == 'clang'
         extra_args += ['-Wno-inconsistent-missing-override', '-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
       endif

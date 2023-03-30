@@ -193,11 +193,7 @@ int LimbPath::ReadProperty(const std::string_view &propName, Reader &reader)
 
 
 Vector LimbPath::RotatePoint(const Vector &point) const {
-    Vector offset = m_RotationOffset;
-    if (m_HFlipped) {
-        offset.FlipX();
-    }
-
+    Vector offset = m_RotationOffset.GetXFlipped(m_HFlipped);
     return ((point +- offset) * m_Rotation) + offset;
 }
 

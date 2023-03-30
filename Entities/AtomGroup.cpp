@@ -1158,7 +1158,7 @@ namespace RTE {
 					massDist = mass / static_cast<float>(penetratingAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Apply the collision response effects.
-					for (const std::pair<Atom*, Vector> &penetratingAtomsEntry : penetratingAtoms) {
+					for (const std::pair<Atom *, Vector> &penetratingAtomsEntry : penetratingAtoms) {
 						if (g_SceneMan.TryPenetrate(intPos[X] + penetratingAtomsEntry.second.GetFloorIntX(), intPos[Y] + penetratingAtomsEntry.second.GetFloorIntY(), forceVel * massDist, forceVel, retardation, 1.0F, penetratingAtomsEntry.first->GetNumPenetrations())) {
 							impulseForces.push_back({ forceVel * massDist * retardation, penetratingAtomsEntry.second });
 						}
@@ -1238,8 +1238,7 @@ namespace RTE {
 
 		if (pushImpulse.GetLargest() > 10000.0F) { pushImpulse.Reset(); }
 
-		Actor* owner = dynamic_cast<Actor*>(m_OwnerMOSR);
-		if (owner) {
+		if (Actor *owner = dynamic_cast<Actor*>(m_OwnerMOSR)) {
 			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
 			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
 			if (againstTravelDirection) {

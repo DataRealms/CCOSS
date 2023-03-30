@@ -1811,10 +1811,10 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 		}
 
 		// Cast a ray down from the left and right of us, to determine our angle of ascent
-		Vector hitPosLeft = hipPos + Vector(-10.0F, 0.0F);
-		Vector hitPosRight = hipPos + Vector(10.0F, 0.0F);
-		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0.0F, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
-		g_SceneMan.CastStrengthRay(hitPosRight, Vector(0.0F, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
+		Vector hitPosLeft = hipPos + Vector(-10.0F, 0);
+		Vector hitPosRight = hipPos + Vector(10.0F, 0);
+		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
+		g_SceneMan.CastStrengthRay(hitPosRight, Vector(0, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
 
 		// Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
 		const float maxAngleDegrees = 40.0F;

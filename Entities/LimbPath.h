@@ -594,10 +594,9 @@ ClassInfoGetters;
     bool IsStaticPoint() const { return m_Segments.empty(); }
 
     /// <summary>
-    /// Returns the lowest point of the walk path, centred.
+    /// Returns the lowest point of this LimbPath, centred.
     /// </summary>
-    /// <param name="rotationOffset">The new rotation offset, in local space.</param>
-    /// <returns>The lowest point, centred.</returns>
+    /// <returns>The lowest point of this LimbPath, centred.</returns>
     Vector GetBottomMiddle() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -846,7 +846,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 		// Draw scene seam
-		vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
+		vline(m_BackBuffer8.get(), 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
 	}
 

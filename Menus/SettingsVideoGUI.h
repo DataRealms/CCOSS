@@ -165,7 +165,8 @@ namespace RTE {
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by this SettingsVideoGUI, or if an Activity is running, first prompts to end it.
 		/// </summary>
-		void ApplyNewResolution();
+		/// <param name="displaysWereMapped">Whether displays were mapped during interaction with this SettingsVideoGUI.</param>
+		void ApplyNewResolution(bool displaysWereMapped = false);
 
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by the appropriate quick change type.

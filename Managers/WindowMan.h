@@ -125,9 +125,10 @@ namespace RTE {
 
 #pragma region Resolution Change Handling
 		/// <summary>
-		/// Updates the stored info of the display the primary window is currently positioned at.
+		/// Attempts to figure our what the hell the OS display arrangement is and what are the resolution capabilities for single or multi-display fullscreen.
 		/// </summary>
-		void UpdateInfoOfDisplayPrimaryWindowIsAt();
+		/// <param name="updateInfoOfDisplayPrimaryWindowIsAt">Whether to update the stored info of the display the primary window is currently positioned at.</param>
+		void MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt = true);
 
 		/// <summary>
 		/// Gets the horizontal resolution of the display the primary game window is currently positioned at.
@@ -153,7 +154,8 @@ namespace RTE {
 		/// <param name="newResX">New width to resize to.</param>
 		/// <param name="newResY">New height to resize to.</param>
 		/// <param name="upscaled">Whether the new resolution should be upscaled.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled);
+		/// <param name="displaysAlreadyMapped">Whether to skip mapping displays because they were already mapped elsewhere.</param>
+		void ChangeResolution(int newResX, int newResY, bool upscaled, bool displaysAlreadyMapped = false);
 
 		/// <summary>
 		/// Switches to a new resolution multiplier.
@@ -208,6 +210,7 @@ namespace RTE {
 		int m_MaxResX; //!< Maximum width the game window can be (desktop width).
 		int m_MaxResY; //!< Maximum height the game window can be (desktop height).
 		std::vector<std::pair<int, SDL_Rect>> m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen; //!< Display indices and bounds that can be used for multi-display fullscreen.
+		bool m_CanMultiDisplayFullscreen; //!< Whether the display arrangement allows switching to multi-display fullscreen.
 
 		int m_DisplayArrangmentLeftMostDisplayIndex; //!< The index of the left-most screen in the OS display arrangement.
 		int m_DisplayArrangementLeftMostOffset; //!< The left-most position in the OS display arrangement.
@@ -243,10 +246,9 @@ namespace RTE {
 
 #pragma region Resolution Handling
 		/// <summary>
-		/// Attempts to figure our what the hell the OS display arrangement is and what are the resolution capabilities for single or multi-display fullscreen.
+		/// Updates the stored info of the display the primary window is currently positioned at.
 		/// </summary>
-		/// <returns>Whether the display arrangement is capable of switching to multi-display fullscreen.</returns>
-		bool MapDisplays();
+		void UpdateInfoOfDisplayPrimaryWindowIsAt();
 
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior.

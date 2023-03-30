@@ -30,6 +30,7 @@ namespace RTE {
 		m_MaxResX = 0;
 		m_MaxResY = 0;
 		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+		m_CanMultiDisplayFullscreen = false;
 		m_DisplayArrangmentLeftMostDisplayIndex = -1;
 		m_DisplayArrangementLeftMostOffset = -1;
 		m_DisplayArrangementLeftMostOffset = -1;
@@ -68,7 +69,7 @@ namespace RTE {
 		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
 		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
 
-		MapDisplays();
+		MapDisplays(false);
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 
@@ -197,7 +198,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::MapDisplays() {
+	void WindowMan::MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt) {
+		if (updateInfoOfDisplayPrimaryWindowIsAt) {
+			UpdateInfoOfDisplayPrimaryWindowIsAt();
+		}
+
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		bool mappingErrorOrOnlyOneDisplay = false;
@@ -260,6 +265,7 @@ namespace RTE {
 					m_MaxResY = maxHeight;
 					m_DisplayArrangementLeftMostOffset = leftMostOffset;
 					m_DisplayArrangementTopMostOffset = topMostOffset;
+					m_CanMultiDisplayFullscreen = true;
 				} else {
 					mappingErrorOrOnlyOneDisplay = true;
 				}
@@ -275,12 +281,11 @@ namespace RTE {
 			m_DisplayArrangementLeftMostOffset = -1;
 			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+			m_CanMultiDisplayFullscreen = false;
 			if (!m_IgnoreMultiDisplays) {
 				ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
 			}
-			return false;
 		}
-		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +327,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled) {
+	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled, bool displaysAlreadyMapped) {
 		int newResMultiplier = upscaled ? 2 : 1;
 
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
@@ -333,11 +338,13 @@ namespace RTE {
 
 		ClearMultiDisplayData();
 
-		bool canMultiDisplayFullscreen = MapDisplays();
+		if (!displaysAlreadyMapped) {
+			MapDisplays();
+		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
 		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (newResY * newResMultiplier == m_DisplayHeightPrimaryWindowIsAt);
-		bool newResFullyCoversAllDisplays = canMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+		bool newResFullyCoversAllDisplays = m_CanMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
 		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			AttemptToRevertToPreviousResolution();
@@ -380,17 +387,19 @@ namespace RTE {
 	void WindowMan::ChangeResolutionMultiplier() {
 		int newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
 
+		MapDisplays();
+
 		if (m_MaxResX < m_ResX * newResMultiplier || m_MaxResY < m_ResY * newResMultiplier ) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
-		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1);
+		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1, true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resMultiplier) {
-		if (!MapDisplays()) {
+		if (!m_CanMultiDisplayFullscreen) {
 			return false;
 		}
 

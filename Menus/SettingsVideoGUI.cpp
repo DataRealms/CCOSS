@@ -195,20 +195,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsVideoGUI::ApplyNewResolution() {
+	void SettingsVideoGUI::ApplyNewResolution(bool displaysWereMapped) {
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
 			m_VideoSettingsBox->SetEnabled(false);
 		} else {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
-			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled);
+			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, displaysWereMapped);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
+		g_WindowMan.MapDisplays();
+
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewResUpscaled = false;
@@ -230,7 +232,7 @@ namespace RTE {
 				break;
 		}
 		g_GUISound.ButtonPressSound()->Play();
-		ApplyNewResolution();
+		ApplyNewResolution(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -62,6 +62,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Initialize() {
+		SDL_Rect currentDisplayBounds;
+		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
+
+		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
+		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
+
 		MapDisplays();
 
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
@@ -179,14 +185,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::MapDisplays() {
-		m_NumDisplays = SDL_GetNumVideoDisplays();
+	void WindowMan::UpdateInfoOfDisplayPrimaryWindowIsAt() {
+		m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		SDL_Rect currentDisplayBounds;
 		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
 
 		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
 		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool WindowMan::MapDisplays() {
+		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		bool mappingErrorOrOnlyOneDisplay = false;
 
@@ -488,11 +500,6 @@ namespace RTE {
 					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
 					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
 					m_AnyWindowHasFocus = true;
-				}
-				break;
-			case SDL_WINDOWEVENT_MOVED:
-				if (windowEvent.window.windowID == SDL_GetWindowID(m_PrimaryWindow.get())) {
-					m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 				}
 				break;
 			default:

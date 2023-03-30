@@ -125,6 +125,11 @@ namespace RTE {
 
 #pragma region Resolution Change Handling
 		/// <summary>
+		/// Updates the stored info of the display the primary window is currently positioned at.
+		/// </summary>
+		void UpdateInfoOfDisplayPrimaryWindowIsAt();
+
+		/// <summary>
 		/// Gets the horizontal resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The horizontal resolution of the display the primary game window is currently positioned at.</returns>
@@ -240,7 +245,7 @@ namespace RTE {
 		/// <summary>
 		/// Attempts to figure our what the hell the OS display arrangement is and what are the resolution capabilities for single or multi-display fullscreen.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the display arrangement is capable of switching to multi-display fullscreen.</returns>
 		bool MapDisplays();
 
 		/// <summary>

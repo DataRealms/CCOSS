@@ -251,12 +251,6 @@ namespace RTE {
 				);
 
 				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
-					SDL_Rect penis;
-					SDL_GetDisplayUsableBounds(displayIndex, &penis);
-					int a = 0;
-				}
-
-				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 #if	SDL_VERSION_ATLEAST(2, 24, 0)
 					m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
 					if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {

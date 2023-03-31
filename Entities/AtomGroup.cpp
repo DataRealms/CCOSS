@@ -1555,22 +1555,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float AtomGroup::GetSurfaceArea(int pixelWidth) {
+	float AtomGroup::GetSurfaceArea(int pixelWidth) const {
 		float distributionAmount;
 
 		switch (m_AreaDistributionType) {
 			case AreaDistributionType::Linear:
 				distributionAmount = static_cast<float>(pixelWidth);
-
+				break;
 			case AreaDistributionType::Circle: {
-				const float radius = static_cast<float>(pixelWidth) * 0.5F;
-				distributionAmount = c_PI * radius * radius;
-			}
-
-			case AreaDistributionType::Square: {
+					const float radius = static_cast<float>(pixelWidth) * 0.5F;
+					distributionAmount = c_PI * radius * radius;
+					break;
+				}
+			case AreaDistributionType::Square:
 				distributionAmount = static_cast<float>(pixelWidth * pixelWidth);
-			}
-
+				break;
 			default:
 				RTEAbort("Unexpected area distribution type!");
 				distributionAmount = 1.0F;

@@ -615,7 +615,6 @@
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
     <ClInclude Include="System\GenericSavedData.h" />
-    <ClInclude Include="System\GLCheck.h" />
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
@@ -623,7 +622,6 @@
     <ClInclude Include="System\Gamepad.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\PieQuadrant.h" />
-    <ClInclude Include="System\ScreenShader.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -988,12 +986,10 @@
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\GenericSavedData.cpp" />
-    <ClCompile Include="System\GLCheck.cpp" />
     <ClCompile Include="System\InputMapping.cpp" />
     <ClCompile Include="System\InputScheme.cpp" />
     <ClCompile Include="System\GraphicalPrimitive.cpp" />
     <ClCompile Include="System\PieQuadrant.cpp" />
-    <ClCompile Include="System\ScreenShader.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
     <ClCompile Include="System\SpatialPartitionGrid.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">

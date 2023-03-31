@@ -252,7 +252,6 @@ namespace RTE {
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
 
 			g_TimerMan.Update();
-			g_FrameMan.ClearFrame();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
@@ -394,7 +393,7 @@ int main(int argc, char **argv) {
 		if (!g_ActivityMan.Initialize()) {
 			RunMenuLoop();
 		}
-		
+
 		RunGameLoop();
 	}
 

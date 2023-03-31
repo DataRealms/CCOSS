@@ -2,7 +2,7 @@
 
 #include "ActivityMan.h"
 
-#include "SDL2/SDL_messagebox.h"
+#include "SDL_messagebox.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 

@@ -72,6 +72,7 @@ namespace RTE {
 		g_MaterialGold = 2,
 		g_MaterialSand = 8,
 		g_MaterialGrass = 128,
+		g_MaterialRubber = 176,
 		g_MaterialDoor = 181
 	};
 

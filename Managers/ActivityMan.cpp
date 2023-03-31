@@ -310,7 +310,7 @@ namespace RTE {
 		if (const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName)) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
 			if (GameActivity *newActivityAsGameActivity = dynamic_cast<GameActivity *>(newActivity)) {
-				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMedium());
+				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMediumDifficulty());
 				if (newActivityAsGameActivity->GetStartingGold() <= 0) {
 					newActivityAsGameActivity->SetStartingGold(static_cast<int>(newActivityAsGameActivity->GetTeamFunds(0)));
 				} else {

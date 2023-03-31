@@ -115,16 +115,13 @@ int ACRocket::Create(const ACRocket &reference) {
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
 
-    if (reference.m_pRFootGroup)
-    {
-        m_pRFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRFootGroup->Clone());
-        m_pRFootGroup->SetOwner(this);
-    }
-    if (reference.m_pLFootGroup)
-    {
-        m_pLFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFootGroup->Clone());
-        m_pLFootGroup->SetOwner(this);
-    }
+	m_pLFootGroup = reference.m_pLFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pLFootGroup->Clone()) : m_pLLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(m_pLFootGroup, "Failed to fallback to using LFoot AtomGroup as LFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a LFootGroup or LLeg Foot attachable!");
+	m_pLFootGroup->SetOwner(this);
+
+	m_pRFootGroup = reference.m_pRFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pRFootGroup->Clone()) : m_pRLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(m_pRFootGroup, "Failed to fallback to using RFoot AtomGroup as RFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a RFootGroup or RLeg Foot attachable!");
+	m_pRFootGroup->SetOwner(this);
 
     m_GearState = reference.m_GearState;
 

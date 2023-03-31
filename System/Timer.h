@@ -21,8 +21,15 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a Timer object with a set sim time elapsed.
 		/// </summary>
+		/// <param name="simTimeLimit">A unsigned long defining this Timer's sim time limit in ms.</param>
+		Timer(double simTimeLimit) { Clear(); Create(simTimeLimit); }
+
+		/// <summary>
+		/// Constructor method used to instantiate a Timer object with a set sim time elapsed.
+		/// </summary>
+		/// <param name="simTimeLimit">A unsigned long defining this Timer's sim time limit in ms.</param>
 		/// <param name="elapsedSimTime">A unsigned long defining the amount of time (in ms) that this Timer should start with elapsed.</param>
-		Timer(unsigned long elapsedSimTime) { Clear(); Create(elapsedSimTime); }
+		Timer(double simTimeLimit, double elapsedSimTime) { Clear(); Create(simTimeLimit, elapsedSimTime); }
 
 		/// <summary>
 		/// Copy constructor method used to instantiate a Timer object identical to an already existing one.
@@ -39,9 +46,17 @@ namespace RTE {
 		/// <summary>
 		/// Makes the Timer object ready for use.
 		/// </summary>
+		/// <param name="simTimeLimit">A unsigned long defining this Timer's sim time limit in ms.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(double simTimeLimit) { return Create(simTimeLimit, 0); }
+
+		/// <summary>
+		/// Makes the Timer object ready for use.
+		/// </summary>
+		/// <param name="simTimeLimit">A unsigned long defining this Timer's sim time limit in ms.</param>
 		/// <param name="elapsedSimTime">A unsigned long defining the amount of time (in ms) that this Timer should start with elapsed.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(unsigned long elapsedSimTime);
+		int Create(double simTimeLimit, double elapsedSimTime);
 
 		/// <summary>
 		/// Creates a Timer to be identical to another, by deep copy.

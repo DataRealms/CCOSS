@@ -189,16 +189,25 @@ int AHuman::Create(const AHuman &reference) {
     m_pFGHandGroup->SetOwner(this);
     m_pBGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pBGHandGroup->Clone());
     m_pBGHandGroup->SetOwner(this);
-    m_pFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone());
+
+	AtomGroup *atomGroupToUseAsFootGroupFG = reference.m_pFGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone()) : m_pFGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupFG, "Failed to fallback to using FGFoot AtomGroup as FGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a FGFootGroup or FGLeg Foot attachable!");
+
+	AtomGroup *atomGroupToUseAsFootGroupBG = reference.m_pBGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone()) : m_pBGLeg->GetFootGroupFromFootAtomGroup();;
+	RTEAssert(atomGroupToUseAsFootGroupBG, "Failed to fallback to using BGFoot AtomGroup as BGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a BGFootGroup or BGLeg Foot attachable!");
+
+    m_pFGFootGroup = atomGroupToUseAsFootGroupFG;
     m_pFGFootGroup->SetOwner(this);
-    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupFGFootGroup->Clone());
+    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupFG->Clone());
+	m_BackupFGFootGroup->RemoveAllAtoms();
     m_BackupFGFootGroup->SetOwner(this);
-    m_BackupFGFootGroup->SetLimbPos(reference.m_BackupFGFootGroup->GetLimbPos());
-    m_pBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone());
+    m_BackupFGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupFG->GetLimbPos());
+    m_pBGFootGroup = atomGroupToUseAsFootGroupBG;
     m_pBGFootGroup->SetOwner(this);
-    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupBGFootGroup->Clone());
+    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupBG->Clone());
+	m_BackupBGFootGroup->RemoveAllAtoms();
     m_BackupBGFootGroup->SetOwner(this);
-    m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
+    m_BackupBGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupBG->GetLimbPos());
 
 	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 

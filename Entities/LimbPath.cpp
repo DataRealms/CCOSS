@@ -41,6 +41,7 @@ void LimbPath::Clear()
     m_JointPos.Reset();
     m_JointVel.Reset();
     m_Rotation.Reset();
+    m_RotationOffset.Reset();
     m_TimeLeft = 0.0;
     m_PathTimer.Reset();
     m_SegTimer.Reset();
@@ -191,6 +192,11 @@ int LimbPath::ReadProperty(const std::string_view &propName, Reader &reader)
 }
 
 
+Vector LimbPath::RotatePoint(const Vector &point) const {
+    Vector offset = m_RotationOffset.GetXFlipped(m_HFlipped);
+    return ((point - offset) * m_Rotation) + offset;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -245,22 +251,23 @@ void LimbPath::Destroy(bool notInherited)
 
 Vector LimbPath::GetProgressPos()
 {
-    if (IsStaticPoint())
-        return m_JointPos.GetFloored() + m_Start * m_Rotation;
-
-    // Start at the start
-    Vector returnVec(m_JointPos.GetFloored() + m_Start * m_Rotation);
+    Vector returnVec(m_Start);
+    if (IsStaticPoint()) {
+        return m_JointPos + RotatePoint(returnVec);
+    }
 
     // Add all the segments before the current one
 	std::deque<Vector>::const_iterator itr;
-    for (itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr)
-        returnVec += (*itr) * m_Rotation;
+    for (itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr) {
+        returnVec += *itr;
+    }
 
     // Add any from the progress made on the current one
-    if (itr != m_Segments.end())
-        returnVec += ((*(m_CurrentSegment)) * m_SegProgress) * m_Rotation;
+    if (itr != m_Segments.end()) {
+        returnVec += *m_CurrentSegment * m_SegProgress;
+    }
 
-    return returnVec;
+    return m_JointPos + RotatePoint(returnVec);
 }
 
 
@@ -271,19 +278,22 @@ Vector LimbPath::GetProgressPos()
 
 Vector LimbPath::GetCurrentSegTarget()
 {
-    if (IsStaticPoint())
-        return m_JointPos.GetFloored() + m_Start * m_Rotation;
+    Vector returnVec(m_Start);
+    if (IsStaticPoint()) {
+        return m_JointPos + RotatePoint(returnVec);
+    }
 
-    Vector returnVec(m_JointPos.GetFloored() + m_Start * m_Rotation);
 	std::deque<Vector>::const_iterator itr;
 
-    for (itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr)
-        returnVec += (*itr) * m_Rotation;
+    for (itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr) {
+        returnVec += *itr;
+    }
 
-    if (itr != m_Segments.end())
-        returnVec += *(m_CurrentSegment) * m_Rotation;
+    if (itr != m_Segments.end()) {
+        returnVec += *m_CurrentSegment;
+    }
 
-    return returnVec;
+    return m_JointPos + RotatePoint(returnVec);
 }
 
 
@@ -563,7 +573,7 @@ bool LimbPath::RestartFree(Vector &limbPos, MOID MOIDToIgnore, int ignoreTeam)
     if (IsStaticPoint())
 	{
 		Vector notUsed;
-        Vector targetPos = m_JointPos.GetFloored() + m_Start * m_Rotation;
+        Vector targetPos = m_JointPos + RotatePoint(m_Start);
         Vector beginPos = targetPos;
 // TODO: don't hardcode the beginpos
         beginPos.m_Y -= 24;
@@ -585,7 +595,7 @@ bool LimbPath::RestartFree(Vector &limbPos, MOID MOIDToIgnore, int ignoreTeam)
         int i = 0;
         for (; i < m_StartSegCount; ++i)
         {
-            result = g_SceneMan.CastObstacleRay(GetProgressPos(), (*m_CurrentSegment) * m_Rotation, notUsed, limbPos, MOIDToIgnore, ignoreTeam, g_MaterialGrass);
+            result = g_SceneMan.CastObstacleRay(GetProgressPos(), RotatePoint(*m_CurrentSegment), notUsed, limbPos, MOIDToIgnore, ignoreTeam, g_MaterialGrass);
 
             // If we found an obstacle after the first pixel, report the current segment as the starting one and that there is free space here
             if (result > 0)
@@ -650,6 +660,16 @@ bool LimbPath::RestartFree(Vector &limbPos, MOID MOIDToIgnore, int ignoreTeam)
     return false;
 }
 
+// Todo - cache this instead of recalculating each time!
+Vector LimbPath::GetBottomMiddle() const
+{
+    float lowestY = m_Start.GetY();
+    for (auto itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr) {
+        lowestY = std::max(itr->GetY(), lowestY);
+    }
+    return Vector(0.0F, lowestY);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -662,13 +682,15 @@ void LimbPath::Draw(BITMAP *pTargetBitmap,
                     unsigned char color) const
 {
     acquire_bitmap(pTargetBitmap);
-    Vector prevPoint = m_JointPos.GetFloored() + (m_Start * m_Rotation) - targetPos;
+    Vector prevPoint = m_Start;
     Vector nextPoint = prevPoint;
     for (std::deque<Vector>::const_iterator itr = m_Segments.begin(); itr != m_Segments.end(); ++itr)
     {
-        nextPoint += (*itr) * m_Rotation;
-        line(pTargetBitmap, prevPoint.m_X, prevPoint.m_Y, nextPoint.m_X, nextPoint.m_Y, color);
-        prevPoint += (*itr) * m_Rotation;
+        nextPoint += *itr;
+        Vector prevWorldPosition = m_JointPos + RotatePoint(prevPoint);
+        Vector nextWorldPosition = m_JointPos + RotatePoint(nextPoint);
+        line(pTargetBitmap, prevWorldPosition.m_X, prevWorldPosition.m_Y, nextWorldPosition.m_X, nextWorldPosition.m_Y, color);
+        prevPoint += *itr;
     }
 
     release_bitmap(pTargetBitmap);

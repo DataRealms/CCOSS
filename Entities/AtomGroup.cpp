@@ -1,4 +1,6 @@
 #include "AtomGroup.h"
+
+#include "Actor.h"
 #include "SLTerrain.h"
 #include "MOSRotating.h"
 #include "LimbPath.h"
@@ -1205,7 +1207,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation) {
+	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation, Vector rotationOffset) {
 		RTEAssert(m_OwnerMOSR, "Tried to push-as-limb an AtomGroup that has no parent!");
 
 		bool didWrap = false;
@@ -1214,6 +1216,7 @@ namespace RTE {
 		limbPath.SetJointPos(jointPos);
 		limbPath.SetJointVel(velocity);
 		limbPath.SetRotation(rotation);
+		limbPath.SetRotationOffset(rotationOffset);
 		limbPath.SetFrameTime(travelTime);
 
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
@@ -1240,6 +1243,18 @@ namespace RTE {
 		} while (!limbPath.FrameDone() && !limbPath.PathEnded());
 
 		if (pushImpulse.GetLargest() > 10000.0F) { pushImpulse.Reset(); }
+
+		if (Actor *owner = dynamic_cast<Actor*>(m_OwnerMOSR)) {
+			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
+			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
+			if (againstTravelDirection) {
+				// Filter some of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
+				// Translate it into to upwards motion to step over what we're walking into instead ;)
+				const float againstIntendedDirectionMultiplier = 0.5F;
+				pushImpulse.m_Y -= std::abs(pushImpulse.m_X * (1.0F - againstIntendedDirectionMultiplier));
+				pushImpulse.m_X *= againstIntendedDirectionMultiplier;
+			}
+		}
 
 		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), jointPos) * c_MPP) : Vector());
 

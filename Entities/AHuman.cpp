@@ -1755,8 +1755,7 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 	if (m_Controller.IsState(BODY_JUMP)) {
 		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
 	} else {
-		int rayCount = 4;
-		float rayLength = 10.0F;
+		float rayLength = 15.0F;
 		Vector hipPos = m_Pos;
 		if (whichLayer == AHuman::Layer::FGROUND && m_pFGLeg) {
 			rayLength += m_pFGLeg->GetMaxLength();
@@ -1765,20 +1764,21 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			rayLength += m_pBGLeg->GetMaxLength();
 			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
 		}
-		float traceRotation = c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor();
-		Vector hitPos;
-		Vector terrainVector(0, rayLength);
-		Vector trace(0, rayLength);
-		for (int i = 0; i < rayCount; i++) {
-			if (g_SceneMan.CastStrengthRay(hipPos, trace, 10.0F, hitPos, 4, g_MaterialGrass)) {
-				terrainVector += trace - g_SceneMan.ShortestDistance(hipPos, hitPos, g_SceneMan.SceneWrapsX());
-			} else {
-				// Since no terrain was found, reinforce the existing terrain direction Vector, so any terrain found in future affects it less.
-				terrainVector *= 1.5F;
-			}
-			trace.RadRotate(traceRotation);
-		}
-		m_WalkAngle[whichLayer] = Matrix((terrainVector * GetFlipFactor()).GetAbsRadAngle() + c_HalfPI * GetFlipFactor());
+
+		// Cast a ray down from the left and right of us, to determine our angle of ascent
+		//TODO Don't use a magic number here, calculate something based on stride length and maybe footgroup width.
+		Vector hitPosLeft = hipPos + Vector(-10.0F, 0);
+		Vector hitPosRight = hipPos + Vector(10.0F, 0);
+		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
+		g_SceneMan.CastStrengthRay(hitPosRight, Vector(0, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
+
+		// Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
+		const float maxAngleDegrees = 40.0F;
+		float terrainRotationDegs = std::clamp((hitPosRight - hitPosLeft).GetAbsDegAngle(), -maxAngleDegrees, maxAngleDegrees);
+
+		Matrix walkAngle;
+		walkAngle.SetDegAngle(terrainRotationDegs);
+		m_WalkAngle[whichLayer] = walkAngle;
 	}
 }
 
@@ -3579,7 +3579,7 @@ void AHuman::Update()
 			if (m_pFGLeg && (!m_pBGLeg || !(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5F) || m_StrideStart)) {
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[BGROUND] = !(m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false));
+				m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false, m_Paths[FGROUND][WALK].GetBottomMiddle());
 				if (restarted) { UpdateWalkAngle(FGROUND); }
 			} else {
 				m_ArmClimbing[BGROUND] = false;
@@ -3588,7 +3588,7 @@ void AHuman::Update()
 				m_StrideStart = false;
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false);
+				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false, m_Paths[BGROUND][WALK].GetBottomMiddle());
 				if (restarted) { UpdateWalkAngle(BGROUND); }
 			} else {
 				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
@@ -3729,9 +3729,9 @@ void AHuman::Update()
 					m_Paths[FGROUND][ARMCRAWL].Terminate();
 					m_Paths[BGROUND][ARMCRAWL].Terminate();
 
-					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][STAND], deltaTime, nullptr, !m_pBGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
 
-					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][STAND], deltaTime, nullptr, !m_pFGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
 				}
 			}
 		}

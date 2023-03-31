@@ -2764,42 +2764,8 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
         }
 
-		// Weight and jetpack energy
-		if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP)) {
-			float mass = GetMass();
-			if (m_JetTimeLeft < 100) {
-				// Draw empty fuel indicator
-				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-			} else {
-				// Display normal jet icons
-				// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
-				str[0] = mass < 135 ? -31 : (mass < 150 ? -30 : (mass < 165 ? -29 : -28));
-				// Do the blinky blink
-				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
-			}
-			str[1] = 0;
-			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 8, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
-
-			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor;
-			if (jetTimeRatio > 0.75F) {
-				gaugeColor = 149;
-			} else if (jetTimeRatio > 0.5F) {
-				gaugeColor = 133;
-			} else if (jetTimeRatio > 0.375F) {
-				gaugeColor = 77;
-			} else if (jetTimeRatio > 0.25F) {
-				gaugeColor = 48;
-			} else {
-				gaugeColor = 13;
-			}
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-
-            m_HUDStack += -10;
-        }
         // Held-related GUI stuff
-        else if (m_pTurret && m_pTurret->IsAttached()) {
+		if (m_pTurret) {
             std::string textString;
             for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
                 if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice)) {
@@ -2818,15 +2784,50 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 10, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 3, textString, GUIFont::Left);
-                m_HUDStack += -10;
+				m_HUDStack -= 9;
             }
-
         } else {
             std::snprintf(str, sizeof(str), "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
 
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
+			if (m_JetTimeLeft < 100.0F) {
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else if (m_pJetpack->IsEmitting()) {
+				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.41F) {
+					str[0] = acceleration > 0.47F ? -31 : -30;
+				} else {
+					str[0] = acceleration > 0.35F ? -29 : -28;
+					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
+				}
+			} else {
+				str[0] = -27;
+			}
+			str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			if (m_JetTimeTotal > 0) {
+				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+				int gaugeColor;
+				if (jetTimeRatio > 0.75F) {
+					gaugeColor = 149;
+				} else if (jetTimeRatio > 0.5F) {
+					gaugeColor = 133;
+				} else if (jetTimeRatio > 0.375F) {
+					gaugeColor = 77;
+				} else if (jetTimeRatio > 0.25F) {
+					gaugeColor = 48;
+				} else {
+					gaugeColor = 13;
+				}
+				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+			}
+			m_HUDStack -= 9;
+		}
 
 		// Print aim angle and rot angle stoff
 		/*{

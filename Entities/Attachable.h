@@ -145,7 +145,7 @@ namespace RTE {
 		/// Sets whether this Attachable will be deleted when removed from its parent.
 		/// </summary>
 		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when removed from its parent.</param>
-		virtual void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
+		void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
 
 		/// <summary>
 		/// Gets whether this Attachable will gib when removed from its parent. Has no effect until the Attachable has been added to a parent.
@@ -157,7 +157,7 @@ namespace RTE {
 		/// Sets whether this Attachable will gib when removed from its parent.
 		/// </summary>
 		/// <param name="gibWhenRemovedFromParent">Whether this Attachable should gib when removed from its parent.</param>
-		virtual void SetGibWhenRemovedFromParent(bool gibWhenRemovedFromParent) { m_GibWhenRemovedFromParent = gibWhenRemovedFromParent; }
+		void SetGibWhenRemovedFromParent(bool gibWhenRemovedFromParent) { m_GibWhenRemovedFromParent = gibWhenRemovedFromParent; }
 
 		/// <summary>
 		/// Gets whether forces transferred from this Attachable should be applied at its parent's offset (rotated to match the parent) where they will produce torque, or directly at its parent's position.

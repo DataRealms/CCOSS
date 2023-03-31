@@ -247,13 +247,13 @@ namespace RTE {
 			screen.ScreenShakeMagnitude = std::min(screen.ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
 
 			// Reduce screen shake over time.
-			screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedSimTimeS());
+			screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedRealTimeS());
 			screen.ScreenShakeMagnitude = std::max(screen.ScreenShakeMagnitude, 0.0F);
 
 			// Feedback was that the best screen-shake strength was between 25% and 40% of default.
 			// As such, we want the default setting to reflect that, instead the default setting being 30%.
 			// So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything).
-			const float screenShakeScale = 0.2F;
+			const float screenShakeScale = 0.3F;
 
 			Vector screenShakeOffset(1.0F, 0.0F);
 			screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);

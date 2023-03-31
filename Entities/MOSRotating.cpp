@@ -287,14 +287,6 @@ int MOSRotating::Create(const MOSRotating &reference) {
 	m_DamageMultiplier = reference.m_DamageMultiplier;
     m_NoSetDamageMultiplier = reference.m_NoSetDamageMultiplier;
 
-/* Allocated in lazy fashion as needed when drawing flipped
-    if (!m_pFlipBitmap && m_aSprite[0])
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
-/* Not anymore; points to shared static bitmaps
-    if (!m_pTempBitmap && m_aSprite[0])
-        m_pTempBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
     m_pTempBitmap = reference.m_pTempBitmap;
     m_pTempBitmapS = reference.m_pTempBitmapS;
 	

@@ -1932,7 +1932,6 @@ void AHuman::UpdateAI()
         {
 			// Stay still and switch to sentry mode if we're close enough to the final destination.
 			if (m_Waypoints.empty() && m_MovePath.empty() && std::abs(m_MoveVector.m_X) < 10.0F) {
-
 				m_LateralMoveState = LAT_STILL;
 				m_DeviceState = SCANNING;
 				if (!m_pMOMoveTarget) { m_AIMode = AIMODE_SENTRY; }
@@ -3320,7 +3319,6 @@ void AHuman::Update()
 	ThrownDevice *thrownDevice = nullptr;
 	if (HeldDevice *device = GetEquippedItem(); device && m_Status != INACTIVE) {
 		if (!dynamic_cast<ThrownDevice *>(device)) {
-
 			device->SetSharpAim(m_SharpAimProgress);
 
 			if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
@@ -3374,10 +3372,10 @@ void AHuman::Update()
 					}
 					float throwProgress = GetThrowProgress();
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->AddHandTarget("Start Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + (thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + thrownDevice->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-					m_pFGArm->AddHandTarget("End Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
 					float maxThrowVel = thrownDevice->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->RemoveAttachable(thrownDevice)) {
@@ -4201,53 +4199,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             }
         }
 
-        // Weight and jetpack energy
-        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
-        {
-            // Draw empty fuel indicator
-            if (m_JetTimeLeft < 100)
-                str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-            // Display normal jet icons
-            else
-            {
-                float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
-				if (acceleration > 0.47F) {
-					str[0] = -31;
-				} else {
-					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
-				}
-				// Do the blinky blink
-				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
-            }
-            // null-terminate
-            str[1] = 0;
-			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 8, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
-
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor;
-			if (jetTimeRatio > 0.75F) {
-				gaugeColor = 149;
-			} else if (jetTimeRatio > 0.5F) {
-				gaugeColor = 133;
-			} else if (jetTimeRatio > 0.375F) {
-				gaugeColor = 77;
-			} else if (jetTimeRatio > 0.25F) {
-				gaugeColor = 48;
-			} else {
-				gaugeColor = 13;
-			}
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-
-			m_HUDStack -= 10;
-			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
-				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
-				m_HUDStack -= 9;
-			}
-		}
-        // Held-related GUI stuff
-        else if (m_pFGArm || m_pBGArm) {
+		if (m_pFGArm || m_pBGArm) {
+			// Held-related GUI stuff
             HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedItem());
 			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
 
@@ -4307,23 +4260,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				std::snprintf(str, sizeof(str), bgHeldFirearm ? "%s | %s" : "%s", fgWeaponString.c_str(), bgWeaponString.c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
-                m_HUDStack -= 10;
+				m_HUDStack -= 9;
             }
-
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-
-				std::string equippedItemsString = (m_pFGArm && m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
+				std::string equippedItemsString = (fgHeldFirearm ? fgHeldFirearm->GetPresetName() : "EMPTY") + (bgHeldFirearm ? " | " + bgHeldFirearm->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
-/*
-                // Reload GUI, only show when there's nothing to pick up
-                if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
-                {
-                    std::snprintf(str, sizeof(str), " œ Reload", pHeldFirearm);
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-                }
-*/
-            }
+			}
         }
         else
         {
@@ -4331,6 +4274,43 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack -= 9;
         }
+
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
+			if (m_JetTimeLeft < 100.0F) {
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else if (m_pJetpack->IsEmitting()) {
+				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.41F) {
+					str[0] = acceleration > 0.47F ? -31 : -30;
+				} else {
+					str[0] = acceleration > 0.35F ? -29 : -28;
+					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
+				}
+			} else {
+				str[0] = -27;
+			}
+			str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			if (m_JetTimeTotal > 0) {
+				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+				int gaugeColor;
+				if (jetTimeRatio > 0.75F) {
+					gaugeColor = 149;
+				} else if (jetTimeRatio > 0.5F) {
+					gaugeColor = 133;
+				} else if (jetTimeRatio > 0.375F) {
+					gaugeColor = 77;
+				} else if (jetTimeRatio > 0.25F) {
+					gaugeColor = 48;
+				} else {
+					gaugeColor = 13;
+				}
+				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+			}
+			m_HUDStack -= 9;
+		}
 
         // Pickup GUI
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {

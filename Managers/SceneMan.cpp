@@ -1006,7 +1006,6 @@ bool SceneMan::TryPenetrate(int posX,
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
-
 	unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
 	if (materialID == g_MaterialAir) {
 		return nullptr;
@@ -1019,7 +1018,7 @@ MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
 	} else {
 		spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 	}
-	// No point generating a key-colored MOPixel
+	// No point generating a key-colored MOPixel.
 	if (spawnColor.GetIndex() == g_MaskColor) {
 		return nullptr;
 	}

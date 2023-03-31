@@ -17,7 +17,7 @@
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "ScreenShader.h"
 
 #include "glm/gtc/matrix_transform.hpp"

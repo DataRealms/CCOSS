@@ -5,7 +5,7 @@
 #include "Vector.h"
 #include "InputScheme.h"
 #include "Gamepad.h"
-#include "SDL2/SDL_keyboard.h"
+#include "SDL_keyboard.h"
 
 #define g_UInputMan UInputMan::Instance()
 extern "C" {

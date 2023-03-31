@@ -1,6 +1,6 @@
 #ifndef RTEGAMEPAD_H
 #define RTEGAMEPAD_H
-#include "SDL2/SDL_gamecontroller.h"
+#include "SDL_gamecontroller.h"
 #include "Vector.h"
 
 namespace RTE {

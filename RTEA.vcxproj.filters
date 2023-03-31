@@ -546,9 +546,6 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="System\ScreenShader.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\Gamepad.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -566,6 +563,12 @@
     </ClInclude>
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GLCheck.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\ScreenShader.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1098,11 +1101,14 @@
     <ClCompile Include="System\SpatialPartitionGrid.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="System\ScreenShader.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
     <ClCompile Include="System\glad\gl.c">
       <Filter>System\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GLCheck.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\ScreenShader.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

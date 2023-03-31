@@ -1,4 +1,4 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release', 'b_lto=true'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++17', 'buildtype=release', 'b_lto=true'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
@@ -12,14 +12,9 @@ if host_machine.system() in ['linux','darwin']
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
-    dependency('tbb'),
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
+    dependency('tbb'),
   ]
-  allegro_dep = dependency('allegro', required: false)
-  loadpng_dep = dependency('loadpng', required: false)
-  if (allegro_dep.found() and loadpng_dep.found())
-    deps += [allegro_dep, loadpng_dep]
-  endif
 endif
 
 elfname = 'CortexCommand'
@@ -146,7 +141,17 @@ external_objects = []
 external_libs = []
 subdir('external')
 
+boost_dep = declare_dependency(include_directories: include_directories('external/include/common/boost_1_75'))
+meson.override_dependency('boost-175', boost_dep)
 install_rpath = prefix/get_option('fmod_dir')
+allegro_proj = subproject('allegro 4.4.3.1-custom')
+allegro_dep = dependency('allegro')
+loadpng_dep = dependency('loadpng')
+luabind_proj = subproject('luabind-0.7.1')
+luabind_dep = dependency('luabind')
+raknet_proj = subproject('RakNet')
+raknet_dep = dependency('RakNet')
+deps += [allegro_dep, loadpng_dep, luabind_dep, raknet_dep]
 
 #### Target Definitions ####
 cccpelf = executable(

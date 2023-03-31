@@ -251,8 +251,20 @@ namespace RTE {
 				);
 
 				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+					SDL_Rect penis;
+					SDL_GetDisplayUsableBounds(displayIndex, &penis);
+					int a = 0;
+				}
+
+				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+#if	SDL_VERSION_ATLEAST(2, 24, 0)
 					m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
 					if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
+#else
+					// This doesn't return the nearest display index to the point but should still be reliable enough for reasonable display arrangements.
+					SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
+					if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
+#endif
 						m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
 						break;
 					}

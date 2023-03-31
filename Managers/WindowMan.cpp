@@ -260,18 +260,30 @@ namespace RTE {
 					if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
 #endif
 						m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
+					}
+
+					// Translate display offsets to backbuffer offsets, where the top left corner is (0,0) to figure out if the display arrangement is unreasonable garbage, i.e not top or bottom edge aligned.
+					// If any of the translated offsets ends up negative, or over-positive for the Y offset, disallow going into multi-display fullscreen
+					// because we'll just end up with an access violation when trying to read from the backbuffer pixel array during rendering.
+					// In odd display size arrangements this is valid as long as the misaligned display is somewhere between the top and bottom edge of the tallest display, as the translated offset will remain in bounds.
+					int translatedOffsetX = (displayBounds.x - leftMostOffset);
+					int translatedOffsetY = (displayBounds.y - topMostOffset);
+					if (translatedOffsetX < 0 || translatedOffsetY < 0 || translatedOffsetY + displayBounds.h > maxHeight) {
+						errorMsg = "Bad display alignment detected!\nMulti-display fullscreen currently supports only horizontal arrangements where all displays are either top or bottom edge aligned";
+						mappingErrorOrOnlyOneDisplay = true;
 						break;
 					}
 				}
-				if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
-					m_MaxResX = totalWidth;
-					m_MaxResY = maxHeight;
-					m_DisplayArrangementLeftMostOffset = leftMostOffset;
-					m_DisplayArrangementTopMostOffset = topMostOffset;
-					m_CanMultiDisplayFullscreen = true;
-				} else {
-					mappingErrorOrOnlyOneDisplay = true;
-				}
+			} else {
+				mappingErrorOrOnlyOneDisplay = true;
+			}
+
+			if (!mappingErrorOrOnlyOneDisplay && m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
+				m_MaxResX = totalWidth;
+				m_MaxResY = maxHeight;
+				m_DisplayArrangementLeftMostOffset = leftMostOffset;
+				m_DisplayArrangementTopMostOffset = topMostOffset;
+				m_CanMultiDisplayFullscreen = true;
 			} else {
 				mappingErrorOrOnlyOneDisplay = true;
 			}

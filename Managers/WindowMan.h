@@ -121,6 +121,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover all the available displays.</returns>
 		bool FullyCoversAllDisplays() const { return m_NumDisplays > 1 && (m_ResX * m_ResMultiplier == m_MaxResX) && (m_ResY * m_ResMultiplier == m_MaxResY); }
+
+		/// <summary>
+		/// Gets the absolute left-most position in the OS display arrangement. Used for correcting mouse position in multi-display fullscreen when the left-most display is not primary.
+		/// </summary>
+		/// <returns>The absolute left-most position in the OS display arrangement.</returns>
+		int GetDisplayArrangementAbsOffsetX() const { return std::abs(m_DisplayArrangementLeftMostOffset); }
+
+		/// <summary>
+		/// Gets the absolute top-most position in the OS display arrangement. Used for correcting mouse position in multi-display fullscreen when the left-most display is not primary.
+		/// </summary>
+		/// <returns>The absolute top-most position in the OS display arrangement.</returns>
+		int GetDisplayArrangementAbsOffsetY() const { return std::abs(m_DisplayArrangementTopMostOffset); }
 #pragma endregion
 
 #pragma region Resolution Change Handling

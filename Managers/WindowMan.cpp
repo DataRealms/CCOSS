@@ -32,8 +32,8 @@ namespace RTE {
 		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 		m_CanMultiDisplayFullscreen = false;
 		m_DisplayArrangmentLeftMostDisplayIndex = -1;
-		m_DisplayArrangementLeftMostOffset = -1;
-		m_DisplayArrangementLeftMostOffset = -1;
+		m_DisplayArrangementLeftMostOffset = 0;
+		m_DisplayArrangementLeftMostOffset = 0;
 
 		m_DisplayIndexPrimaryWindowIsAt = 0;
 		m_DisplayWidthPrimaryWindowIsAt = 0;
@@ -63,6 +63,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Initialize() {
+		m_NumDisplays = SDL_GetNumVideoDisplays();
+
 		SDL_Rect currentDisplayBounds;
 		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
 
@@ -206,14 +208,15 @@ namespace RTE {
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		bool mappingErrorOrOnlyOneDisplay = false;
+		std::string errorMsg = "";
 
 		if (!m_IgnoreMultiDisplays) {
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 
 			int leftMostOffset = 0;
-			int topMostOffset = 0;
-			int maxHeight = 0;
-			int maxUsableHeight = m_ResY;
+			int topMostOffset = std::numeric_limits<int>::max();
+			int maxHeight = std::numeric_limits<int>::min();
+			int maxUsableHeight = std::numeric_limits<int>::max();
 			int minHeightDisplayIndex = -1;
 			int totalWidth = 0;
 
@@ -235,7 +238,8 @@ namespace RTE {
 
 					totalWidth += displayBounds.w;
 				} else {
-					g_ConsoleMan.PrintString("ERROR: Failed to get resolution of display " + std::to_string(displayIndex));
+					errorMsg = "Failed to get resolution of display " + std::to_string(displayIndex);
+					mappingErrorOrOnlyOneDisplay = true;
 				}
 			}
 
@@ -246,16 +250,9 @@ namespace RTE {
 					}
 				);
 
-				// TODO: Probably need this for vertical setups, but that's more headache to deal with. Currently a vertical arrangement works but extends horizontally so it's useless.
-				//std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
-				//	[](auto left, auto right) {
-				//		return left.second.y < right.second.y;
-				//	}
-				//);
-
 				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
-					SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
-					if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
+					m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
+					if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
 						m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
 						break;
 					}
@@ -283,7 +280,7 @@ namespace RTE {
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 			m_CanMultiDisplayFullscreen = false;
 			if (!m_IgnoreMultiDisplays) {
-				ShowMessageBox("Failed to map displays for multi-display fullscreen!\nFullscreen will be limited to the display the window is positioned at!");
+				ShowMessageBox("Failed to map displays for multi-display fullscreen" + (!errorMsg.empty() ? (" because:\n\n" + errorMsg) : "") + "!\n\nFullscreen will be limited to the display the window is positioned at!");
 			}
 		}
 	}
@@ -353,9 +350,7 @@ namespace RTE {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
-
-			int windowPosX = (m_ResX * newResMultiplier <= m_DisplayWidthPrimaryWindowIsAt) ? SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt) : (m_MaxResX - (m_ResX * newResMultiplier)) / 2;
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPosX, SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
 		}
 
 		m_ResX = newResX;
@@ -378,7 +373,6 @@ namespace RTE {
 			} else {
 				CreatePrimaryTexture();
 			}
-
 		}
 	}
 
@@ -410,6 +404,7 @@ namespace RTE {
 		// Move the window to the detected leftmost display to avoid all the headaches.
 		if (m_DisplayIndexPrimaryWindowIsAt != m_DisplayArrangmentLeftMostDisplayIndex) {
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex));
+			m_DisplayIndexPrimaryWindowIsAt = m_DisplayArrangmentLeftMostDisplayIndex;
 		}
 
 		bool errorSettingFullscreen = false;
@@ -437,29 +432,28 @@ namespace RTE {
 					break;
 				}
 			}
+
+			int textureOffsetX = (displayOffsetX - m_DisplayArrangementLeftMostOffset);
+			int textureOffsetY = (displayOffsetY - m_DisplayArrangementTopMostOffset);
+
 			m_MultiDisplayTextureOffsets.emplace_back(SDL_Rect{
-				(m_DisplayArrangementLeftMostOffset + displayOffsetX) / resMultiplier,
-				(m_DisplayArrangementTopMostOffset + displayOffsetY) / resMultiplier,
+				textureOffsetX / resMultiplier,
+				// Sometimes an odd Y offset implodes all the things, depending on the stupidity of the arrangement and what display is primary.
+				// Sometimes it needs to be in multiples of 4 for reasons unknown to man, so we're just gonna go with this and hope for the best, for now at least.
+				RoundToNearestMultiple(textureOffsetY, 2) / resMultiplier,
 				displayWidth / resMultiplier,
 				displayHeight / resMultiplier
-				});
+			});
 		}
 
 		if (errorSettingFullscreen) {
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPrevPositionX, windowPrevPositionY);
 			ClearMultiDisplayData();
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), windowPrevPositionX, windowPrevPositionY);
 			return false;
 		}
 
 		CreateMultiDisplayTextures();
 		SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-
-		// CBA to do figure out letterboxing for multiple displays, so just fix the resolution.
-		//if (actualResX != resX * resMultiplier || actualResY != resY * resMultiplier) {
-		//	ShowMessageBox("Desired reolution would lead to letterboxing, adjusting to fill entire displays.");
-		//	resX = actualResX / resMultiplier;
-		//	resY = actualResY / resMultiplier;
-		//}
 
 		return true;
 	}

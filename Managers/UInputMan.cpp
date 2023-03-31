@@ -717,7 +717,7 @@ namespace RTE {
 						int windowPosX = 0;
 						int windowPosY = 0;
 						SDL_GetWindowPosition(SDL_GetWindowFromID(inputEvent.motion.windowID), &windowPosX, &windowPosY);
-						Vector windowCoord(static_cast<float>(windowPosX), static_cast<float>(windowPosY));
+						Vector windowCoord(static_cast<float>(g_WindowMan.GetDisplayArrangementAbsOffsetX() + windowPosX), static_cast<float>(g_WindowMan.GetDisplayArrangementAbsOffsetY() + windowPosY));
 						m_AbsoluteMousePos += windowCoord;
 					}
 					break;

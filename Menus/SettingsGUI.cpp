@@ -1,9 +1,9 @@
 #include "SettingsGUI.h"
-#include "FrameMan.h"
+#include "WindowMan.h"
 
 #include "GUI.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUITab.h"
@@ -12,13 +12,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/SettingsGUI.ini");
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		rootBox->Resize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
 		m_SettingsTabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
 		m_SettingsTabberBox->SetPositionAbs((rootBox->GetWidth() - m_SettingsTabberBox->GetWidth()) / 2, 140);

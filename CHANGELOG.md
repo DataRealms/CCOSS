@@ -596,6 +596,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Timer` Lua (R) properties `RealTimeLimitProgress` and `SimTimeLimitProgress`, that get how much progress the `Timer` has made towards its `RealTimeLimit` or `SimTimeLimit`. 0 means no progress, 1.0 means the timer has reached or passed the time limit.
 
+- New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
+
+- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution via quick toggles or custom values.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -605,6 +609,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Greatly reduce online multiplayer bandwidth usage.
 
 - Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
+
+- Swapped to SDL2 for window management and input handling.
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -704,17 +710,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	(35) EditorTeam3
 	(36) EditorTeam4
 	```
-    
-- UInputMan switches from polling based allegro input to event based sdl input.
-
-  - `UInputMan::JoyDirection*` `UInputMan::GetJoystickDirectionState`, `UInputMan::Analog*Value` `InputMapping::SetDirection` Removed whichStick parameter. No longer used or meaningful.
-
-  - `UInputMan::Key*` now takes `SDL_Scancode` or `SDL_Keycode` values. `SDL_Scancode` maps to physical key locations independent of layout, `SDL_Keycode` takes keyboard layout into account. This applies to all functions and values that take keycodes. Scancodes may be found at https://github.com/libsdl-org/SDL/blob/main/include/SDL_scancode.h
-
-  - Gamecontroller axis and buttons are now shared between almost all different controller types (any included in `SDL_gamecontrollerdb.h`, adding additional mappings not yet implemented) labels can be found at https://wiki.libsdl.org/SDL_GameControllerButton and https://wiki.libsdl.org/SDL_GameControllerAxis
-
-  - Gamecontroller hotplug and disconnect is now porperly detected at any point and will attempt to reconnect devices to the same gamepad slot.
-  
 
 - Major improvements to pathfinding performance and AI decision making.
 
@@ -793,10 +788,21 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	CheckOffset(screenId);
 	SetScroll(center, screenId);
 	```
-	
+
 - `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
 
-- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is: `DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
+- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is:  
+	`DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
+
+- `UInputMan` Lua functions `KeyPressed`, `KeyReleased` and `KeyHeld` now take `SDL_Keycode` values instead of Allegro scancodes.  
+	Keycodes take keyboard layout into account and should be the preferred way of detecting input.
+
+	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
+	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
+
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+
+- Replace `PrintScreen` with `F12` for dumping a single screenshot. Printscreen is being unreliable.
 
 - `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
 	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
@@ -818,6 +824,12 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- 1366x768 is not longer a troublesome resolution and all restrictions from using it are removed.
+
+- Multi-display fullscreen now works regardless of window position or which screen in the arrangment is set as primary.
+
+- Controller hot-plug and disconnect is now porperly detected at any point and will attempt to reconnect devices to the same gamepad slot.
 
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
@@ -851,7 +863,14 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
 
-- Removed `InputMapping::GetStick` as there is no more stick mapping.
+- Removed `whichStick` parameter for the following `UInputMan` Lua functions:  
+	`JoyDirectionPressed`, `JoyDirectionReleased`, `JoyDirectionHeld`, `AnalogAxisValue`  
+	No longer used or meaningful.
+
+- Removed `UInputMan` Lua function `WhichKeyHeld`.
+
+- Dedicated fullscreen has been removed (again) along with the following `Settings.ini` properties:
+	`ForceVirtualFullScreenGfxDriver`, `ForceDedicatedFullScreenGfxDriver`
 
 </details>
 

@@ -22,9 +22,9 @@ sources += files(
 'Timer.cpp',
 'RTEError.cpp',
 'Matrix.cpp',
-'ScreenShader.cpp',
+#'ScreenShader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
+#'GLCheck.cpp',
 'SpatialPartitionGrid.cpp',
-'GLCheck.cpp',
 )

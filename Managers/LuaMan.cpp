@@ -53,7 +53,8 @@ namespace RTE {
 		//set_pcall_callback(&AddFileAndLineToError); // NOTE: this seems to do nothing because retrieving the error from the lua stack wasn't done correctly. The current error handling works just fine but might look into doing this properly sometime later.
 
 		// Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
-		luabind::module(m_MasterState)[luabind::class_<LuaMan>("LuaManager")
+		luabind::module(m_MasterState)[
+			luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
 				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
 				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
@@ -152,14 +153,6 @@ namespace RTE {
 			RegisterLuaBindingsOfType(ManagerLuaBindings, SettingsMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, TimerMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, UInputMan),
-			RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
-			RegisterLuaBindingsOfType(MiscLuaBindings, InputDevice),
-			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
-			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
-			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, ArcPrimitive),
@@ -176,10 +169,18 @@ namespace RTE {
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive),
-			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Keycode),
-			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_Scancode),
-			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerButton),
-			RegisterLuaBindingsOfType(SDLLuaBindings, SDL_GameControllerAxis)
+			RegisterLuaBindingsOfType(InputLuaBindings, InputDevice),
+			RegisterLuaBindingsOfType(InputLuaBindings, InputElements),
+			RegisterLuaBindingsOfType(InputLuaBindings, JoyButtons),
+			RegisterLuaBindingsOfType(InputLuaBindings, JoyDirections),
+			RegisterLuaBindingsOfType(InputLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_Keycode),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_Scancode),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_GameControllerButton),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_GameControllerAxis),
+			RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode)
 		];
 
 		// Assign the manager instances to globals in the lua master state

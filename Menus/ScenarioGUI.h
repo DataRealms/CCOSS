@@ -9,7 +9,7 @@ namespace RTE {
 	class Activity;
 	class Scene;
 	class AllegroScreen;
-	class AllegroInput;
+	class GUIInputWrapper;
 	class AllegroBitmap;
 	class GUIControlManager;
 	class GUICollectionBox;
@@ -40,14 +40,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) { Clear(); Create(guiScreen, guiInput); }
+		ScenarioGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) { Clear(); Create(guiScreen, guiInput); }
 
 		/// <summary>
 		/// Makes the ScenarioGUI object ready for use.
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
+		void Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
 #pragma endregion
 
 #pragma region Setters

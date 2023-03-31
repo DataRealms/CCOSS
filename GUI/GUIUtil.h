@@ -29,7 +29,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="text">String to put into the clipboard.</param>
 		/// <returns>True if text was added to the clipboard.</returns>
-		static bool SetClipboardText(std::string text);
+		static bool SetClipboardText(const std::string &text);
 	};
 }
 #endif

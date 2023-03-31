@@ -267,10 +267,8 @@ namespace RTE {
 	/// <summary>
 	/// Returns the sign of the given input value.
 	/// </summary>
-	/// <returns>
-	/// The sign as an integer -1, 0 or +1.
-	/// </returns>
-	template <typename Type> int Sign(const Type& value) {
+	/// <returns>The sign as an integer -1, 0 or +1.</returns>
+	template <typename Type> int Sign(const Type &value) {
 		return (Type(0) < value) - (Type(0) > value);
 	}
 #pragma endregion

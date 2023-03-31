@@ -37,7 +37,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool GUIUtil::SetClipboardText(std::string text) {
+	bool GUIUtil::SetClipboardText(const std::string &text) {
 		int result = SDL_SetClipboardText(text.c_str());
 		return result == 0;
 	}

@@ -1,6 +1,7 @@
 #include "NetworkClient.h"
 
 #include "ConsoleMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "AudioMan.h"
@@ -173,8 +174,8 @@ namespace RTE {
 	void NetworkClient::SendRegisterMsg() {
 		MsgRegister msg = {};
 		msg.Id = ID_CLT_REGISTER;
-		msg.ResolutionX = g_FrameMan.GetResX();
-		msg.ResolutionY = g_FrameMan.GetResY();
+		msg.ResolutionX = g_WindowMan.GetResX();
+		msg.ResolutionY = g_WindowMan.GetResY();
 		strncpy(msg.Name, m_PlayerName.c_str(), c_PlayerNameCharLimit);
 		m_Client->Send((const char *)&msg, sizeof(msg), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 		g_ConsoleMan.PrintString("CLIENT: Registration Sent");
@@ -956,10 +957,10 @@ namespace RTE {
 			int newSourceX = m_SceneBackgroundBitmap->w + sourceX;
 
 			masked_blit(m_SceneBackgroundBitmap, dst_bmp, newSourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
-		} else if (sourceX + g_FrameMan.GetResX() >= m_SceneBackgroundBitmap->w) {
+		} else if (sourceX + g_WindowMan.GetResX() >= m_SceneBackgroundBitmap->w) {
 			// Draw if the out of seam portion is to the right
 			int newDestX = m_SceneBackgroundBitmap->w - sourceX;
-			int width = g_FrameMan.GetResX() - newDestX;
+			int width = g_WindowMan.GetResX() - newDestX;
 
 			masked_blit(m_SceneBackgroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
@@ -974,10 +975,10 @@ namespace RTE {
 			int newSourceX = m_SceneForegroundBitmap->w + sourceX;
 
 			masked_blit(m_SceneForegroundBitmap, dst_bmp, newSourceX, sourceY, destX, destY, src_bmp->w, src_bmp->h);
-		} else if (sourceX + g_FrameMan.GetResX() >= m_SceneForegroundBitmap->w) {
+		} else if (sourceX + g_WindowMan.GetResX() >= m_SceneForegroundBitmap->w) {
 			// Draw if the out of seam portion is to the right
 			int newDestX = m_SceneForegroundBitmap->w - sourceX;
-			int width = g_FrameMan.GetResX() - newDestX;
+			int width = g_WindowMan.GetResX() - newDestX;
 
 			masked_blit(m_SceneForegroundBitmap, dst_bmp, 0, sourceY, newDestX, destY, width, src_bmp->h);
 		}
@@ -1049,8 +1050,8 @@ namespace RTE {
 			int h = static_cast<int>(static_cast<float>(bmp->h) * scale);
 
 			int x = 0;
-			int y = g_FrameMan.GetResY() / 2 - h / 2;
-			if (h >= g_FrameMan.GetResY()) { y = 0; }
+			int y = g_WindowMan.GetResY() / 2 - h / 2;
+			if (h >= g_WindowMan.GetResY()) { y = 0; }
 
 			// Recalculate everything for tall maps
 			if (static_cast<float>(bmp->h) / static_cast<float>(bmp->w) > 1) {
@@ -1058,9 +1059,9 @@ namespace RTE {
 				h = dst_bmp->h;
 				w = static_cast<int>(static_cast<float>(bmp->w) * scale);
 
-				x = g_FrameMan.GetResX() / 2 - w / 2;
+				x = g_WindowMan.GetResX() / 2 - w / 2;
 				y = 0;
-				if (w >= g_FrameMan.GetResX()) { x = 0; }
+				if (w >= g_WindowMan.GetResX()) { x = 0; }
 			}
 
 			// Draw previous layer

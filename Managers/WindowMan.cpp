@@ -329,21 +329,35 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
-		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
-
-		int result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), FullyCoversDisplayWindowIsAtOnly() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0;
-
-		if (!revertToDefaults && result != 0) {
-			ShowMessageBox("Failed to switch to new resolution, reverted back to previous setting! Attempting to revert to defaults!");
-
+		auto setDefaultResSettings = [this]() {
 			m_ResX = c_DefaultResX;
 			m_ResY = c_DefaultResY;
 			m_ResMultiplier = 1;
 			g_SettingsMan.UpdateSettingsFile();
+		};
 
+		int windowFlags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+		if ((m_ResX * m_ResMultiplier >= m_MaxResX) && (m_ResY * m_ResMultiplier >= m_MaxResY)) {
+			setDefaultResSettings();
+			windowFlags = 0;
+		}
+		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
+
+		if (!FullyCoversDisplayWindowIsAtOnly()) {
+			windowFlags = 0;
+			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_FALSE);
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
+		}
+
+		bool result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), windowFlags) == 0;
+
+		if (!result && !revertToDefaults) {
+			ShowMessageBox("Failed to revert to previous resolution settings!\nAttempting to revert to defaults!");
+			setDefaultResSettings();
 			AttemptToRevertToPreviousResolution(true);
-		} else if (result != 0) {
-			RTEAbort("Unable to revert to previous resolution or defaults because : \n" + std::string(SDL_GetError()) + "!");
+		} else if (!result) {
+			RTEAbort("Failed to revert to previous resolution or defaults because: \n" + std::string(SDL_GetError()) + "!");
 		}
 	}
 
@@ -368,8 +382,12 @@ namespace RTE {
 		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (newResY * newResMultiplier == m_DisplayHeightPrimaryWindowIsAt);
 		bool newResFullyCoversAllDisplays = m_CanMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
+		bool recoveredToPreviousSettings = false;
+
 		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+			ShowMessageBox("Failed to switch to new resolution!\nAttempting to revert to previous settings!");
 			AttemptToRevertToPreviousResolution();
+			recoveredToPreviousSettings = true;
 		} else if (!newResFullyCoversDisplayPrimaryWindowIsAtOnly && !newResFullyCoversAllDisplays) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
@@ -377,12 +395,13 @@ namespace RTE {
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
 		}
+		if (!recoveredToPreviousSettings) {
+			m_ResX = newResX;
+			m_ResY = newResY;
+			m_ResMultiplier = newResMultiplier;
 
-		m_ResX = newResX;
-		m_ResY = newResY;
-		m_ResMultiplier = newResMultiplier;
-
-		g_SettingsMan.UpdateSettingsFile();
+			g_SettingsMan.UpdateSettingsFile();
+		}
 
 		if (onlyResMultiplierChange) {
 			if (!newResFullyCoversAllDisplays) {
@@ -399,6 +418,8 @@ namespace RTE {
 				CreatePrimaryTexture();
 			}
 		}
+
+		g_ConsoleMan.PrintString("SYSTEM: " + std::string(!recoveredToPreviousSettings ? "Switched to different resolution." : "Failed to switch to different resolution. Reverted to previous settings."));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -481,13 +502,6 @@ namespace RTE {
 		SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::CompleteResolutionChange() {
-		m_ResolutionChanged = false;
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

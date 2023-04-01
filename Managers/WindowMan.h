@@ -189,7 +189,7 @@ namespace RTE {
 		/// <summary>
 		/// Completes the resolution change by resetting the flag.
 		/// </summary>
-		void CompleteResolutionChange();
+		void CompleteResolutionChange() { m_ResolutionChanged = false; }
 #pragma endregion
 
 #pragma region Concrete Methods

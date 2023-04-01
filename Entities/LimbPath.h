@@ -444,11 +444,13 @@ ClassInfoGetters;
 // Arguments:       A bool telling this path to be flipped or not.
 // Return value:    None.
 
-    void SetHFlip(bool hflipped)
-    {
-        m_HFlipped = hflipped;
-        m_Rotation.SetXFlipped(m_HFlipped);
-    }
+    void SetHFlip(bool hflipped) { m_HFlipped = hflipped; }
+
+    /// <summary>
+    /// Gets the h flip.
+    /// </summary>
+    /// <returns>The h flip.</returns>
+    bool GetHFlip() { return m_HFlipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -480,7 +482,7 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Informs this LimbPath of the current rotation of its owning Actor's
 //                  for this frame. Needs to be done before travelling
-//                  anyhting along this path each frame.
+//                  anything along this path each frame.
 // Arguments:       A Matrix with the updated rotation info.
 // Return value:    None.
 

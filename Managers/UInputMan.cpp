@@ -734,10 +734,8 @@ namespace RTE {
 					m_MouseWheelChange = inputEvent.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? inputEvent.wheel.y : -inputEvent.wheel.y;
 					break;
 				case SDL_CONTROLLERAXISMOTION:
-				case SDL_JOYAXISMOTION: {
-					SDL_JoystickID id = inputEvent.type == SDL_CONTROLLERAXISMOTION ? inputEvent.caxis.which : inputEvent.jaxis.which;
-					std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
-					if (device != s_PrevJoystickStates.end()) {
+				case SDL_JOYAXISMOTION:
+					if (std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), inputEvent.type == SDL_CONTROLLERAXISMOTION ? inputEvent.caxis.which : inputEvent.jaxis.which); device != s_PrevJoystickStates.end()) {
 						if (SDL_IsGameController(device->m_DeviceIndex) && inputEvent.type == SDL_CONTROLLERAXISMOTION) {
 							UpdateJoystickAxis(device, inputEvent.caxis.axis, inputEvent.caxis.value);
 						} else if (!SDL_IsGameController(device->m_DeviceIndex)) {
@@ -745,14 +743,11 @@ namespace RTE {
 						}
 					}
 					break;
-				}
 				case SDL_CONTROLLERBUTTONDOWN:
 				case SDL_CONTROLLERBUTTONUP:
 				case SDL_JOYBUTTONDOWN:
-				case SDL_JOYBUTTONUP: {
-					SDL_JoystickID id = inputEvent.type == SDL_CONTROLLERBUTTONDOWN || inputEvent.type == SDL_CONTROLLERBUTTONUP ? inputEvent.cbutton.which : inputEvent.jbutton.which;
-					std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
-					if (device != s_PrevJoystickStates.end()) {
+				case SDL_JOYBUTTONUP:
+					if (std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), (inputEvent.type == SDL_CONTROLLERBUTTONDOWN || inputEvent.type == SDL_CONTROLLERBUTTONUP) ? inputEvent.cbutton.which : inputEvent.jbutton.which);  device != s_PrevJoystickStates.end()) {
 						int button = -1;
 						int state = -1;
 						if (SDL_IsGameController(device->m_DeviceIndex)) {
@@ -771,13 +766,11 @@ namespace RTE {
 						device->m_Buttons[button] = state;
 					}
 					break;
-				}
 				case SDL_JOYDEVICEADDED:
 					HandleGamepadHotPlug(inputEvent.jdevice.which);
 					break;
-				case SDL_JOYDEVICEREMOVED: {
-					std::vector<Gamepad>::iterator prevDevice = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), inputEvent.jdevice.which);
-					if (prevDevice != s_PrevJoystickStates.end()) {
+				case SDL_JOYDEVICEREMOVED:
+					if (std::vector<Gamepad>::iterator prevDevice = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), inputEvent.jdevice.which); prevDevice != s_PrevJoystickStates.end()) {
 						g_ConsoleMan.PrintString("INFO: Gamepad " + std::to_string(prevDevice->m_DeviceIndex + 1) + " disconnected!");
 						SDL_GameControllerClose(SDL_GameControllerFromInstanceID(prevDevice->m_JoystickID));
 						prevDevice->m_JoystickID = -1;
@@ -785,14 +778,12 @@ namespace RTE {
 						std::fill(prevDevice->m_Buttons.begin(), prevDevice->m_Buttons.end(), false);
 						m_NumJoysticks--;
 					}
-					std::vector<Gamepad>::iterator changedDevice = std::find(s_ChangedJoystickStates.begin(), s_ChangedJoystickStates.end(), inputEvent.jdevice.which);
-					if (changedDevice != s_ChangedJoystickStates.end()) {
+					if (std::vector<Gamepad>::iterator changedDevice = std::find(s_ChangedJoystickStates.begin(), s_ChangedJoystickStates.end(), inputEvent.jdevice.which); changedDevice != s_ChangedJoystickStates.end()) {
 						changedDevice->m_JoystickID = -1;
 						std::fill(changedDevice->m_Axis.begin(), changedDevice->m_Axis.end(), false);
 						std::fill(changedDevice->m_Buttons.begin(), changedDevice->m_Buttons.end(), false);
 					}
 					break;
-				}
 				default:
 					break;
 			}

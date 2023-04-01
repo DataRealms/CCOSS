@@ -261,8 +261,24 @@ namespace RTE {
 
 		m_NewResUpscaled = m_CustomResolutionUpscaledCheckbox->GetCheck();
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
-		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
-		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
+
+		int newResX = g_WindowMan.GetResX();
+		int newResY = g_WindowMan.GetResY();
+
+		if (std::string newResXString = m_CustomResolutionWidthTextBox->GetText(); !newResXString.empty()) {
+			newResX = std::stoi(newResXString);
+		} else {
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(newResX));
+		}
+
+		if (std::string newResYString = m_CustomResolutionHeightTextBox->GetText(); !newResYString.empty()) {
+			newResY = std::stoi(newResYString);
+		} else {
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(newResY));
+		}
+
+		m_NewResX = newResX / newMultiplier;
+		m_NewResY = newResY / newMultiplier;
 
 		bool invalidResolution = false;
 

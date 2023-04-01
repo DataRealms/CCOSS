@@ -1216,7 +1216,7 @@ namespace RTE {
 		// Fixup for walking backwards
 		Vector adjustedJointPos = jointPos;
 		if (limbPath.GetHFlip() != m_OwnerMOSR->IsHFlipped()) {
-			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX();
+			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX() * 2.0F;
 		}
 
 		limbPath.SetJointPos(adjustedJointPos);

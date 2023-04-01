@@ -201,95 +201,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt) {
-		if (updateInfoOfDisplayPrimaryWindowIsAt) {
-			UpdateInfoOfDisplayPrimaryWindowIsAt();
-		}
-
-		m_NumDisplays = SDL_GetNumVideoDisplays();
-
-		bool mappingErrorOrOnlyOneDisplay = false;
-		std::string errorMsg = "";
-
-		if (!m_IgnoreMultiDisplays) {
-			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
-
-			int leftMostOffset = 0;
-			int topMostOffset = std::numeric_limits<int>::max();
-			int maxHeight = std::numeric_limits<int>::min();
-			int maxUsableHeight = std::numeric_limits<int>::max();
-			int minHeightDisplayIndex = -1;
-			int totalWidth = 0;
-
-			for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
-				SDL_Rect displayBounds;
-				if (SDL_GetDisplayBounds(displayIndex, &displayBounds) == 0) {
-					m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.emplace_back(displayIndex, displayBounds);
-
-					leftMostOffset = std::min(leftMostOffset, displayBounds.x);
-					topMostOffset = std::min(topMostOffset, displayBounds.y);
-					maxHeight = std::max(maxHeight, displayBounds.h);
-
-					int prevMinHeight = maxUsableHeight;
-					maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
-
-					if (maxUsableHeight < prevMinHeight) {
-						minHeightDisplayIndex = displayIndex;
-					}
-
-					totalWidth += displayBounds.w;
-				} else {
-					errorMsg = "Failed to get resolution of display " + std::to_string(displayIndex);
-					mappingErrorOrOnlyOneDisplay = true;
-				}
-			}
-
-			if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() > 1) {
-				std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
-					[](auto left, auto right) {
-						return left.second.x < right.second.x;
-					}
-				);
-
-				for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
-#if	SDL_VERSION_ATLEAST(2, 24, 0)
-					m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
-					if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
-#else
-					// This doesn't return the nearest display index to the point but should still be reliable enough for reasonable display arrangements.
-					SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
-					if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
-#endif
-						m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
-					}
-
-					// Translate display offsets to backbuffer offsets, where the top left corner is (0,0) to figure out if the display arrangement is unreasonable garbage, i.e not top or bottom edge aligned.
-					// If any of the translated offsets ends up negative, or over-positive for the Y offset, disallow going into multi-display fullscreen
-					// because we'll just end up with an access violation when trying to read from the backbuffer pixel array during rendering.
-					// In odd display size arrangements this is valid as long as the misaligned display is somewhere between the top and bottom edge of the tallest display, as the translated offset will remain in bounds.
-					int translatedOffsetX = (displayBounds.x - leftMostOffset);
-					int translatedOffsetY = (displayBounds.y - topMostOffset);
-					if (translatedOffsetX < 0 || translatedOffsetY < 0 || translatedOffsetY + displayBounds.h > maxHeight) {
-						errorMsg = "Bad display alignment detected!\nMulti-display fullscreen currently supports only horizontal arrangements where all displays are either top or bottom edge aligned";
-						mappingErrorOrOnlyOneDisplay = true;
-						break;
-					}
-				}
-			} else {
-				mappingErrorOrOnlyOneDisplay = true;
-			}
-
-			if (!mappingErrorOrOnlyOneDisplay && m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
-				m_MaxResX = totalWidth;
-				m_MaxResY = maxHeight;
-				m_DisplayArrangementLeftMostOffset = leftMostOffset;
-				m_DisplayArrangementTopMostOffset = topMostOffset;
-				m_CanMultiDisplayFullscreen = true;
-			} else {
-				mappingErrorOrOnlyOneDisplay = true;
-			}
-		}
-
-		if (m_IgnoreMultiDisplays || mappingErrorOrOnlyOneDisplay) {
+		auto setSingleDisplayMode = [this](const std::string &errorMsg = "") {
 			m_MaxResX = m_DisplayWidthPrimaryWindowIsAt;
 			m_MaxResY = m_DisplayHeightPrimaryWindowIsAt;
 			m_NumDisplays = 1;
@@ -297,9 +209,105 @@ namespace RTE {
 			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 			m_CanMultiDisplayFullscreen = false;
-			if (!m_IgnoreMultiDisplays) {
-				ShowMessageBox("Failed to map displays for multi-display fullscreen" + (!errorMsg.empty() ? (" because:\n\n" + errorMsg) : "") + "!\n\nFullscreen will be limited to the display the window is positioned at!");
+			if (!errorMsg.empty()) {
+				ShowMessageBox("Failed to map displays for multi-display fullscreen because:\n\n" + errorMsg + "!\n\nFullscreen will be limited to the display the window is positioned at!");
 			}
+		};
+
+		if (updateInfoOfDisplayPrimaryWindowIsAt) {
+			UpdateInfoOfDisplayPrimaryWindowIsAt();
+		}
+
+		m_NumDisplays = SDL_GetNumVideoDisplays();
+
+		if (m_IgnoreMultiDisplays || m_NumDisplays == 1) {
+			setSingleDisplayMode();
+			return;
+		}
+
+		m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
+
+		int leftMostOffset = 0;
+		int topMostOffset = std::numeric_limits<int>::max();
+		int maxHeight = std::numeric_limits<int>::min();
+		//int maxUsableHeight = std::numeric_limits<int>::max();
+		//int minHeightDisplayIndex = -1;
+		int totalWidth = 0;
+
+		for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
+			SDL_Rect displayBounds;
+			if (SDL_GetDisplayBounds(displayIndex, &displayBounds) == 0) {
+				m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.emplace_back(displayIndex, displayBounds);
+
+				leftMostOffset = std::min(leftMostOffset, displayBounds.x);
+				topMostOffset = std::min(topMostOffset, displayBounds.y);
+				maxHeight = std::max(maxHeight, displayBounds.h);
+
+				/*
+				// TODO: Figure out not-quite-letterboxing-but-letterboxing in multi-display fullscreen.
+				// Deal with this by creating the backbuffer to fit the minimum height display and then offset the taller display textures on the renderers to align everything.
+				// Access violation my beloved. Deal with later.
+				int prevMinHeight = maxUsableHeight;
+				maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
+
+				if (maxUsableHeight < prevMinHeight) {
+					minHeightDisplayIndex = displayIndex;
+				}
+				*/
+
+				totalWidth += displayBounds.w;
+			} else {
+				setSingleDisplayMode("Failed to get resolution of display " + std::to_string(displayIndex) + "!");
+				return;
+			}
+		}
+
+		if (m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.size() == 1) {
+			setSingleDisplayMode("Somehow ended up with only one valid display even though " + std::to_string(m_NumDisplays) + " are available!");
+			return;
+		}
+
+		std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
+			[](auto left, auto right) {
+				return left.second.x < right.second.x;
+			}
+		);
+
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+			// Translate display offsets to backbuffer offsets, where the top left corner is (0,0) to figure out if the display arrangement is unreasonable garbage, i.e not top or bottom edge aligned.
+			// If any of the translated offsets ends up negative, or over-positive for the Y offset, disallow going into multi-display fullscreen
+			// because we'll just end up with an access violation when trying to read from the backbuffer pixel array during rendering.
+			// In odd display size arrangements this is valid as long as the misaligned display is somewhere between the top and bottom edge of the tallest display, as the translated offset will remain in bounds.
+			int translatedOffsetX = (displayBounds.x - leftMostOffset);
+			int translatedOffsetY = (displayBounds.y - topMostOffset);
+			if (translatedOffsetX < 0 || translatedOffsetY < 0 || translatedOffsetY + displayBounds.h > maxHeight) {
+				setSingleDisplayMode("Bad display alignment detected!\nMulti-display fullscreen currently supports only horizontal arrangements where all displays are either top or bottom edge aligned!");
+				return;
+			}
+		}
+
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+#if	SDL_VERSION_ATLEAST(2, 24, 0)
+			m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
+			if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
+#else
+			// This doesn't return the nearest display index to the point but should still be reliable enough for reasonable display arrangements.
+			SDL_Point testPoint = { leftMostOffset + 1, topMostOffset + 1 };
+			if (SDL_PointInRect(&testPoint, &displayBounds) == SDL_TRUE) {
+#endif
+				m_DisplayArrangmentLeftMostDisplayIndex = displayIndex;
+				break;
+			}
+		}
+
+		if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
+			m_MaxResX = totalWidth;
+			m_MaxResY = maxHeight;
+			m_DisplayArrangementLeftMostOffset = leftMostOffset;
+			m_DisplayArrangementTopMostOffset = topMostOffset;
+			m_CanMultiDisplayFullscreen = true;
+		} else {
+			setSingleDisplayMode("Unable to determine left-most display index!");
 		}
 	}
 

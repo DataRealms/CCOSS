@@ -98,6 +98,12 @@ namespace RTE {
 		const std::list<Atom *> & GetAtomList() const { return m_Atoms; }
 
 		/// <summary>
+		/// Sets the a new list of Atoms that make up the group.
+		/// </summary>
+		/// <param name="newAtoms">List of Atoms that make up the group.</param>
+		void SetAtomList(const std::list<Atom *> &newAtoms);
+
+		/// <summary>
 		/// Gets the current number of Atoms that make up the group.
 		/// </summary>
 		/// <returns>The number of Atoms that make up the group.</returns>
@@ -171,6 +177,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A float with the moment of inertia, in Kg * meter^2.</returns>
 		float GetMomentOfInertia();
+
+		/// <summary>
+		/// Sets the offset of the joint relative to this AtomGroup's origin when used as a limb.
+		/// </summary>
+		/// <param name="newOffset">The new joint offset.</param>
+		void SetJointOffset(const Vector &newOffset) { m_JointOffset = newOffset; }
 #pragma endregion
 
 #pragma region Atom Management

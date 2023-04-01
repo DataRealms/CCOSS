@@ -147,6 +147,12 @@ public:
         /// <returns>Whether or not a Box was removed.</returns>
         bool RemoveBox(const Box &boxToRemove);
 
+		/// <summary>
+		/// Gets the first Box in this Area.
+		/// </summary>
+		/// <returns>The first Box in this Area.</returns>
+		const Box * GetFirstBox() const { return m_BoxList.empty() ? nullptr : &m_BoxList[0]; }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  HasNoArea

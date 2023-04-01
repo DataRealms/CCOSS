@@ -164,6 +164,11 @@ namespace RTE {
 		void PopulateResolutionsComboBox();
 
 		/// <summary>
+		/// Remaps the displays to get the new maximum resolution values to update the numeric limits on the custom resolution textboxes.
+		/// </summary>
+		void UpdateCustomResolutionLimits();
+
+		/// <summary>
 		/// Attempts to change the resolution using the new values set by this SettingsVideoGUI, or if an Activity is running, first prompts to end it.
 		/// </summary>
 		/// <param name="displaysWereMapped">Whether displays were mapped during interaction with this SettingsVideoGUI.</param>

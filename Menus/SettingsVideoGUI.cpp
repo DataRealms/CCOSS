@@ -198,6 +198,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsVideoGUI::UpdateCustomResolutionLimits() {
+		g_WindowMan.MapDisplays();
+
+		int newMaxResX = g_WindowMan.GetMaxResX();
+		int newMaxResY = g_WindowMan.GetMaxResY();
+
+		m_CustomResolutionWidthTextBox->SetMaxNumericValue(newMaxResX);
+		if (std::string widthText = m_CustomResolutionWidthTextBox->GetText(); widthText.empty() || (!widthText.empty() && std::stoi(widthText) > newMaxResX)) {
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(newMaxResX));
+		}
+
+		m_CustomResolutionHeightTextBox->SetMaxNumericValue(newMaxResY);
+		if (std::string heightText = m_CustomResolutionHeightTextBox->GetText(); heightText.empty() || (!heightText.empty() && std::stoi(heightText) > newMaxResY)) {
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(newMaxResY));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsVideoGUI::ApplyNewResolution(bool displaysWereMapped) {
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
@@ -343,6 +362,7 @@ namespace RTE {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
 				} else if (guiEvent.GetControl() == m_IgnoreMultiDisplaysCheckbox) {
 					g_WindowMan.SetIgnoreMultiDisplays(m_IgnoreMultiDisplaysCheckbox->GetCheck());
+					UpdateCustomResolutionLimits();
 				}
 			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {

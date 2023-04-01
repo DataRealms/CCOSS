@@ -726,9 +726,9 @@ namespace RTE {
 					if (inputEvent.button.button > SDL_BUTTON_RIGHT) {
 						continue;
 					}
-					s_ChangedMouseButtonStates[inputEvent.button.button] = (inputEvent.button.state != s_PrevMouseButtonStates[inputEvent.button.button]);
-					s_PrevMouseButtonStates[inputEvent.button.button] = inputEvent.button.state;
-					s_CurrentMouseButtonStates[inputEvent.button.button] = inputEvent.button.state;
+					s_ChangedMouseButtonStates[inputEvent.button.button] = (static_cast<bool>(inputEvent.button.state) != s_PrevMouseButtonStates[inputEvent.button.button]);
+					s_PrevMouseButtonStates[inputEvent.button.button] = static_cast<bool>(inputEvent.button.state);
+					s_CurrentMouseButtonStates[inputEvent.button.button] = static_cast<bool>(inputEvent.button.state);
 					break;
 				case SDL_MOUSEWHEEL:
 					m_MouseWheelChange = inputEvent.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? inputEvent.wheel.y : -inputEvent.wheel.y;

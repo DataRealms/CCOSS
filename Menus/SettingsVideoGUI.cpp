@@ -37,6 +37,9 @@ namespace RTE {
 		m_EnableVSyncCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnableVSync"));
 		m_EnableVSyncCheckbox->SetCheck(g_WindowMan.GetVSyncEnabled());
 
+		m_IgnoreMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
+		m_IgnoreMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetIgnoreMultiDisplays());
+
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
@@ -322,6 +325,8 @@ namespace RTE {
 			if (guiEvent.GetMsg() == GUICheckbox::Changed) {
 				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
+				} else if (guiEvent.GetControl() == m_IgnoreMultiDisplaysCheckbox) {
+					g_WindowMan.SetIgnoreMultiDisplays(m_IgnoreMultiDisplaysCheckbox->GetCheck());
 				}
 			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {

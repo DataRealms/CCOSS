@@ -119,6 +119,7 @@ namespace RTE {
 		GUIRadioButton *m_TwoPlayerSplitscreenHSplitRadioButton;
 		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
 		GUICheckbox *m_EnableVSyncCheckbox;
+		GUICheckbox *m_IgnoreMultiDisplaysCheckbox;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;

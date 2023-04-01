@@ -111,6 +111,18 @@ namespace RTE {
 		void SetVSyncEnabled(bool enable);
 
 		/// <summary>
+		/// Gets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// </summary>
+		/// <returns>Whether the multi-display arrangement is ignored.</returns>
+		bool GetIgnoreMultiDisplays() const { return m_IgnoreMultiDisplays; }
+
+		/// <summary>
+		/// Sets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// </summary>
+		/// <param name="ignore">Whether the multi-display arrangement should be ignored</param>
+		void SetIgnoreMultiDisplays(bool ignore) { m_IgnoreMultiDisplays = ignore; }
+
+		/// <summary>
 		/// Checks whether the current resolution settings fully cover the display the primary game window is positioned at.
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover the display the primary game window is positioned at.</returns>

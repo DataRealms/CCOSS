@@ -1207,20 +1207,26 @@ namespace RTE {
 		bool didWrap = false;
 		Vector pushImpulse;
 
-		limbPath.SetJointPos(jointPos);
+		// Fixup for walking backwards
+		Vector adjustedJointPos = jointPos;
+		if (limbPath.GetHFlip() != m_OwnerMOSR->IsHFlipped()) {
+			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX();
+		}
+
+		limbPath.SetJointPos(adjustedJointPos);
 		limbPath.SetJointVel(velocity);
 		limbPath.SetRotation(rotation);
 		limbPath.SetRotationOffset(rotationOffset);
 		limbPath.SetFrameTime(travelTime);
 
-		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
+		Vector limbDist = g_SceneMan.ShortestDistance(adjustedJointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
 		// Pull back or reset the limb if it strayed off the path.
 		if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetRadius())) {
 			if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetDiameter())) {
 				limbPath.Terminate();
 			} else {
-				m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
+				m_LimbPos = adjustedJointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
 			}
 		}
 
@@ -1250,7 +1256,7 @@ namespace RTE {
 			}
 		}
 
-		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), jointPos) * c_MPP) : Vector());
+		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), adjustedJointPos) * c_MPP) : Vector());
 
 		return true;
 	}

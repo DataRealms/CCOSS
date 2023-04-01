@@ -556,16 +556,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() const {
+		static constexpr int bytesPerPixel = FrameMan::m_BPP / 8;
+
 		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
 
 		if (m_MultiDisplayTextureOffsets.empty()) {
-			SDL_UpdateTexture(m_PrimaryTexture.get(), nullptr, backbuffer->line[0], backbuffer->w * 4);
+			SDL_UpdateTexture(m_PrimaryTexture.get(), nullptr, backbuffer->line[0], backbuffer->w * bytesPerPixel);
 			SDL_RenderCopy(m_PrimaryRenderer.get(), m_PrimaryTexture.get(), nullptr, nullptr);
 			SDL_RenderPresent(m_PrimaryRenderer.get());
 		} else {
 			for (size_t i = 0; i < m_MultiDisplayTextureOffsets.size(); ++i) {
-				int displayOffsetX = m_MultiDisplayTextureOffsets[i].x * 4;
-				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(), nullptr, backbuffer->line[m_MultiDisplayTextureOffsets[i].y] + displayOffsetX, backbuffer->w * 4);
+				SDL_UpdateTexture(m_MultiDisplayTextures[i].get(), nullptr, backbuffer->line[m_MultiDisplayTextureOffsets[i].y] + m_MultiDisplayTextureOffsets[i].x * bytesPerPixel, backbuffer->w * bytesPerPixel);
 				SDL_RenderCopy(m_MultiDisplayRenderers[i].get(), m_MultiDisplayTextures[i].get(), nullptr, nullptr);
 				SDL_RenderPresent(m_MultiDisplayRenderers[i].get());
 			}

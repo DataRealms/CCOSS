@@ -167,7 +167,6 @@ namespace RTE {
 		int result = -1;
 
 #if	SDL_VERSION_ATLEAST(2, 0, 18)
-		// Setting VSync per renderer is introduced in 2.0.18.
 		if (!m_MultiDisplayRenderers.empty()) {
 			for (const auto &renderer : m_MultiDisplayRenderers) {
 				result = SDL_RenderSetVSync(renderer.get(), sdlEnable);
@@ -182,7 +181,7 @@ namespace RTE {
 #endif
 
 		if (result != 0) {
-			g_ConsoleMan.PrintString("ERROR: Unable to change VSync mode at runtime! The change will be applied after restarting!");
+			ShowMessageBox("Unable to change VSync mode at runtime! The change will be applied after restarting!");
 		}
 	}
 

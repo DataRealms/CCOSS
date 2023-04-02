@@ -341,16 +341,16 @@ namespace RTE {
 		void SetMousePos(const Vector &newPos, int whichPlayer = -1) const;
 
 		/// <summary>
-		/// Gets mouse sensitivity.
+		/// Gets mouse sensitivity while in Activity.
 		/// </summary>
 		/// <returns>The current mouse sensitivity.</returns>
 		float GetMouseSensitivity() const { return m_MouseSensitivity; }
 
 		/// <summary>
-		/// Sets mouse sensitivity.
+		/// Sets mouse sensitivity while in Activity.
 		/// </summary>
 		/// <param name="sensitivity">New sensitivity value.</param>
-		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = std::clamp(sensitivity, 0.1F, 2.0F); }
 
 		/// <summary>
 		/// Gets whether a mouse button is being held down right now.
@@ -684,7 +684,7 @@ namespace RTE {
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
 		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.
-		float m_MouseSensitivity; //!< Mouse sensitivity, to replace hardcoded 0.6 value in Update.
+		float m_MouseSensitivity; //!< Mouse sensitivity multiplier while in Activity. HAS NO EFFECT IN MENUS.
 		int m_MouseWheelChange; //!< The relative mouse wheel position since last reset of it.
 
 		bool m_TrapMousePos; //!< Whether the mouse is trapped in the middle of the screen each update or not.

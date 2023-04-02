@@ -761,7 +761,7 @@ namespace RTE {
 							button = inputEvent.jbutton.button;
 							state = inputEvent.jbutton.state;
 						}
-						int index = device - s_PrevJoystickStates.begin();
+						size_t index = device - s_PrevJoystickStates.begin();
 						s_ChangedJoystickStates[index].m_Buttons[button] = state != device->m_Buttons[button];
 						device->m_Buttons[button] = state;
 					}

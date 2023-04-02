@@ -156,7 +156,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	///
+	/// Polls the SDL event queue and passes events to be handled by the relevant managers.
 	/// </summary>
 	void PollEvents() {
 		SDL_Event sdlEvent;
@@ -176,9 +176,9 @@ namespace RTE {
 				case SDL_MOUSEBUTTONDOWN:
 				case SDL_MOUSEWHEEL:
 				case SDL_CONTROLLERAXISMOTION:
-				case SDL_JOYAXISMOTION:
 				case SDL_CONTROLLERBUTTONDOWN:
 				case SDL_CONTROLLERBUTTONUP:
+				case SDL_JOYAXISMOTION:
 				case SDL_JOYBUTTONDOWN:
 				case SDL_JOYBUTTONUP:
 				case SDL_JOYDEVICEADDED:

@@ -110,7 +110,7 @@ macOS meson setup requires specifying gcc, setup meson environment with:
 `sudo pacman -S sdl2 tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  
 
 **Ubuntu >=20.04:**  
-`sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
+`sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.1-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
 `sudo python3 -m pip install meson`
 
 **Fedora:**  

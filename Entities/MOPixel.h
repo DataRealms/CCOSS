@@ -196,8 +196,6 @@ namespace RTE {
 		Atom *m_Atom; //!< The single Atom that is responsible for collisions of this MOPixel.
 		Color m_Color; //!< Color representation of this MOPixel. 
 
-		float m_DistanceTraveled; //!< An estimate of how far this MO has traveled since its creation.	
-
 		float m_LethalRange; //!< After this distance in meters, the MO has a chance to no longer hit MOs, and its Lifetime decreases. Defaults to the length of a player's screen.
 		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.

@@ -295,11 +295,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Attachable::CollideAtPoint(HitData &hd) {
-		if (m_IgnoresParticlesWhileAttached && m_Parent && !m_Parent->ToDelete()) {
-			MOSRotating *hitorAsMOSR = dynamic_cast<MOSRotating *>(hd.Body[HITOR]);
-			if (!hitorAsMOSR) {
-				return false;
-			}
+		if (m_IgnoresParticlesWhileAttached && m_Parent && !m_Parent->ToDelete() && !dynamic_cast<MOSRotating *>(hd.Body[HITOR])) {
+			return false;
 		}
 		return MOSRotating::CollideAtPoint(hd);
 	}

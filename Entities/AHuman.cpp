@@ -191,16 +191,25 @@ int AHuman::Create(const AHuman &reference) {
     m_pFGHandGroup->SetOwner(this);
     m_pBGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pBGHandGroup->Clone());
     m_pBGHandGroup->SetOwner(this);
-    m_pFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone());
+
+	AtomGroup *atomGroupToUseAsFootGroupFG = reference.m_pFGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone()) : m_pFGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupFG, "Failed to fallback to using FGFoot AtomGroup as FGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a FGFootGroup or FGLeg Foot attachable!");
+
+	AtomGroup *atomGroupToUseAsFootGroupBG = reference.m_pBGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone()) : m_pBGLeg->GetFootGroupFromFootAtomGroup();;
+	RTEAssert(atomGroupToUseAsFootGroupBG, "Failed to fallback to using BGFoot AtomGroup as BGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a BGFootGroup or BGLeg Foot attachable!");
+
+    m_pFGFootGroup = atomGroupToUseAsFootGroupFG;
     m_pFGFootGroup->SetOwner(this);
-    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupFGFootGroup->Clone());
+    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupFG->Clone());
+	m_BackupFGFootGroup->RemoveAllAtoms();
     m_BackupFGFootGroup->SetOwner(this);
-    m_BackupFGFootGroup->SetLimbPos(reference.m_BackupFGFootGroup->GetLimbPos());
-    m_pBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone());
+    m_BackupFGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupFG->GetLimbPos());
+    m_pBGFootGroup = atomGroupToUseAsFootGroupBG;
     m_pBGFootGroup->SetOwner(this);
-    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupBGFootGroup->Clone());
+    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupBG->Clone());
+	m_BackupBGFootGroup->RemoveAllAtoms();
     m_BackupBGFootGroup->SetOwner(this);
-    m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
+    m_BackupBGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupBG->GetLimbPos());
 
 	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
@@ -1748,8 +1757,7 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 	if (m_Controller.IsState(BODY_JUMP)) {
 		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
 	} else {
-		int rayCount = 4;
-		float rayLength = 10.0F;
+		float rayLength = 15.0F;
 		Vector hipPos = m_Pos;
 		if (whichLayer == AHuman::Layer::FGROUND && m_pFGLeg) {
 			rayLength += m_pFGLeg->GetMaxLength();
@@ -1758,20 +1766,21 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			rayLength += m_pBGLeg->GetMaxLength();
 			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
 		}
-		float traceRotation = c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor();
-		Vector hitPos;
-		Vector terrainVector(0, rayLength);
-		Vector trace(0, rayLength);
-		for (int i = 0; i < rayCount; i++) {
-			if (g_SceneMan.CastStrengthRay(hipPos, trace, 10.0F, hitPos, 4, g_MaterialGrass)) {
-				terrainVector += trace - g_SceneMan.ShortestDistance(hipPos, hitPos, g_SceneMan.SceneWrapsX());
-			} else {
-				// Since no terrain was found, reinforce the existing terrain direction Vector, so any terrain found in future affects it less.
-				terrainVector *= 1.5F;
-			}
-			trace.RadRotate(traceRotation);
-		}
-		m_WalkAngle[whichLayer] = Matrix((terrainVector * GetFlipFactor()).GetAbsRadAngle() + c_HalfPI * GetFlipFactor());
+
+		// Cast a ray down from the left and right of us, to determine our angle of ascent
+		//TODO Don't use a magic number here, calculate something based on stride length and maybe footgroup width.
+		Vector hitPosLeft = hipPos + Vector(-10.0F, 0.0F);
+		Vector hitPosRight = hipPos + Vector(10.0F, 0.0F);
+		g_SceneMan.CastStrengthRay(hitPosLeft, Vector(0.0F, rayLength), 10.0F, hitPosLeft, 0, g_MaterialGrass);
+		g_SceneMan.CastStrengthRay(hitPosRight, Vector(0.0F, rayLength), 10.0F, hitPosRight, 0, g_MaterialGrass);
+
+		// Clamp the max angle, so we don't end up trying to walk at a 80 degree angle up sheer walls
+		const float maxAngleDegrees = 40.0F;
+		float terrainRotationDegs = std::clamp((hitPosRight - hitPosLeft).GetAbsDegAngle(), -maxAngleDegrees, maxAngleDegrees);
+
+		Matrix walkAngle;
+		walkAngle.SetDegAngle(terrainRotationDegs);
+		m_WalkAngle[whichLayer] = walkAngle;
 	}
 }
 
@@ -1925,7 +1934,6 @@ void AHuman::UpdateAI()
         {
 			// Stay still and switch to sentry mode if we're close enough to the final destination.
 			if (m_Waypoints.empty() && m_MovePath.empty() && std::abs(m_MoveVector.m_X) < 10.0F) {
-
 				m_LateralMoveState = LAT_STILL;
 				m_DeviceState = SCANNING;
 				if (!m_pMOMoveTarget) { m_AIMode = AIMODE_SENTRY; }
@@ -3313,7 +3321,6 @@ void AHuman::Update()
 	ThrownDevice *thrownDevice = nullptr;
 	if (HeldDevice *device = GetEquippedItem(); device && m_Status != INACTIVE) {
 		if (!dynamic_cast<ThrownDevice *>(device)) {
-
 			device->SetSharpAim(m_SharpAimProgress);
 
 			if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
@@ -3367,10 +3374,10 @@ void AHuman::Update()
 					}
 					float throwProgress = GetThrowProgress();
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->AddHandTarget("Start Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + (thrownDevice->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + thrownDevice->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-					m_pFGArm->AddHandTarget("End Throw Offset", m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle));
+                    m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
 					float maxThrowVel = thrownDevice->GetCalculatedMaxThrowVelIncludingArmThrowStrength();
 					if (MovableObject *pMO = m_pFGArm->RemoveAttachable(thrownDevice)) {
@@ -3572,7 +3579,7 @@ void AHuman::Update()
 			if (m_pFGLeg && (!m_pBGLeg || !(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5F) || m_StrideStart)) {
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[BGROUND] = !(m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false));
+				m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false, m_Paths[FGROUND][WALK].GetBottomMiddle());
 				if (restarted) { UpdateWalkAngle(FGROUND); }
 			} else {
 				m_ArmClimbing[BGROUND] = false;
@@ -3581,7 +3588,7 @@ void AHuman::Update()
 				m_StrideStart = false;
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false);
+				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false, m_Paths[BGROUND][WALK].GetBottomMiddle());
 				if (restarted) { UpdateWalkAngle(BGROUND); }
 			} else {
 				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
@@ -3722,9 +3729,9 @@ void AHuman::Update()
 					m_Paths[FGROUND][ARMCRAWL].Terminate();
 					m_Paths[BGROUND][ARMCRAWL].Terminate();
 
-					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][STAND], deltaTime, nullptr, !m_pBGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
 
-					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][STAND], deltaTime, nullptr, !m_pFGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
 				}
 			}
 		}
@@ -4194,53 +4201,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             }
         }
 
-        // Weight and jetpack energy
-        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
-        {
-            // Draw empty fuel indicator
-            if (m_JetTimeLeft < 100)
-                str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-            // Display normal jet icons
-            else
-            {
-                float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
-				if (acceleration > 0.47F) {
-					str[0] = -31;
-				} else {
-					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
-				}
-				// Do the blinky blink
-				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
-            }
-            // null-terminate
-            str[1] = 0;
-			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 8, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
-
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor;
-			if (jetTimeRatio > 0.75F) {
-				gaugeColor = 149;
-			} else if (jetTimeRatio > 0.5F) {
-				gaugeColor = 133;
-			} else if (jetTimeRatio > 0.375F) {
-				gaugeColor = 77;
-			} else if (jetTimeRatio > 0.25F) {
-				gaugeColor = 48;
-			} else {
-				gaugeColor = 13;
-			}
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-
-			m_HUDStack -= 10;
-			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
-				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
-				m_HUDStack -= 9;
-			}
-		}
-        // Held-related GUI stuff
-        else if (m_pFGArm || m_pBGArm) {
+		if (m_pFGArm || m_pBGArm) {
+			// Held-related GUI stuff
             HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedItem());
 			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
 
@@ -4300,23 +4262,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				std::snprintf(str, sizeof(str), bgHeldFirearm ? "%s | %s" : "%s", fgWeaponString.c_str(), bgWeaponString.c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
-                m_HUDStack -= 10;
+				m_HUDStack -= 9;
             }
-
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-
-				std::string equippedItemsString = (m_pFGArm && m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
+				std::string equippedItemsString = (fgHeldFirearm ? fgHeldFirearm->GetPresetName() : "EMPTY") + (bgHeldFirearm ? " | " + bgHeldFirearm->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
-/*
-                // Reload GUI, only show when there's nothing to pick up
-                if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
-                {
-                    std::snprintf(str, sizeof(str), " œ Reload", pHeldFirearm);
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-                }
-*/
-            }
+			}
         }
         else
         {
@@ -4324,6 +4276,43 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack -= 9;
         }
+
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
+			if (m_JetTimeLeft < 100.0F) {
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else if (m_pJetpack->IsEmitting()) {
+				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.41F) {
+					str[0] = acceleration > 0.47F ? -31 : -30;
+				} else {
+					str[0] = acceleration > 0.35F ? -29 : -28;
+					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
+				}
+			} else {
+				str[0] = -27;
+			}
+			str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			if (m_JetTimeTotal > 0) {
+				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+				int gaugeColor;
+				if (jetTimeRatio > 0.75F) {
+					gaugeColor = 149;
+				} else if (jetTimeRatio > 0.5F) {
+					gaugeColor = 133;
+				} else if (jetTimeRatio > 0.375F) {
+					gaugeColor = 77;
+				} else if (jetTimeRatio > 0.25F) {
+					gaugeColor = 48;
+				} else {
+					gaugeColor = 13;
+				}
+				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+			}
+			m_HUDStack -= 9;
+		}
 
         // Pickup GUI
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {

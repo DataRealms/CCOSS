@@ -223,7 +223,6 @@ void GUIManager::Update(bool ignoreKeyboardEvents) {
 
 
 		for (i = 1; i < 256; i++) {
-
 			switch (KeyboardBuffer[i]) {
 				// KeyDown & KeyPress
 				case GUIInput::Pushed:

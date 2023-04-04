@@ -1,5 +1,6 @@
 #include "MenuMan.h"
 #include "SettingsMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "PresetMan.h"
@@ -8,7 +9,7 @@
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 
 #include "Controller.h"
 #include "TitleScreen.h"
@@ -25,7 +26,7 @@ namespace RTE {
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
 
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-		m_GUIInput = std::make_unique<AllegroInput>(-1, g_UInputMan.GetJoystickCount() > 0);
+		m_GUIInput = std::make_unique<GUIInputWrapper>(-1, g_UInputMan.GetJoystickCount() > 0);
 
 		if (firstTimeInit) { g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get(), g_SettingsMan.GetLoadingScreenProgressReportDisabled()); }
 
@@ -200,7 +201,7 @@ namespace RTE {
 		g_FrameMan.ClearBackBuffer32();
 
 		// Early return when changing resolution so screen remains black while everything is being recreated instead of being stuck showing a badly aligned title screen.
-		if (g_FrameMan.ResolutionChanged()) {
+		if (g_WindowMan.ResolutionChanged()) {
 			return;
 		}
 
@@ -236,7 +237,7 @@ namespace RTE {
 					int matchedDevice = InputDevice::DEVICE_GAMEPAD_1 + playerIndex;
 					if (matchedDevice != device) {
 						BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
-						if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25); }
+						if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_WindowMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_WindowMan.GetResY() - 25); }
 					}
 				}
 			}

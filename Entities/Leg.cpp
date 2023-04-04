@@ -1,5 +1,6 @@
 #include "Leg.h"
 #include "PresetMan.h"
+#include "AtomGroup.h"
 
 namespace RTE {
 
@@ -138,6 +139,60 @@ namespace RTE {
 			m_Foot->SetParentGibBlastStrengthMultiplier(0.0F);
 			m_Foot->SetCollidesWithTerrainWhileAttached(false);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	AtomGroup * Leg::GetFootGroupFromFootAtomGroup() {
+		if (!m_Foot) {
+			return nullptr;
+		}
+
+		AtomGroup *footGroup = dynamic_cast<AtomGroup *>(m_Foot->GetAtomGroup()->Clone());
+
+		int atomLeftMostOffset = m_Foot->GetSpriteWidth();
+		int atomTopMostOffset = m_Foot->GetSpriteHeight();
+		int atomBottomMostOffset = 0;
+
+		for (const Atom *atom : footGroup->GetAtomList()) {
+			int atomOffsetX = atom->GetOriginalOffset().GetFloorIntX();
+			int atomOffsetY = atom->GetOriginalOffset().GetFloorIntY();
+			// Auto-generated AtomGroups are created empty so a single Atom is added at 0,0. Ignore it and any others to not screw up detecting the left-most and top-most offsets.
+			if (atomOffsetX != 0 && atomOffsetY != 0) {
+				atomLeftMostOffset = std::min(atomLeftMostOffset, atomOffsetX);
+				atomTopMostOffset = std::min(atomTopMostOffset, atomOffsetY);
+				atomBottomMostOffset = std::max(atomBottomMostOffset, atomOffsetY);
+			}
+		}
+		int groupCenterOffsetY = (atomTopMostOffset + atomBottomMostOffset) / 2;
+
+		std::vector<Atom *> filteredAtomList;
+
+		// We want the FootGroup to end up with an "L" shape, so filter all the top and right Atoms while taking into account the heel might be slant and the sole might not be flat. The extra Atoms are not necessary and might (further) screw up some walking physics.
+		// Start from the bottom so we can filter any Atom that might be above the bottom-most one on the same X offset.
+		for (auto atomItr = footGroup->GetAtomList().crbegin(); atomItr != footGroup->GetAtomList().crend(); ++atomItr) {
+			int atomOffsetX = (*atomItr)->GetOriginalOffset().GetFloorIntX();
+			int atomOffsetY = (*atomItr)->GetOriginalOffset().GetFloorIntY();
+
+			bool haveBottomMostAtomOnThisXOffset = false;
+			for (const Atom *filteredAtom : filteredAtomList) {
+				haveBottomMostAtomOnThisXOffset = (filteredAtom->GetOriginalOffset().GetFloorIntX() == atomOffsetX) && (filteredAtom->GetOriginalOffset().GetFloorIntY() > atomOffsetY);
+				if (haveBottomMostAtomOnThisXOffset) {
+					break;
+				}
+			}
+
+			if (atomOffsetX == atomLeftMostOffset || atomOffsetY == atomBottomMostOffset || (!haveBottomMostAtomOnThisXOffset && atomOffsetX > atomLeftMostOffset && atomOffsetY >= groupCenterOffsetY)) {
+				Atom *newAtom = new Atom(*(*atomItr));
+				newAtom->SetMaterial(g_SceneMan.GetMaterialFromID(MaterialColorKeys::g_MaterialRubber));
+
+				filteredAtomList.emplace_back(newAtom);
+			}
+		}
+		footGroup->SetAtomList(filteredAtomList);
+		footGroup->SetJointOffset(m_Foot->GetJointOffset());
+
+		return footGroup;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

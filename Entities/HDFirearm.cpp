@@ -815,7 +815,7 @@ void HDFirearm::Update()
 				if (!m_FiredOnce && (m_LastFireTmr.GetElapsedSimTimeMS() - m_DeactivationDelay - m_ActivationDelay) > msPerRound) {
 					roundsFired = 1;
 					// Wind back the last fire timer appropriately for the first round, but not farther back than 0
-					m_LastFireTmr.SetElapsedSimTimeMS(std::max(m_LastFireTmr.GetElapsedSimTimeMS() - msPerRound, (double)0));
+					m_LastFireTmr.SetElapsedSimTimeMS(std::max(m_LastFireTmr.GetElapsedSimTimeMS() - msPerRound, 0.0));
 				}
 				// How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
 				if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay)) {

@@ -6,6 +6,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PerformanceMan.h"
 #include "PostProcessMan.h"
@@ -311,7 +312,7 @@ namespace RTE {
 		if (const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName)) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
 			if (GameActivity *newActivityAsGameActivity = dynamic_cast<GameActivity *>(newActivity)) {
-				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMedium());
+				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMediumDifficulty());
 				if (newActivityAsGameActivity->GetStartingGold() <= 0) {
 					newActivityAsGameActivity->SetStartingGold(static_cast<int>(newActivityAsGameActivity->GetTeamFunds(0)));
 				} else {
@@ -364,9 +365,8 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_FrameMan.ClearBackBuffer32();
+			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -379,9 +379,8 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
-		g_FrameMan.SwapWindow();
+		g_FrameMan.ClearBackBuffer32();
+		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

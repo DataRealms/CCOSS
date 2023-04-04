@@ -1044,7 +1044,7 @@ void GATutorial::SetupAreas()
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Missions.rte/Objects/Tutorial/Funds.png", 2, 250));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Missions.rte/Objects/Tutorial/Funds.png", 1, 333));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point upper-left to 'Buy Menu'", 6000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up and left to 'Buy Menu'", 6000, "Missions.rte/Objects/Tutorial/MenuBuyMenu.png", 2, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Missions.rte/Objects/Tutorial/BuyMenuCargo.png", 1, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Missions.rte/Objects/Tutorial/BuyMenuCargo.png", 2, 500));
     m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Missions.rte/Objects/Tutorial/BuyMenuBuy.png", 2, 500));
@@ -1063,11 +1063,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFEAST].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFEAST].clear();
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point bottom-right to 'Form Squad'", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point down and right to 'Form Squad'", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Missions.rte/Objects/Tutorial/TeamSelect.png", 4, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Missions.rte/Objects/Tutorial/TeamFollow.png", 2, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with similar weapons will fire in unison with the leader", 4000, "Missions.rte/Objects/Tutorial/TeamFollow.png", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point bottom-right again to disband squad", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point down and right again to disband squad", 4000, "Missions.rte/Objects/Tutorial/MenuTeam.png", 2, 500));
     m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can head east for a TRIAL BATTLE!", 8000, "Missions.rte/Objects/Tutorial/ArrowRight.png", 2));
 
     m_AreaTimer.Reset();

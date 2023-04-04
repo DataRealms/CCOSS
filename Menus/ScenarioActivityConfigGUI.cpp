@@ -282,16 +282,16 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
 		if (!m_StartingGoldAdjustedManually) {
-			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasy());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMedium());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCakeDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCakeDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasyDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasyDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMediumDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMediumDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHardDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHardDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNutsDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNutsDifficulty());
 			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MaxDifficulty && m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMaxDifficulty());
 			} else if (m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {

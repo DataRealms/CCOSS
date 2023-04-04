@@ -10,7 +10,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::unique_ptr<GraphicalPrimitive> PrimitiveMan::MakeUniqueOfAppropriateTypeFromPrimitiveRawPtr(GraphicalPrimitive *primitive) {
-		switch (primitive->GetPrimtiveType()) {
+		switch (primitive->GetPrimitiveType()) {
 			case GraphicalPrimitive::PrimitiveType::Line:
 				return std::unique_ptr<LinePrimitive>(static_cast<LinePrimitive *>(primitive));
 			case GraphicalPrimitive::PrimitiveType::Arc:

@@ -16,6 +16,7 @@
 #include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
@@ -89,11 +90,11 @@ void GameActivity::Clear()
 	m_DefaultFogOfWar = -1;
 	m_DefaultRequireClearPathToOrbit = -1;
 	m_DefaultDeployUnits = 1;
-	m_DefaultGoldCake = -1;
-	m_DefaultGoldEasy = -1;
-	m_DefaultGoldMedium = -1;
-	m_DefaultGoldHard = -1;
-	m_DefaultGoldNuts = -1;
+	m_DefaultGoldCakeDifficulty = -1;
+	m_DefaultGoldEasyDifficulty = -1;
+	m_DefaultGoldMediumDifficulty = -1;
+	m_DefaultGoldHardDifficulty = -1;
+	m_DefaultGoldNutsDifficulty = -1;
 	m_DefaultGoldMaxDifficulty = -1;
 	m_FogOfWarSwitchEnabled = true;
 	m_DeployUnitsSwitchEnabled = false;
@@ -193,11 +194,11 @@ int GameActivity::Create(const GameActivity &reference)
 	m_DefaultFogOfWar = reference.m_DefaultFogOfWar;
 	m_DefaultRequireClearPathToOrbit = reference.m_DefaultRequireClearPathToOrbit;
 	m_DefaultDeployUnits = reference.m_DefaultDeployUnits;
-	m_DefaultGoldCake = reference.m_DefaultGoldCake;
-	m_DefaultGoldEasy = reference.m_DefaultGoldEasy;
-	m_DefaultGoldMedium = reference.m_DefaultGoldMedium;
-	m_DefaultGoldHard = reference.m_DefaultGoldHard;
-	m_DefaultGoldNuts = reference.m_DefaultGoldNuts;
+	m_DefaultGoldCakeDifficulty = reference.m_DefaultGoldCakeDifficulty;
+	m_DefaultGoldEasyDifficulty = reference.m_DefaultGoldEasyDifficulty;
+	m_DefaultGoldMediumDifficulty = reference.m_DefaultGoldMediumDifficulty;
+	m_DefaultGoldHardDifficulty = reference.m_DefaultGoldHardDifficulty;
+	m_DefaultGoldNutsDifficulty = reference.m_DefaultGoldNutsDifficulty;
 	m_DefaultGoldMaxDifficulty = reference.m_DefaultGoldMaxDifficulty;
 	m_FogOfWarSwitchEnabled = reference.m_FogOfWarSwitchEnabled;
 	m_DeployUnitsSwitchEnabled = reference.m_DeployUnitsSwitchEnabled;
@@ -239,17 +240,17 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DefaultRequireClearPathToOrbit;
     else if (propName == "DefaultDeployUnits")
         reader >> m_DefaultDeployUnits;
-    else if (propName == "DefaultGoldCake")
-        reader >> m_DefaultGoldCake;
-    else if (propName == "DefaultGoldEasy")
-        reader >> m_DefaultGoldEasy;
-    else if (propName == "DefaultGoldMedium")
-        reader >> m_DefaultGoldMedium;
-    else if (propName == "DefaultGoldHard")
-        reader >> m_DefaultGoldHard;
-    else if (propName == "DefaultGoldNuts")
-        reader >> m_DefaultGoldNuts;
-	else if (propName == "DefaultGoldNuts!")
+    else if (propName == "DefaultGoldCakeDifficulty")
+        reader >> m_DefaultGoldCakeDifficulty;
+    else if (propName == "DefaultGoldEasyDifficulty")
+        reader >> m_DefaultGoldEasyDifficulty;
+    else if (propName == "DefaultGoldMediumDifficulty")
+        reader >> m_DefaultGoldMediumDifficulty;
+    else if (propName == "DefaultGoldHardDifficulty")
+        reader >> m_DefaultGoldHardDifficulty;
+    else if (propName == "DefaultGoldNutsDifficulty")
+        reader >> m_DefaultGoldNutsDifficulty;
+	else if (propName == "DefaultGoldMaxDifficulty")
         reader >> m_DefaultGoldMaxDifficulty;
     else if (propName == "FogOfWarSwitchEnabled")
         reader >> m_FogOfWarSwitchEnabled;
@@ -861,7 +862,7 @@ int GameActivity::Start()
     // Set the split screen config before the Scene (and it SceneLayers, specifially) are loaded
     int humanCount = GetHumanCount();
     // Depending on the resolution aspect ratio, split first horizontally (if wide screen)
-    if (((float)g_FrameMan.GetResX() / (float)g_FrameMan.GetResY()) >= 1.6)
+    if (((float)g_WindowMan.GetResX() / (float)g_WindowMan.GetResY()) >= 1.6)
         g_FrameMan.ResetSplitScreens(humanCount > 1, humanCount > 2);
     // or vertically (if 4:3-ish)
     else
@@ -970,27 +971,27 @@ int GameActivity::Start()
 					// If both splits, or just Vsplit, then in upper right quadrant
 					if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetVSplit()))
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
-						m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
+						m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
+						m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
 					}
 					// If only hsplit, then lower left quadrant
 					else
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-						m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+						m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+						m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 					}
 				}
 				// Screen 3 is lower left quadrant
 				else if (ScreenOfPlayer(player) == 2)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 				}
 				// Screen 4 is lower right quadrant
 				else if (ScreenOfPlayer(player) == 3)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				}
 			}
 		}

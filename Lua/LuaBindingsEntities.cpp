@@ -967,6 +967,7 @@ namespace RTE {
 		.property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)
 		.property("PrevPos", &MovableObject::GetPrevPos)
 		.property("PrevVel", &MovableObject::GetPrevVel)
+		.property("DistanceTravelled", &MovableObject::GetDistanceTravelled)
 		.property("AngularVel", &MovableObject::GetAngularVel, &MovableObject::SetAngularVel)
 		.property("Radius", &MovableObject::GetRadius)
 		.property("Diameter", &MovableObject::GetDiameter)
@@ -1257,6 +1258,9 @@ namespace RTE {
 
 		.property("ClassName", &Scene::Area::GetClassName)
 		.property("Name", &Scene::Area::GetName)
+		.property("FirstBox", &Scene::Area::GetFirstBox)
+		.property("Center", &Scene::Area::GetCenterPoint)
+		.property("RandomPoint", &Scene::Area::GetRandomPoint)
 
 		.def("Reset", &Scene::Area::Reset)
 		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)

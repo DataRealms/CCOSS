@@ -2,13 +2,14 @@
 
 #include "LuaMan.h"
 #include "UInputMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUITextBox.h"
 #include "GUILabel.h"
@@ -41,7 +42,7 @@ namespace RTE {
 
 	int ConsoleMan::Initialize() {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32()); }
-		if (!m_GUIInput) { m_GUIInput = new AllegroInput(-1); }
+		if (!m_GUIInput) { m_GUIInput = new GUIInputWrapper(-1); }
 		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
 
 		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini")) {
@@ -52,7 +53,7 @@ namespace RTE {
 		m_GUIControlManager->EnableMouse(false);
 
 		// Stretch the invisible root box to fill the screen
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
 		if (!m_ParentBox) {
 			m_ParentBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConsoleGUIBox"));
@@ -67,7 +68,7 @@ namespace RTE {
 		m_ParentBox->SetEnabled(false);
 		m_ParentBox->SetVisible(false);
 
-		if (!g_FrameMan.ResolutionChanged()) { m_OutputLog.emplace_back("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------"); }
+		if (!g_WindowMan.ResolutionChanged()) { m_OutputLog.emplace_back("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------"); }
 
 		return 0;
 	}
@@ -75,13 +76,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Destroy() {
-		if (!g_FrameMan.ResolutionChanged()) { SaveAllText("LogConsole.txt"); }
+		if (!g_WindowMan.ResolutionChanged()) { SaveAllText("LogConsole.txt"); }
 
 		delete m_GUIControlManager;
 		delete m_GUIInput;
 		delete m_GUIScreen;
 
-		if (g_FrameMan.ResolutionChanged()) {
+		if (g_WindowMan.ResolutionChanged()) {
 			m_GUIScreen = nullptr;
 			m_GUIInput = nullptr;
 			m_GUIControlManager = nullptr;
@@ -124,7 +125,7 @@ namespace RTE {
 			return;
 		}
 
-		m_ParentBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY() * m_ConsoleScreenRatio);
+		m_ParentBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY() * m_ConsoleScreenRatio);
 		m_ConsoleText->SetSize(m_ParentBox->GetWidth() - 4, m_ParentBox->GetHeight() - m_InputTextBox->GetHeight() - 2);
 		m_ConsoleTextMaxNumLines = 5 + (m_ConsoleText->GetHeight() / m_GUIControlManager->GetSkin()->GetFont("FontSmall.png")->GetFontHeight());
 		m_InputTextBox->SetPositionRel(m_InputTextBox->GetRelXPos(), m_ConsoleText->GetHeight());
@@ -220,7 +221,7 @@ namespace RTE {
 		PrintString("--- SHORTCUTS ---");
 		PrintString("CTRL + ~ - Console in read-only mode without input capture");
 		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
-		PrintString("CTRL + S / PrintScrn - Make a screenshot");
+		PrintString("CTRL + S - Make continuous screenshots while the keys are held");
 		PrintString("CTRL + W - Make a screenshot of the entire level");
 		PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		PrintString("CTRL + P - Show performance stats");
@@ -238,6 +239,7 @@ namespace RTE {
 		PrintString("F9 - Load latest quick-save");
 		PrintString("CTRL + F9 - Load latest auto-save");
 		PrintString("F10 - Clear Console log");
+		PrintString("F12 - Make a single screenshot");
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,9 +284,9 @@ namespace RTE {
 
 		m_GUIControlManager->Update();
 
-		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDL_SCANCODE_DOWN)) {
+		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDLK_DOWN)) {
 			SetConsoleScreenSize(m_ConsoleScreenRatio + 0.05F);
-		} else if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDL_SCANCODE_UP)) {
+		} else if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDLK_UP)) {
 			SetConsoleScreenSize(m_ConsoleScreenRatio - 0.05F);
 		}
 
@@ -293,9 +295,9 @@ namespace RTE {
 			m_InputTextBox->SetFocus();
 
 			if (!m_InputLog.empty() && !g_UInputMan.FlagCtrlState()) {
-				if (g_UInputMan.KeyPressed(SDL_SCANCODE_UP)) {
+				if (g_UInputMan.KeyPressed(SDLK_UP)) {
 					LoadLoggedInput(false);
-				} else if (g_UInputMan.KeyPressed(SDL_SCANCODE_DOWN)) {
+				} else if (g_UInputMan.KeyPressed(SDLK_DOWN)) {
 					LoadLoggedInput(true);
 				}
 			}
@@ -307,7 +309,7 @@ namespace RTE {
 		}
 
 		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
-		if ((g_UInputMan.KeyPressed(SDLK_RETURN) || g_UInputMan.KeyPressed(SDL_SCANCODE_KP_ENTER)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
+		if ((g_UInputMan.KeyPressed(SDLK_RETURN) || g_UInputMan.KeyPressed(SDLK_KP_ENTER)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
 			FeedString(m_InputTextBox->GetText().empty() ? true : false);
 		}
 	}

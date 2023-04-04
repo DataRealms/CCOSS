@@ -724,7 +724,7 @@ void Actor::AddGold(float goldOz) {
 		m_GoldPicked = true;
 		if (isHumanTeam) {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-				if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team && !g_GUISound.FundsChangedSound()->IsBeingPlayed()) { g_GUISound.FundsChangedSound()->Play(player); }
+				if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team) { g_GUISound.FundsChangedSound()->Play(player); }
 			}
 		}
 	}

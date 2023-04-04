@@ -4,15 +4,8 @@
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
-#include "glm/glm.hpp"
 
 #define g_FrameMan FrameMan::Instance()
-
-
-extern "C" {
-	struct SDL_Window;
-	typedef void* SDL_GLContext;
-}
 
 namespace RTE {
 
@@ -21,18 +14,16 @@ namespace RTE {
 	class GUIFont;
 	class ScreenShader;
 
-	struct SdlWindowDeleter {
-		void operator()(SDL_Window *window);
+	struct BitmapDeleter {
+		void operator() (BITMAP *bitmap) const;
 	};
 
-	struct SdlContextDeleter {
-		void operator()(SDL_GLContext context);
-	};
 	/// <summary>
-	/// The singleton manager over the composition and display of frames.
+	/// The singleton manager over the composition of frames.
 	/// </summary>
 	class FrameMan : public Singleton<FrameMan> {
 		friend class SettingsMan;
+		friend class WindowMan;
 
 	public:
 
@@ -40,9 +31,9 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a FrameMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a FrameMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
-		FrameMan();
+		FrameMan() { Clear(); }
 
 		/// <summary>
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
@@ -55,26 +46,15 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		~FrameMan();
+		~FrameMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
 		/// </summary>
 		void Destroy();
-
-		/// <summary>
-		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten and allocated new memory addresses.
-		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
-		/// </summary>
-		void DestroyTempBackBuffers();
 #pragma endregion
 
 #pragma region Concrete Methods
-		/// <summary>
-		/// Prints the selected graphics driver message to the console. Has to be done after all managers initialization because ConsoleMan does not exist during FrameMan initialization.
-		/// </summary>
-		void PrintForcedGfxDriverMessage() const;
-
 		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
 		/// </summary>
@@ -91,125 +71,19 @@ namespace RTE {
 		/// Gets the 8bpp backbuffer bitmap.
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 8bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetBackBuffer8() const { return m_BackBuffer8; }
+		BITMAP * GetBackBuffer8() const { return m_BackBuffer8.get(); }
 
 		/// <summary>
 		/// Gets the 32bpp backbuffer bitmap. Make sure you don't do any blending stuff to the 8bpp one!
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
+		BITMAP * GetBackBuffer32() const { return m_BackBuffer32.get(); }
 
 		/// <summary>
 		/// Gets the 32bpp bitmap that is used for overlaying the screen.
 		/// </summary>
 		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
-
-		/// <summary>
-		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
-		/// </summary>
-		/// <returns>
-		/// The pointer to the main window.
-		/// </returns>
-		SDL_Window* GetWindow() const { return m_Window.get();}
-
-		SDL_GLContext GetContext() const { return m_GLContext.get(); }
-#pragma endregion
-
-#pragma region Display Switch Callbacks
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
-		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-		/// </summary>
-		void DisplaySwitchOut();
-
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-		/// </summary>
-		void DisplaySwitchIn();
-#pragma endregion
-#pragma region Resolution Handling
-		/// <summary>
-		/// Gets the graphics driver that is used for rendering.
-		/// </summary>
-		/// <returns>The graphics driver that is used for rendering.</returns>
-		int GetGraphicsDriver() const { return m_Fullscreen; }
-
-		/// <summary>
-		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
-		/// </summary>
-		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
-		bool IsUsingDedicatedGraphicsDriver() const { return false; }
-
-		/// <summary>
-		/// Gets the maximum horizontal resolution the game window can be (desktop width).
-		/// </summary>
-		/// <returns>The maximum horizontal resolution the game window can be (desktop width).</returns>
-		int GetMaxResX() const { return m_MaxResX; }
-
-		/// <summary>
-		/// Gets the maximum vertical resolution the game window can be (desktop height).
-		/// </summary>
-		/// <returns>The maximum vertical resolution the game window can be (desktop height).</returns>
-		int GetMaxResY() const { return m_MaxResY; }
-
-		/// <summary>
-		/// Gets the horizontal resolution of the screen.
-		/// </summary>
-		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>
-		int GetResX() const { return m_ResX; }
-
-		/// <summary>
-		/// Gets the vertical resolution of the screen.
-		/// </summary>
-		/// <returns>An int describing the vertical resolution of the screen in pixels.</returns>
-		int GetResY() const { return m_ResY; }
-
-		/// <summary>
-		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
-		/// </summary>
-		/// <returns>What multiple the screen resolution is run in.</returns>
-		int GetResMultiplier() const { return m_ResMultiplier; }
-
-		/// <summary>
-		/// Gets whether the game window resolution was changed.
-		/// </summary>
-		/// <returns>Whether the game window resolution was changed.</returns>
-		bool ResolutionChanged() const { return m_ResChanged; }
-
-		/// <summary>
-		/// Checks whether the game window is currently in fullscreen mode.
-		/// </summary>
-		/// <returns>
-		/// Whether the window is fullscreen.
-		/// </returns>
-		bool IsWindowFullscreen() const { return m_Fullscreen; }
-
-		/// <summary>
-		/// Sets and switches to a new windowed mode resolution multiplier.
-		/// </summary>
-		/// <param name="newMultiplier">The multiplier to switch to.</param>
-		void ChangeResolutionMultiplier(int newMultiplier = 1);
-
-		/// <summary>
-		/// Switches the game window resolution to the specified dimensions.
-		/// </summary>
-		/// <param name="newResX">New width to set window to.</param>
-		/// <param name="newResY">New height to set window to.</param>
-		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
-		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
-
-		/// <summary>
-		/// Apply resolution change after window resize.
-		/// </summary>
-		/// <param name="newResX">
-		/// The new horizontal resolution.
-		/// </param>
-		/// <param name="newResY">
-		/// The new verticla resolution.
-		/// </param>
-		void WindowResizedCallback(int newResX, int newResY);
+		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32.get(); }
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -352,29 +226,14 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// Clear the GL backbuffer to start a new frame.
-		/// </summary>
-		void ClearFrame();
-
-		/// <summary>
-		/// Flips the frame buffers, draws the software backbuffer to the gl backbuffer. Draw other gl things (imgui) after this.
-		/// </summary>
-		void FlipFrameBuffers();
-
-		/// <summary>
-		/// Present the window content.
-		/// </summary>
-		void SwapWindow();
-
-		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8, m_BlackColor); }
+		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8.get(), m_BlackColor); }
 
 		/// <summary>
 		/// Clears the 32bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer32() { clear_to_color(m_BackBuffer32, 0); }
+		void ClearBackBuffer32() { clear_to_color(m_BackBuffer32.get(), 0); }
 
 		/// <summary>
 		/// Sets a specific color table which is used for any subsequent blended drawing in indexed color modes.
@@ -447,56 +306,56 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBuffer8Ready(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBuffer8Ready(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player].get(); }
 
 		/// <summary>
 		/// Gets the ready 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get GUI backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferGUI8Ready(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Ready(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player].get(); }
 
 		/// <summary>
 		/// Gets the current 8bpp backbuffer bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBuffer8Current(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBuffer8Current(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player].get(); }
 
 		/// <summary>
 		/// Gets the current 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player].get(); }
 
 		/// <summary>
 		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediate8Ready(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Ready(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player].get(); }
 
 		/// <summary>
 		/// Gets the ready 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player].get(); }
 
 		/// <summary>
 		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player].get(); }
 
 		/// <summary>
 		/// Gets the current 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player].get(); }
 
 		// TODO: Figure out.
 		/// <summary>
@@ -574,7 +433,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToPNG(const char *nameBase) { m_WantScreenDump = true; m_ScreenDumpName = nameBase; return 0; } // return SaveBitmap(ScreenDump, nameBase); }
+		int SaveScreenToPNG(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
 		/// Dumps a bitmap of everything on the scene to a PNG file.
@@ -591,39 +450,16 @@ namespace RTE {
 		int SaveWorldPreviewToPNG(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
-	protected:
+	private:
+
+		/// <summary>
+		/// Enumeration with different settings for the SaveBitmap() method.
+		/// </summary>
+		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
-		std::unique_ptr<SDL_Window, SdlWindowDeleter> m_Window; //!< The main Window.
-		std::vector<std::unique_ptr<SDL_Window, SdlWindowDeleter>> m_MultiWindows; //!< Additional windows for multi display fullscreen.
-		std::vector<glm::mat4> m_WindowView; //!< The projection matrices for each window. Index 0 should always be the main window.
-		std::vector<glm::vec4> m_WindowViewport; //!< The viewports for all windows, to allow for preserved aspect ratios.
-		std::vector<glm::mat4> m_WindowTransforms; //!< The UV transforms for each window. Index 0 should always be the main window.
-		std::unique_ptr<void, SdlContextDeleter> m_GLContext; //!< Opaque GL context pointer.
-		GLuint m_ScreenTexture; //!< GL pointer to the screen texture.
-		std::unique_ptr<ScreenShader> m_ScreenShader; //!< The copy shader to bring the backbuffer to the screen.
-		GLuint m_ScreenVBO; //!< The vertex buffer object that stores the vertices.
-		GLuint m_ScreenVAO; //!< The array buffer that defines the vertex array for gl to draw.
-		std::vector<float> m_ScreenVertices; //!< Simple triangle strip quad.
-
-		int m_EnableVsync; //!< Whether to enable Vsync, -1 enables adaptive sync;
-
-		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
-		bool m_Fullscreen; //!< The graphics driver that will be used for rendering.
-		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
-
-		int m_NumScreens; //!< Number of physical screens.
-		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).
-		int m_MaxResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
-		int m_PrimaryScreenResX; //!< Width of the primary physical screen only.
-		int m_PrimaryScreenResY; //!< Height of the primary physical screen only.
-
-		int m_ResX; //!< Game window width.
-		int m_ResY; //!< Game window height.
-		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-
-		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
+		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -644,7 +480,7 @@ namespace RTE {
 		std::array<std::unordered_map<std::array<int, 4>, std::pair<COLOR_MAP, long long>>, DrawBlendMode::BlendModeCount> m_ColorTables;
 		Timer m_ColorTablePruneTimer; //!< Timer for pruning unused color tables to prevent ridiculous memory usage.
 
-		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_PlayerScreen; //!< Intermediary split screen bitmap.
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
 		int m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 
@@ -663,19 +499,19 @@ namespace RTE {
 		bool m_FlashedLastFrame[c_MaxScreenCount]; //!< Whether we flashed last frame or not.
 		Timer m_FlashTimer[c_MaxScreenCount]; //!< Flash screen timer.
 
-		bool m_WantScreenDump; //!< Whether to save a screenshot at the end of the frame.
 		std::string m_ScreenDumpName; //!< The filename of the screenshot to save.
-		BITMAP *m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
-		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
-		BITMAP *m_OverlayBitmap32; //!< 32bpp bitmap used for overlaying (fading in/out or darkening) the screen.
-		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
-		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
-		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
+		std::unique_ptr<BITMAP, BitmapDeleter> m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_OverlayBitmap32; //!< 32bpp bitmap used for overlaying (fading in/out or darkening) the screen.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
+		std::unique_ptr<BITMAP, BitmapDeleter> m_ScreenDumpNamePlaceholder; //!< Dummy BITMAP for keeping naming continuity when saving ScreenDumps with multi-threading.
 
-		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
-		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
-		BITMAP *m_NetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending.
-		BITMAP *m_NetworkBackBufferFinalGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending. Used to draw UI only.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_NetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_NetworkBackBufferFinalGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending. Used to draw UI only.
 
 		Vector m_TargetPos[2][c_MaxScreenCount]; //!< Frame target position for network players.
 
@@ -687,57 +523,7 @@ namespace RTE {
 
 		std::mutex m_NetworkBitmapLock[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
 
-	private:
-
-		/// <summary>
-		/// Enumeration with different settings for the SaveBitmap() method.
-		/// </summary>
-		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
-
-		/// <summary>
-		/// Stupid Windows-only problems:
-		/// Allowing execution to continue in the background while in dedicated fullscreen mode requires using a display switch mode which clears out the screen's video memory when the process window is not in focus.
-		/// Trying to access the screen BITMAP to figure out if it was cleared does not seem to work because the pointer isn't getting nulled, and trying to read dimensions/anything returns valid values,
-		/// but then everything implodes when the blit happens because there's actually nothing to blit to (and of course when everything has already imploded it does report that dimensions are 0 and everything is cleared. Very helpful indeed).
-		/// This flag does the job. While true blitting the backbuffer to the screen will be skipped during FlipFrameBuffers().
-		/// Will be set true during the display switch-out and reset to false during the switch-in callbacks. Will always be false in windowed modes and under Linux.
-		/// </summary>
-		static bool s_DisableFrameBufferFlip;
-
-		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
-
-		/// <summary>
-		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
-		/// Overwriting the backbuffers without storing the original pointers and deleting them after the resolution change will result in a memory leak.
-		/// </summary>
-		BITMAP *m_TempBackBuffer8;
-		BITMAP *m_TempBackBuffer32;
-		BITMAP *m_TempOverlayBitmap32;
-		BITMAP *m_TempPlayerScreen;
-		BITMAP *m_TempNetworkBackBufferIntermediate8[2][c_MaxScreenCount];
-		BITMAP *m_TempNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount];
-		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
-		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
-
-
-#pragma region Create Breakdown
-		/// <summary>
-		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Initialize().
-		/// </summary>
-		/// <param name="resX">Game window width to check.</param>
-		/// <param name="resY">Game window height to check.</param>
-		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
-
-		/// <summary>
-		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
-		/// </summary>
-		/// <param name="resX">Game window width to check.</param>
-		/// <param name="resY">Game window height to check.</param>
-		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		/// <returns>Whether multi-screen validation performed any overrides to settings.</returns>
-		bool ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
-
+#pragma region Initialize Breakdown
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Initialize().
 		/// </summary>
@@ -745,51 +531,9 @@ namespace RTE {
 		int CreateBackBuffers();
 
 		/// <summary>
-		/// Create additional windows for multi display fullscreen. Will create as many windows as necessary to fulfill resXxresY resolution.
-		/// </summary>
-		/// <param name="resX">
-		/// Requested horizontal resolution (not including scaling).
-		/// </param>
-		/// <param name="resY">
-		/// Requested vertical resolution (not including scaling).
-		/// </param>
-		/// <param name="resMultiplier">
-		/// Requested resolution multiplier.
-		/// </param>
-		/// <returns>
-		/// Whether all displays were created successfully.
-		/// </returns>
-		bool CreateFullscreenMultiWindows(int resX, int resY, int resMultiplier);
-
-		/// <summary>
 		/// Creates the RGB lookup table and color table presets for drawing with transparency in indexed color mode. This is called during Initialize().
 		/// </summary>
 		void CreatePresetColorTables();
-#pragma endregion
-
-#pragma region Resolution Handling
-		/// <summary>
-		/// Stores the current backbuffers in the temporary backbuffers and calls CreateBackbuffers() to overwrite the current ones with new resolution settings.
-		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
-		/// </summary>
-		void RecreateBackBuffers();
-
-		/// <summary>
-		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
-		/// </summary>
-		/// <param name="resX">
-		/// Desired horizontal resolution.
-		/// </param>
-		/// <param name="resY">
-		/// Desired vertical resolution.
-		/// </param>
-		/// <param name="windowW">
-		/// Window horizontal resolution.
-		/// </param>
-		/// <param name="windowH">
-		/// Window vertical resolution.
-		/// </param>
-		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
 #pragma region Draw Breakdown
@@ -837,7 +581,7 @@ namespace RTE {
 		/// </param>
 		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 or nullptr if not in SingleBitmap mode.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int SaveBitmap(SaveBitmapMode modeToSave, const std::string& nameBase, BITMAP *bitmapToSave = nullptr);
+		int SaveBitmap(SaveBitmapMode modeToSave, const std::string &nameBase, BITMAP *bitmapToSave = nullptr);
 
 		/// <summary>
 		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.
@@ -880,7 +624,6 @@ namespace RTE {
 		/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
-
 
 		// Disallow the use of some implicit methods.
 		FrameMan(const FrameMan &reference) = delete;

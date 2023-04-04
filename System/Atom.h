@@ -194,7 +194,7 @@ namespace RTE {
 		/// Sets the material of this Atom.
 		/// </summary>
 		/// <param name="newMat">The new material of this Atom.</param>
-		void SetMaterial(Material *newMat) { m_Material = newMat; }
+		void SetMaterial(const Material *newMat) { m_Material = newMat; }
 
 		/// <summary>
 		/// Gets the Color of this Atom's trail.

@@ -641,7 +641,7 @@ void ACraft::AddInventoryItem(MovableObject *pItemToAdd)
 			m_GoldPicked = true;
 			if (g_ActivityMan.GetActivity()->IsHumanTeam(m_Team)) {
 				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-					if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team && !g_GUISound.FundsChangedSound()->IsBeingPlayed()) { g_GUISound.FundsChangedSound()->Play(player); }
+					if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team) { g_GUISound.FundsChangedSound()->Play(player); }
 				}
 			}
 		}

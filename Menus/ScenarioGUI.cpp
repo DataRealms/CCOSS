@@ -1,5 +1,6 @@
 #include "ScenarioGUI.h"
 
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -14,7 +15,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUIComboBox.h"
 #include "GUIButton.h"
@@ -50,13 +51,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	void ScenarioGUI::Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		m_RootBox->Resize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 		m_ActivityConfigBoxRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigRoot"));
 		m_ActivityConfigBoxRootBox->Resize(m_RootBox->GetWidth(), m_RootBox->GetHeight());
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("BackToMainButton"));
@@ -264,8 +265,8 @@ namespace RTE {
 			if (std::abs(sceneListEntry->GetLocation().GetY()) < m_PlanetRadius + 100 && std::abs(sceneListEntry->GetLocation().GetX()) < m_PlanetRadius + 100) {
 				if (sceneYPos < 10) {
 					sceneListEntry->SetLocationOffset(sceneListEntry->GetLocationOffset() + Vector(0, static_cast<float>(10 - sceneYPos)));
-				} else if (sceneYPos > g_FrameMan.GetResY() - 10) {
-					sceneListEntry->SetLocationOffset(sceneListEntry->GetLocationOffset() + Vector(0, static_cast<float>(g_FrameMan.GetResY() - 10 - sceneYPos)));
+				} else if (sceneYPos > g_WindowMan.GetResY() - 10) {
+					sceneListEntry->SetLocationOffset(sceneListEntry->GetLocationOffset() + Vector(0, static_cast<float>(g_WindowMan.GetResY() - 10 - sceneYPos)));
 				} else {
 					sceneListEntry->SetLocationOffset(Vector(0, 0));
 				}
@@ -450,8 +451,8 @@ namespace RTE {
 				m_SitePointNameLabel->SetText(m_HoveredScene->GetPresetName());
 				Vector sceneLabelPos = m_PlanetCenter + Vector(m_HoveredScene->GetLocation() + m_HoveredScene->GetLocationOffset()) - Vector(static_cast<float>(m_SitePointNameLabel->GetWidth() / 2), 0) - Vector(0, static_cast<float>(m_SitePointNameLabel->GetHeight()) * 1.5F);
 				int padding = 5;
-				sceneLabelPos.SetX(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntX(), padding, g_FrameMan.GetResX() - m_SitePointNameLabel->GetWidth() - padding)));
-				sceneLabelPos.SetY(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntY(), padding, g_FrameMan.GetResY() - m_SitePointNameLabel->GetHeight() - padding)));
+				sceneLabelPos.SetX(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntX(), padding, g_WindowMan.GetResX() - m_SitePointNameLabel->GetWidth() - padding)));
+				sceneLabelPos.SetY(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntY(), padding, g_WindowMan.GetResY() - m_SitePointNameLabel->GetHeight() - padding)));
 				m_SitePointNameLabel->SetPositionAbs(sceneLabelPos.GetFloorIntX(), sceneLabelPos.GetFloorIntY());
 				m_SitePointNameLabel->SetVisible(true);
 			}

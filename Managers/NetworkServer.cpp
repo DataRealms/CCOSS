@@ -11,6 +11,7 @@
 
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "WindowMan.h"
 #include "UInputMan.h"
 #include "TimerMan.h"
 #include "AudioMan.h"
@@ -1648,7 +1649,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::DrawStatisticsData() {
-		int midX = g_FrameMan.GetResX() / 2;
+		int midX = g_WindowMan.GetResX() / 2;
 
 		BITMAP *bmp = g_FrameMan.GetBackBuffer8();
 		AllegroBitmap guiBMP(bmp);
@@ -1785,12 +1786,12 @@ namespace RTE {
 				m_DataSentTotal[i] / (1024 * 1024)
 			);
 
-			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_FrameMan.GetResX() / 5, 75, buf, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_WindowMan.GetResX() / 5, 75, buf, GUIFont::Left);
 
 			if (i < c_MaxClients) {
 				int lines = 2;
 				std::snprintf(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d", m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
-				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_FrameMan.GetResX() / 5, g_FrameMan.GetResY() - lines * 15, buf, GUIFont::Left);
+				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_WindowMan.GetResX() / 5, g_WindowMan.GetResY() - lines * 15, buf, GUIFont::Left);
 			}
 		}
 	}

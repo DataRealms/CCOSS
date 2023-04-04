@@ -4,9 +4,9 @@ sources += files(
 'LuaBindingsActivities.cpp',
 'LuaBindingsEntities.cpp',
 'LuaBindingsGUI.cpp',
+'LuaBindingsInput.cpp',
 'LuaBindingsManagers.cpp',
 'LuaBindingsMisc.cpp',
-'LuaBindingsSDL.cpp',
 'LuaBindingsSystem.cpp',
 'LuaBindingsPrimitives.cpp'
 )

@@ -1,4 +1,6 @@
 #include "AtomGroup.h"
+
+#include "Actor.h"
 #include "SLTerrain.h"
 #include "MOSRotating.h"
 #include "LimbPath.h"
@@ -202,6 +204,15 @@ namespace RTE {
 		}
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void AtomGroup::SetAtomList(const std::vector<Atom *> &newAtoms) {
+		for (const Atom *atom : m_Atoms) {
+			delete atom;
+		}
+		m_Atoms = newAtoms;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1198,25 +1209,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation) {
+	bool AtomGroup::PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted, bool affectRotation, Vector rotationOffset) {
 		RTEAssert(m_OwnerMOSR, "Tried to push-as-limb an AtomGroup that has no parent!");
 
 		bool didWrap = false;
 		Vector pushImpulse;
 
-		limbPath.SetJointPos(jointPos);
+		// Fixup for walking backwards
+		Vector adjustedJointPos = jointPos;
+		if (limbPath.GetHFlip() != m_OwnerMOSR->IsHFlipped()) {
+			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX() * 2.0F;
+		}
+
+		limbPath.SetJointPos(adjustedJointPos);
 		limbPath.SetJointVel(velocity);
 		limbPath.SetRotation(rotation);
+		limbPath.SetRotationOffset(rotationOffset);
 		limbPath.SetFrameTime(travelTime);
 
-		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
+		Vector limbDist = g_SceneMan.ShortestDistance(adjustedJointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
 		// Pull back or reset the limb if it strayed off the path.
 		if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetRadius())) {
 			if (limbDist.MagnitudeIsGreaterThan(m_OwnerMOSR->GetDiameter())) {
 				limbPath.Terminate();
 			} else {
-				m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
+				m_LimbPos = adjustedJointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
 			}
 		}
 
@@ -1234,7 +1252,19 @@ namespace RTE {
 
 		if (pushImpulse.GetLargest() > 10000.0F) { pushImpulse.Reset(); }
 
-		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), jointPos) * c_MPP) : Vector());
+		if (Actor *owner = dynamic_cast<Actor*>(m_OwnerMOSR)) {
+			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
+			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
+			if (againstTravelDirection) {
+				// Filter some of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
+				// Translate it into to upwards motion to step over what we're walking into instead ;)
+				const float againstIntendedDirectionMultiplier = 0.5F;
+				pushImpulse.m_Y -= std::abs(pushImpulse.m_X * (1.0F - againstIntendedDirectionMultiplier));
+				pushImpulse.m_X *= againstIntendedDirectionMultiplier;
+			}
+		}
+
+		m_OwnerMOSR->AddImpulseForce(pushImpulse, affectRotation ? (g_SceneMan.ShortestDistance(m_OwnerMOSR->GetPos(), adjustedJointPos) * c_MPP) : Vector());
 
 		return true;
 	}
@@ -1538,22 +1568,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float AtomGroup::GetSurfaceArea(int pixelWidth) {
+	float AtomGroup::GetSurfaceArea(int pixelWidth) const {
 		float distributionAmount;
 
 		switch (m_AreaDistributionType) {
 			case AreaDistributionType::Linear:
 				distributionAmount = static_cast<float>(pixelWidth);
-
+				break;
 			case AreaDistributionType::Circle: {
-				const float radius = static_cast<float>(pixelWidth) * 0.5F;
-				distributionAmount = c_PI * radius * radius;
-			}
-
-			case AreaDistributionType::Square: {
+					const float radius = static_cast<float>(pixelWidth) * 0.5F;
+					distributionAmount = c_PI * radius * radius;
+					break;
+				}
+			case AreaDistributionType::Square:
 				distributionAmount = static_cast<float>(pixelWidth * pixelWidth);
-			}
-
+				break;
 			default:
 				RTEAbort("Unexpected area distribution type!");
 				distributionAmount = 1.0F;

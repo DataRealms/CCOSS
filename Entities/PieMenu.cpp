@@ -864,7 +864,7 @@ namespace RTE {
 				m_ActiveSubPieMenu->m_HoverTimer.Reset();
 			} else if (m_ActivatedPieSlice && !m_ActivatedPieSlice->GetScriptPath().empty() && !m_ActivatedPieSlice->GetFunctionName().empty()) {
 				if (const MovableObject *scriptTarget = m_Owner ? m_Owner : m_AffectedObject) {
-					g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper(), "", "", { this, m_ActivatedPieSlice, scriptTarget });
+					g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper(), "", "", { scriptTarget, this, m_ActivatedPieSlice });
 				}
 			}
 		}

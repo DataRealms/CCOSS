@@ -13,6 +13,7 @@
 
 #include "AssemblyEditor.h"
 
+#include "WindowMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
@@ -28,14 +29,7 @@
 #include "DataModule.h"
 
 #include "GUI.h"
-#include "GUIFont.h"
-#include "AllegroScreen.h"
-#include "AllegroBitmap.h"
-#include "AllegroInput.h"
-#include "GUIControlManager.h"
 #include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
 #include "GUITextBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
@@ -174,7 +168,7 @@ int AssemblyEditor::Start()
     // Resize the invisible root container so it matches the screen rez
     GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));
     if (pRootBox)
-        pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+        pRootBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pLoadDialogBox)
@@ -185,9 +179,9 @@ int AssemblyEditor::Start()
         m_pLoadDialogBox->SetVisible(false);
     }
     m_pLoadNameCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("LoadSceneCB"));
-	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pLoadNameCombo->SetDropHeight(std::min(m_pLoadNameCombo->GetDropHeight(), g_WindowMan.GetResY() / 2));
 	m_pModuleCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ModuleCB"));
-	m_pModuleCombo->SetDropHeight(std::min(m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2));
+	m_pModuleCombo->SetDropHeight(std::min(m_pModuleCombo->GetDropHeight(), g_WindowMan.GetResY() / 2));
 	m_pLoadDialogBox->SetSize(m_pLoadDialogBox->GetWidth(), m_pLoadDialogBox->GetHeight() + (std::max(m_pLoadNameCombo->GetDropHeight(), m_pModuleCombo->GetDropHeight()))); // Make sure the dropdowns can fit, no matter how tall they are.
     m_pLoadButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadSceneButton"));
     m_pLoadCancel = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("LoadCancelButton"));
@@ -250,7 +244,7 @@ void AssemblyEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }
@@ -517,7 +511,7 @@ void AssemblyEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int
 
 void AssemblyEditor::Draw(BITMAP* pTargetBitmap, const Vector &targetPos)
 {
-    EditorActivity::Draw(pTargetBitmap, targetPos);    
+    EditorActivity::Draw(pTargetBitmap, targetPos);
 }
 
 
@@ -554,27 +548,27 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(std::string saveAsName)
 		Vector pos = (*itr)->GetPos() - pBA->GetPos() - pBA->GetBitmapOffset();
 		Vector finalPos = pos;
 
-		if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) && 
+		if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) &&
 			(pos.m_Y >= 0) && (pos.m_Y < pBA->GetBitmapHeight()))
 			skip = false;
-		
+
 		// Try to move scene object across seams and see if it fits into assembly box
 		if (g_SceneMan.GetScene()->WrapsX())
 		{
 			pos = (*itr)->GetPos() - pBA->GetPos() - pBA->GetBitmapOffset() + Vector(g_SceneMan.GetScene()->GetWidth(), 0);
 
-			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) && 
+			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) &&
 				(pos.m_Y >= 0) && (pos.m_Y < pBA->GetBitmapHeight()))
-			{			
+			{
 				skip = false;
 				finalPos = pos;
 			}
 
 			pos = (*itr)->GetPos() - pBA->GetPos() - pBA->GetBitmapOffset() - Vector(g_SceneMan.GetScene()->GetWidth(), 0);
 
-			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) && 
+			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) &&
 				(pos.m_Y >= 0) && (pos.m_Y < pBA->GetBitmapHeight()))
-			{			
+			{
 				skip = false;
 				finalPos = pos;
 			}
@@ -584,23 +578,23 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(std::string saveAsName)
 		{
 			pos = (*itr)->GetPos() - pBA->GetPos() - pBA->GetBitmapOffset() + Vector(0, g_SceneMan.GetScene()->GetHeight());
 
-			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) && 
+			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) &&
 				(pos.m_Y >= 0) && (pos.m_Y < pBA->GetBitmapHeight()))
-			{			
+			{
 				skip = false;
 				finalPos = pos;
 			}
 
 			pos = (*itr)->GetPos() - pBA->GetPos() - pBA->GetBitmapOffset() - Vector(0, g_SceneMan.GetScene()->GetHeight());
 
-			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) && 
+			if ((pos.m_X >= 0) && (pos.m_X < pBA->GetBitmapWidth()) &&
 				(pos.m_Y >= 0) && (pos.m_Y < pBA->GetBitmapHeight()))
-			{			
+			{
 				skip = false;
 				finalPos = pos;
 			}
 		}
-	
+
 		if (!skip)
 		{
 			SceneObject *pNewSO = dynamic_cast<SceneObject *>((*itr)->Clone());
@@ -781,7 +775,7 @@ void AssemblyEditor::UpdateLoadDialog()
 			}
 		}
 
-		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_FrameMan.GetResY() / 2 }));
+		m_pModuleCombo->SetDropHeight(std::min({ m_pModuleCombo->GetListPanel()->GetStackHeight() + 4, m_pModuleCombo->GetDropHeight(), g_WindowMan.GetResY() / 2 }));
         // Select the user scenes module
         m_pModuleCombo->SetSelectedIndex(scenesIndex);
     }

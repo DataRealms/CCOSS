@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // File:            MultiplayerGame.cpp
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     
+// Description:
 // Project:         Retro Terrain Engine
-// Author(s):       
+// Author(s):
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 #include "MultiplayerGame.h"
 
+#include "WindowMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
@@ -29,16 +30,12 @@
 #include "GUI.h"
 #include "GUIFont.h"
 #include "AllegroScreen.h"
-#include "AllegroBitmap.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
 #include "GUITextBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
-#include "GUIComboBox.h"
 
 #include "MultiplayerGameGUI.h"
 
@@ -171,7 +168,7 @@ namespace RTE {
 		if (!m_pGUIScreen)
 			m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer8());
 		if (!m_pGUIInput)
-			m_pGUIInput = new AllegroInput(-1, true);
+			m_pGUIInput = new GUIInputWrapper(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
 		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
@@ -184,15 +181,15 @@ namespace RTE {
 		// Resize the invisible root container so it matches the screen rez
 		GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));
 		if (pRootBox)
-			pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+			pRootBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
 
 		GUICollectionBox *pDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConnectDialogBox"));
 		if (pDialogBox)
 		{
-			pDialogBox->SetPositionAbs(g_FrameMan.GetResX() / 2 - pDialogBox->GetWidth() / 2, g_FrameMan.GetResY() / 2 - pDialogBox->GetHeight() / 2);
-			m_BackToMainButton->SetPositionAbs((g_FrameMan.GetResX() - m_BackToMainButton->GetWidth()) / 2, pDialogBox->GetYPos() + pDialogBox->GetHeight() + 10);
+			pDialogBox->SetPositionAbs(g_WindowMan.GetResX() / 2 - pDialogBox->GetWidth() / 2, g_WindowMan.GetResY() / 2 - pDialogBox->GetHeight() / 2);
+			m_BackToMainButton->SetPositionAbs((g_WindowMan.GetResX() - m_BackToMainButton->GetWidth()) / 2, pDialogBox->GetYPos() + pDialogBox->GetHeight() + 10);
 		}
 
 		m_pServerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("ServerNameTB"));
@@ -322,7 +319,7 @@ namespace RTE {
 							if (port == 0)
 								port = 8000;
 						}
-						else 
+						else
 						{
 							serverName = m_pServerNameTextBox->GetText();
 							port = 8000;
@@ -334,7 +331,7 @@ namespace RTE {
 
 						g_NetworkClient.Connect(serverName, port, playerName);
 						bool saveSettings = false;
-						
+
 						if (g_SettingsMan.GetPlayerNetworkName() != m_pPlayerNameTextBox->GetText())
 						{
 							g_SettingsMan.SetPlayerNetworkName(m_pPlayerNameTextBox->GetText());

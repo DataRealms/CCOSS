@@ -24,7 +24,8 @@ namespace RTE {
 	/// Pops up a message box dialog in the OS. For debug purposes mostly.
 	/// </summary>
 	/// <param name="message">The string that the message box should display.</param>
-	extern void ShowMessageBox(const std::string &message);
+	/// <param name="abortMessage">Whether the message box should display the abort title and icon. If not, the warning title and icon will be displayed.</param>
+	extern void ShowMessageBox(const std::string &message, bool abortMessage = false);
 
 	/// <summary>
 	/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.

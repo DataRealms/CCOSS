@@ -398,8 +398,11 @@ Vector Scene::Area::GetCenterPoint() const
 {
     Vector areaCenter;
 
-    if (!m_BoxList.empty())
-    {
+    if (!m_BoxList.empty()) {
+		if (m_BoxList.size() == 1) {
+			return m_BoxList[0].GetCenter();
+		}
+
         float totalWeight = 0;
         for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
         {

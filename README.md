@@ -30,6 +30,8 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\` into the **Data Repository**:
 * `fmod.dll`
 * `fmodL.dll`
+* `SDL2.dll`
+* `SDL2-64.dll`
 
 Now you're ready to build and launch the game.  
 Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.
@@ -50,18 +52,18 @@ The Linux build uses the meson build system, and builds against system libraries
 
 ## Dependencies
 
-* `g++>=8.1` or `clang++` (needs to support c++17 filesystem)
-* `allegro4` (optional, if missing will attempt to compile a stripped down version)
-* `loadpng` (optional, will be compiled if missing)
+* `gcc`, `g++` (>=9, clang unsupported) 
 * `sdl2`
 * `flac`
 * `luajit`
-* `lua`
+* `lua` (maybe optional)
 * `minizip`
+* `tbb`
 * `lz4>=1.9.0`
 * `libpng`
-* [`meson`](https://www.mesonbuild.com)`>= 0.60` (`pip install meson` if your distro doesn't include a recent version)
-* `boost>=1.55`
+* [`meson`](https://www.mesonbuild.com)`>= 1.0.0` (`pip install meson` if your distro doesn't include a recent version)
+
+For unspecified versions assume compatibility with the latest ubuntu LTS release.
 
 ## Building
 
@@ -71,7 +73,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 3. Open a terminal in the Source Repository.
 
-4. `meson build` or `meson --buildtype=debug build` for debug build (default is release build)
+4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)
 
 5. `ninja -C build`
 
@@ -99,18 +101,20 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 - `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
 
 **Homebrew (macOS):**  
-`brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng ninja meson`
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng gcc@12 ninja meson`
+
+macOS meson setup requires specifying gcc, setup meson environment with:  
+`env CC=gcc-12 CXX=g++-12 meson setup build`
 
 **Arch Linux:**  
-<<<<<<< HEAD
-`sudo pacman -S allegro4 sdl2 boost flac luajit lua52 minizip lz4 libpng meson ninja base-devel`  
+`sudo pacman -S sdl2 tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  
 
 **Ubuntu >=20.04:**  
-`sudo apt-get install build-essential liballegro4-dev libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev ninja-build python-pip`  
-`sudo python -m pip install meson`
+`sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
+`sudo python3 -m pip install meson`
 
 **Fedora:**  
-`# dnf install allegro-loadpng-devel allegro-devel libsdl2-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel lz4-devel libpng-devel lua-devel gcc gcc-c++`  
+`# dnf install allegro-loadpng-devel allegro-devel libsdl2-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel tbb-devel lz4-devel libpng-devel lua-devel gcc gcc-c++`  
 
 ## Troubleshooting
 

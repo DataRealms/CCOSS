@@ -108,7 +108,6 @@ namespace RTE {
 
 		std::vector<PresetResolutionRecord> m_PresetResolutions; //!< Contains PresetResolutionRecords for all the supported preset resolutions.
 
-		int m_NewFullscreen; //!< The new graphics driver to use when changing resolution.
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
 		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.
@@ -119,6 +118,7 @@ namespace RTE {
 		GUICollectionBox *m_VideoSettingsBox;
 		GUIRadioButton *m_TwoPlayerSplitscreenHSplitRadioButton;
 		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
+		GUICheckbox *m_EnableVSyncCheckbox;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;
@@ -129,8 +129,6 @@ namespace RTE {
 		GUITextBox *m_CustomResolutionWidthTextBox;
 		GUITextBox *m_CustomResolutionHeightTextBox;
 		GUICheckbox *m_CustomResolutionUpscaledCheckbox;
-		GUIRadioButton *m_CustomResolutionBorderlessRadioButton;
-		GUIRadioButton *m_CustomResolutionDedicatedRadioButton;
 		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;
@@ -167,7 +165,8 @@ namespace RTE {
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by this SettingsVideoGUI, or if an Activity is running, first prompts to end it.
 		/// </summary>
-		void ApplyNewResolution();
+		/// <param name="displaysWereMapped">Whether displays were mapped during interaction with this SettingsVideoGUI.</param>
+		void ApplyNewResolution(bool displaysWereMapped = false);
 
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by the appropriate quick change type.

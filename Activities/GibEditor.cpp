@@ -13,6 +13,7 @@
 
 #include "GibEditor.h"
 
+#include "WindowMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
@@ -30,14 +31,8 @@
 #include "DataModule.h"
 
 #include "GUI.h"
-#include "GUIFont.h"
-#include "AllegroScreen.h"
 #include "AllegroBitmap.h"
-#include "AllegroInput.h"
-#include "GUIControlManager.h"
 #include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
 #include "GUITextBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
@@ -179,7 +174,7 @@ int GibEditor::Start()
     // Resize the invisible root container so it matches the screen rez
     GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"));
     if (pRootBox)
-        pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+        pRootBox->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 
     // Make sure we have convenient points to the containing GUI dialog boxes that we will manipulate the positions of
     if (!m_pNewDialogBox)
@@ -272,7 +267,7 @@ void GibEditor::End()
 {
     EditorActivity::End();
 
-    
+
 
     m_ActivityState = ActivityState::Over;
 }

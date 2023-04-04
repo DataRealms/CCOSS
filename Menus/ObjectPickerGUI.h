@@ -6,7 +6,7 @@
 #include "GUI.h"
 #include "GUIControlManager.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 
 namespace RTE {
 
@@ -166,7 +166,7 @@ namespace RTE {
 		Vector m_CursorPos; //!< Screen position of the cursor.
 
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this ObjectPickerGUI's GUIControlManager.
-		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this ObjectPickerGUI's GUIControlManager.
+		std::unique_ptr<GUIInputWrapper> m_GUIInput; //!< The GUIInput interface that will be used by this ObjectPickerGUI's GUIControlManager.
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls.
 		GUICollectionBox *m_ParentBox; //!< Collection box of the picker GUI.
 		GUICollectionBox *m_PopupBox; //!< Collection box of the buy popups that contain information about items.

@@ -5,15 +5,13 @@
 #include "Vector.h"
 #include "InputScheme.h"
 #include "Gamepad.h"
-#include "SDL2/SDL_keyboard.h"
+#include "SDL_keyboard.h"
+#include "SDL_events.h"
 
 #define g_UInputMan UInputMan::Instance()
-extern "C" {
-union SDL_Event;
-}
+
 namespace RTE {
 
-	class GUIInput;
 	class Icon;
 
 	/// <summary>
@@ -61,6 +59,12 @@ namespace RTE {
 		void LoadDeviceIcons();
 
 		/// <summary>
+		///
+		/// </summary>
+		/// <param name="inputEvent"></param>
+		void QueueInputEvent(const SDL_Event &inputEvent);
+
+		/// <summary>
 		/// Updates the state of this UInputMan. Supposed to be done every frame.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -69,10 +73,10 @@ namespace RTE {
 
 #pragma region Control Scheme and Input Mapping Handling
 		/// <summary>
-		/// Sets the GUIInput instance to capture key state from. This is used for better key detection during input mapping input capture.
+		/// Sets whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 		/// </summary>
-		/// <param name="guiInputInstance">Pointer to the GUIInput instance to capture key state from, or nullptr if using UInputMan input capture.</param>
-		void SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *guiInputInstance) const;
+		/// <param name="skip">Whether to skip handling special input or not.</param>
+		void SetSkipHandlingSpecialInput(bool skip) { m_SkipHandlingSpecialInput = skip; }
 
 		/// <summary>
 		/// Gets the currently used input device of the specified player.
@@ -190,7 +194,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether there are any start key/button presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
-		/// <param="includeSpacebar">Whether to check for space bar presses or not.
+		/// <param name="includeSpacebar">Whether to check for space bar presses or not.</param>
 		/// <returns>Whether any start buttons or keys have been pressed at all since last frame.</returns>
 		bool AnyStartPress(bool includeSpacebar = true);
 
@@ -227,41 +231,46 @@ namespace RTE {
 		void DisableKeys(bool disable = true) { m_DisableKeyboard = disable; }
 
 		/// <summary>
-		/// Gets whether a key is being held right now.
+		/// Gets whether a key is being held right now, by scancode.
 		/// </summary>
-		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="scancodeToTest">A scancode to test. See SDL_Scancode enumeration.</param>
 		/// <returns>Whether the key is held or not.</returns>
-		bool KeyHeld(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
-		bool KeyHeld(SDL_Keycode keyToTest) const { return KeyHeld(SDL_GetScancodeFromKey(keyToTest));}
+		bool KeyHeld(SDL_Scancode scancodeToTest) const { return GetKeyboardButtonState(scancodeToTest, InputState::Held); }
 
 		/// <summary>
-		/// Shows the scancode of the keyboard key which is currently down.
+		/// Gets whether a key is being held right now, by keycode.
 		/// </summary>
-		/// <returns>The scancode of the first keyboard key in the keyboard buffer. 0 means none.</returns>
-		int WhichKeyHeld() const { return 0; } // int key = readkey(); return key >> 8; }
+		/// <param name="keycodeToTest">A keycode to test. See SDL_KeyCode enumeration.</param>
+		/// <returns>Whether the key is held or not.</returns>
+		bool KeyHeld(SDL_Keycode keycodeToTest) const { return KeyHeld(SDL_GetScancodeFromKey(keycodeToTest));}
 
 		/// <summary>
-		/// Gets whether a key was pressed between the last update and the one previous to it.
+		/// Gets whether a key was pressed between the last update and the one previous to it, by scancode.
 		/// </summary>
-		/// <param name="keyToTest">A SDL_Scancode with the SDL scancode enumeration to test (follows usb-hid definitions).</param>
+		/// <param name="scancodeToTest">A scancode to test. See SDL_Scancode enumeration.</param>
 		/// <returns>Whether the key is pressed or not.</returns>
-		bool KeyPressed(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+		bool KeyPressed(SDL_Scancode scancodeToTest) const { return GetKeyboardButtonState(scancodeToTest, InputState::Pressed); }
 
 		/// <summary>
-		/// Gets whether a key was pressed between the last update and the one previous to it.
+		/// Gets whether a key was pressed between the last update and the one previous to it, by keycode.
 		/// </summary>
-		/// <param name="keyToTest">A SDL_Keycode with the SDL key enumeration to test.</param>
+		/// <param name="keycodeToTest">A keycode to test. See SDL_KeyCode enumeration.</param>
 		/// <returns>Whether the key is pressed or not.</returns>
-		bool KeyPressed(SDL_Keycode keyToTest) const { return KeyPressed(SDL_GetScancodeFromKey(keyToTest)); }
+		bool KeyPressed(SDL_Keycode keycodeToTest) const { return KeyPressed(SDL_GetScancodeFromKey(keycodeToTest)); }
 
 		/// <summary>
-		/// Gets whether a key was released between the last update and the one previous to it.
+		/// Gets whether a key was released between the last update and the one previous to it, by scancode.
 		/// </summary>
-		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="scancodeToTest">A scancode to test. See SDL_Scancode enumeration.</param>
 		/// <returns>Whether the key is released or not.</returns>
-		bool KeyReleased(SDL_Scancode keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+		bool KeyReleased(SDL_Scancode scancodeToTest) const { return GetKeyboardButtonState(scancodeToTest, InputState::Released); }
 
-		bool KeyReleased(SDL_Keycode keyToTest) const { return KeyReleased(SDL_GetScancodeFromKey(keyToTest)); }
+		/// <summary>
+		///Gets whether a key was released between the last update and the one previous to it, by keycode.
+		/// </summary>
+		/// <param name="keycodeToTest">A keycode to test. See SDL_KeyCode enumeration.</param>
+		/// <returns>Whether the key is released or not.</returns>
+		bool KeyReleased(SDL_Keycode keycodeToTest) const { return KeyReleased(SDL_GetScancodeFromKey(keycodeToTest)); }
 
 		/// <summary>
 		/// Return true if there are any keyboard button presses at all.
@@ -272,13 +281,9 @@ namespace RTE {
 		/// <summary>
 		/// Fills the given string with the text input since the last frame (if any).
 		/// </summary>
-		/// <param name="text">
-		/// The std::string to fill.
-		/// </param>
-		/// <returns>
-		/// Whether there is text input.
-		/// </returns>
-		bool GetTextInput(std::string& text) const {text = m_TextInput; return !m_TextInput.empty();}
+		/// <param name="text">The std::string to fill.</param>
+		/// <returns>Whether there is text input.</returns>
+		bool GetTextInput(std::string &text) const { text = m_TextInput; return !m_TextInput.empty(); }
 #pragma endregion
 
 #pragma region Mouse Handling
@@ -298,18 +303,14 @@ namespace RTE {
 		/// <summary>
 		/// Get the absolute mouse position in window coordinates.
 		/// </summary>
-		/// <returns>
-		/// The absoulte mouse position.
-		/// </returns>
+		/// <returns>The absolute mouse position.</returns>
 		Vector GetAbsoluteMousePosition() const { return m_AbsoluteMousePos; }
 
 		/// <summary>
 		/// Set the absolute mouse position (e.g. for player input mouse movement). Does not move the system cursor.
 		/// </summary>
-		/// <param name="pos">
-		/// The new mouse position.
-		/// </param>
-		void SetAbsoluteMousePosition(const Vector pos) { m_AbsoluteMousePos = pos; }
+		/// <param name="pos">The new mouse position.</param>
+		void SetAbsoluteMousePosition(const Vector &pos) { m_AbsoluteMousePos = pos; }
 
 		/// <summary>
 		/// Gets the relative movement of the mouse since last update. Only returns true if the selected player is actually using the mouse.
@@ -337,7 +338,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPos">Where to place the mouse.</param>
 		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
-		void SetMousePos(Vector &newPos, int whichPlayer = -1) const;
+		void SetMousePos(const Vector &newPos, int whichPlayer = -1) const;
 
 		/// <summary>
 		/// Gets mouse sensitivity.
@@ -438,8 +439,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="device">The InputDevice to get index from.</param>
 		/// <returns>The corrected index. A non-joystick device will result in an out of range value returned which will not affect any active joysticks.</returns>
-		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT ; }
+		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT; }
 
+		/// <summary>
+		/// Gets the number of axis of the specified joystick.
+		/// </summary>
+		/// <param name="whichJoy">Joystick to check.</param>
+		/// <returns>The number of axis of the joystick.</returns>
 		int GetJoystickAxisCount(int whichJoy) const;
 
 		/// <summary>
@@ -447,7 +453,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="joystickNumber">Joystick to check for.</param>
 		/// <returns>Whether the specified joystick is active.</returns>
-		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && s_PrevJoystickStates[joystickNumber].m_JoystickID   != -1; }
+		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && s_PrevJoystickStates[joystickNumber].m_JoystickID != -1; }
 
 		/// <summary>
 		/// Gets whether a joystick button is being held down right now.
@@ -645,18 +651,15 @@ namespace RTE {
 		void ClearNetworkAccumulatedStates();
 #pragma endregion
 
-	protected:
+	private:
 
 		/// <summary>
 		/// Enumeration for the different states an input element or button can be in.
 		/// </summary>
 		enum InputState { Held, Pressed, Released, InputStateCount };
 
-		static GUIInput *s_GUIInputInstanceToCaptureKeyStateFrom; //!< Pointer to the GUIInput instance to capture key state from, if any. This is used for better key detection during input mapping input capture.
-
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_PrevKeyStates; //!< Key states as they were the previous update.
 		static std::array<uint8_t, SDL_NUM_SCANCODES> s_ChangedKeyStates; //!< Key states that have changed.
-		std::string m_TextInput;
 
 		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_CurrentMouseButtonStates; //!< Current mouse button states.
 		static std::array<bool, MouseButtons::MAX_MOUSE_BUTTONS> s_PrevMouseButtonStates; //!< Mouse button states as they were the previous update.
@@ -664,15 +667,19 @@ namespace RTE {
 
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
-		int m_NumJoysticks; //!< The number of currently connected gamecontrollers;
+
+		std::queue<SDL_Event> m_EventQueue; //!<
+
+		bool m_SkipHandlingSpecialInput; //!< Whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
+
+		int m_NumJoysticks; //!< The number of currently connected gamepads.
+
+		std::string m_TextInput; //!< Buffer for passing text input from SDL event handling to the GUI.
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
 		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
-
-		bool m_GameHasAnyFocus; //!< Whether any game window might have focus.
-		bool m_FrameLostFocus; //!< Whether the focus lost event was due to moving between screens.
 
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
@@ -704,8 +711,6 @@ namespace RTE {
 
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
 
-	private:
-
 #pragma region Input State Handling
 		/// <summary>
 		/// Gets whether an input element is in the specified state.
@@ -727,10 +732,10 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether a keyboard key is in the specified state.
 		/// </summary>
-		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="scancodeToTest">A scancode to test. See SDL_Scancode enumeration.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the keyboard key is in the specified state or not.</returns>
-		bool GetKeyboardButtonState(SDL_Scancode keyToTest, InputState whichState) const;
+		bool GetKeyboardButtonState(SDL_Scancode scancodeToTest, InputState whichState) const;
 
 		/// <summary>
 		/// Gets whether a mouse button is in the specified state.
@@ -819,13 +824,10 @@ namespace RTE {
 		void UpdateJoystickAxis(std::vector<Gamepad>::iterator device, int axis, int newValue);
 
 		/// <summary>
-		/// Open a joystick or gamecontroller device and add it to the joystick list if a gamepad slot is available (up to max player count).
+		/// Connect a joystick or gamepad device and add it to the joystick list if a slot is available (up to max player count).
 		/// </summary>
-		/// <param name="deviceIndex">
-		/// The device index (generated by the connected event or a value up to SDL_NumJoysticks()).
-		/// </param>
-
-		void OpenJoystick(int deviceIndex);
+		/// <param name="deviceIndex">The device index (generated by the connected event or a value up to SDL_NumJoysticks()).</param>
+		void HandleGamepadHotPlug(int deviceIndex);
 
 		/// <summary>
 		/// Stores all the input events that happened during this update to be compared to in the next update. This is called from Update().

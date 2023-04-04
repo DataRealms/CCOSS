@@ -25,7 +25,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update -yq
-          sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libtbb-dev libboost-dev libsdl2-dev libopengl-dev ninja-build
+          sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libopengl-dev ninja-build
           sudo pip install meson==0.60.0
 
       - name: Install Clang
@@ -38,8 +38,8 @@ jobs:
 
       - name: Build
         env:
-          CC: "clang"
-          CXX: "clang++"
+          CC: "gcc"
+          CXX: "g++"
         run: |
           meson setup --buildtype=release -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=/usr/lib/ --prefix=/usr/ build
           meson compile -C build
@@ -79,12 +79,13 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install pkg-config sdl2 minizip lz4 flac luajit lua@5.1 libpng tbb ninja meson
+          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc ninja meson
 
       - name: Build
         env:
-          CC: "clang"
-          CXX: "clang++"
+          CC: "gcc-12"
+          CXX: "g++-12"
+          LDFLAGS: "-static-libgcc -static-libstdc++"
         run: |
           meson setup --buildtype=release -Ddebug_type=release build
           meson compile -C build

@@ -41,6 +41,7 @@ void MovableObject::Clear()
     m_Vel.Reset();
     m_PrevPos.Reset();
     m_PrevVel.Reset();
+	m_DistanceTravelled = 0;
     m_Scale = 1.0;
     m_GlobalAccScalar = 1.0;
     m_AirResistance = 0;
@@ -959,6 +960,8 @@ void MovableObject::PostTravel()
 
     // Reset the terrain intersection warning
     m_CheckTerrIntersection = false;
+
+	m_DistanceTravelled += m_Vel.GetMagnitude() * c_PPM * g_TimerMan.GetDeltaTimeSecs();
 }
 
 /*

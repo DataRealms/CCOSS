@@ -4,6 +4,7 @@
 // This restores features removed from the C++17 standard (auto_ptr and some other stuff). This is needed for LuaBind to work because it relies on it heavily.
 #define _HAS_AUTO_PTR_ETC 1
 #define _LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+
 // Disable a bunch of unneeded crap in WinAPI (on top of WIN32_LEAN_AND_MEAN)
 #ifdef _WIN32
 #define NOMINMAX
@@ -79,10 +80,6 @@
 #include <filesystem>
 #include <atomic>
 #include <execution>
-
-#include "glad/gl.h"
-#include "GLCheck.h"
-
 
 namespace std {
 

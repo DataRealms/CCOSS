@@ -30,20 +30,6 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI.h"
-#include "GUIFont.h"
-#include "AllegroScreen.h"
-#include "AllegroBitmap.h"
-#include "AllegroInput.h"
-#include "GUIControlManager.h"
-#include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
-#include "GUITextBox.h"
-#include "GUIButton.h"
-#include "GUILabel.h"
-#include "GUIComboBox.h"
-
 #include "ObjectPickerGUI.h"
 
 namespace RTE {

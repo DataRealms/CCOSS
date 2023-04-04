@@ -4,10 +4,6 @@
 #include "LuabindDefinitions.h"
 #include "LuaAdapterDefinitions.h"
 
-#include "SDL2/SDL_scancode.h"
-#include "SDL2/SDL_keycode.h"
-#include "SDL2/SDL_gamecontroller.h"
-
 namespace RTE {
 
 #pragma region Lua Binding Registration Macros
@@ -164,20 +160,6 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Struct that contains Lua binding registration functions for types that don't really belong in any of the other binding structs.
-	/// </summary>
-	struct MiscLuaBindings {
-		LuaBindingRegisterFunctionDeclarationForType(AlarmEvent);
-		LuaBindingRegisterFunctionDeclarationForType(InputDevice);
-		LuaBindingRegisterFunctionDeclarationForType(InputElements);
-		LuaBindingRegisterFunctionDeclarationForType(MouseButtons);
-		LuaBindingRegisterFunctionDeclarationForType(JoyButtons);
-		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
-		LuaBindingRegisterFunctionDeclarationForType(Directions);
-		LuaBindingRegisterFunctionDeclarationForType(DrawBlendMode);
-	};
-
-	/// <summary>
 	/// Struct that contains Lua binding registration functions for GraphicalPrimitive classes.
 	/// </summary>
 	struct PrimitiveLuaBindings {
@@ -199,12 +181,28 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(BitmapPrimitive);
 	};
 
-	struct SDLLuaBindings {
+	/// <summary>
+	/// Struct that contains Lua binding registration functions for various input enumerations.
+	/// </summary>
+	struct InputLuaBindings {
+		LuaBindingRegisterFunctionDeclarationForType(InputDevice);
+		LuaBindingRegisterFunctionDeclarationForType(InputElements);
+		LuaBindingRegisterFunctionDeclarationForType(MouseButtons);
+		LuaBindingRegisterFunctionDeclarationForType(JoyButtons);
+		LuaBindingRegisterFunctionDeclarationForType(JoyDirections);
 		LuaBindingRegisterFunctionDeclarationForType(SDL_Scancode);
 		LuaBindingRegisterFunctionDeclarationForType(SDL_Keycode);
 		LuaBindingRegisterFunctionDeclarationForType(SDL_GameControllerButton);
 		LuaBindingRegisterFunctionDeclarationForType(SDL_GameControllerAxis);
 	};
 
+	/// <summary>
+	/// Struct that contains Lua binding registration functions for types that don't really belong in any of the other binding structs.
+	/// </summary>
+	struct MiscLuaBindings {
+		LuaBindingRegisterFunctionDeclarationForType(AlarmEvent);
+		LuaBindingRegisterFunctionDeclarationForType(Directions);
+		LuaBindingRegisterFunctionDeclarationForType(DrawBlendMode);
+	};
 }
 #endif

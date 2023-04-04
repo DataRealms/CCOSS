@@ -16,13 +16,13 @@
 /// Data Realms, LLC - http://www.datarealms.com
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// Cortex Command Community Project Discord - https://discord.gg/TSU6StNQUG
-/// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
+
 #include "allegro.h"
-#include "SDL2/SDL.h"
+#include "SDL.h"
 
 #include "GUI.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 
@@ -38,6 +38,7 @@
 #include "PerformanceMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
+#include "WindowMan.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
@@ -60,6 +61,7 @@ namespace RTE {
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
 		g_PerformanceMan.Initialize();
+		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
 
@@ -75,8 +77,6 @@ namespace RTE {
 		// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
 		// If Settings.ini already exists and is fully populated, this will deal with overwriting it to apply any overrides performed by the managers at boot (e.g resolution validation).
 		if (g_SettingsMan.SettingsNeedOverwrite()) { g_SettingsMan.UpdateSettingsFile(); }
-
-		g_FrameMan.PrintForcedGfxDriverMessage();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,44 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
+	///
+	/// </summary>
+	void PollEvents() {
+		SDL_Event sdlEvent;
+		while (SDL_PollEvent(&sdlEvent)) {
+			switch (sdlEvent.type) {
+				case SDL_QUIT:
+					System::SetQuit(true);
+					break;
+				case SDL_WINDOWEVENT:
+					g_WindowMan.HandleWindowEvent(sdlEvent);
+					break;
+				case SDL_KEYUP:
+				case SDL_KEYDOWN:
+				case SDL_TEXTINPUT:
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEBUTTONUP:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEWHEEL:
+				case SDL_CONTROLLERAXISMOTION:
+				case SDL_JOYAXISMOTION:
+				case SDL_CONTROLLERBUTTONDOWN:
+				case SDL_CONTROLLERBUTTONUP:
+				case SDL_JOYBUTTONDOWN:
+				case SDL_JOYBUTTONUP:
+				case SDL_JOYDEVICEADDED:
+				case SDL_JOYDEVICEREMOVED:
+					g_UInputMan.QueueInputEvent(sdlEvent);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
 	/// Game menus loop.
 	/// </summary>
 	void RunMenuLoop() {
@@ -164,17 +202,20 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
+			PollEvents();
+
+			g_WindowMan.Update();
+
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
 
-			if (g_FrameMan.ResolutionChanged()) {
+			if (g_WindowMan.ResolutionChanged()) {
 				g_MenuMan.Reinitialize();
 				g_ConsoleMan.Destroy();
 				g_ConsoleMan.Initialize();
-				g_FrameMan.DestroyTempBackBuffers();
+				g_WindowMan.CompleteResolutionChange();
 			}
 
 			if (g_MenuMan.Update()) {
@@ -184,8 +225,7 @@ namespace RTE {
 
 			g_MenuMan.Draw();
 			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_WindowMan.UploadFrame();
 		}
 	}
 
@@ -209,16 +249,18 @@ namespace RTE {
 		long long drawTotalTime = 0;
 
 		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
 			bool serverUpdated = false;
-
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
+
 			g_TimerMan.Update();
-			g_FrameMan.ClearFrame();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
+
+				PollEvents();
+
+				g_WindowMan.Update();
 
 				g_PerformanceMan.NewPerformanceSample();
 				g_PerformanceMan.UpdateMSPSU();
@@ -297,8 +339,7 @@ namespace RTE {
 			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_WindowMan.UploadFrame();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;
 			g_PerformanceMan.UpdateMSPF(updateTotalTime, drawTotalTime);
@@ -313,16 +354,17 @@ namespace RTE {
 /// </summary>
 int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
-	// allegro_init();
-	install_allegro(SYSTEM_NONE, &errno, atexit);
+	install_allegro(SYSTEM_NONE, &errno, std::atexit);
 	loadpng_init();
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER);
+
 #if SDL_MINOR_VERSION > 22
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 #endif
+
 	SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetHint("SDL_ALLOW_TOPMOST", 0);
+	SDL_SetHint("SDL_ALLOW_TOPMOST", "0");
 
 	if (std::filesystem::exists("Base.rte/gamecontrollerdb.txt")) {
 		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
@@ -354,7 +396,7 @@ int main(int argc, char **argv) {
 		if (!g_ActivityMan.Initialize()) {
 			RunMenuLoop();
 		}
-		
+
 		RunGameLoop();
 	}
 
@@ -362,8 +404,10 @@ int main(int argc, char **argv) {
 
 	allegro_exit();
 	SDL_Quit();
+
 	return EXIT_SUCCESS;
 }
+
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }
 #endif

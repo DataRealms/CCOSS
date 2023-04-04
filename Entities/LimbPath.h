@@ -444,11 +444,13 @@ ClassInfoGetters;
 // Arguments:       A bool telling this path to be flipped or not.
 // Return value:    None.
 
-    void SetHFlip(bool hflipped)
-    {
-        m_HFlipped = hflipped;
-        m_Rotation.SetXFlipped(m_HFlipped);
-    }
+    void SetHFlip(bool hflipped) { m_HFlipped = hflipped; }
+
+    /// <summary>
+    /// Gets the h flip.
+    /// </summary>
+    /// <returns>The h flip.</returns>
+    bool GetHFlip() { return m_HFlipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -480,11 +482,17 @@ ClassInfoGetters;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Informs this LimbPath of the current rotation of its owning Actor's
 //                  for this frame. Needs to be done before travelling
-//                  anyhting along this path each frame.
+//                  anything along this path each frame.
 // Arguments:       A Matrix with the updated rotation info.
 // Return value:    None.
 
     void SetRotation(const Matrix &rotation) { m_Rotation = rotation; m_Rotation.SetXFlipped(m_HFlipped); }
+
+    /// <summary>
+    /// Sets the new rotation offset.
+    /// </summary>
+    /// <param name="rotationOffset">The new rotation offset, in local space.</param>
+    void SetRotationOffset(const Vector& rotationOffset) { m_RotationOffset = rotationOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -587,6 +595,11 @@ ClassInfoGetters;
 
     bool IsStaticPoint() const { return m_Segments.empty(); }
 
+    /// <summary>
+    /// Returns the lowest point of this LimbPath, centred.
+    /// </summary>
+    /// <returns>The lowest point of this LimbPath, centred.</returns>
+    Vector GetBottomMiddle() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  Draw
@@ -643,8 +656,10 @@ protected:
     Vector m_JointPos;
     // The latest known velocity of the owning actor's joint in world coordinates.
     Vector m_JointVel;
-    // The latest known rotation of the owning actor in world coordinates.
+    // The rotation applied to this walkpath.
     Matrix m_Rotation;
+    // The point we should be rotated around, in local space.
+    Vector m_RotationOffset;
 
     // If GetNextTimeSeg() couldn't use up all frame time because the current segment
     // ended,this var stores the remainder of time that should be used to progress
@@ -679,6 +694,13 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+	/// Rotates a point to match our rotation and rotation offset.
+	/// </summary>
+    /// <param name="point">The point to rotate.</param>
+    /// <returns>The rotated point.</returns>
+    Vector RotatePoint(const Vector &point) const;
 
 };
 

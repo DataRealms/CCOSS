@@ -397,7 +397,6 @@ namespace RTE {
 		.def("ScancodePressed", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyPressed)
 		.def("ScancodeReleased", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyReleased)
 		.def("ScancodeHeld", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyHeld)
-		.def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
 		.def("MouseButtonPressed", &UInputMan::MouseButtonPressed)
 		.def("MouseButtonReleased", &UInputMan::MouseButtonReleased)
 		.def("MouseButtonHeld", &UInputMan::MouseButtonHeld)

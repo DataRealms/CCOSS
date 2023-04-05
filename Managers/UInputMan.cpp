@@ -669,7 +669,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::QueueInputEvent(const SDL_Event &inputEvent) {
-		m_EventQueue.emplace(inputEvent);
+		m_EventQueue.emplace_back(inputEvent);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,8 +689,8 @@ namespace RTE {
 		m_RawMouseMovement.Reset();
 
 		SDL_Event inputEvent;
-		while (!m_EventQueue.empty()) {
-			inputEvent = m_EventQueue.front();
+		for (std::vector<SDL_Event>::const_iterator eventIterator = m_EventQueue.begin(); eventIterator != m_EventQueue.end(); eventIterator++) {
+			inputEvent = *eventIterator;
 
 			switch (inputEvent.type) {
 				case SDL_KEYUP:
@@ -725,7 +725,7 @@ namespace RTE {
 				case SDL_MOUSEBUTTONUP:
 				case SDL_MOUSEBUTTONDOWN:
 					if (inputEvent.button.button > SDL_BUTTON_RIGHT) {
-						continue;
+						break;
 					}
 					s_ChangedMouseButtonStates[inputEvent.button.button] = (static_cast<bool>(inputEvent.button.state) != s_PrevMouseButtonStates[inputEvent.button.button]);
 					s_PrevMouseButtonStates[inputEvent.button.button] = static_cast<bool>(inputEvent.button.state);
@@ -756,7 +756,7 @@ namespace RTE {
 								button = inputEvent.cbutton.button;
 								state = inputEvent.cbutton.state;
 							} else {
-								continue;
+								break;
 							}
 						} else {
 							button = inputEvent.jbutton.button;
@@ -789,8 +789,8 @@ namespace RTE {
 					break;
 			}
 
-			m_EventQueue.pop();
 		}
+		m_EventQueue.clear();
 
 		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
 		if (IsInMultiplayerMode()) {

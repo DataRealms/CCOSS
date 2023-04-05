@@ -712,7 +712,6 @@ namespace RTE {
 				}
 				case SDL_MOUSEMOTION:
 					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
-					m_RawMouseMovement *= m_MouseSensitivity;
 					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
 					if (g_WindowMan.FullyCoversAllDisplays()) {
 						int windowPosX = 0;
@@ -791,6 +790,7 @@ namespace RTE {
 
 		}
 		m_EventQueue.clear();
+		m_RawMouseMovement *= m_MouseSensitivity;
 
 		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
 		if (IsInMultiplayerMode()) {

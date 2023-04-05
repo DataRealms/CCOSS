@@ -1063,15 +1063,14 @@ namespace RTE {
 								device->m_DigitalAxis[axisUp] = 0;
 							}
 						}
+					} else if (deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
+						if (std::abs(value / 32767.0) < deadZone) {
+							s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevAxisValue);
+							s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevDigitalValue);
+							device->m_Axis[axis] = 0;
+							device->m_DigitalAxis[axis] = 0;
+						}
 					}
-				}
-			}
-			if (!isAxisMapped && deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
-				if (std::abs(value / 32767.0) < deadZone) {
-					s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevAxisValue);
-					s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevDigitalValue);
-					device->m_Axis[axis] = 0;
-					device->m_DigitalAxis[axis] = 0;
 				}
 			}
 		}

@@ -45,6 +45,16 @@ The first build will take a while, but future ones should be quicker.
 
 If you want to use an IDE other than Visual Studio, you will have to build using meson. Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers.
 
+## Windows Subsystem for Linux (WSL)
+
+The Linux build can be built and run on Windows 10 using WSL by following the Linux [building](#building) and [running](#running) instructions.  
+Information on installing and using WSL can be found [here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+Building can be done directly from the Windows filesystem side, without having to clone the repositories on the Linux filesystem side.  
+By default WSL will mount your `C:` drive to `/mnt/c/`, or just `/c/`. From there you can navigate to the Source and Data directories to follow the meson build steps.
+
+This has been tested with WSL2 Ubuntu 22.04 but should work with other distributions and WSL1 as well.
+
 ***
 
 # Linux and macOS Build Instructions

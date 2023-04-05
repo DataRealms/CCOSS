@@ -1,12 +1,12 @@
 /* ======================================================================================== */
 /* FMOD Core API - C++ header file.                                                         */
-/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2020.                               */
+/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2023.                               */
 /*                                                                                          */
 /* Use this header in conjunction with fmod_common.h (which contains all the constants /    */
 /* callbacks) to develop using the C++ language.                                            */
 /*                                                                                          */
 /* For more detail visit:                                                                   */
-/* https://fmod.com/resources/documentation-api?version=2.0&page=core-api.html              */
+/* https://fmod.com/docs/2.02/api/core-api.html                                             */
 /* ======================================================================================== */
 #ifndef _FMOD_HPP
 #define _FMOD_HPP
@@ -43,7 +43,7 @@ namespace FMOD
     /*
         FMOD System factory functions.
     */
-    inline FMOD_RESULT System_Create        (System **system) { return FMOD_System_Create((FMOD_SYSTEM **)system); }
+    inline FMOD_RESULT System_Create        (System **system, unsigned int headerversion = FMOD_VERSION) { return FMOD_System_Create((FMOD_SYSTEM **)system, headerversion); }
 
     /*
        'System' API
@@ -123,8 +123,7 @@ namespace FMOD
         FMOD_RESULT F_API getVersion              (unsigned int *version);
         FMOD_RESULT F_API getOutputHandle         (void **handle);
         FMOD_RESULT F_API getChannelsPlaying      (int *channels, int *realchannels = 0);
-        FMOD_RESULT F_API getCPUUsage             (float *dsp, float *stream, float *geometry, float *update, float *total);
-        FMOD_RESULT F_API getCPUUsageEx           (float *convolutionThread1, float *convolutionThread2);
+        FMOD_RESULT F_API getCPUUsage             (FMOD_CPU_USAGE *usage);
         FMOD_RESULT F_API getFileUsage            (long long *sampleBytesRead, long long *streamBytesRead, long long *otherBytesRead);
 
         // Sound/DSP/Channel/FX creation and retrieval.
@@ -474,6 +473,7 @@ namespace FMOD
         FMOD_RESULT F_API getChannelFormat       (FMOD_CHANNELMASK *channelmask, int *numchannels, FMOD_SPEAKERMODE *source_speakermode);
         FMOD_RESULT F_API getOutputChannelFormat (FMOD_CHANNELMASK inmask, int inchannels, FMOD_SPEAKERMODE inspeakermode, FMOD_CHANNELMASK *outmask, int *outchannels, FMOD_SPEAKERMODE *outspeakermode);
         FMOD_RESULT F_API reset                  ();
+        FMOD_RESULT F_API setCallback            (FMOD_DSP_CALLBACK callback);
 
         // DSP parameter control.
         FMOD_RESULT F_API setParameterFloat      (int index, float value);

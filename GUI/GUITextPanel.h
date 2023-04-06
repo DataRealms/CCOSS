@@ -101,6 +101,7 @@ public:
 
     void OnKeyPress(int KeyCode, int Modifier) override;
 
+	void OnTextInput(std::string_view inputText) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetText

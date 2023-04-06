@@ -114,7 +114,7 @@ namespace RTE {
 		m_InputElementCapturingInputNameLabel->SetText(m_InputMapLabel[inputElement]->GetText());
 		m_ConfiguringManually = true;
 
-		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(m_GUIControlManager->GetManager()->GetInputController());
+		g_UInputMan.SetSkipHandlingSpecialInput(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ namespace RTE {
 		m_InputMappingCaptureBox->SetEnabled(false);
 		m_ConfiguringManually = false;
 
-		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(nullptr);
+		g_UInputMan.SetSkipHandlingSpecialInput(false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ namespace RTE {
 
 	void SettingsInputMappingGUI::HandleManualConfigSequence() {
 		bool inputCaptured = false;
-		if (g_UInputMan.KeyReleased(KEY_DEL)) {
+		if (g_UInputMan.KeyReleased(SDLK_DELETE)) {
 			m_ConfiguringPlayerInputScheme->ClearMapping(m_InputElementCapturingInput);
 			inputCaptured = true;
 		}

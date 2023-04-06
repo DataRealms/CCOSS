@@ -5,8 +5,6 @@
 #include "ConsoleMan.h"
 
 #include "SDL.h"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/matrix_query.hpp"
 
 namespace RTE {
 

@@ -17,9 +17,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Clear() {
-		m_PrimaryWindow.reset();
-		m_PrimaryRenderer.reset();
 		m_PrimaryTexture.reset();
+		m_PrimaryRenderer.reset();
+		m_PrimaryWindow.reset();
 		ClearMultiDisplayData();
 
 		m_AnyWindowHasFocus = false;

@@ -187,7 +187,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::UpdateInfoOfDisplayPrimaryWindowIsAt() {
+	void WindowMan::UpdatePrimaryDisplayInfo() {
 		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		SDL_Rect currentDisplayBounds;
@@ -199,7 +199,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt) {
+	void WindowMan::MapDisplays(bool updatePrimaryDisplayInfo) {
 		auto setSingleDisplayMode = [this](const std::string &errorMsg = "") {
 			m_MaxResX = m_PrimaryWindowDisplayWidth;
 			m_MaxResY = m_PrimaryWindowDisplayHeight;
@@ -214,8 +214,8 @@ namespace RTE {
 			}
 		};
 
-		if (updateInfoOfDisplayPrimaryWindowIsAt) {
-			UpdateInfoOfDisplayPrimaryWindowIsAt();
+		if (updatePrimaryDisplayInfo) {
+			UpdatePrimaryDisplayInfo();
 		}
 
 		m_NumDisplays = SDL_GetNumVideoDisplays();
@@ -361,16 +361,16 @@ namespace RTE {
 		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_PrimaryWindowDisplayWidth) && (newResY * newResMultiplier == m_PrimaryWindowDisplayHeight);
+		bool newResFullyCoversPrimaryWindowDisplay = (newResX * newResMultiplier == m_PrimaryWindowDisplayWidth) && (newResY * newResMultiplier == m_PrimaryWindowDisplayHeight);
 		bool newResFullyCoversAllDisplays = m_CanMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
 		bool recoveredToPreviousSettings = false;
 
-		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversDisplayPrimaryWindowIsAtOnly && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversPrimaryWindowDisplay && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			ShowMessageBox("Failed to switch to new resolution!\nAttempting to revert to previous settings!");
 			AttemptToRevertToPreviousResolution();
 			recoveredToPreviousSettings = true;
-		} else if (!newResFullyCoversDisplayPrimaryWindowIsAtOnly && !newResFullyCoversAllDisplays) {
+		} else if (!newResFullyCoversPrimaryWindowDisplay && !newResFullyCoversAllDisplays) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());

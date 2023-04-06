@@ -272,7 +272,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the stored info of the display the primary window is currently positioned at.
 		/// </summary>
-		void UpdateInfoOfDisplayPrimaryWindowIsAt();
+		void UpdatePrimaryDisplayInfo();
 
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior.

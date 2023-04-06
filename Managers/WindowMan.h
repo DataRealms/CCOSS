@@ -2,7 +2,6 @@
 #define _RTEWINDOWMAN_
 
 #include "Singleton.h"
-#include "glm/glm.hpp"
 
 #define g_WindowMan WindowMan::Instance()
 

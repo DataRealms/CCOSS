@@ -29,10 +29,11 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 
 3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\win` into the **Data Repository**:
 * `fmod.dll`
-* `SDL2-64.dll`
-For 32-bit builds, copy the following libraries from the `x86` folder inside `...\lib\win`:
-* `fmodL.dll`
 * `SDL2.dll`
+
+  For 32-bit builds, copy the following libraries from the `x86` folder inside `...\lib\win` as well:
+* `fmodL.dll`
+* `SDL2-32.dll`
 
 Now you're ready to build and launch the game.  
 Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.

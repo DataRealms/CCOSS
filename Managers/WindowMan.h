@@ -216,12 +216,12 @@ namespace RTE {
 
 	private:
 
-		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
-		std::shared_ptr<SDL_Renderer> m_PrimaryRenderer; //!< The main window renderer, draws to the main window.
+		std::unique_ptr<SDL_Window, SDLWindowDeleter> m_PrimaryWindow; //!< The main window.
+		std::unique_ptr<SDL_Renderer, SDLRendererDeleter> m_PrimaryRenderer; //!< The main window renderer, draws to the main window.
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture; //!< The main window renderer's drawing surface.
 
-		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
-		std::vector<std::shared_ptr<SDL_Renderer>> m_MultiDisplayRenderers; //!< Additional renderers for multi-display fullscreen.
+		std::vector<std::unique_ptr<SDL_Window, SDLWindowDeleter>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
+		std::vector<std::unique_ptr<SDL_Renderer, SDLRendererDeleter>> m_MultiDisplayRenderers; //!< Additional renderers for multi-display fullscreen.
 		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional textures when drawing to multiple displays.
 		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 

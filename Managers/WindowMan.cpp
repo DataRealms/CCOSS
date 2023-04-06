@@ -229,8 +229,6 @@ namespace RTE {
 		int leftMostOffset = 0;
 		int topMostOffset = std::numeric_limits<int>::max();
 		int maxHeight = std::numeric_limits<int>::min();
-		//int maxUsableHeight = std::numeric_limits<int>::max();
-		//int minHeightDisplayIndex = -1;
 		int totalWidth = 0;
 
 		for (int displayIndex = 0; displayIndex < m_NumDisplays; ++displayIndex) {
@@ -241,18 +239,6 @@ namespace RTE {
 				leftMostOffset = std::min(leftMostOffset, displayBounds.x);
 				topMostOffset = std::min(topMostOffset, displayBounds.y);
 				maxHeight = std::max(maxHeight, displayBounds.h);
-
-				/*
-				// TODO: Figure out not-quite-letterboxing-but-letterboxing in multi-display fullscreen.
-				// Deal with this by creating the backbuffer to fit the minimum height display and then offset the taller display textures on the renderers to align everything.
-				// Access violation my beloved. Deal with later.
-				int prevMinHeight = maxUsableHeight;
-				maxUsableHeight = std::min(maxUsableHeight, displayBounds.h);
-
-				if (maxUsableHeight < prevMinHeight) {
-					minHeightDisplayIndex = displayIndex;
-				}
-				*/
 
 				totalWidth += displayBounds.w;
 			} else {
@@ -314,7 +300,7 @@ namespace RTE {
 
 	void WindowMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1 || resMultiplier > 8) {
-			resMultiplier = std::clamp(resMultiplier, 1, 8);
+			resMultiplier = std::clamp<int>(resMultiplier, 1, 8);
 			resX = std::min(resX, m_MaxResX / resMultiplier);
 			resY = std::min(resY, m_MaxResY / resMultiplier);
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");

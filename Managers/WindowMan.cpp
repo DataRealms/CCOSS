@@ -35,9 +35,9 @@ namespace RTE {
 		m_DisplayArrangementLeftMostOffset = 0;
 		m_DisplayArrangementLeftMostOffset = 0;
 
-		m_DisplayIndexPrimaryWindowIsAt = 0;
-		m_DisplayWidthPrimaryWindowIsAt = 0;
-		m_DisplayHeightPrimaryWindowIsAt = 0;
+		m_PrimaryWindowDisplayIndex = 0;
+		m_PrimaryWindowDisplayWidth = 0;
+		m_PrimaryWindowDisplayHeight = 0;
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
@@ -66,10 +66,10 @@ namespace RTE {
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
 		SDL_Rect currentDisplayBounds;
-		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
+		SDL_GetDisplayBounds(m_PrimaryWindowDisplayIndex, &currentDisplayBounds);
 
-		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
-		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
+		m_PrimaryWindowDisplayWidth = currentDisplayBounds.w;
+		m_PrimaryWindowDisplayHeight = currentDisplayBounds.h;
 
 		MapDisplays(false);
 
@@ -79,7 +79,7 @@ namespace RTE {
 		CreatePrimaryRenderer();
 		CreatePrimaryTexture();
 
-		m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		if (FullyCoversAllDisplays()) {
 			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
@@ -90,11 +90,11 @@ namespace RTE {
 
 	void WindowMan::CreatePrimaryWindow() {
 		const char *windowTitle = "Cortex Command Community Project";
-		int windowPosX = (m_ResX * m_ResMultiplier <= m_DisplayWidthPrimaryWindowIsAt) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
+		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN;
 
-		if (FullyCoversDisplayWindowIsAtOnly()) {
+		if (FullyCoversPrimaryWindowDisplayOnly()) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -188,21 +188,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UpdateInfoOfDisplayPrimaryWindowIsAt() {
-		m_DisplayIndexPrimaryWindowIsAt = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
+		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		SDL_Rect currentDisplayBounds;
-		SDL_GetDisplayBounds(m_DisplayIndexPrimaryWindowIsAt, &currentDisplayBounds);
+		SDL_GetDisplayBounds(m_PrimaryWindowDisplayIndex, &currentDisplayBounds);
 
-		m_DisplayWidthPrimaryWindowIsAt = currentDisplayBounds.w;
-		m_DisplayHeightPrimaryWindowIsAt = currentDisplayBounds.h;
+		m_PrimaryWindowDisplayWidth = currentDisplayBounds.w;
+		m_PrimaryWindowDisplayHeight = currentDisplayBounds.h;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt) {
 		auto setSingleDisplayMode = [this](const std::string &errorMsg = "") {
-			m_MaxResX = m_DisplayWidthPrimaryWindowIsAt;
-			m_MaxResY = m_DisplayHeightPrimaryWindowIsAt;
+			m_MaxResX = m_PrimaryWindowDisplayWidth;
+			m_MaxResY = m_PrimaryWindowDisplayHeight;
 			m_NumDisplays = 1;
 			m_DisplayArrangementLeftMostOffset = -1;
 			m_DisplayArrangementTopMostOffset = -1;
@@ -327,10 +327,10 @@ namespace RTE {
 		}
 		SDL_SetWindowSize(m_PrimaryWindow.get(), m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier);
 
-		if (!FullyCoversDisplayWindowIsAtOnly()) {
+		if (!FullyCoversPrimaryWindowDisplayOnly()) {
 			windowFlags = 0;
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_FALSE);
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
 		}
 
 		bool result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), windowFlags) == 0;
@@ -361,7 +361,7 @@ namespace RTE {
 		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (newResY * newResMultiplier == m_DisplayHeightPrimaryWindowIsAt);
+		bool newResFullyCoversDisplayPrimaryWindowIsAtOnly = (newResX * newResMultiplier == m_PrimaryWindowDisplayWidth) && (newResY * newResMultiplier == m_PrimaryWindowDisplayHeight);
 		bool newResFullyCoversAllDisplays = m_CanMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
 
 		bool recoveredToPreviousSettings = false;
@@ -375,7 +375,7 @@ namespace RTE {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
-			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayIndexPrimaryWindowIsAt));
+			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
 		}
 		if (!recoveredToPreviousSettings) {
 			m_ResX = newResX;
@@ -430,9 +430,9 @@ namespace RTE {
 		SDL_GetWindowPosition(m_PrimaryWindow.get(), &windowPrevPositionX, &windowPrevPositionY);
 
 		// Move the window to the detected leftmost display to avoid all the headaches.
-		if (m_DisplayIndexPrimaryWindowIsAt != m_DisplayArrangmentLeftMostDisplayIndex) {
+		if (m_PrimaryWindowDisplayIndex != m_DisplayArrangmentLeftMostDisplayIndex) {
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_DisplayArrangmentLeftMostDisplayIndex));
-			m_DisplayIndexPrimaryWindowIsAt = m_DisplayArrangmentLeftMostDisplayIndex;
+			m_PrimaryWindowDisplayIndex = m_DisplayArrangmentLeftMostDisplayIndex;
 		}
 
 		bool errorSettingFullscreen = false;
@@ -443,7 +443,7 @@ namespace RTE {
 			int displayWidth = displayBounds.w;
 			int displayHeight = displayBounds.h;
 
-			if (displayIndex == m_DisplayIndexPrimaryWindowIsAt) {
+			if (displayIndex == m_PrimaryWindowDisplayIndex) {
 				m_MultiDisplayWindows.emplace_back(m_PrimaryWindow);
 				m_MultiDisplayRenderers.emplace_back(m_PrimaryRenderer);
 			} else {

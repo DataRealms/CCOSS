@@ -126,7 +126,7 @@ namespace RTE {
 		/// Checks whether the current resolution settings fully cover the display the primary game window is positioned at.
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover the display the primary game window is positioned at.</returns>
-		bool FullyCoversDisplayWindowIsAtOnly() const { return (m_ResX * m_ResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (m_ResY * m_ResMultiplier == m_DisplayHeightPrimaryWindowIsAt); }
+		bool FullyCoversPrimaryWindowDisplayOnly() const { return (m_ResX * m_ResMultiplier == m_PrimaryWindowDisplayWidth) && (m_ResY * m_ResMultiplier == m_PrimaryWindowDisplayHeight); }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover all the available displays.
@@ -158,13 +158,13 @@ namespace RTE {
 		/// Gets the horizontal resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The horizontal resolution of the display the primary game window is currently positioned at.</returns>
-		int GetWidthOfDisplayWindowIsAt() const { return m_DisplayWidthPrimaryWindowIsAt; }
+		int GetPriaryWindowDisplayWidth() const { return m_PrimaryWindowDisplayWidth; }
 
 		/// <summary>
 		/// Gets the vertical resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The vertical resolution of the display the primary game window is currently positioned at.</returns>
-		int GetHeightOfDisplayWindowIsAt() const { return m_DisplayHeightPrimaryWindowIsAt; }
+		int GetPrimaryWindowDisplayHeight() const { return m_PrimaryWindowDisplayHeight; }
 
 		/// <summary>
 		/// Gets whether the game resolution was changed.
@@ -240,9 +240,9 @@ namespace RTE {
 		int m_DisplayArrangementLeftMostOffset; //!< The left-most position in the OS display arrangement.
 		int m_DisplayArrangementTopMostOffset; //!< The top-most position in the OS display arrangement.
 
-		int m_DisplayIndexPrimaryWindowIsAt; //!< The index of the display the main window is currently positioned at.
-		int m_DisplayWidthPrimaryWindowIsAt; //!< The width of the display the main window is currently positioned at.
-		int m_DisplayHeightPrimaryWindowIsAt; //!< The height of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayIndex; //!< The index of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayWidth; //!< The width of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayHeight; //!< The height of the display the main window is currently positioned at.
 
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.

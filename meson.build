@@ -25,6 +25,10 @@ extra_args=[]
 preprocessor_flags = []
 suffix=''
 
+if compiler.get_id() == 'clang'
+  error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
+endif
+
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
   message('gcc detected')

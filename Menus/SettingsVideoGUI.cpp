@@ -156,10 +156,8 @@ namespace RTE {
 			if (SDL_GetDisplayMode(displayIndex, i, &mode) == 0) {
 				modeList.push_back(mode);
 
-				if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
-					if (IsSupportedResolution(mode.w, mode.h)) {
-						resRecords.emplace(mode.w, mode.h, false);
-					}
+				if ((SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) && IsSupportedResolution(mode.w, mode.h)) {
+					resRecords.emplace(mode.w, mode.h, false);
 				}
 			} else {
 				(void)SDL_GetError();

@@ -149,7 +149,7 @@ namespace RTE {
 
 	void WindowMan::CreateMultiDisplayTextures() {
 		m_MultiDisplayTextures.resize(m_MultiDisplayTextureOffsets.size());
-		for (size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
+		for (std::size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
 			m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiDisplayRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h));
 			if (!m_MultiDisplayTextures[i]) {
 				RTEAbort("Failed to create texture for multi-display because:\n" + std::string(SDL_GetError()));
@@ -163,20 +163,20 @@ namespace RTE {
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
-		int sdlEnable = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
+		int sdlEnableVSync = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
 		int result = -1;
 
 #if	SDL_VERSION_ATLEAST(2, 0, 18)
 		if (!m_MultiDisplayRenderers.empty()) {
 			for (const auto &renderer : m_MultiDisplayRenderers) {
-				result = SDL_RenderSetVSync(renderer.get(), sdlEnable);
+				result = SDL_RenderSetVSync(renderer.get(), sdlEnableVSync);
 
 				if (result != 0) {
 					break;
 				}
 			}
 		} else {
-			result = SDL_RenderSetVSync(m_PrimaryRenderer.get(), sdlEnable);
+			result = SDL_RenderSetVSync(m_PrimaryRenderer.get(), sdlEnableVSync);
 		}
 #endif
 
@@ -313,15 +313,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
-		bool settingsNeedOverwrite = false;
-
-		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
-			settingsNeedOverwrite = true;
-			resX = m_MaxResX / resMultiplier;
-			resY = m_MaxResY / resMultiplier;
+		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1 || resMultiplier > 8) {
+			resMultiplier = std::clamp(resMultiplier, 1, 8);
+			resX = std::min(resX, m_MaxResX / resMultiplier);
+			resY = std::min(resY, m_MaxResY / resMultiplier);
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
-		}
-		if (settingsNeedOverwrite) {
 			g_SettingsMan.SetSettingsNeedOverwrite();
 		}
 	}
@@ -351,7 +347,6 @@ namespace RTE {
 		}
 
 		bool result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), windowFlags) == 0;
-
 		if (!result && !revertToDefaults) {
 			ShowMessageBox("Failed to revert to previous resolution settings!\nAttempting to revert to defaults!");
 			setDefaultResSettings();
@@ -429,7 +424,7 @@ namespace RTE {
 
 		MapDisplays();
 
-		if (m_MaxResX < m_ResX * newResMultiplier || m_MaxResY < m_ResY * newResMultiplier ) {
+		if ((m_ResX * newResMultiplier >= m_MaxResX) || (m_ResY * newResMultiplier >= m_MaxResY)) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
@@ -590,6 +585,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	glm::vec4 WindowMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
+		//TODO these casts should be made explicit to do maffs good.
 		float aspectRatio = resX / static_cast<float>(resY);
 		int width = windowW;
 		int height = width / aspectRatio + 0.5F;

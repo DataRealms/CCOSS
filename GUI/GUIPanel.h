@@ -248,6 +248,10 @@ public:
 
     virtual void OnKeyPress(int KeyCode, int Modifier);
 
+	/// <summary>
+	/// Called when text input is received.
+	/// </summary>
+	/// <param name="inputText">The input text being received.</param>
 	virtual void OnTextInput(std::string_view inputText);
 
 //////////////////////////////////////////////////////////////////////////////////////////

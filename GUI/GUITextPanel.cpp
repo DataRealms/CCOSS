@@ -289,15 +289,16 @@ void GUITextPanel::OnTextInput(std::string_view inputText) {
 		minValidKeyCode = 48;
 		maxValidKeyCode = 57;
 	}
-	for (std::string_view::const_iterator character = inputText.begin(); character < inputText.end(); ++character){
-		// Add valid ASCII characters
-		if (*character >= minValidKeyCode && *character <= maxValidKeyCode) {
+
+	for (auto characterIterator = inputText.begin(); characterIterator < inputText.end(); ++characterIterator){
+		char character = *characterIterator;
+		if (character >= minValidKeyCode && character <= maxValidKeyCode) {
 			RemoveSelectionText();
-			char buf[2] = { *character, '\0' };
+			std::string buffer = { character, '\0' };
 			if (m_MaxTextLength > 0 && m_Text.length() >= m_MaxTextLength) {
 				return;
 			}
-			m_Text.insert(m_CursorIndex, buf);
+			m_Text.insert(m_CursorIndex, buffer);
 			m_CursorIndex++;
 
 			if (m_NumericOnly && m_MaxNumericValue > 0 && std::stoi(m_Text) > m_MaxNumericValue) {

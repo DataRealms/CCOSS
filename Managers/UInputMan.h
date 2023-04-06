@@ -442,10 +442,10 @@ namespace RTE {
 		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT; }
 
 		/// <summary>
-		/// Gets the number of axis of the specified joystick.
+		/// Gets the number of axes of the specified joystick.
 		/// </summary>
 		/// <param name="whichJoy">Joystick to check.</param>
-		/// <returns>The number of axis of the joystick.</returns>
+		/// <returns>The number of axes of the joystick.</returns>
 		int GetJoystickAxisCount(int whichJoy) const;
 
 		/// <summary>

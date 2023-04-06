@@ -10,9 +10,6 @@ namespace RTE {
 	/// Structure for storing SDL_GameController or SDL_Joystick states.
 	/// </summary>
 	struct Gamepad {
-
-	public:
-
 		int m_DeviceIndex = -1; //!< The SDL device index, used when reopening devices as SDL will attempt to reassign joysticks to the same index.
 		SDL_JoystickID m_JoystickID = -1; //!< The joystick ID for event handling.
 		std::vector<int> m_Axis; //!< Array of analog axis states.

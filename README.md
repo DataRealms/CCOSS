@@ -83,7 +83,8 @@ For unspecified versions assume compatibility with the latest ubuntu LTS release
 
 3. Open a terminal in the Source Repository.
 
-4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)
+4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)  
+	For macOS you need to specify gcc, with `env CC=gcc-12 CXX=g++-12 meson setup build`
 
 5. `ninja -C build`
 
@@ -111,10 +112,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 - `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
 
 **Homebrew (macOS):**  
-`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng gcc@12 ninja meson`
-
-macOS meson setup requires specifying gcc, setup meson environment with:  
-`env CC=gcc-12 CXX=g++-12 meson setup build`
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng tbb gcc@12 ninja meson`
 
 **Arch Linux:**  
 `sudo pacman -S sdl2 tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  

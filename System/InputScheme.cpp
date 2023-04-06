@@ -456,7 +456,9 @@ namespace RTE {
 		if (whichJoy < 0) {
 			return false;
 		}
-		if (int whichButton = g_UInputMan.WhichJoyButtonPressed(whichJoy); whichButton != JoyButtons::JOY_NONE) {
+		
+		int whichButton = g_UInputMan.WhichJoyButtonPressed(whichJoy); 
+		if (whichButton != JoyButtons::JOY_NONE) {
 			m_InputMappings.at(whichInput).Reset();
 			SetJoyButtonMapping(whichInput, whichButton);
 			return true;

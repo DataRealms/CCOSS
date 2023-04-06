@@ -411,7 +411,7 @@ namespace RTE {
 
 		MapDisplays();
 
-		if ((m_ResX * newResMultiplier >= m_MaxResX) || (m_ResY * newResMultiplier >= m_MaxResY)) {
+		if ((m_ResX * newResMultiplier > m_MaxResX) || (m_ResY * newResMultiplier > m_MaxResY)) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}

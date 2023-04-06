@@ -117,7 +117,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 **Arch Linux:**  
 `sudo pacman -S sdl2 tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  
 
-**Ubuntu >=20.04:**  
+**Ubuntu >=22.04:**  
 `sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.1-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
 `sudo python3 -m pip install meson`
 

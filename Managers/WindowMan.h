@@ -306,16 +306,6 @@ namespace RTE {
 		/// <param name="resMultiplier">Requested resolution multiplier.</param>
 		/// <returns>Whether all displays were created successfully.</returns>
 		bool ChangeResolutionToMultiDisplayFullscreen(int resMultiplier);
-
-		/// <summary>
-		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
-		/// </summary>
-		/// <param name="resX">Desired horizontal resolution.</param>
-		/// <param name="resY">Desired vertical resolution.</param>
-		/// <param name="windowW">Window horizontal resolution.</param>
-		/// <param name="windowH">Window vertical resolution.</param>
-		/// <returns></returns>
-		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
 #pragma region Display Switch Handling

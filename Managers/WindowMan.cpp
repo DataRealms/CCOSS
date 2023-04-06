@@ -208,6 +208,7 @@ namespace RTE {
 			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 			m_CanMultiDisplayFullscreen = false;
+			m_IgnoreMultiDisplays = true;
 			if (!errorMsg.empty()) {
 				ShowMessageBox("Failed to map displays for multi-display fullscreen because:\n\n" + errorMsg + "!\n\nFullscreen will be limited to the display the window is positioned at!");
 			}
@@ -568,21 +569,4 @@ namespace RTE {
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	glm::vec4 WindowMan::GetViewportLetterbox(int resX, int resY, int windowW, int windowH) {
-		//TODO these casts should be made explicit to do maffs good.
-		float aspectRatio = resX / static_cast<float>(resY);
-		int width = windowW;
-		int height = width / aspectRatio + 0.5F;
-
-		if (height > windowH) {
-			height = windowH;
-			width = height * aspectRatio + 0.5F;
-		}
-
-		int offsetX = (windowW / 2) - (width / 2);
-		int offsetY = (windowH / 2) - (height / 2);
-		return glm::vec4(offsetX, windowH - offsetY - height, width, height);
-	}
 }

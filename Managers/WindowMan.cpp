@@ -149,7 +149,7 @@ namespace RTE {
 
 	void WindowMan::CreateMultiDisplayTextures() {
 		m_MultiDisplayTextures.resize(m_MultiDisplayTextureOffsets.size());
-		for (std::size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
+		for (size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
 			m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiDisplayRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h));
 			if (!m_MultiDisplayTextures[i]) {
 				RTEAbort("Failed to create texture for multi-display because:\n" + std::string(SDL_GetError()));

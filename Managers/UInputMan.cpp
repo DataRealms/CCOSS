@@ -94,7 +94,7 @@ namespace RTE {
 
 		int controllerIndex = 0;
 
-		for (std::size_t index = 0; index < std::min(SDL_NumJoysticks(), static_cast<int>(Players::MaxPlayerCount)); ++index) {
+		for (size_t index = 0; index < std::min(SDL_NumJoysticks(), static_cast<int>(Players::MaxPlayerCount)); ++index) {
 			if (SDL_IsGameController(index)) {
 				SDL_GameController *controller = SDL_GameControllerOpen(index);
 				if (!controller) {
@@ -762,7 +762,7 @@ namespace RTE {
 							button = inputEvent.jbutton.button;
 							state = inputEvent.jbutton.state;
 						}
-						std::size_t index = device - s_PrevJoystickStates.begin();
+						size_t index = device - s_PrevJoystickStates.begin();
 						s_ChangedJoystickStates[index].m_Buttons[button] = state != device->m_Buttons[button];
 						device->m_Buttons[button] = state;
 					}
@@ -1031,7 +1031,7 @@ namespace RTE {
 				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme[joystickPlayer].GetInputMappings();
 				std::array<InputElements, 4> elementsToCheck = {InputElements::INPUT_L_LEFT, InputElements::INPUT_L_UP, InputElements::INPUT_R_LEFT, InputElements::INPUT_R_UP};
 
-				for (std::size_t i = 0; i < elementsToCheck.size(); i += 2) {
+				for (size_t i = 0; i < elementsToCheck.size(); i += 2) {
 					int axisLeft{SDL_CONTROLLER_AXIS_INVALID};
 					int axisUp{SDL_CONTROLLER_AXIS_INVALID};
 					if (inputElements->at(elementsToCheck[i]).JoyDirMapped()) {

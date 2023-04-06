@@ -71,7 +71,7 @@ namespace RTE {
 		memset(m_KeyboardBuffer, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
 		memset(m_ScanCodeState, 0, sizeof(uint8_t) * GUIInput::Constants::KEYBOARD_BUFFER_SIZE);
 
-		for (std::size_t k = 0; k < GUIInput::Constants::KEYBOARD_BUFFER_SIZE; ++k) {
+		for (size_t k = 0; k < GUIInput::Constants::KEYBOARD_BUFFER_SIZE; ++k) {
 			if (g_UInputMan.KeyPressed(static_cast<SDL_Scancode>(k))) {
 				m_ScanCodeState[k] = GUIInput::Pushed;
 				uint8_t keyName = static_cast<uint8_t>(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(k)));

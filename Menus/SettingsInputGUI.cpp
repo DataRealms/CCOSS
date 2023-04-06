@@ -139,7 +139,7 @@ namespace RTE {
 			case InputDevice::DEVICE_GAMEPAD_4:
 				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
-				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(50);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(85);
 				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
 				break;
 			default:

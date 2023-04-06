@@ -5,6 +5,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "MetaMan.h"
@@ -359,8 +360,8 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.ClearBackBuffer32();
+			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -373,8 +374,8 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.ClearBackBuffer32();
+		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

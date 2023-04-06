@@ -1,7 +1,8 @@
 ﻿#include "System.h"
 #include "unzip.h"
+#include "boost/functional/hash.hpp"
 
-#ifdef __unix__
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
@@ -44,16 +45,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
+		// Use boost::hash for compiler independent hashing.
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
 				for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::recursive_directory_iterator(s_WorkingDirectory, std::filesystem::directory_options::follow_directory_symlink)) {
-					s_WorkingTree.emplace_back(std::hash<std::string>()(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
+					s_WorkingTree.emplace_back(boost::hash<std::string>()(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
 				}
 			}
-			if (std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>()(pathToCheck)) != s_WorkingTree.end()) {
+			if (std::find(s_WorkingTree.begin(), s_WorkingTree.end(), boost::hash<std::string>()(pathToCheck)) != s_WorkingTree.end()) {
 				return true;
 			} else if (std::filesystem::exists(pathToCheck) && std::filesystem::last_write_time(pathToCheck) > s_ProgramStartTime) {
-				s_WorkingTree.emplace_back(std::hash<std::string>()(pathToCheck));
+				s_WorkingTree.emplace_back(boost::hash<std::string>()(pathToCheck));
 				return true;
 			}
 			return false;
@@ -93,7 +95,7 @@ namespace RTE {
 		// Just make sure to really overwrite all old output, " - done! ✓" is shorter than "reading line 700"
 		std::string unicodedOutput = reportString + "            ";
 
-#ifdef __unix__
+#if  defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		// Colorize output with ANSI escape code
 		std::string greenTick = "\033[1;32m✓\033[0;0m";
 		std::string yellowDot = "\033[1;33m•\033[0;0m";
@@ -126,7 +128,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::PrintToCLI(const std::string &stringToPrint) {
-#ifdef __unix__
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 		std::string outputString = stringToPrint;
 		// Color the words ERROR: and SYSTEM: red
 		std::regex regexError("(ERROR|SYSTEM):");

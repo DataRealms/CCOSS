@@ -149,9 +149,6 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	bool Shift = ((Modifier & MODI_SHIFT) != 0);
 	bool ModKey = ((Modifier & MODI_CTRL) != 0);
 
-	// To convert to allegro's crazy scheme with their keyboard function returning the order of the letter when ctrl is pressed
-	int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
-
 	if (m_Locked) {
 		return;
 	}
@@ -242,7 +239,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	}
 
 	// ModKey-X (Cut)
-	if (asciiChar == 'x' && ModKey) {
+	if (KeyCode == 'x' && ModKey) {
 		if (m_GotSelection) {
 			GUIUtil::SetClipboardText(GetSelectionText());
 			RemoveSelectionText();
@@ -252,13 +249,13 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	}
 
 	// ModKey-C (Copy)
-	if (asciiChar == 'c' && ModKey) {
+	if (KeyCode == 'c' && ModKey) {
 		if (m_GotSelection) { GUIUtil::SetClipboardText(GetSelectionText()); }
 		return;
 	}
 
 	// ModKey-V (Paste)
-	if (asciiChar == 'v' && ModKey) {
+	if (KeyCode == 'v' && ModKey) {
 		RemoveSelectionText();
 		std::string Text = "";
 		GUIUtil::GetClipboardText(&Text);
@@ -270,7 +267,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	}
 
 	// ModKey-A (Select All)
-	if (asciiChar == 'a' && ModKey) {
+	if (KeyCode == 'a' && ModKey) {
 		DoSelection(0, m_Text.size());
 		UpdateText();
 		return;
@@ -281,28 +278,36 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		SendSignal(Enter, 0);
 		return;
 	}
+}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUITextPanel::OnTextInput(std::string_view inputText) {
 	int minValidKeyCode = 32;
 	int maxValidKeyCode = 126;
 	if (m_NumericOnly) {
 		minValidKeyCode = 48;
 		maxValidKeyCode = 57;
 	}
-	// Add valid ASCII characters
-	if (KeyCode >= minValidKeyCode && KeyCode <= maxValidKeyCode) {
-		RemoveSelectionText();
-		char buf[2] = { static_cast<char>(KeyCode), '\0' };
-		if (m_MaxTextLength > 0 && m_Text.length() >= m_MaxTextLength) {
-			return;
+
+	for (auto characterIterator = inputText.begin(); characterIterator < inputText.end(); ++characterIterator){
+		char character = *characterIterator;
+		if (character >= minValidKeyCode && character <= maxValidKeyCode) {
+			RemoveSelectionText();
+			std::string buffer = { character, '\0' };
+			if (m_MaxTextLength > 0 && m_Text.length() >= m_MaxTextLength) {
+				return;
+			}
+			m_Text.insert(m_CursorIndex, buffer);
+			m_CursorIndex++;
+
+			if (m_NumericOnly && m_MaxNumericValue > 0 && std::stoi(m_Text) > m_MaxNumericValue) {
+				m_Text = std::to_string(m_MaxNumericValue);
+			}
+
+			SendSignal(Changed, 0);
+			UpdateText(true);
 		}
-		m_Text.insert(m_CursorIndex, buf);
-		m_CursorIndex++;
-
-		if (m_NumericOnly && m_MaxNumericValue > 0 && std::stoi(m_Text) > m_MaxNumericValue) { m_Text = std::to_string(m_MaxNumericValue); }
-
-		SendSignal(Changed, 0);
-		UpdateText(true);
-		return;
 	}
 }
 

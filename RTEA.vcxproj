@@ -133,8 +133,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -156,9 +156,9 @@
       <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;setupapi.lib;version.lib;imm32.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -184,8 +184,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -207,9 +207,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-64.lib;loadpng-debug-64.lib;liblz4_debug_static.lib;luajit-debug-64.lib;luabind-debug-64.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;setupapi.lib;version.lib;imm32.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-64.lib;loadpng-debug-64.lib;liblz4_debug_static.lib;luajit-debug-64.lib;luabind-debug-64.lib;raknet-debug-64.lib;sdl2main-debug-64.lib;sdl2-debug-64.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -234,8 +234,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -257,9 +257,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug-release.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;setupapi.lib;version.lib;imm32.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug-release.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -285,8 +285,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -308,9 +308,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-64.lib;loadpng-debug-64.lib;liblz4_debug_static.lib;luajit-debug-release-64.lib;luabind-debug-64.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;setupapi.lib;version.lib;imm32.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-64.lib;loadpng-debug-64.lib;liblz4_debug_static.lib;luajit-debug-release-64.lib;luabind-debug-64.lib;raknet-debug-64.lib;sdl2main-debug-64.lib;sdl2-debug-64.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -338,8 +338,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -364,9 +364,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-release.lib;loadpng-debug-release.lib;liblz4_release_static.lib;luajit-debug-release.lib;luabind-debug-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-release.lib;loadpng-debug-release.lib;liblz4_release_static.lib;luajit-debug-release.lib;luabind-debug-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
@@ -398,8 +398,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -425,9 +425,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-release-64.lib;loadpng-debug-release-64.lib;liblz4_release_static.lib;luajit-debug-release-64.lib;luabind-debug-release-64.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-debug-release-64.lib;loadpng-debug-release-64.lib;liblz4_release_static.lib;luajit-debug-release-64.lib;luabind-debug-release-64.lib;raknet-release-64.lib;opengl32.lib;SDL2-64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
@@ -458,8 +458,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -482,9 +482,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-release.lib;loadpng-release.lib;liblz4_release_static.lib;luajit-release.lib;luabind-release.lib;RakNet_Release_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;allegro-release.lib;loadpng-release.lib;liblz4_release_static.lib;luajit-release.lib;luabind-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
@@ -516,8 +516,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -541,9 +541,9 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-release-64.lib;loadpng-release-64.lib;liblz4_release_static.lib;luajit-release-64.lib;luabind-release-64.lib;RakNet_Release_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;allegro-release-64.lib;loadpng-release-64.lib;liblz4_release_static.lib;luajit-release-64.lib;luabind-release-64.lib;raknet-release-64.lib;opengl32.lib;SDL2-64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
@@ -581,6 +581,9 @@
     <ClInclude Include="GUI\GUIInterface.h" />
     <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="GUI\Wrappers\AllegroBitmap.h" />
+    <ClInclude Include="GUI\Wrappers\AllegroScreen.h" />
+    <ClInclude Include="GUI\Wrappers\GUIInputWrapper.h" />
     <ClInclude Include="Lua\LuaAdapterDefinitions.h" />
     <ClInclude Include="Lua\LuabindObjectWrapper.h" />
     <ClInclude Include="Lua\LuabindDefinitions.h" />
@@ -593,6 +596,7 @@
     <ClInclude Include="Managers\PerformanceMan.h" />
     <ClInclude Include="Managers\PostProcessMan.h" />
     <ClInclude Include="Managers\PrimitiveMan.h" />
+    <ClInclude Include="Managers\WindowMan.h" />
     <ClInclude Include="Menus\LoadingScreen.h" />
     <ClInclude Include="Menus\ModManagerGUI.h" />
     <ClInclude Include="Menus\ScenarioActivityConfigGUI.h" />
@@ -615,6 +619,7 @@
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
     <ClInclude Include="System\GraphicalPrimitive.h" />
+    <ClInclude Include="System\Gamepad.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\PieQuadrant.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
@@ -648,9 +653,6 @@
     <ClInclude Include="Managers\SettingsMan.h" />
     <ClInclude Include="Managers\TimerMan.h" />
     <ClInclude Include="Managers\UInputMan.h" />
-    <ClInclude Include="GUI\AllegroBitmap.h" />
-    <ClInclude Include="GUI\AllegroInput.h" />
-    <ClInclude Include="GUI\AllegroScreen.h" />
     <ClInclude Include="GUI\GUI.h" />
     <ClInclude Include="GUI\GUIBanner.h" />
     <ClInclude Include="GUI\GUIButton.h" />
@@ -745,6 +747,9 @@
     <ClInclude Include="Menus\SceneEditorGUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GUI\Wrappers\AllegroBitmap.cpp" />
+    <ClCompile Include="GUI\Wrappers\AllegroScreen.cpp" />
+    <ClCompile Include="GUI\Wrappers\GUIInputWrapper.cpp" />
     <ClCompile Include="Lua\LuaAdapters.cpp">
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
       <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
@@ -871,6 +876,24 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsInput.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+    </ClCompile>
     <ClCompile Include="Lua\LuaBindingsPrimitives.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
@@ -945,6 +968,7 @@
     <ClCompile Include="Managers\PostProcessMan.cpp" />
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Managers\CameraMan.cpp" />
+    <ClCompile Include="Managers\WindowMan.cpp" />
     <ClCompile Include="Menus\LoadingScreen.cpp" />
     <ClCompile Include="Menus\ModManagerGUI.cpp" />
     <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp" />
@@ -994,6 +1018,94 @@
     <ClCompile Include="System\RTETools.cpp" />
     <ClCompile Include="System\Matrix.cpp" />
     <ClCompile Include="System\MicroPather\micropather.cpp" />
+    <ClCompile Include="System\glad\gl.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PreprocessorDefinitions>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </PrecompiledHeaderOutputFile>
+      <UndefineAllPreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</UndefineAllPreprocessorDefinitions>
+      <UndefineAllPreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</UndefineAllPreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">Default</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">Default</LanguageStandard_C>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">CompileAsC</CompileAs>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">ProgramDatabase</DebugInformationFormat>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">CompileAsC</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">
+      </ForcedIncludeFiles>
+    </ClCompile>
     <ClCompile Include="System\PathFinder.cpp" />
     <ClCompile Include="System\Reader.cpp" />
     <ClCompile Include="System\System.cpp" />
@@ -1012,9 +1124,6 @@
     <ClCompile Include="Managers\SettingsMan.cpp" />
     <ClCompile Include="Managers\TimerMan.cpp" />
     <ClCompile Include="Managers\UInputMan.cpp" />
-    <ClCompile Include="GUI\AllegroBitmap.cpp" />
-    <ClCompile Include="GUI\AllegroInput.cpp" />
-    <ClCompile Include="GUI\AllegroScreen.cpp" />
     <ClCompile Include="GUI\GUIBanner.cpp" />
     <ClCompile Include="GUI\GUIButton.cpp" />
     <ClCompile Include="GUI\GUICheckbox.cpp" />

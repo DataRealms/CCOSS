@@ -19,4 +19,5 @@ sources += files(
 'SettingsMan.cpp',
 'TimerMan.cpp',
 'UInputMan.cpp',
+'WindowMan.cpp'
 )

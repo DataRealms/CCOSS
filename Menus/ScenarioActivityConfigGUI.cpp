@@ -326,7 +326,7 @@ namespace RTE {
 				}
 			}
 			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && hoveredTeam != m_LockedCPUTeam && (m_LockedCPUTeam == Activity::Teams::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
-				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_PRIMARY)) {
+				if (g_UInputMan.MenuButtonReleased(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
 					HandleClickOnPlayerTeamSetupCell(hoveredPlayer, hoveredTeam);
 				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
 					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);

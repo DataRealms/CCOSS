@@ -26,18 +26,11 @@
 #include "DataModule.h"
 
 #include "GUI.h"
-#include "GUIFont.h"
 #include "AllegroScreen.h"
-#include "AllegroBitmap.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
-#include "GUITextBox.h"
-#include "GUIButton.h"
-#include "GUILabel.h"
-#include "GUIComboBox.h"
+
 
 namespace RTE {
 
@@ -225,7 +218,7 @@ int EditorActivity::Start()
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer8());
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(-1, true); 
+        m_pGUIInput = new GUIInputWrapper(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {

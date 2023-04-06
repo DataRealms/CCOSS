@@ -127,12 +127,11 @@ namespace RTE {
 			case InputDevice::DEVICE_KEYB_ONLY:
 				break;
 			case InputDevice::DEVICE_MOUSE_KEYB:
-				// Mouse sensitivity doesn't seem to really work so keep the controls disabled for now, also it's shared between all mouse+keyboard using players.
-				/*
+				// Mouse sensitivity is shared between all mouse+keyboard players and has effect only in Activities.
 				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
-				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(100);
-				*/
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMinimum(1);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(200);
 				break;
 			case InputDevice::DEVICE_GAMEPAD_1:
 			case InputDevice::DEVICE_GAMEPAD_2:
@@ -140,7 +139,7 @@ namespace RTE {
 			case InputDevice::DEVICE_GAMEPAD_4:
 				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
-				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(50);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(85);
 				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
 				break;
 			default:

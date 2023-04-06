@@ -119,12 +119,12 @@ AL_FUNC_DEPRECATED(int, initialise_joystick, (void));
 /* the good old file selector */
 #define OLD_FILESEL_WIDTH   -1
 #define OLD_FILESEL_HEIGHT  -1
-
+#if 0
 AL_INLINE_DEPRECATED(int, file_select, (AL_CONST char *message, char *path, AL_CONST char *ext),
 {
    return file_select_ex(message, path, ext, 1024, OLD_FILESEL_WIDTH, OLD_FILESEL_HEIGHT);
 })
-
+#endif
 
 /* the old (and broken!) file enumeration function */
 AL_FUNC_DEPRECATED(int, for_each_file, (AL_CONST char *name, int attrib, AL_METHOD(void, callback, (AL_CONST char *filename, int attrib, int param)), int param));
@@ -165,12 +165,12 @@ AL_INLINE_DEPRECATED(void, draw_character, (BITMAP *bmp, BITMAP *sprite, int x, 
 {
    draw_character_ex(bmp, sprite, x, y, color, _textmode);
 })
-
+#if 0
 AL_INLINE_DEPRECATED(int, gui_textout, (struct BITMAP *bmp, AL_CONST char *s, int x, int y, int color, int centre),
 {
    return gui_textout_ex(bmp, s, x, y, color, _textmode, centre);
 })
-
+#endif
 
 /* the old close button functions */
 AL_INLINE_DEPRECATED(int, set_window_close_button, (int enable),

@@ -59,9 +59,9 @@ namespace RTE {
 		void LoadDeviceIcons();
 
 		/// <summary>
-		///
+		/// Adds an (input) SDL_Event to the Event queue for processing on Update.
 		/// </summary>
-		/// <param name="inputEvent"></param>
+		/// <param name="inputEvent">The SDL input event to queue.</param>
 		void QueueInputEvent(const SDL_Event &inputEvent);
 
 		/// <summary>
@@ -668,7 +668,7 @@ namespace RTE {
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
 
-		std::vector<SDL_Event> m_EventQueue; //!<
+		std::vector<SDL_Event> m_EventQueue; //!< List of incoming input events.
 
 		bool m_SkipHandlingSpecialInput; //!< Whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 
@@ -710,6 +710,9 @@ namespace RTE {
 		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
 
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
+
+		static constexpr double c_GamepadAxisLimit = 32767.0; //!< Maximum axis value as defined by SDL (int16 max).
+		static constexpr int c_AxisDigitalThreshold = 8192; //!< Digital Axis threshold value as defined by allegro.
 
 #pragma region Input State Handling
 		/// <summary>

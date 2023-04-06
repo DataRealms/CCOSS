@@ -516,7 +516,7 @@ namespace RTE {
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
 				m_AnyWindowHasFocus = false;
-				m_FocusLostDueToMovingBetweenGameWindows = true;
+				m_FocusLostDueToMovingBetweenGameWindows = FullyCoversAllDisplays();
 				DisplaySwitchOut();
 				break;
 			case SDL_WINDOWEVENT_ENTER:

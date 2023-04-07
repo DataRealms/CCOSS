@@ -2,7 +2,6 @@
 #define _RTEWINDOWMAN_
 
 #include "Singleton.h"
-#include "glm/glm.hpp"
 
 #define g_WindowMan WindowMan::Instance()
 
@@ -52,7 +51,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a WindowMan object before deletion from system memory.
 		/// </summary>
-		~WindowMan() = default;
+		~WindowMan();
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -111,10 +110,22 @@ namespace RTE {
 		void SetVSyncEnabled(bool enable);
 
 		/// <summary>
+		/// Gets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// </summary>
+		/// <returns>Whether the multi-display arrangement is ignored.</returns>
+		bool GetIgnoreMultiDisplays() const { return m_IgnoreMultiDisplays; }
+
+		/// <summary>
+		/// Sets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// </summary>
+		/// <param name="ignore">Whether the multi-display arrangement should be ignored</param>
+		void SetIgnoreMultiDisplays(bool ignore) { m_IgnoreMultiDisplays = ignore; }
+
+		/// <summary>
 		/// Checks whether the current resolution settings fully cover the display the primary game window is positioned at.
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover the display the primary game window is positioned at.</returns>
-		bool FullyCoversDisplayWindowIsAtOnly() const { return (m_ResX * m_ResMultiplier == m_DisplayWidthPrimaryWindowIsAt) && (m_ResY * m_ResMultiplier == m_DisplayHeightPrimaryWindowIsAt); }
+		bool FullyCoversPrimaryWindowDisplayOnly() const { return (m_ResX * m_ResMultiplier == m_PrimaryWindowDisplayWidth) && (m_ResY * m_ResMultiplier == m_PrimaryWindowDisplayHeight); }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover all the available displays.
@@ -146,13 +157,13 @@ namespace RTE {
 		/// Gets the horizontal resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The horizontal resolution of the display the primary game window is currently positioned at.</returns>
-		int GetWidthOfDisplayWindowIsAt() const { return m_DisplayWidthPrimaryWindowIsAt; }
+		int GetPriaryWindowDisplayWidth() const { return m_PrimaryWindowDisplayWidth; }
 
 		/// <summary>
 		/// Gets the vertical resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The vertical resolution of the display the primary game window is currently positioned at.</returns>
-		int GetHeightOfDisplayWindowIsAt() const { return m_DisplayHeightPrimaryWindowIsAt; }
+		int GetPrimaryWindowDisplayHeight() const { return m_PrimaryWindowDisplayHeight; }
 
 		/// <summary>
 		/// Gets whether the game resolution was changed.
@@ -177,7 +188,7 @@ namespace RTE {
 		/// <summary>
 		/// Completes the resolution change by resetting the flag.
 		/// </summary>
-		void CompleteResolutionChange();
+		void CompleteResolutionChange() { m_ResolutionChanged = false; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -228,9 +239,9 @@ namespace RTE {
 		int m_DisplayArrangementLeftMostOffset; //!< The left-most position in the OS display arrangement.
 		int m_DisplayArrangementTopMostOffset; //!< The top-most position in the OS display arrangement.
 
-		int m_DisplayIndexPrimaryWindowIsAt; //!< The index of the display the main window is currently positioned at.
-		int m_DisplayWidthPrimaryWindowIsAt; //!< The width of the display the main window is currently positioned at.
-		int m_DisplayHeightPrimaryWindowIsAt; //!< The height of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayIndex; //!< The index of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayWidth; //!< The width of the display the main window is currently positioned at.
+		int m_PrimaryWindowDisplayHeight; //!< The height of the display the main window is currently positioned at.
 
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
@@ -260,7 +271,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the stored info of the display the primary window is currently positioned at.
 		/// </summary>
-		void UpdateInfoOfDisplayPrimaryWindowIsAt();
+		void UpdatePrimaryDisplayInfo();
 
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior.
@@ -294,16 +305,6 @@ namespace RTE {
 		/// <param name="resMultiplier">Requested resolution multiplier.</param>
 		/// <returns>Whether all displays were created successfully.</returns>
 		bool ChangeResolutionToMultiDisplayFullscreen(int resMultiplier);
-
-		/// <summary>
-		/// Get a GL viewport with letterboxing for a window resolutions with different aspect ratio.
-		/// </summary>
-		/// <param name="resX">Desired horizontal resolution.</param>
-		/// <param name="resY">Desired vertical resolution.</param>
-		/// <param name="windowW">Window horizontal resolution.</param>
-		/// <param name="windowH">Window vertical resolution.</param>
-		/// <returns></returns>
-		glm::vec4 GetViewportLetterbox(int resX, int resY, int windowW, int windowH);
 #pragma endregion
 
 #pragma region Display Switch Handling

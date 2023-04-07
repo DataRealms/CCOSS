@@ -134,7 +134,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;TARGET_MACHINE_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -235,7 +235,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;MIN_DEBUG_BUILD;DEBUGMODE;TARGET_MACHINE_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -286,7 +286,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;MIN_DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -339,7 +339,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;TARGET_MACHINE_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -459,7 +459,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;TARGET_MACHINE_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>

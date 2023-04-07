@@ -59,9 +59,9 @@ namespace RTE {
 		void LoadDeviceIcons();
 
 		/// <summary>
-		///
+		/// Adds an (input) SDL_Event to the Event queue for processing on Update.
 		/// </summary>
-		/// <param name="inputEvent"></param>
+		/// <param name="inputEvent">The SDL input event to queue.</param>
 		void QueueInputEvent(const SDL_Event &inputEvent);
 
 		/// <summary>
@@ -341,16 +341,16 @@ namespace RTE {
 		void SetMousePos(const Vector &newPos, int whichPlayer = -1) const;
 
 		/// <summary>
-		/// Gets mouse sensitivity.
+		/// Gets mouse sensitivity while in Activity.
 		/// </summary>
 		/// <returns>The current mouse sensitivity.</returns>
 		float GetMouseSensitivity() const { return m_MouseSensitivity; }
 
 		/// <summary>
-		/// Sets mouse sensitivity.
+		/// Sets mouse sensitivity while in Activity.
 		/// </summary>
 		/// <param name="sensitivity">New sensitivity value.</param>
-		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = std::clamp(sensitivity, 0.1F, 2.0F); }
 
 		/// <summary>
 		/// Gets whether a mouse button is being held down right now.
@@ -442,10 +442,10 @@ namespace RTE {
 		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT; }
 
 		/// <summary>
-		/// Gets the number of axis of the specified joystick.
+		/// Gets the number of axes of the specified joystick.
 		/// </summary>
 		/// <param name="whichJoy">Joystick to check.</param>
-		/// <returns>The number of axis of the joystick.</returns>
+		/// <returns>The number of axes of the joystick.</returns>
 		int GetJoystickAxisCount(int whichJoy) const;
 
 		/// <summary>
@@ -668,7 +668,7 @@ namespace RTE {
 		static std::vector<Gamepad> s_PrevJoystickStates; //!< Joystick states as they were the previous update.
 		static std::vector<Gamepad> s_ChangedJoystickStates; //!< Joystick states that have changed.
 
-		std::queue<SDL_Event> m_EventQueue; //!<
+		std::vector<SDL_Event> m_EventQueue; //!< List of incoming input events.
 
 		bool m_SkipHandlingSpecialInput; //!< Whether to skip handling any special input (F1-F12, etc.) to avoid shenanigans during manual input mapping.
 
@@ -684,7 +684,7 @@ namespace RTE {
 		Vector m_AbsoluteMousePos; //!< The absolute mouse position in screen coordinates.
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
 		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.
-		float m_MouseSensitivity; //!< Mouse sensitivity, to replace hardcoded 0.6 value in Update.
+		float m_MouseSensitivity; //!< Mouse sensitivity multiplier while in Activity. HAS NO EFFECT IN MENUS.
 		int m_MouseWheelChange; //!< The relative mouse wheel position since last reset of it.
 
 		bool m_TrapMousePos; //!< Whether the mouse is trapped in the middle of the screen each update or not.
@@ -710,6 +710,9 @@ namespace RTE {
 		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
 
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
+
+		static constexpr double c_GamepadAxisLimit = 32767.0; //!< Maximum axis value as defined by SDL (int16 max).
+		static constexpr int c_AxisDigitalThreshold = 8192; //!< Digital Axis threshold value as defined by allegro.
 
 #pragma region Input State Handling
 		/// <summary>

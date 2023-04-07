@@ -598,7 +598,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
 
-- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution via quick toggles or custom values.
+- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
 
 </details>
 
@@ -802,7 +802,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
 
-- Replace `PrintScreen` with `F12` for dumping a single screenshot. Printscreen is being unreliable.
+- Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
 
 - `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
 	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
@@ -825,11 +825,12 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 <details><summary><b>Fixed</b></summary>
 
-- 1366x768 is not longer a troublesome resolution and all restrictions from using it are removed.
+- Improved support for varied resolutions and aspect ratios. 1366x768 users rejoice.
 
-- Multi-display fullscreen now works regardless of window position or which screen in the arrangment is set as primary.
+- Multi-display fullscreen now works regardless of window position or which screen in the arrangement is set as primary.  
+	Still limited to horizontal arrangements that are top or bottom edge aligned (or anywhere in between for arrangements with different height displays).
 
-- Controller hot-plug and disconnect is now porperly detected at any point and will attempt to reconnect devices to the same gamepad slot.
+- Controller hot-plug and disconnect is now properly detected at any point and will attempt to reconnect devices to the same gamepad slot.
 
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 

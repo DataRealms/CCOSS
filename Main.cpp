@@ -156,9 +156,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	///
+	/// Polls the SDL event queue and passes events to be handled by the relevant managers.
 	/// </summary>
-	void PollEvents() {
+	void PollSDLEvents() {
 		SDL_Event sdlEvent;
 		while (SDL_PollEvent(&sdlEvent)) {
 			switch (sdlEvent.type) {
@@ -176,9 +176,9 @@ namespace RTE {
 				case SDL_MOUSEBUTTONDOWN:
 				case SDL_MOUSEWHEEL:
 				case SDL_CONTROLLERAXISMOTION:
-				case SDL_JOYAXISMOTION:
 				case SDL_CONTROLLERBUTTONDOWN:
 				case SDL_CONTROLLERBUTTONUP:
+				case SDL_JOYAXISMOTION:
 				case SDL_JOYBUTTONDOWN:
 				case SDL_JOYBUTTONUP:
 				case SDL_JOYDEVICEADDED:
@@ -201,7 +201,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
-			PollEvents();
+			PollSDLEvents();
 
 			g_WindowMan.Update();
 
@@ -257,7 +257,7 @@ namespace RTE {
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
 
-				PollEvents();
+				PollSDLEvents();
 
 				g_WindowMan.Update();
 

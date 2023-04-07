@@ -119,6 +119,7 @@ namespace RTE {
 		GUIRadioButton *m_TwoPlayerSplitscreenHSplitRadioButton;
 		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
 		GUICheckbox *m_EnableVSyncCheckbox;
+		GUICheckbox *m_IgnoreMultiDisplaysCheckbox;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;
@@ -161,6 +162,11 @@ namespace RTE {
 		/// Fills the PresetResolutions list with all valid PresetResolutionRecords, then fills the PresetResolutionComboBox using it and selects the currently selected preset resolution, if any.
 		/// </summary>
 		void PopulateResolutionsComboBox();
+
+		/// <summary>
+		/// Remaps the displays to get the new maximum resolution values to update the numeric limits on the custom resolution textboxes.
+		/// </summary>
+		void UpdateCustomResolutionLimits();
 
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by this SettingsVideoGUI, or if an Activity is running, first prompts to end it.

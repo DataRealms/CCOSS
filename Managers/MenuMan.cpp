@@ -112,7 +112,7 @@ namespace RTE {
 		if (quitResult) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOutQuit);
 		} else if (m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit) {
-			m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0);
+			m_GUIInput->SetKeyJoyMouseCursor(true);
 		}
 		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEndQuit) {
 			System::SetQuit();

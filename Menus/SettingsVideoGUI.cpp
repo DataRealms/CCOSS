@@ -37,6 +37,10 @@ namespace RTE {
 		m_EnableVSyncCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnableVSync"));
 		m_EnableVSyncCheckbox->SetCheck(g_WindowMan.GetVSyncEnabled());
 
+		m_IgnoreMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
+		m_IgnoreMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetIgnoreMultiDisplays());
+		m_IgnoreMultiDisplaysCheckbox->SetVisible(SDL_GetNumVideoDisplays() > 1);
+
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
@@ -127,7 +131,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
-		if ((width >= 640 && height >= 450) && (width <= g_WindowMan.GetMaxResX() && height <= g_WindowMan.GetMaxResY())) {
+		if ((width >= c_MinResX && height >= c_MinResY) && (width <= g_WindowMan.GetMaxResX() && height <= g_WindowMan.GetMaxResY())) {
 			// Filter wacky resolutions that are taller than wide and some other dumb ones.
 			if ((height > width) || (width == 1152 && height == 864) || (width == 1176 && height == 664)) {
 				return false;
@@ -153,10 +157,8 @@ namespace RTE {
 			if (SDL_GetDisplayMode(displayIndex, i, &mode) == 0) {
 				modeList.push_back(mode);
 
-				if (SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) {
-					if (IsSupportedResolution(mode.w, mode.h)) {
-						resRecords.emplace(mode.w, mode.h, false);
-					}
+				if ((SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) && IsSupportedResolution(mode.w, mode.h)) {
+					resRecords.emplace(mode.w, mode.h, false);
 				}
 			} else {
 				(void)SDL_GetError();
@@ -195,6 +197,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsVideoGUI::UpdateCustomResolutionLimits() {
+		g_WindowMan.MapDisplays();
+
+		int newMaxResX = g_WindowMan.GetMaxResX();
+		int newMaxResY = g_WindowMan.GetMaxResY();
+
+		m_CustomResolutionWidthTextBox->SetMaxNumericValue(newMaxResX);
+		if (std::string widthText = m_CustomResolutionWidthTextBox->GetText(); widthText.empty() || (!widthText.empty() && std::stoi(widthText) > newMaxResX)) {
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(newMaxResX));
+		}
+
+		m_CustomResolutionHeightTextBox->SetMaxNumericValue(newMaxResY);
+		if (std::string heightText = m_CustomResolutionHeightTextBox->GetText(); heightText.empty() || (!heightText.empty() && std::stoi(heightText) > newMaxResY)) {
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(newMaxResY));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsVideoGUI::ApplyNewResolution(bool displaysWereMapped) {
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
@@ -214,8 +235,8 @@ namespace RTE {
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewResUpscaled = false;
-				m_NewResX = g_WindowMan.GetWidthOfDisplayWindowIsAt() / 2;
-				m_NewResY = g_WindowMan.GetHeightOfDisplayWindowIsAt() / 2;
+				m_NewResX = g_WindowMan.GetPriaryWindowDisplayWidth() / 2;
+				m_NewResY = g_WindowMan.GetPrimaryWindowDisplayHeight() / 2;
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
 				m_NewResUpscaled = false;
@@ -258,8 +279,24 @@ namespace RTE {
 
 		m_NewResUpscaled = m_CustomResolutionUpscaledCheckbox->GetCheck();
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
-		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
-		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
+
+		int newResX = g_WindowMan.GetResX();
+		int newResY = g_WindowMan.GetResY();
+
+		if (std::string newResXString = m_CustomResolutionWidthTextBox->GetText(); !newResXString.empty()) {
+			newResX = std::stoi(newResXString);
+		} else {
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(newResX));
+		}
+
+		if (std::string newResYString = m_CustomResolutionHeightTextBox->GetText(); !newResYString.empty()) {
+			newResY = std::stoi(newResYString);
+		} else {
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(newResY));
+		}
+
+		m_NewResX = newResX / newMultiplier;
+		m_NewResY = newResY / newMultiplier;
 
 		bool invalidResolution = false;
 
@@ -322,6 +359,9 @@ namespace RTE {
 			if (guiEvent.GetMsg() == GUICheckbox::Changed) {
 				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
+				} else if (guiEvent.GetControl() == m_IgnoreMultiDisplaysCheckbox) {
+					g_WindowMan.SetIgnoreMultiDisplays(m_IgnoreMultiDisplaysCheckbox->GetCheck());
+					UpdateCustomResolutionLimits();
 				}
 			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {

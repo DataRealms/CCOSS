@@ -13,7 +13,7 @@ jobs:
   # This workflow contains a single job called "build"
   build-release-linux:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -25,7 +25,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update -yq
-          sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libopengl-dev ninja-build
+          sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libopengl-dev libfuse2 ninja-build
           sudo pip install meson==0.60.0
 
       - name: Install Clang

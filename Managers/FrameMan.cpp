@@ -481,19 +481,21 @@ namespace RTE {
 					blit(m_BackBuffer32.get(), m_ScreenDumpBuffer.get(), 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 
 					if (save_png(fullFileName, m_ScreenDumpNamePlaceholder.get(), nullptr) == 0) {
-						auto saveScreenDump = [fullFileName](BITMAP *screenDumpBuffer, int resMultiplier) {
-							// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
-							BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(screenDumpBuffer), screenDumpBuffer->w * resMultiplier, screenDumpBuffer->h * resMultiplier);
-							stretch_blit(screenDumpBuffer, outputBitmap, 0, 0, screenDumpBuffer->w, screenDumpBuffer->h, 0, 0, outputBitmap->w, outputBitmap->h);
+						// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
+						BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
+						stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer.get()->w, m_ScreenDumpBuffer.get()->h, 0, 0, outputBitmap->w, outputBitmap->h);
+
+						auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
 							// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
-							if (save_png(fullFileName, outputBitmap, nullptr) == 0) {
+							if (save_png(fullFileName, bitmapToSaveCopy, nullptr) == 0) {
 								g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
 							} else {
 								g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
 							}
-							destroy_bitmap(outputBitmap);
+							destroy_bitmap(bitmapToSaveCopy);
+							bitmapToSaveCopy = nullptr;
 						};
-						std::thread saveThread(saveScreenDump, m_ScreenDumpBuffer.get(), g_WindowMan.GetResMultiplier());
+						std::thread saveThread(saveScreenDump, outputBitmap);
 						// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 						saveThread.detach();
 

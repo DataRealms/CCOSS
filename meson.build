@@ -57,7 +57,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     if debug_type == 'release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
-      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+      preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif

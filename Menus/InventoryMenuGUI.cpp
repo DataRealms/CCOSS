@@ -1,5 +1,6 @@
 #include "InventoryMenuGUI.h"
 
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "MovableMan.h"
@@ -192,7 +193,7 @@ namespace RTE {
 	int InventoryMenuGUI::SetupFullOrTransferMode() {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
-		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(m_MenuController->GetPlayer()); }
+		if (!m_GUIInput) { m_GUIInput = std::make_unique<GUIInputWrapper>(m_MenuController->GetPlayer()); }
 		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins", "InventoryMenuSkin.ini"), "Failed to create InventoryMenuGUI GUIControlManager and load it from Base.rte/GUIs/Skins/Menus/InventoryMenuSkin.ini");
 
 		//TODO When this is split into 2 classes, full mode should use the fonts from its gui control manager while transfer mode, will need to get its fonts from FrameMan. May be good for the ingame menu base class to have these font pointers, even if some subclasses set em up in different ways.
@@ -209,7 +210,7 @@ namespace RTE {
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(m_MenuController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(m_MenuController->GetPlayer()));
 		} else {
-			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 		}
 
 		m_GUITopLevelBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBox_InventoryMenuGUI"));
@@ -230,7 +231,7 @@ namespace RTE {
 		m_GUIOffhandEquippedItemButton->SetHorizontalOverflowScroll(true);
 		m_GUIReloadButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Reload"));
 		m_GUIReloadButton->SetText("");
-		m_GUIReloadButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Reload"));
+		m_GUIReloadButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Refresh"));
 		m_GUIDropButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Drop"));
 		m_GUIDropButton->SetText("");
 		m_GUIDropButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Drop"));
@@ -785,7 +786,11 @@ namespace RTE {
 					g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 					m_GUIInformationToggleButton->OnLoseFocus();
 				} else if (guiControl == m_GUIEquippedItemButton) {
-					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0, buttonHeld);
+					int equippedItemButtonIndexToUse = 0;
+					if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr); inventoryActorAsAHuman && !inventoryActorAsAHuman->GetFGArm() && !inventoryActorAsAHuman->GetEquippedBGItem()) {
+						equippedItemButtonIndexToUse = 1;
+					}
+					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, equippedItemButtonIndexToUse, buttonHeld);
 				} else if (guiControl == m_GUIOffhandEquippedItemButton) {
 					HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1, buttonHeld);
 					m_GUIOffhandEquippedItemButton->OnMouseLeave(0, 0, 0, 0);
@@ -850,7 +855,11 @@ namespace RTE {
 						m_GUIEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
+						int equippedItemButtonIndexToUse = 0;
+						if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr); inventoryActorAsAHuman && !inventoryActorAsAHuman->GetFGArm() && !inventoryActorAsAHuman->GetEquippedBGItem()) {
+							equippedItemButtonIndexToUse = 1;
+						}
+						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, equippedItemButtonIndexToUse);
 						m_GUIEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
@@ -1206,29 +1215,29 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex) {
+	bool InventoryMenuGUI::SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex) {
 		if (!m_InventoryActorIsHuman) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-			return;
+			return false;
 		}
 
 		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
 		MovableObject *equippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first : nullptr;
 		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
-		
+
 		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
 		if (!inventoryItemToSwapIn && inventoryItemIndex < m_InventoryActor->GetInventorySize()) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-			return;
+			return false;
 		}
 		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsDualWieldable() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
-		
+
 		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
 		MovableObject *equippedItemToSwapOut = equippedItemIndex == 0 ? equippedItem : offhandEquippedItem;
-		
+
 		if (equippedItemIndex == 0 && !inventoryActorAsAHuman->GetFGArm()) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-			return;
+			return false;
 		}
 
 		Arm *equippedItemArm = equippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
@@ -1239,11 +1248,12 @@ namespace RTE {
 			inventoryActorAsAHuman->GetBGArm()->SetHandCurrentPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
 		}
 		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::ReloadSelectedItem() {
+	void InventoryMenuGUI::ReloadSelectedItem() { //for a in MovableMan.Actors do print(ToAHuman(a).EquippedBGItem:SetOneHanded(true)) end
 		if (!m_InventoryActorIsHuman) {
 			return;
 		}
@@ -1251,22 +1261,16 @@ namespace RTE {
 		if (m_GUISelectedItem == nullptr) {
 			inventoryActorAsAHuman->ReloadFirearms();
 		} else if (const HDFirearm *selectedItemObjectAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {
-			if (m_GUISelectedItem->InventoryIndex > -1) {
-				if (!m_InventoryActorEquippedItems.empty() && m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size()) {
-					SwapEquippedItemAndInventoryItem(0, m_GUISelectedItem->InventoryIndex);
-				} else if (inventoryActorAsAHuman->GetFGArm() || inventoryActorAsAHuman->GetBGArm()) {
-					Arm *armToUse = inventoryActorAsAHuman->GetFGArm() ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
-					const HeldDevice *inventoryItemToReload = m_GUISelectedItem->InventoryIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(m_GUISelectedItem->InventoryIndex)) : nullptr;
-					if (!inventoryItemToReload) {
-						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-						return;
-					}
-					armToUse->SetHeldDevice(dynamic_cast<HeldDevice *>(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex)));
-				}
+			bool selectedItemIsEquipped = m_GUISelectedItem->EquippedItemIndex > -1;
+			if (!selectedItemIsEquipped) {
+				int equippedItemIndexToUse = inventoryActorAsAHuman->GetFGArm() ? 0 : 1;
+				selectedItemIsEquipped = SwapEquippedItemAndInventoryItem(equippedItemIndexToUse, m_GUISelectedItem->InventoryIndex);
 			}
-			// Setting the round count to 0 then reloading firearms is a trick to try to make only selected firearm reload, even if the AHuman is dual-wielding, while also not break one-at-a-time reloading in the edge case where the AHuman is already reloading.
-			selectedItemObjectAsFirearm->GetMagazine()->SetRoundCount(0);
-			inventoryActorAsAHuman->ReloadFirearms(true);
+			if (selectedItemIsEquipped) {
+				// Setting the round count to 0 then reloading firearms is a trick to try to make only selected firearm reload, even if the AHuman is dual-wielding, while also not break one-at-a-time reloading in the edge case where the AHuman is already reloading.
+				selectedItemObjectAsFirearm->GetMagazine()->SetRoundCount(0);
+				inventoryActorAsAHuman->ReloadFirearms(true);
+			}
 		}
 		ClearSelectedItem();
 		m_GUIReloadButton->OnLoseFocus();

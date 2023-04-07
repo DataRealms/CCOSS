@@ -135,6 +135,8 @@ namespace RTE {
 		return luabind::class_<Timer>("Timer")
 
 		.def(luabind::constructor<>())
+		.def(luabind::constructor<double>())
+		.def(luabind::constructor<double, double>())
 
 		.property("StartRealTimeMS", &Timer::GetStartRealTimeMS, &Timer::SetStartRealTimeMS)
 		.property("ElapsedRealTimeS", &Timer::GetElapsedRealTimeS, &Timer::SetElapsedRealTimeS)
@@ -142,6 +144,8 @@ namespace RTE {
 		.property("StartSimTimeMS", &Timer::GetStartSimTimeMS, &Timer::SetStartSimTimeMS)
 		.property("ElapsedSimTimeS", &Timer::GetElapsedSimTimeS, &Timer::SetElapsedSimTimeS)
 		.property("ElapsedSimTimeMS", &Timer::GetElapsedSimTimeMS, &Timer::SetElapsedSimTimeMS)
+		.property("RealTimeLimitProgress", &Timer::RealTimeLimitProgress)
+		.property("SimTimeLimitProgress", &Timer::SimTimeLimitProgress)
 
 		.def("Reset", &Timer::Reset)
 		.def("SetRealTimeLimitMS", &Timer::SetRealTimeLimitMS)

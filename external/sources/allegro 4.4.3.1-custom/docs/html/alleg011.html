@@ -1,0 +1,414 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Palette routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Palette routines">Palette routines</a></h1>
+
+<ul>
+<li><a href="#_set_color">_set_color</a> &mdash; Inline version of set_color().
+<li><a href="#black_palette">black_palette</a> &mdash; A palette containing solid black colors.
+<li><a href="#default_palette">default_palette</a> &mdash; The default IBM BIOS palette.
+<li><a href="#desktop_palette">desktop_palette</a> &mdash; The palette used by the Atari ST low resolution desktop.
+<li><a href="#fade_from">fade_from</a> &mdash; Gradually fades the palette between two others.
+<li><a href="#fade_from_range">fade_from_range</a> &mdash; Gradually fades a part of the palette between two others.
+<li><a href="#fade_in">fade_in</a> &mdash; Gradually fades the palette from black.
+<li><a href="#fade_in_range">fade_in_range</a> &mdash; Gradually fades a part of the palette from black.
+<li><a href="#fade_interpolate">fade_interpolate</a> &mdash; Calculates a new palette interpolated between two others.
+<li><a href="#fade_out">fade_out</a> &mdash; Gradually fades the palette to black.
+<li><a href="#fade_out_range">fade_out_range</a> &mdash; Gradually fades a part of the palette to black.
+<li><a href="#generate_332_palette">generate_332_palette</a> &mdash; Constructs a fake truecolor palette.
+<li><a href="#generate_optimized_palette">generate_optimized_palette</a> &mdash; Generates an optimized palette for a bitmap.
+<li><a href="#get_color">get_color</a> &mdash; Retrieves the specified palette entry.
+<li><a href="#get_palette">get_palette</a> &mdash; Retrieves the entire palette of 256 colors.
+<li><a href="#get_palette_range">get_palette_range</a> &mdash; Retrieves a specific palette range.
+<li><a href="#select_palette">select_palette</a> &mdash; Sets the internal palette for color conversion.
+<li><a href="#set_color">set_color</a> &mdash; Sets the specified palette entry to the specified RGB triplet.
+<li><a href="#set_palette">set_palette</a> &mdash; Sets the entire palette of 256 colors.
+<li><a href="#set_palette_range">set_palette_range</a> &mdash; Sets a specific range of the palette.
+<li><a href="#unselect_palette">unselect_palette</a> &mdash; Restores the palette before last call to select_palette().
+</ul>
+
+<p>
+All the Allegro drawing functions use integer parameters to represent 
+colors. In truecolor resolutions these numbers encode the color directly as 
+a collection of red, green, and blue bits, but in a regular 256-color mode 
+the values are treated as indexes into the current palette, which is a table 
+listing the red, green and blue intensities for each of the 256 possible 
+colors.
+
+<p>
+Palette entries are stored in an RGB structure, which contains red, green 
+and blue intensities in the VGA hardware format, ranging from 0-63, and is 
+defined as:
+<blockquote class="code"><pre>
+   typedef struct <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a>
+   {
+      unsigned char r, g, b;
+   } <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a>;
+</pre></blockquote>
+It contains an additional field for the purpose of padding but you should
+not usually care about it. For example:
+<blockquote class="code"><pre>
+   <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> black = { 0,  0,  0  };
+   <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> white = { 63, 63, 63 };
+   <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> green = { 0,  63, 0  };
+   <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> grey  = { 32, 32, 32 };
+</pre></blockquote>
+The type PALETTE is defined to be an array of PAL_SIZE RGB structures, where
+PAL_SIZE is a preprocessor constant equal to 256.
+
+<p>
+You may notice that a lot of the code in Allegro spells 'palette' as 
+'pallete'. This is because the headers from my old Mark Williams compiler on 
+the Atari spelt it with two l's, so that is what I'm used to. Allegro will 
+happily accept either spelling, due to some #defines in allegro/alcompat.h
+(which can be turned off by defining the ALLEGRO_NO_COMPATIBILITY symbol
+before including Allegro headers).
+
+<p><br>
+<div class="al-api"><b>void <a name="set_color">set_color</a>(int index, const <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *p);</b></div><br>
+   Sets the specified palette entry to the specified RGB triplet. Unlike the 
+   other palette functions this doesn't do any retrace synchronisation, so 
+   you should call vsync() before it to prevent snow problems. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> rgb;
+      ...
+      <a href="alleg008.html#vsync" class="autotype" title="Waits for a vertical retrace to begin.">vsync</a>();
+      <a href="#set_color" class="autotype" title="Sets the specified palette entry to the specified RGB triplet.">set_color</a>(192, &amp;rgb);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_palette" title="Sets the entire palette of 256 colors.">set_palette</a>,
+<a class="xref" href="#get_color" title="Retrieves the specified palette entry.">get_color</a>,
+<a class="xref" href="#_set_color" title="Inline version of set_color().">_set_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>,
+<a class="eref" href="alleg045.html#exscroll" title="Mode-X hardware scrolling and split screens.">exscroll</a>.</blockquote>
+<div class="al-api"><b>void <a name="_set_color">_set_color</a>(int index, const <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *p);</b></div><br>
+   This is an inline version of set_color(), intended for use in the
+   vertical retrace simulator callback function (retrace_proc, which is now
+   deprecated).
+
+<p>
+   If you really must use _set_color from retrace_proc, note that it should
+   only be used under DOS, in VGA mode 13h and mode-X. Some SVGA chipsets
+   aren't VGA compatible (set_color() and set_palette() will use VESA calls on
+   these cards, but _set_color() doesn't know about that).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_color" title="Sets the specified palette entry to the specified RGB triplet.">set_color</a>,
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_palette">set_palette</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p);</b></div><br>
+   Sets the entire palette of 256 colors. You should provide an array of 256 
+   RGB structures. Unlike set_color(), there is no need to call vsync() 
+   before this function. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> palette;
+      ...
+      bmp = <a href="alleg010.html#load_bitmap" class="autotype" title="Loads any supported bitmap from a file.">load_bitmap</a>(filename, palette);
+      if (!bmp)
+         abort_on_error("Couldn't load bitmap!");
+      <a href="#set_palette" class="autotype" title="Sets the entire palette of 256 colors.">set_palette</a>(palette);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#set_palette_range" title="Sets a specific range of the palette.">set_palette_range</a>,
+<a class="xref" href="#set_color" title="Sets the specified palette entry to the specified RGB triplet.">set_color</a>,
+<a class="xref" href="#get_palette" title="Retrieves the entire palette of 256 colors.">get_palette</a>,
+<a class="xref" href="#select_palette" title="Sets the internal palette for color conversion.">select_palette</a>,
+<a class="xref" href="alleg012.html#palette_color" title="Maps palette indexes into the current pixel format colors.">palette_color</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_palette_range">set_palette_range</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p, int from, int to, int vsync);</b></div><br>
+   Sets the palette entries between from and to (inclusive: pass 0 and 255 
+   to set the entire palette). If vsync is set it waits for the vertical 
+   retrace, otherwise it sets the colors immediately. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> palette;
+      ...
+      /* Modify the first 16 entries. */
+      change_first_16_colors(palette);
+      /* Now update them waiting for <a href="alleg008.html#vsync" class="autotype" title="Waits for a vertical retrace to begin.">vsync</a>. */
+      <a href="#set_palette_range" class="autotype" title="Sets a specific range of the palette.">set_palette_range</a>(palette, 0, 15, 1);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_palette" title="Sets the entire palette of 256 colors.">set_palette</a>,
+<a class="xref" href="#get_palette_range" title="Retrieves a specific palette range.">get_palette_range</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_color">get_color</a>(int index, <a class="autotype" href="alleg001.html#RGB" title="Single palette entry.">RGB</a> *p);</b></div><br>
+   Retrieves the specified palette entry. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#RGB" class="autotype" title="Single palette entry.">RGB</a> color;
+      ...
+      <a href="#get_color" class="autotype" title="Retrieves the specified palette entry.">get_color</a>(11, &amp;color);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_palette" title="Retrieves the entire palette of 256 colors.">get_palette</a>,
+<a class="xref" href="#set_color" title="Sets the specified palette entry to the specified RGB triplet.">set_color</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_palette">get_palette</a>(<a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p);</b></div><br>
+   Retrieves the entire palette of 256 colors. You should provide an array 
+   of 256 RGB structures to store it in. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#PALETTE" class="autotype" title="Stores palette information.">PALETTE</a> pal;
+      ...
+      <a href="#get_palette" class="autotype" title="Retrieves the entire palette of 256 colors.">get_palette</a>(pal);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_palette_range" title="Retrieves a specific palette range.">get_palette_range</a>,
+<a class="xref" href="#get_color" title="Retrieves the specified palette entry.">get_color</a>,
+<a class="xref" href="#set_palette" title="Sets the entire palette of 256 colors.">set_palette</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_palette_range">get_palette_range</a>(<a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p, int from, int to);</b></div><br>
+   Retrieves the palette entries between from and to (inclusive: pass 0 and 
+   255 to get the entire palette).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_palette" title="Retrieves the entire palette of 256 colors.">get_palette</a>,
+<a class="xref" href="#set_palette_range" title="Sets a specific range of the palette.">set_palette_range</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_interpolate">fade_interpolate</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> source, const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> dest,
+                      <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> output, int pos, int from, int to);</b></div><br>
+   Calculates a temporary palette part way between source and dest, 
+   returning it in the output parameter. The position between the two 
+   extremes is specified by the pos value: 0 returns an exact copy of 
+   source, 64 returns dest, 32 returns a palette half way between the two, 
+   etc. This routine only affects colors between from and to (inclusive: 
+   pass 0 and 255 to interpolate the entire palette).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_in" title="Gradually fades the palette from black.">fade_in</a>,
+<a class="xref" href="#fade_out" title="Gradually fades the palette to black.">fade_out</a>,
+<a class="xref" href="#fade_from" title="Gradually fades the palette between two others.">fade_from</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_from_range">fade_from_range</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> source, const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> dest,
+                     int speed, int from, int to);</b></div><br>
+   Gradually fades a part of the palette from the source palette to the dest 
+   palette. The speed is from 1 (the slowest) up to 64 (instantaneous). This 
+   routine only affects colors between from and to (inclusive: pass 0 and 
+   255 to fade the entire palette).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_from" title="Gradually fades the palette between two others.">fade_from</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_in_range">fade_in_range</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p, int speed, int from, int to);</b></div><br>
+   Gradually fades a part of the palette from a black screen to the 
+   specified palette. The speed is from 1 (the slowest) up to 64 
+   (instantaneous). This routine only affects colors between from and to 
+   (inclusive: pass 0 and 255 to fade the entire palette).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_in" title="Gradually fades the palette from black.">fade_in</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_out_range">fade_out_range</a>(int speed, int from, int to);</b></div><br>
+   Gradually fades a part of the palette from the current palette to a black 
+   screen. The speed is from 1 (the slowest) up to 64 (instantaneous). This 
+   routine only affects colors between from and to (inclusive: pass 0 and 
+   255 to fade the entire palette).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_out" title="Gradually fades the palette to black.">fade_out</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_from">fade_from</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> source, const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> dest, int speed);</b></div><br>
+   Fades gradually from the source palette to the dest palette. The speed is 
+   from 1 (the slowest) up to 64 (instantaneous).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_in" title="Gradually fades the palette from black.">fade_in</a>,
+<a class="xref" href="#fade_out" title="Gradually fades the palette to black.">fade_out</a>,
+<a class="xref" href="#fade_interpolate" title="Calculates a new palette interpolated between two others.">fade_interpolate</a>,
+<a class="xref" href="#fade_from_range" title="Gradually fades a part of the palette between two others.">fade_from_range</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_in">fade_in</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p, int speed);</b></div><br>
+   Fades gradually from a black screen to the specified palette. The speed 
+   is from 1 (the slowest) up to 64 (instantaneous).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_out" title="Gradually fades the palette to black.">fade_out</a>,
+<a class="xref" href="#fade_from" title="Gradually fades the palette between two others.">fade_from</a>,
+<a class="xref" href="#fade_interpolate" title="Calculates a new palette interpolated between two others.">fade_interpolate</a>,
+<a class="xref" href="#fade_in_range" title="Gradually fades a part of the palette from black.">fade_in_range</a>.</blockquote>
+<div class="al-api"><b>void <a name="fade_out">fade_out</a>(int speed);</b></div><br>
+   Fades gradually from the current palette to a black screen. The speed is 
+   from 1 (the slowest) up to 64 (instantaneous).
+
+<p>
+   Note that this function will block your game while the fade is in effect,
+   and it won't work right visually if you are not in an 8 bit color depth
+   resolution.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fade_in" title="Gradually fades the palette from black.">fade_in</a>,
+<a class="xref" href="#fade_from" title="Gradually fades the palette between two others.">fade_from</a>,
+<a class="xref" href="#fade_interpolate" title="Calculates a new palette interpolated between two others.">fade_interpolate</a>,
+<a class="xref" href="#fade_in_range" title="Gradually fades a part of the palette from black.">fade_in_range</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>.</blockquote>
+<div class="al-api"><b>void <a name="select_palette">select_palette</a>(const <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> p);</b></div><br>
+   Ugly hack for use in various dodgy situations where you need to convert 
+   between paletted and truecolor image formats. Sets the internal palette 
+   table in the same way as the set_palette() function, so the conversion 
+   will use the specified palette, but without affecting the display 
+   hardware in any way. The previous palette settings are stored in an 
+   internal buffer, and can be restored by calling unselect_palette(). If
+   you call select_palette() again, however, the internal buffer will be
+   overwritten.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_palette" title="Sets the entire palette of 256 colors.">set_palette</a>,
+<a class="xref" href="#unselect_palette" title="Restores the palette before last call to select_palette().">unselect_palette</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>.</blockquote>
+<div class="al-api"><b>void <a name="unselect_palette">unselect_palette</a>();</b></div><br>
+   Restores the palette tables that were in use before the last call to 
+   select_palette().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#select_palette" title="Sets the internal palette for color conversion.">select_palette</a>.</blockquote>
+<div class="al-api"><b>void <a name="generate_332_palette">generate_332_palette</a>(<a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> pal);</b></div><br>
+   Constructs a fake truecolor palette, using three bits for red and green 
+   and two for the blue. The load_bitmap() function fills the palette
+   parameter with this if the file does not contain a palette itself (ie. you
+   are reading a truecolor bitmap).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#generate_optimized_palette" title="Generates an optimized palette for a bitmap.">generate_optimized_palette</a>,
+<a class="xref" href="alleg008.html#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excolmap" title="Creating graphical effects with color mapping tables.">excolmap</a>,
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>,
+<a class="eref" href="alleg045.html#extruec" title="Truecolor pixel format conversions.">extruec</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="generate_optimized_palette">generate_optimized_palette</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> pal,
+                               const char rsvd[PAL_SIZE]);</b></div><br>
+   Generates a 256-color palette suitable for making a reduced color version 
+   of the specified truecolor image. The rsvd parameter points to a table 
+   indicating which colors it is allowed to modify: zero for free colors
+   which may be set to whatever the optimiser likes, negative values for
+   reserved colors which cannot be used, and positive values for fixed
+   palette entries that must not be changed, but can be used in the
+   optimisation.
+<p><b>Return value:</b>
+   Returns the number of different colors recognised in the provided bitmap,
+   zero if the bitmap is not a truecolor image or there wasn't enough memory
+   to perform the operation, and negative if there was any internal error in
+   the color reduction code.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#generate_332_palette" title="Constructs a fake truecolor palette.">generate_332_palette</a>,
+<a class="xref" href="alleg008.html#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> <a name="default_palette">default_palette</a>;</b></div><br>
+   The default IBM BIOS palette. This will be automatically selected 
+   whenever you set a new graphics mode. The palette contains 16 basic
+   colors plus many gradients between them. If you want to see the values,
+   you can write a small Allegro program which saves a screenshot with this
+   palette, or open the grabber tool provided with Allegro and create a new
+   palette object, which will use this palette by default.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#black_palette" title="A palette containing solid black colors.">black_palette</a>,
+<a class="xref" href="#desktop_palette" title="The palette used by the Atari ST low resolution desktop.">desktop_palette</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exjoy" title="Detecting, calibrating and using joystick input.">exjoy</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> <a name="black_palette">black_palette</a>;</b></div><br>
+   A palette containing solid black colors, used by the fade routines.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#default_palette" title="The default IBM BIOS palette.">default_palette</a>,
+<a class="xref" href="#desktop_palette" title="The palette used by the Atari ST low resolution desktop.">desktop_palette</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#expal" title="Palette effects and color cycling.">expal</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> <a name="desktop_palette">desktop_palette</a>;</b></div><br>
+   The palette used by the Atari ST low resolution desktop. I'm not quite 
+   sure why this is still here, except that the grabber and test programs 
+   use it. It is probably the only Atari legacy code left in Allegro, and it 
+   would be a shame to remove it :-)
+
+<p>
+   The contents of this palette are 16 colors repeated 16 times. Color entry
+   zero is equal to color entry 16, which is equal to color entry 24, etc.
+<blockquote class="text"><pre>
+       Index      Color       RGB values
+         0     White          63  63  63
+         1     Red            63   0   0
+         2     Green           0  63   0
+         3     Yellow         63  63   0
+         4     Blue            0   0  63
+         5     Pink           63   0  63
+         6     Cyan            0  63  63
+         7     Grey           16  16  16
+         8     Light grey     31  31  31
+         9     Light red      63  31  31
+        10     Light green    31  63  31
+        11     Light yellow   63  63  31
+        12     Light blue     31  31  63
+        13     Light pink     63  31  63
+        14     Light cyan     31  63  63
+        15     Black           0   0   0</pre></blockquote>
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#default_palette" title="The default IBM BIOS palette.">default_palette</a>,
+<a class="xref" href="#black_palette" title="A palette containing solid black colors.">black_palette</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

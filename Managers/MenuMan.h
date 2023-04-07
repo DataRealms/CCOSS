@@ -8,7 +8,7 @@
 namespace RTE {
 
 	class AllegroScreen;
-	class AllegroInput;
+	class GUIInputWrapper;
 	class Controller;
 	class TitleScreen;
 	class MainMenuGUI;
@@ -74,7 +74,7 @@ namespace RTE {
 
 		ActiveMenu m_ActiveMenu; //!< The currently active menu screen that is being updated and drawn. See ActiveMenu enumeration.
 
-		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
+		std::unique_ptr<GUIInputWrapper> m_GUIInput; //!< The GUIInput interface of this MenuMan.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
 		std::unique_ptr<Controller> m_MenuController; //!< A Controller to handle player input in menu screens that require it.
 

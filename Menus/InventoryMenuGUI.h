@@ -7,7 +7,7 @@
 #include "GUI.h"
 #include "GUIControlManager.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 
 namespace RTE {
 
@@ -283,7 +283,7 @@ namespace RTE {
 		/// </summary>
 		std::unique_ptr<GUIControlManager> m_GUIControlManager;
 		std::unique_ptr<AllegroScreen> m_GUIScreen;
-		std::unique_ptr<AllegroInput> m_GUIInput;
+		std::unique_ptr<GUIInputWrapper> m_GUIInput;
 		GUICollectionBox *m_GUITopLevelBox;
 		GUILabel *m_GUIInformationText;
 		GUIButton *m_GUIInformationToggleButton;
@@ -442,7 +442,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="equippedItemIndex">The index of the equipped item being swapped out.</param>
 		/// <param name="inventoryItemIndex">The index in the inventory of the item being swapped in.</param>
-		void SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex);
+		/// <returns>Whether the inventory item at the given inventory item index was successfully equipped to the given equipped item index.</returns>
+		bool SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex);
 
 		/// <summary>
 		/// Reloads the selected item if it is equipped, or swaps to it and then reloads it if it isn't.

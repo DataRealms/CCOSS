@@ -122,10 +122,13 @@ int MOSRotating::Create()
     m_SpriteCenter.SetXY(m_aSprite[m_Frame]->w / 2, m_aSprite[m_Frame]->h / 2);
     m_SpriteCenter += m_SpriteOffset;
 
-/* Allocated in lazy fashion as needed when drawing flipped
-    if (!m_pFlipBitmap && m_aSprite[0])
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+
 /* Not anymore; points to shared static bitmaps
     if (!m_pTempBitmap && m_aSprite[0])
         m_pTempBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
@@ -208,6 +211,14 @@ int MOSRotating::Create(ContentFile spriteFile,
                         const unsigned long lifetime)
 {
     MOSprite::Create(spriteFile, frameCount, mass, position, velocity, lifetime);
+	
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+
     return 0;
 }
 
@@ -286,6 +297,13 @@ int MOSRotating::Create(const MOSRotating &reference) {
 */
     m_pTempBitmap = reference.m_pTempBitmap;
     m_pTempBitmapS = reference.m_pTempBitmapS;
+	
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
 
     return 0;
 }
@@ -1590,9 +1608,6 @@ void MOSRotating::Update() {
             TransferForcesFromAttachable(attachable);
         }
     }
-
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); }
-    if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) { m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

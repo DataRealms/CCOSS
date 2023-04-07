@@ -206,6 +206,7 @@ namespace RTE {
 
 		.def(luabind::constructor<>())
 
+		.property("PlayerControllable", &Actor::IsPlayerControllable, &Actor::SetPlayerControllable)
 		.property("BodyHitSound", &Actor::GetBodyHitSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetBodyHitSound)
 		.property("AlarmSound", &Actor::GetAlarmSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetAlarmSound)
 		.property("PainSound", &Actor::GetPainSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPainSound)
@@ -685,7 +686,8 @@ namespace RTE {
 		.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &LuaAdaptersPropertyOwnershipSafetyFaker::HDFirearmSetReloadEndSound)
 		.property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
 		.property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
-		.property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
+		.property("BaseReloadTime", &HDFirearm::GetBaseReloadTime, &HDFirearm::SetBaseReloadTime)
+		.property("ReloadTime", &HDFirearm::GetReloadTime)
 		.property("ReloadProgress", &HDFirearm::GetReloadProgress)
 		.property("ShakeRange", &HDFirearm::GetShakeRange, &HDFirearm::SetShakeRange)
 		.property("SharpShakeRange", &HDFirearm::GetSharpShakeRange, &HDFirearm::SetSharpShakeRange)
@@ -1249,6 +1251,9 @@ namespace RTE {
 
 		.property("ClassName", &Scene::Area::GetClassName)
 		.property("Name", &Scene::Area::GetName)
+		.property("FirstBox", &Scene::Area::GetFirstBox)
+		.property("Center", &Scene::Area::GetCenterPoint)
+		.property("RandomPoint", &Scene::Area::GetRandomPoint)
 
 		.def("Reset", &Scene::Area::Reset)
 		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)

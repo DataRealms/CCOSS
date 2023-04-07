@@ -398,7 +398,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
 	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
 	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
-	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+	Also note that this will reload the `Entity`'s sprites (and of all other referenced entity presets), which will be reflected immediately in all existing copies of the `Entity`.
 	
 - New INI and Lua (R/W) `Actor` property `AIBaseDigStrength`, used to determine the strength of the terrain the `Actor` can attempt to move through without digging tools. Normally used for moving through things like terrain debris and corpses. Defaults to 35.
 
@@ -529,6 +529,26 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
+- Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
+
+- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
+
+- Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.
+
+- Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
+
+- Added `Actor` INI and Lua property (R/W) `PlayerControllable`, that determines whether the `Actor` can be swapped to by human players. Note that Lua can probably break this, by forcing the `Controller`s of `Actor`s that aren't `PlayerControllable` to the `CIM_PLAYER` input mode.
+
+- Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
+
+- Added new `Timer` constructors `timer = Timer(elapsedSimTimeMS)` and `timer = Timer(elapsedSimTimeMS, simTimeLimitMS)` that let you setup `Timer`s more cleanly.
+
+- Added `Timer` Lua (R) properties `RealTimeLimitProgress` and `SimTimeLimitProgress`, that get how much progress the `Timer` has made towards its `RealTimeLimit` or `SimTimeLimit`. 0 means no progress, 1.0 means the timer has reached or passed the time limit.
+
+- New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
+
+- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -536,6 +556,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
+
+- Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
+
+- Swapped to SDL2 for window management and input handling.
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -576,10 +600,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
 
-- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:  
+- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenuOwner, pieMenu, pieSlice)`. The details for these are as follows:  
+	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.  
 	`pieSlice` - The `PieSlice` that has been activated to call this function.  
-	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 
 - `OnPieMenu(self)` event function has been changed to `WhilePieMenuOpen(self, openedPieMenu)` and will run as long as the `PieMenu` is open.
 
@@ -714,9 +738,36 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	SetScroll(center, screenId);
 	```
 
+- `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
+
+- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is:  
+	`DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
+
+- `UInputMan` Lua functions `KeyPressed`, `KeyReleased` and `KeyHeld` now take `SDL_Keycode` values instead of Allegro scancodes.  
+	Keycodes take keyboard layout into account and should be the preferred way of detecting input.
+
+	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
+	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
+
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+
+- Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
+
+- `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
+	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
+
+- Failing to create actor `FootGroup`s during loading will now crash with error message instead of straight to desktop.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Improved support for varied resolutions and aspect ratios. 1366x768 users rejoice.
+
+- Multi-display fullscreen now works regardless of window position or which screen in the arrangement is set as primary.  
+	Still limited to horizontal arrangements that are top or bottom edge aligned (or anywhere in between for arrangements with different height displays).
+
+- Controller hot-plug and disconnect is now properly detected at any point and will attempt to reconnect devices to the same gamepad slot.
 
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
@@ -749,6 +800,15 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
 
 - Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
+
+- Removed `whichStick` parameter for the following `UInputMan` Lua functions:  
+	`JoyDirectionPressed`, `JoyDirectionReleased`, `JoyDirectionHeld`, `AnalogAxisValue`  
+	No longer used or meaningful.
+
+- Removed `UInputMan` Lua function `WhichKeyHeld`.
+
+- Dedicated fullscreen has been removed (again) along with the following `Settings.ini` properties:
+	`ForceVirtualFullScreenGfxDriver`, `ForceDedicatedFullScreenGfxDriver`
 
 </details>
 
@@ -989,6 +1049,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added Lua bindings for `scene.Areas` and `area.Boxes` that you can iterate through to get all the `Areas` in a `Scene` and all the `Boxes` in an `Area`.
 
 - Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
+
+- Added `Area` Lua property `area.FirstBox` that returns the first `Box` in this `Area`. Useful for `Areas` that only have one `Box`.
+
+- Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
 
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 

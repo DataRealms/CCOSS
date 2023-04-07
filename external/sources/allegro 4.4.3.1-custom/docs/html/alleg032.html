@@ -1,0 +1,562 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Fixed point math routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Fixed point math routines">Fixed point math routines</a></h1>
+
+<ul>
+<li><a href="#fixacos">fixacos</a> &mdash; Fixed point inverse cosine lookup table.
+<li><a href="#fixadd">fixadd</a> &mdash; Safe function to add fixed point numbers clamping overflow.
+<li><a href="#fixasin">fixasin</a> &mdash; Fixed point inverse sine lookup table.
+<li><a href="#fixatan">fixatan</a> &mdash; Fixed point inverse tangent lookup table.
+<li><a href="#fixatan2">fixatan2</a> &mdash; Fixed point version of the libc atan2() routine.
+<li><a href="#fixceil">fixceil</a> &mdash; Returns the smallest integer not less than x.
+<li><a href="#fixcos">fixcos</a> &mdash; Fixed point cosine of binary angles.
+<li><a href="#fixdiv">fixdiv</a> &mdash; Fixed point division.
+<li><a href="#fixfloor">fixfloor</a> &mdash; Returns the greatest integer not greater than x.
+<li><a href="#fixhypot">fixhypot</a> &mdash; Fixed point hypotenuse.
+<li><a href="#fixmul">fixmul</a> &mdash; Multiplies two fixed point values together.
+<li><a href="#fixsin">fixsin</a> &mdash; Fixed point sine of binary angles.
+<li><a href="#fixsqrt">fixsqrt</a> &mdash; Fixed point square root.
+<li><a href="#fixsub">fixsub</a> &mdash; Safe function to subtract fixed point numbers clamping underflow.
+<li><a href="#fixtan">fixtan</a> &mdash; Fixed point tangent of binary angles.
+<li><a href="#fixtof">fixtof</a> &mdash; Converts a fixed point to floating point.
+<li><a href="#fixtoi">fixtoi</a> &mdash; Converts a fixed point to integer with rounding.
+<li><a href="#fixtorad_r">fixtorad_r</a> &mdash; Constant to convert angles in fixed point format to radians.
+<li><a href="#ftofix">ftofix</a> &mdash; Converts a floating point value to fixed point.
+<li><a href="#itofix">itofix</a> &mdash; Converts an integer to fixed point.
+<li><a href="#radtofix_r">radtofix_r</a> &mdash; Constant to convert radians to fixed point angles.
+</ul>
+
+<p>
+Allegro provides some routines for working with fixed point numbers, and
+defines the type <tt>`fixed'</tt> to be a signed 32-bit integer. The high word is 
+used for the integer part and the low word for the fraction, giving a range
+of -32768 to 32767 and an accuracy of about four or five decimal places.
+Fixed point numbers can be assigned, compared, added, subtracted, negated and
+shifted (for multiplying or dividing by powers of two) using the normal
+integer operators, but you should take care to use the appropriate conversion
+routines when mixing fixed point with integer or floating point values.
+Writing `fixed_point_1 + fixed_point_2' is OK, but `fixed_point + integer' is
+not.
+
+<p>
+Unfortunately the only advantage of fixed point math routines is that you
+don't require a floating point coprocessor to use them. This was great in the
+time period of i386 and i486 machines, but stopped being so useful with the
+coming of the Pentium class of processors. From Pentium onwards, CPUs have
+increased their strength in floating point operations, equaling or even
+surpassing integer math performance.
+
+<p>
+Depending on the type of operations your program may need, using floating
+point types may be faster than fixed types if you are targeting a specific
+machine class. Allegro comes with a test program in the <tt>`allegro/tests'</tt>
+directory. Its <tt>`Misc'</tt> menu contains a basic profile test which can give you
+an idea of the speed difference between fixed and float types for a few basic
+operations on your machine. However, don't forget to profile your program in
+real life conditions, tight loop benchmarks are after all artificial.
+
+<p>
+Fixed point math is considered "add-on" material and is kept only for
+backwards compatibility. Whenever a future release of Allegro breaks backwards
+compatibility, fixed point math will likely be moved to a separate add-on
+package for the very few users who still find it convenient and useful, and
+Allegro functions using fixed point math will use other types.
+
+<p><br>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="itofix">itofix</a>(int x);</b></div><br>
+   Converts an integer to fixed point. This is the same thing as x&lt;&lt;16.
+   Remember that overflows (trying to convert an integer greater than 32767)
+   and underflows (trying to convert an integer lesser than -32768) are not
+   detected even in debug builds! The values simply "wrap around". Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> number;
+      /* This conversion is OK. */
+      number = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(<a href="#fixtoi" class="autotype" title="Converts a fixed point to integer with rounding.">fixtoi</a>(number) == 100);
+      number = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(64000);
+      /* This check will fail in debug builds. */
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(<a href="#fixtoi" class="autotype" title="Converts a fixed point to integer with rounding.">fixtoi</a>(number) == 64000);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the value of the integer converted to fixed point ignoring
+   overflows.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixtoi" title="Converts a fixed point to integer with rounding.">fixtoi</a>,
+<a class="xref" href="#ftofix" title="Converts a floating point value to fixed point.">ftofix</a>,
+<a class="xref" href="#fixtof" title="Converts a fixed point to floating point.">fixtof</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b>int <a name="fixtoi">fixtoi</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   Converts fixed point to integer, rounding as required to the nearest
+   integer. Example:
+<blockquote class="code"><pre>
+      int result;
+      /* This will put 33 into <tt>`result'</tt>. */
+      result = <a href="#fixtoi" class="autotype" title="Converts a fixed point to integer with rounding.">fixtoi</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 3);
+      /* But this will round up to 17. */
+      result = <a href="#fixtoi" class="autotype" title="Converts a fixed point to integer with rounding.">fixtoi</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 6);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="#ftofix" title="Converts a floating point value to fixed point.">ftofix</a>,
+<a class="xref" href="#fixtof" title="Converts a fixed point to floating point.">fixtof</a>,
+<a class="xref" href="#fixfloor" title="Returns the greatest integer not greater than x.">fixfloor</a>,
+<a class="xref" href="#fixceil" title="Returns the smallest integer not less than x.">fixceil</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="fixfloor">fixfloor</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   Returns the greatest integer not greater than x. That is, it rounds 
+   towards negative infinity. Example:
+<blockquote class="code"><pre>
+      int result;
+      /* This will put 33 into <tt>`result'</tt>. */
+      result = <a href="#fixfloor" class="autotype" title="Returns the greatest integer not greater than x.">fixfloor</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 3);
+      /* And this will round down to 16. */
+      result = <a href="#fixfloor" class="autotype" title="Returns the greatest integer not greater than x.">fixfloor</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 6);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixtoi" title="Converts a fixed point to integer with rounding.">fixtoi</a>,
+<a class="xref" href="#fixceil" title="Returns the smallest integer not less than x.">fixceil</a>.</blockquote>
+<div class="al-api"><b>int <a name="fixceil">fixceil</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   Returns the smallest integer not less than x. That is, it rounds towards
+   positive infinity. Example:
+<blockquote class="code"><pre>
+      int result;
+      /* This will put 34 into <tt>`result'</tt>. */
+      result = <a href="#fixceil" class="autotype" title="Returns the smallest integer not less than x.">fixceil</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 3);
+      /* This will round up to 17. */
+      result = <a href="#fixceil" class="autotype" title="Returns the smallest integer not less than x.">fixceil</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 6);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixtoi" title="Converts a fixed point to integer with rounding.">fixtoi</a>,
+<a class="xref" href="#fixfloor" title="Returns the greatest integer not greater than x.">fixfloor</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="ftofix">ftofix</a>(double x);</b></div><br>
+   Converts a floating point value to fixed point. Unlike itofix(), this
+   function clamps values which could overflow the type conversion, setting
+   <tt>`errno'</tt> to ERANGE in the process if this happens. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> number;
+      number = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-40000);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(<a href="#fixfloor" class="autotype" title="Returns the greatest integer not greater than x.">fixfloor</a>(number) == -32768);
+      number = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(64000);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(<a href="#fixfloor" class="autotype" title="Returns the greatest integer not greater than x.">fixfloor</a>(number) == 32767);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno); /* This will fail. */</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the value of the floating point value converted to fixed point
+   clamping overflows (and setting <tt>`errno'</tt>).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixtof" title="Converts a fixed point to floating point.">fixtof</a>,
+<a class="xref" href="#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="#fixtoi" title="Converts a fixed point to integer with rounding.">fixtoi</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>,
+<a class="eref" href="alleg045.html#exrotscl" title="Demonstrates rotate_scaled_sprite functions.">exrotscl</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>double <a name="fixtof">fixtof</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   Converts fixed point to floating point. Example:
+<blockquote class="code"><pre>
+      float result;
+      
+      /* This will put 33.33333 into <tt>`result'</tt>. */
+      result = <a href="#fixtof" class="autotype" title="Converts a fixed point to floating point.">fixtof</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 3);
+      /* This will put 16.66666 into <tt>`result'</tt>. */
+      result = <a href="#fixtof" class="autotype" title="Converts a fixed point to floating point.">fixtof</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100) / 6);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#ftofix" title="Converts a floating point value to fixed point.">ftofix</a>,
+<a class="xref" href="#itofix" title="Converts an integer to fixed point.">itofix</a>,
+<a class="xref" href="#fixtoi" title="Converts a fixed point to integer with rounding.">fixtoi</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixmul">fixmul</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y);</b></div><br>
+   A fixed point value can be multiplied or divided by an integer with the 
+   normal `*' and <tt>`/'</tt> operators. To multiply two fixed point values, though,
+   you must use this function.
+
+<p>
+   If an overflow occurs, <tt>`errno'</tt> will be set and the maximum possible value
+   will be returned, but <tt>`errno'</tt> is not cleared if the operation is
+   successful. This means that if you are going to test for overflow you
+   should set <tt>`errno=0'</tt> before calling fixmul(). Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+
+      /* This will put 30000 into <tt>`result'</tt>. */
+      result = <a href="#fixmul" class="autotype" title="Multiplies two fixed point values together.">fixmul</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(10), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(3000));
+      /* But this overflows, and sets <tt>`errno'</tt>. */
+      result = <a href="#fixmul" class="autotype" title="Multiplies two fixed point values together.">fixmul</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(100), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(3000));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the clamped result of multiplying <tt>`x'</tt> by <tt>`y'</tt>, setting <tt>`errno'</tt> to
+   ERANGE if there was an overflow.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixadd" title="Safe function to add fixed point numbers clamping overflow.">fixadd</a>,
+<a class="xref" href="#fixsub" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>,
+<a class="xref" href="#fixdiv" title="Fixed point division.">fixdiv</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exstars" title="3d starfield and lightsourced spaceship.">exstars</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixdiv">fixdiv</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y);</b></div><br>
+   A fixed point value can be divided by an integer with the normal <tt>`/'</tt>
+   operator. To divide two fixed point values, though, you must use this
+   function. If a division by zero occurs, <tt>`errno'</tt> will be set and the
+   maximum possible value will be returned, but <tt>`errno'</tt> is not cleared if the
+   operation is successful. This means that if you are going to test for
+   division by zero you should set <tt>`errno=0'</tt> before calling fixdiv(). Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+      /* This will put 0.06060 <tt>`result'</tt>. */
+      result = <a href="#fixdiv" class="autotype" title="Fixed point division.">fixdiv</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(2), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(33));
+      /* This will put 0 into <tt>`result'</tt>. */
+      result = <a href="#fixdiv" class="autotype" title="Fixed point division.">fixdiv</a>(0, <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-30));
+      /* Sets <tt>`errno'</tt> and puts -32768 into <tt>`result'</tt>. */
+      result = <a href="#fixdiv" class="autotype" title="Fixed point division.">fixdiv</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-100), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(0));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno); /* This will fail. */</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the result of dividing <tt>`x'</tt> by <tt>`y'</tt>. If <tt>`y'</tt> is zero, returns the
+   maximum possible fixed point value and sets <tt>`errno'</tt> to ERANGE.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixadd" title="Safe function to add fixed point numbers clamping overflow.">fixadd</a>,
+<a class="xref" href="#fixsub" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>,
+<a class="xref" href="#fixmul" title="Multiplies two fixed point values together.">fixmul</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixadd">fixadd</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y);</b></div><br>
+   Although fixed point numbers can be added with the normal '+' integer 
+   operator, that doesn't provide any protection against overflow. If overflow
+   is a problem, you should use this function instead. It is slower than using
+   integer operators, but if an overflow occurs it will set <tt>`errno'</tt> and clamp
+   the result, rather than just letting it wrap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+      /* This will put 5035 into <tt>`result'</tt>. */
+      result = <a href="#fixadd" class="autotype" title="Safe function to add fixed point numbers clamping overflow.">fixadd</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(5000), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(35));
+      /* Sets <tt>`errno'</tt> and puts -32768 into <tt>`result'</tt>. */
+      result = <a href="#fixadd" class="autotype" title="Safe function to add fixed point numbers clamping overflow.">fixadd</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-31000), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-3000));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno); /* This will fail. */</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the clamped result of adding <tt>`x'</tt> to <tt>`y'</tt>, setting <tt>`errno'</tt> to ERANGE
+   if there was an overflow.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixsub" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>,
+<a class="xref" href="#fixmul" title="Multiplies two fixed point values together.">fixmul</a>,
+<a class="xref" href="#fixdiv" title="Fixed point division.">fixdiv</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixsub">fixsub</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y);</b></div><br>
+   Although fixed point numbers can be subtracted with the normal '-' integer
+   operator, that doesn't provide any protection against overflow. If overflow
+   is a problem, you should use this function instead. It is slower than using
+   integer operators, but if an overflow occurs it will set <tt>`errno'</tt> and clamp
+   the result, rather than just letting it wrap. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+      /* This will put 4965 into <tt>`result'</tt>. */
+      result = <a href="#fixsub" class="autotype" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(5000), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(35));
+      /* Sets <tt>`errno'</tt> and puts -32768 into <tt>`result'</tt>. */
+      result = <a href="#fixsub" class="autotype" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-31000), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(3000));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno); /* This will fail. */</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the clamped result of subtracting <tt>`y'</tt> from <tt>`x'</tt>, setting <tt>`errno'</tt> to
+   ERANGE if there was an overflow.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixadd" title="Safe function to add fixed point numbers clamping overflow.">fixadd</a>,
+<a class="xref" href="#fixmul" title="Multiplies two fixed point values together.">fixmul</a>,
+<a class="xref" href="#fixdiv" title="Fixed point division.">fixdiv</a>.</blockquote>
+<br><center><h2><a name="Fixed point trig">Fixed point trig</a></h2></center><p>
+The fixed point square root, sin, cos, tan, inverse sin, and inverse cos 
+functions are implemented using lookup tables, which are very fast but not 
+particularly accurate. At the moment the inverse tan uses an iterative 
+search on the tan table, so it is a lot slower than the others. Note that on
+machines with very good floating point processors using these functions could
+be slower in real life code due to cache misses: it may be faster to wait
+a few extra cycles for a floating point sine result rather than wait for the
+CPU to fetch the precalculated table from main memory. Always profile your
+code.
+
+<p>
+Angles are represented in a binary format with 256 equal to a full circle, 
+64 being a right angle and so on. This has the advantage that a simple 
+bitwise 'and' can be used to keep the angle within the range zero to a full
+circle, eliminating all those tiresome 'if (angle &gt;= 360)' checks.
+
+<p><br>
+<div class="al-api"><b>extern const <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixtorad_r">fixtorad_r</a>;</b></div><br>
+   This constant gives a ratio which can be used to convert a fixed point
+   number in binary angle format to a fixed point number in radians. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> rad_angle, binary_angle;
+      /* Set the binary angle to 90 degrees. */
+      binary_angle = 64;
+      /* Now convert to radians (about 1.57). */
+      rad_angle = <a href="#fixmul" class="autotype" title="Multiplies two fixed point values together.">fixmul</a>(binary_angle, <a href="#fixtorad_r" class="autotype" title="Constant to convert angles in fixed point format to radians.">fixtorad_r</a>);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixmul" title="Multiplies two fixed point values together.">fixmul</a>,
+<a class="xref" href="#radtofix_r" title="Constant to convert radians to fixed point angles.">radtofix_r</a>.</blockquote>
+<div class="al-api"><b>extern const <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="radtofix_r">radtofix_r</a>;</b></div><br>
+   This constant gives a ratio which can be used to convert a fixed point
+   number in radians to a fixed point number in binary angle format. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> rad_angle, binary_angle;
+      ...
+      binary_angle = <a href="#fixmul" class="autotype" title="Multiplies two fixed point values together.">fixmul</a>(rad_angle, <a href="#radtofix_r" class="autotype" title="Constant to convert radians to fixed point angles.">radtofix_r</a>);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fixmul" title="Multiplies two fixed point values together.">fixmul</a>,
+<a class="xref" href="#fixtorad_r" title="Constant to convert angles in fixed point format to radians.">fixtorad_r</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixsin">fixsin</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the sine of a value using a lookup table. The input
+   value must be a fixed point binary angle. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> angle;
+      int result;
+
+      /* Set the binary angle to 90 degrees. */
+      angle = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(64);
+      /* The sine of 90 degrees is one. */
+      result = <a href="#fixtoi" class="autotype" title="Converts a fixed point to integer with rounding.">fixtoi</a>(<a href="#fixsin" class="autotype" title="Fixed point sine of binary angles.">fixsin</a>(angle));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(result == 1);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the sine of a fixed point binary format angle. The return value
+   will be in radians.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixcos">fixcos</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the cosine of a value using a lookup table. The input
+   value must be a fixed point binary angle. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> angle;
+      float result;
+
+      /* Set the binary angle to 45 degrees. */
+      angle = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(32);
+      /* The cosine of 45 degrees is about 0.7071. */
+      result = <a href="#fixtof" class="autotype" title="Converts a fixed point to floating point.">fixtof</a>(<a href="#fixcos" class="autotype" title="Fixed point cosine of binary angles.">fixcos</a>(angle));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(result &gt; 0.7 &amp;&amp; result &lt; 0.71);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the cosine of a fixed point binary format angle. The return value
+   will be in radians.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex12bit" title="How to fake a 12-bit truecolor mode on an 8-bit card.">ex12bit</a>,
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exblend" title="Using translucency in truecolor modes.">exblend</a>,
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixtan">fixtan</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the tangent of a value using a lookup table. The input
+   value must be a fixed point binary angle. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> angle, res_a, res_b;
+      float dif;
+      
+      angle = <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(37);
+      /* Prove that tan(angle) == sin(angle) / cos(angle). */
+      res_a = <a href="#fixdiv" class="autotype" title="Fixed point division.">fixdiv</a>(<a href="#fixsin" class="autotype" title="Fixed point sine of binary angles.">fixsin</a>(angle), <a href="#fixcos" class="autotype" title="Fixed point cosine of binary angles.">fixcos</a>(angle));
+      res_b = <a href="#fixtan" class="autotype" title="Fixed point tangent of binary angles.">fixtan</a>(angle);
+      dif = <a href="#fixtof" class="autotype" title="Converts a fixed point to floating point.">fixtof</a>(<a href="#fixsub" class="autotype" title="Safe function to subtract fixed point numbers clamping underflow.">fixsub</a>(res_a, res_b));
+      <a href="alleg000.html#allegro_message" class="autotype" title="Used mainly to show error messages to users.">allegro_message</a>("Precision error: %f\n", dif);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the tangent of a fixed point binary format angle. The return value
+   will be in radians.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixasin">fixasin</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the inverse sine of a value using a lookup table. The
+   input value must be a fixed point value. The inverse sine is defined only
+   in the domain from `-1' to <tt>`1'</tt>. Outside of this input range, the function
+   will set <tt>`errno'</tt> to EDOM and return zero. Example:
+<blockquote class="code"><pre>
+      float angle;
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> val;
+
+      /* Sets <tt>`val'</tt> to a right binary angle (<tt>`64'</tt>). */
+      val = <a href="#fixasin" class="autotype" title="Fixed point inverse sine lookup table.">fixasin</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(1));
+      /* Sets <tt>`angle'</tt> to 0.2405. */
+      angle = <a href="#fixtof" class="autotype" title="Converts a fixed point to floating point.">fixtof</a>(<a href="#fixmul" class="autotype" title="Multiplies two fixed point values together.">fixmul</a>(<a href="#fixasin" class="autotype" title="Fixed point inverse sine lookup table.">fixasin</a>(<a href="#ftofix" class="autotype" title="Converts a floating point value to fixed point.">ftofix</a>(0.238)), <a href="#fixtorad_r" class="autotype" title="Constant to convert angles in fixed point format to radians.">fixtorad_r</a>));
+      /* This will trigger the assert. */
+      val = <a href="#fixasin" class="autotype" title="Fixed point inverse sine lookup table.">fixasin</a>(<a href="#ftofix" class="autotype" title="Converts a floating point value to fixed point.">ftofix</a>(-1.09));
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the inverse sine of a fixed point value, measured as fixed point
+   binary format angle, or zero if the input was out of the range. All return
+   values of this function will be in the range `-64' to <tt>`64'</tt>.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixacos">fixacos</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the inverse cosine of a value using a lookup table. The
+   input value must be a fixed point radian. The inverse cosine is defined
+   only in the domain from `-1' to <tt>`1'</tt>. Outside of this input range, the
+   function will set <tt>`errno'</tt> to EDOM and return zero. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+
+      /* Sets <tt>`result'</tt> to binary angle 128. */
+      result = <a href="#fixacos" class="autotype" title="Fixed point inverse cosine lookup table.">fixacos</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-1));</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the inverse sine of a fixed point value, measured as fixed point
+   binary format angle, or zero if the input was out of range. All return
+   values of this function will be in the range <tt>`0'</tt> to <tt>`128'</tt>.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixatan">fixatan</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This function finds the inverse tangent of a value using a lookup table.
+   The input value must be a fixed point radian. The inverse tangent is the
+   value whose tangent is <tt>`x'</tt>. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+
+      /* Sets <tt>`result'</tt> to binary angle 13. */
+      result = <a href="#fixatan" class="autotype" title="Fixed point inverse tangent lookup table.">fixatan</a>(<a href="#ftofix" class="autotype" title="Converts a floating point value to fixed point.">ftofix</a>(0.326));</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the inverse tangent of a fixed point value, measured as a fixed
+   point binary format angle.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixatan2">fixatan2</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This is a fixed point version of the libc atan2() routine. It computes the
+   arc tangent of `y / x', but the signs of both arguments are used to
+   determine the quadrant of the result, and <tt>`x'</tt> is permitted to be zero. This
+   function is useful to convert Cartesian coordinates to polar coordinates.
+   Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> result;
+      
+      /* Sets <tt>`result'</tt> to binary angle 64. */
+      result = <a href="#fixatan2" class="autotype" title="Fixed point version of the libc atan2() routine.">fixatan2</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(1), 0);
+      /* Sets <tt>`result'</tt> to binary angle -109. */
+      result = <a href="#fixatan2" class="autotype" title="Fixed point version of the libc atan2() routine.">fixatan2</a>(<a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-1), <a href="#itofix" class="autotype" title="Converts an integer to fixed point.">itofix</a>(-2));
+      /* Fails the assert. */
+      result = <a href="#fixatan2" class="autotype" title="Fixed point version of the libc atan2() routine.">fixatan2</a>(0, 0);
+      <a href="alleg044.html#ASSERT" class="autotype" title="Debugging helper macro to assert.">ASSERT</a>(!errno);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the arc tangent of `y / x' in fixed point binary format angle,
+   from `-128' to <tt>`128'</tt>. If both <tt>`x'</tt> and <tt>`y'</tt> are zero, returns zero and sets
+   <tt>`errno'</tt> to EDOM.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixsqrt">fixsqrt</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x);</b></div><br>
+   This finds out the non negative square root of <tt>`x'</tt>. If <tt>`x'</tt> is negative,
+   <tt>`errno'</tt> is set to EDOM and the function returns zero.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exfixed" title="Using fixed point maths.">exfixed</a>,
+<a class="eref" href="alleg045.html#exlights" title="One way to do colored lighting effects in a hicolor video mode.">exlights</a>,
+<a class="eref" href="alleg045.html#exspline" title="Constructing smooth movement paths from spline curves.">exspline</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> <a name="fixhypot">fixhypot</a>(<a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> x, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> y);</b></div><br>
+   Fixed point hypotenuse (returns the square root of `x*x + y*y'). This
+   should be better than calculating the formula yourself manually, since
+   the error is much smaller.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Fixed point trig" title="">Fixed point trig</a>.</blockquote>
+<br><center><h2><a name="Fix class">Fix class</a></h2></center><p>
+If you are programming in C++ you can ignore all the above and use the fix 
+class instead, which overloads a lot of operators to provide automatic 
+conversion to and from integer and floating point values, and calls the 
+above routines as they are required. You should not mix the fix class with 
+the fixed typedef though, because the compiler will mistake the fixed values 
+for regular integers and insert unnecessary conversions. For example, if x 
+is an object of class fix, calling fixsqrt(x) will return the wrong result. 
+You should use the overloaded sqrt(x) or x.sqrt() instead.
+
+<p>
+On top of that, the Fix class may be slower than using directly the C
+functions because of implicit internal conversions from one type to another
+which you otherwise could avoid or minimise. Finally, this is the only bit
+of C++ in the whole Allegro library, and the developers are certainly going
+to move it into add-on space in the next version of Allegro which breaks
+source backwards compatibility.
+
+
+
+<p><br>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

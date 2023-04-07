@@ -20,9 +20,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Timer::Create(unsigned long elapsedSimTime) {
-		SetElapsedSimTimeMS(elapsedSimTime);
+	int Timer::Create(double simTimeLimit, double elapsedSimTime) {
 		m_TicksPerMS = static_cast<double>(g_TimerMan.GetTicksPerSecond()) * 0.001;
+		SetSimTimeLimitMS(simTimeLimit);
+		if (elapsedSimTime >= 0) {
+			SetElapsedSimTimeMS(elapsedSimTime);
+		}
 		return 0;
 	}
 

@@ -1,0 +1,987 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Configuration routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Configuration routines">Configuration routines</a></h1>
+
+<ul>
+<li><a href="#config_is_hooked">config_is_hooked</a> &mdash; Tells if a config section has custom hooks.
+<li><a href="#flush_config_file">flush_config_file</a> &mdash; Flushes the current config file to disk.
+<li><a href="#free_config_entries">free_config_entries</a> &mdash; Frees memory allocated for config entry lists.
+<li><a href="#get_config_argv">get_config_argv</a> &mdash; Reads a token list from the configuration file.
+<li><a href="#get_config_float">get_config_float</a> &mdash; Retrieves a float from the configuration file.
+<li><a href="#get_config_hex">get_config_hex</a> &mdash; Retrieves a hexadecimal value from the configuration file.
+<li><a href="#get_config_id">get_config_id</a> &mdash; Retrieves a driver ID from a configuration file.
+<li><a href="#get_config_int">get_config_int</a> &mdash; Retrieves an integer from the configuration file.
+<li><a href="#get_config_string">get_config_string</a> &mdash; Retrieves a string from the configuration file.
+<li><a href="#get_config_text">get_config_text</a> &mdash; Returns a string translated to the current language.
+<li><a href="#hook_config_section">hook_config_section</a> &mdash; Hooks a configuration file section with custom handlers.
+<li><a href="#list_config_entries">list_config_entries</a> &mdash; Lists the names of all entries in a config section
+<li><a href="#list_config_sections">list_config_sections</a> &mdash; Lists the names of all sections available in the current configuration.
+<li><a href="#override_config_data">override_config_data</a> &mdash; Specifies a block of data containing config overrides.
+<li><a href="#override_config_file">override_config_file</a> &mdash; Specifies a file containing config overrides.
+<li><a href="#pop_config_state">pop_config_state</a> &mdash; Pops a previously pushed configuration state.
+<li><a href="#push_config_state">push_config_state</a> &mdash; Pushes the current configuration state.
+<li><a href="#reload_config_texts">reload_config_texts</a> &mdash; Reloads translated strings returned by get_config_text().
+<li><a href="#set_config_data">set_config_data</a> &mdash; Sets a block of configuration data.
+<li><a href="#set_config_file">set_config_file</a> &mdash; Sets the configuration file.
+<li><a href="#set_config_float">set_config_float</a> &mdash; Writes a float in the configuration file.
+<li><a href="#set_config_hex">set_config_hex</a> &mdash; Writes a hexadecimal integer in the configuration file.
+<li><a href="#set_config_id">set_config_id</a> &mdash; Writes a driver ID in the configuration file.
+<li><a href="#set_config_int">set_config_int</a> &mdash; Writes an integer in the configuration file.
+<li><a href="#set_config_string">set_config_string</a> &mdash; Writes a string in the configuration file.
+</ul>
+
+<p>
+Various parts of Allegro, such as the sound routines and the 
+load_joystick_data() function, require some configuration information. This 
+data is stored in text files as a collection of <tt>`variable=value'</tt> lines,
+along with comments that begin with a `#' character and continue to the end
+of the line. The configuration file may optionally be divided into sections, 
+which begin with a <tt>`[sectionname]'</tt> line. Each section has a unique
+namespace, to prevent variable name conflicts, but any variables that aren't 
+in a section are considered to belong to all the sections simultaneously.
+
+<p>
+Note that variable and section names cannot contain spaces.
+
+<p>
+By default the configuration data is read from a file called <tt>`allegro.cfg'</tt>,
+which can be located either in the same directory as the program executable, 
+or the directory pointed to by the ALLEGRO environment variable. Under Unix, 
+it also checks for `~/allegro.cfg', `~/.allegrorc', <tt>`/etc/allegro.cfg'</tt>, and
+<tt>`/etc/allegrorc'</tt>, in that order; under BeOS only the last two are also
+checked. MacOS X also checks in the Contents/Resources directory of the
+application bundle, if any, before doing the checks above.
+
+<p>
+If you don't like this approach, you can specify any filename you like, or
+use a block of binary configuration data provided by your program (which
+could for example be loaded from a datafile). You can also extend the paths
+searched for allegro resources with set_allegro_resource_path().
+
+<p>
+You can store whatever custom information you like in the config file, along 
+with the standard variables that are used by Allegro (see below). Allegro
+comes with a setup directory where you can find configuration programs. The
+standalone setup program is likely to be of interest to final users. It
+allows any user to create an <tt>`allegro.cfg'</tt> file without the need to touch a
+text editor and enter values by hand. It also provides a few basic tests like
+sound playing for sound card testing. You are welcome to include the setup
+program with your game, either as is or with modified graphics to fit better
+your game.
+
+<p><br>
+<div class="al-api"><b>void <a name="set_config_file">set_config_file</a>(const char *filename);</b></div><br>
+   Sets the configuration file to be used by all subsequent config
+   functions. (Allegro will not search for this file in other locations
+   as it does with allegro.cfg at the time of initialization.)
+   
+<p>
+   All pointers returned by previous calls to get_config_string() and
+   other related functions are invalidated when you call this function!
+   You can call this function before install_allegro() to change the
+   configuration file, but after set_uformat() if you want to use a text 
+   encoding format other than the default.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_data" title="Sets a block of configuration data.">set_config_data</a>,
+<a class="xref" href="#override_config_file" title="Specifies a file containing config overrides.">override_config_file</a>,
+<a class="xref" href="#push_config_state" title="Pushes the current configuration state.">push_config_state</a>,
+<a class="xref" href="alleg002.html#set_uformat" title="Set the global current text encoding format.">set_uformat</a>,
+<a class="xref" href="#Standard config variables" title="">Standard config variables</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_data">set_config_data</a>(const char *data, int length);</b></div><br>
+   Specifies a block of data to be used by all subsequent config functions, 
+   which you have already loaded from disk (eg. as part of some more 
+   complicated format of your own, or in a grabber datafile). This routine 
+   makes a copy of the information, so you can safely free the data after 
+   calling it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#override_config_data" title="Specifies a block of data containing config overrides.">override_config_data</a>,
+<a class="xref" href="#push_config_state" title="Pushes the current configuration state.">push_config_state</a>,
+<a class="xref" href="#Standard config variables" title="">Standard config variables</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>.</blockquote>
+<div class="al-api"><b>void <a name="override_config_file">override_config_file</a>(const char *filename);</b></div><br>
+   Specifies a file containing config overrides. These settings will be used 
+   in addition to the parameters in the main config file, and where a 
+   variable is present in both files this version will take priority. This 
+   can be used by application programmers to override some of the config 
+   settings from their code, while still leaving the main config file free 
+   for the end user to customise. For example, you could specify a 
+   particular sample frequency and IBK instrument file, but the user could 
+   still use an <tt>`allegro.cfg'</tt> file to specify the port settings and irq
+   numbers.
+
+<p>
+   The override config file will not only take precedence when reading, but
+   will also be used for storing values. When you are done with using the
+   override config file, you can call override_config_file with a NULL
+   parameter, so config data will be directly read from the current config
+   file again.
+
+<p>
+   Note: The override file is completely independent from the current
+   configuration. You can e.g. call set_config_file, and the override file
+   will still be active. Also the flush_config_file function will only affect
+   the current config file (which can be changed with set_config_file), never
+   the overriding one specified with this function. The modified override
+   config is written back to disk whenever you call override_config_file.
+
+<p>
+   Example:
+<blockquote class="code"><pre>
+      <a href="#override_config_file" class="autotype" title="Specifies a file containing config overrides.">override_config_file</a>("my.cfg");
+      /* This will read from my.cfg, and if it doesn't find a
+       * setting, will read from the current config file instead.
+       */
+      language = <a href="#get_config_string" class="autotype" title="Retrieves a string from the configuration file.">get_config_string</a>("system", "language", NULL);
+      /* This will always write to my.cfg, no matter if the
+       * settings is already present or not.
+       */
+      <a href="#set_config_string" class="autotype" title="Writes a string in the configuration file.">set_config_string</a>("system", "language", "RU");
+      /* This forces the changed setting to be written back to
+       * disk. Else it is written back at the next call to
+       * <a href="#override_config_file" class="autotype" title="Specifies a file containing config overrides.">override_config_file</a>, or when Allegro shuts down.
+       */
+      <a href="#override_config_file" class="autotype" title="Specifies a file containing config overrides.">override_config_file</a>(NULL);</pre></blockquote>
+
+<p>
+   Note that this function and override_config_data() are mutually exclusive,
+   i.e. calling one will cancel the effects of the other.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#override_config_data" title="Specifies a block of data containing config overrides.">override_config_data</a>,
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>.</blockquote>
+<div class="al-api"><b>void <a name="override_config_data">override_config_data</a>(const char *data, int length);</b></div><br>
+   Version of override_config_file() which uses a block of data that has 
+   already been read into memory. The length of the block has to be specified
+   in bytes. Example:
+<blockquote class="code"><pre>
+      /* Force German as system language, Spanish keyboard map. */
+      const char *override_data = "[system]\n"
+         "language=DE\n"
+         "keyboard=ES";
+      <a href="#override_config_data" class="autotype" title="Specifies a block of data containing config overrides.">override_config_data</a>(override_data, <a href="alleg002.html#ustrsize" class="autotype" title="Size of the string in bytes without null terminator.">ustrsize</a>(override_data));</pre></blockquote>
+
+<p>
+   Note that this function and override_config_file() are mutually exclusive,
+   i.e. calling one will cancel the effects of the other.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#override_config_file" title="Specifies a file containing config overrides.">override_config_file</a>,
+<a class="xref" href="#set_config_data" title="Sets a block of configuration data.">set_config_data</a>.</blockquote>
+<div class="al-api"><b>void <a name="push_config_state">push_config_state</a>();</b></div><br>
+   Pushes the current configuration state (filename, variable values, etc). 
+   onto an internal stack, allowing you to select some other config source 
+   and later restore the current settings by calling pop_config_state(). 
+   This function is mostly intended for internal use by other library 
+   functions, for example when you specify a config filename to the 
+   save_joystick_data() function, it pushes the config state before 
+   switching to the file you specified.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#pop_config_state" title="Pops a previously pushed configuration state.">pop_config_state</a>,
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="alleg007.html#save_joystick_data" title="Saves joystick calibration data.">save_joystick_data</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>void <a name="pop_config_state">pop_config_state</a>();</b></div><br>
+   Pops a configuration state previously stored by push_config_state(), 
+   replacing the current config source with it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#push_config_state" title="Pushes the current configuration state.">push_config_state</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>void <a name="flush_config_file">flush_config_file</a>();</b></div><br>
+   Writes the current config file to disk if the contents have changed 
+   since it was loaded or since the latest call to the function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#override_config_file" title="Specifies a file containing config overrides.">override_config_file</a>,
+<a class="xref" href="#push_config_state" title="Pushes the current configuration state.">push_config_state</a>.</blockquote>
+<div class="al-api"><b>void <a name="reload_config_texts">reload_config_texts</a>(const char *new_language);</b></div><br>
+   Reloads the translated strings returned by get_config_text(). This is
+   useful to switch to another language in your program at runtime. If you
+   want to modify the <tt>`[system]'</tt> language configuration variable yourself, or
+   you have switched configuration files, you will want to pass NULL to
+   just reload whatever language is currently selected. Or you can pass a
+   string containing the two letter code of the language you desire to
+   switch to, and the function will modify the language variable. After you
+   call this function, the previously returned pointers of get_config_text()
+   will be invalid. Example:
+<blockquote class="code"><pre>
+      ...
+      /* The user selects French from a language choice menu. */
+      <a href="#reload_config_texts" class="autotype" title="Reloads translated strings returned by get_config_text().">reload_config_texts</a>("FR");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_config_text" title="Returns a string translated to the current language.">get_config_text</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#Standard config variables" title="">Standard config variables</a>.</blockquote>
+<div class="al-api"><b>void <a name="hook_config_section">hook_config_section</a>(const char *section,
+       int (*intgetter)(const char *name, int def),
+       const char *(*stringgetter)(const char *name, const char *def),
+       void (*stringsetter)(const char *name, const char *value));</b></div><br>
+   Takes control of the specified config file section, so that your hook 
+   functions will be used to manipulate it instead of the normal disk file 
+   access. If both the getter and setter functions are NULL, a currently 
+   present hook will be unhooked. Hooked functions have the highest 
+   priority. If a section is hooked, the hook will always be called, so you 
+   can also hook a '#' section: even override_config_file() cannot override 
+   a hooked section. Example:
+<blockquote class="code"><pre>
+      int decode_encrypted_int(const char *name, int def)
+      {
+         ...
+      }
+      
+      const char *decode_encrypted_string(const char *name, const char *def)
+      {
+         ...
+      }
+      
+      void encode_plaintext_string(const char *name, const char *value)
+      {
+         ...
+      }
+      
+      int main(int argc, char *argv[])
+      {
+         ...
+         /* Make it harder for users to tinker with the high scores. */
+         <a href="#hook_config_section" class="autotype" title="Hooks a configuration file section with custom handlers.">hook_config_section</a>("high_scores", decode_encrypted_int,
+            decode_encrypted_string, encode_plaintext_string);
+         ...
+      } <a href="alleg000.html#END_OF_MAIN" class="autotype" title="Macro to put after your main() function.">END_OF_MAIN</a>()</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#config_is_hooked" title="Tells if a config section has custom hooks.">config_is_hooked</a>.</blockquote>
+<div class="al-api"><b>int <a name="config_is_hooked">config_is_hooked</a>(const char *section);</b></div><br>
+   Returns TRUE if the specified config section has been hooked. Example:
+<blockquote class="code"><pre>
+      if (<a href="#config_is_hooked" class="autotype" title="Tells if a config section has custom hooks.">config_is_hooked</a>("high_scores")) {
+         <a href="#hook_config_section" class="autotype" title="Hooks a configuration file section with custom handlers.">hook_config_section</a>("high_scores, NULL, NULL, NULL);
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#hook_config_section" title="Hooks a configuration file section with custom handlers.">hook_config_section</a>.</blockquote>
+<div class="al-api"><b>const char *<a name="get_config_string">get_config_string</a>(const char *section,
+                              const char *name, const char *def);</b></div><br>
+   Retrieves a string variable from the current config file. The section name
+   may be set to NULL to read variables from the root of the file, or used to
+   control which set of parameters (eg. sound or joystick) you are interested
+   in reading. Example:
+<blockquote class="code"><pre>
+      const char *lang = <a href="#get_config_string" class="autotype" title="Retrieves a string from the configuration file.">get_config_string</a>("system", "language", "EN");
+</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the constant string found in the configuration file.
+   If the named variable cannot be found, or its entry in the config file is
+   empty, the value of <tt>`def'</tt> is returned.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#get_config_argv" title="Reads a token list from the configuration file.">get_config_argv</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>,
+<a class="xref" href="#get_config_text" title="Returns a string translated to the current language.">get_config_text</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_config_int">get_config_int</a>(const char *section, const char *name, int def);</b></div><br>
+   Reads an integer variable from the current config file. See the comments 
+   about get_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_int" title="Writes an integer in the configuration file.">set_config_int</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#get_config_argv" title="Reads a token list from the configuration file.">get_config_argv</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_config_hex">get_config_hex</a>(const char *section, const char *name, int def);</b></div><br>
+   Reads an integer variable from the current config file, in hexadecimal 
+   format. See the comments about get_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_hex" title="Writes a hexadecimal integer in the configuration file.">set_config_hex</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#get_config_argv" title="Reads a token list from the configuration file.">get_config_argv</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>.</blockquote>
+<div class="al-api"><b>float <a name="get_config_float">get_config_float</a>(const char *section, const char *name, float def);</b></div><br>
+   Reads a floating point variable from the current config file. See the 
+   comments about get_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_float" title="Writes a float in the configuration file.">set_config_float</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#get_config_argv" title="Reads a token list from the configuration file.">get_config_argv</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_config_id">get_config_id</a>(const char *section, const char *name, int def);</b></div><br>
+   Reads a 4-letter driver ID variable from the current config file. See the 
+   comments about get_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_id" title="Writes a driver ID in the configuration file.">set_config_id</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#get_config_argv" title="Reads a token list from the configuration file.">get_config_argv</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>.</blockquote>
+<div class="al-api"><b>char **<a name="get_config_argv">get_config_argv</a>(const char *section, const char *name, int *argc);</b></div><br>
+   Reads a token list (words separated by spaces) from the current config
+   file. The token list is stored in a temporary buffer that will be clobbered
+   by the next call to get_config_argv(), so the data should not be expected
+   to persist.
+<p><b>Return value:</b>
+   Returns an argv style argument list and sets <tt>`argc'</tt> to the number of
+   retrieved tokens. If the variable is not present, returns NULL and sets 
+   argc to zero.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exconfig" title="Using the configuration routines.">exconfig</a>.</blockquote>
+<div class="al-api"><b>const char *<a name="get_config_text">get_config_text</a>(const char *msg);</b></div><br>
+   This function is primarily intended for use by internal library code, but 
+   it may perhaps be helpful to application programmers as well. It uses the 
+   <tt>`language.dat'</tt> or <tt>`XXtext.cfg'</tt> files (where XX is a language code) to look 
+   up a translated version of the parameter in the currently selected 
+   language.
+
+<p>
+   This is basically the same thing as calling get_config_string() with 
+   <tt>`[language]'</tt> as the section, <tt>`msg'</tt> as the variable name, and <tt>`msg'</tt> as the 
+   default value, but it contains some special code to handle Unicode format 
+   conversions. The <tt>`msg'</tt> parameter is always given in ASCII format, but the 
+   returned string will be converted into the current text encoding, with 
+   memory being allocated as required, so you can assume that this pointer 
+   will persist without having to manually allocate storage space for each 
+   string.
+
+<p>
+   Note that if you are planning on distributing your game on the Unix
+   platform there is a special issue with how to deal with the <tt>`language.dat'</tt>
+   file. Read section "Files shared by Allegro" of the chapter "Unix
+   specifics" to learn more about this.
+<p><b>Return value:</b>
+   Returns a suitable translation if one can be found or a copy of the 
+   parameter if nothing else is available. 
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#reload_config_texts" title="Reloads translated strings returned by get_config_text().">reload_config_texts</a>,
+<a class="xref" href="#Standard config variables" title="">Standard config variables</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_string">set_config_string</a>(const char *section, const char *name,
+                       const char *val);</b></div><br>
+   Writes a string variable to the current config file, replacing any 
+   existing value it may have, or removes the variable if <tt>`val'</tt> is NULL. The
+   section name may be set to NULL to write the variable to the root of the 
+   file, or used to control which section the variable is inserted into. The 
+   altered file will be cached in memory, and not actually written to disk 
+   until you call allegro_exit(). Note that you can only write to files in 
+   this way, so the function will have no effect if the current config 
+   source was specified with set_config_data() rather than set_config_file().
+
+<p>
+   As a special case, variable or section names that begin with a '#' 
+   character are treated specially and will not be read from or written to 
+   the disk. Addon packages can use this to store version info or other 
+   status information into the config module, from where it can be read with 
+   the get_config_string() function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#set_config_float" title="Writes a float in the configuration file.">set_config_float</a>,
+<a class="xref" href="#set_config_hex" title="Writes a hexadecimal integer in the configuration file.">set_config_hex</a>,
+<a class="xref" href="#set_config_int" title="Writes an integer in the configuration file.">set_config_int</a>,
+<a class="xref" href="#set_config_id" title="Writes a driver ID in the configuration file.">set_config_id</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_int">set_config_int</a>(const char *section, const char *name, int val);</b></div><br>
+   Writes an integer variable to the current config file. See the comments 
+   about set_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_int" title="Retrieves an integer from the configuration file.">get_config_int</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#set_config_float" title="Writes a float in the configuration file.">set_config_float</a>,
+<a class="xref" href="#set_config_hex" title="Writes a hexadecimal integer in the configuration file.">set_config_hex</a>,
+<a class="xref" href="#set_config_id" title="Writes a driver ID in the configuration file.">set_config_id</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_hex">set_config_hex</a>(const char *section, const char *name, int val);</b></div><br>
+   Writes an integer variable to the current config file, in hexadecimal 
+   format. See the comments about set_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_hex" title="Retrieves a hexadecimal value from the configuration file.">get_config_hex</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#set_config_float" title="Writes a float in the configuration file.">set_config_float</a>,
+<a class="xref" href="#set_config_int" title="Writes an integer in the configuration file.">set_config_int</a>,
+<a class="xref" href="#set_config_id" title="Writes a driver ID in the configuration file.">set_config_id</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_float">set_config_float</a>(const char *section, const char *name, float val);</b></div><br>
+   Writes a floating point variable to the current config file. See the 
+   comments about set_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_float" title="Retrieves a float from the configuration file.">get_config_float</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#set_config_hex" title="Writes a hexadecimal integer in the configuration file.">set_config_hex</a>,
+<a class="xref" href="#set_config_int" title="Writes an integer in the configuration file.">set_config_int</a>,
+<a class="xref" href="#set_config_id" title="Writes a driver ID in the configuration file.">set_config_id</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_config_id">set_config_id</a>(const char *section, const char *name, int val);</b></div><br>
+   Writes a 4-letter driver ID variable to the current config file. See the
+   comments about set_config_string().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_id" title="Retrieves a driver ID from a configuration file.">get_config_id</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#set_config_float" title="Writes a float in the configuration file.">set_config_float</a>,
+<a class="xref" href="#set_config_hex" title="Writes a hexadecimal integer in the configuration file.">set_config_hex</a>,
+<a class="xref" href="#set_config_int" title="Writes an integer in the configuration file.">set_config_int</a>.</blockquote>
+<div class="al-api"><b>int <a name="list_config_entries">list_config_entries</a>(const char *section, const char ***names);</b></div><br>
+   This function can be used to get a list of all entries in the given config
+   section. The names parameter is a pointer to an array of strings. If it
+   points to a NULL pointer, the list will be allocated, else it will be
+   re-allocated. You should free the list again with free_config_entries if you
+   don't need it anymore, or you can pass it again to list_config_entries and
+   the memory will be re-used. See the following example for how you can use it,
+   it will print out the complete contents of the current configuration:
+<blockquote class="code"><pre>
+   int i, n;
+   char const **sections = NULL;
+   char const **entries = NULL;
+
+   /* List all entries not in any section. */
+   n = <a href="#list_config_entries" class="autotype" title="Lists the names of all entries in a config section">list_config_entries</a>(NULL, &amp;entries);
+   for (i = 0; i < n; i++)
+      printf(" %s=\"%s\"\n", entries[i], <a href="#get_config_string" class="autotype" title="Retrieves a string from the configuration file.">get_config_string</a>(
+             NULL, entries[i], "-"));
+
+   /* List all sections (and entries in them). */
+   n = <a href="#list_config_sections" class="autotype" title="Lists the names of all sections available in the current configuration.">list_config_sections</a>(&amp;sections);
+   /* loop through all section names */
+   for (i = 0; i < n; i++)
+   {
+      int j, m;
+      printf("%s\n", sections[i]);
+      m = <a href="#list_config_entries" class="autotype" title="Lists the names of all entries in a config section">list_config_entries</a>(sections[i], &amp;entries);
+      /* loop through all entries in the section */
+      for (j = 0; j < m; j++)
+      {
+          printf(" %s=\"%s\"\n", entries[j], <a href="#get_config_string" class="autotype" title="Retrieves a string from the configuration file.">get_config_string</a>(
+             sections[i], entries[j], "-"));
+      }
+   }
+   /* It is enough to free the arrays once at the end. */
+   <a href="#free_config_entries" class="autotype" title="Frees memory allocated for config entry lists.">free_config_entries</a>(&amp;sections);
+   <a href="#free_config_entries" class="autotype" title="Frees memory allocated for config entry lists.">free_config_entries</a>(&amp;entries);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns the number of valid strings in the names array.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#list_config_sections" title="Lists the names of all sections available in the current configuration.">list_config_sections</a>,
+<a class="xref" href="#free_config_entries" title="Frees memory allocated for config entry lists.">free_config_entries</a>.</blockquote>
+<div class="al-api"><b>int <a name="list_config_sections">list_config_sections</a>(const char ***names);</b></div><br>
+   The names parameter is a pointer to an array of strings. If it points to a
+   NULL pointer, the list will be allocated, else it will be re-allocated. After
+   the function returns, it will contain the names of all sections in the
+   current configuration. Use free_config_entries to free the allocated memory
+   again. See list_config_entries for more information and an example how to use
+   it.
+<p><b>Return value:</b>
+   Returns the number of valid strings in the names array.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#list_config_entries" title="Lists the names of all entries in a config section">list_config_entries</a>,
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>,
+<a class="xref" href="#free_config_entries" title="Frees memory allocated for config entry lists.">free_config_entries</a>.</blockquote>
+<div class="al-api"><b>int <a name="free_config_entries">free_config_entries</a>(const char ***names);</b></div><br>
+
+<p>
+   Once you are done with the string arrays filled in by list_config_entries and
+   list_config_sections, you can free them again with this function. The passed
+   array pointer will be set to NULL, and you directly can pass the same pointer
+   again to list_config_entries or list_config_sections later - but you also
+   could pass them again without freeing first, since the memory is re-allocated
+   when the pointer is not NULL.
+
+<p>
+   See list_config_entries for an example of how to use it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#list_config_entries" title="Lists the names of all entries in a config section">list_config_entries</a>,
+<a class="xref" href="#list_config_sections" title="Lists the names of all sections available in the current configuration.">list_config_sections</a>.</blockquote>
+<br><center><h2><a name="Standard config variables">Standard config variables</a></h2></center><p>
+Allegro uses these standard variables from the configuration file:
+<ul><li>
+[system]<br>
+   Section containing general purpose variables:
+<ul><li>
+system = x<br>
+   Specifies which system driver to use. This is currently only useful on 
+   Linux, for choosing between the X-Windows ("XWIN") or console ("LNXC") 
+   modes.
+<li>
+keyboard = x<br>
+   Specifies which keyboard layout to use. The parameter is the name of a 
+   keyboard mapping file produced by the keyconf utility, and can either be 
+   a fully qualified file path or a base name like <tt>`us'</tt> or <tt>`uk'</tt>. If the 
+   latter, Allegro will look first for a separate config file with that name 
+   (eg. <tt>`uk.cfg'</tt>) and then for an object with that name in the <tt>`keyboard.dat'</tt>
+   file (eg. <tt>`UK_CFG'</tt>). The config file or <tt>`keyboard.dat'</tt> file can be stored 
+   in the same directory as the program, or in the location pointed to by 
+   the ALLEGRO environment variable. Look in the <tt>`keyboard.dat'</tt> file to see 
+   what mappings are currently available.
+<li>
+language = x<br>
+   Specifies which language file to use for error messages and other bits of 
+   system text. The parameter is the name of a translation file, and can 
+   either be a fully qualified file path or a base name like <tt>`en'</tt> or <tt>`es'</tt>. If
+   the latter, Allegro will look first for a separate config file with a 
+   name in the form <tt>`entext.cfg'</tt>, and then for an object with that name in 
+   the <tt>`language.dat'</tt> file (eg. <tt>`ENTEXT_CFG'</tt>). The config file or 
+   <tt>`language.dat'</tt> file can be stored in the same directory as the program, or 
+   in the location pointed to by the ALLEGRO environment variable.
+
+   Look in the <tt>`language.dat'</tt> file to see which mappings are currently
+   available. If there is none for your language, you can create it using the
+   English one as model, and even send it to the Allegro development team to
+   include it in future releases.
+<li>
+disable_screensaver = x<br>
+   Specifies whether to disable the screensaver: 0 to never disable it, 1 to
+   disable it in fullscreen mode only and 2 to always disable it. Default is 1.
+<li>
+menu_opening_delay = x<br>
+   Sets how long the menus take to auto-open. The time is given in
+   milliseconds (default is <tt>`300'</tt>). Specifying `-1' will disable the 
+   auto-opening feature.
+<li>
+XInitThreads = x<br>
+   If this is set to 0, the X11 port will not call XInitThreads. This can have
+   slight performance advantages and was required on some broken X11 servers,
+   but it makes Allegro incompatible with other X11 libraries like Mesa.
+</ul><li>
+[graphics]<br>
+   Section containing graphics configuration information, using the
+   variables:
+<ul><li>
+gfx_card = x<br>
+   Specifies which graphics driver to use when the program requests 
+   GFX_AUTODETECT. Multiple possible drivers can be suggested with extra 
+   lines in the form `gfx_card1 = x', `gfx_card2 = x', etc, or you can 
+   specify different drivers for each mode and color depth with variables in 
+   the form `gfx_card_24bpp = x', `gfx_card_640x480x16 = x', etc.
+<li>
+gfx_cardw = x<br>
+   Specifies which graphics driver to use when the program requests 
+   GFX_AUTODETECT_WINDOWED. This variable functions exactly like
+   gfx_card in all other respects. If it is not set, Allegro will look
+   for the gfx_card variable.
+<li>
+disable_vsync = x<br>
+   Specifies whether to disable synchronization with the vertical blank when
+   page-flipping (yes or no). Disabling synchronization may increase the
+   frame rate on slow systems, at the expense of introducing flicker on fast
+   systems.
+<li>
+vbeaf_driver = x<br>
+   DOS and Linux only: specifies where to look for the VBE/AF driver 
+   (vbeaf.drv). If this variable is not set, Allegro will look in the same 
+   directory as the program, and then fall back on the standard locations 
+   (<tt>`c:\'</tt> for DOS, <tt>`/usr/local/lib'</tt>, <tt>`/usr/lib'</tt>, <tt>`/lib'</tt>, and <tt>`/'</tt> for Linux, or 
+   the directory specified with the VBEAF_PATH environment variable).
+<li>
+framebuffer = x<br>
+   Linux only: specifies what device file to use for the fbcon driver. If 
+   this variable is not set, Allegro checks the FRAMEBUFFER environment 
+   variable, and then defaults to <tt>`/dev/fb0'</tt>.
+<li>
+force_centering = x<br>
+   Unix/X11 only: specifies whether to force window centering in fullscreen
+   mode when the XWFS driver is used (yes or no). Enabling this setting may
+   cause some artifacts to appear on KDE desktops.
+<li>
+disable_direct_updating = x<br>
+   Windows only: specifies whether to disable direct updating when the 
+   GFX_DIRECTX_WIN driver is used in color conversion mode (yes or no).
+   Direct updating can cause artifacts to be left on the desktop when the 
+   window is moved or minimized; disabling it results in a significant
+   performance loss.
+</ul><li>
+[mouse]<br>
+   Section containing mouse configuration information, using the variables:
+<ul><li>
+mouse = x<br>
+   Mouse driver type. Available DOS drivers are:
+<blockquote class="text"><pre>
+      MICK - mickey mode driver (normally the best)
+      I33  - int 0x33 callback driver
+      POLL - timer polling (for use under NT)
+</pre></blockquote>
+   Linux console mouse drivers are:
+<blockquote class="text"><pre>
+      MS   - Microsoft serial mouse
+      IMS  - Microsoft serial mouse with Intellimouse extension
+      LPS2 - PS2 mouse
+      LIPS - PS2 mouse with Intellimouse extension
+      GPMD - GPM repeater data (Mouse Systems protocol)
+      EV   - Event interfaces (EVDEV)</pre></blockquote>
+<li>
+num_buttons = x<br>
+   Sets the number of mouse buttons viewed by Allegro. You don't normally
+   need to set this variable because Allegro will autodetect it. You can only
+   use it to restrict the set of actual mouse buttons to zero or positive
+   values, negative values will be ignored.
+<li>
+emulate_three = x<br>
+   Sets whether to emulate a third mouse button by detecting chords of the 
+   left and right buttons (yes or no). Defaults to no.
+<li>
+mouse_device = x<br>
+   Linux only: specifies the name of the mouse device file (eg. 
+   <tt>`/dev/mouse'</tt>).
+<li>
+ev_absolute = x<br>
+   Linux only: specifies the mode for the default EV input:
+      0 - relative mode: pointer position changes if the input moves,
+      1 - absolute mode: pointer position is the input position.
+   If unspecified, the mode is relative.
+   If the device supports several tools (such as a graphic tablet), the
+   default input is the mouse. If the device has only one tool (e.g. a
+   normal mouse) the default input is this tool. All additional tools
+   work in absolute mode.
+<li>
+ev_min_x = x<br>
+ev_max_x = x<br>
+ev_min_y = x<br>
+ev_max_y = x<br>
+ev_min_z = x<br>
+ev_max_z = x<br>
+   Linux only: for absolute EV inputs, minimum and maximum value. By default
+   this information is autodetected.  If you want to use only part of a
+   tablet, you need to set the entries for X and Y axis by hand.
+<li>
+ev_abs_to_rel_x = x<br>
+ev_abs_to_rel_y = x<br>
+ev_abs_to_rel_z = x<br>
+   Linux only: scaling factor for tablet mouse speed.  Defaults to 1.
+   This is used only when the input sends absolute events (tablet, joystick,
+   etc.) and the cursor should behave like a mouse.
+   If you are using a mouse on a tablet, you need to set these entries
+   for X and Y axis (try numbers between 1 and 40).
+<li>
+mouse_accel_factor = x<br>
+   Windows only: specifies the mouse acceleration factor. Defaults to 1.
+   Set it to 0 in order to disable mouse acceleration. 2 accelerates twice
+   as much as 1.
+</ul><li>
+[sound]<br>
+   Section containing sound configuration information, using the variables:
+<ul><li>
+digi_card = x<br>
+   Sets the driver to use for playing digital samples.
+<li>
+midi_card = x<br>
+   Sets the driver to use for MIDI music.
+<li>
+digi_input_card = x<br>
+   Sets the driver to use for digital sample input.
+<li>
+midi_input_card = x<br>
+   Sets the driver to use for MIDI data input.
+<li>
+digi_voices = x<br>
+   Specifies the minimum number of voices to reserve for use by the digital 
+   sound driver. How many are possible depends on the driver.
+<li>
+midi_voices = x<br>
+   Specifies the minimum number of voices to reserve for use by the MIDI 
+   sound driver. How many are possible depends on the driver.
+<li>
+digi_volume = x<br>
+   Sets the volume for digital sample playback, from 0 to 255.
+<li>
+midi_volume = x<br>
+   Sets the volume for midi music playback, from 0 to 255.
+<li>
+quality = x<br>
+   Controls the sound quality vs. performance tradeoff for the sample mixing 
+   code. This can be set to any of the values:<blockquote class="text"><pre>
+      0 - fast mixing of 8-bit data into 16-bit buffers
+      1 - true 16-bit mixing (requires a 16-bit stereo sound card)
+      2 - interpolated 16-bit mixing</pre></blockquote>
+<li>
+flip_pan = x<br>
+   Toggling this between 0 and 1 reverses the left/right panning of samples, 
+   which might be needed because some SB cards get the stereo image the wrong
+   way round.
+<li>
+sound_freq = x<br>
+   DOS, Unix and BeOS: sets the sample frequency. With the SB driver, 
+   possible rates are 11906 (any), 16129 (any), 22727 (SB 2.0 and above), 
+   and 45454 (only on SB 2.0 or SB16, not the stereo SB Pro driver). On the 
+   ESS Audiodrive, possible rates are 11363, 17046, 22729, or 44194. On the 
+   Ensoniq Soundscape, possible rates are 11025, 16000, 22050, or 48000. On 
+   the Windows Sound System, possible rates are 11025, 22050, 44100, or 
+   48000. Don't worry if you set some other number by mistake: Allegro will 
+   automatically round it to the closest supported frequency.
+<li>
+sound_bits = x<br>
+   Unix and BeOS: sets the preferred number of bits (8 or 16).
+<li>
+sound_stereo = x<br>
+   Unix and BeOS: selects mono or stereo output (0 or 1).
+<li>
+sound_port = x<br>
+   DOS only: sets the sound card port address (this is usually 220).
+<li>
+sound_dma = x<br>
+   DOS only: sets the sound card DMA channel (this is usually 1).
+<li>
+sound_irq = x<br>
+   DOS only: sets the sound card IRQ number (this is usually 7).
+<li>
+fm_port = x<br>
+   DOS only: sets the port address of the OPL synth (this is usually 388).
+<li>
+mpu_port = x<br>
+   DOS only: sets the port address of the MPU-401 MIDI interface (this is 
+   usually 330).
+<li>
+mpu_irq = x<br>
+   DOS only: sets the IRQ for the MPU-401 (this is usually the same as 
+   sound_irq).
+<li>
+ibk_file = x<br>
+   DOS only: specifies the name of a .IBK file which will be used to replace 
+   the standard Adlib patch set.
+<li>
+ibk_drum_file = x<br>
+   DOS only: specifies the name of a .IBK file which will be used to replace 
+   the standard set of Adlib percussion patches.
+<li>
+oss_driver = x<br>
+   Unix only: sets the OSS device driver name. Usually <tt>`/dev/dsp'</tt> or 
+   <tt>`/dev/audio'</tt>, but could be a particular device (e.g. <tt>`/dev/dsp2'</tt>).
+<li>
+oss_numfrags = x<br>
+oss_fragsize = x<br>
+   Unix only: sets number of OSS driver fragments (buffers) and size of each 
+   buffer in samples. Buffers are filled with data in the interrupts where 
+   interval between subsequent interrupts is not less than 10 ms. If 
+   hardware can play all information from buffers faster than 10 ms, then 
+   there will be clicks, when hardware have played all data and library has 
+   not prepared new data yet. On the other hand, if it takes too long for 
+   device driver to play data from all buffers, then there will be delays 
+   between action which triggers sound and sound itself.
+<li>
+oss_midi_driver = x<br>
+   Unix only: sets the OSS MIDI device name. Usually <tt>`/dev/sequencer'</tt>.
+<li>
+oss_mixer_driver = x<br>
+   Unix only: sets the OSS mixer device name. Usually <tt>`/dev/mixer'</tt>.
+<li>
+esd_server = x<br>
+   Unix only: where to find the ESD (Enlightened Sound Daemon) server.
+<li>
+alsa_card = x<br>
+alsa_pcmdevice = x<br>
+   Unix only: card number and PCM device for the ALSA 0.5 sound driver.
+<li>
+alsa_device = x<br>
+   Unix only: device name for the ALSA 0.9 sound driver. The format is
+   &lt;driver&gt;[:&lt;card&gt;,&lt;device&gt;], for example: `hw:0,1'.
+<li>
+alsa_mixer_device = x<br>
+   Unix only: mixer device name for the ALSA 0.9 sound driver. The
+   default is "default".
+<li>
+alsa_mixer_elem = x<br>
+   Unix only: mixer element name for the ALSA 0.9 driver. The default
+   is PCM.
+<li>
+alsa_numfrags = x<br>
+   Unix only: number of ALSA driver fragments (buffers).
+<li>
+alsa_fragsize = x<br>
+   Unix only: size of each ALSA fragment, in samples.
+<li>
+alsa_rawmidi_card = x<br>
+   Unix only: card number and device for the ALSA 0.5 midi driver.
+<li>
+alsa_rawmidi_device = x<br>
+   Unix only: device for the ALSA 0.5 midi driver or device name for
+   the ALSA 0.9 midi driver (see alsa_device for the format).
+<li>
+jack_client_name = x<br>
+   Sets the name with which Allegro should identify itself to the Jack
+   audio server.
+<li>
+jack_buffer_size = x<br>
+   Forces a buffer size for the transfer buffer from Allegro's mixer
+   to Jack.
+<li>
+be_midi_quality = x<br>
+   BeOS only: system MIDI synthesizer instruments quality. 0 uses low
+   quality 8-bit 11 kHz samples, 1 uses 16-bit 22 kHz samples.
+<li>
+be_midi_freq = x<br>
+   BeOS only: MIDI sample mixing frequency in Hz. Can be 11025, 22050 or
+   44100.
+<li>
+be_midi_interpolation = x<br>
+   BeOS only: specifies the MIDI samples interpolation method. 0 doesn't
+   interpolate, it's fast but has the worst quality; 1 does a fast
+   interpolation with better performances, but it's a bit slower than the
+   previous method; 2 does a linear interpolation between samples, it is the
+   slowest method but gives the best performances.
+<li>
+be_midi_reverb = x<br>
+   BeOS only: reverberation intensity, from 0 to 5. 0 disables it, 5 is the
+   strongest one.
+<li>
+ca_midi_quality = x<br>
+   MacOS X only: CoreAudio MIDI synthesizer rendering quality, from 0 to 127.
+   Higher qualities sound better but increase the CPU work load.
+<li>
+ca_midi_reverb = x<br>
+   MacOS X only: CoreAudio MIDI synthesizer reverberation intensity, from 0
+   to 5. 0 equals to a small room (low reverb), 5 to a plate (high reverb).
+<li>
+patches = x<br>
+   Specifies where to find the sample set for the DIGMID driver. This can 
+   either be a Gravis style directory containing a collection of .pat files 
+   and a <tt>`default.cfg'</tt> index, or an Allegro datafile produced by the pat2dat 
+   utility. If this variable is not set, Allegro will look either for a 
+   <tt>`default.cfg'</tt> or <tt>`patches.dat'</tt> file in the same directory as the program, 
+   the directory pointed to by the ALLEGRO environment variable, and the 
+   standard GUS directory pointed to by the ULTRASND environment variable.
+</ul><li>
+[midimap]<br>
+   If you are using the SB MIDI output or MPU-401 drivers with an external 
+   synthesiser that is not General MIDI compatible, you can use the midimap 
+   section of the config file to specify a patch mapping table for 
+   converting GM patch numbers into whatever bank and program change 
+   messages will select the appropriate sound on your synth. This is a real 
+   piece of self-indulgence. I have a Yamaha TG500, which has some great 
+   sounds but no GM patch set, and I just had to make it work somehow...
+
+   This section consists of a set of lines in the form:
+<ul><li>
+p&lt;n&gt; = bank0 bank1 prog pitch<br>
+   With this statement, n is the GM program change number (1-128), bank0 and 
+   bank1 are the two bank change messages to send to your synth (on 
+   controllers #0 and #32), prog is the program change message to send to 
+   your synth, and pitch is the number of semitones to shift everything that 
+   is played with that sound. Setting the bank change numbers to -1 will 
+   prevent them from being sent.
+
+   For example, the line:
+<blockquote class="text"><pre>
+      p36 = 0 34 9 12
+</pre></blockquote>
+   specifies that whenever GM program 36 (which happens to be a fretless 
+   bass) is selected, Allegro should send a bank change message #0 with a 
+   parameter of 0, a bank change message #32 with a parameter of 34, a 
+   program change with a parameter of 9, and then should shift everything up 
+   by an octave.
+</ul><li>
+[joystick]<br>
+   Section containing joystick configuration information, using the
+   variables:
+<ul><li>
+joytype = x<br>
+   Specifies which joystick driver to use when the program requests 
+   JOY_TYPE_AUTODETECT.
+<li>
+joystick_device = x<br>
+   BeOS and Linux only: specifies the name of the joystick device to be used
+   (as reported in the system joystick preferences under BeOS). The first
+   device found is used by default. If you want to specify the device for
+   each joystick, use variables of the form joystick_device_n, where n is
+   the joystick number.
+<li>
+throttle_axis = x<br>
+   Linux only: sets the axis number the throttle is located at. This
+   variable will be used for every detected joystick. If you want to specify
+   the axis number for each joystick individually, use variables of the form
+   throttle_axis_n, where n is the joystick number.
+</ul></ul>
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_config_file" title="Sets the configuration file.">set_config_file</a>,
+<a class="xref" href="#set_config_string" title="Writes a string in the configuration file.">set_config_string</a>,
+<a class="xref" href="#get_config_string" title="Retrieves a string from the configuration file.">get_config_string</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

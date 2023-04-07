@@ -14,6 +14,7 @@
 #include "BuyMenuGUI.h"
 
 #include "CameraMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -24,7 +25,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUITab.h"
@@ -148,7 +149,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(pController->GetPlayer());
+        m_pGUIInput = new GUIInputWrapper(pController->GetPlayer());
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
@@ -170,7 +171,7 @@ int BuyMenuGUI::Create(Controller *pController)
 	}
 	else
 	{
-		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
 	}
 
     // Make sure we have convenient points to teh containing GUI colleciton boxes that we will manipulate the positions of
@@ -252,7 +253,7 @@ int BuyMenuGUI::Create(Controller *pController)
 	else
 	{
 		// If we're not split screen horizontally, then stretch out the layout for all the relevant controls
-		int stretchAmount = g_FrameMan.GetResY() / 2;
+		int stretchAmount = g_WindowMan.GetResY() / 2;
 
 		if (!g_FrameMan.GetHSplit())
 		{

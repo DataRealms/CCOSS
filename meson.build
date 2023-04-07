@@ -1,24 +1,20 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++17', 'buildtype=release', 'b_lto=true'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
 deps=[]
-if host_machine.system() in ['linux','osx']
+if host_machine.system() in ['linux','darwin']
   deps = [
-    dependency('allegro', version:'<5.0'),
-    dependency('loadpng'),
+    dependency('sdl2'),
     dependency('flac'),
     dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
-    dependency('boost'), #needed for luabind
-    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2']),
+    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
+    dependency('tbb'),
   ]
-  if host_machine.system() == 'linux'
-    deps += dependency('x11')
-  endif
 endif
 
 elfname = 'CortexCommand'
@@ -29,13 +25,19 @@ extra_args=[]
 preprocessor_flags = []
 suffix=''
 
+if compiler.get_id() == 'clang'
+  error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
+endif
+
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   #suffix = 'x86_64'
+	if host_machine.system()=='linux'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
+	endif
 
   # Set preprocessor flags and cpp arguments according to build options
   buildtype_debug = get_option('debug')
@@ -45,14 +47,17 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     extra_args += ['-Wno-unknown-pragmas', '-Wno-deprecated-declarations', '-Wno-misleading-indentation'] # Disable #pragma region complaints and luabind auto_ptr warning
 
     if get_option('sane_warnings')
-      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-inconsistent-missing-override']
+      extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-unused-variable', '-Wno-unused-function']
+      if compiler.get_id() == 'clang'
+        extra_args += ['-Wno-inconsistent-missing-override', '-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
+      endif
     endif
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
-      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+      preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
@@ -120,6 +125,7 @@ source_inc_dirs = include_directories(
   'Activities',
   'Entities',
   'GUI',
+  'GUI/Wrappers',
   'Lua',
   'Managers',
   'Menus',
@@ -140,18 +146,32 @@ external_objects = []
 external_libs = []
 subdir('external')
 
+boost_dep = declare_dependency(include_directories: include_directories('external/include/common/boost_1_75'))
+meson.override_dependency('boost-175', boost_dep)
 install_rpath = prefix/get_option('fmod_dir')
+allegro_proj = subproject('allegro 4.4.3.1-custom')
+allegro_dep = dependency('allegro')
+loadpng_dep = dependency('loadpng')
+luabind_proj = subproject('luabind-0.7.1')
+luabind_dep = dependency('luabind')
+raknet_proj = subproject('RakNet')
+raknet_dep = dependency('RakNet')
+deps += [allegro_dep, loadpng_dep, luabind_dep, raknet_dep]
 
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
   link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
-  cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
+  cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),
   win_subsystem:'windows' # Windows mark as GUI app
 )
+
+if get_option('debug') and get_option('b_lto')
+  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
+endif
 
 #### Installing #####
 base_exclude_files = [

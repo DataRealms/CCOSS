@@ -281,18 +281,20 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
 		if (!m_StartingGoldAdjustedManually) {
-			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasy());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMedium());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
-			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
-			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCakeDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCakeDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasyDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasyDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMediumDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMediumDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHardDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHardDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNutsDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNutsDifficulty());
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MaxDifficulty && m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMaxDifficulty());
+			} else if (m_SelectedActivity->GetDefaultGoldMaxDifficulty() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMaxDifficulty());
 			} else {
 				m_StartingGoldSlider->SetValue(2000);
 			}
@@ -302,7 +304,6 @@ namespace RTE {
 			std::snprintf(goldString.data(), goldString.size(), " %c Infinite", -58);
 		} else {
 			int startGold = m_StartingGoldSlider->GetValue();
-			startGold = startGold - (startGold % 500);
 			std::snprintf(goldString.data(), goldString.size(), " %c %d oz", -58, startGold);
 		}
 		m_StartingGoldLabel->SetText(goldString);
@@ -325,7 +326,7 @@ namespace RTE {
 				}
 			}
 			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && hoveredTeam != m_LockedCPUTeam && (m_LockedCPUTeam == Activity::Teams::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
-				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_PRIMARY)) {
+				if (g_UInputMan.MenuButtonReleased(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
 					HandleClickOnPlayerTeamSetupCell(hoveredPlayer, hoveredTeam);
 				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
 					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);

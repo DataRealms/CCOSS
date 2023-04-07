@@ -38,6 +38,7 @@
 #include "ACDropShip.h"
 #include "HDFirearm.h"
 #include "Magazine.h"
+#include "ThrownDevice.h"
 
 namespace RTE {
 
@@ -392,8 +393,11 @@ Vector Scene::Area::GetCenterPoint() const
 {
     Vector areaCenter;
 
-    if (!m_BoxList.empty())
-    {
+    if (!m_BoxList.empty()) {
+		if (m_BoxList.size() == 1) {
+			return m_BoxList[0].GetCenter();
+		}
+
         float totalWeight = 0;
         for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
         {
@@ -919,12 +923,12 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // Pathfinding init
     if (initPathfinding)
     {
-        // Create the pathfinding stuff based on the current scene
+		// Create the pathfinding stuff based on the current scene
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-        // TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+		// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 		//int sceneArea = GetWidth() * GetHeight();
-        //unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
         for (int i = 0; i < m_pPathFinders.size(); ++i) {
@@ -1496,20 +1500,25 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
+	for (const std::string &group : *sceneObjectToSave->GetGroupList()) {
+		writer.NewPropertyWithValue("AddToGroup", group);
+	}
+
+	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
+	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
 	if (!isChildAttachable) {
-		writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
-		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
 	}
 
 	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
-	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
+	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
 		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
 		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
+		writer.NewPropertyWithValue("PinStrength", movableObjectToSave->GetPinStrength());
 	}
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
@@ -1538,6 +1547,20 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
 			writer.NewProperty("SpecialBehaviour_AddWound");
 			SaveSceneObject(writer, wound, true);
+		}
+
+		for (auto &[key, value] : mosRotatingToSave->GetStringValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("StringValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
+		}
+
+		for (auto &[key, value] : mosRotatingToSave->GetNumberValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("NumberValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
 		}
 	}
 
@@ -1586,6 +1609,11 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			}
 		}
 
+		if (const HeldDevice *heldDeviceToSave = dynamic_cast<const HeldDevice *>(sceneObjectToSave)) {
+			writer.NewPropertyWithValue("SpecialBehaviour_Activated", heldDeviceToSave->IsActivated());
+			writer.NewPropertyWithValue("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", heldDeviceToSave->GetActivationTimer().GetElapsedSimTimeMS());
+		}
+
 		if (const HDFirearm *hdFirearmToSave = dynamic_cast<const HDFirearm *>(sceneObjectToSave)) {
 			WriteHardcodedAttachableOrNone("Magazine", hdFirearmToSave->GetMagazine());
 			WriteHardcodedAttachableOrNone("Flash", hdFirearmToSave->GetFlash());
@@ -1597,8 +1625,26 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
 		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
+		int aiModeToSave = actorToSave->GetAIMode() == Actor::AIMode::AIMODE_SQUAD ? Actor::AIMode::AIMODE_GOTO : actorToSave->GetAIMode();
+		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO && (!actorToSave->GetMOMoveTarget() && g_SceneMan.ShortestDistance(actorToSave->GetMovePathEnd(), actorToSave->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(1.0F))) {
+			aiModeToSave = Actor::AIMode::AIMODE_SENTRY;
+		}
+		writer.NewPropertyWithValue("AIMode", aiModeToSave);
+		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO) {
+			const std::string addWaypointPropertyName = "SpecialBehaviour_AddAISceneWaypoint";
+			if (const MovableObject *actorToSaveMOMoveTarget = actorToSave->GetMOMoveTarget()) {
+				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSaveMOMoveTarget->GetPos());
+			} else {
+				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSave->GetMovePathEnd());
+				for (auto &[waypointPosition, waypointObject] : actorToSave->GetWaypointList()) {
+					writer.NewPropertyWithValue(addWaypointPropertyName, waypointPosition);
+				}
+			}
+		}
+
 		if (actorToSave->GetDeploymentID()) {
 			writer.NewPropertyWithValue("DeploymentID", actorToSave->GetDeploymentID());
 		}
@@ -2931,9 +2977,18 @@ void Scene::ResetPathFinding()
 
 void Scene::UpdatePathFinding()
 {
+    constexpr int nodeUpdatesPerCall = 100;
+    constexpr int maxUnupdatedMaterialAreas = 1000;
+
+    int nodesToUpdate = nodeUpdatesPerCall / g_ActivityMan.GetActivity()->GetTeamCount();
+    if (m_pTerrain->GetUpdatedMaterialAreas().size() > maxUnupdatedMaterialAreas) {
+        // Our list of boxes is getting too big and a bit out of hand, so clear everything.
+        nodesToUpdate = std::numeric_limits<int>::max();
+    }
+
     // Update our shared pathFinder
-    bool updated = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
-    if (updated) {
+    std::vector<int> updatedNodes = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas(), nodesToUpdate);
+    if (!updatedNodes.empty()) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
             if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) {
@@ -2943,14 +2998,13 @@ void Scene::UpdatePathFinding()
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
             g_MovableMan.OverrideMaterialDoors(true, team);
 
-            GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
+            GetPathFinder(static_cast<Activity::Teams>(team))->UpdateNodeList(updatedNodes);
 
             // Place back the material representation of all doors of this team so they are as we found them.
             g_MovableMan.OverrideMaterialDoors(false, team);
         }
     }
 
-    m_pTerrain->ClearUpdatedMaterialAreas();
     m_PartialPathUpdateTimer.Reset();
     m_PathfindingUpdated = true;
 }
@@ -3072,9 +3126,8 @@ void Scene::Update()
 		}
 	}
 
-    // Only update the pathfinding on occasion, as it's a costly operation
-    if (m_PartialPathUpdateTimer.IsPastRealMS(10000))
-    {
+    // Occasionally update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
+    if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {
         UpdatePathFinding();
     }
 }

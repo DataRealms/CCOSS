@@ -91,7 +91,7 @@ namespace RTE {
 		/// Creates a hash value out of a path to a ContentFile.
 		/// </summary>
 		/// <returns>Hash value of a path to a ContentFile.</returns>
-		size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
+		size_t GetHash() const;
 
 		/// <summary>
 		/// Converts hash values into file paths to ContentFiles.
@@ -142,6 +142,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Data Handling
+		/// <summary>
+		/// Reloads all BITMAPs in the cache from disk, allowing any changes to be reflected at runtime.
+		/// </summary>
+		static void ReloadAllBitmaps();
+
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
 		/// </summary>
@@ -246,6 +251,13 @@ namespace RTE {
 		/// <param name="asyncLoading">Whether to enable FMOD asynchronous loading or not. Should be disabled for loading audio files with Lua AddSound.</param>
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
 		FMOD::Sound * LoadAndReleaseSound(bool abortGameForInvalidSound = true, bool asyncLoading = true);
+
+		/// <summary>
+		/// Reloads a specific BITMAP in the cache from disk, allowing any changes to be reflected at runtime.
+		/// </summary>
+		/// <param name="filePath">The filepath to the bitmap we want to reload.</param>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when reloading this bitmap.</param>
+		static void ReloadBitmap(const std::string &filePath, int conversionMode = 0);
 #pragma endregion
 
 		/// <summary>

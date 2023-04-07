@@ -2,30 +2,33 @@ name: Compile check
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the development branch
+  # Triggers the workflow for pushes to master or development, for pull request events, and for the merge queue
   push:
     branches: [master, development]
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
+  merge_group:
+    types: [checks_requested]
 
   workflow_dispatch:
 
 jobs:
   build-linux:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
 
       - name: Install Dependencies
         run: |
           sudo apt-get update -yq
-          sudo apt-get install --no-install-recommends liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev
+          sudo apt-get install --no-install-recommends liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libopengl-dev ninja-build
+          sudo pip install meson==0.60.3
 
       - name: Install Clang
         # You may pin to the exact commit or the version.
@@ -35,26 +38,33 @@ jobs:
           # Set up cc/c++ executables
           cc: 1 # optional, default is 1
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: build-check-${{runner.os}}-regressed
-          max-size: 5G
+      - name: Build
+        env:
+          CC: "gcc"
+          CXX: "g++"
+        run: |
+          meson setup --buildtype=debug -Ddebug_type=full build
+          meson compile -C build
+
+  build-macos:
+    runs-on: macos-latest
+
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+
+      - name: Install Dependencies
+        run: |
+          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson
 
       - name: Build
-        # You may pin to the exact commit or the version.
-        # uses: BSFishy/meson-build@6f1930d878fd3eed3853c1c91285ec604c37f3a5
-        uses: BSFishy/meson-build@v1.0.3
         env:
-          CC: "clang"
-          CXX: "clang++"
-          CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
-        with:
-          # The action to run
-          setup-options: --buildtype=debug -Ddebug_type=full
-          meson-version: 0.60.0
-          ninja-version: 1.10.2
-          action: build
+          CC: "gcc-12"
+          CXX: "g++-12"
+        run: |
+          meson setup --buildtype=debug -Ddebug_type=full build
+          meson compile -C build
 
   build-windows:
     env:
@@ -69,7 +79,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1

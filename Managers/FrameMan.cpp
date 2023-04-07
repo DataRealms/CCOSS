@@ -481,10 +481,10 @@ namespace RTE {
 					blit(m_BackBuffer32.get(), m_ScreenDumpBuffer.get(), 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 
 					if (save_png(fullFileName, m_ScreenDumpNamePlaceholder.get(), nullptr) == 0) {
-						auto saveScreenDump = [fullFileName](BITMAP *screenDumpBuffer) {
+						auto saveScreenDump = [fullFileName](BITMAP *screenDumpBuffer, int resMultiplier) {
 							// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
-							BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(screenDumpBuffer), screenDumpBuffer->w, screenDumpBuffer->h);
-							blit(screenDumpBuffer, outputBitmap, 0, 0, 0, 0, screenDumpBuffer->w, screenDumpBuffer->h);
+							BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(screenDumpBuffer), screenDumpBuffer->w * resMultiplier, screenDumpBuffer->h * resMultiplier);
+							stretch_blit(screenDumpBuffer, outputBitmap, 0, 0, screenDumpBuffer->w, screenDumpBuffer->h, 0, 0, outputBitmap->w, outputBitmap->h);
 							// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
 							if (save_png(fullFileName, outputBitmap, nullptr) == 0) {
 								g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
@@ -493,7 +493,7 @@ namespace RTE {
 							}
 							destroy_bitmap(outputBitmap);
 						};
-						std::thread saveThread(saveScreenDump, m_ScreenDumpBuffer.get());
+						std::thread saveThread(saveScreenDump, m_ScreenDumpBuffer.get(), g_WindowMan.GetResMultiplier());
 						// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 						saveThread.detach();
 

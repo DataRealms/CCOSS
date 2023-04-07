@@ -73,7 +73,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore) {
+	void RTEAssertFunc(const std::string &description, const char *file, int line) {
 		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
 		RTEAbortFunc(description, file, line);
 	}

@@ -25,6 +25,10 @@ extra_args=[]
 preprocessor_flags = []
 suffix=''
 
+if compiler.get_id() == 'clang'
+  error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
+endif
+
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
   message('gcc detected')
@@ -53,7 +57,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     if debug_type == 'release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
-      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+      preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
@@ -158,7 +162,7 @@ deps += [allegro_dep, loadpng_dep, luabind_dep, raknet_dep]
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
   link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
-  cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
+  cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),

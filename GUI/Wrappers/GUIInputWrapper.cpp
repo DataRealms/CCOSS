@@ -118,24 +118,40 @@ namespace RTE {
 
 			if (m_Player >= 0 && m_Player < 4) {
 				if (m_NetworkMouseX[m_Player] != 0) {
-					if (m_NetworkMouseX[m_Player] < 0) m_NetworkMouseX[m_Player] = 1;
-					if (m_NetworkMouseX[m_Player] >= g_FrameMan.GetPlayerFrameBufferWidth(m_Player)) m_NetworkMouseX[m_Player] = g_FrameMan.GetPlayerFrameBufferWidth(m_Player) - 2;
+					if (m_NetworkMouseX[m_Player] < 0) {
+						m_NetworkMouseX[m_Player] = 1;
+					}
+					if (m_NetworkMouseX[m_Player] >= g_FrameMan.GetPlayerFrameBufferWidth(m_Player)) {
+						m_NetworkMouseX[m_Player] = g_FrameMan.GetPlayerFrameBufferWidth(m_Player) - 2;
+					}
 					mousePos.SetX(static_cast<float>(m_NetworkMouseX[m_Player]));
 				}
 				if (m_NetworkMouseY[m_Player] != 0) {
-					if (m_NetworkMouseY[m_Player] < 0) m_NetworkMouseY[m_Player] = 1;
-					if (m_NetworkMouseY[m_Player] >= g_FrameMan.GetPlayerFrameBufferHeight(m_Player)) m_NetworkMouseY[m_Player] = g_FrameMan.GetPlayerFrameBufferHeight(m_Player) - 2;
+					if (m_NetworkMouseY[m_Player] < 0) {
+						m_NetworkMouseY[m_Player] = 1;
+					}
+					if (m_NetworkMouseY[m_Player] >= g_FrameMan.GetPlayerFrameBufferHeight(m_Player)) {
+						m_NetworkMouseY[m_Player] = g_FrameMan.GetPlayerFrameBufferHeight(m_Player) - 2;
+					}
 					mousePos.SetY(static_cast<float>(m_NetworkMouseY[m_Player]));
 				}
 			} else {
 				if (m_NetworkMouseX[0] != 0) {
-					if (m_NetworkMouseX[0] < 0) m_NetworkMouseX[0] = 1;
-					if (m_NetworkMouseX[0] >= g_FrameMan.GetPlayerFrameBufferWidth(0)) m_NetworkMouseX[0] = g_FrameMan.GetPlayerFrameBufferWidth(0) - 2;
+					if (m_NetworkMouseX[0] < 0) {
+						m_NetworkMouseX[0] = 1;
+					}
+					if (m_NetworkMouseX[0] >= g_FrameMan.GetPlayerFrameBufferWidth(0)) {
+						m_NetworkMouseX[0] = g_FrameMan.GetPlayerFrameBufferWidth(0) - 2;
+					}
 					mousePos.SetX(static_cast<float>(m_NetworkMouseX[0]));
 				}
 				if (m_NetworkMouseY[0] != 0) {
-					if (m_NetworkMouseY[0] < 0) m_NetworkMouseY[0] = 1;
-					if (m_NetworkMouseY[0] >= g_FrameMan.GetPlayerFrameBufferHeight(0)) m_NetworkMouseY[0] = g_FrameMan.GetPlayerFrameBufferHeight(0) - 2;
+					if (m_NetworkMouseY[0] < 0) {
+						m_NetworkMouseY[0] = 1;
+					}
+					if (m_NetworkMouseY[0] >= g_FrameMan.GetPlayerFrameBufferHeight(0)) {
+						m_NetworkMouseY[0] = g_FrameMan.GetPlayerFrameBufferHeight(0) - 2;
+					}
 					mousePos.SetY(static_cast<float>(m_NetworkMouseY[0]));
 				}
 			}
@@ -170,9 +186,9 @@ namespace RTE {
 				m_MouseButtonsStates[2] = GUIInput::Up;
 			}
 
-			if (m_Player < 0 || m_Player >= 4) {
-				for (int i = 0; i < 4; i++) {
-					m_MouseWheelChange = g_UInputMan.MouseWheelMovedByPlayer(i);
+			if (m_Player <= Players::NoPlayer || m_Player >= Players::MaxPlayerCount) {
+				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+					m_MouseWheelChange = g_UInputMan.MouseWheelMovedByPlayer(player);
 					if (m_MouseWheelChange) {
 						break;
 					}
@@ -181,8 +197,7 @@ namespace RTE {
 				m_MouseWheelChange = g_UInputMan.MouseWheelMovedByPlayer(m_Player);
 			}
 		} else {
-			int player = m_Player;
-			if (player < 0 || player >= 4) { player = 0; }
+			int player = (m_Player <= Players::NoPlayer || m_Player >= Players::MaxPlayerCount) ? 0 : m_Player;
 
 			m_NetworkMouseButtonsEvents[player][0] = m_NetworkMouseButtonsStates[player][0] == GUIInput::Down ? (m_PrevNetworkMouseButtonsStates[player][0] == GUIInput::Up ? GUIInput::Pushed : GUIInput::Repeat) : (m_PrevNetworkMouseButtonsStates[player][0] == GUIInput::Down ? GUIInput::Released : GUIInput::None);
 			m_NetworkMouseButtonsEvents[player][1] = m_NetworkMouseButtonsStates[player][1] == GUIInput::Down ? (m_PrevNetworkMouseButtonsStates[player][1] == GUIInput::Up ? GUIInput::Pushed : GUIInput::Repeat) : (m_PrevNetworkMouseButtonsStates[player][1] == GUIInput::Down ? GUIInput::Released : GUIInput::None);
@@ -197,28 +212,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void GUIInputWrapper::UpdateKeyJoyMouseInput(float keyElapsedTime) {
+		//TODO Try to not use magic numbers throughout this method.
 		int mouseDenominator = g_WindowMan.GetResMultiplier();
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
 
-		// See how much to accelerate the joystick input based on how long the stick has been pushed around
+		// See how much to accelerate the joystick input based on how long the stick has been pushed around.
 		if (joyKeyDirectional.MagnitudeIsLessThan(0.95F)) { m_CursorAccelTimer->Reset(); }
 
 		float acceleration = 0.25F + static_cast<float>(std::min(m_CursorAccelTimer->GetElapsedRealTimeS(), 0.5)) * 20.0F;
 		Vector newMousePos = g_UInputMan.GetAbsoluteMousePosition();
 
-		// Manipulate the mouse position with the joysticks or keys
+		// Manipulate the mouse position with the joysticks or keys.
 		newMousePos.m_X += joyKeyDirectional.GetX() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration;
 		newMousePos.m_Y += joyKeyDirectional.GetY() * static_cast<float>(mouseDenominator) * keyElapsedTime * 15.0F * acceleration;
-		// Prevent mouse from flying out of the screen
-		newMousePos.m_X = std::max(0.0f, newMousePos.m_X);
-		newMousePos.m_Y = std::max(0.0f, newMousePos.m_Y);
-		// Pull in a bit so cursor doesn't completely disappear
-		newMousePos.m_X = std::min(static_cast<float>(g_WindowMan.GetResX() * mouseDenominator) - 3.0F, newMousePos.m_X);
-		newMousePos.m_Y = std::min(static_cast<float>(g_WindowMan.GetResY() * mouseDenominator) - 3.0F, newMousePos.m_Y);
+
+		// Keep the mouse within the bounds of the screen. Give it a bit of leeway on the right side, to account for the cursor sprite size.
+		newMousePos.m_X = std::clamp(newMousePos.m_X, 0.0F, static_cast<float>(g_WindowMan.GetResX() * mouseDenominator) - 3.0F);
+		newMousePos.m_Y = std::clamp(newMousePos.m_Y, 0.0F, static_cast<float>(g_WindowMan.GetResY() * mouseDenominator) - 3.0F);
 
 		g_UInputMan.SetAbsoluteMousePosition(newMousePos);
 
-		// Button states/presses, Primary - ACTUALLY make either button work, we don't have use for secondary in menus
+		// Update mouse button states and presses. In the menu, either left or mouse button works.
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MenuCursorButtons::MENU_EITHER)) {
 			m_MouseButtonsStates[0] = GUIInput::Down;
 			m_MouseButtonsEvents[0] = GUIInput::Repeat;

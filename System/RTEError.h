@@ -33,28 +33,24 @@ namespace RTE {
 	/// <param name="description">Message explaining the reason for aborting.</param>
 	/// <param name="file">The source file from which abort was called.</param>
 	/// <param name="line">The line abort was called from in the source file.</param>
-	extern void RTEAbortFunc(const std::string &description, const std::string &file, int line);
+	[[noreturn]] extern void RTEAbortFunc(const std::string &description, const std::string &file, int line);
 
 	#define RTEAbort(description) {							\
 		RTEAbortFunc(description, __FILE__, __LINE__);		\
 	}
 
 	/// <summary>
-	/// A souped-up, customized abort function that brings up a nice dialog box.
-	/// The user can choose to break or ignore the particular assertion failure once, or to always ignore.
+	/// An assert, which upon failure will abort.
 	/// </summary>
 	/// <param name="description">The description of the assertion.</param>
 	/// <param name="file">The source file in which the assertion is made.</param>
 	/// <param name="line">The line where the assertion is made.</param>
-	/// <param name="alwaysIgnore">A reference to a bool that is used in an "Always ignore" functionality.</param>
-	extern void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore);
+	[[noreturn]] extern void RTEAssertFunc(const std::string &description, const char *file, int line);
 
-	#define RTEAssert(expression, description) {									\
-		static bool RTEASSERT_alwaysIgnore = false;									\
-		bool RTEASSERT_success = expression;										\
-		if (!RTEASSERT_success && !RTEASSERT_alwaysIgnore) {						\
-			RTEAssertFunc(description, __FILE__, __LINE__, RTEASSERT_alwaysIgnore);	\
-		}																			\
+	#define RTEAssert(expression, description) {			\
+		if (!(expression)) {								\
+			RTEAssertFunc(description, __FILE__, __LINE__);	\
+		}													\
 	}
 }
 #endif

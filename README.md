@@ -45,6 +45,16 @@ The first build will take a while, but future ones should be quicker.
 
 If you want to use an IDE other than Visual Studio, you will have to build using meson. Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers.
 
+## Windows Subsystem for Linux (WSL)
+
+The Linux build can be built and run on Windows 10 using WSL by following the Linux [building](#building) and [running](#running) instructions.  
+Information on installing and using WSL can be found [here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+Building can be done directly from the Windows filesystem side, without having to clone the repositories on the Linux filesystem side.  
+By default WSL will mount your `C:` drive to `/mnt/c/`, or just `/c/`. From there you can navigate to the Source and Data directories to follow the meson build steps.
+
+This has been tested with WSL2 Ubuntu 22.04 but should work with other distributions and WSL1 as well.
+
 ***
 
 # Linux and macOS Build Instructions
@@ -73,7 +83,8 @@ For unspecified versions assume compatibility with the latest ubuntu LTS release
 
 3. Open a terminal in the Source Repository.
 
-4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)
+4. `meson setup build` or `meson setup --buildtype=debug build` for debug build (default is release build)  
+	For macOS you need to specify gcc, with `env CC=gcc-12 CXX=g++-12 meson setup build`
 
 5. `ninja -C build`
 
@@ -101,16 +112,13 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 - `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
 
 **Homebrew (macOS):**  
-`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng gcc@12 ninja meson`
-
-macOS meson setup requires specifying gcc, setup meson environment with:  
-`env CC=gcc-12 CXX=g++-12 meson setup build`
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng tbb gcc@12 ninja meson`
 
 **Arch Linux:**  
 `sudo pacman -S sdl2 tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  
 
-**Ubuntu >=20.04:**  
-`sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
+**Ubuntu >=22.04:**  
+`sudo apt-get install build-essential libsdl2-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.1-dev libminizip-dev liblz4-dev libpng++-dev libtbb-dev ninja-build python3-pip`  
 `sudo python3 -m pip install meson`
 
 **Fedora:**  

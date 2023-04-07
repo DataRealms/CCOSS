@@ -1,11 +1,11 @@
 /* ======================================================================================== */
 /* FMOD Core API - Common C/C++ header file.                                                */
-/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2020.                               */
+/* Copyright (c), Firelight Technologies Pty, Ltd. 2004-2023.                               */
 /*                                                                                          */
 /* This header is included by fmod.hpp (C++ interface) and fmod.h (C interface)             */
 /*                                                                                          */
 /* For more detail visit:                                                                   */
-/* https://fmod.com/resources/documentation-api?version=2.0&page=core-api-common.html       */
+/* https://fmod.com/docs/2.02/api/core-api-common.html                                      */
 /* ======================================================================================== */
 #ifndef _FMOD_COMMON_H
 #define _FMOD_COMMON_H
@@ -52,13 +52,11 @@ typedef struct FMOD_POLYGON        FMOD_POLYGON;
 typedef struct FMOD_GEOMETRY       FMOD_GEOMETRY;
 typedef struct FMOD_SYNCPOINT      FMOD_SYNCPOINT;
 typedef struct FMOD_ASYNCREADINFO  FMOD_ASYNCREADINFO;
-typedef unsigned int               FMOD_PORT_TYPE;
-typedef unsigned long long         FMOD_PORT_INDEX;
 
 /*
     FMOD constants
 */
-#define FMOD_VERSION    0x00020107                     /* 0xaaaabbcc -> aaaa = product version, bb = major version, cc = minor version.*/
+#define FMOD_VERSION    0x00020213                     /* 0xaaaabbcc -> aaaa = product version, bb = major version, cc = minor version.*/
 
 typedef unsigned int FMOD_DEBUG_FLAGS;
 #define FMOD_DEBUG_LEVEL_NONE                       0x00000000
@@ -88,6 +86,7 @@ typedef unsigned int FMOD_INITFLAGS;
 #define FMOD_INIT_STREAM_FROM_UPDATE                0x00000001
 #define FMOD_INIT_MIX_FROM_UPDATE                   0x00000002
 #define FMOD_INIT_3D_RIGHTHANDED                    0x00000004
+#define FMOD_INIT_CLIP_OUTPUT                       0x00000008
 #define FMOD_INIT_CHANNEL_LOWPASS                   0x00000100
 #define FMOD_INIT_CHANNEL_DISTANCEFILTER            0x00000200
 #define FMOD_INIT_PROFILE_ENABLE                    0x00010000
@@ -128,6 +127,8 @@ typedef unsigned int FMOD_SYSTEM_CALLBACK_TYPE;
 #define FMOD_SYSTEM_CALLBACK_RECORDLISTCHANGED      0x00001000
 #define FMOD_SYSTEM_CALLBACK_BUFFEREDNOMIX          0x00002000
 #define FMOD_SYSTEM_CALLBACK_DEVICEREINITIALIZE     0x00004000
+#define FMOD_SYSTEM_CALLBACK_OUTPUTUNDERRUN         0x00008000
+#define FMOD_SYSTEM_CALLBACK_RECORDPOSITIONCHANGED  0x00010000
 #define FMOD_SYSTEM_CALLBACK_ALL                    0xFFFFFFFF
 
 typedef unsigned int FMOD_MODE;
@@ -181,6 +182,10 @@ typedef unsigned int FMOD_CHANNELMASK;
 #define FMOD_CHANNELMASK_7POINT0                    (FMOD_CHANNELMASK_FRONT_LEFT | FMOD_CHANNELMASK_FRONT_RIGHT | FMOD_CHANNELMASK_FRONT_CENTER  | FMOD_CHANNELMASK_SURROUND_LEFT | FMOD_CHANNELMASK_SURROUND_RIGHT | FMOD_CHANNELMASK_BACK_LEFT      | FMOD_CHANNELMASK_BACK_RIGHT)
 #define FMOD_CHANNELMASK_7POINT1                    (FMOD_CHANNELMASK_FRONT_LEFT | FMOD_CHANNELMASK_FRONT_RIGHT | FMOD_CHANNELMASK_FRONT_CENTER  | FMOD_CHANNELMASK_LOW_FREQUENCY | FMOD_CHANNELMASK_SURROUND_LEFT  | FMOD_CHANNELMASK_SURROUND_RIGHT | FMOD_CHANNELMASK_BACK_LEFT | FMOD_CHANNELMASK_BACK_RIGHT)
 
+typedef unsigned long long FMOD_PORT_INDEX;
+#define FMOD_PORT_INDEX_NONE                        0xFFFFFFFFFFFFFFFF
+#define FMOD_PORT_INDEX_FLAG_VR_CONTROLLER          0x1000000000000000
+
 typedef int FMOD_THREAD_PRIORITY;
 /* Platform specific priority range */
 #define FMOD_THREAD_PRIORITY_PLATFORM_MIN           (-32 * 1024)
@@ -213,7 +218,7 @@ typedef unsigned int FMOD_THREAD_STACK_SIZE;
 #define FMOD_THREAD_STACK_SIZE_MIXER                (80  * 1024)
 #define FMOD_THREAD_STACK_SIZE_FEEDER               (16  * 1024)
 #define FMOD_THREAD_STACK_SIZE_STREAM               (96  * 1024)
-#define FMOD_THREAD_STACK_SIZE_FILE                 (48  * 1024)
+#define FMOD_THREAD_STACK_SIZE_FILE                 (64  * 1024)
 #define FMOD_THREAD_STACK_SIZE_NONBLOCKING          (112 * 1024)
 #define FMOD_THREAD_STACK_SIZE_RECORD               (16  * 1024)
 #define FMOD_THREAD_STACK_SIZE_GEOMETRY             (48  * 1024)
@@ -224,12 +229,12 @@ typedef unsigned int FMOD_THREAD_STACK_SIZE;
 #define FMOD_THREAD_STACK_SIZE_CONVOLUTION1         (16  * 1024)
 #define FMOD_THREAD_STACK_SIZE_CONVOLUTION2         (16  * 1024)
 
-typedef unsigned long long FMOD_THREAD_AFFINITY;
+typedef long long FMOD_THREAD_AFFINITY;
 /* Platform agnostic thread groupings */
-#define FMOD_THREAD_AFFINITY_GROUP_DEFAULT          0x8000000000000000
-#define FMOD_THREAD_AFFINITY_GROUP_A                0x8000000000000001
-#define FMOD_THREAD_AFFINITY_GROUP_B                0x8000000000000002
-#define FMOD_THREAD_AFFINITY_GROUP_C                0x8000000000000003
+#define FMOD_THREAD_AFFINITY_GROUP_DEFAULT          0x4000000000000000
+#define FMOD_THREAD_AFFINITY_GROUP_A                0x4000000000000001
+#define FMOD_THREAD_AFFINITY_GROUP_B                0x4000000000000002
+#define FMOD_THREAD_AFFINITY_GROUP_C                0x4000000000000003
 /* Thread defaults */
 #define FMOD_THREAD_AFFINITY_MIXER                  FMOD_THREAD_AFFINITY_GROUP_A
 #define FMOD_THREAD_AFFINITY_FEEDER                 FMOD_THREAD_AFFINITY_GROUP_C
@@ -244,7 +249,6 @@ typedef unsigned long long FMOD_THREAD_AFFINITY;
 #define FMOD_THREAD_AFFINITY_STUDIO_LOAD_SAMPLE     FMOD_THREAD_AFFINITY_GROUP_C
 #define FMOD_THREAD_AFFINITY_CONVOLUTION1           FMOD_THREAD_AFFINITY_GROUP_C
 #define FMOD_THREAD_AFFINITY_CONVOLUTION2           FMOD_THREAD_AFFINITY_GROUP_C
-
 /* Core mask, valid up to 1 << 62 */
 #define FMOD_THREAD_AFFINITY_CORE_ALL               0
 #define FMOD_THREAD_AFFINITY_CORE_0                 (1 << 0)
@@ -294,7 +298,6 @@ typedef unsigned long long FMOD_THREAD_AFFINITY;
 #define FMOD_MAX_SYSTEMS                            8
 #define FMOD_MAX_LISTENERS                          8
 #define FMOD_REVERB_MAXINSTANCES                    4
-#define FMOD_PORT_INDEX_NONE                        0xFFFFFFFFFFFFFFFF
 
 typedef enum FMOD_THREAD_TYPE
 {
@@ -434,6 +437,8 @@ typedef enum FMOD_OUTPUTTYPE
     FMOD_OUTPUTTYPE_NNAUDIO,
     FMOD_OUTPUTTYPE_WINSONIC,
     FMOD_OUTPUTTYPE_AAUDIO,
+    FMOD_OUTPUTTYPE_AUDIOWORKLET,
+    FMOD_OUTPUTTYPE_PHASE,
 
     FMOD_OUTPUTTYPE_MAX,
     FMOD_OUTPUTTYPE_FORCEINT = 65536
@@ -635,6 +640,14 @@ typedef enum FMOD_DSP_RESAMPLER
     FMOD_DSP_RESAMPLER_FORCEINT = 65536
 } FMOD_DSP_RESAMPLER;
 
+typedef enum FMOD_DSP_CALLBACK_TYPE
+{
+    FMOD_DSP_CALLBACK_DATAPARAMETERRELEASE,
+
+    FMOD_DSP_CALLBACK_MAX,
+    FMOD_DSP_CALLBACK_FORCEINT = 65536
+} FMOD_DSP_CALLBACK_TYPE;
+
 typedef enum FMOD_DSPCONNECTION_TYPE
 {
     FMOD_DSPCONNECTION_TYPE_STANDARD,
@@ -678,12 +691,27 @@ typedef enum FMOD_TAGDATATYPE
     FMOD_TAGDATATYPE_FORCEINT = 65536
 } FMOD_TAGDATATYPE;
 
+typedef enum FMOD_PORT_TYPE
+{
+    FMOD_PORT_TYPE_MUSIC,
+    FMOD_PORT_TYPE_COPYRIGHT_MUSIC,
+    FMOD_PORT_TYPE_VOICE,
+    FMOD_PORT_TYPE_CONTROLLER,
+    FMOD_PORT_TYPE_PERSONAL,
+    FMOD_PORT_TYPE_VIBRATION,
+    FMOD_PORT_TYPE_AUX,
+
+    FMOD_PORT_TYPE_MAX,
+    FMOD_PORT_TYPE_FORCEINT = 65536
+} FMOD_PORT_TYPE;
+
 /*
     FMOD callbacks
 */
 typedef FMOD_RESULT (F_CALL *FMOD_DEBUG_CALLBACK)           (FMOD_DEBUG_FLAGS flags, const char *file, int line, const char* func, const char* message);
 typedef FMOD_RESULT (F_CALL *FMOD_SYSTEM_CALLBACK)          (FMOD_SYSTEM *system, FMOD_SYSTEM_CALLBACK_TYPE type, void *commanddata1, void* commanddata2, void *userdata);
 typedef FMOD_RESULT (F_CALL *FMOD_CHANNELCONTROL_CALLBACK)  (FMOD_CHANNELCONTROL *channelcontrol, FMOD_CHANNELCONTROL_TYPE controltype, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbacktype, void *commanddata1, void *commanddata2);
+typedef FMOD_RESULT (F_CALL *FMOD_DSP_CALLBACK)             (FMOD_DSP *dsp, FMOD_DSP_CALLBACK_TYPE type, void *data);
 typedef FMOD_RESULT (F_CALL *FMOD_SOUND_NONBLOCK_CALLBACK)  (FMOD_SOUND *sound, FMOD_RESULT result);
 typedef FMOD_RESULT (F_CALL *FMOD_SOUND_PCMREAD_CALLBACK)   (FMOD_SOUND *sound, void *data, unsigned int datalen);
 typedef FMOD_RESULT (F_CALL *FMOD_SOUND_PCMSETPOS_CALLBACK) (FMOD_SOUND *sound, int subsound, unsigned int position, FMOD_TIMEUNIT postype);
@@ -766,6 +794,7 @@ typedef struct FMOD_ADVANCEDSETTINGS
     FMOD_DSP_RESAMPLER  resamplerMethod;
     unsigned int        randomSeed;
     int                 maxConvolutionThreads;
+    int                 maxOpusCodecs;
 } FMOD_ADVANCEDSETTINGS;
 
 typedef struct FMOD_TAG
@@ -842,6 +871,23 @@ typedef struct FMOD_ERRORCALLBACK_INFO
     const char                      *functionname;
     const char                      *functionparams;
 } FMOD_ERRORCALLBACK_INFO;
+
+typedef struct FMOD_CPU_USAGE
+{
+    float           dsp;
+    float           stream;
+    float           geometry;
+    float           update;
+    float           convolution1;
+    float           convolution2;
+} FMOD_CPU_USAGE;
+
+typedef struct FMOD_DSP_DATA_PARAMETER_INFO
+{
+    void           *data;
+    unsigned int    length;
+    int             index;
+} FMOD_DSP_DATA_PARAMETER_INFO;
 
 /*
     FMOD optional headers for plugin development

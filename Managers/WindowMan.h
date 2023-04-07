@@ -150,14 +150,14 @@ namespace RTE {
 		/// <summary>
 		/// Attempts to figure our what the hell the OS display arrangement is and what are the resolution capabilities for single or multi-display fullscreen.
 		/// </summary>
-		/// <param name="updateInfoOfDisplayPrimaryWindowIsAt">Whether to update the stored info of the display the primary window is currently positioned at.</param>
-		void MapDisplays(bool updateInfoOfDisplayPrimaryWindowIsAt = true);
+		/// <param name="updatePrimaryDisplayInfo">Whether to update the stored info of the display the primary window is currently positioned at.</param>
+		void MapDisplays(bool updatePrimaryDisplayInfo = true);
 
 		/// <summary>
 		/// Gets the horizontal resolution of the display the primary game window is currently positioned at.
 		/// </summary>
 		/// <returns>The horizontal resolution of the display the primary game window is currently positioned at.</returns>
-		int GetPriaryWindowDisplayWidth() const { return m_PrimaryWindowDisplayWidth; }
+		int GetPrimaryWindowDisplayWidth() const { return m_PrimaryWindowDisplayWidth; }
 
 		/// <summary>
 		/// Gets the vertical resolution of the display the primary game window is currently positioned at.

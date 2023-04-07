@@ -19,6 +19,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Clear() {
+		m_RootBoxMaxWidth = 0;
+
 		m_MainMenuScreenGUIControlManager = nullptr;
 		m_SubMenuScreenGUIControlManager = nullptr;
 		m_ActiveGUIControlManager = nullptr;
@@ -58,11 +60,13 @@ namespace RTE {
 		RTEAssert(m_SubMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 		m_SubMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuSubMenuGUI.ini");
 
+		m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
+
 		GUICollectionBox *mainScreenRootBox = dynamic_cast<GUICollectionBox *>(m_MainMenuScreenGUIControlManager->GetControl("root"));
-		mainScreenRootBox->Resize(g_WindowMan.GetResX(), mainScreenRootBox->GetHeight());
+		mainScreenRootBox->Resize(m_RootBoxMaxWidth, mainScreenRootBox->GetHeight());
 
 		GUICollectionBox *subMenuScreenRootBox = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("root"));
-		subMenuScreenRootBox->Resize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
+		subMenuScreenRootBox->Resize(m_RootBoxMaxWidth, g_WindowMan.GetResY());
 
 		m_MainMenuButtons[MenuButton::BackToMainButton] = dynamic_cast<GUIButton*>(m_SubMenuScreenGUIControlManager->GetControl("ButtonBackToMain"));
 		m_MainMenuButtons[MenuButton::BackToMainButton]->CenterInParent(true, false);
@@ -217,7 +221,7 @@ namespace RTE {
 		m_MainMenuScreens[MenuScreen::MetaGameNoticeScreen]->GUIPanel::AddChild(m_MainMenuButtons[MenuButton::BackToMainButton]);
 
 		m_MainMenuButtons[MenuButton::BackToMainButton]->SetVisible(true);
-		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((g_WindowMan.GetResX() - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, m_MainMenuButtons[MenuButton::MetaGameContinueButton]->GetYPos() + 25);
+		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((m_RootBoxMaxWidth - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, m_MainMenuButtons[MenuButton::MetaGameContinueButton]->GetYPos() + 25);
 
 		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("MetaLabel"));
 
@@ -255,7 +259,7 @@ namespace RTE {
 		m_MainMenuScreens[MenuScreen::CreditsScreen]->GUIPanel::AddChild(m_MainMenuButtons[MenuButton::BackToMainButton]);
 
 		m_MainMenuButtons[MenuButton::BackToMainButton]->SetVisible(true);
-		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((g_WindowMan.GetResX() - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, g_WindowMan.GetResY() - 35);
+		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((m_RootBoxMaxWidth - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, g_WindowMan.GetResY() - 35);
 
 		m_VersionLabel->SetVisible(false);
 

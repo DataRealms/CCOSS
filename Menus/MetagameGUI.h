@@ -1015,6 +1015,7 @@ protected:
         ANIMMODECOUNT
     };
 
+	int m_RootBoxMaxWidth; //!< The maximum width the root CollectionBox that holds all this menu's GUI elements. This is to constrain this menu to the primary window's display (left-most) while in multi-display fullscreen, otherwise positioning can get stupid.
 
     // Controller which controls this menu. Not owned
     Controller *m_pController;

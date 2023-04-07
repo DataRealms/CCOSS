@@ -86,6 +86,24 @@ namespace RTE {
 			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
 		};
 
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
+
+		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
+		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
+
+		bool m_ModsListFetched; //!< Whether the known mods list was fetched, even if no valid mod DataModules were added to it.
+		bool m_ScriptsListFetched; //!< Whether the known scripts list was fetched, even if no valid GlobalScripts were added to it.
+
+		/// <summary>
+		/// GUI elements that compose the Mod Manager menu screen.
+		/// </summary>
+		GUIButton *m_BackToMainButton;
+		GUIButton *m_ToggleModButton;
+		GUIButton *m_ToggleScriptButton;
+		GUIListBox *m_ModsListBox;
+		GUIListBox *m_ScriptsListBox;
+		GUILabel *m_ModOrScriptDescriptionLabel;
+
 #pragma region Mod and Script Handling
 		/// <summary>
 		/// Gets whether both lists were fetched, even if nothing valid was added to them.
@@ -113,24 +131,6 @@ namespace RTE {
 		/// </summary>
 		void ToggleScript();
 #pragma endregion
-
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
-
-		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
-		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
-
-		bool m_ModsListFetched; //!< Whether the known mods list was fetched, even if no valid mod DataModules were added to it.
-		bool m_ScriptsListFetched; //!< Whether the known scripts list was fetched, even if no valid GlobalScripts were added to it.
-
-		/// <summary>
-		/// GUI elements that compose the Mod Manager menu screen.
-		/// </summary>
-		GUIButton *m_BackToMainButton;
-		GUIButton *m_ToggleModButton;
-		GUIButton *m_ToggleScriptButton;
-		GUIListBox *m_ModsListBox;
-		GUIListBox *m_ScriptsListBox;
-		GUILabel *m_ModOrScriptDescriptionLabel;
 
 		// Disallow the use of some implicit methods.
 		ModManagerGUI(const ModManagerGUI &reference) = delete;

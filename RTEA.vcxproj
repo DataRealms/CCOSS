@@ -140,7 +140,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -191,7 +191,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -241,7 +241,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -292,7 +292,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -346,7 +346,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <OmitFramePointers>false</OmitFramePointers>
@@ -407,7 +407,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4566;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>%(ForcedIncludeFiles);StandardIncludes.h;</ForcedIncludeFiles>
       <OmitFramePointers>false</OmitFramePointers>

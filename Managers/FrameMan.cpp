@@ -496,7 +496,6 @@ namespace RTE {
 							bitmapToSaveCopy = nullptr;
 						};
 						std::thread saveThread(saveScreenDump, outputBitmap);
-						// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 						saveThread.detach();
 
 						saveSuccess = true;

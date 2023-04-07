@@ -71,7 +71,7 @@ int make_range(lua_State* L, Container& container)
 template <class Container>
 int make_range(lua_State* L, Container* container)
 {
-	return make_range(L, container->begin(), container->end());
+    return make_range(L, container->begin(), container->end());
 }
 
 struct iterator_converter

@@ -472,7 +472,7 @@ namespace RTE {
 
 					// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
 					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
-					stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer.get()->w, m_ScreenDumpBuffer.get()->h, 0, 0, outputBitmap->w, outputBitmap->h);
+					stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h, 0, 0, outputBitmap->w, outputBitmap->h);
 
 					auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
 						// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
@@ -482,7 +482,6 @@ namespace RTE {
 							g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + fullFileName);
 						}
 						destroy_bitmap(bitmapToSaveCopy);
-						bitmapToSaveCopy = nullptr;
 					};
 					std::thread saveThread(saveScreenDump, outputBitmap);
 					saveThread.detach();

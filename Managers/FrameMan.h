@@ -503,7 +503,7 @@ namespace RTE {
 		std::unique_ptr<BITMAP, BitmapDeleter> m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
 		std::unique_ptr<BITMAP, BitmapDeleter> m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		std::unique_ptr<BITMAP, BitmapDeleter> m_OverlayBitmap32; //!< 32bpp bitmap used for overlaying (fading in/out or darkening) the screen.
-		std::unique_ptr<BITMAP, BitmapDeleter> m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
+		std::unique_ptr<BITMAP, BitmapDeleter> m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps. This is used for color conversion between 32bpp and 24bpp so we can save the file.
 		std::unique_ptr<BITMAP, BitmapDeleter> m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
 		std::unique_ptr<BITMAP, BitmapDeleter> m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
 		std::unique_ptr<BITMAP, BitmapDeleter> m_ScreenDumpNamePlaceholder; //!< Dummy BITMAP for keeping naming continuity when saving ScreenDumps with multi-threading.

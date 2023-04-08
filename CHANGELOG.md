@@ -545,6 +545,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 <details><summary><b>Changed</b></summary>
 
+- Codebase now uses the C++20 standard.
+
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.

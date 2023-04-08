@@ -455,24 +455,14 @@ namespace RTE {
 			return -1;
 		}
 
-		int fileNumber = 0;
-		int maxFileTrys = 1000;
-		char fullFileName[256];
-
-		while (fileNumber < maxFileTrys) {
-			// Check for the file namebase001.png; if it exists, try 002, etc.
-			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase.c_str(), fileNumber++, ".png");
-			if (!std::filesystem::exists(fullFileName)) {
-				break;
-			}
-		}
+		std::string fullFileName = std::format("{}/{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
 
 		bool saveSuccess = false;
 
 		switch (modeToSave) {
 			case SingleBitmap:
 				if (bitmapToSave && save_png(nameBase.c_str(), bitmapToSave, m_Palette) == 0) {
-					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(nameBase));
+					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + nameBase);
 					saveSuccess = true;
 				}
 				break;
@@ -480,26 +470,24 @@ namespace RTE {
 				if (m_BackBuffer32 && m_ScreenDumpBuffer) {
 					blit(m_BackBuffer32.get(), m_ScreenDumpBuffer.get(), 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 
-					if (save_png(fullFileName, m_ScreenDumpNamePlaceholder.get(), nullptr) == 0) {
-						// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
-						BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
-						stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer.get()->w, m_ScreenDumpBuffer.get()->h, 0, 0, outputBitmap->w, outputBitmap->h);
+					// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
+					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
+					stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer.get()->w, m_ScreenDumpBuffer.get()->h, 0, 0, outputBitmap->w, outputBitmap->h);
 
-						auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
-							// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
-							if (save_png(fullFileName, bitmapToSaveCopy, nullptr) == 0) {
-								g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
-							} else {
-								g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
-							}
-							destroy_bitmap(bitmapToSaveCopy);
-							bitmapToSaveCopy = nullptr;
-						};
-						std::thread saveThread(saveScreenDump, outputBitmap);
-						saveThread.detach();
+					auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
+						// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
+						if (save_png(fullFileName.c_str(), bitmapToSaveCopy, nullptr) == 0) {
+							g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + fullFileName);
+						} else {
+							g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + fullFileName);
+						}
+						destroy_bitmap(bitmapToSaveCopy);
+						bitmapToSaveCopy = nullptr;
+					};
+					std::thread saveThread(saveScreenDump, outputBitmap);
+					saveThread.detach();
 
-						saveSuccess = true;
-					}
+					saveSuccess = true;
 				}
 				break;
 			case ScenePreviewDump:
@@ -514,8 +502,8 @@ namespace RTE {
 					blit(m_ScenePreviewDumpGradient.get(), scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer.get(), scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					if (SaveIndexedPNG(fullFileName, scenePreviewDumpBuffer) == 0) {
-						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
+					if (SaveIndexedPNG(fullFileName.c_str(), scenePreviewDumpBuffer) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + fullFileName);
 						saveSuccess = true;
 					}
 					destroy_bitmap(scenePreviewDumpBuffer);
@@ -525,8 +513,8 @@ namespace RTE {
 					BITMAP *depthConvertBitmap = create_bitmap_ex(24, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
 					blit(m_WorldDumpBuffer.get(), depthConvertBitmap, 0, 0, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
 
-					if (save_png(fullFileName, depthConvertBitmap, nullptr) == 0) {
-						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
+					if (save_png(fullFileName.c_str(), depthConvertBitmap, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + fullFileName);
 						saveSuccess = true;
 					}
 					destroy_bitmap(depthConvertBitmap);
@@ -537,7 +525,7 @@ namespace RTE {
 				return -1;
 		}
 		if (!saveSuccess) {
-			g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
+			g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + fullFileName);
 			return -1;
 		} else {
 			return 0;

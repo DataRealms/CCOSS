@@ -455,7 +455,22 @@ namespace RTE {
 			return -1;
 		}
 
+		// TODO: Remove this once GCC13 is released and switched to. std::format and std::chrono::time_zone are not part of latest libstdc++.
+#if _LINUX_OR_MACOSX_
+		std::chrono::time_point now = std::chrono::system_clock::now();
+		time_t currentTime = std::chrono::system_clock::to_time_t(now);
+		tm *localCurrentTime = std::localtime(&currentTime);
+		std::array<char, 32> formattedTimeAndDate = {};
+		std::strftime(formattedTimeAndDate.data(), sizeof(formattedTimeAndDate), "%F_%H-%M-%S", localCurrentTime);
+
+		std::array<char, 128> fullFileNameBuffer = {};
+		// We can't get sub-second precision from timeBuffer so we'll append absolute time to not overwrite the same file when dumping multiple times per second.
+		std::snprintf(fullFileNameBuffer.data(), sizeof(fullFileNameBuffer), "%s/%s_%s.%zi.png", System::GetScreenshotDirectory().c_str(), nameBase.c_str(), formattedTimeAndDate.data(), g_TimerMan.GetAbsoluteTime());
+
+		std::string fullFileName(fullFileNameBuffer.data());
+#else
 		std::string fullFileName = std::format("{}/{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
+#endif
 
 		bool saveSuccess = false;
 

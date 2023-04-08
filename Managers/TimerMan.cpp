@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#elif _LINUX_OR_MACOSX_
 #include <time.h>
 #endif
 

@@ -5,6 +5,7 @@
 #include "MOSRotating.h"
 #include "LimbPath.h"
 #include "ConsoleMan.h"
+#include "PrimitiveMan.h"
 
 namespace RTE {
 
@@ -1210,7 +1211,11 @@ namespace RTE {
 		// Fixup for walking backwards
 		Vector adjustedJointPos = jointPos;
 		if (limbPath.GetHFlip() != m_OwnerMOSR->IsHFlipped()) {
-			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX() * 2.0F;
+			// Adjust for joint offset
+			adjustedJointPos.m_X -= m_JointOffset.GetXFlipped(!limbPath.GetHFlip()).GetX();
+
+			// Adjust for walkpath itself being offcentre
+			adjustedJointPos.m_X -= limbPath.GetMiddleX();
 		}
 
 		limbPath.SetJointPos(adjustedJointPos);

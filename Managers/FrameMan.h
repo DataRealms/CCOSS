@@ -201,6 +201,15 @@ namespace RTE {
 		int CalculateTextHeight(const std::string &text, int maxWidth, bool isSmall);
 
 		/// <summary>
+		/// Gets a copy of the passed in string, split into multiple lines as needed to fit within the specified width limit, based on the font to use.
+		/// </summary>
+		/// <param name="stringToSplit">The string to get a split copy of.</param>
+		/// <param name="widthLimit">The maximum width each line of the string can be.</param>
+		/// <param name="fontToUse">The font the string will use for calculating the string's width.</param>
+		/// <returns>A copy of the passed in string, split into multiple lines as needed.</returns>
+		std::string SplitStringToFitWidth(const std::string &stringToSplit, int widthLimit, bool useSmallFont);
+
+		/// <summary>
 		/// Gets the message to be displayed on top of each player's screen.
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to get message from.</param>

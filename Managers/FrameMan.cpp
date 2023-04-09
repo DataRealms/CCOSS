@@ -322,6 +322,47 @@ namespace RTE {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string FrameMan::SplitStringToFitWidth(const std::string &stringToSplit, int widthLimit, bool useSmallFont) {
+		GUIFont *fontToUse = GetFont(useSmallFont);
+		auto SplitSingleLineAsNeeded = [this, &widthLimit, &fontToUse](std::string &lineToSplitAsNeeded) {
+			int numberOfScreenWidthsForText = static_cast<int>(std::ceil(static_cast<float>(fontToUse->CalculateWidth(lineToSplitAsNeeded)) / static_cast<float>(widthLimit)));
+			if (numberOfScreenWidthsForText > 1) {
+				int splitInterval = static_cast<int>(std::ceil(static_cast<float>(lineToSplitAsNeeded.size()) / static_cast<float>(numberOfScreenWidthsForText)));
+				for (int i = 1; i <= numberOfScreenWidthsForText; i++) {
+					size_t newLineCharacterPosition = std::min(static_cast<size_t>(i * splitInterval + (i - 1)), lineToSplitAsNeeded.size());
+					if (newLineCharacterPosition == lineToSplitAsNeeded.size()) {
+						break;
+					}
+					lineToSplitAsNeeded.insert(newLineCharacterPosition, "\n");
+				}
+			}
+		};
+
+		std::string splitString;
+		size_t previousNewLinePos = 0;
+		size_t nextNewLinePos = stringToSplit.find("\n");
+		if (nextNewLinePos != std::string::npos) {
+			while (nextNewLinePos != std::string::npos) {
+				nextNewLinePos = stringToSplit.find("\n", previousNewLinePos);
+				std::string currentLine = stringToSplit.substr(previousNewLinePos, nextNewLinePos - previousNewLinePos);
+				previousNewLinePos = nextNewLinePos + 1;
+
+				SplitSingleLineAsNeeded(currentLine);
+				splitString += currentLine;
+				if (nextNewLinePos != std::string::npos) {
+					splitString += "\n";
+				}
+			}
+		} else {
+			splitString = stringToSplit;
+			SplitSingleLineAsNeeded(splitString);
+		}
+
+		return splitString;
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::CalculateTextWidth(const std::string &text, bool isSmall) {
@@ -871,12 +912,12 @@ namespace RTE {
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= g_WindowMan.GetResX() / 2) { screenOcclusionOffsetX = 0; }
 
-				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
+				std::string screenTextToDraw = m_ScreenText[playerScreen];
 				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, ">>> " + m_ScreenText[playerScreen] + " <<<", GUIFont::Centre);
-				} else {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen], GUIFont::Centre);
+					screenTextToDraw = ">>> " + screenTextToDraw + " <<<";
 				}
+				screenTextToDraw = SplitStringToFitWidth(screenTextToDraw, bufferOrScreenWidth, false);
+				GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, screenTextToDraw, GUIFont::Centre);
 				textPosY += 12;
 			}
 

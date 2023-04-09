@@ -81,7 +81,8 @@ namespace RTE {
 		.def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
 		.def("FlashScreen", &FrameMan::FlashScreen)
 		.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
-		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth);
+		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth)
+		.def("SplitStringToFitWidth", &FrameMan::SplitStringToFitWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

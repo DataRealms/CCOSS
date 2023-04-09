@@ -2,7 +2,7 @@
 #include "unzip.h"
 #include "boost/functional/hash.hpp"
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if _LINUX_OR_MACOSX_
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
@@ -95,7 +95,7 @@ namespace RTE {
 		// Just make sure to really overwrite all old output, " - done! ✓" is shorter than "reading line 700"
 		std::string unicodedOutput = reportString + "            ";
 
-#if  defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if _LINUX_OR_MACOSX_
 		// Colorize output with ANSI escape code
 		std::string greenTick = "\033[1;32m✓\033[0;0m";
 		std::string yellowDot = "\033[1;33m•\033[0;0m";
@@ -128,7 +128,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::PrintToCLI(const std::string &stringToPrint) {
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if _LINUX_OR_MACOSX_
 		std::string outputString = stringToPrint;
 		// Color the words ERROR: and SYSTEM: red
 		std::regex regexError("(ERROR|SYSTEM):");

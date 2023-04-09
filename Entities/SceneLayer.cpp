@@ -212,14 +212,12 @@ namespace RTE {
 				PALETTE palette;
 				get_palette(palette);
 				if (save_png(bitmapPath.c_str(), bitmapToSave, palette) != 0) {
-					// TODO: This will not kill the main thread. Figure this out!
 					RTEAbort(std::string("Failed to save SceneLayerImpl bitmap to path and name: " + bitmapPath));
 				}
 				destroy_bitmap(bitmapToSave);
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
 			m_BitmapFile.SetDataPath(bitmapPath);
-			// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 			saveThread.detach();
 		}
 		return 0;

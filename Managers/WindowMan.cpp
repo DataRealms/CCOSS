@@ -81,6 +81,9 @@ namespace RTE {
 		CreatePrimaryRenderer();
 		CreatePrimaryTexture();
 
+		// SDL is kinda dumb about the taskbar icon so we need to poll after creating the window for it to show up, otherwise there's no icon till it starts polling in the main menu loop.
+		SDL_PollEvent(nullptr);
+
 		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		if (FullyCoversAllDisplays()) {

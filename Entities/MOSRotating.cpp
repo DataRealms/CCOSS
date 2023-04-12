@@ -1555,10 +1555,6 @@ void MOSRotating::PostTravel()
 // Description:     Updates this MOSRotating. Supposed to be done every frame.
 
 void MOSRotating::Update() {
-#ifndef RELEASE_BUILD
-	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-#endif
-
     MOSprite::Update();
 
     if (m_InheritEffectRotAngle) { m_EffectRotAngle = m_Rotation.GetRadAngle(); }

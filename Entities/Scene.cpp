@@ -1589,7 +1589,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());
 			writer.NewPropertyWithValue("BurstSpacing", aemitterToSave->GetBurstSpacing());
 			writer.NewPropertyWithValue("BurstTriggered", aemitterToSave->IsSetToBurst());
-			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngle());
+			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngleMatrix());
 			writer.NewPropertyWithValue("EmissionOffset", aemitterToSave->GetEmitOffset());
 			writer.NewPropertyWithValue("EmissionDamage", aemitterToSave->GetEmitDamage());
 			WriteHardcodedAttachableOrNone("Flash", aemitterToSave->GetFlash());

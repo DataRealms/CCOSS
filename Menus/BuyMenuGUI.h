@@ -33,6 +33,7 @@ class GUITab;
 class GUIListBox;
 class GUITextBox;
 class GUIButton;
+class GUIBitmap;
 class GUILabel;
 class SceneObject;
 class MovableObject;
@@ -336,6 +337,11 @@ public:
 	/// <param name="enabled">Whether or not equipment selection mode should be enabled.</param>
     void EnableEquipmentSelection(bool enabled);
 
+    /// <summary>
+    /// Updates the nesting level for every item in the cart.
+    /// </summary>
+    void UpdateItemNestingLevels();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -529,6 +535,22 @@ public:
 
 	void ClearCartList();
 
+    /// <summary>
+    /// Adds an item to the cart.
+    /// </summary>
+    /// <param name="name">The name shown for the item.</param>
+    /// <param name="rightText">The text that is shown right-aligned on the item (typically the cost of the item).</param>
+    /// <param name="pBitmap">The sprite image rendered for the item. This takes ownership!</param>
+    /// <param name="pEntity">The entity that this item refers to and will create when bought.</param>
+    /// <param name="extraIndex">Extra index for special indexing or reference that the item is associated with. Menu-specific.</param>
+    void AddCartItem(const std::string &name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
+
+    /// <summary>
+    /// Duplicates an item in the cart.
+    /// </summary>
+    /// <param name="itemIndex">The index of the item to duplicate.</param>
+    void DuplicateCartItem(const int itemIndex);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			LoadDefaultLoadoutToCart
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -702,6 +724,7 @@ protected:
         ITEMS,
         ORDER,
         OK,
+		CLEARORDER,
         FOCUSCOUNT
     };
 
@@ -748,6 +771,10 @@ protected:
     float m_MenuSpeed;
     // Which item in the currently focused list box we have selected
     int m_ListItemIndex;
+    // Which item we're dragging
+    int m_DraggedItemIndex;
+    // Whether we're currently dragging
+    bool m_IsDragging;
     // Which object was last hovered over by the mouse, to avoid repeatedly selecting hte same item over and over when mose only moves a pixel
     int m_LastHoveredMouseIndex;
     // Which item in each of the categories was last selected, so the scrolling doesn't have to be redone each time user flips back and forth
@@ -824,6 +851,8 @@ protected:
     GUILabel *m_pCostLabel;
     // The purchasing button
     GUIButton *m_pBuyButton;
+
+	GUIButton *m_ClearOrderButton; //!< Button for clearing the cart.
     // The save set button
     GUIButton *m_pSaveButton;
     // The clear set button

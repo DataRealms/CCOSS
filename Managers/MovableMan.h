@@ -886,14 +886,14 @@ public:
     /// <param name="box">The Box to get MOs within.</param>
     /// <param name="ignoreTeam">The team to ignore.</param>
     /// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); }
+    const std::vector<MovableObject *> * GetMOsInBox(const Box &box, int ignoreTeam) const;
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the given Box.
 	/// </summary>
 	/// <param name="box">The Box to get MOs within.</param>
 	/// <returns>Pointers to the MOs that are within the given Box.</returns>
-    const std::vector<MovableObject *> & GetMOsInBox(const Box &box) const { return GetMOsInBox(box, Activity::NoTeam); }
+    const std::vector<MovableObject *> * GetMOsInBox(const Box &box) const { return GetMOsInBox(box, Activity::NoTeam); }
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.
@@ -902,7 +902,7 @@ public:
 	/// <param name="radius">The radius to check for MOs within.</param>
 	/// <param name="ignoreTeam">The team to ignore.</param>
 	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam); }
+    const std::vector<MovableObject *> * GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the specified radius of the given centre position.
@@ -910,7 +910,7 @@ public:
 	/// <param name="centre">The position to check for MOs in.</param>
 	/// <param name="radius">The radius to check for MOs within.</param>
 	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position.</returns>
-    const std::vector<MovableObject *> & GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
+    const std::vector<MovableObject *> * GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

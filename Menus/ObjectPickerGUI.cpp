@@ -523,7 +523,7 @@ namespace RTE {
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Notification) {
 				if (guiEvent.GetControl() == m_GroupsList) {
-					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
+					if (guiEvent.GetMsg() == GUIListBox::MouseDown && (guiEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
 						SelectGroupByIndex(m_GroupsList->GetSelectedIndex());
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
 						const GUIListPanel::Item *groupListItem = m_GroupsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
@@ -534,7 +534,7 @@ namespace RTE {
 						SelectGroupByIndex(m_ShownGroupIndex, false);
 					}
 				} else if (guiEvent.GetControl() == m_ObjectsList) {
-					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
+					if (guiEvent.GetMsg() == GUIListBox::MouseDown && (guiEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
 						m_ObjectsList->ScrollToSelected();
 						if (const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected()) {
 							if (objectListItem->m_ExtraIndex >= 0) {

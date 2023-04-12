@@ -504,7 +504,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
 #ifdef DRAW_MOID_LAYER
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
 #else
-    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam, true);
     MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
 #endif
 
@@ -2184,38 +2184,36 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
     // The fraction of a pixel that we start from, to be added to the integer result positions for accuracy
     Vector startFraction(start.m_X - intPos[X], start.m_Y - intPos[Y]);
 
-    if (delta[X] == 0 && delta[Y] == 0)
-        return false;
+    if (delta[X] == 0 && delta[Y] == 0) {
+        return -1.0f;
+    }
 
     /////////////////////////////////////////////////////
     // Bresenham's line drawing algorithm preparation
 
-    if (delta[X] < 0)
-    {
+    if (delta[X] < 0) {
         increment[X] = -1;
         delta[X] = -delta[X];
-    }
-    else
+    } else {
         increment[X] = 1;
+    }
 
-    if (delta[Y] < 0)
-    {
+    if (delta[Y] < 0) {
         increment[Y] = -1;
         delta[Y] = -delta[Y];
-    }
-    else
+    } else {
         increment[Y] = 1;
+    }
 
     // Scale by 2, for better accuracy of the error at the first pixel
-    delta2[X] = delta[X] << 1;
-    delta2[Y] = delta[Y] << 1;
+    delta2[X] = delta[X] * 2;
+    delta2[Y] = delta[Y] * 2;
 
     // If X is dominant, Y is submissive, and vice versa.
     if (delta[X] > delta[Y]) {
         dom = X;
         sub = Y;
-    }
-    else {
+    } else {
         dom = Y;
         sub = X;
     }
@@ -2267,43 +2265,44 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
 
             // See if we found the looked-for pixel of the correct material,
             // Or an MO is blocking the way
-            if ((checkMat != g_MaterialAir && checkMat != ignoreMaterial) || (checkMOID != g_NoMOID && checkMOID != ignoreMOID))
-            {
+            if ((checkMat != g_MaterialAir && checkMat != ignoreMaterial) || (checkMOID != g_NoMOID && checkMOID != ignoreMOID)) {
                 hitObstacle = true;
                 obstaclePos.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
                 m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 break;
-            }
-            else
+            } else {
                 freePos.SetXY(intPos[X], intPos[Y]);
+            }
 
             skipped = 0;
 
             if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
-        }
-        else
+        } else {
             freePos.SetXY(intPos[X], intPos[Y]);
+        }
     }
 
     // Add the pixel fraction to the free position if there were any free pixels
-    if (domSteps != 0)
+    if (domSteps != 0) {
         freePos += startFraction;
+    }
 
     if (hitObstacle)
     {
         // Add the pixel fraction to the obstacle position, to acoid losing precision
         obstaclePos += startFraction;
-        // If there was an obstacle on the start position, return 0 as the distance to obstacle
-        if (domSteps == 0)
-            return 0;
-        // Calculate the length between the start and the found material pixel coords
-        else
+        if (domSteps == 0) {
+            // If there was an obstacle on the start position, return 0 as the distance to obstacle
+            return 0.0F;
+        } else {
+            // Calculate the length between the start and the found material pixel coords
             return g_SceneMan.ShortestDistance(obstaclePos, start).GetMagnitude();
+        }
     }
 
     // Didn't hit anything but air
-    return -1.0;
+    return -1.0F;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

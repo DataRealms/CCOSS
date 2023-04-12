@@ -911,7 +911,7 @@ int GameActivity::Start()
             continue;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
         // And occlusion
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
@@ -1178,7 +1178,7 @@ void GameActivity::UpdateEditing()
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
 
         // Check if the player says he's done editing, and if so, make sure he really is good to go
         if (m_pEditorGUI[player]->GetEditorGUIMode() == SceneEditorGUI::DONEEDITING)
@@ -1339,7 +1339,7 @@ void GameActivity::Update()
         bool skipBuyUpdate = false;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), team);
+        g_CameraMan.SetScreenTeam(team, ScreenOfPlayer(player));
 
         //////////////////////////////////////////////////////
         // Assure that Controlled Actor is a safe pointer

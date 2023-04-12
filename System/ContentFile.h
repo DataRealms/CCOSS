@@ -91,7 +91,7 @@ namespace RTE {
 		/// Creates a hash value out of a path to a ContentFile.
 		/// </summary>
 		/// <returns>Hash value of a path to a ContentFile.</returns>
-		size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
+		size_t GetHash() const;
 
 		/// <summary>
 		/// Converts hash values into file paths to ContentFiles.

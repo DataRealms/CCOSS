@@ -4,7 +4,7 @@
 namespace RTE {
 
 	class AllegroScreen;
-	class AllegroInput;
+	class GUIInputWrapper;
 	class GUIControlManager;
 	class GUILabel;
 	class GUIButton;
@@ -23,7 +23,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ModManagerGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ModManagerGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
+		ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -86,6 +86,24 @@ namespace RTE {
 			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
 		};
 
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
+
+		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
+		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
+
+		bool m_ModsListFetched; //!< Whether the known mods list was fetched, even if no valid mod DataModules were added to it.
+		bool m_ScriptsListFetched; //!< Whether the known scripts list was fetched, even if no valid GlobalScripts were added to it.
+
+		/// <summary>
+		/// GUI elements that compose the Mod Manager menu screen.
+		/// </summary>
+		GUIButton *m_BackToMainButton;
+		GUIButton *m_ToggleModButton;
+		GUIButton *m_ToggleScriptButton;
+		GUIListBox *m_ModsListBox;
+		GUIListBox *m_ScriptsListBox;
+		GUILabel *m_ModOrScriptDescriptionLabel;
+
 #pragma region Mod and Script Handling
 		/// <summary>
 		/// Gets whether both lists were fetched, even if nothing valid was added to them.
@@ -113,24 +131,6 @@ namespace RTE {
 		/// </summary>
 		void ToggleScript();
 #pragma endregion
-
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
-
-		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
-		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
-
-		bool m_ModsListFetched; //!< Whether the known mods list was fetched, even if no valid mod DataModules were added to it.
-		bool m_ScriptsListFetched; //!< Whether the known scripts list was fetched, even if no valid GlobalScripts were added to it.
-
-		/// <summary>
-		/// GUI elements that compose the Mod Manager menu screen.
-		/// </summary>
-		GUIButton *m_BackToMainButton;
-		GUIButton *m_ToggleModButton;
-		GUIButton *m_ToggleScriptButton;
-		GUIListBox *m_ModsListBox;
-		GUIListBox *m_ScriptsListBox;
-		GUILabel *m_ModOrScriptDescriptionLabel;
 
 		// Disallow the use of some implicit methods.
 		ModManagerGUI(const ModManagerGUI &reference) = delete;

@@ -41,6 +41,9 @@ namespace RTE {
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.
 
+	static constexpr int c_MinResX = 640; //!< Minimum game window width.
+	static constexpr int c_MinResY = 384; //!< Minimum game window height.
+
 	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
 	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.
 
@@ -72,6 +75,7 @@ namespace RTE {
 		g_MaterialGold = 2,
 		g_MaterialSand = 8,
 		g_MaterialGrass = 128,
+		g_MaterialRubber = 176,
 		g_MaterialDoor = 181
 	};
 
@@ -244,9 +248,9 @@ namespace RTE {
 	/// </summary>
 	enum MouseButtons {
 		MOUSE_NONE = -1,
-		MOUSE_LEFT = 0,
-		MOUSE_RIGHT,
+		MOUSE_LEFT = 1,
 		MOUSE_MIDDLE,
+		MOUSE_RIGHT,
 		MAX_MOUSE_BUTTONS
 	};
 
@@ -267,6 +271,15 @@ namespace RTE {
 		JOY_10,
 		JOY_11,
 		JOY_12,
+		JOY_13,
+		JOY_15,
+		JOY_16,
+		JOY_17,
+		JOY_18,
+		JOY_19,
+		JOY_20,
+		JOY_21,
+		JOY_22,
 		MAX_JOY_BUTTONS
 	};
 

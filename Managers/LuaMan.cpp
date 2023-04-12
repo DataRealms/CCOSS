@@ -153,14 +153,6 @@ namespace RTE {
 			RegisterLuaBindingsOfType(ManagerLuaBindings, SettingsMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, TimerMan),
 			RegisterLuaBindingsOfType(ManagerLuaBindings, UInputMan),
-			RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
-			RegisterLuaBindingsOfType(MiscLuaBindings, InputDevice),
-			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
-			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
-			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, GraphicalPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, LinePrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, ArcPrimitive),
@@ -176,7 +168,19 @@ namespace RTE {
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TrianglePrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TriangleFillPrimitive),
 			RegisterLuaBindingsOfType(PrimitiveLuaBindings, TextPrimitive),
-			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive)
+			RegisterLuaBindingsOfType(PrimitiveLuaBindings, BitmapPrimitive),
+			RegisterLuaBindingsOfType(InputLuaBindings, InputDevice),
+			RegisterLuaBindingsOfType(InputLuaBindings, InputElements),
+			RegisterLuaBindingsOfType(InputLuaBindings, JoyButtons),
+			RegisterLuaBindingsOfType(InputLuaBindings, JoyDirections),
+			RegisterLuaBindingsOfType(InputLuaBindings, MouseButtons),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_Keycode),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_Scancode),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_GameControllerButton),
+			RegisterLuaBindingsOfType(InputLuaBindings, SDL_GameControllerAxis),
+			RegisterLuaBindingsOfType(MiscLuaBindings, AlarmEvent),
+			RegisterLuaBindingsOfType(MiscLuaBindings, Directions),
+			RegisterLuaBindingsOfType(MiscLuaBindings, DrawBlendMode)
 		];
 
 		// Assign the manager instances to globals in the lua master state

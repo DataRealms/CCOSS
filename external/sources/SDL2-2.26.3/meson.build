@@ -1,0 +1,1 @@
+project('sdl2', 'c')

@@ -190,26 +190,42 @@ int ACrab::Create(const ACrab &reference) {
 	m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
 
-    m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
+	AtomGroup *atomGroupToUseAsFootGroupLFG = reference.m_pLFGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone()) : m_pLFGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupLFG, "Failed to fallback to using LFGFoot AtomGroup as LFGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a LFGFootGroup or LFGLeg Foot attachable!");
+
+	AtomGroup *atomGroupToUseAsFootGroupLBG = reference.m_pLBGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pLBGFootGroup->Clone()) : m_pLBGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupLBG, "Failed to fallback to using LBGFoot AtomGroup as LBGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a LBGFootGroup or LBGLeg Foot attachable!");
+
+	AtomGroup *atomGroupToUseAsFootGroupRFG = reference.m_pRFGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pRFGFootGroup->Clone()) : m_pRFGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupRFG, "Failed to fallback to using RFGFoot AtomGroup as RFGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a RFGFootGroup or RFGLeg Foot attachable!");
+
+	AtomGroup *atomGroupToUseAsFootGroupRBG = reference.m_pRBGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pRBGFootGroup->Clone()) : m_pRBGLeg->GetFootGroupFromFootAtomGroup();
+	RTEAssert(atomGroupToUseAsFootGroupRBG, "Failed to fallback to using RBGFoot AtomGroup as RBGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a RBGFootGroup or RBGLeg Foot attachable!");
+
+    m_pLFGFootGroup = atomGroupToUseAsFootGroupLFG;
     m_pLFGFootGroup->SetOwner(this);
-    m_BackupLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLFGFootGroup->Clone());
+    m_BackupLFGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupLFG->Clone());
+	m_BackupLFGFootGroup->RemoveAllAtoms();
     m_BackupLFGFootGroup->SetOwner(this);
-    m_BackupLFGFootGroup->SetLimbPos(reference.m_BackupLFGFootGroup->GetLimbPos());
-    m_pLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLBGFootGroup->Clone());
+    m_BackupLFGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupLFG->GetLimbPos());
+    m_pLBGFootGroup = atomGroupToUseAsFootGroupLBG;
     m_pLBGFootGroup->SetOwner(this);
-    m_BackupLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLBGFootGroup->Clone());
+    m_BackupLBGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupLBG->Clone());
+	m_BackupLBGFootGroup->RemoveAllAtoms();
     m_BackupLBGFootGroup->SetOwner(this);
-    m_BackupLBGFootGroup->SetLimbPos(reference.m_BackupLBGFootGroup->GetLimbPos());
-    m_pRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRFGFootGroup->Clone());
+    m_BackupLBGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupLFG->GetLimbPos());
+    m_pRFGFootGroup = atomGroupToUseAsFootGroupRFG;
     m_pRFGFootGroup->SetOwner(this);
-    m_BackupRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRFGFootGroup->Clone());
+    m_BackupRFGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupRFG->Clone());
+	m_BackupRFGFootGroup->RemoveAllAtoms();
     m_BackupRFGFootGroup->SetOwner(this);
-    m_BackupRFGFootGroup->SetLimbPos(reference.m_BackupRFGFootGroup->GetLimbPos());
-    m_pRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRBGFootGroup->Clone());
+    m_BackupRFGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupLFG->GetLimbPos());
+    m_pRBGFootGroup = atomGroupToUseAsFootGroupRBG;
     m_pRBGFootGroup->SetOwner(this);
-    m_BackupRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRBGFootGroup->Clone());
+    m_BackupRBGFootGroup = dynamic_cast<AtomGroup *>(atomGroupToUseAsFootGroupRBG->Clone());
+	m_BackupRBGFootGroup->RemoveAllAtoms();
     m_BackupRBGFootGroup->SetOwner(this);
-    m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
+    m_BackupRBGFootGroup->SetLimbPos(atomGroupToUseAsFootGroupLFG->GetLimbPos());
 
 	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
@@ -1041,7 +1057,7 @@ void ACrab::UpdateAI()
                 if (alarmVec.GetLargest() <= aeItr->m_Range * m_Perceptiveness)
                 {
 	 	    Vector zero;
-					
+
                     // Now check if we have line of sight to the alarm point
                     // Don't check all the way to the target, we are checking for no obstacles, and target will be an abstacle in itself
                     if (g_SceneMan.CastObstacleRay(sensorPos, alarmVec * 0.9, zero, zero, m_RootMOID, IgnoresWhichTeam(), g_MaterialGrass, 5) < 0)
@@ -1464,7 +1480,7 @@ void ACrab::UpdateAI()
                     m_DeviceState = SCANNING;
                     m_DigState = NOTDIGGING;
                 }
-            }  
+            }
         }
         // If we need to and can, pick up any weapon on the ground
         else if (m_pItemInReach)
@@ -1644,8 +1660,8 @@ void ACrab::UpdateAI()
     // Already in a jump
     if (m_ObstacleState == JUMPING)
     {
-        // Override the lateral control for the precise jump 
-        // Turn around 
+        // Override the lateral control for the precise jump
+        // Turn around
         if (m_MoveVector.m_X > 0 && m_LateralMoveState == LAT_LEFT)
             m_LateralMoveState = LAT_RIGHT;
         else if (m_MoveVector.m_X < 0 && m_LateralMoveState == LAT_RIGHT)
@@ -1667,7 +1683,7 @@ void ACrab::UpdateAI()
         if (m_JumpState == UPJUMP)
         {
 			Vector notUsed;
-			
+
             // Burn the jetpack
             m_Controller.SetState(BODY_JUMP, true);
 
@@ -1695,7 +1711,7 @@ void ACrab::UpdateAI()
         if (m_JumpState == APEXJUMP)
         {
 			Vector notUsed;
-			
+
             m_PointingTarget = m_JumpTarget;
 
             // We are falling again, and we can still see the target! start adjusting our aim and jet nozzle forward
@@ -1729,7 +1745,7 @@ void ACrab::UpdateAI()
         if (m_JumpState == LANDJUMP)
         {
 			Vector notUsed;
-			
+
             m_PointingTarget = m_JumpTarget;
 
             // Burn the jetpack for a short while to get forward momentum, but not too much
@@ -1771,7 +1787,7 @@ void ACrab::UpdateAI()
         if ((-m_MoveVector.m_Y > m_CharHeight * 0.66))// && (fabs(m_MoveVector.m_X) < m_CharHeight))
         {
 			Vector notUsed;
-			
+
             // Is there room to jump straight up for as high as we want?
             // ALso, has teh jetpack been given a rest since last attempt?
             if (m_JumpTimer.IsPastSimMS(3500) && !g_SceneMan.CastStrengthRay(cpuPos, Vector(0, m_MoveTarget.m_Y - cpuPos.m_Y), 5, notUsed, 3))
@@ -1822,9 +1838,9 @@ void ACrab::UpdateAI()
                     if (rise >= m_CharHeight)
                         break;
                 }
-				
+
 				Vector notUsed;
-				
+
                 // The rise is high enough to warrant looking across the trench for obstacles in the way of a jump
                 if (rise >= m_CharHeight && !g_SceneMan.CastStrengthRay(cpuPos, Vector((*pItr).m_X - cpuPos.m_X, 0), 5, notUsed, 3))
                 {
@@ -2025,7 +2041,7 @@ void ACrab::UpdateAI()
             {
                 m_ObstacleState = BACKSTEPPING;
                 m_StuckTimer.Reset();
-            }  
+            }
         }
         else
         {
@@ -2101,7 +2117,7 @@ void ACrab::Update()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
-    
+
 	Vector analogAim = m_Controller.GetAnalogAim();
     const float analogAimDeadzone = 0.1F;
 
@@ -2402,7 +2418,7 @@ void ACrab::Update()
             ///////////////////
             // RIGHT LEGS
 
-			if (m_pRFGLeg) { 
+			if (m_pRFGLeg) {
 				if (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5F)) {
 					m_StrideStart[RIGHTSIDE] = false;
 					m_StrideTimer[RIGHTSIDE].Reset();
@@ -2553,7 +2569,7 @@ void ACrab::Update()
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting
-    
+
     if (m_Controller.IsState(AI_MODE_SET))
     {
         if (m_Controller.IsState(PRESS_RIGHT))
@@ -2702,7 +2718,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
     // Raidus
 //    waypoint = m_Pos - targetPos;
-//    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
+//    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);
 // TODO: REMOVE THIS IS TEMP
 */
 
@@ -2828,7 +2844,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             int iconOff = m_apAIIcons[0]->w + 2;
             int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
-            
+
             if (m_AIMode == AIMODE_SENTRY)
             {
                 std::snprintf(str, sizeof(str), "%s", "Sentry");
@@ -2900,7 +2916,7 @@ void ACrab::SetLimbPathSpeed(int speedPreset, float speed)
 // Virtual method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 
 float ACrab::GetLimbPathPushForce() const
 {
@@ -2911,7 +2927,7 @@ float ACrab::GetLimbPathPushForce() const
 // Virtual method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
-//                  stuff in the scene with. 
+//                  stuff in the scene with.
 
 void ACrab::SetLimbPathPushForce(float force)
 {

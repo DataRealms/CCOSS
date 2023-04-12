@@ -16,6 +16,7 @@
 #include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
@@ -861,7 +862,7 @@ int GameActivity::Start()
     // Set the split screen config before the Scene (and it SceneLayers, specifially) are loaded
     int humanCount = GetHumanCount();
     // Depending on the resolution aspect ratio, split first horizontally (if wide screen)
-    if (((float)g_FrameMan.GetResX() / (float)g_FrameMan.GetResY()) >= 1.6)
+    if (((float)g_WindowMan.GetResX() / (float)g_WindowMan.GetResY()) >= 1.6)
         g_FrameMan.ResetSplitScreens(humanCount > 1, humanCount > 2);
     // or vertically (if 4:3-ish)
     else
@@ -970,27 +971,27 @@ int GameActivity::Start()
 					// If both splits, or just Vsplit, then in upper right quadrant
 					if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetVSplit()))
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
-						m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
+						m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
+						m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
 					}
 					// If only hsplit, then lower left quadrant
 					else
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-						m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+						m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+						m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 					}
 				}
 				// Screen 3 is lower left quadrant
 				else if (ScreenOfPlayer(player) == 2)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 				}
 				// Screen 4 is lower right quadrant
 				else if (ScreenOfPlayer(player) == 3)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				}
 			}
 		}

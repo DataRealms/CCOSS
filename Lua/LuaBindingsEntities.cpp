@@ -1256,6 +1256,9 @@ namespace RTE {
 
 		.property("ClassName", &Scene::Area::GetClassName)
 		.property("Name", &Scene::Area::GetName)
+		.property("FirstBox", &Scene::Area::GetFirstBox)
+		.property("Center", &Scene::Area::GetCenterPoint)
+		.property("RandomPoint", &Scene::Area::GetRandomPoint)
 
 		.def("Reset", &Scene::Area::Reset)
 		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)

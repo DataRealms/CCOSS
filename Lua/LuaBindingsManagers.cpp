@@ -81,7 +81,8 @@ namespace RTE {
 		.def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
 		.def("FlashScreen", &FrameMan::FlashScreen)
 		.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
-		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth);
+		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth)
+		.def("SplitStringToFitWidth", &FrameMan::SplitStringToFitWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,10 +392,12 @@ namespace RTE {
 		.def("ElementPressed", &UInputMan::ElementPressed)
 		.def("ElementReleased", &UInputMan::ElementReleased)
 		.def("ElementHeld", &UInputMan::ElementHeld)
-		.def("KeyPressed", &UInputMan::KeyPressed)
-		.def("KeyReleased", &UInputMan::KeyReleased)
-		.def("KeyHeld", &UInputMan::KeyHeld)
-		.def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
+		.def("KeyPressed", (bool(UInputMan::*)(SDL_Keycode) const) &UInputMan::KeyPressed)
+		.def("KeyReleased", (bool(UInputMan::*)(SDL_Keycode) const) &UInputMan::KeyReleased)
+		.def("KeyHeld", (bool(UInputMan::*)(SDL_Keycode) const) &UInputMan::KeyHeld)
+		.def("ScancodePressed", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyPressed)
+		.def("ScancodeReleased", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyReleased)
+		.def("ScancodeHeld", (bool(UInputMan::*)(SDL_Scancode) const) &UInputMan::KeyHeld)
 		.def("MouseButtonPressed", &UInputMan::MouseButtonPressed)
 		.def("MouseButtonReleased", &UInputMan::MouseButtonReleased)
 		.def("MouseButtonHeld", &UInputMan::MouseButtonHeld)
@@ -410,7 +413,6 @@ namespace RTE {
 		.def("AnalogAimValues", &UInputMan::AnalogAimValues)
 		.def("SetMouseValueMagnitude", &UInputMan::SetMouseValueMagnitude)
 		.def("AnalogAxisValue", &UInputMan::AnalogAxisValue)
-		.def("AnalogStickValues", &UInputMan::AnalogStickValues)
 		.def("MouseUsedByPlayer", &UInputMan::MouseUsedByPlayer)
 		.def("AnyMouseButtonPress", &UInputMan::AnyMouseButtonPress)
 		.def("GetMouseMovement", &UInputMan::GetMouseMovement)

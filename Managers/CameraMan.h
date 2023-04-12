@@ -37,6 +37,11 @@ namespace RTE {
 		~CameraMan() { Destroy(); }
 
 		/// <summary>
+		/// Resets the entire CameraMan to their default settings or values.
+		/// </summary>
+		void Reset() { Clear(); }
+
+		/// <summary>
 		/// Destroys and resets (through Clear()) the CameraMan object.
 		/// </summary>
 		void Destroy() { Clear(); }
@@ -264,7 +269,7 @@ namespace RTE {
 		float m_DefaultShakePerUnitOfRecoilEnergy; //!< How much the screen should shake per unit of energy for recoil, when screen shake amount is auto-calculated.
 		float m_DefaultShakeFromRecoilMaximum; //!< The maximum amount of screen shake recoil can cause, when screen shake is auto-calculated. This is ignored by per-firearm shake settings.
 
-		std::array<Screen, c_MaxScreenCount> m_Screens;
+		std::array<Screen, c_MaxScreenCount> m_Screens; //!< Array with the Screen of each player.
 
 		/// <summary>
 		/// Clears all the member variables of this CameraMan, effectively resetting the members of this abstraction level only.

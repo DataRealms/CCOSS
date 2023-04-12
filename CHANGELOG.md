@@ -470,9 +470,17 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Buy Menu Quality-of-Life improvements:  
+	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
+	Items in the cart will be indented to signify what actor's inventory they belong to.  
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
+
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
-	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon will shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
 
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
@@ -808,7 +816,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fix `MOSRotating` `GetWounds()` Lua function missing its implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 - Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
 
@@ -1203,7 +1213,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
+	In place of these functions, you can get all wounds with `GetWounds`, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.

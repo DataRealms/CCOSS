@@ -9,9 +9,11 @@
 
 namespace RTE {
 
+	bool RTEError::s_CurrentlyAborting = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ShowMessageBox(const std::string &message, bool abortMessage) {
+	void RTEError::ShowMessageBox(const std::string &message, bool abortMessage) {
 		const char *messageBoxTitle = "RTE Warning! (>_<)";
 		int messageBoxFlags = SDL_MESSAGEBOX_WARNING;
 
@@ -25,15 +27,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEAbortFunc(const std::string &description, const std::string &file, int line) {
-		// We attempt to save the game when aborting, but this could potentially lead to a recursive fault if the saving itself is aborting.
-		static bool currentAborting = false;
-		if (currentAborting) {
-			// We're going in a loop! Just ignore all future aborts and let the saving hopefully complete, until the stack unrolls.
-			return;
-		}
-
-		currentAborting = true;
+	void RTEError::AbortFunc(const std::string &description, const std::string &file, int line) {
+		s_CurrentlyAborting = true;
 
 		if (!System::IsInExternalModuleValidationMode()) {
 			// Attempt to save the game itself, so the player can hopefully resume where they were.
@@ -66,15 +61,14 @@ namespace RTE {
 
 			ShowMessageBox(abortMessage, true);
 		}
-
-		currentAborting = false;
+		s_CurrentlyAborting = false;
 		AbortAction;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEAssertFunc(const std::string &description, const char *file, int line, bool &alwaysIgnore) {
+	void RTEError::AssertFunc(const std::string &description, const char *file, int line) {
 		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-		RTEAbortFunc(description, file, line);
+		AbortFunc(description, file, line);
 	}
 }

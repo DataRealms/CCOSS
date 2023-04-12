@@ -519,9 +519,7 @@ void AreaPickerGUI::Update()
 
             if (anEvent.GetControl() == m_pAreasList)
             {
-                // Doubleclick
-//                if(anEvent.GetMsg() == GUIListBox::DoubleClicked)
-                if(anEvent.GetMsg() == GUIListBox::MouseDown)
+                if(anEvent.GetMsg() == GUIListBox::MouseDown && (anEvent.GetData() & GUIListBox::MOUSE_LEFT))
                 {
                     GUIListPanel::Item *pItem = m_pAreasList->GetSelected();
                     if (pItem)

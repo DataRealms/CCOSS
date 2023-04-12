@@ -113,7 +113,7 @@ namespace RTE {
 		int bottomRightCellY = static_cast<int>(std::floor(bottomRight.m_Y / static_cast<float>(m_CellSize)));
 
 		// Note - GetCellIdForCellCoords accounts for wrapping automatically, so we don't have to deal with it here.
-		auto& cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
+		auto &cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
 			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
 				const std::vector<MOID> &moidsInCell = cells[ignoreTeam + 1][GetCellIdForCellCoords(x, y)];
@@ -150,7 +150,7 @@ namespace RTE {
 		int bottomRightCellY = static_cast<int>(std::floor((center.m_Y + radius) / static_cast<float>(m_CellSize)));
 
 		// Note - GetCellIdForCellCoords accounts for wrapping automatically, so we don't have to deal with it here.
-		auto& cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
+		auto &cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
 		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
 			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
 				const std::vector<MOID> &moidsInCell = cells[ignoreTeam + 1][GetCellIdForCellCoords(x, y)];
@@ -182,7 +182,7 @@ namespace RTE {
 		// So let's sanity check this shit.
 		ignoreTeam = ignoreTeam < Activity::NoTeam || ignoreTeam > Activity::MaxTeamCount ? Activity::NoTeam : ignoreTeam;
 
-		auto& cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
+		auto &cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
 		return cells[ignoreTeam + 1][GetCellIdForCellCoords(cellX, cellY)];
 	}
 

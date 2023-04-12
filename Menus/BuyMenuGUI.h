@@ -724,6 +724,7 @@ protected:
         ITEMS,
         ORDER,
         OK,
+		CLEARORDER,
         FOCUSCOUNT
     };
 
@@ -850,6 +851,8 @@ protected:
     GUILabel *m_pCostLabel;
     // The purchasing button
     GUIButton *m_pBuyButton;
+
+	GUIButton *m_ClearOrderButton; //!< Button for clearing the cart.
     // The save set button
     GUIButton *m_pSaveButton;
     // The clear set button

@@ -743,7 +743,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
 	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
 
-	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
 
 - Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
 

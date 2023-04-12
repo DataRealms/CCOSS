@@ -322,24 +322,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, 
-	                                                                  bool includePositiveDamageAttachables,
-	                                                                  bool includeNegativeDamageAttachables, 
-	                                                                  bool includeNoDamageAttachables) {
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) {
 		auto *wounds = new std::vector<AEmitter *>();
-
 		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, *wounds);
 		return wounds;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LuaAdaptersMOSRotating::GetWoundsImpl(const MOSRotating *luaSelfObject, 
-	                                           bool includePositiveDamageAttachables, 
-	                                           bool includeNegativeDamageAttachables, 
-	                                           bool includeNoDamageAttachables,
-	                                           std::vector<AEmitter *> &wounds) {
+	void LuaAdaptersMOSRotating::GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds) {
 		wounds.insert(wounds.end(), luaSelfObject->GetWoundList().begin(), luaSelfObject->GetWoundList().end());
+
 		if (includePositiveDamageAttachables || includeNegativeDamageAttachables || includeNoDamageAttachables) {
 			for (const Attachable *attachable : luaSelfObject->GetAttachables()) {
 				bool attachableSatisfiesConditions = (includePositiveDamageAttachables && attachable->GetDamageMultiplier() > 0) ||

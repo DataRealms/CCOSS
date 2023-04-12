@@ -466,17 +466,17 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
-- Buy Menu Quality-of-Life improvements.
-	Shift-clicking an item in the cart will now empty the entire cart.
-	Items in the cart will be indented to signify what actor's inventory they belong to.
-	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
+- Buy Menu Quality-of-Life improvements:  
+	Shift-clicking an item in the cart will now empty the entire cart.  
+	Items in the cart will be indented to signify what actor's inventory they belong to.  
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
-	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon will shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
 
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
@@ -781,9 +781,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fix `MOSRotating`s GetWounds() Lua function missing it's implementation.
+- Fix `MOSRotating` `GetWounds()` Lua function missing its implementation.
 
-- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 </details>
 

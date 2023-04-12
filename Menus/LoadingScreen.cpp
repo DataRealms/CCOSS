@@ -49,7 +49,7 @@ namespace RTE {
 		if (!m_LoadingLogWriter) {
 			m_LoadingLogWriter = std::make_unique<Writer>("LogLoading.txt");
 			if (!m_LoadingLogWriter->WriterOK()) {
-				ShowMessageBox("Failed to instantiate the Loading Log writer!\nModule loading will proceed without being logged!");
+				RTEError::ShowMessageBox("Failed to instantiate the Loading Log writer!\nModule loading will proceed without being logged!");
 				m_LoadingLogWriter.reset();
 			}
 		}

@@ -2005,10 +2005,8 @@ void BuyMenuGUI::Update()
                 }
             }
 
-            // We do this down here, outside the m_pCartList control, because if we have a mouse-up event even outside the cart, we should stop dragging.
-            // Note this still isn't perfect. We don't get sent any notification whatsoever if the mouseup occurs outside the GUI panel...
-            // So, meh. That one is too tricky to properly fix.
-            if (anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
+            // We do this down here, outside the m_pCartList control, because if we have a mouse-up event even outside the cart, we should stop dragging. We also check UInputMan in case the mouse is released entirely outside of the buy menu.
+            if ((anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) || g_UInputMan.MouseButtonReleased(MouseButtons::MOUSE_LEFT, m_pController->GetPlayer())) {
                 m_DraggedItemIndex = -1;
                 m_IsDragging = false;
             } 

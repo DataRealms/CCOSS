@@ -74,7 +74,7 @@ void AHuman::Clear()
     m_JetTimeLeft = 0.0;
 	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
-	m_ActivateBGItem = false;
+	m_CanActivateBGItem = false;
 	m_TriggerPulled = false;
 	m_WaitingToReloadOffhand = false;
     m_ThrowTmr.Reset();
@@ -3322,14 +3322,14 @@ void AHuman::Update()
 
 			if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
 				if (m_Controller.IsState(WEAPON_FIRE)) {
-					if (!m_ActivateBGItem) {
+					if (!m_CanActivateBGItem) {
 						if (deviceAsFirearm->IsFullAuto()) {
 							deviceAsFirearm->Activate();
-							m_ActivateBGItem = (deviceAsFirearm->FiredOnce() || deviceAsFirearm->IsReloading()) && deviceAsFirearm->HalfwayToNextRound();
+							m_CanActivateBGItem = (deviceAsFirearm->FiredOnce() || deviceAsFirearm->IsReloading()) && deviceAsFirearm->HalfwayToNextRound();
 						} else if (!m_TriggerPulled) {
 							deviceAsFirearm->Activate();
 							if (deviceAsFirearm->FiredOnce()) {
-								m_ActivateBGItem = true;
+								m_CanActivateBGItem = true;
 								m_TriggerPulled = true;
 							}
 						}
@@ -3339,7 +3339,7 @@ void AHuman::Update()
 					m_TriggerPulled = false;
 				}
 			} else {
-				m_ActivateBGItem = true;
+				m_CanActivateBGItem = true;
 				if (m_Controller.IsState(WEAPON_FIRE)) {
 					device->Activate();
 					if (device->IsEmpty()) {
@@ -3355,13 +3355,13 @@ void AHuman::Update()
 			}
 
 			if (device->IsReloading()) {
-				m_ActivateBGItem = true;
+				m_CanActivateBGItem = true;
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 				device->SetSharpAim(m_SharpAimProgress);
 			}
 		} else {
-			m_ActivateBGItem = true;
+			m_CanActivateBGItem = true;
 			if (thrownDevice = dynamic_cast<ThrownDevice *>(device)) {
 				thrownDevice->SetSharpAim(isSharpAiming ? 1.0F : 0);
 				if (m_Controller.IsState(WEAPON_FIRE)) {
@@ -3410,16 +3410,16 @@ void AHuman::Update()
 			}
 		}
 	} else {
-		m_ActivateBGItem = true;
+		m_CanActivateBGItem = true;
 	}
 
 	if (HeldDevice *device = GetEquippedBGItem(); device && m_Status != INACTIVE) {
 		if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
 			if (m_Controller.IsState(WEAPON_FIRE)) {
-				if (m_ActivateBGItem && (!m_TriggerPulled || (deviceAsFirearm->IsFullAuto() && deviceAsFirearm->HalfwayToNextRound()))) {
+				if (m_CanActivateBGItem && (!m_TriggerPulled || (deviceAsFirearm->IsFullAuto() && deviceAsFirearm->HalfwayToNextRound()))) {
 					deviceAsFirearm->Activate();
 					if (deviceAsFirearm->FiredOnce()) {
-						m_ActivateBGItem = false;
+						m_CanActivateBGItem = false;
 						m_TriggerPulled = true;
 					}
 				}
@@ -3428,7 +3428,7 @@ void AHuman::Update()
 				m_TriggerPulled = false;
 			}
 		} else {
-			m_ActivateBGItem = false;
+			m_CanActivateBGItem = false;
 			if (m_Controller.IsState(WEAPON_FIRE)) {
 				device->Activate();
 			} else {
@@ -3442,13 +3442,13 @@ void AHuman::Update()
 		device->SetSharpAim(m_SharpAimProgress);
 
 		if (device->IsReloading()) {
-			m_ActivateBGItem = false;
+			m_CanActivateBGItem = false;
 			m_SharpAimTimer.Reset();
 			m_SharpAimProgress = 0;
 			device->SetSharpAim(m_SharpAimProgress);
 		}
 	} else {
-		m_ActivateBGItem = false;
+		m_CanActivateBGItem = false;
 	}
 
 	if (m_ArmsState == THROWING_PREP && !thrownDevice) {

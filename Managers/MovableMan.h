@@ -880,13 +880,22 @@ public:
 
 	unsigned int GetSimUpdateFrameNumber() const { return m_SimUpdateFrameNumber; }
 
+	/// <summary>
+	/// Gets pointers to the MOs that are within the given Box, and whose team is not ignored.
+	/// </summary>
+	/// <param name="box">The Box to get MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
+	/// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const;
+
     /// <summary>
     /// Gets pointers to the MOs that are within the given Box, and whose team is not ignored.
     /// </summary>
     /// <param name="box">The Box to get MOs within.</param>
     /// <param name="ignoreTeam">The team to ignore.</param>
     /// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> * GetMOsInBox(const Box &box, int ignoreTeam) const;
+	const std::vector<MovableObject *> *GetMOsInBox(const Box &box, int ignoreTeam) const { return GetMOsInBox(box, ignoreTeam, false); }
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the given Box.
@@ -901,8 +910,18 @@ public:
 	/// <param name="centre">The position to check for MOs in.</param>
 	/// <param name="radius">The radius to check for MOs within.</param>
 	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
 	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
-    const std::vector<MovableObject *> * GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const;
+	const std::vector<MovableObject *> *GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const;
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return GetMOsInRadius(centre, radius, ignoreTeam, false); }
 
 	/// <summary>
 	/// Gets pointers to the MOs that are within the specified radius of the given centre position.

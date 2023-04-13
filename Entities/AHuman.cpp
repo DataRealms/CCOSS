@@ -3325,7 +3325,7 @@ void AHuman::Update()
 					if (!m_CanActivateBGItem) {
 						if (deviceAsFirearm->IsFullAuto()) {
 							deviceAsFirearm->Activate();
-							m_CanActivateBGItem = (deviceAsFirearm->FiredOnce() || deviceAsFirearm->IsReloading()) && deviceAsFirearm->HalfwayToNextRound();
+							m_CanActivateBGItem = deviceAsFirearm->FiredOnce() && deviceAsFirearm->HalfwayToNextRound();
 						} else if (!m_TriggerPulled) {
 							deviceAsFirearm->Activate();
 							if (deviceAsFirearm->FiredOnce()) {

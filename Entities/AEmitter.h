@@ -168,6 +168,8 @@ ClassInfoGetters;
 
     float GetEmitAngle() const { return m_EmitAngle.GetRadAngle(); }
 
+    const Matrix & GetEmitAngleMatrix() const { return m_EmitAngle; }
+
 	/// <summary>
 	/// Gets the offset of the emission point from this' sprite center, which gets rotated with this.
 	/// </summary>

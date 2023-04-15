@@ -398,9 +398,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	// Yeah, this is dumb - read as double and cast. 
+	// This is because, for whatever fucking reason, iostream can save out floats at a precision that it's then unable to read...
 	GUIReader & GUIReader::operator>>(float &var) {
 		DiscardEmptySpace();
-		*m_Stream >> var;
+		double var2;
+		*m_Stream >> var2;
+		var = static_cast<float>(var2);
 		return *this;
 	}
 

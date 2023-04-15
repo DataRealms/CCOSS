@@ -9,7 +9,7 @@ namespace RTE {
 	class Activity;
 	class Scene;
 	class AllegroScreen;
-	class AllegroInput;
+	class GUIInputWrapper;
 	class AllegroBitmap;
 	class GUIControlManager;
 	class GUICollectionBox;
@@ -40,14 +40,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) { Clear(); Create(guiScreen, guiInput); }
+		ScenarioGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) { Clear(); Create(guiScreen, guiInput); }
 
 		/// <summary>
 		/// Makes the ScenarioGUI object ready for use.
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
+		void Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
 #pragma endregion
 
 #pragma region Setters
@@ -73,6 +73,8 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
+		int m_RootBoxMaxWidth; //!< The maximum width the root CollectionBox that holds all this menu's GUI elements. This is to constrain this menu to the primary window's display (left-most) while in multi-display fullscreen, otherwise positioning can get stupid.
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the ScenarioGUI.
 		ScenarioMenuUpdateResult m_UpdateResult; //!< The result of the ScenarioGUI update. See ScenarioMenuUpdateResult enumeration.

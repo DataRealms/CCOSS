@@ -240,6 +240,22 @@ void MovableMan::UnregisterObject(MovableObject * mo)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          PurgeAllMOs
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -564,7 +580,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 // Description:     Get a pointer to an Actor in the internal Actor list that is of a
 //                  specifc team and closest to a specific scene point.
 
-Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis)
+Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, bool onlyPlayerControllableActors, const Actor *excludeThis)
 {
     if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() || m_ActorRoster[team].empty())
         return 0;
@@ -579,7 +595,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (std::deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam) {
+            if ((*aIt) == excludeThis || (*aIt)->GetTeam() != Activity::NoTeam || (onlyPlayerControllableActors && !(*aIt)->IsPlayerControllable())) {
                 continue;
             }
 
@@ -597,7 +613,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (std::list<Actor *>::iterator aIt = m_ActorRoster[team].begin(); aIt != m_ActorRoster[team].end(); ++aIt)
         {
-			if ((*aIt) == pExcludeThis || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
+			if ((*aIt) == excludeThis || (onlyPlayerControllableActors && !(*aIt)->IsPlayerControllable()) || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
 				continue;
 			}
 
@@ -1365,7 +1381,7 @@ int MovableMan::GetAllActors(bool transferOwnership, std::list<SceneObject *> &a
             actorList.push_back(actor);
             addedCount++;
         }
-        else if (transferOwnership) 
+        else if (transferOwnership)
         {
             delete actor;
         }

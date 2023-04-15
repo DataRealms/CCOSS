@@ -120,6 +120,8 @@ public:
 
 	unsigned char GetScanCodeState(unsigned char scancode) const;
 
+	bool GetTextInput(std::string_view &text) const { text = m_TextInput; return !m_TextInput.empty(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMouseButtons
@@ -180,8 +182,10 @@ protected:
     // Keyboard buffer holding the key states
 	unsigned char m_KeyboardBuffer[KEYBOARD_BUFFER_SIZE];
 	unsigned char m_ScanCodeState[KEYBOARD_BUFFER_SIZE];
+	std::string m_TextInput;
+	bool m_HasTextInput;
 
-    // Mouse button states
+	// Mouse button states
     // Order:    Left, Middle, Right
 	int m_MouseButtonsEvents[3];
 	int m_MouseButtonsStates[3];

@@ -2,7 +2,7 @@
 #define _RTENETWORKMSG_
 
 #include "Constants.h"
-#include "RakNet/MessageIdentifiers.h"
+#include "MessageIdentifiers.h"
 
 namespace RTE {
 

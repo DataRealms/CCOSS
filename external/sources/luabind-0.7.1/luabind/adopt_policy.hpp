@@ -113,6 +113,7 @@ namespace luabind { namespace detail
 			void* obj;
 			void* held;
 
+			assert(crep && "adopt_pointer used with type that cannot be converted");
 			boost::tie(obj,held) = crep->allocate(L);
 
 			new(obj) object_rep(ptr, crep, object_rep::owner, delete_s<T>::apply);

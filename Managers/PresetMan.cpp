@@ -918,7 +918,7 @@ void PresetMan::ReloadAllScripts() const {
 	for (const DataModule *dataModule : m_pDataModules) {
 		dataModule->ReloadAllScripts();
 	}
-	g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded");
+	g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

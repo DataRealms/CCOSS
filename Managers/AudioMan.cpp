@@ -245,7 +245,46 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
+    void AudioMan::FinishAllLoopingSounds() {
+		if (m_AudioEnabled) {
+			int numberOfPlayingChannels;
+			FMOD::Channel *soundChannel;
+
+			FMOD_RESULT result = m_MobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing mobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+				return;
+			}
+
+			for (int i = 0; i < numberOfPlayingChannels; i++) {
+				result = m_MobileSoundChannelGroup->getChannel(i, &soundChannel);
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: Failed to get mobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+					return;
+				}
+				soundChannel->setLoopCount(0);
+			}
+
+			result = m_ImmobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing immobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+				return;
+			}
+
+			for (int i = 0; i < numberOfPlayingChannels; i++) {
+				result = m_ImmobileSoundChannelGroup->getChannel(i, &soundChannel);
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: Failed to get immobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+					return;
+				}
+				soundChannel->setLoopCount(0);
+			}
+		}
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
 			const std::string fullFilePath = g_PresetMan.FullModulePath(filePath);
 			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, fullFilePath.c_str(), loops); }
@@ -265,7 +304,8 @@ namespace RTE {
 
 			FMOD::Sound *musicStream;
 
-			result = m_AudioSystem->createStream(fullFilePath.c_str(), FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
+			result = m_AudioSystem->createStream(fullFilePath.c_str(), ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
+
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not open music file " + fullFilePath + ": " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -279,10 +319,6 @@ namespace RTE {
 			FMOD::Channel *musicChannel;
 			result = musicStream->set3DMinMaxDistance(c_SoundMaxAudibleDistance, c_SoundMaxAudibleDistance);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
-			if (result == FMOD_OK) {
-				FMOD_VECTOR zero_vector = GetAsFMODVector(Vector());
-				result = musicChannel->set3DAttributes(&zero_vector, nullptr);
-			}
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + fullFilePath + ": " + std::string(FMOD_ErrorString(result)));
 				return;

@@ -8,13 +8,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SeedRNG() {
-		// Pre-Seed generation
-		std::array<int, 624> seedData;
-		std::random_device randomDevice;
-		std::generate_n(seedData.data(), seedData.size(), std::ref(randomDevice));
+		// Use a constant seed for determinism.
+		static constexpr uint32_t constSeed = []() {
+			// VERY IMPORTANT, DO NOT CHANGE THIS!...
+			// ...it's the name of my childhood pet ;)
+			std::string_view seedString = "Bubble";
 
-		std::seed_seq sequence(std::begin(seedData), std::end(seedData));
-		g_RNG.seed(sequence);
+			// Biggest prime in a int64_t, because we want all bits to potentially be set (so let us overflow).
+			const uint64_t hugePrime = 18446744073709551557;
+
+			uint64_t seedResult = 0;
+			for (char c : seedString) {
+				seedResult += static_cast<uint64_t>(c) * hugePrime;
+			}
+			return static_cast<uint32_t>(seedResult);
+		}();
+
+		g_RNG.seed(constSeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

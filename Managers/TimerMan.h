@@ -221,9 +221,9 @@ namespace RTE {
 
 	protected:
 
-		long long m_StartTime; //!< The point in real time when the simulation (re)started.
+		std::chrono::steady_clock::time_point m_StartTime; //!< The point in real time when the simulation (re)started.
 		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.
-		long long m_RealTimeTicks; //!< The number of actual time ticks counted so far.
+		long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
 		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.

@@ -13,6 +13,7 @@
 
 #include "MetagameGUI.h"
 
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -26,7 +27,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUIComboBox.h"
@@ -155,6 +156,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
 
 void MetagameGUI::Clear()
 {
+	m_RootBoxMaxWidth = 0;
+
     m_pController = 0;
     m_pGUIScreen = 0;
     m_pGUIInput = 0;
@@ -367,7 +370,7 @@ int MetagameGUI::Create(Controller *pController)
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
     if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(-1, true);
+        m_pGUIInput = new GUIInputWrapper(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
 	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
@@ -375,12 +378,14 @@ int MetagameGUI::Create(Controller *pController)
 	}
     m_pGUIController->Load("Data/Base.rte/GUIs/MetagameGUI.ini");
 
+	m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
+
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     GUICollectionBox *pRootBox = m_apScreenBox[ROOTBOX] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
     // Make the root box fill the screen
-//    pRootBox->SetPositionAbs((g_FrameMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - pRootBox->GetHeight()) / 2);
+//    pRootBox->SetPositionAbs((g_WindowMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_WindowMan.GetResY() - pRootBox->GetHeight()) / 2);
     pRootBox->SetDrawBackground(false);
-    pRootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+    pRootBox->Resize(m_RootBoxMaxWidth, g_WindowMan.GetResY());
 
     m_pBannerRedTop = new GUIBanner();
     m_pBannerRedBottom = new GUIBanner();
@@ -598,7 +603,7 @@ int MetagameGUI::Create(Controller *pController)
         // Make the lists be scrolled to the top when they are initially dropped
 //        m_apPlayerHandicap[metaPlayer]->GetListPanel()->ScrollToTop();
     }
-    
+
     // Save and Load Dialogs
     m_NewSaveBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("NewSaveText"));
     m_pSavesToOverwriteCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("OverwriteList"));
@@ -640,7 +645,7 @@ int MetagameGUI::Create(Controller *pController)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          MoveLocationsIntoTheScreen
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Moves any locations closer to the center of the planet if they were left out 
+// Description:     Moves any locations closer to the center of the planet if they were left out
 void MetagameGUI::MoveLocationsIntoTheScreen()
 {
 	//Clear offsets
@@ -649,7 +654,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 
 	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet
 	// which is outside the screen when this is called first time
-	Vector planetCenter = Vector(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+	Vector planetCenter = Vector(m_RootBoxMaxWidth / 2, g_WindowMan.GetResY() / 2);
 	// Correct planet pos a bit when it's location is known
 	if (!m_PlanetCenter.IsZero())
 		planetCenter = m_PlanetCenter;
@@ -665,8 +670,8 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 			if (y < 10)
 				(*pItr)->SetLocationOffset(Vector(0, -y + 14));
 
-			if (y > g_FrameMan.GetResY() - 10)
-				(*pItr)->SetLocationOffset(Vector(0, -(y - g_FrameMan.GetResY() + 14)));
+			if (y > g_WindowMan.GetResY() - 10)
+				(*pItr)->SetLocationOffset(Vector(0, -(y - g_WindowMan.GetResY() + 14)));
 		}
 	}
 
@@ -675,7 +680,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
     {
 		bool isOverlapped = false;
 
-		do 
+		do
 		{
 			isOverlapped = false;
 
@@ -879,7 +884,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
                     m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
-                // Not the current target, so set slider to 0. It will set the new budget as 
+                // Not the current target, so set slider to 0. It will set the new budget as
                 else
                     m_pSceneBudgetSlider->SetValue(0);
             }
@@ -888,7 +893,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
                     m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
-                // Not the current target, so set slider to 0. It will set the new budget as 
+                // Not the current target, so set slider to 0. It will set the new budget as
                 else
                     m_pSceneBudgetSlider->SetValue(0);
             }
@@ -1172,7 +1177,7 @@ bool MetagameGUI::StartNewGame()
         m_pPhaseBox->SetPositionRel(m_apScreenBox[ROOTBOX]->GetWidth() - m_pPhaseBox->GetWidth() - 10, m_apScreenBox[ROOTBOX]->GetHeight() - m_pPhaseBox->GetHeight() - 40);
     else
         m_pPhaseBox->SetPositionRel((m_apScreenBox[ROOTBOX]->GetWidth() / 2) - (m_pPhaseBox->GetWidth() / 2), m_apScreenBox[ROOTBOX]->GetHeight() - m_pPhaseBox->GetHeight() - 10);
-    
+
 
     // Start game of specified size!
     g_MetaMan.NewGame(m_pSizeSlider->GetValue());
@@ -1253,7 +1258,7 @@ bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resa
     g_MetaMan.m_GameName = saveName;
 
     // Save any loaded scene data FIRST, so that all the paths of ContentFiles get updated to the actual save location first,
-    // which may have been changed due to the saveName being different than before.   
+    // which may have been changed due to the saveName being different than before.
     g_MetaMan.SaveSceneData(METASAVEPATH + saveName);
 
     // Whichever new or existing, create a writer with the path
@@ -1584,8 +1589,8 @@ void MetagameGUI::Update()
     {
         if (g_MetaMan.m_StateChanged)
         {
-            m_pBannerYellowTop->ShowText("DAY", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 2500, 200);
-            m_pBannerYellowBottom->ShowText(GetRoundName(g_MetaMan.m_CurrentRound), GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6,  2500, 300);
+            m_pBannerYellowTop->ShowText("DAY", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 2500, 200);
+            m_pBannerYellowBottom->ShowText(GetRoundName(g_MetaMan.m_CurrentRound), GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6,  2500, 300);
         }
         m_pPhaseLabel->SetText("New Day");
         // Blink the start button to draw attention to it
@@ -1597,7 +1602,7 @@ void MetagameGUI::Update()
         {
             m_pBannerYellowTop->HideText(2500, 200);
             m_pBannerYellowBottom->HideText(2500, 300);
-//            m_pBannerRedTop->ShowText("Sites Found", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.1, 3500, 200);
+//            m_pBannerRedTop->ShowText("Sites Found", GUIBanner::FLYBYLEFTWARD, 1000, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.1, 3500, 200);
         }
 
         m_pPhaseLabel->SetText("New Sites Found");
@@ -1608,7 +1613,7 @@ void MetagameGUI::Update()
     {
         if (g_MetaMan.m_StateChanged)
         {
-//            m_pBannerRedBottom->ShowText("Incomes", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.2, 3500, 200);
+//            m_pBannerRedBottom->ShowText("Incomes", GUIBanner::FLYBYLEFTWARD, 1000, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.2, 3500, 200);
         }
         m_pPhaseLabel->SetText("Counting Incomes");
         m_apMetaButton[CONTINUE]->SetText("Skip");
@@ -1630,8 +1635,8 @@ void MetagameGUI::Update()
                 {
                     m_apMetaButton[CONTINUE]->SetText("Continue");
                     m_pPhaseLabel->SetText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s Turn");
-                    m_pBannerRedTop->ShowText("Game Over", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
-                    m_pBannerRedBottom->ShowText("for " + g_MetaMan.m_Players[metaPlayer].GetName() + "!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
+                    m_pBannerRedTop->ShowText("Game Over", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                    m_pBannerRedBottom->ShowText("for " + g_MetaMan.m_Players[metaPlayer].GetName() + "!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
 
                     // Show a lil descriptive message as to why the game ended
                     m_pGameMessageLabel->SetVisible(true);
@@ -1646,8 +1651,8 @@ void MetagameGUI::Update()
                 {
                     m_apMetaButton[CONTINUE]->SetText("Start Turn");
                     m_pPhaseLabel->SetText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s Turn");
-                    m_pBannerRedTop->ShowText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
-                    m_pBannerRedBottom->ShowText("Turn", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
+                    m_pBannerRedTop->ShowText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                    m_pBannerRedBottom->ShowText("Turn", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
                     m_pGameMessageLabel->SetVisible(false);
                     m_PreTurn = true;
                 }
@@ -1674,7 +1679,7 @@ void MetagameGUI::Update()
             if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) <= 0)
             {
                 m_apMetaButton[CONTINUE]->SetText(m_BlinkTimer.AlternateReal(333) ? "> Continue <" : "Continue");
-                UpdatePlayerActionLines(metaPlayer);                
+                UpdatePlayerActionLines(metaPlayer);
             }
             // Normal turn
             else
@@ -1729,8 +1734,8 @@ void MetagameGUI::Update()
             // Noone left??
             if (winnerTeam == Activity::NoTeam)
             {
-                m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
-                m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);                
+                m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
             }
             else
             {
@@ -1750,12 +1755,12 @@ void MetagameGUI::Update()
                         winnerNames = winnerNames + (winnerNames.empty() ? "" : " and ") + (*pItr).GetName();
                     }
                 }
-                m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
-                m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
+                m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
 //                std::snprintf(winStr, sizeof(winStr), "Team %d", winner + 1);
-//                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
-//                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
+//                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+//                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
             }
         }
 
@@ -1842,7 +1847,7 @@ void MetagameGUI::Update()
                         newCandidateItr = sItr;
                 }
             }
-            
+
             // Set new hovered scene to be the one now closest to the cursor, if there is any and if it is different the a currently hovered one
             if (newCandidateItr != g_MetaMan.m_Scenes.end() && (*newCandidateItr) != m_pHoveredScene)
             {
@@ -2077,7 +2082,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 void MetagameGUI::UpdateInput()
 {
     // If esc pressed, show campaign dialog if applicable
-	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+	if (g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 		if (m_MenuScreen == MENUDIALOG) {
 			g_MetaMan.SetSuspend(false);
 			SwitchToScreen(ROOTBOX);
@@ -2096,7 +2101,7 @@ void MetagameGUI::UpdateInput()
     int mouseX, mouseY;
     m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
     Vector mousePos(mouseX, mouseY);
-    
+
     // If not currently dragging a box, see if we should start
     bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
     if (!m_pDraggedBox && menuButtonHeld && !m_EngageDrag)
@@ -2227,7 +2232,7 @@ void MetagameGUI::UpdateInput()
                 // Signal that we want to go back to main menu
                 m_BackToMain = true;
                 g_GUISound.BackButtonPressSound()->Play();
-				
+
             }
 
 			// Open save menu button pressed
@@ -2332,9 +2337,9 @@ void MetagameGUI::UpdateInput()
                         m_apPlayerControlButton[player]->SetText("None");
                     // Show changes in affected player' gizmos
                     UpdatePlayerSetup();
-                    
+
                     g_GUISound.ButtonPressSound()->Play();
-                } 
+                }
             }
 
 			// Start New Game menu button pressed
@@ -3030,7 +3035,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             // Simulate that all active players had a brain at some point
             if (pOffensive->PlayerActive(player))
                 pOffensive->SetPlayerHadBrain(player, true);
-        }        
+        }
     }
 
     // SINGLE player going to an unowned site.. it will be always be taken over, at some base cost of a brain landing
@@ -3651,7 +3656,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
                 m_AnimModeDuration = m_AnimIncomeLine == m_aBrainSaleIncomeLineIndices[m_AnimMetaPlayer] ? 4000 : 2000;
                 m_AnimTimer1.Reset();
                 m_IncomeSiteLines[m_AnimIncomeLine].m_OnlyLastSegments = -1;
-                // Show the change 
+                // Show the change
                 FundsChangeIndication(m_AnimMetaPlayer, m_IncomeSiteLines[m_AnimIncomeLine].m_FundsTarget - m_IncomeSiteLines[m_AnimIncomeLine].m_FundsAmount, Vector(m_apPlayerBarLabel[m_AnimMetaPlayer]->GetXPos() + m_apPlayerBarLabel[m_AnimMetaPlayer]->GetWidth(), m_apPlayerBarLabel[m_AnimMetaPlayer]->GetYPos()), m_AnimModeDuration);
 
                 // Show the brain being sucked away if this is a brain liquidation income event
@@ -4290,7 +4295,7 @@ void MetagameGUI::SetupOffensives()
         // No hooomins??
         if ((*aItr)->GetHumanCount() < 1)
         {
-            
+
         }
     }
 */
@@ -4354,7 +4359,7 @@ void MetagameGUI::UpdateOffensives()
     ////////////////////////////////////////////////////
     // New Offensive, so set it up
     if (m_AnimActivityChange)
-    {   
+    {
         // Show which mission we're on of all the offensive activities in queue
         std::snprintf(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
         m_pPhaseLabel->SetText(str);
@@ -5244,7 +5249,7 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
 
     // Update the quad assignments for all players
     UpdateBattleQuads(siteScreenPos);
-    
+
     // Go through all attacking players for this activity
     for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
@@ -5282,7 +5287,7 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
 
             // Figure out start and ending positions for the brain label's travels and the team flag badge
-            // Upper left quadrant 
+            // Upper left quadrant
             if (quadIndex == 0)
             {
                 // Team flag position
@@ -5398,7 +5403,7 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
 
     // Update the quad assignments for all players
     UpdateBattleQuads(siteScreenPos);
-    
+
     // Go through all players for this activity
     for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
@@ -5436,7 +5441,7 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The resident brain that is defending this site from attack, and the unallocated funds of its player that he gets to use (beyond the defense investments already made here).");
 
             // Figure out start and ending positions for the brain label's travels and the team flag badge
-            // Upper left quadrant 
+            // Upper left quadrant
             if (quadIndex == 0)
             {
                 // Team flag position
@@ -5538,7 +5543,7 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
 
     // Update the quad assignments for all players
     UpdateBattleQuads(siteScreenPos);
-    
+
     // Go through all players for this activity
     for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
@@ -5576,7 +5581,7 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
 
             // Figure out start and ending positions for the brain label's travels and the team flag badge
-            // Upper left quadrant 
+            // Upper left quadrant
             if (quadIndex == 0)
             {
                 // Team flag position
@@ -5693,7 +5698,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 
     // Update the quad assignments for all players
     UpdateBattleQuads(siteScreenPos);
-    
+
     // Go through all players for this activity
     for (std::vector<MetaPlayer>::iterator mpItr = g_MetaMan.m_Players.begin(); mpItr != g_MetaMan.m_Players.end(); ++mpItr)
     {
@@ -5749,7 +5754,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 }
 
                 // Figure out the position of the dead brain label
-                // Upper left quadrant 
+                // Upper left quadrant
                 if (quadIndex == 0)
                 {
                     // Team flag position
@@ -5823,7 +5828,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 m_apPlayerBrainTravelLabel[mp]->SetToolTip("The new resident brain that has won this site and is settling in here now.");
 
                 // Figure out start and ending positions for the brain label's travels and the team flag badge
-                // Upper left quadrant 
+                // Upper left quadrant
                 if (quadIndex == 0)
                 {
                     // Team flag position
@@ -6476,13 +6481,13 @@ void MetagameGUI::UpdateSiteNameLabel(bool visible, std::string text, const Vect
 /*
         if (m_pScenePlanetLabel->GetXPos() < pad)
             m_pScenePlanetLabel->SetPositionAbs(pad, m_pScenePlanetLabel->GetYPos());
-        else if (m_pScenePlanetLabel->GetXPos() + m_pScenePlanetLabel->GetWidth() + pad >= g_FrameMan.GetResX())
-            m_pScenePlanetLabel->SetPositionAbs(g_FrameMan.GetResX() - m_pScenePlanetLabel->GetWidth() - pad, m_pScenePlanetLabel->GetYPos());
+        else if (m_pScenePlanetLabel->GetXPos() + m_pScenePlanetLabel->GetWidth() + pad >= m_RootBoxMaxWidth)
+            m_pScenePlanetLabel->SetPositionAbs(m_RootBoxMaxWidth - m_pScenePlanetLabel->GetWidth() - pad, m_pScenePlanetLabel->GetYPos());
 */
         if (m_pScenePlanetLabel->GetYPos() < pad)
             m_pScenePlanetLabel->SetPositionAbs(m_pScenePlanetLabel->GetXPos(), pad);
-        else if (m_pScenePlanetLabel->GetYPos() + m_pScenePlanetLabel->GetHeight() + pad >= g_FrameMan.GetResY())
-            m_pScenePlanetLabel->SetPositionAbs(m_pScenePlanetLabel->GetXPos(), g_FrameMan.GetResY() - m_pScenePlanetLabel->GetHeight() - pad);
+        else if (m_pScenePlanetLabel->GetYPos() + m_pScenePlanetLabel->GetHeight() + pad >= g_WindowMan.GetResY())
+            m_pScenePlanetLabel->SetPositionAbs(m_pScenePlanetLabel->GetXPos(), g_WindowMan.GetResY() - m_pScenePlanetLabel->GetHeight() - pad);
     }
 }
 
@@ -6570,7 +6575,7 @@ bool MetagameGUI::RemoveSiteLine(std::vector<SiteLine> &lineList, int removeInde
     int index = 0;
     bool removed = false;
     for (std::vector<SiteLine>::iterator slItr = lineList.begin(); slItr != lineList.end(); ++slItr, ++index)
-    {        
+    {
         if (index == removeIndex)
         {
             lineList.erase(slItr);
@@ -6784,7 +6789,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
         else
         {
             circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius, color);
-            circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius - 1, color);            
+            circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius - 1, color);
         }
     }
 
@@ -6948,7 +6953,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
         else
         {
             circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius, color);
-            circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius - 1, color);            
+            circle(drawBitmap, sitePos.m_X, sitePos.m_Y, circleRadius - 1, color);
         }
     }
 

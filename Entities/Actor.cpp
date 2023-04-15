@@ -62,6 +62,7 @@ bool Actor::m_sIconsLoaded = false;
 
 void Actor::Clear() {
     m_Controller.Reset();
+	m_PlayerControllable = true;
     m_BodyHitSound = nullptr;
     m_AlarmSound = nullptr;
     m_PainSound = nullptr;
@@ -198,6 +199,7 @@ int Actor::Create(const Actor &reference)
     m_Controller = reference.m_Controller;
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
+	m_PlayerControllable = reference.m_PlayerControllable;
 
 	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
 	if (reference.m_AlarmSound) { m_AlarmSound = dynamic_cast<SoundContainer*>(reference.m_AlarmSound->Clone()); }
@@ -276,12 +278,15 @@ int Actor::Create(const Actor &reference)
     m_PassengerSlots = reference.m_PassengerSlots;
 
     m_AIMode = reference.m_AIMode;
-//    m_Waypoints = reference.m_Waypoints;
+    m_Waypoints = reference.m_Waypoints;
     m_DrawWaypoints = reference.m_DrawWaypoints;
     m_MoveTarget = reference.m_MoveTarget;
     m_pMOMoveTarget = reference.m_pMOMoveTarget;
     m_PrevPathTarget = reference.m_PrevPathTarget;
     m_MoveVector = reference.m_MoveVector;
+	if (!m_Waypoints.empty()) {
+		UpdateMovePath();
+	}
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
@@ -310,7 +315,9 @@ int Actor::Create(const Actor &reference)
 
 int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "BodyHitSound") {
+	if (propName == "PlayerControllable") {
+		reader >> m_PlayerControllable;
+	} else if (propName == "BodyHitSound") {
 		m_BodyHitSound = new SoundContainer;
 		reader >> m_BodyHitSound;
 	} else if (propName == "AlarmSound") {
@@ -381,11 +388,14 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
     }
     else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
-    else if (propName == "AIMode")
-    {
-        int mode;
-        reader >> mode;
-        m_AIMode = static_cast<AIMode>(mode);
+	else if (propName == "AIMode") {
+		int mode;
+		reader >> mode;
+		m_AIMode = static_cast<AIMode>(mode);
+	} else if (propName == "SpecialBehaviour_AddAISceneWaypoint") {
+		Vector waypointToAdd;
+		reader >> waypointToAdd;
+		AddAISceneWaypoint(waypointToAdd);
 	} else if (propName == "PieMenu") {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
@@ -414,6 +424,7 @@ int Actor::Save(Writer &writer) const
 {
     MOSRotating::Save(writer);
 
+	writer.NewPropertyWithValue("PlayerControllable", m_PlayerControllable);
     writer.NewProperty("BodyHitSound");
     writer << m_BodyHitSound;
     writer.NewProperty("AlarmSound");
@@ -1168,7 +1179,7 @@ BITMAP * Actor::GetAIModeIcon()
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-MOID Actor::GetAIMOWaypointID()
+MOID Actor::GetAIMOWaypointID() const
 {
 	if (g_MovableMan.ValidMO(m_pMOMoveTarget))
 		return m_pMOMoveTarget->GetID();
@@ -1861,7 +1872,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         return;
 
     // AI waypoints or points of interest
-    if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))
+    if (m_DrawWaypoints && m_PlayerControllable && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))
     {
         // Draw the AI paths, from the ultimate destination back up to the actor's position.
         // We do this backwards so the lines won't crawl and the dots can be evenly spaced throughout
@@ -1934,7 +1945,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+	if (m_PlayerControllable && g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
 		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
 	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
@@ -1967,7 +1978,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*prevItr) == (*selfItr))
                         break;
                 }
-                while((*prevItr)->GetController()->IsPlayerControlled() ||
+                while(!(*prevItr)->IsPlayerControllable() || (*prevItr)->GetController()->IsPlayerControlled() ||
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 // Get the next actor in the list (not controlled by another player)
@@ -1979,7 +1990,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*nextItr) == (*selfItr))
                         break;
                 }
-                while((*nextItr)->GetController()->IsPlayerControlled() ||
+                while(!(*nextItr)->IsPlayerControllable() || (*nextItr)->GetController()->IsPlayerControlled() ||
                       g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 Vector iconPos = cpuPos;

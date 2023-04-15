@@ -212,9 +212,15 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GripStrengthMultiplier;
     } else if (propName == "SharpLength")
         reader >> m_MaxSharpLength;
-    else if (propName == "Loudness")
+    else if (propName == "Loudness") {
         reader >> m_Loudness;
-    else
+	} else if (propName == "SpecialBehaviour_Activated") {
+		reader >> m_Activated;
+	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
+		double elapsedSimTimeMS;
+		reader >> elapsedSimTimeMS;
+		m_ActivationTimer.SetElapsedSimTimeMS(elapsedSimTimeMS);
+	} else
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -523,8 +529,11 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 			m_SeenByPlayer.fill(false);
 			m_BlinkTimer.Reset();
 		} else {
-			// Only draw if the team viewing this has seen the space where this is located.
 			int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
+            if (viewingPlayer == -1) {
+                return;
+            }
+            // Only draw if the team viewing this has seen the space where this is located.
 			int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
 			if (viewingTeam == Activity::NoTeam || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
 				return;

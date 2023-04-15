@@ -206,6 +206,7 @@ namespace RTE {
 
 		.def(luabind::constructor<>())
 
+		.property("PlayerControllable", &Actor::IsPlayerControllable, &Actor::SetPlayerControllable)
 		.property("BodyHitSound", &Actor::GetBodyHitSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetBodyHitSound)
 		.property("AlarmSound", &Actor::GetAlarmSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetAlarmSound)
 		.property("PainSound", &Actor::GetPainSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPainSound)
@@ -685,7 +686,8 @@ namespace RTE {
 		.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &LuaAdaptersPropertyOwnershipSafetyFaker::HDFirearmSetReloadEndSound)
 		.property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
 		.property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
-		.property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
+		.property("BaseReloadTime", &HDFirearm::GetBaseReloadTime, &HDFirearm::SetBaseReloadTime)
+		.property("ReloadTime", &HDFirearm::GetReloadTime)
 		.property("ReloadProgress", &HDFirearm::GetReloadProgress)
 		.property("ShakeRange", &HDFirearm::GetShakeRange, &HDFirearm::SetShakeRange)
 		.property("SharpShakeRange", &HDFirearm::GetSharpShakeRange, &HDFirearm::SetSharpShakeRange)
@@ -914,6 +916,8 @@ namespace RTE {
 		.def("GetGibWoundLimit", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetGibWoundLimit)
 		.def("GetWoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.def("GetWoundCount", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetWoundCount)
+		.def("GetWounds", &LuaAdaptersMOSRotating::GetWounds1, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetWounds", &LuaAdaptersMOSRotating::GetWounds2, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
 		.def("AddWound", &MOSRotating::AddWound, luabind::adopt(_2))
 		.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove)) &MOSRotating::RemoveWounds)
 		.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove, bool positiveDamage, bool negativeDamage, bool noDamage)) &MOSRotating::RemoveWounds)
@@ -1247,6 +1251,9 @@ namespace RTE {
 
 		.property("ClassName", &Scene::Area::GetClassName)
 		.property("Name", &Scene::Area::GetName)
+		.property("FirstBox", &Scene::Area::GetFirstBox)
+		.property("Center", &Scene::Area::GetCenterPoint)
+		.property("RandomPoint", &Scene::Area::GetRandomPoint)
 
 		.def("Reset", &Scene::Area::Reset)
 		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)

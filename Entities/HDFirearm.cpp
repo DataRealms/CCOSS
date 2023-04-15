@@ -53,7 +53,7 @@ void HDFirearm::Clear()
     m_DeactivationDelay = 0;
     m_Reloading = false;
     m_DoneReloading = false;
-    m_ReloadTime = 0;
+    m_BaseReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
 	m_Reloadable = true;
@@ -132,7 +132,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_DeactivationDelay = reference.m_DeactivationDelay;
     m_Reloading = reference.m_Reloading;
     m_DoneReloading = reference.m_DoneReloading;
-    m_ReloadTime = reference.m_ReloadTime;
+    m_BaseReloadTime = reference.m_BaseReloadTime;
 	m_LastFireTmr = reference.m_LastFireTmr;
 	m_ReloadTmr = reference.m_ReloadTmr;
     m_FullAuto = reference.m_FullAuto;
@@ -205,8 +205,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_ActivationDelay;
     } else if (propName == "DeactivationDelay") {
         reader >> m_DeactivationDelay;
-	} else if (propName == "ReloadTime") {
-		reader >> m_ReloadTime;
+	} else if (propName == "BaseReloadTime" || propName == "ReloadTime") {
+		reader >> m_BaseReloadTime;
     } else if (propName == "FullAuto") {
         reader >> m_FullAuto;
     } else if (propName == "FireIgnoresThis") {
@@ -295,7 +295,7 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("DeactivationDelay");
     writer << m_DeactivationDelay;
     writer.NewProperty("ReloadTime");
-    writer << m_ReloadTime;
+    writer << m_BaseReloadTime;
     writer.NewProperty("FullAuto");
     writer << m_FullAuto;
     writer.NewProperty("FireIgnoresThis");

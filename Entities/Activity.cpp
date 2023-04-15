@@ -4,6 +4,7 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
 
@@ -331,6 +332,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
+		g_AudioMan.FinishAllLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
@@ -725,7 +727,7 @@ void Activity::Clear() {
 		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return false;
 		}
-		if (!actor || !g_MovableMan.IsActor(actor)) {
+		if (!actor || !g_MovableMan.IsActor(actor) || !actor->IsPlayerControllable()) {
 			return false;
 		}
 		if ((actor != m_Brain[player] && actor->IsPlayerControlled()) || IsOtherPlayerBrain(actor, player)) {
@@ -748,7 +750,7 @@ void Activity::Clear() {
 		actorSwitchSoundToPlay->Play(player);
 
 		// If out of frame from the POV of the preswitch actor, play the camera travel noise
-		const int switchSoundThreshold = g_FrameMan.GetResX() / 2;
+		const int switchSoundThreshold = g_WindowMan.GetResX() / 2;
 		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).MagnitudeIsGreaterThan(static_cast<float>(switchSoundThreshold))) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}

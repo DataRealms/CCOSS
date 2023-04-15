@@ -40,6 +40,10 @@ namespace RTE {
 	struct mouse_buttons : public luabind::enum_wrapper {};
 	struct joy_buttons : public luabind::enum_wrapper {};
 	struct joy_directions : public luabind::enum_wrapper {};
+	struct key_codes : public luabind::enum_wrapper {};
+	struct scan_codes : public luabind::enum_wrapper {};
+	struct gamepad_buttons : public luabind::enum_wrapper {};
+	struct gamepad_axis : public luabind::enum_wrapper {};
 	struct directions : public luabind::enum_wrapper {};
 	struct blend_modes : public luabind::enum_wrapper {};
 

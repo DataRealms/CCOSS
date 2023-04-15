@@ -466,9 +466,17 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Buy Menu Quality-of-Life improvements:  
+	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
+	Items in the cart will be indented to signify what actor's inventory they belong to.  
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
+
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
-	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon will shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
 
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
@@ -486,7 +494,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
 
-- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
+- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam, getsHitByMOsOnly)` and `GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`. The `getsHitByMOsOnly` defaults to false, which will get every `MovableObject`.
 
 - `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
 
@@ -523,15 +531,37 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
 
+- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
+
+- Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.
+
+- Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
+
+- Added `Actor` INI and Lua property (R/W) `PlayerControllable`, that determines whether the `Actor` can be swapped to by human players. Note that Lua can probably break this, by forcing the `Controller`s of `Actor`s that aren't `PlayerControllable` to the `CIM_PLAYER` input mode.
+
+- Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
+
+- Added new `Timer` constructors `timer = Timer(elapsedSimTimeMS)` and `timer = Timer(elapsedSimTimeMS, simTimeLimitMS)` that let you setup `Timer`s more cleanly.
+
+- Added `Timer` Lua (R) properties `RealTimeLimitProgress` and `SimTimeLimitProgress`, that get how much progress the `Timer` has made towards its `RealTimeLimit` or `SimTimeLimit`. 0 means no progress, 1.0 means the timer has reached or passed the time limit.
+
+- New `Settings.ini` property `EnableVSync` to enable vertical synchronization. Enabled by default.
+
+- New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Codebase now uses the C++20 standard.
 
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
 - Greatly reduce online multiplayer bandwidth usage.
 
 - Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
+
+- Swapped to SDL2 for window management and input handling.
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -572,10 +602,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Lua function `BuyMenuGUI:SetHeaderImage` renamed to `SetBannerImage`.
 
-- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenu, pieSlice, pieMenuOwner)`. The details for these are as follows:  
+- Lua functions run by `PieSlice`s will now have the following signature: `pieSliceFunction(pieMenuOwner, pieMenu, pieSlice)`. The details for these are as follows:  
+	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 	`pieMenu` - The `PieMenu` that is being used, and is calling this function. Note that this may be a sub-`PieMenu`.  
 	`pieSlice` - The `PieSlice` that has been activated to call this function.  
-	`pieMenuOwner` - The `Actor` owner of this `PieMenu`, or the `MovableObject` affected object of it if it has no owner.
 
 - `OnPieMenu(self)` event function has been changed to `WhilePieMenuOpen(self, openedPieMenu)` and will run as long as the `PieMenu` is open.
 
@@ -710,9 +740,36 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	SetScroll(center, screenId);
 	```
 
+- `HDFirearm` Lua property `ReloadTime` is no longer writable. Use `BaseReloadTime` instead. INI property `ReloadTime` has been renamed to `BaseReloadTime`, though `ReloadTime` still works as well.
+
+- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is:  
+	`DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
+
+- `UInputMan` Lua functions `KeyPressed`, `KeyReleased` and `KeyHeld` now take `SDL_Keycode` values instead of Allegro scancodes.  
+	Keycodes take keyboard layout into account and should be the preferred way of detecting input.
+
+	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
+	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
+
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+
+- Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
+
+- `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
+	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
+
+- Failing to create actor `FootGroup`s during loading will now crash with error message instead of straight to desktop.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Improved support for varied resolutions and aspect ratios. 1366x768 users rejoice.
+
+- Multi-display fullscreen now works regardless of window position or which screen in the arrangement is set as primary.  
+	Still limited to horizontal arrangements that are top or bottom edge aligned (or anywhere in between for arrangements with different height displays).
+
+- Controller hot-plug and disconnect is now properly detected at any point and will attempt to reconnect devices to the same gamepad slot.
 
 - Fixed material view not drawing correctly when viewed in split-screen. ([Issue #54](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/54))
 
@@ -724,7 +781,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fix `MOSRotating` `GetWounds()` Lua function missing its implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 </details>
 
@@ -743,6 +802,15 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Removed `OnPieMenu` listeners for `Activity`s and `GlobalScript`s, and removed the `ProvidesPieMenuContext` concept and everything around it. These things should no longer be necessary since you can modify `PieMenu`s on the fly at any time, and they made this already complex set of code even more complicated.
 
 - Removed `SceneMan` Lua functions `SetOffsetX(x, screenId)` and `SetOffsetY(y, screenId)`. Use `CameraMan:SetOffset(offsetVector, screenId)` instead.
+
+- Removed `whichStick` parameter for the following `UInputMan` Lua functions:  
+	`JoyDirectionPressed`, `JoyDirectionReleased`, `JoyDirectionHeld`, `AnalogAxisValue`  
+	No longer used or meaningful.
+
+- Removed `UInputMan` Lua function `WhichKeyHeld`.
+
+- Dedicated fullscreen has been removed (again) along with the following `Settings.ini` properties:
+	`ForceVirtualFullScreenGfxDriver`, `ForceDedicatedFullScreenGfxDriver`
 
 </details>
 
@@ -984,6 +1052,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
 
+- Added `Area` Lua property `area.FirstBox` that returns the first `Box` in this `Area`. Useful for `Areas` that only have one `Box`.
+
+- Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
+
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
 - New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.
@@ -1022,6 +1094,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
 
 - New Settings.ini flag `UseExperimentalMultiplayerSpeedBoosts = 1/0`. When turned on, it will use some code that **may** speed up multiplayer.
+
+- New `FrameMan` Lua function `SplitStringToFitWidth(stringToSplit, widthLimit, useSmallFont)`, which lets you split up a string so it fits within a given width limit for the specified font. Does not try to perfectly fit strings, and can be wonky if the width limit is small. Mostly used to ensure text fits on the screen!
 
 </details>
 
@@ -1102,7 +1176,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
+	In place of these functions, you can get all wounds with `GetWounds`, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.
@@ -1184,6 +1258,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
 - Added support for multiple lines in DataModule descriptions in their Index.inis. See earlier entry on multiple lines in descriptions for details on how to use this.
+
+- `FrameMan` screen text will now always try to fit on the screen, splitting into multiple lines if needed. If you want more control of this, split your screen text manually with the `"\n"` new line character.
 
 </details>
 

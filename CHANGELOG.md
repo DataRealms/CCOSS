@@ -549,6 +549,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
 
+- Added Lua (R/W) properties for `ACrab` `AimRangeUpperLimit` and `AimRangeLowerLimit`. INI bindings already existed and are mentioned in an earlier changelog entry.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

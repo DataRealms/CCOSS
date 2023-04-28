@@ -1005,12 +1005,13 @@ bool SceneMan::TryPenetrate(int posX,
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
-	unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
-	if (materialID == g_MaterialAir) {
+	int materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
+	if (materialID <= MaterialColorKeys::g_MaterialAir) {
 		return nullptr;
 	}
-	Material const * sceneMat = GetMaterialFromID(materialID);
-	Material const * spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+	const Material *sceneMat = GetMaterialFromID(static_cast<uint8_t>(materialID));
+	const Material *spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+
 	Color spawnColor;
 	if (spawnMat->UsesOwnColor()) {
 		spawnColor = spawnMat->GetColor();
@@ -1018,16 +1019,17 @@ MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
 		spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 	}
 	// No point generating a key-colored MOPixel.
-	if (spawnColor.GetIndex() == g_MaskColor) {
+	if (spawnColor.GetIndex() == ColorKeys::g_MaskColor) {
 		return nullptr;
 	}
-	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, posY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
+	Atom *pixelAtom = new Atom(Vector(), spawnMat->GetIndex(), nullptr, spawnColor, 2);
+	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(static_cast<float>(posX), static_cast<float>(posY)), Vector(), pixelAtom, 0);
 	pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
 	g_MovableMan.AddParticle(pixelMO);
 
-	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
-	RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
-	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
+	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, ColorKeys::g_MaskColor);
+	RegisterTerrainChange(posX, posY, 1, 1, ColorKeys::g_MaskColor, false);
+	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, MaterialColorKeys::g_MaterialAir);
 
 	return pixelMO;
 }

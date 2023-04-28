@@ -551,6 +551,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added Lua (R/W) properties for `ACrab` `AimRangeUpperLimit` and `AimRangeLowerLimit`. INI bindings already existed and are mentioned in an earlier changelog entry.
 
+- Added `TerrainObject` INI property `ClearChildObjects` that lets you clear child objects when doing a `CopyOf` of another `TerrainObject`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

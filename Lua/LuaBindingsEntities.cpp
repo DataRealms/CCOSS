@@ -238,10 +238,12 @@ namespace RTE {
 		.property("InventorySize", &Actor::GetInventorySize)
 		.property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
 		.property("MovePathSize", &Actor::GetMovePathSize)
+		.property("MovePathEnd", &Actor::GetMovePathEnd)
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 		.property("PieMenu", &Actor::GetPieMenu, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPieMenu)
 		.property("AIBaseDigStrength", &Actor::GetAIBaseDigStrength, &Actor::SetAIBaseDigStrength)
+		.property("SceneWaypoints", &Actor::GetSceneWaypoints, luabind::return_stl_iterator)
 
 		.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
 		.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)

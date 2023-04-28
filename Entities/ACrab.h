@@ -543,6 +543,30 @@ int FirearmActivationDelay() const;
 	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
 	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
 
+	/// <summary>
+	/// Gets the upper limit of this ACrab's aim range.
+	/// </summary>
+	/// <returns>The upper limit of this ACrab's aim range.</returns>
+	float GetAimRangeUpperLimit() const { return m_AimRangeUpperLimit; }
+
+	/// <summary>
+	/// Sets the upper limit of this ACrab's aim range.
+	/// </summary>
+	/// <param name="aimRangeUpperLimit">The new upper limit of this ACrab's aim range.</param>
+	void SetAimRangeUpperLimit(float aimRangeUpperLimit) { m_AimRangeUpperLimit = aimRangeUpperLimit; }
+
+	/// <summary>
+	/// Gets the lower limit of this ACrab's aim range.
+	/// </summary>
+	/// <returns>The lower limit of this ACrab's aim range.</returns>
+	float GetAimRangeLowerLimit() const { return m_AimRangeLowerLimit; }
+
+	/// <summary>
+	/// Sets the lower limit of this ACrab's aim range.
+	/// </summary>
+	/// <param name="aimRangeLowerLimit">The new lower limit of this ACrab's aim range.</param>
+	void SetAimRangeLowerLimit(float aimRangeLowerLimit) { m_AimRangeLowerLimit = aimRangeLowerLimit; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

@@ -1211,6 +1211,17 @@ MOID Actor::GetAIMOWaypointID() const
 		return g_NoMOID;
 }
 
+std::vector<Vector> Actor::GetSceneWaypoints() const {
+	std::vector<Vector> sceneWaypoints;
+	sceneWaypoints.reserve(m_Waypoints.size());
+	for (auto &waypointEntry : m_Waypoints) {
+		if (waypointEntry.second == nullptr) {
+			sceneWaypoints.emplace_back(waypointEntry.first);
+		}
+	}
+	return sceneWaypoints;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateMovePath

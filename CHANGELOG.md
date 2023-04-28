@@ -553,6 +553,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `TerrainObject` INI property `ClearChildObjects` that lets you clear child objects when doing a `CopyOf` of another `TerrainObject`.
 
+- Added `Actor` Lua (R) property `MovePathEnd`, that gets you the last point in the `Actor`'s move path.
+
+- Added `Actor` Lua (R) property `SceneWaypoints`, that lets you iterate over the `Actor`'s scene waypoints.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

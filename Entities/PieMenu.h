@@ -159,7 +159,7 @@ namespace RTE {
 		/// Sets the full inner radius of this PieMenu and recreates the background bitmap if it's changed.
 		/// </summary>
 		/// <param name="fullInnerRadius">The new full inner radius of this PieMenu.</param>
-		void SetFullInnerRadius(int fullInnerRadius) { if (m_FullInnerRadius != fullInnerRadius) { m_FullInnerRadius = fullInnerRadius; RecreateBackgroundBitmaps(); } }
+		void SetFullInnerRadius(int fullInnerRadius) { if (m_FullInnerRadius != fullInnerRadius) { if (m_CurrentInnerRadius == m_FullInnerRadius) { m_CurrentInnerRadius = fullInnerRadius; } m_FullInnerRadius = fullInnerRadius; RecreateBackgroundBitmaps(); } }
 
 		/// <summary>
 		/// Gets whether or not the PieMenu is enabled or in the process of being enabled, and is not in wobble mode.

@@ -101,7 +101,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
-- New `Settings.ini` and `SettingsMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
+- New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
 
 - New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
 	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  

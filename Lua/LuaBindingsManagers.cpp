@@ -278,6 +278,7 @@ namespace RTE {
 		.property("GlobalAcc", &SceneMan::GetGlobalAcc)
 		.property("OzPerKg", &SceneMan::GetOzPerKg)
 		.property("KgPerOz", &SceneMan::GetKgPerOz)
+		.property("ScrapCompactingHeight", &SceneMan::GetScrapCompactingHeight, &SceneMan::SetScrapCompactingHeight)
 
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
@@ -357,7 +358,6 @@ namespace RTE {
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
 		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
 		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD)
-		.property("ScrapCompactingHeight", &SettingsMan::GetScrapCompactingHeight, &SettingsMan::SetScrapCompactingHeight)
 		.property("AutomaticGoldDeposit", &SettingsMan::GetAutomaticGoldDeposit);
 	}
 

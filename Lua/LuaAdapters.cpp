@@ -478,6 +478,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	const std::list<Box> * LuaAdaptersSceneMan::WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap) {
+		std::list<Box> *wrappedBoxes = new std::list<Box>();
+		sceneMan.WrapBox(boxToWrap, *wrappedBoxes);
+		return wrappedBoxes;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersPrimitiveMan::DrawPolygonPrimitive(PrimitiveMan &primitiveMan, const Vector &centerPos, int color, const luabind::object &verticesTable) {
 		primitiveMan.DrawPolygonOrPolygonFillPrimitive(-1, centerPos, color, ConvertLuaTableToVectorOfType<Vector *>(verticesTable), false);
 	}

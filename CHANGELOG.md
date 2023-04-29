@@ -1101,6 +1101,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
 
+- Added `SceneMan` Lua function `SceneMan:WrapBox(boxToWrap)` which takes a `Box` and, if it passes over the seam, splits it into multiple boxes and returns them. Useful for creating `Boxes` without having to worry about the seam.
+
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
 - New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.

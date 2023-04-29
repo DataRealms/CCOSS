@@ -1500,7 +1500,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
-	for (const std::string &group : *sceneObjectToSave->GetGroupList()) {
+	for (const std::string &group : *sceneObjectToSave->GetGroups()) {
 		writer.NewPropertyWithValue("AddToGroup", group);
 	}
 

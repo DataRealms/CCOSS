@@ -279,7 +279,7 @@ int BunkerAssembly::Save(Writer &writer) const
 	SceneObject::Save(writer);
 
     // Groups are essential for BunkerAssemblies so save them, because entity seem to ignore them
-	for (std::list<std::string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
+	for (auto itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
     {
 		if ((*itr) != m_ParentAssemblyScheme && (*itr) != m_ParentSchemeGroup)
 		{

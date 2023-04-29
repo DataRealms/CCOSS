@@ -450,6 +450,17 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region SceneMan Lua Adapters
+	struct LuaAdaptersSceneMan {
+		/// <summary>
+		/// Takes a Box and returns a list of Boxes that describe the Box, wrapped appropriately for the current Scene.
+		/// </summary>
+		/// <param name="boxToWrap">The Box to wrap.</param>
+		/// <returns>A list of Boxes that make up the Box to wrap, wrapped appropriately for the current Scene.</returns>
+		static const std::list<Box> * WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap);
+	};
+#pragma endregion
+
 #pragma region PrimitiveMan Lua Adapters
 	struct LuaAdaptersPrimitiveMan {
 		/// <summary>

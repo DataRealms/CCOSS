@@ -93,6 +93,7 @@ namespace RTE {
 
 		// If we seem to be about to settle, make sure we're not still flying in the air
 		if ((m_ToSettle || IsAtRest()) && g_SceneMan.OverAltitude(m_Pos, (m_aSprite[m_Frame]->h / 2) + 3, 2)) {
+			m_VelOscillations = 0;
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}

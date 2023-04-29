@@ -244,6 +244,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable smart BuyMenu navigation or not.</param>
 		void SetSmartBuyMenuNavigation(bool enable) { m_EnableSmartBuyMenuNavigation = enable; }
+
+		/// <summary>
+		/// Gets whether gold gathered by Actors is automatically added into team funds.
+		/// </summary>
+		/// <returns>Whether gold gathered by Actors is automatically added into team funds.</returns>
+		bool GetAutomaticGoldDeposit() const { return m_AutomaticGoldDeposit; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -499,6 +505,7 @@ namespace RTE {
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 		bool m_EnableSmartBuyMenuNavigation; //!< Whether swapping to equipment mode and back should change active tabs in the BuyMenu.
+		bool m_AutomaticGoldDeposit; //!< Whether gold gathered by Actors is automatically added into team funds. False means that gold needs to be manually transported into orbit via Craft.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

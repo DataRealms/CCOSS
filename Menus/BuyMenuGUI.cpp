@@ -1384,14 +1384,14 @@ void BuyMenuGUI::Update()
                 if (craftMaxMass == 0) {
                     description += "\nNO CARGO SPACE!";
                 } else if (craftMaxMass > 0) {
-                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
+                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, craftMaxMass < 50.0F ? 1 : 0, 3) + " kg";
                 }
                 if (craftMaxPassengers >= 0 && craftMaxMass != 0) { description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers); }
             } else {
 				// Items in the BuyMenu always have any remainder rounded up in their masses.
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
-                    description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
+					description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
                     int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
@@ -1412,7 +1412,7 @@ void BuyMenuGUI::Update()
 								extraMass = itemAsMOSRotating->GetNumberValue("Belt Mass");
 							}
 						}
-                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, 1, 2) + " kg";
+                        description += "\nMass: " + (itemAsMO->GetMass() + extraMass < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, itemAsMO->GetMass() + extraMass < 50.0F ? 1 : 0, 3) + " kg");
                     }
                 }
             }
@@ -1576,7 +1576,7 @@ void BuyMenuGUI::Update()
             const Entity *currentItem = pItem->m_pEntity;
             const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
             if (itemAsActor) {
-                description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
+				description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
 
                 int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                 if (passengerSlotsTaken > 1) {
@@ -1585,7 +1585,7 @@ void BuyMenuGUI::Update()
             } else {
                 const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                 if (itemAsMO) {
-                    description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+					description += "\nMass: " + (itemAsMO->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass(), itemAsMO->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
                 }
             }
         }
@@ -2522,7 +2522,7 @@ void BuyMenuGUI::AddPresetsToItemList()
         // Add the ship's cost, if there is one defined
         if ((*lItr).GetDeliveryCraft())
         {
-            loadoutLabel += " on " + (*lItr).GetDeliveryCraft()->GetPresetName();
+            loadoutLabel += " via " + (*lItr).GetDeliveryCraft()->GetPresetName();
             // Adjust price for foreignness of the ship to this player
             loadoutCost += (*lItr).GetDeliveryCraft()->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
         }

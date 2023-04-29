@@ -264,7 +264,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    The current amount of carried gold, in Oz.
 
-    virtual float GetGoldCarried() const { return m_GoldCarried; }
+	float GetGoldCarried() const { return m_GoldCarried; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -458,7 +458,7 @@ ClassInfoGetters;
 // Arguments:       A Status enumeration.
 // Return value:    None.
 
-    void SetStatus(Actor::Status newStatus) { m_Status = newStatus; }
+	void SetStatus(Actor::Status newStatus) { m_Status = newStatus; if (newStatus == Actor::Status::UNSTABLE) { m_StableRecoverTimer.Reset(); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -546,18 +546,6 @@ ClassInfoGetters;
 
     virtual bool Look(float FOVSpread, float range);
 
-/* Old version, we don't let the actors carry gold anymore, goes directly to the team funds instead
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a certain amount of ounces of gold to teh currently carried
-//                  amount.
-// Arguments:       The amount in Oz with which to change the current gol dtally of this
-//                  Actor.
-// Return value:    None.
-
-    void AddGold(float goldOz) { m_GoldCarried += std::ceil(goldOz); m_GoldPicked = true; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddGold
@@ -569,17 +557,10 @@ ClassInfoGetters;
     void AddGold(float goldOz);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    void RestDetection() override;
-
+	/// <summary>
+	/// Does the calculations necessary to detect whether this Actor is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	void RestDetection() override;
 
 	/// <summary>
 	/// Adds health points to this Actor's current health value.
@@ -953,6 +934,10 @@ ClassInfoGetters;
 
     virtual void DropAllInventory();
 
+	/// <summary>
+	/// Converts all of the Gold carried by this Actor into MovableObjects and ejects them into the Scene.
+	/// </summary>
+    virtual void DropAllGold();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetInventorySize

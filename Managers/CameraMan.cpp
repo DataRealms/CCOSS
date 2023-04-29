@@ -206,22 +206,6 @@ namespace RTE {
 		Screen &screen = m_Screens[screenId];
 		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
 
-		// Don't let our screen shake beyond our max.
-		screen.ScreenShakeMagnitude = std::min(screen.ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
-
-		// Reduce screen shake over time.
-		screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedRealTimeS());
-		screen.ScreenShakeMagnitude = std::max(screen.ScreenShakeMagnitude, 0.0F);
-
-		// Feedback was that the best screen-shake strength was between 25% and 40% of default.
-		// As such, we want the default setting to reflect that, instead the default setting being 30%.
-		// So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything).
-		const float screenShakeScale = 0.3F;
-
-		Vector screenShakeOffset(1.0F, 0.0F);
-		screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
-		screenShakeOffset *= screen.ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
-
 		if (g_TimerMan.DrawnSimUpdate()) {
 			// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
 			if (screen.TargetWrapped) {
@@ -259,7 +243,26 @@ namespace RTE {
 			newOffset += scrollVec * scrollProgress;
 		}
 
-		newOffset += screenShakeOffset;
+		if (g_ActivityMan.GetActivity()->GetActivityState() == Activity::ActivityState::Running) {
+			// Don't let our screen shake beyond our max.
+			screen.ScreenShakeMagnitude = std::min(screen.ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
+
+			// Reduce screen shake over time.
+			screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedRealTimeS());
+			screen.ScreenShakeMagnitude = std::max(screen.ScreenShakeMagnitude, 0.0F);
+
+			// Feedback was that the best screen-shake strength was between 25% and 40% of default.
+			// As such, we want the default setting to reflect that, instead the default setting being 30%.
+			// So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything).
+			const float screenShakeScale = 0.3F;
+
+			Vector screenShakeOffset(1.0F, 0.0F);
+			screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
+			screenShakeOffset *= screen.ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
+
+			newOffset += screenShakeOffset;
+		}
+
 		SetOffset(newOffset, screenId);
 
 		screen.DeltaOffset = screen.Offset - oldOffset;

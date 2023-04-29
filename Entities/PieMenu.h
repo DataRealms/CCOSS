@@ -317,6 +317,15 @@ namespace RTE {
 		/// <param name="originalSource">The original source whose PieSlices should be removed.</param>
 		/// <returns>Whether or not any PieSlices were removed from this PieMenu.</returns>
 		bool RemovePieSlicesByOriginalSource(const Entity *originalSource);
+
+		/// <summary>
+		/// Replaces the first PieSlice with the second, ensuring original source, direction, middle slice eligibility, angles and slot count are maintained.
+		/// The existing PieSlice is returned, and ownership IS transferred both ways!
+		/// </summary>
+		/// <param name="pieSliceToReplace">The PieSlice that will be replaced.</param>
+		/// <param name="replacementPieSlice">The PieSlice that will replace the existing one. If this is nullptr, the existing one will just be removed.</param>
+		/// <returns>The removed PieSlice, if there is one. Ownership IS transferred!</returns>
+		PieSlice * ReplacePieSlice(const PieSlice *pieSliceToReplace, PieSlice *replacementPieSlice);
 #pragma endregion
 
 #pragma region Updating

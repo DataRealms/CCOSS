@@ -185,6 +185,12 @@ namespace RTE {
 				case 2:
 					roundingBuffer = std::ceil(roundingBuffer);
 					break;
+				case 3:
+					roundingBuffer = std::ceil(roundingBuffer);
+					if (int remainder = static_cast<int>(roundingBuffer) % 10; remainder > 0) {
+						roundingBuffer = roundingBuffer - static_cast<float>(remainder) + (remainder <= 5 ? 5.0F : 10.0F);
+					}
+					break;
 				default:
 					RTEAbort("Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
 					break;

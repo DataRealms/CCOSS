@@ -709,35 +709,36 @@ bool Actor::Look(float FOVSpread, float range)
     return g_SceneMan.CastSeeRay(m_Team, aimPos, lookVector, ignored, 25, g_SceneMan.GetUnseenResolution(m_Team).GetSmallest() / 2);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a certain amount of ounces of gold to this' team's total funds.
-
-void Actor::AddGold(float goldOz)
-{
-    g_ActivityMan.GetActivity()->ChangeTeamFunds(goldOz, m_Team);
+void Actor::AddGold(float goldOz) {
+	bool isHumanTeam = g_ActivityMan.GetActivity()->IsHumanTeam(m_Team);
+	if (g_SettingsMan.GetAutomaticGoldDeposit() || !isHumanTeam) {
+		// TODO: Allow AI to reliably deliver gold via craft
+		g_ActivityMan.GetActivity()->ChangeTeamFunds(goldOz, m_Team);
+	} else {
+		m_GoldCarried += goldOz;
+		m_GoldPicked = true;
+		if (isHumanTeam) {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+				if (g_ActivityMan.GetActivity()->GetTeamOfPlayer(player) == m_Team) { g_GUISound.FundsChangedSound()->Play(player); }
+			}
+		}
+	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void Actor::RestDetection() {
+	MOSRotating::RestDetection();
 
-void Actor::RestDetection()
-{
-    MOSRotating::RestDetection();
-
-    if (m_Status != DEAD) {
-        m_RestTimer.Reset();
-        m_ToSettle = false;
-    }
+	if (m_Status != DEAD) {
+		m_AngOscillations = 0;
+		m_VelOscillations = 0;
+		m_RestTimer.Reset();
+		m_ToSettle = false;
+	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddAIMOWaypoint
@@ -888,7 +889,8 @@ void Actor::DropAllInventory()
 			velMax = velMin + std::sqrt(m_SpriteRadius);
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNum(), 0);
+			gibROffset.RadRotate(c_PI * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -906,18 +908,17 @@ void Actor::DropAllInventory()
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
+				pObject->SetAngularVel((pObject->GetAngularVel() * RandomNum(0.5F, 1.5F)) * (RandomNum() < 0.5F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
 			if (gibVel.IsZero()) {
 				gibVel.SetXY(RandomNum(velMin, velMax), 0.0F);
+				gibVel.RadRotate(c_PI * RandomNormalNum());
 			} else {
 				gibVel.SetMagnitude(RandomNum(velMin, velMax));
 			}
-			// Don't! the offset was already rotated!
-			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
 			//            gibVel += (impactImpulse / m_Gibs.size()) / pObject->GetMass();
 			pObject->SetVel(m_Vel + gibVel);
@@ -944,6 +945,29 @@ void Actor::DropAllInventory()
 
     // We have exhausted all teh inventory into the scene, passing ownership
     m_Inventory.clear();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Actor::DropAllGold() {
+	const Material *goldMaterial = g_SceneMan.GetMaterialFromID(g_MaterialGold);
+	float velMin = 3.0F;
+	float velMax = velMin + std::sqrt(m_SpriteRadius);
+
+	for (int i = 0; i < static_cast<int>(std::floor(m_GoldCarried)); i++) {
+		Vector dropOffset(m_SpriteRadius * 0.3F * RandomNum(), 0);
+		dropOffset.RadRotate(c_PI * RandomNormalNum());
+		
+		Vector dropVelocity(dropOffset);
+		dropVelocity.SetMagnitude(RandomNum(velMin, velMax));
+
+		Atom *goldMOPixelAtom = new Atom(Vector(), g_MaterialGold, nullptr, goldMaterial->GetColor(), 2);
+
+		MOPixel *goldMOPixel = new MOPixel(goldMaterial->GetColor(), goldMaterial->GetPixelDensity(), m_Pos + dropOffset, dropVelocity, goldMOPixelAtom);
+		goldMOPixel->SetToHitMOs(false);
+		g_MovableMan.AddParticle(goldMOPixel);
+	}
+	m_GoldCarried = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1516,33 +1540,7 @@ void Actor::Update()
     if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
 		if (m_Inventory.size() > 0) { DropAllInventory(); }
-
-        Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
-        int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
-        for (int i = 0; i < goldCount; i++)
-        {
-/*
-            MOPixel *pixelMO = dynamic_cast<MOPixel *>(MOPixel::InstanceFromPool());
-            pixelMO->Create(AuMat.color,
-                            AuMat.pixelDensity,
-                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                            Vector(4 * NormalRand(), RandomNum(-5, -7)),
-                            new Atom(Vector(), AuMat, 0, AuMat.color, 2),
-                            0);
-*/
-            MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
-                                           AuMat->GetPixelDensity(),
-                                           Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4.0F * RandomNormalNum(), RandomNum(-5.0F, -7.0F)),
-                                           new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
-                                           0);
-
-            pixelMO->SetToHitMOs(false);
-            pixelMO->SetToGetHitByMOs(false);
-            g_MovableMan.AddParticle(pixelMO);
-            pixelMO = 0;
-        }
-        m_GoldCarried = 0;
+		if (m_GoldCarried > 0) { DropAllGold(); }
     }
 
     ////////////////////////////////
@@ -1815,24 +1813,21 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
             m_HUDStack += -12;
 
-            // Gold
-            if (GetGoldCarried() > 0) {
-                str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
-                pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
-                pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
+			if (IsPlayerControlled()) {
+				if (GetGoldCarried() > 0) {
+					str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
+					pSymbolFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX() - 11, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
+					std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
+					pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 2, str, GUIFont::Left);
 
-                m_HUDStack += -11;
-            }
-
-			// Player name
-			if (IsPlayerControlled() && g_FrameMan.IsInMultiplayerMode())
-			{
-				GameActivity * pGameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-				if (pGameActivity)
-				{
-					pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, pGameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
-					m_HUDStack += -11;
+					m_HUDStack -= 11;
+				}
+				// Player name
+				if (g_FrameMan.IsInMultiplayerMode()) {
+					if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity())) {
+						pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 2, gameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
+						m_HUDStack -= 11;
+					}
 				}
 			}
 /* Obsolete

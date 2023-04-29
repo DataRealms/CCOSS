@@ -75,7 +75,6 @@ void ACrab::Clear()
 //        m_StrideTimer[side].Reset();
     }
     m_Aiming = false;
-    m_GoldInInventoryChunk = 0;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -238,8 +237,6 @@ int ACrab::Create(const ACrab &reference) {
             m_Paths[side][BGROUND][i].Create(reference.m_Paths[side][BGROUND][i]);
         }
     }
-
-    m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
 
     m_DeviceState = reference.m_DeviceState;
     m_SweepState = reference.m_SweepState;
@@ -2152,7 +2149,7 @@ void ACrab::Update()
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(m_pJetpack->GetTotalBurstSize(), 2)) * (m_pJetpack->CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
 		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
             m_pJetpack->EnableEmission(true);
             // Jetpacks are noisy!
@@ -2165,8 +2162,7 @@ void ACrab::Update()
         else {
             m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
         }
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;
@@ -2393,6 +2389,7 @@ void ACrab::Update()
             float RBGLegProg = m_Paths[RIGHTSIDE][BGROUND][WALK].GetRegularProgress();
 
             bool restarted = false;
+			Matrix walkAngle(rotAngle * 0.5F);
 
 			// Make sure we are starting a stride if we're basically stopped.
 			if (isStill) { m_StrideStart[LEFTSIDE] = true; }
@@ -2402,14 +2399,14 @@ void ACrab::Update()
 
 			if (m_pLFGLeg && (!m_pLBGLeg || (!(m_Paths[LEFTSIDE][FGROUND][WALK].PathEnded() && LBGLegProg < 0.5F) || m_StrideStart[LEFTSIDE]))) {
 				m_StrideTimer[LEFTSIDE].Reset();
-				m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][WALK], deltaTime, &restarted);
+				m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, walkAngle, m_Paths[LEFTSIDE][FGROUND][WALK], deltaTime, &restarted);
 			}
 
 			if (m_pLBGLeg) {
 				if (!m_pLFGLeg || !(m_Paths[LEFTSIDE][BGROUND][WALK].PathEnded() && LFGLegProg < 0.5F)) {
 					m_StrideStart[LEFTSIDE] = false;
 					m_StrideTimer[LEFTSIDE].Reset();
-					m_pLBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][WALK], deltaTime);
+					m_pLBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLBGLeg->GetParentOffset()), m_Vel, walkAngle, m_Paths[LEFTSIDE][BGROUND][WALK], deltaTime);
 				} else {
 					m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pLBGLeg->GetMass(), deltaTime);
 				}
@@ -2425,7 +2422,7 @@ void ACrab::Update()
 				if (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5F)) {
 					m_StrideStart[RIGHTSIDE] = false;
 					m_StrideTimer[RIGHTSIDE].Reset();
-					m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][WALK], deltaTime, &restarted);
+					m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, walkAngle, m_Paths[RIGHTSIDE][FGROUND][WALK], deltaTime, &restarted);
 				} else {
 					m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRFGLeg->GetMass(), deltaTime);
 				}
@@ -2433,7 +2430,7 @@ void ACrab::Update()
 
 			if (m_pRBGLeg && (!m_pRFGLeg || (!(m_Paths[RIGHTSIDE][BGROUND][WALK].PathEnded() && RFGLegProg < 0.5F) || m_StrideStart[RIGHTSIDE]))) {
 				m_StrideTimer[RIGHTSIDE].Reset();
-				m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][WALK], deltaTime);
+				m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()), m_Vel, walkAngle, m_Paths[RIGHTSIDE][BGROUND][WALK], deltaTime);
 			}
 
 			// Reset the right-side walking stride if it's taking longer than it should.
@@ -2469,11 +2466,11 @@ void ACrab::Update()
 						m_Paths[side][layer][WALK].Terminate();
 					}
 				}
-				if (m_pLFGLeg) { m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][STAND], deltaTime); }
+				if (m_pLFGLeg) { m_pLFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][STAND], deltaTime, nullptr, !m_pRFGLeg); }
 
 				if (m_pLBGLeg) { m_pLBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pLBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][STAND], deltaTime); }
 
-				if (m_pRFGLeg) { m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][STAND], deltaTime); }
+				if (m_pRFGLeg) { m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][STAND], deltaTime, nullptr, !m_pLFGLeg); }
 
 				if (m_pRBGLeg) { m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][STAND], deltaTime); }
 			}
@@ -2767,31 +2764,8 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
         }
 
-		// Weight and jetpack energy
-		if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP)) {
-			float mass = GetMass();
-			if (m_JetTimeLeft < 100) {
-				// Draw empty fuel indicator
-				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-			} else {
-				// Display normal jet icons
-				// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
-				str[0] = mass < 135 ? -31 : (mass < 150 ? -30 : (mass < 165 ? -29 : -28));
-				// Do the blinky blink
-				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
-			}
-			str[1] = 0;
-            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
-
-			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-
-            m_HUDStack += -10;
-        }
         // Held-related GUI stuff
-        else if (m_pTurret && m_pTurret->IsAttached()) {
+		if (m_pTurret) {
             std::string textString;
             for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
                 if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice)) {
@@ -2810,15 +2784,50 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 10, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 3, textString, GUIFont::Left);
-                m_HUDStack += -10;
+				m_HUDStack -= 9;
             }
-
         } else {
             std::snprintf(str, sizeof(str), "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
 
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
+			if (m_JetTimeLeft < 100.0F) {
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else if (m_pJetpack->IsEmitting()) {
+				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.41F) {
+					str[0] = acceleration > 0.47F ? -31 : -30;
+				} else {
+					str[0] = acceleration > 0.35F ? -29 : -28;
+					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
+				}
+			} else {
+				str[0] = -27;
+			}
+			str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			if (m_JetTimeTotal > 0) {
+				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+				int gaugeColor;
+				if (jetTimeRatio > 0.75F) {
+					gaugeColor = 149;
+				} else if (jetTimeRatio > 0.5F) {
+					gaugeColor = 133;
+				} else if (jetTimeRatio > 0.375F) {
+					gaugeColor = 77;
+				} else if (jetTimeRatio > 0.25F) {
+					gaugeColor = 48;
+				} else {
+					gaugeColor = 13;
+				}
+				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+			}
+			m_HUDStack -= 9;
+		}
 
 		// Print aim angle and rot angle stoff
 		/*{

@@ -111,7 +111,7 @@ namespace RTE {
 
 		// TODO: Make proper save system that knows not to save redundant data!
 		/*
-		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
+		for (auto itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
 			writer.NewPropertyWithValue("AddToGroup", *itr);
 		}
 		*/

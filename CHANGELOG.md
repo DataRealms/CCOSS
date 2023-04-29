@@ -981,7 +981,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	**`ADoor`** - `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
 - Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
-`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
+`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder, 3 for ceiled remainder with the last decimal place rounded to the nearest 0 or 5 (i.e. if option 2 gave 10.1, this would give 10.5, if it gave 10.369 this would give 10.370, etc.)`
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 

@@ -18,6 +18,7 @@ namespace RTE {
 		.property("ModuleID", &Entity::GetModuleID)
 		.property("ModuleName", &Entity::GetModuleName)
 		.property("RandomWeight", &Entity::GetRandomWeight)
+		.property("Groups", &Entity::GetGroups, luabind::return_stl_iterator)
 
 		.def("Clone", &LuaAdaptersEntityClone::CloneEntity)
 		.def("Reset", &Entity::Reset)
@@ -468,7 +469,6 @@ namespace RTE {
 		.def("Look", &AHuman::Look)
 		.def("LookForGold", &AHuman::LookForGold)
 		.def("LookForMOs", &AHuman::LookForMOs)
-		.def("IsOnScenePoint", &AHuman::IsOnScenePoint)
 		.def("GetLimbPath", &AHuman::GetLimbPath)
 		.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
 		.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)

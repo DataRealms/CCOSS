@@ -81,7 +81,8 @@ namespace RTE {
 		.def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
 		.def("FlashScreen", &FrameMan::FlashScreen)
 		.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
-		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth);
+		.def("CalculateTextWidth", &FrameMan::CalculateTextWidth)
+		.def("SplitStringToFitWidth", &FrameMan::SplitStringToFitWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,10 +156,12 @@ namespace RTE {
 		.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)
 		.def("EnableParticleSettling", &MovableMan::EnableParticleSettling)
 		.def("IsMOSubtractionEnabled", &MovableMan::IsMOSubtractionEnabled)
-		.def("GetMOsInBox", (const std::vector<MovableObject *> & (MovableMan::*)(const Box &) const)&MovableMan::GetMOsInBox, luabind::return_stl_iterator)
-		.def("GetMOsInBox", (const std::vector<MovableObject *> & (MovableMan::*)(const Box &, int) const)&MovableMan::GetMOsInBox, luabind::return_stl_iterator)
-		.def("GetMOsInRadius", (const std::vector<MovableObject *> & (MovableMan::*)(const Vector &, float) const)&MovableMan::GetMOsInRadius, luabind::return_stl_iterator)
-		.def("GetMOsInRadius", (const std::vector<MovableObject *> & (MovableMan::*)(const Vector &, float, int) const)&MovableMan::GetMOsInRadius, luabind::return_stl_iterator)
+		.def("GetMOsInBox", (const std::vector<MovableObject *> * (MovableMan::*)(const Box &box) const)&MovableMan::GetMOsInBox, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetMOsInBox", (const std::vector<MovableObject *> * (MovableMan::*)(const Box &box, int ignoreTeam) const)&MovableMan::GetMOsInBox, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetMOsInBox", (const std::vector<MovableObject *> * (MovableMan::*)(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const)&MovableMan::GetMOsInBox, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetMOsInRadius", (const std::vector<MovableObject *> * (MovableMan::*)(const Vector &centre, float radius) const)&MovableMan::GetMOsInRadius, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetMOsInRadius", (const std::vector<MovableObject *> * (MovableMan::*)(const Vector &centre, float radius, int ignoreTeam) const)&MovableMan::GetMOsInRadius, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetMOsInRadius", (const std::vector<MovableObject *> * (MovableMan::*)(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const)&MovableMan::GetMOsInRadius, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
 
 		.def("AddMO", &LuaAdaptersMovableMan::AddMO, luabind::adopt(_2))
 		.def("AddActor", &LuaAdaptersMovableMan::AddActor, luabind::adopt(_2))
@@ -275,6 +278,7 @@ namespace RTE {
 		.property("GlobalAcc", &SceneMan::GetGlobalAcc)
 		.property("OzPerKg", &SceneMan::GetOzPerKg)
 		.property("KgPerOz", &SceneMan::GetKgPerOz)
+		.property("ScrapCompactingHeight", &SceneMan::GetScrapCompactingHeight, &SceneMan::SetScrapCompactingHeight)
 
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
@@ -320,10 +324,12 @@ namespace RTE {
 		.def("WrapPosition", (bool (SceneMan::*)(Vector &))&SceneMan::WrapPosition)//, out_value(_2))
 		.def("SnapPosition", &SceneMan::SnapPosition)
 		.def("ShortestDistance", &SceneMan::ShortestDistance)
+		.def("WrapBox", &LuaAdaptersSceneMan::WrapBoxes, luabind::return_stl_iterator)
 		.def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
 		.def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
 		.def("AddSceneObject", &SceneMan::AddSceneObject, luabind::adopt(_2))
-		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans);
+		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
+		.def("DislodgePixel", &SceneMan::DislodgePixel);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,7 +358,8 @@ namespace RTE {
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
 		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
-		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
+		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD)
+		.property("AutomaticGoldDeposit", &SettingsMan::GetAutomaticGoldDeposit);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

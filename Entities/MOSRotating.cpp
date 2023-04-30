@@ -287,14 +287,6 @@ int MOSRotating::Create(const MOSRotating &reference) {
 	m_DamageMultiplier = reference.m_DamageMultiplier;
     m_NoSetDamageMultiplier = reference.m_NoSetDamageMultiplier;
 
-/* Allocated in lazy fashion as needed when drawing flipped
-    if (!m_pFlipBitmap && m_aSprite[0])
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
-/* Not anymore; points to shared static bitmaps
-    if (!m_pTempBitmap && m_aSprite[0])
-        m_pTempBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
     m_pTempBitmap = reference.m_pTempBitmap;
     m_pTempBitmapS = reference.m_pTempBitmapS;
 	
@@ -507,13 +499,13 @@ int MOSRotating::GetWoundCount(bool includePositiveDamageAttachables, bool inclu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) const {
+Attachable * MOSRotating::GetNearestDetachableAttachableToOffset(const Vector &offset) const {
 	Attachable *nearestAttachable = nullptr;
-	float closestRadius = -1.0F;
+	float closestRadius = m_SpriteRadius;
 	for (Attachable *attachable : m_Attachables) {
-		if (attachable->GetsHitByMOs() && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0) {
+		if (attachable->GetsHitByMOs() && attachable->GetGibImpulseLimit() > 0 && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0 && offset.Dot(attachable->GetParentOffset()) > 0) {
 			float radius = (offset - attachable->GetParentOffset()).GetMagnitude();
-			if (closestRadius < 0 || radius < closestRadius) {
+			if (radius < closestRadius) {
 				closestRadius = radius;
 				nearestAttachable = attachable;
 			}
@@ -524,14 +516,36 @@ Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) con
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::DetachAttachablesFromImpulse(Vector &impulseVector) {
+	float impulseRemainder = impulseVector.GetMagnitude();
+	// Find the attachable closest to the impact point by using an inverted impulse vector.
+	Vector invertedImpulseOffset = Vector(impulseVector.GetX(), impulseVector.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation;
+	Attachable *nearestAttachableToImpulse = GetNearestDetachableAttachableToOffset(invertedImpulseOffset);
+	while (nearestAttachableToImpulse) {
+		float attachableImpulseLimit = nearestAttachableToImpulse->GetGibImpulseLimit();
+		float attachableJointStrength = nearestAttachableToImpulse->GetJointStrength();
+		if (impulseRemainder > attachableImpulseLimit) {
+			nearestAttachableToImpulse->GibThis(impulseVector.SetMagnitude(attachableImpulseLimit));
+			impulseRemainder -= attachableImpulseLimit;
+		} else if (impulseRemainder > attachableJointStrength) {
+			RemoveAttachable(nearestAttachableToImpulse, true, true);
+			impulseRemainder -= attachableJointStrength;
+		} else {
+			break;
+		}
+		nearestAttachableToImpulse = GetNearestDetachableAttachableToOffset(invertedImpulseOffset);
+	}
+	impulseVector.SetMagnitude(impulseRemainder);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
-    if (woundToAdd && !ToDelete()) {
+    if (woundToAdd && !m_ToDelete) {
 		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
-			// Find and detach an attachable near the new wound before gibbing the object itself.
-			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
-				if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
-					RemoveAttachable(attachableToDetach, true, true);
-				}
+			// Find and detach an attachable near the new wound before gibbing the object itself. TODO: Perhaps move this to Actor, since it's more relevant there?
+			if (Attachable *attachableToDetach = GetNearestDetachableAttachableToOffset(parentOffsetToSet); attachableToDetach && m_DetachAttachablesBeforeGibbingFromWounds) {
+				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
@@ -541,7 +555,6 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 		}
         woundToAdd->SetCollidesWithTerrainWhileAttached(false);
         woundToAdd->SetParentOffset(parentOffsetToSet);
-        woundToAdd->SetInheritsHFlipped(false);
         woundToAdd->SetParent(this);
         woundToAdd->SetIsWound(true);
         if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
@@ -738,6 +751,10 @@ void MOSRotating::AddRecoil()
 
 bool MOSRotating::CollideAtPoint(HitData &hd)
 {
+	if (m_ToDelete) {
+		return false;	// TODO: Add a settings flag to enable old school particle sponges!
+	}
+
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
 
@@ -967,11 +984,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         {
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
-            pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
+			pEntryWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle() + c_PI);
             float damageMultiplier = pEntryWound->HasNoSetDamageMultiplier() ? 1.0F : pEntryWound->GetDamageMultiplier();
 			pEntryWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
-            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
+            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteWidth() / 2);
 			AddWound(pEntryWound, entryPos + m_SpriteOffset);
             pEntryWound = 0;
         }
@@ -986,8 +1003,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             {
                 AEmitter *pExitWound = dynamic_cast<AEmitter *>(m_pExitWound->Clone());
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
-                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
-                pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
+                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteWidth() / 2);
+				pExitWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle());
                 float damageMultiplier = pExitWound->HasNoSetDamageMultiplier() ? 1.0F : pExitWound->GetDamageMultiplier();
 				pExitWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
 				AddWound(pExitWound, exitPos + m_SpriteOffset);
@@ -1103,7 +1120,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				}
 				gibParticleClone->SetRotAngle(gibVelocity.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0));
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);
@@ -1136,14 +1153,14 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				// TODO: Figure out how much the magnitude of an offset should affect spread
 				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
 
-				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() > 0 ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
 				}
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);
@@ -1163,7 +1180,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
 	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
         RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
-        if (RandomNum() < attachable->GetGibWithParentChance()) {
+        if (RandomNum() < attachable->GetGibWithParentChance() || attachable->GetGibWhenRemovedFromParent()) {
             attachable->GibThis();
             continue;
         }
@@ -1229,15 +1246,9 @@ void MOSRotating::ApplyImpulses() {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && totalImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
-				}
-			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(averagedImpulseForceOffset.SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && totalImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis(totalImpulse);
+			DetachAttachablesFromImpulse(totalImpulse);
+			// Use the remainder of the impulses left over from detaching to gib the parent object.
+			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 		}
 	}
 
@@ -1265,47 +1276,53 @@ void MOSRotating::ResetAllTimers()
         (*attachable)->ResetAllTimers();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void MOSRotating::RestDetection() {
+	MOSprite::RestDetection();
 
-void MOSRotating::RestDetection()
-{
-    MOSprite::RestDetection();
+	// Rotational settling detection.
+	if ((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) {
+		++m_AngOscillations;
+	} else {
+		m_AngOscillations = 0;
+	}
 
-    // Rotational settling detection.
-    if (((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) && m_RestThreshold >= 0) {
-        if (m_AngOscillations >= 2)
-            m_ToSettle = true;
-        else
-            ++m_AngOscillations;
-    }
-    else
-        m_AngOscillations = 0;
+	if (std::abs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01) { m_RestTimer.Reset(); }
 
-//    if (fabs(m_AngularVel) >= 1.0)
-//        m_RestTimer.Reset();
+	// If about to settle, make sure the object isn't flying in the air.
+	// Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
+	if (m_ToSettle || IsAtRest()) {
+		bool resting = true;
+		if (g_SceneMan.OverAltitude(m_Pos, static_cast<int>(m_SpriteRadius) + 4, 3)) {
+			resting = false;
+			for (const Attachable *attachable : m_Attachables) {
+				if (attachable->GetCollidesWithTerrainWhileAttached() && !g_SceneMan.OverAltitude(attachable->GetPos(), static_cast<int>(attachable->GetIndividualRadius()) + 2, 3)) {
+					resting = true;
+					break;
+				}
+			}
+		}
+		if (!resting) {
+			m_VelOscillations = 0;
+			m_AngOscillations = 0;
+			m_RestTimer.Reset();
+			m_ToSettle = false;
+		}
+	}
+	m_PrevRotation = m_Rotation;
+	m_PrevAngVel = m_AngularVel;
+}
 
-    if (fabs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01)
-        m_RestTimer.Reset();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // If we seem to be about to settle, make sure we're not flying in the air still.
-    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
-    if (m_ToSettle || IsAtRest())
-    {
-        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
-        {
-            m_RestTimer.Reset();
-            m_ToSettle = false;
-        }
-    }
-
-    m_PrevRotation = m_Rotation;
-    m_PrevAngVel = m_AngularVel;
+bool MOSRotating::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength != 0) {
+		return false;
+	} else if (m_VelOscillations > 2 || m_AngOscillations > 2) {
+		return true;
+	}
+	return m_RestTimer.IsPastSimMS(m_RestThreshold);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1503,8 +1520,7 @@ void MOSRotating::Travel()
 void MOSRotating::PostTravel()
 {
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
-    if (IsTooFast())
-        GibThis();
+	if (IsTooFast()) { GibThis(); }
 
 	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
 	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }
@@ -1518,15 +1534,10 @@ void MOSRotating::PostTravel()
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && m_TravelImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
-				}
-			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && m_TravelImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis();
+			Vector totalImpulse(m_TravelImpulse.GetX(), m_TravelImpulse.GetY());
+			DetachAttachablesFromImpulse(totalImpulse);
+			// Use the remainder of the impulses left over from detaching to gib the parent object.
+			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(); }
 		}
 	}
     // Reset
@@ -1555,10 +1566,6 @@ void MOSRotating::PostTravel()
 // Description:     Updates this MOSRotating. Supposed to be done every frame.
 
 void MOSRotating::Update() {
-#ifndef RELEASE_BUILD
-	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-#endif
-
     MOSprite::Update();
 
     if (m_InheritEffectRotAngle) { m_EffectRotAngle = m_Rotation.GetRadAngle(); }
@@ -1716,7 +1723,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());
             if (parentBreakWound) {
 				parentBreakWound->SetDrawnAfterParent(attachable->IsDrawnAfterParent());
-                parentBreakWound->SetEmitAngle((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
+				parentBreakWound->SetInheritedRotAngleOffset((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
                 AddWound(parentBreakWound, attachable->GetParentOffset(), false);
                 parentBreakWound = nullptr;
             }
@@ -1724,7 +1731,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
         if (!attachable->IsSetToDelete() && attachable->GetBreakWound()) {
             AEmitter *childBreakWound = dynamic_cast<AEmitter *>(attachable->GetBreakWound()->Clone());
             if (childBreakWound) {
-                childBreakWound->SetEmitAngle(attachable->GetJointOffset().GetAbsRadAngle());
+				childBreakWound->SetInheritedRotAngleOffset(attachable->GetJointOffset().GetAbsRadAngle());
                 attachable->AddWound(childBreakWound, attachable->GetJointOffset());
                 childBreakWound = nullptr;
             }
@@ -1745,6 +1752,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
     if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
     if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);
+		if (attachable->GetGibWhenRemovedFromParent()) { attachable->GibThis(); }
         return nullptr;
     }
 

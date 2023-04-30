@@ -101,6 +101,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
+- New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
+
 - New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
 	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
 	Only has a noticeable effect when the "Allow purchases from other factions" (`Settings.ini` `ShowForeignItems`) gameplay setting is disabled.
@@ -160,9 +162,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PieSlice`s with no preset name will always be added by this.
 
 	**`RemovePieSlice(pieSliceToRemove)`** - Removes the given `PieSlice` from the `PieMenu`, and returns it to Lua so you can add it to another `PieMenu` if you want.  
-	**`RemovePieSlicesByPresetName()`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByType()`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
-	**`RemovePieSlicesByOriginalSource()`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.
+	**`RemovePieSlicesByPresetName(presetNameToRemoveBy)`** - Removes any `PieSlice`s with the given preset name from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByType(pieSliceTypeToRemoveBy)`** - Removes any `PieSlice`s with the given `PieSlice` `Type` from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	**`RemovePieSlicesByOriginalSource(originalSource)`** - Removes any `PieSlice`s with the original source from the `PieMenu`. Note that, unlike `RemovePieSlice`, the `PieSlice` is not returned, since multiple `PieSlices` can be removed this way. Instead, this returns true if any `PieSlice`s were removed.  
+	
+	**`ReplacePieSlice`(pieSliceToReplace, replacementPieSlice)`** - Replaces the specified `PieSlice` to replace, if it exists in the `PieMenu`, with the replacement `PieSlice` and returns the replaced `PieSlice` for use (e.g. for adding to a different `PieMenu`). The replacement `PieSlice` takes the replaced `PieSlice`'s original source, direction, middle slice eligibility, angles and slot count, so it seamlessly replaces it.
 
 - `PieSlice`s have been modified to support `PieMenu`s being defined in INI. They have the following properties:  
 
@@ -466,9 +470,17 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
+- Buy Menu Quality-of-Life improvements:  
+	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
+	Items in the cart will be indented to signify what actor's inventory they belong to.  
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+
+- Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
+
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
-	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon will shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
 
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
@@ -486,7 +498,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
 
-- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
+- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam, getsHitByMOsOnly)` and `GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`. The `getsHitByMOsOnly` defaults to false, which will get every `MovableObject`.
 
 - `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
 
@@ -499,11 +511,15 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added Lua convenience function `RoundToNearestMultiple(num, multiple)` which returns a number rounded to the nearest specified multiple.  
 	Note that this operates on integers, so fractional parts will be truncated towards zero by type conversion.
 
+- Added `Actor` INI and Lua property (R/W) `PlayerControllable`, that determines whether the `Actor` can be swapped to by human players. Note that Lua can probably break this, by forcing the `Controller`s of `Actor`s that aren't `PlayerControllable` to the `CIM_PLAYER` input mode.
+
+- Added alternative `MovableMan:GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, onlyPlayerControllableActors, actorToExclude)` that acts like the existing version, but allows you to specify whether or not to only get `Actors` that are `PlayerControllable`.
+
+- New `Attachable` INI and Lua property `IgnoresParticlesWhileAttached`, which determines whether the `Attachable` should ignore collisions (and penetrations) with single-atom particles. Useful for preventing `HeldDevice`s from being destroyed by bullets while equipped.
+
 - Added `AHuman` INI and Lua (R/W) property `DeviceArmSwayRate`, that defines how much `HeldDevices` will sway when walking. 0 is no sway, 1 directly couples sway with leg movement, >1 may be funny. Defaults to 0.75.
 
-- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`. A non-zero value is reqiured for `OneHandedReloadAngle` to be used.
-
-- Added `AHuman` INI and Lua (R/W) property `OneHandedReloadAngleOffset`, that defines the angle in radians that should be added to `HeldDevice`s when reloading with only one hand (i.e. the `HeldDevice` is one-handed, or the `AHuman` no longer has their bg`Arm`), in addition to the `Arm`'s rotation. Note that this will only be used if the `AHuman` has a non-zero `ReloadOffset`.
+- Added `AHuman` INI and Lua (R/W) property `ReloadOffset`, that defines where `Hands` should move to when reloading, if they're not holding a supported `HeldDevice`.
 
 - Added `AHuman` Lua function `FirearmsAreReloading(onlyIfAllFirearmsAreReloading)` which returns whether or not this `AHuman`'s `HeldDevices` are currently reloading. If the parameter is set to true and the `AHuman` is holding multiple `HeldDevices`, this will only return true if all of them are reloading.
 
@@ -533,7 +549,29 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	
 	The default values are `AreaDistributionType = Circle` and `AreaDistributionSurfaceAreaMultiplier = 0.5`, meaning that an object is assumed to be an oval with a depth of half it's width.
 
+- New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
+
+- New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
+
+- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+
+- New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
+
+- New `Settings.ini` property `AutomaticGoldDeposit` which determines whether gold gathered by actors is automatically added into the team's funds. False means that gold needs to be manually transported into orbit via craft, the old school way. Enabled by default.  
+	A noteworthy change in comparison to previous logic is that gold is no longer converted into objects, and `GoldCarried` is now automatically transferred into craft upon entering them. This effectively allows the same actor to resume prospecting without having to return to orbit with the craft.  
+	Regardless of the setting, this behavior is always disabled for AI-only teams for the time being, until the actor AI is accommodated accordingly.
+
+- New `Actor` Lua function `AddGold(goldOz)` which adds the passed-in amount of gold either to the team's funds, or the `GoldCarried` of the actor in question, depending on whether automatic gold depositing is enabled. This effectively simulates the actor collecting gold.
+
+- New `Actor` Lua function `DropAllGold()` which converts all of the actor's `GoldCarried` into particles and spews them on the ground.
+
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
+
+- New `MovableObject` Lua (R) property `DistanceTravelled` which returns the amount of pixels the object has travelled since its creation.
 
 - Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
 
@@ -553,9 +591,19 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
 
+- Added Lua (R/W) properties for `ACrab` `AimRangeUpperLimit` and `AimRangeLowerLimit`. INI bindings already existed and are mentioned in an earlier changelog entry.
+
+- Added `TerrainObject` INI property `ClearChildObjects` that lets you clear child objects when doing a `CopyOf` of another `TerrainObject`.
+
+- Added `Actor` Lua (R) property `MovePathEnd`, that gets you the last point in the `Actor`'s move path.
+
+- Added `Actor` Lua (R) property `SceneWaypoints`, that lets you iterate over the `Actor`'s scene waypoints.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Codebase now uses the C++20 standard.
 
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
@@ -705,7 +753,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	MaxLength - The max length of the Arm in pixels.
 	MoveSpeed - How quickly the Arm moves between targets. 0 means no movement, 1 means instant movement.
-	HandDefaultIdleOffset - The idle offset this Arm will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
+	HandIdleOffset - The idle offset this Arm's hand will move to if it has no targets, and nothing else affecting its idle offset (e.g. it's not holding or supporting a HeldDevice). IdleOffset is also allowed for compatibility.
 	HandSprite - The sprite file for this Arm's hand. Hand is also allowed for compatibility.
 	GripStrength - The Arm's grip strength when holding HeldDevices. Further described below, in the entry where it was added.
 	ThrowStrength - The Arm's throw strength when throwing ThrownDevices. Further described below, in the entry where it was added.
@@ -714,8 +762,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	They now have the following Lua properties and functions:  
 	**`MaxLength`** (R) - Allows getting the `Arm`'s maximum length.  
 	**`MoveSpeed`** (R/W) - Allows getting and setting the `Arm`'s movement speed. 0 means no movement, 1 means instant movement.  
-	**`HandDefaultIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
-	**`HandCurrentPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
+	**`HandIdleOffset`** (R/W) - Allows getting and setting the `Arm`'s default idle hand offset, i.e. where the hand will go when it has no targets and isn't holding or supporting anything.  
+	**`HandPos`** (R/W) - Gets and sets the current position of the hand. Note that this will override any animations and move the hand to the position instantly, so it's generally not recommended.  
 	**`HasAnyHandTargets`** (R) - Gets whether or not this `Arm` has any hand targets, i.e. any positions the `Arm` is supposed to try to move its hand to.  
 	**`NumberOfHandTargets`** (R) - Gets the number of hand targets this `Arm` has.  
 	**`NextHandTargetDescription`** (R/W) - Gets the description of the next target this `Arm`'s hand is moving to, or an empty string if there are no targets.  
@@ -753,7 +801,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
 	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
 
-	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
 
 - Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
 
@@ -761,6 +809,11 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
 
 - Failing to create actor `FootGroup`s during loading will now crash with error message instead of straight to desktop.
+
+- `Gib` property `InheritsVel` now works as a `float` scalar from 0 to 1, defining the portion of velocity inherited from the parent object.
+
+- Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
+	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
 
 </details>
 
@@ -783,7 +836,11 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fix `MOSRotating` `GetWounds()` Lua function missing its implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
+
+- Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
 
 </details>
 
@@ -936,7 +993,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	**`ADoor`** - `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
 - Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
-`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
+`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder, 3 for ceiled remainder with the last decimal place rounded to the nearest 0 or 5 (i.e. if option 2 gave 10.1, this would give 10.5, if it gave 10.369 this would give 10.370, etc.)`
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
@@ -1056,6 +1113,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
 
+- Added `SceneMan` Lua function `SceneMan:WrapBox(boxToWrap)` which takes a `Box` and, if it passes over the seam, splits it into multiple boxes and returns them. Useful for creating `Boxes` without having to worry about the seam.
+
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
 - New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.
@@ -1094,6 +1153,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
 
 - New Settings.ini flag `UseExperimentalMultiplayerSpeedBoosts = 1/0`. When turned on, it will use some code that **may** speed up multiplayer.
+
+- New `FrameMan` Lua function `SplitStringToFitWidth(stringToSplit, widthLimit, useSmallFont)`, which lets you split up a string so it fits within a given width limit for the specified font. Does not try to perfectly fit strings, and can be wonky if the width limit is small. Mostly used to ensure text fits on the screen!
 
 </details>
 
@@ -1174,7 +1235,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 		
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
-	In place of these functions, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
+	In place of these functions, you can get all wounds with `GetWounds`, you can get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), and remove wounds with `RemoveWounds`. You can also get the total gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property).  
 	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
 	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.
@@ -1256,6 +1317,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
 - Added support for multiple lines in DataModule descriptions in their Index.inis. See earlier entry on multiple lines in descriptions for details on how to use this.
+
+- `FrameMan` screen text will now always try to fit on the screen, splitting into multiple lines if needed. If you want more control of this, split your screen text manually with the `"\n"` new line character.
 
 </details>
 

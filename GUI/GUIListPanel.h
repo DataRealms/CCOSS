@@ -33,22 +33,24 @@ public:
     // Item structure
     struct Item
     {
-        int                m_ID;
-        std::string        m_Name;
+        int m_ID = 0;
+        std::string m_Name;
         // Extra text field displayed right-justified in the item
-        std::string        m_RightText;
+        std::string m_RightText;
         // Extra index for special indexing or reference that the item is associated with. Menu-specific
-        int                 m_ExtraIndex;
-        bool            m_Selected;
+        int m_ExtraIndex = 0;
+        bool m_Selected = false;
         // Can contain a bitmap to display in the list
         // This is OWNED
-        GUIBitmap       *m_pBitmap;
+        GUIBitmap *m_pBitmap = nullptr;
         // Extra data associated with the item
         // This is NOT OWNED
-        const Entity          *m_pEntity;
-        int             m_Height;
+        const Entity *m_pEntity = nullptr;
+        int m_Height = 0;
+		// An x offset to apply to the item (to allow nesting)
+		int m_OffsetX = 0;
 
-        Item() { m_pBitmap = 0; m_pEntity = 0; m_Height = 0; }
+        Item() { }
         ~Item() { delete m_pBitmap; m_pBitmap = 0; }
 
     };
@@ -102,7 +104,7 @@ public:
 //                  An Extra menu-specific index that this item may be associated with.
 //                  Object instance associated with the item. Ownership is NOT TRANSFERRED!
 
-    void AddItem(const std::string &Name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
+    void AddItem(const std::string &Name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1, const int offsetX = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -527,13 +529,11 @@ public:
 	/// <param name="newPadding">The new scrollbar padding, in pixels.</param>
 	void SetScrollBarPadding(int newPadding) { m_ScrollBarPadding = newPadding; AdjustScrollbars(); }
 
-protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          BuildBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Build the bitmap.
-// Arguments:       UpdateBase, UpdateText.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Method:          BuildBitmap
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Build the bitmap.
+	// Arguments:       UpdateBase, UpdateText.
 
 	void BuildBitmap(bool UpdateBase, bool UpdateText);
 

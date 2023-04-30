@@ -1,6 +1,7 @@
 #include "ActivityMan.h"
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "UInputMan.h"
@@ -123,7 +124,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
+		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, false);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
@@ -265,6 +266,9 @@ namespace RTE {
 
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
+
+		// Reset screen positions and shake
+		g_CameraMan.Reset();
 
 		m_ActivityAllowsSaving = false;
 

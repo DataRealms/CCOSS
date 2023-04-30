@@ -50,8 +50,9 @@ namespace RTE {
 		// When the buttons are released.
 		RELEASE_PRIMARY,
 		RELEASE_SECONDARY,
-		// Any of the four action buttons, fire, aim, inventory and jump (not next and previous actor!).
+		// Either button of fire or aim
 		PRESS_FACEBUTTON,
+		RELEASE_FACEBUTTON,
 		SCROLL_UP,
 		SCROLL_DOWN,
 		DEBUG_ONE,

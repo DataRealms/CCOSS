@@ -156,6 +156,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
 
 void MetagameGUI::Clear()
 {
+	m_RootBoxMaxWidth = 0;
+
     m_pController = 0;
     m_pGUIScreen = 0;
     m_pGUIInput = 0;
@@ -376,12 +378,14 @@ int MetagameGUI::Create(Controller *pController)
 	}
     m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
+	m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
+
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     GUICollectionBox *pRootBox = m_apScreenBox[ROOTBOX] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
     // Make the root box fill the screen
 //    pRootBox->SetPositionAbs((g_WindowMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_WindowMan.GetResY() - pRootBox->GetHeight()) / 2);
     pRootBox->SetDrawBackground(false);
-    pRootBox->Resize(g_WindowMan.GetResX(), g_WindowMan.GetResY());
+    pRootBox->Resize(m_RootBoxMaxWidth, g_WindowMan.GetResY());
 
     m_pBannerRedTop = new GUIBanner();
     m_pBannerRedBottom = new GUIBanner();
@@ -650,7 +654,7 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 
 	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet
 	// which is outside the screen when this is called first time
-	Vector planetCenter = Vector(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
+	Vector planetCenter = Vector(m_RootBoxMaxWidth / 2, g_WindowMan.GetResY() / 2);
 	// Correct planet pos a bit when it's location is known
 	if (!m_PlanetCenter.IsZero())
 		planetCenter = m_PlanetCenter;
@@ -1584,8 +1588,8 @@ void MetagameGUI::Update()
     {
         if (g_MetaMan.m_StateChanged)
         {
-            m_pBannerYellowTop->ShowText("DAY", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 2500, 200);
-            m_pBannerYellowBottom->ShowText(GetRoundName(g_MetaMan.m_CurrentRound), GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6,  2500, 300);
+            m_pBannerYellowTop->ShowText("DAY", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 2500, 200);
+            m_pBannerYellowBottom->ShowText(GetRoundName(g_MetaMan.m_CurrentRound), GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6,  2500, 300);
         }
         m_pPhaseLabel->SetText("New Day");
         // Blink the start button to draw attention to it
@@ -1597,7 +1601,7 @@ void MetagameGUI::Update()
         {
             m_pBannerYellowTop->HideText(2500, 200);
             m_pBannerYellowBottom->HideText(2500, 300);
-//            m_pBannerRedTop->ShowText("Sites Found", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.1, 3500, 200);
+//            m_pBannerRedTop->ShowText("Sites Found", GUIBanner::FLYBYLEFTWARD, 1000, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.1, 3500, 200);
         }
 
         m_pPhaseLabel->SetText("New Sites Found");
@@ -1608,7 +1612,7 @@ void MetagameGUI::Update()
     {
         if (g_MetaMan.m_StateChanged)
         {
-//            m_pBannerRedBottom->ShowText("Incomes", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.2, 3500, 200);
+//            m_pBannerRedBottom->ShowText("Incomes", GUIBanner::FLYBYLEFTWARD, 1000, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.2, 3500, 200);
         }
         m_pPhaseLabel->SetText("Counting Incomes");
         m_apMetaButton[CONTINUE]->SetText("Skip");
@@ -1630,8 +1634,8 @@ void MetagameGUI::Update()
                 {
                     m_apMetaButton[CONTINUE]->SetText("Continue");
                     m_pPhaseLabel->SetText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s Turn");
-                    m_pBannerRedTop->ShowText("Game Over", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 3500, 0);
-                    m_pBannerRedBottom->ShowText("for " + g_MetaMan.m_Players[metaPlayer].GetName() + "!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6, 3500, 0);
+                    m_pBannerRedTop->ShowText("Game Over", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                    m_pBannerRedBottom->ShowText("for " + g_MetaMan.m_Players[metaPlayer].GetName() + "!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
 
                     // Show a lil descriptive message as to why the game ended
                     m_pGameMessageLabel->SetVisible(true);
@@ -1646,8 +1650,8 @@ void MetagameGUI::Update()
                 {
                     m_apMetaButton[CONTINUE]->SetText("Start Turn");
                     m_pPhaseLabel->SetText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s Turn");
-                    m_pBannerRedTop->ShowText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 3500, 0);
-                    m_pBannerRedBottom->ShowText("Turn", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6, 3500, 0);
+                    m_pBannerRedTop->ShowText(g_MetaMan.m_Players[metaPlayer].GetName() + "'s", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                    m_pBannerRedBottom->ShowText("Turn", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
                     m_pGameMessageLabel->SetVisible(false);
                     m_PreTurn = true;
                 }
@@ -1729,8 +1733,8 @@ void MetagameGUI::Update()
             // Noone left??
             if (winnerTeam == Activity::NoTeam)
             {
-                m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 3500, 0);
-                m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6, 3500, 0);
+                m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
             }
             else
             {
@@ -1750,12 +1754,12 @@ void MetagameGUI::Update()
                         winnerNames = winnerNames + (winnerNames.empty() ? "" : " and ") + (*pItr).GetName();
                     }
                 }
-                m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 3500, 0);
-                m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6, 3500, 0);
+                m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+                m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
 //                std::snprintf(winStr, sizeof(winStr), "Team %d", winner + 1);
-//                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.4, 3500, 0);
-//                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_WindowMan.GetResX(), g_WindowMan.GetResY()), 0.6, 3500, 0);
+//                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.4, 3500, 0);
+//                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(m_RootBoxMaxWidth, g_WindowMan.GetResY()), 0.6, 3500, 0);
             }
         }
 
@@ -6476,8 +6480,8 @@ void MetagameGUI::UpdateSiteNameLabel(bool visible, std::string text, const Vect
 /*
         if (m_pScenePlanetLabel->GetXPos() < pad)
             m_pScenePlanetLabel->SetPositionAbs(pad, m_pScenePlanetLabel->GetYPos());
-        else if (m_pScenePlanetLabel->GetXPos() + m_pScenePlanetLabel->GetWidth() + pad >= g_WindowMan.GetResX())
-            m_pScenePlanetLabel->SetPositionAbs(g_WindowMan.GetResX() - m_pScenePlanetLabel->GetWidth() - pad, m_pScenePlanetLabel->GetYPos());
+        else if (m_pScenePlanetLabel->GetXPos() + m_pScenePlanetLabel->GetWidth() + pad >= m_RootBoxMaxWidth)
+            m_pScenePlanetLabel->SetPositionAbs(m_RootBoxMaxWidth - m_pScenePlanetLabel->GetWidth() - pad, m_pScenePlanetLabel->GetYPos());
 */
         if (m_pScenePlanetLabel->GetYPos() < pad)
             m_pScenePlanetLabel->SetPositionAbs(m_pScenePlanetLabel->GetXPos(), pad);

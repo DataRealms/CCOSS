@@ -1500,7 +1500,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
-	for (const std::string &group : *sceneObjectToSave->GetGroupList()) {
+	for (const std::string &group : *sceneObjectToSave->GetGroups()) {
 		writer.NewPropertyWithValue("AddToGroup", group);
 	}
 
@@ -1568,6 +1568,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
 		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", attachableToSave->GetGibWhenRemovedFromParent());
 		writer.NewPropertyWithValue("JointStrength", attachableToSave->GetJointStrength());
 		writer.NewPropertyWithValue("JointStiffness", attachableToSave->GetJointStiffness());
 		writer.NewPropertyWithValue("JointOffset", attachableToSave->GetJointOffset());
@@ -1589,7 +1590,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());
 			writer.NewPropertyWithValue("BurstSpacing", aemitterToSave->GetBurstSpacing());
 			writer.NewPropertyWithValue("BurstTriggered", aemitterToSave->IsSetToBurst());
-			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngle());
+			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngleMatrix());
 			writer.NewPropertyWithValue("EmissionOffset", aemitterToSave->GetEmitOffset());
 			writer.NewPropertyWithValue("EmissionDamage", aemitterToSave->GetEmitDamage());
 			WriteHardcodedAttachableOrNone("Flash", aemitterToSave->GetFlash());

@@ -39,6 +39,7 @@ void Activity::Clear() {
 			m_IsHuman[player] = player == Players::PlayerOne;
 			m_PlayerScreen[player] = (player == Players::PlayerOne) ? Players::PlayerOne : Players::NoPlayer;
 			m_ViewState[player] = ViewState::Normal;
+			m_DeathTimer[player].Reset();
 			m_Team[player] = Teams::TeamOne;
 			m_TeamFundsShare[player] = 1.0F;
 			m_FundsContribution[player] = 0;
@@ -759,6 +760,20 @@ void Activity::Clear() {
 		m_ViewState[player] = Normal;
 
 		return true;
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	void Activity::LoseControlOfActor(int player) {
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			if (Actor *actor = m_ControlledActor[player]; actor && g_MovableMan.IsActor(actor)) {
+				actor->SetControllerMode(Controller::CIM_AI);
+				actor->GetController()->SetDisabled(false);
+			}
+			m_ControlledActor[player] = nullptr;
+			m_ViewState[player] = ViewState::DeathWatch;
+			m_DeathTimer[player].Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

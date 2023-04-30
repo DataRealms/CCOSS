@@ -81,6 +81,9 @@ namespace RTE {
 		CreatePrimaryRenderer();
 		CreatePrimaryTexture();
 
+		// SDL is kinda dumb about the taskbar icon so we need to poll after creating the window for it to show up, otherwise there's no icon till it starts polling in the main menu loop.
+		SDL_PollEvent(nullptr);
+
 		m_PrimaryWindowDisplayIndex = SDL_GetWindowDisplayIndex(m_PrimaryWindow.get());
 
 		if (FullyCoversAllDisplays()) {
@@ -91,7 +94,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::CreatePrimaryWindow() {
-		const char *windowTitle = "Cortex Command Community Project";
+		std::string windowTitle = "Cortex Command Community Project";
+
+#ifdef DEBUG_BUILD
+		windowTitle += " (Full Debug)";
+#elif MIN_DEBUG_BUILD
+		windowTitle += " (Min Debug)";
+#elif DEBUG_RELEASE_BUILD
+		windowTitle += " (Debug Release)";
+#endif
+
+#ifdef TARGET_MACHINE_X86
+		windowTitle += " (x86)";
+#endif
+
 		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN;
@@ -100,16 +116,16 @@ namespace RTE {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
-		m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle, windowPosX, windowPosY, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowFlags), SDLWindowDeleter());
+		m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle.c_str(), windowPosX, windowPosY, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, windowFlags), SDLWindowDeleter());
 		if (!m_PrimaryWindow) {
-			ShowMessageBox("Unable to create window because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
+			RTEError::ShowMessageBox("Unable to create window because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to defaults!");
 
 			m_ResX = c_DefaultResX;
 			m_ResY = c_DefaultResY;
 			m_ResMultiplier = 1;
 			g_SettingsMan.SetSettingsNeedOverwrite();
 
-			m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN), SDLWindowDeleter());
+			m_PrimaryWindow = std::shared_ptr<SDL_Window>(SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, SDL_WINDOW_SHOWN), SDLWindowDeleter());
 			if (!m_PrimaryWindow) {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
@@ -126,7 +142,7 @@ namespace RTE {
 
 		m_PrimaryRenderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, renderFlags), SDLRendererDeleter());
 		if (!m_PrimaryRenderer) {
-			ShowMessageBox("Unable to create hardware accelerated renderer because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to software rendering!");
+			RTEError::ShowMessageBox("Unable to create hardware accelerated renderer because:\n" + std::string(SDL_GetError()) + "!\n\nTrying to revert to software rendering!");
 			m_PrimaryRenderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(m_PrimaryWindow.get(), -1, SDL_RENDERER_SOFTWARE), SDLRendererDeleter());
 
 			if (!m_PrimaryRenderer) {
@@ -183,7 +199,7 @@ namespace RTE {
 #endif
 
 		if (result != 0) {
-			ShowMessageBox("Unable to change VSync mode at runtime! The change will be applied after restarting!");
+			RTEError::ShowMessageBox("Unable to change VSync mode at runtime! The change will be applied after restarting!");
 		}
 	}
 
@@ -212,7 +228,7 @@ namespace RTE {
 			m_CanMultiDisplayFullscreen = false;
 			m_IgnoreMultiDisplays = true;
 			if (!errorMsg.empty()) {
-				ShowMessageBox("Failed to map displays for multi-display fullscreen because:\n\n" + errorMsg + "!\n\nFullscreen will be limited to the display the window is positioned at!");
+				RTEError::ShowMessageBox("Failed to map displays for multi-display fullscreen because:\n\n" + errorMsg + "!\n\nFullscreen will be limited to the display the window is positioned at!");
 			}
 		};
 
@@ -306,7 +322,7 @@ namespace RTE {
 			resMultiplier = std::clamp<int>(resMultiplier, 1, 8);
 			resX = std::min(resX, m_MaxResX / resMultiplier);
 			resY = std::min(resY, m_MaxResY / resMultiplier);
-			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
+			RTEError::ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 			g_SettingsMan.SetSettingsNeedOverwrite();
 		}
 	}
@@ -337,7 +353,7 @@ namespace RTE {
 
 		bool result = SDL_SetWindowFullscreen(m_PrimaryWindow.get(), windowFlags) == 0;
 		if (!result && !revertToDefaults) {
-			ShowMessageBox("Failed to revert to previous resolution settings!\nAttempting to revert to defaults!");
+			RTEError::ShowMessageBox("Failed to revert to previous resolution settings!\nAttempting to revert to defaults!");
 			setDefaultResSettings();
 			AttemptToRevertToPreviousResolution(true);
 		} else if (!result) {
@@ -369,7 +385,7 @@ namespace RTE {
 		bool recoveredToPreviousSettings = false;
 
 		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversPrimaryWindowDisplay && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
-			ShowMessageBox("Failed to switch to new resolution!\nAttempting to revert to previous settings!");
+			RTEError::ShowMessageBox("Failed to switch to new resolution!\nAttempting to revert to previous settings!");
 			AttemptToRevertToPreviousResolution();
 			recoveredToPreviousSettings = true;
 		} else if (!newResFullyCoversPrimaryWindowDisplay && !newResFullyCoversAllDisplays) {
@@ -414,7 +430,7 @@ namespace RTE {
 		MapDisplays();
 
 		if ((m_ResX * newResMultiplier > m_MaxResX) || (m_ResY * newResMultiplier > m_MaxResY)) {
-			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
+			RTEError::ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
 		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1, true);

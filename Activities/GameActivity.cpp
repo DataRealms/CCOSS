@@ -63,7 +63,6 @@ void GameActivity::Clear()
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
-        m_DeathTimer[player].Reset();
         m_ActorSelectTimer[player].Reset();
         m_ActorCursor[player].Reset();
         m_pLastMarkedActor[player] = 0;
@@ -166,7 +165,6 @@ int GameActivity::Create(const GameActivity &reference)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
-//        m_DeathTimer[player] = reference.m_DeathTimer[player];
         m_ActorCursor[player] = reference.m_ActorCursor[player];
         m_pLastMarkedActor[player] = reference.m_pLastMarkedActor[player];
         m_LandingZone[player] = reference.m_LandingZone[player];
@@ -911,7 +909,7 @@ int GameActivity::Start()
             continue;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
         // And occlusion
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
@@ -1178,7 +1176,7 @@ void GameActivity::UpdateEditing()
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
 
         // Check if the player says he's done editing, and if so, make sure he really is good to go
         if (m_pEditorGUI[player]->GetEditorGUIMode() == SceneEditorGUI::DONEEDITING)
@@ -1339,7 +1337,7 @@ void GameActivity::Update()
         bool skipBuyUpdate = false;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), team);
+        g_CameraMan.SetScreenTeam(team, ScreenOfPlayer(player));
 
         //////////////////////////////////////////////////////
         // Assure that Controlled Actor is a safe pointer
@@ -1365,14 +1363,13 @@ void GameActivity::Update()
                 if (g_MovableMan.IsActor(m_ControlledActor[player]))
                 {
                     m_DeathViewTarget[player] = m_ControlledActor[player]->GetPos();
+					m_DeathTimer[player].Reset();
                 }
                 // Add delay after death before switching so the death comedy can be witnessed
                 // Died, so enter death watch mode
                 else
                 {
-                    m_ControlledActor[player] = 0;
-                    m_ViewState[player] = ViewState::DeathWatch;
-                    m_DeathTimer[player].Reset();
+					LoseControlOfActor(player);
                 }
             }
             // Ok, done watching death comedy, now automatically switch
@@ -1392,9 +1389,7 @@ void GameActivity::Update()
             // Any other viewing mode and the actor died... go to deathwatch
             else if (m_ControlledActor[player] && !g_MovableMan.IsActor(m_ControlledActor[player]))
             {
-                m_ControlledActor[player] = 0;
-                m_ViewState[player] = ViewState::DeathWatch;
-                m_DeathTimer[player].Reset();
+				LoseControlOfActor(player);
             }
         }
         // Player brain is now gone! Remove any control he may have had

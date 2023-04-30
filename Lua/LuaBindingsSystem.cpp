@@ -98,6 +98,7 @@ namespace RTE {
 			luabind::value("RELEASE_PRIMARY", ControlState::RELEASE_PRIMARY),
 			luabind::value("RELEASE_SECONDARY", ControlState::RELEASE_SECONDARY),
 			luabind::value("PRESS_FACEBUTTON", ControlState::PRESS_FACEBUTTON),
+			luabind::value("RELEASE_FACEBUTTON", ControlState::RELEASE_FACEBUTTON),
 			luabind::value("SCROLL_UP", ControlState::SCROLL_UP),
 			luabind::value("SCROLL_DOWN", ControlState::SCROLL_DOWN),
 			luabind::value("DEBUG_ONE", ControlState::DEBUG_ONE),

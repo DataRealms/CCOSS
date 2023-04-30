@@ -329,6 +329,10 @@ namespace RTE {
 #pragma region MOSRotating Lua Adapters
 	struct LuaAdaptersMOSRotating {
 		static void GibThis(MOSRotating *luaSelfObject);
+		static std::vector<AEmitter *> * GetWounds1(const MOSRotating *luaSelfObject);
+		static std::vector<AEmitter *> * GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
+		// Need a seperate implementation function without the return so we can safely recurse.
+		static void GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds);
 	};
 #pragma endregion
 
@@ -443,6 +447,17 @@ namespace RTE {
 		/// <param name="className">The class name of the Entity to reload.</param>
 		/// <returns>Whether or not the Entity was reloaded.</returns>
 		static bool ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className);
+	};
+#pragma endregion
+
+#pragma region SceneMan Lua Adapters
+	struct LuaAdaptersSceneMan {
+		/// <summary>
+		/// Takes a Box and returns a list of Boxes that describe the Box, wrapped appropriately for the current Scene.
+		/// </summary>
+		/// <param name="boxToWrap">The Box to wrap.</param>
+		/// <returns>A list of Boxes that make up the Box to wrap, wrapped appropriately for the current Scene.</returns>
+		static const std::list<Box> * WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap);
 	};
 #pragma endregion
 

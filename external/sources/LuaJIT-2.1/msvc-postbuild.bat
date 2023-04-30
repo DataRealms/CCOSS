@@ -15,12 +15,12 @@ cd %~dp0\src\
 @rem Call minilua to determine what the architecture is.
 @minilua
 @if errorlevel 8 (
-  @if "%1"=="" (@set BUILDTYPE=release-64)
-  @if "%1"=="debug" (@set BUILDTYPE=debug-64)
-  @if "%1"=="debug-release" (@set BUILDTYPE=debug-release-64)
-) else (
   @if "%1"=="debug" (@set BUILDTYPE=debug)
   @if "%1"=="debug-release" (@set BUILDTYPE=debug-release)
+) else (
+  @if "%1"=="" (@set BUILDTYPE=release-32)
+  @if "%1"=="debug" (@set BUILDTYPE=debug-32)
+  @if "%1"=="debug-release" (@set BUILDTYPE=debug-release-32)
 )
 
 @set LJLIBNAME=%LJLIBNAMESTEM%%BUILDTYPE%%LJLIBNAMEEXT%

@@ -435,6 +435,8 @@ namespace RTE {
 		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
+		.property("MovementState", &AHuman::GetMovementState, &AHuman::SetMovementState)
+		.property("ProneState", &AHuman::GetProneState, &AHuman::SetProneState)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)

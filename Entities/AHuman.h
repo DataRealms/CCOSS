@@ -389,6 +389,27 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
 	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
 
+	/// Gets this AHuman's MovementState.
+	/// </summary>
+	/// <returns>This AHuman's MovementState.</returns>
+	MovementState GetMovementState() const { return m_MoveState; }
+
+	/// <summary>
+	/// Sets this AHuman's MovementState to the new state.
+	/// </summary>
+	/// <param name="newMovementState">This AHuman's new MovementState.</param>
+	void SetMovementState(MovementState newMovementState) { m_MoveState = newMovementState; }
+
+	/// Gets this AHuman's ProneState.
+	/// </summary>
+	/// <returns>This AHuman's ProneState.</returns>
+	ProneState GetProneState() const { return m_ProneState; }
+
+	/// <summary>
+	/// Sets this AHuman's ProneState to the new state.
+	/// </summary>
+	/// <param name="newProneState">This AHuman's new ProneState.</param>
+	void SetProneState(ProneState newProneState) { m_ProneState = newProneState; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint

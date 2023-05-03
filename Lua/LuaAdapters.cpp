@@ -258,6 +258,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::vector<Vector> * LuaAdaptersActor::GetSceneWaypoints(Actor *luaSelfObject) {
+		std::vector<Vector> *sceneWaypoints = new std::vector<Vector>();
+		sceneWaypoints->reserve(luaSelfObject->GetWaypointsSize());
+		for (auto &[sceneWaypoint, movableObjectWaypoint] : luaSelfObject->GetWaypointList()) {
+			if (movableObjectWaypoint == nullptr) {
+				sceneWaypoints->emplace_back(sceneWaypoint);
+			}
+		}
+		return sceneWaypoints;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}

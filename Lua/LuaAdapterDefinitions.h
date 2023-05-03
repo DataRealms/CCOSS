@@ -299,6 +299,12 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Actor Lua Adapters
+	struct LuaAdaptersActor {
+		static std::vector<Vector> * GetSceneWaypoints(Actor *luaSelfObject);
+	};
+#pragma endregion
+
 #pragma region AHuman Lua Adapters
 	struct LuaAdaptersAHuman {
 		static void ReloadFirearms(AHuman *luaSelfObject);

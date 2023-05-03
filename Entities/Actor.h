@@ -703,12 +703,6 @@ ClassInfoGetters;
 	/// <returns>The list of waypoints for this Actor.</returns>
 	const std::list<std::pair<Vector, const MovableObject *>> & GetWaypointList() const { return m_Waypoints; }
 
-	/// <summary>
-	/// Gets a vector containing this Actor's position waypoints.
-	/// </summary>
-	/// <returns>A vector containing this Actor's position waypoints.</returns>
-	std::vector<Vector> GetSceneWaypoints() const;
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetWaypointsSize
 //////////////////////////////////////////////////////////////////////////////////////////

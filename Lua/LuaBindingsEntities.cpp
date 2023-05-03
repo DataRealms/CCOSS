@@ -449,6 +449,7 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
+		.property("LimbPushForcesAndCollisionsDisabled", &AHuman::GetLimbPushForcesAndCollisionsDisabled, &AHuman::SetLimbPushForcesAndCollisionsDisabled)
 		.property("IsClimbing", &AHuman::IsClimbing)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 		.property("DeviceArmSwayRate", &AHuman::GetDeviceArmSwayRate, &AHuman::SetDeviceArmSwayRate)

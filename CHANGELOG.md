@@ -531,6 +531,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `AHuman` Lua property (R/W) `ProneState`, that lets you get and set the `AHuman`'s `ProneState`. If you don't know what this does, you probably don't need or want it.
 
+- Added `AHuman` Lua property (R/W) `LimbPushForcesAndCollisionsDisabled`, that lets you disable limb (i.e. hand group and foot group) push forces and collisions. Effectively, if this is on, arms and legs won't do any movement and will just swing around with momentum.
+
 - Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
 
 - Added `HeldDevice` INI and Lua (R/W) property `OneHandedReloadTimeMultiplier`, that determines how much faster or slower an `HeldDevice` is when reloading one-handed (i.e. if it's one-handed and the other `Arm` is missing, or is holding something).

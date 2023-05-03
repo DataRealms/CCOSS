@@ -411,6 +411,19 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newProneState">This AHuman's new ProneState.</param>
 	void SetProneState(ProneState newProneState) { m_ProneState = newProneState; }
 
+	/// <summary>
+	/// Gets whether or not this AHuman's limb push forces have been disabled.
+	/// </summary>
+	/// <returns>Whether or not this AHuman's limb push forces have been disabled.</returns>
+	bool GetLimbPushForcesAndCollisionsDisabled() const { return m_LimbPushForcesAndCollisionsDisabled; }
+
+	/// <summary>
+	/// Sets whether or not this AHuman's limb push forces should be disabled.
+	/// </summary>
+	/// <param name="newLimbPushForcesAndCollisionsDisabled">Whether or not this AHuman's limb push forces should be disabled.</param>
+	void SetLimbPushForcesAndCollisionsDisabled(bool newLimbPushForcesAndCollisionsDisabled) { m_LimbPushForcesAndCollisionsDisabled = newLimbPushForcesAndCollisionsDisabled; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1044,6 +1057,7 @@ protected:
     // This is engaged if the player first crouches (still upright spring), and then presses left/right
     // It is disengaged as soon as the crouch button/direction is released
     ProneState m_ProneState;
+	bool m_LimbPushForcesAndCollisionsDisabled; //<! Whether or limb push forces and collisions have been disabled (likely for Lua purposes).
     // Timer for the going prone procedural animation
     Timer m_ProneTimer;
     // Limb paths for different movement states.

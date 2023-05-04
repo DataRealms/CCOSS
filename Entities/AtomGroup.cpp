@@ -5,7 +5,6 @@
 #include "MOSRotating.h"
 #include "LimbPath.h"
 #include "ConsoleMan.h"
-#include "PrimitiveMan.h"
 
 namespace RTE {
 
@@ -445,7 +444,7 @@ namespace RTE {
 				segRatio = 1.0F;
 			}
 			segProgress = 0.0F;
-		
+
 			if (linSegTraj.IsZero() && rotDelta == 0) {
 				break;
 			}
@@ -476,7 +475,7 @@ namespace RTE {
 				hitTerrAtoms.clear();
 				penetratingAtoms.clear();
 				hitResponseAtoms.clear();
-				
+
 				int atomsHitMOsCount = 0;
 
 				for (Atom *atom : m_Atoms) {
@@ -707,7 +706,7 @@ namespace RTE {
 				}
 
 				// Make sub-pixel progress if there was a hit on the very first step.
-				//if (segProgress == 0) { segProgress = 0.1 / (float)stepsOnSeg; }                 
+				//if (segProgress == 0) { segProgress = 0.1 / (float)stepsOnSeg; }
 
 				// Now calculate the total time left to travel, according to the progress made.
 				timeLeft -= timeLeft * (segProgress * segRatio);
@@ -1256,7 +1255,7 @@ namespace RTE {
 		if (pushImpulse.GetLargest() > 10000.0F) { pushImpulse.Reset(); }
 
 		if (Actor *owner = dynamic_cast<Actor*>(m_OwnerMOSR)) {
-			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F || 
+			bool againstTravelDirection = owner->GetController()->IsState(MOVE_LEFT)  && pushImpulse.m_X > 0.0F ||
 			                              owner->GetController()->IsState(MOVE_RIGHT) && pushImpulse.m_X < 0.0F;
 			if (againstTravelDirection) {
 				// Filter some of our impulse out. We're pushing against an obstacle, but we don't want to kick backwards!
@@ -1621,7 +1620,7 @@ namespace RTE {
 		const int spriteWidth = refSprite->w * static_cast<int>(m_OwnerMOSR->GetScale());
 		const int spriteHeight = refSprite->h * static_cast<int>(m_OwnerMOSR->GetScale());
 
-		// Only try to generate AtomGroup if scaled width and height are > 0 as we're playing with fire trying to create 0x0 bitmap. 
+		// Only try to generate AtomGroup if scaled width and height are > 0 as we're playing with fire trying to create 0x0 bitmap.
 		if (spriteWidth > 0 && spriteHeight > 0) {
 			int x;
 			int y;
@@ -1714,7 +1713,7 @@ namespace RTE {
 					}
 				}
 
-				// Scan HORIZONTALLY from RIGHT to LEFT and place Atoms in depth beyond the silhouette edge. 
+				// Scan HORIZONTALLY from RIGHT to LEFT and place Atoms in depth beyond the silhouette edge.
 				for (y = 0; y < spriteHeight; y += m_Resolution) {
 					inside = false;
 					for (x = spriteWidth - 1; x >= 0; --x) {

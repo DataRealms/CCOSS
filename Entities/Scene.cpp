@@ -1501,7 +1501,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
-	for (const std::string &group : *sceneObjectToSave->GetGroupList()) {
+	for (const std::string &group : *sceneObjectToSave->GetGroups()) {
 		writer.NewPropertyWithValue("AddToGroup", group);
 	}
 
@@ -1569,6 +1569,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
 		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", attachableToSave->GetGibWhenRemovedFromParent());
 		writer.NewPropertyWithValue("JointStrength", attachableToSave->GetJointStrength());
 		writer.NewPropertyWithValue("JointStiffness", attachableToSave->GetJointStiffness());
 		writer.NewPropertyWithValue("JointOffset", attachableToSave->GetJointOffset());

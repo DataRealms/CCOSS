@@ -40,10 +40,11 @@ namespace RTE
 {
 
 #define CLEANAIRINTERVAL 200000
-#define COMPACTINGHEIGHT 25
 
 const std::string SceneMan::c_ClassName = "SceneMan";
 std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Clear()
 {
@@ -76,6 +77,8 @@ void SceneMan::Clear()
 	if (m_pOrphanSearchBitmap)
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
+
+	m_ScrapCompactingHeight = 25;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -579,16 +582,17 @@ bool SceneMan::SceneIsLocked() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
-    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) {
         m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
     } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
 #ifdef DRAW_MOID_LAYER
         m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 #else
         const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-        RTEAssert(mo, "Trying to register a null MOID to the MOID grid! This is not allowed.")
-        IntRect rect(left, top, right, bottom);
-        m_MOIDsGrid.Add(rect, *mo);
+        if (mo) {
+            IntRect rect(left, top, right, bottom);
+            m_MOIDsGrid.Add(rect, *mo);
+        }
 #endif
     }
 }
@@ -871,9 +875,8 @@ bool SceneMan::TryPenetrate(int posX,
     Material const * sceneMat = GetMaterialFromID(materialID);
     Material const * spawnMat;
 
-    float sprayScale = 0.1;
-//    float spraySpread = 10.0;
-    float sqrImpMag = impulse.GetSqrMagnitude();
+	float sprayScale = 0.1F;
+	float sqrImpMag = impulse.GetSqrMagnitude();
 
     // Test if impulse force is enough to penetrate
     if (sqrImpMag >= (sceneMat->GetIntegrity() * sceneMat->GetIntegrity()))
@@ -939,9 +942,8 @@ bool SceneMan::TryPenetrate(int posX,
 //        retardation = -sceneMat.density;
         retardation = -(sceneMat->GetIntegrity() / std::sqrt(sqrImpMag));
 
-        // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
-        if (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
-        {
+		// If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles.
+		if (m_ScrapCompactingHeight > 0 && (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)) {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
             BITMAP *pBGColor = m_pCurrentScene->GetTerrain()->GetBGColorBitmap();
@@ -950,58 +952,42 @@ bool SceneMan::TryPenetrate(int posX,
             int testMaterialID = g_MaterialAir;
             MOPixel *pixelMO = 0;
             Color spawnColor;
-            float sprayMag = velocity.GetLargest() * sprayScale;
-            Vector sprayVel;
+			float sprayMag = std::sqrt(velocity.GetMagnitude() * sprayScale);
+			Vector sprayVel;
 
-            // Look at pixel above to see if it isn't air and has support, or should fall down
-            for (int testY = posY - 1; testY > posY - COMPACTINGHEIGHT && testY >= 0; --testY)
-            {
-                // Check if there is a material pixel above
-                if ((testMaterialID = _getpixel(pMaterial, posX, testY)) != g_MaterialAir)
-                {
-                    sceneMat = GetMaterialFromID(testMaterialID);
+			for (int testY = posY - 1; testY > posY - m_ScrapCompactingHeight && testY >= 0; --testY) {
+				if ((testMaterialID = _getpixel(pMaterial, posX, testY)) != g_MaterialAir) {
+					sceneMat = GetMaterialFromID(testMaterialID);
 
-                    // No support in the background layer, or is scrap material, so make particle of some of them
-                    if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor)
-                    {
-                        //  Only generate  particles of some of 'em
-                        if (RandomNum() > 0.75F)
-                        {
-                            // Figure out the mateiral and color of the new spray particle
-                            spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
-                            if (spawnMat->UsesOwnColor())
-                                spawnColor = spawnMat->GetColor();
-                            else
-                                spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
+					if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor) {
+						if (RandomNum() < 0.7F) {
+							spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+							if (spawnMat->UsesOwnColor()) {
+								spawnColor = spawnMat->GetColor();
+							} else {
+								spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
+							}
+							if (spawnColor.GetIndex() != g_MaskColor) {
+								// Send terrain pixels flying at a diminishing rate the higher the column goes.
+								sprayVel.SetXY(0, -sprayMag * (1.0F - (static_cast<float>(posY - testY) / static_cast<float>(m_ScrapCompactingHeight))));
+								sprayVel.RadRotate(RandomNum(-c_HalfPI, c_HalfPI));
 
-                            // No point generating a key-colored MOPixel
-                            if (spawnColor.GetIndex() != g_MaskColor)
-                            {
-                                // Figure out the randomized velocity the spray should have upward
-								sprayVel.SetXY(sprayMag* RandomNormalNum() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * RandomNum(0.0F, 0.5F)));
-
-                                // Create the new spray pixel
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
 
-                                // Let it loose into the world
-                                pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
-                                pixelMO->SetToGetHitByMOs(false);
-                                g_MovableMan.AddParticle(pixelMO);
-                                pixelMO = 0;
-                            }
-
-							// Remove orphaned terrain left from hits and scrap damage
-							RemoveOrphans(posX + testY%2 ? -1 : 1, testY, 5, 25, true);
+								pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
+								pixelMO->SetToGetHitByMOs(false);
+								g_MovableMan.AddParticle(pixelMO);
+								pixelMO = 0;
+							}
+							RemoveOrphans(posX + testY % 2 ? -1 : 1, testY, removeOrphansRadius + 5, removeOrphansMaxArea + 10, true);
 						}
 
-                        // Clear the terrain pixel now when the particle has been generated from it
 						RegisterTerrainChange(posX, testY, 1, 1, g_MaskColor, false);
-                        _putpixel(pFGColor, posX, testY, g_MaskColor);
-                        _putpixel(pMaterial, posX, testY, g_MaterialAir);
-                    }
-                    // There is support, so stop checking
-                    else
-                        break;
+						_putpixel(pFGColor, posX, testY, g_MaskColor);
+						_putpixel(pMaterial, posX, testY, g_MaterialAir);
+					} else {
+						break;
+					}
                 }
             }
         }
@@ -1018,6 +1004,38 @@ bool SceneMan::TryPenetrate(int posX,
         return true;
     }
     return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
+	int materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
+	if (materialID <= MaterialColorKeys::g_MaterialAir) {
+		return nullptr;
+	}
+	const Material *sceneMat = GetMaterialFromID(static_cast<uint8_t>(materialID));
+	const Material *spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+
+	Color spawnColor;
+	if (spawnMat->UsesOwnColor()) {
+		spawnColor = spawnMat->GetColor();
+	} else {
+		spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
+	}
+	// No point generating a key-colored MOPixel.
+	if (spawnColor.GetIndex() == ColorKeys::g_MaskColor) {
+		return nullptr;
+	}
+	Atom *pixelAtom = new Atom(Vector(), spawnMat->GetIndex(), nullptr, spawnColor, 2);
+	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(static_cast<float>(posX), static_cast<float>(posY)), Vector(), pixelAtom, 0);
+	pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
+	g_MovableMan.AddParticle(pixelMO);
+
+	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, ColorKeys::g_MaskColor);
+	RegisterTerrainChange(posX, posY, 1, 1, ColorKeys::g_MaskColor, false);
+	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, MaterialColorKeys::g_MaterialAir);
+
+	return pixelMO;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2701,7 +2719,7 @@ void SceneMan::Update(int screenId) {
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
 	if (screenId == 0) {
-		m_pCurrentScene->Update(); 
+		m_pCurrentScene->Update();
 	}
 
     g_CameraMan.Update(screenId);
@@ -2709,7 +2727,7 @@ void SceneMan::Update(int screenId) {
     const Vector &offset = g_CameraMan.GetOffset(screenId);
 	m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
-	if (m_pDebugLayer) { 
+	if (m_pDebugLayer) {
         m_pDebugLayer->SetOffset(offset);
     }
 
@@ -2783,8 +2801,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			}
             if (!g_FrameMan.IsInMultiplayerMode()) {
                 int teamId = g_CameraMan.GetScreenTeam(m_LastUpdatedScreen);
-				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) { 
-                    unseenLayer->Draw(targetBitmap, targetBox); 
+				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) {
+                    unseenLayer->Draw(targetBitmap, targetBox);
                 }
 			}
 
@@ -2792,8 +2810,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-			if (m_pDebugLayer) { 
-                m_pDebugLayer->Draw(targetBitmap, targetBox); 
+			if (m_pDebugLayer) {
+                m_pDebugLayer->Draw(targetBitmap, targetBox);
             }
 
 			break;

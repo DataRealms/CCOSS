@@ -75,6 +75,12 @@ namespace RTE {
 			reader >> newChildObject;
 			newChildObject.SetTeam(m_Team);
 			m_ChildObjects.emplace_back(newChildObject);
+		} else if (propName == "ClearChildObjects") {
+			bool clearChildObjects;
+			reader >> clearChildObjects;
+			if (clearChildObjects) {
+				m_ChildObjects.clear();
+			}
 		} else {
 			return SceneObject::ReadProperty(propName, reader);
 		}

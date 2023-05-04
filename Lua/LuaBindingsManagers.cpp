@@ -281,6 +281,7 @@ namespace RTE {
 		.property("GlobalAcc", &SceneMan::GetGlobalAcc)
 		.property("OzPerKg", &SceneMan::GetOzPerKg)
 		.property("KgPerOz", &SceneMan::GetKgPerOz)
+		.property("ScrapCompactingHeight", &SceneMan::GetScrapCompactingHeight, &SceneMan::SetScrapCompactingHeight)
 
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool, bool))&SceneMan::LoadScene)
 		.def("LoadScene", (int (SceneMan::*)(std::string, bool))&SceneMan::LoadScene)
@@ -326,10 +327,12 @@ namespace RTE {
 		.def("WrapPosition", (bool (SceneMan::*)(Vector &))&SceneMan::WrapPosition)//, out_value(_2))
 		.def("SnapPosition", &SceneMan::SnapPosition)
 		.def("ShortestDistance", &SceneMan::ShortestDistance)
+		.def("WrapBox", &LuaAdaptersSceneMan::WrapBoxes, luabind::return_stl_iterator)
 		.def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
 		.def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
 		.def("AddSceneObject", &SceneMan::AddSceneObject, luabind::adopt(_2))
-		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans);
+		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
+		.def("DislodgePixel", &SceneMan::DislodgePixel);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -358,7 +361,8 @@ namespace RTE {
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
 		.property("AIUpdateInterval", &SettingsMan::GetAIUpdateInterval, &SettingsMan::SetAIUpdateInterval)
-		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
+		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD)
+		.property("AutomaticGoldDeposit", &SettingsMan::GetAutomaticGoldDeposit);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

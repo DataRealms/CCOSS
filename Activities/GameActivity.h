@@ -1018,8 +1018,6 @@ protected:
     Vector m_ObservationTarget[Players::MaxPlayerCount];
     // The player death sceneman scroll targets, for when a player-controlled actor dies and the view should go to his last position
     Vector m_DeathViewTarget[Players::MaxPlayerCount];
-    // Timers for measuring death cam delays.
-    Timer m_DeathTimer[Players::MaxPlayerCount];
     // Times the delay between regular actor swtich, and going into manual siwtch mode
     Timer m_ActorSelectTimer[Players::MaxPlayerCount];
     // The cursor for selecting new Actors

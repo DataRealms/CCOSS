@@ -173,8 +173,9 @@ namespace RTE {
 	int PieMenu::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "IconSeparatorMode") {
 			std::string iconSeparatorModeString = reader.ReadPropValue();
-			if (c_IconSeparatorModeMap.find(iconSeparatorModeString) != c_IconSeparatorModeMap.end()) {
-				m_IconSeparatorMode = c_IconSeparatorModeMap.find(iconSeparatorModeString)->second;
+			auto itr = c_IconSeparatorModeMap.find(iconSeparatorModeString);
+			if (itr != c_IconSeparatorModeMap.end()) {
+				m_IconSeparatorMode = itr->second;
 			} else {
 				try {
 					m_IconSeparatorMode = static_cast<IconSeparatorMode>(std::stoi(iconSeparatorModeString));
@@ -355,7 +356,9 @@ namespace RTE {
 					leastFullPieQuadrant = &pieQuadrant;
 				}
 			}
-			sliceWasAdded = leastFullPieQuadrant->AddPieSlice(pieSliceToAdd);
+			if (leastFullPieQuadrant) {
+				sliceWasAdded = leastFullPieQuadrant->AddPieSlice(pieSliceToAdd);
+			}
 		} else {
 			int desiredQuadrantIndex = static_cast<int>(pieSliceDirection);
 			sliceWasAdded = m_PieQuadrants.at(desiredQuadrantIndex).AddPieSlice(pieSliceToAdd);
@@ -489,8 +492,77 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieMenu::Update() {
-		Controller *controller = GetController();
+    PieSlice * PieMenu::ReplacePieSlice(const PieSlice *pieSliceToReplace, PieSlice *replacementPieSlice) {
+		if (pieSliceToReplace == nullptr) {
+			return nullptr;
+		}
+		if (replacementPieSlice == nullptr) {
+			return RemovePieSlice(pieSliceToReplace);
+		}
+
+		PieSlice *replacedPieSlice = nullptr;
+
+		auto DoPieSliceReplacementInPieQuadrant = [&replacedPieSlice, &pieSliceToReplace, &replacementPieSlice](PieQuadrant &pieQuadrant) {
+			if (pieSliceToReplace == pieQuadrant.m_MiddlePieSlice.get()) {
+				replacedPieSlice = pieQuadrant.m_MiddlePieSlice.release();
+				pieQuadrant.m_MiddlePieSlice = std::unique_ptr<PieSlice>(replacementPieSlice);
+			} else if (pieSliceToReplace == pieQuadrant.m_LeftPieSlices[0].get()) {
+				replacedPieSlice = pieQuadrant.m_LeftPieSlices[0].release();
+				pieQuadrant.m_LeftPieSlices[0] = std::unique_ptr<PieSlice>(replacementPieSlice);
+			} else if (pieSliceToReplace == pieQuadrant.m_LeftPieSlices[1].get()) {
+				replacedPieSlice = pieQuadrant.m_LeftPieSlices[1].release();
+				pieQuadrant.m_LeftPieSlices[1] = std::unique_ptr<PieSlice>(replacementPieSlice);
+			} else if (pieSliceToReplace == pieQuadrant.m_RightPieSlices[0].get()) {
+				replacedPieSlice = pieQuadrant.m_RightPieSlices[0].release();
+				pieQuadrant.m_RightPieSlices[0] = std::unique_ptr<PieSlice>(replacementPieSlice);
+			} else if (pieSliceToReplace == pieQuadrant.m_RightPieSlices[1].get()) {
+				replacedPieSlice = pieQuadrant.m_RightPieSlices[1].release();
+				pieQuadrant.m_RightPieSlices[1] = std::unique_ptr<PieSlice>(replacementPieSlice);
+			}
+			RTEAssert(replacedPieSlice, "Tried to do PieSlice replacement in PieQuadrant, but PieSlice to replace was not found and removed from any PieQuadrant.");
+		};
+
+		if (Directions sliceDirection = pieSliceToReplace->GetDirection(); sliceDirection > Directions::None) {
+			if (sliceDirection == Directions::Any) {
+				for (PieQuadrant &pieQuadrant : m_PieQuadrants) {
+					if (pieQuadrant.ContainsPieSlice(pieSliceToReplace)) {
+						DoPieSliceReplacementInPieQuadrant(pieQuadrant);
+						break;
+					}
+				}
+			} else if (PieQuadrant &pieQuadrant = m_PieQuadrants[sliceDirection]; pieQuadrant.ContainsPieSlice(pieSliceToReplace)) {
+				DoPieSliceReplacementInPieQuadrant(pieQuadrant);
+			}
+		}
+
+		if (replacedPieSlice) {
+			replacementPieSlice->SetOriginalSource(pieSliceToReplace->GetOriginalSource());
+			replacementPieSlice->SetDirection(pieSliceToReplace->GetDirection());
+			replacementPieSlice->SetCanBeMiddleSlice(pieSliceToReplace->GetCanBeMiddleSlice());
+			replacementPieSlice->SetStartAngle(pieSliceToReplace->GetStartAngle());
+			replacementPieSlice->SetSlotCount(pieSliceToReplace->GetSlotCount());
+			replacementPieSlice->SetMidAngle(pieSliceToReplace->GetMidAngle());
+
+			if (m_HoveredPieSlice == pieSliceToReplace) {
+				m_HoveredPieSlice = replacementPieSlice;
+			}
+			if (m_ActivatedPieSlice == pieSliceToReplace) {
+				m_ActivatedPieSlice = replacedPieSlice;
+			}
+			if (m_AlreadyActivatedPieSlice == pieSliceToReplace) {
+				m_AlreadyActivatedPieSlice = replacementPieSlice;
+			}
+
+			RepopulateAndRealignCurrentPieSlices();
+		}
+
+		return replacedPieSlice;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void PieMenu::Update() {
+		const Controller *controller = GetController();
 
 		m_ActivatedPieSlice = nullptr;
 

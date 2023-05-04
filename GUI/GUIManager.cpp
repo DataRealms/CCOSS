@@ -243,6 +243,10 @@ void GUIManager::Update(bool ignoreKeyboardEvents) {
 					break;
 			}
 		}
+		std::string_view textInput;
+		if (m_Input->GetTextInput(textInput)) {
+			m_FocusPanel->OnTextInput(textInput);
+		}
 	}
 }
 

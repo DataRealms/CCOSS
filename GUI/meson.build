@@ -1,7 +1,7 @@
 sources += files(
-'AllegroBitmap.cpp',
-'AllegroInput.cpp',
-'AllegroScreen.cpp',
+'Wrappers/AllegroBitmap.cpp',
+'Wrappers/AllegroScreen.cpp',
+'Wrappers/GUIInputWrapper.cpp',
 'GUIBanner.cpp',
 'GUIButton.cpp',
 'GUICheckbox.cpp',

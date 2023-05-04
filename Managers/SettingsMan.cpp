@@ -2,6 +2,7 @@
 #include "ConsoleMan.h"
 #include "CameraMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "AudioMan.h"
@@ -30,6 +31,7 @@ namespace RTE {
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
+		m_AutomaticGoldDeposit = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -101,17 +103,15 @@ namespace RTE {
 		if (propName == "PaletteFile") {
 			reader >> g_FrameMan.m_PaletteFile;
 		} else if (propName == "ResolutionX") {
-			reader >> g_FrameMan.m_ResX;
+			reader >> g_WindowMan.m_ResX;
 		} else if (propName == "ResolutionY") {
-			reader >> g_FrameMan.m_ResY;
+			reader >> g_WindowMan.m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
-			reader >> g_FrameMan.m_ResMultiplier;
-		} else if (propName == "DisableMultiScreenResolutionValidation") {
-			reader >> g_FrameMan.m_DisableMultiScreenResolutionValidation;
-		} else if (propName == "ForceVirtualFullScreenGfxDriver") {
-			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
-		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
-			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
+			reader >> g_WindowMan.m_ResMultiplier;
+		} else if (propName == "EnableVSync") {
+			reader >> g_WindowMan.m_EnableVSync;
+		} else if (propName == "IgnoreMultiDisplays") {
+			reader >> g_WindowMan.m_IgnoreMultiDisplays;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
 		} else if (propName == "MasterVolume") {
@@ -161,6 +161,10 @@ namespace RTE {
 			reader >> m_ShowEnemyHUD;
 		} else if (propName == "SmartBuyMenuNavigation") {
 			reader >> m_EnableSmartBuyMenuNavigation;
+		} else if (propName == "ScrapCompactingHeight") {
+			reader >> g_SceneMan.m_ScrapCompactingHeight;
+		} else if (propName == "AutomaticGoldDeposit") {
+			reader >> m_AutomaticGoldDeposit;
 		} else if (propName == "ScreenShakeStrength") {
 			reader >> g_CameraMan.m_ScreenShakeStrength;
 		} else if (propName == "ScreenShakeDecay") {
@@ -311,12 +315,11 @@ namespace RTE {
 		writer.NewLineString("// Display Settings", false);
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("PaletteFile", g_FrameMan.m_PaletteFile);
-		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_ResX);
-		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_ResY);
-		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
-		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
-		writer.NewPropertyWithValue("ForceVirtualFullScreenGfxDriver", g_FrameMan.m_ForceVirtualFullScreenGfxDriver);
-		writer.NewPropertyWithValue("ForceDedicatedFullScreenGfxDriver", g_FrameMan.m_ForceDedicatedFullScreenGfxDriver);
+		writer.NewPropertyWithValue("ResolutionX", g_WindowMan.m_ResX);
+		writer.NewPropertyWithValue("ResolutionY", g_WindowMan.m_ResY);
+		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
+		writer.NewPropertyWithValue("EnableVSync", g_WindowMan.m_EnableVSync);
+		writer.NewPropertyWithValue("IgnoreMultiDisplays", g_WindowMan.m_IgnoreMultiDisplays);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);
@@ -353,6 +356,8 @@ namespace RTE {
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
+		writer.NewPropertyWithValue("ScrapCompactingHeight", g_SceneMan.m_ScrapCompactingHeight);
+		writer.NewPropertyWithValue("AutomaticGoldDeposit", m_AutomaticGoldDeposit);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

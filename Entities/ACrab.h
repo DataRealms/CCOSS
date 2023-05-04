@@ -136,15 +136,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGoldCarried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets how many ounces of gold this Actor is carrying.
-// Arguments:       None.
-// Return value:    The current amount of carried gold, in Oz.
-
-	float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEyePos
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the absoltue position of this' eye, or equivalent, where look
@@ -552,6 +543,30 @@ int FirearmActivationDelay() const;
 	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
 	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
 
+	/// <summary>
+	/// Gets the upper limit of this ACrab's aim range.
+	/// </summary>
+	/// <returns>The upper limit of this ACrab's aim range.</returns>
+	float GetAimRangeUpperLimit() const { return m_AimRangeUpperLimit; }
+
+	/// <summary>
+	/// Sets the upper limit of this ACrab's aim range.
+	/// </summary>
+	/// <param name="aimRangeUpperLimit">The new upper limit of this ACrab's aim range.</param>
+	void SetAimRangeUpperLimit(float aimRangeUpperLimit) { m_AimRangeUpperLimit = aimRangeUpperLimit; }
+
+	/// <summary>
+	/// Gets the lower limit of this ACrab's aim range.
+	/// </summary>
+	/// <returns>The lower limit of this ACrab's aim range.</returns>
+	float GetAimRangeLowerLimit() const { return m_AimRangeLowerLimit; }
+
+	/// <summary>
+	/// Sets the lower limit of this ACrab's aim range.
+	/// </summary>
+	/// <param name="aimRangeLowerLimit">The new lower limit of this ACrab's aim range.</param>
+	void SetAimRangeLowerLimit(float aimRangeLowerLimit) { m_AimRangeLowerLimit = aimRangeLowerLimit; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -605,8 +620,6 @@ protected:
 	bool m_StrideStart[SIDECOUNT];
 	// Times the strides to make sure they get restarted if they end up too long
 	Timer m_StrideTimer[SIDECOUNT];
-	// How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-	int m_GoldInInventoryChunk;
 	// The maximum angle MountedMO can be aimed up, positive values only, in radians
 	float m_AimRangeUpperLimit;
 	// The maximum angle MountedMO can be aimed down, positive values only, in radians

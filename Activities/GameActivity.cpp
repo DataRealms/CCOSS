@@ -16,6 +16,7 @@
 #include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
@@ -62,7 +63,6 @@ void GameActivity::Clear()
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
-        m_DeathTimer[player].Reset();
         m_ActorSelectTimer[player].Reset();
         m_ActorCursor[player].Reset();
         m_pLastMarkedActor[player] = 0;
@@ -165,7 +165,6 @@ int GameActivity::Create(const GameActivity &reference)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
-//        m_DeathTimer[player] = reference.m_DeathTimer[player];
         m_ActorCursor[player] = reference.m_ActorCursor[player];
         m_pLastMarkedActor[player] = reference.m_pLastMarkedActor[player];
         m_LandingZone[player] = reference.m_LandingZone[player];
@@ -863,7 +862,7 @@ int GameActivity::Start()
     // Set the split screen config before the Scene (and it SceneLayers, specifially) are loaded
     int humanCount = GetHumanCount();
     // Depending on the resolution aspect ratio, split first horizontally (if wide screen)
-    if (((float)g_FrameMan.GetResX() / (float)g_FrameMan.GetResY()) >= 1.6)
+    if (((float)g_WindowMan.GetResX() / (float)g_WindowMan.GetResY()) >= 1.6)
         g_FrameMan.ResetSplitScreens(humanCount > 1, humanCount > 2);
     // or vertically (if 4:3-ish)
     else
@@ -910,7 +909,7 @@ int GameActivity::Start()
             continue;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
         // And occlusion
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
@@ -972,27 +971,27 @@ int GameActivity::Start()
 					// If both splits, or just Vsplit, then in upper right quadrant
 					if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetVSplit()))
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
-						m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
+						m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
+						m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
 					}
 					// If only hsplit, then lower left quadrant
 					else
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-						m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+						m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+						m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 					}
 				}
 				// Screen 3 is lower left quadrant
 				else if (ScreenOfPlayer(player) == 2)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 				}
 				// Screen 4 is lower right quadrant
 				else if (ScreenOfPlayer(player) == 3)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				}
 			}
 		}
@@ -1177,7 +1176,7 @@ void GameActivity::UpdateEditing()
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
 
         // Check if the player says he's done editing, and if so, make sure he really is good to go
         if (m_pEditorGUI[player]->GetEditorGUIMode() == SceneEditorGUI::DONEEDITING)
@@ -1338,7 +1337,7 @@ void GameActivity::Update()
         bool skipBuyUpdate = false;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), team);
+        g_CameraMan.SetScreenTeam(team, ScreenOfPlayer(player));
 
         //////////////////////////////////////////////////////
         // Assure that Controlled Actor is a safe pointer
@@ -1364,14 +1363,13 @@ void GameActivity::Update()
                 if (g_MovableMan.IsActor(m_ControlledActor[player]))
                 {
                     m_DeathViewTarget[player] = m_ControlledActor[player]->GetPos();
+					m_DeathTimer[player].Reset();
                 }
                 // Add delay after death before switching so the death comedy can be witnessed
                 // Died, so enter death watch mode
                 else
                 {
-                    m_ControlledActor[player] = 0;
-                    m_ViewState[player] = ViewState::DeathWatch;
-                    m_DeathTimer[player].Reset();
+					LoseControlOfActor(player);
                 }
             }
             // Ok, done watching death comedy, now automatically switch
@@ -1391,9 +1389,7 @@ void GameActivity::Update()
             // Any other viewing mode and the actor died... go to deathwatch
             else if (m_ControlledActor[player] && !g_MovableMan.IsActor(m_ControlledActor[player]))
             {
-                m_ControlledActor[player] = 0;
-                m_ViewState[player] = ViewState::DeathWatch;
-                m_DeathTimer[player].Reset();
+				LoseControlOfActor(player);
             }
         }
         // Player brain is now gone! Remove any control he may have had

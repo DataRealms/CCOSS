@@ -258,6 +258,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::vector<Vector> * LuaAdaptersActor::GetSceneWaypoints(Actor *luaSelfObject) {
+		std::vector<Vector> *sceneWaypoints = new std::vector<Vector>();
+		sceneWaypoints->reserve(luaSelfObject->GetWaypointsSize());
+		for (auto &[sceneWaypoint, movableObjectWaypoint] : luaSelfObject->GetWaypointList()) {
+			if (movableObjectWaypoint == nullptr) {
+				sceneWaypoints->emplace_back(sceneWaypoint);
+			}
+		}
+		return sceneWaypoints;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}
@@ -312,6 +325,38 @@ namespace RTE {
 
 	void LuaAdaptersMOSRotating::GibThis(MOSRotating *luaSelfObject) {
 		luaSelfObject->GibThis();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds1(const MOSRotating *luaSelfObject) {
+		return GetWounds2(luaSelfObject, true, false, false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) {
+		auto *wounds = new std::vector<AEmitter *>();
+		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, *wounds);
+		return wounds;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMOSRotating::GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds) {
+		wounds.insert(wounds.end(), luaSelfObject->GetWoundList().begin(), luaSelfObject->GetWoundList().end());
+
+		if (includePositiveDamageAttachables || includeNegativeDamageAttachables || includeNoDamageAttachables) {
+			for (const Attachable *attachable : luaSelfObject->GetAttachables()) {
+				bool attachableSatisfiesConditions = (includePositiveDamageAttachables && attachable->GetDamageMultiplier() > 0) ||
+				                                     (includeNegativeDamageAttachables && attachable->GetDamageMultiplier() < 0) ||
+				                                     (includeNoDamageAttachables && attachable->GetDamageMultiplier() == 0);
+
+				if (attachableSatisfiesConditions) {
+					GetWoundsImpl(attachable, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+				}
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,6 +487,14 @@ namespace RTE {
 
 	bool LuaAdaptersPresetMan::ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className) {
 		return ReloadEntityPreset1(presetMan, presetName, className, "");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::list<Box> * LuaAdaptersSceneMan::WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap) {
+		std::list<Box> *wrappedBoxes = new std::list<Box>();
+		sceneMan.WrapBox(boxToWrap, *wrappedBoxes);
+		return wrappedBoxes;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

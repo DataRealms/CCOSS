@@ -62,8 +62,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="box">The Box to get MovableObjects within.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
+		/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
 		/// <returns>A vector of pointers to all MovableObjects within the given Box, who aren't of the ignored team.</returns>
-		const std::vector<MovableObject *> & GetMOsInBox(const Box &box, int ignoreTeam) const;
+		std::vector<MovableObject *> GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const;
 
 		/// <summary>
 		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.
@@ -71,8 +72,9 @@ namespace RTE {
 		/// <param name="center">The center point to get MovableObjects around.</param>
 		/// <param name="radius">The radius to get MovableObjects within.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
+		/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
 		/// <returns>A vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.</returns>
-		const std::vector<MovableObject *> & GetMOsInRadius(const Vector &center, float radius, int ignoreTeam) const;
+		std::vector<MovableObject *> GetMOsInRadius(const Vector &center, float radius, int ignoreTeam, bool getsHitByMOsOnly) const;
 
 		/// <summary>
 		/// Gets the MOIDs that are potentially overlapping the given X and Y Scene coordinates.
@@ -80,8 +82,9 @@ namespace RTE {
 		/// <param name="x">The X coordinate to check.</param>
 		/// <param name="y">The Y coordinate to check.</param>
 		/// <param name="ignoreTeam">The team to ignore when getting MOIDs.</param>
+		/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
 		/// <returns>A vector of MOIDs that are potentially overlapping the x and y coordinates.</returns>
-		const std::vector<int> & GetMOIDsAtPosition(int x, int y, int ignoreTeam) const;
+		const std::vector<int> & GetMOIDsAtPosition(int x, int y, int ignoreTeam, bool getsHitByMOsOnly) const;
 #pragma endregion
 
 	private:
@@ -93,6 +96,7 @@ namespace RTE {
 		// We store a list per team, so overlapping Actors don't waste loads of time collision checking against themselves.
 		// Note that this is this list of MOIDs that are potentially colliding per team, so the list for team 1 contains the MOIDs for team 2, 3, 4, and no-team, as well as anything for team 1 that doesn't ignore team hits.
 		std::array<std::vector<std::vector<int>>, Activity::MaxTeamCount + 1> m_Cells; //!< Array of cells for each team. The outside-vector is the vector of cells for the team, and each inside-vector entry contains all MOIDs in the cell's space that can collide with that team.
+		std::array<std::vector<std::vector<int>>, Activity::MaxTeamCount + 1> m_PhysicsCells; //!< Same as m_Cells, but includes only objects that are GetsHitByMOs.
 
 		std::unordered_set<int> m_UsedCellIds; //!< Set of used cell Ids, maintained to avoid wasting time looping through and clearing unused cells.
 

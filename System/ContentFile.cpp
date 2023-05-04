@@ -6,6 +6,7 @@
 #include "png.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
+#include "boost/functional/hash.hpp"
 
 namespace RTE {
 
@@ -98,6 +99,13 @@ namespace RTE {
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
 		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	size_t ContentFile::GetHash() const {
+		// Use boost::hash for compiler independent hashing.
+		return boost::hash<std::string>()(m_DataPath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +229,7 @@ namespace RTE {
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
-		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
+		if (storeBitmap && foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
 			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {

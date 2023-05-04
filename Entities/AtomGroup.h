@@ -351,6 +351,12 @@ namespace RTE {
 		/// <param name="position">Current position of the owner MOSR.</param>>
 		/// <returns>Whether all intersections were successfully resolved.</returns>
 		bool ResolveMOSIntersection(Vector &position);
+
+		/// <summary>
+		/// Returns the surface area for a given pixel width.
+		/// </summary>
+		/// <returns>Our surface area.</returns>
+		float GetSurfaceArea(int pixelWidth) const;
 #pragma endregion
 
 #pragma region Debug
@@ -365,6 +371,12 @@ namespace RTE {
 #pragma endregion
 
 	protected:
+		/// <summary>
+		/// Enumeration for how the AtomGroup's area is distributed. Linear means it acts a 2D line whereas Circle/Square acts as a pseudo-3d circle/square.
+		/// </summary>
+		enum class AreaDistributionType { Linear, Circle, Square };
+
+		static const std::unordered_map<std::string, AreaDistributionType> c_AreaDistributionTypeMap; //!< A map of strings to AreaDistributionTypes to support string parsing for the AreaDistributionType enum.
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
@@ -395,6 +407,10 @@ namespace RTE {
 		float m_MomentOfInertia; //!< Moment of Inertia for this AtomGroup.
 
 		std::list<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
+		
+		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup will distribute energy when it collides with something.
+		
+		float m_AreaDistributionSurfaceAreaMultiplier; //!< A multiplier for the AtomGroup's surface area, which affects how much it digs into terrain. 0.5 would halve the surface area so it would dig into terrain twice as much, 2.0 would make it dig into terrain half as much.
 
 	private:
 

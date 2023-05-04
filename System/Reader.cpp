@@ -111,12 +111,13 @@ namespace RTE {
 			if (peek == '\n' || peek == '\r' || peek == '\t') {
 				ReportError("Property name wasn't followed by a value");
 			}
+
 			temp = static_cast<char>(m_Stream->get());
 			if (m_Stream->eof()) {
 				EndIncludeFile();
 				break;
 			}
-			if (!m_Stream->good()) { ReportError("Stream failed for some reason"); }
+			if (!m_Stream->good() || temp == -1) { ReportError("Stream failed for some reason"); }
 			retString.append(1, temp);
 		}
 		// Trim the string of whitespace

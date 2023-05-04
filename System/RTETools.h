@@ -19,12 +19,6 @@ namespace RTE {
 	void SeedRNG();
 
 	/// <summary>
-	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
-	/// </summary>
-	/// <param name="seed">Seed for the random number generator.</param>
-	inline void SeedRNG(unsigned int seed) { g_RNG.seed(seed); }
-
-	/// <summary>
 	/// Function template which returns a uniformly distributed random number in the range [-1, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
@@ -268,6 +262,14 @@ namespace RTE {
 			outputVector.emplace_back(doublePointerArray[i]);
 		}
 		return outputVector;
+	}
+
+	/// <summary>
+	/// Returns the sign of the given input value.
+	/// </summary>
+	/// <returns>The sign as an integer -1, 0 or +1.</returns>
+	template <typename Type> int Sign(const Type &value) {
+		return (Type(0) < value) - (Type(0) > value);
 	}
 #pragma endregion
 }

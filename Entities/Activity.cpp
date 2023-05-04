@@ -4,6 +4,7 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
 
@@ -38,6 +39,7 @@ void Activity::Clear() {
 			m_IsHuman[player] = player == Players::PlayerOne;
 			m_PlayerScreen[player] = (player == Players::PlayerOne) ? Players::PlayerOne : Players::NoPlayer;
 			m_ViewState[player] = ViewState::Normal;
+			m_DeathTimer[player].Reset();
 			m_Team[player] = Teams::TeamOne;
 			m_TeamFundsShare[player] = 1.0F;
 			m_FundsContribution[player] = 0;
@@ -749,7 +751,7 @@ void Activity::Clear() {
 		actorSwitchSoundToPlay->Play(player);
 
 		// If out of frame from the POV of the preswitch actor, play the camera travel noise
-		const int switchSoundThreshold = g_FrameMan.GetResX() / 2;
+		const int switchSoundThreshold = g_WindowMan.GetResX() / 2;
 		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).MagnitudeIsGreaterThan(static_cast<float>(switchSoundThreshold))) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}
@@ -758,6 +760,20 @@ void Activity::Clear() {
 		m_ViewState[player] = Normal;
 
 		return true;
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	void Activity::LoseControlOfActor(int player) {
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			if (Actor *actor = m_ControlledActor[player]; actor && g_MovableMan.IsActor(actor)) {
+				actor->SetControllerMode(Controller::CIM_AI);
+				actor->GetController()->SetDisabled(false);
+			}
+			m_ControlledActor[player] = nullptr;
+			m_ViewState[player] = ViewState::DeathWatch;
+			m_DeathTimer[player].Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

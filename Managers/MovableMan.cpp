@@ -240,6 +240,22 @@ void MovableMan::UnregisterObject(MovableObject * mo)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          PurgeAllMOs
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -700,7 +716,7 @@ Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vec
 
 Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) const
 {
-    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_ActorRoster[team].empty())
         return 0;
 
     float sqrShortestDistance = std::numeric_limits<float>::infinity();
@@ -1010,6 +1026,8 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 {
 	if (!pActor)
 		return;
+
+	if (pActor->IsPlayerControlled()) { g_ActivityMan.GetActivity()->LoseControlOfActor(pActor->GetController()->GetPlayer()); }
 
 	RemoveActorFromTeamRoster(pActor);
 	pActor->SetTeam(team);
@@ -1365,7 +1383,7 @@ int MovableMan::GetAllActors(bool transferOwnership, std::list<SceneObject *> &a
             actorList.push_back(actor);
             addedCount++;
         }
-        else if (transferOwnership) 
+        else if (transferOwnership)
         {
             delete actor;
         }

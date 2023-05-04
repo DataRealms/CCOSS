@@ -1,10 +1,12 @@
 #include "ActivityMan.h"
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "MetaMan.h"
@@ -122,7 +124,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
+		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, false);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
@@ -265,6 +267,9 @@ namespace RTE {
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
 
+		// Reset screen positions and shake
+		g_CameraMan.Reset();
+
 		m_ActivityAllowsSaving = false;
 
 		m_StartActivity.reset(activity);
@@ -359,8 +364,8 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.ClearBackBuffer32();
+			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -373,8 +378,8 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.ClearBackBuffer32();
+		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

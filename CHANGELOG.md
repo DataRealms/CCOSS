@@ -543,6 +543,18 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
 
+- Ground pressure calculations revamp. Ground pressure, by default, is now calculated using a pseudo-3d model which takes into account the depth of an object colliding with terrain. This means actors cause much less terrain deformation from walking, especially large actors walking on smooth ground.
+
+	New `AtomGroup` INI property `AreaDistributionType`, with the following options: 
+	```
+	Linear // Legacy CC behaviour. This is best for long but flat objects, like guns.
+	Circle // Calculates ground pressure assuming objects are cylindrical with a diameter equal to the object's width. This is best for roundish objects, like feet.
+	Square // Similar to Circle, but instead assuming that the object is a cuboid with a depth equal to the object's width.
+	```
+	New `AtomGroup` INI propery `AreaDistributionSurfaceAreaMultiplier`. This is a multiplier to the calculated surface area, i.e how "blunt" an object is. Large values lead to objects having lower ground pressure, and so dig into the terrain less. 
+	
+	The default values are `AreaDistributionType = Circle` and `AreaDistributionSurfaceAreaMultiplier = 0.5`, meaning that an object is assumed to be an oval with a depth of half it's width.
+
 - New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
 
 - New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.

@@ -589,9 +589,10 @@ void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top
         m_pMOIDLayer->RegisterDrawing(left, top, right, bottom);
 #else
         const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-        RTEAssert(mo, "Trying to register a null MOID to the MOID grid! This is not allowed.")
-        IntRect rect(left, top, right, bottom);
-        m_MOIDsGrid.Add(rect, *mo);
+        if (mo) {
+            IntRect rect(left, top, right, bottom);
+            m_MOIDsGrid.Add(rect, *mo);
+        }
 #endif
     }
 }

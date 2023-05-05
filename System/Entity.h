@@ -384,7 +384,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichGroup">A string which describes the group to check for.</param>
 		/// <returns>Whether this Entity is in the specified group or not.</returns>
-		bool IsInGroup(const std::string &whichGroup) const { return m_Groups.contains(whichGroup); }
+		bool IsInGroup(const std::string &whichGroup) const { return whichGroup == "None" ? false : (whichGroup == "All" || whichGroup == "Any" || m_Groups.contains(whichGroup)); }
 
 		/// <summary>
 		/// Adds this Entity to a new grouping.

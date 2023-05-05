@@ -140,6 +140,8 @@ void Actor::Clear() {
 	m_Organic = false;
 	m_Mechanical = false;
 
+	m_LimbPushForcesAndCollisionsDisabled = false;
+
 	m_PieMenu.reset();
 }
 
@@ -296,6 +298,8 @@ int Actor::Create(const Actor &reference)
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
+
+	m_LimbPushForcesAndCollisionsDisabled = reference.m_LimbPushForcesAndCollisionsDisabled;
 
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
 	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));

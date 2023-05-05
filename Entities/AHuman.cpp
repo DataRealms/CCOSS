@@ -57,7 +57,6 @@ void AHuman::Clear()
     m_StrideSound = nullptr;
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
-	m_LimbPushForcesAndCollisionsDisabled = false;
     m_ProneState = NOTPRONE;
     m_ProneTimer.Reset();
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
@@ -215,8 +214,6 @@ int AHuman::Create(const AHuman &reference) {
     m_ArmsState = reference.m_ArmsState;
     m_MoveState = reference.m_MoveState;
     m_ProneState = reference.m_ProneState;
-
-	m_LimbPushForcesAndCollisionsDisabled = reference.m_LimbPushForcesAndCollisionsDisabled;
 
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);

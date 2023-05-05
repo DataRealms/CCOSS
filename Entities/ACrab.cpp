@@ -2356,7 +2356,7 @@ void ACrab::Update()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
-    if (m_Status == STABLE)
+    if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
         if ((m_pLFGFootGroup->GetAtomCount() == 0 && m_BackupLFGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {

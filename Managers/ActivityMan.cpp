@@ -12,6 +12,7 @@
 #include "MetaMan.h"
 
 #include "GAScripted.h"
+#include "SLTerrain.h"
 
 #include "EditorActivity.h"
 #include "SceneEditor.h"
@@ -89,6 +90,10 @@ namespace RTE {
 		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 		modifiableScene->SetSavedGameInternal(true);
 
+		// Make sure the terrain is also treated as an original preset, otherwise it will screw up if we save then load then save again, since it'll try to be a CopyOf of itself.
+		modifiableScene->GetTerrain()->SetPresetName(fileName);
+		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
+
 		// Block the main thread for a bit to let the Writer access the relevant data.
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
@@ -150,9 +155,12 @@ namespace RTE {
 
 		// SetSceneToLoad() doesn't Clone(), but when the Activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally.
 		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
+		// Saved Scenes get their presetname set to their filename to ensure they're separate from the preset Scene they're based off of.
+		// However, saving a game you've already saved will end up with its OriginalScenePresetName set to the filename, which will screw up restarting the Activity, so we set its PresetName here.
+		scene->SetPresetName(originalScenePresetName);
 		// For starting Activity, we need to directly clone the Activity we want to start.
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
-		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
+		// When this method exits, our Scene object will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");

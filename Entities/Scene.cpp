@@ -2962,11 +2962,13 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 // Description:     Recalculates all of the pathfinding data. This is very expensive, so
 //                  do very rarely!
 
-void Scene::ResetPathFinding()
-{
-    for (const std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
-        pathFinder->RecalculateAllCosts();
-    }
+void Scene::ResetPathFinding() {
+	GetPathFinder(Activity::Teams::NoTeam)->RecalculateAllCosts();
+	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+		g_MovableMan.OverrideMaterialDoors(true, team);
+		GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAllCosts();
+		g_MovableMan.OverrideMaterialDoors(false, team);
+	}
 }
 
 

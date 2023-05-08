@@ -4262,7 +4262,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				m_HUDStack -= 9;
             }
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-				std::string equippedItemsString = (fgHeldFirearm ? fgHeldFirearm->GetPresetName() : "EMPTY") + (bgHeldFirearm ? " | " + bgHeldFirearm->GetPresetName() : "");
+				HeldDevice *fgEquippedItem = GetEquippedItem();
+				HeldDevice *bgEquippedItem = GetEquippedBGItem();
+				std::string equippedItemsString = (fgEquippedItem ? fgEquippedItem->GetPresetName() : "EMPTY") + (bgEquippedItem ? " | " + bgEquippedItem->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}

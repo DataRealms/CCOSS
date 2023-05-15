@@ -385,7 +385,7 @@ namespace RTE {
 
 	void ADoor::Update() {
 		if (m_Door) {
-			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
+			if (m_DoorState != STOPPED && m_Status != Actor::Status::INACTIVE && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
 				UpdateSensors(); 
 			}
 			UpdateDoorAttachableActions();

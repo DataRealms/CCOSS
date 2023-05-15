@@ -1244,7 +1244,8 @@ namespace RTE {
 		.def("ResetPathFinding", &Scene::ResetPathFinding)
 		.def("UpdatePathFinding", &Scene::UpdatePathFinding)
 		.def("PathFindingUpdated", &Scene::PathFindingUpdated)
-		.def("CalculatePath", &Scene::CalculateScenePath)
+		.def("CalculatePath", &LuaAdaptersScene::CalculatePath1)
+		.def("CalculatePath", &LuaAdaptersScene::CalculatePath2)
 
 		.enum_("PlacedObjectSets")[
 			luabind::value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),

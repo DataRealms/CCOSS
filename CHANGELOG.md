@@ -607,6 +607,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `MovableObject` Lua (R) property `HasEverBeenAddedToMovableMan` that tells you whether or not the `MovableObject` has ever been added to `MovableMan`.
 
+- Added alternate version of `Scene` Lua function `CalculatePath(startPos, endPos, movePathToGround, digStrength, team)` that works as the previous one, but lets you specify the team to calculate the path for, allowing you to ignore doors on your team.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

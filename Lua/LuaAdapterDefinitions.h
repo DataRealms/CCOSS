@@ -299,6 +299,13 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Scene Lua Adapters
+	struct LuaAdaptersScene {
+		static int CalculatePath1(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePath2(luaSelfObject, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
+		static int CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
+	};
+#pragma endregion
+
 #pragma region Actor Lua Adapters
 	struct LuaAdaptersActor {
 		static std::vector<Vector> * GetSceneWaypoints(Actor *luaSelfObject);

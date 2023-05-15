@@ -989,6 +989,7 @@ namespace RTE {
 		.property("RootID", &MovableObject::GetRootID)
 		.property("MOIDFootprint", &MovableObject::GetMOIDFootprint)
 		.property("Sharpness", &MovableObject::GetSharpness, &MovableObject::SetSharpness)
+		.property("HasEverBeenAddedToMovableMan", &MovableObject::HasEverBeenAddedToMovableMan)
 		.property("AboveHUDPos", &MovableObject::GetAboveHUDPos)
 		.property("HitsMOs", &MovableObject::HitsMOs, &MovableObject::SetToHitMOs)
 		.property("GetsHitByMOs", &MovableObject::GetsHitByMOs, &MovableObject::SetToGetHitByMOs)

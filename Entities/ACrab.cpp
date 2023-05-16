@@ -102,9 +102,14 @@ void ACrab::Clear()
 
 int ACrab::Create()
 {
-    // Read all the properties
-    if (Actor::Create() < 0)
-        return -1;
+	// Read all the properties
+	if (Actor::Create() < 0) {
+		return -1;
+	}
+
+	if (m_AIMode == Actor::AIMODE_NONE) {
+		m_AIMode = Actor::AIMODE_BRAINHUNT;
+	}
 
     // Create the background paths copied from the foreground ones which were already read in
     for (int side = 0; side < SIDECOUNT; ++side)

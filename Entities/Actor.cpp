@@ -162,8 +162,6 @@ int Actor::Create()
     // Default to an interesitng AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
-    if (m_AIMode == AIMODE_NONE)
-        m_AIMode = AIMODE_BRAINHUNT;
     m_UpdateMovePath = true;
 
     m_ViewPoint = m_Pos;

@@ -116,6 +116,10 @@ int AHuman::Create()
 		return -1;
 	}
 
+	if (m_AIMode == Actor::AIMODE_NONE) {
+		m_AIMode = Actor::AIMODE_BRAINHUNT;
+	}
+
     // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
     if (m_pFGArm) {
         m_Attachables.erase(std::find(m_Attachables.begin(), m_Attachables.end(), m_pFGArm));

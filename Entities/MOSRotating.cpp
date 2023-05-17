@@ -15,6 +15,7 @@
 
 #include "CameraMan.h"
 #include "SettingsMan.h"
+#include "PresetMan.h"
 #include "AtomGroup.h"
 #include "SLTerrain.h"
 #include "MOPixel.h"
@@ -335,21 +336,17 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
 		}
-	} else if (propName == "AddAEmitter" || propName == "AddEmitter")
-    {
-        AEmitter *pEmitter = new AEmitter;
-        reader >> pEmitter;
-		m_Attachables.push_back(pEmitter);
-    }
-    else if (propName == "AddAttachable")
-    {
-        Attachable *pAttachable = new Attachable;
-        reader >> pAttachable;
-        m_Attachables.push_back(pAttachable);
+	} else if (propName == "AddAttachable" || propName == "AddAEmitter" || propName == "AddEmitter") {
+		Entity *readerEntity = g_PresetMan.ReadReflectedPreset(reader);
+		if (Attachable *readerAttachable = dynamic_cast<Attachable *>(readerEntity)) {
+			AddAttachable(readerAttachable);
+		} else {
+			reader.ReportError("Tried to AddAttachable a non-Attachable type!");
+		}
 	} else if (propName == "SpecialBehaviour_AddWound") {
 		AEmitter *wound = new AEmitter;
 		reader >> wound;
-		m_Wounds.push_back(wound);
+		AddWound(wound, wound->GetParentOffset());
 	}
     else if (propName == "AddGib")
     {

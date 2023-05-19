@@ -35,6 +35,8 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_ActivityAllowsSaving = false;
+		m_ActiveSavingThreadCount = 0;
+		m_IsLoading = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
@@ -61,7 +63,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::SaveCurrentGame(const std::string &fileName) const {
+	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+		IncrementSavingThreadCount();
+
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
@@ -107,9 +115,10 @@ namespace RTE {
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
-		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
+		auto saveWriterData = [this](std::unique_ptr<Writer> writerToSave) {
 			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
 			writerToSave->EndWrite();
+			DecrementSavingThreadCount();
 		};
 
 		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
@@ -125,7 +134,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) const {
+	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+		m_IsLoading = true;
+
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
@@ -164,6 +179,8 @@ namespace RTE {
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");
+
+		m_IsLoading = false;
 		return true;
 	}
 

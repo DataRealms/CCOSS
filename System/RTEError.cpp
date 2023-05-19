@@ -32,7 +32,7 @@ namespace RTE {
 
 		if (!System::IsInExternalModuleValidationMode()) {
 			// Attempt to save the game itself, so the player can hopefully resume where they were.
-			g_ActivityMan.SaveCurrentGame("AbortSave");
+			bool abortSaveMade = g_ActivityMan.SaveCurrentGame("AbortSave");
 
 			// Save out the screen bitmap, after making a copy of it, faster sometimes.
 			if (screen) {
@@ -53,7 +53,11 @@ namespace RTE {
 			std::filesystem::path filePath = file;
 			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
 
-			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe game has attempted to save to 'AbortSave'.\nThe console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
+			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\n";
+			if (abortSaveMade) {
+				abortMessage += "The game has attempted to save to 'AbortSave'.\n";
+			}
+			abortMessage += "The console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
 
 			g_ConsoleMan.PrintString(abortMessage);
 			g_ConsoleMan.SaveAllText("AbortLog.txt");

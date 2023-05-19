@@ -293,7 +293,9 @@ namespace RTE {
 		g_AudioMan.StopMusic();
 
 		// Reset screen positions and shake
-		g_CameraMan.Reset();
+		for (int screen = 0; screen < c_MaxScreenCount; screen++) {
+			g_CameraMan.SetScreenShake(0, screen);
+		}
 
 		m_ActivityAllowsSaving = false;
 

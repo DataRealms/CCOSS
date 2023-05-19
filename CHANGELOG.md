@@ -561,7 +561,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
 
-- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
+- New `HDFirearm` INI and Lua (R/W) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle in radians, the latter being used when the device is held with no supporting `Arm` available. 0 means the animation is disabled. 
+
+- New `HDFirearm` Lua (R) property `CurrentReloadAngle` which gets the reload angle being currently used. I.e. the `ReloadAngle` when there's a supporting `Arm` available, and the `OneHandedReloadAngle` when there isn't.
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
 

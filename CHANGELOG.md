@@ -827,6 +827,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
 	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
 
+- New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

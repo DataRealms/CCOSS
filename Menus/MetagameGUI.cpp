@@ -1206,9 +1206,6 @@ bool MetagameGUI::LoadGame()
                 return false;
             }
 
-            // Reconstruct income site lines
-            UpdateIncomeCounting(true);
-
             // Reconstruct the player action lines - they are important!
             for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
                 UpdatePlayerActionLines(metaPlayer);

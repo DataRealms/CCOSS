@@ -13,6 +13,8 @@
 
 #include "SDL.h"
 
+#include "imgui/imgui.h"
+
 namespace RTE {
 
 	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_PrevKeyStates;
@@ -191,11 +193,14 @@ namespace RTE {
 				case InputDevice::DEVICE_KEYB_ONLY:
 					if (ElementHeld(player, InputElements::INPUT_L_UP)) {
 						allInput.m_Y += -1.0F;
-					} else if (ElementHeld(player, InputElements::INPUT_L_DOWN)) {
+					}
+					if (ElementHeld(player, InputElements::INPUT_L_DOWN)) {
 						allInput.m_Y += 1.0F;
-					} else if (ElementHeld(player, InputElements::INPUT_L_LEFT)) {
+					}
+					if (ElementHeld(player, InputElements::INPUT_L_LEFT)) {
 						allInput.m_X += -1.0F;
-					} else if (ElementHeld(player, InputElements::INPUT_L_RIGHT)) {
+					}
+					if (ElementHeld(player, InputElements::INPUT_L_RIGHT)) {
 						allInput.m_X += 1.0F;
 					}
 					break;
@@ -645,6 +650,9 @@ namespace RTE {
 				case InputState::Pressed:
 					return axisState == -1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
 				case InputState::Released:
+					if (axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0) {
+						std::cout << "Released " << whichAxis << " of " << whichJoy << std::endl;
+					}
 					return axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
 				default:
 					RTEAbort("Undefined InputState value passed in. See InputState enumeration");
@@ -657,6 +665,9 @@ namespace RTE {
 				case InputState::Pressed:
 					return axisState == 1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
 				case InputState::Released:
+					if (axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0) {
+						std::cout << "Released " << whichAxis << " of " << whichJoy << std::endl;
+					}
 					return axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
 				default:
 					RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
@@ -800,6 +811,7 @@ namespace RTE {
 			m_NetworkAccumulatedRawMouseMovement[Players::PlayerOne] += m_RawMouseMovement;
 		}
 		UpdateMouseInput();
+		UpdateJoystickDigitalAxis();
 		HandleSpecialInput();
 		StoreInputEventsForNextUpdate();
 
@@ -996,19 +1008,9 @@ namespace RTE {
 			int joystickIndex = device - s_PrevJoystickStates.begin();
 
 			int prevAxisValue = device->m_Axis[axis];
-			int prevDigitalValue = device->m_DigitalAxis[axis];
-
-			int newDigitalState = 0;
-			if (value > c_AxisDigitalThreshold) {
-				newDigitalState = 1;
-			} else if (value < -c_AxisDigitalThreshold) {
-				newDigitalState = -1;
-			}
 
 			s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(value - device->m_Axis[axis]);
-			s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axis] = Sign(newDigitalState - prevDigitalValue);
 			device->m_Axis[axis] = value;
-			device->m_DigitalAxis[axis] = newDigitalState;
 
 			Players joystickPlayer = Players::NoPlayer;
 			float deadZone = 0.0F;
@@ -1051,26 +1053,36 @@ namespace RTE {
 						if (aimValues.MagnitudeIsLessThan(deadZone)) {
 							if (axisLeft != SDL_CONTROLLER_AXIS_INVALID) {
 								s_ChangedJoystickStates[joystickIndex].m_Axis[axisLeft] = Sign(axisLeft == axis ? -prevAxisValue : -device->m_Axis[axisLeft]);
-								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisLeft] = Sign(axisLeft == axis ? -prevDigitalValue : -device->m_DigitalAxis[axisLeft]);
 								device->m_Axis[axisLeft] = 0;
-								device->m_DigitalAxis[axisLeft] = 0;
 							}
 							if (axisUp != SDL_CONTROLLER_AXIS_INVALID) {
 								s_ChangedJoystickStates[joystickIndex].m_Axis[axisUp] = Sign(axisUp == axis ? -prevAxisValue : -device->m_Axis[axisUp]);
-								s_ChangedJoystickStates[joystickIndex].m_DigitalAxis[axisUp] = Sign(axisLeft == axis ? -prevDigitalValue : -device->m_DigitalAxis[axisUp]);
 								device->m_Axis[axisUp] = 0;
-								device->m_DigitalAxis[axisUp] = 0;
 							}
 						}
 					} else if (deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
 						if (std::abs(static_cast<double>(value) / c_GamepadAxisLimit) < deadZone) {
 							s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevAxisValue);
-							s_ChangedJoystickStates[joystickIndex].m_Axis[axis] = Sign(-prevDigitalValue);
 							device->m_Axis[axis] = 0;
-							device->m_DigitalAxis[axis] = 0;
 						}
 					}
 				}
+			}
+		}
+	}
+
+	void UInputMan::UpdateJoystickDigitalAxis() {
+		for (size_t i = 0; i < s_PrevJoystickStates.size(); ++i) {
+			for (size_t axis = 0; axis < s_PrevJoystickStates[i].m_DigitalAxis.size(); ++axis) {
+				int prevDigitalValue = s_PrevJoystickStates[i].m_DigitalAxis[axis];
+				int newDigitalValue = 0;
+				if (s_PrevJoystickStates[i].m_Axis[axis] > c_AxisDigitalThreshold) {
+					newDigitalValue = 1;
+				} else if (s_PrevJoystickStates[i].m_Axis[axis] < -c_AxisDigitalThreshold) {
+					newDigitalValue = -1;
+				}
+				s_ChangedJoystickStates[i].m_DigitalAxis[axis] = Sign(newDigitalValue - prevDigitalValue);
+				s_PrevJoystickStates[i].m_DigitalAxis[axis] = newDigitalValue;
 			}
 		}
 	}

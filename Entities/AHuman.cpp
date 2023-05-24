@@ -3400,9 +3400,6 @@ void AHuman::Update()
 					}
 					if (thrownDevice->ActivatesWhenReleased()) { thrownDevice->Activate(); }
 					m_ThrowTmr.Reset();
-				} else {
-					//m_pFGArm->SetHandIdleRotation(adjustedAimAngle);
-					//m_pFGArm->AddHandTarget("Stance Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStanceOffset().RadRotate(adjustedAimAngle)); //TODO this can probably be replaced non-targeted handling, especially if I let you rotate idle offsets. Make sure to fix arm so TDs aren't excluded, to make this happen
 				}
 			} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 				m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
@@ -3413,6 +3410,13 @@ void AHuman::Update()
 				m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 			}
 		}
+	} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
+		m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
+		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		EquipShieldInBGArm();
+		m_ArmsState = WEAPON_READY;
+	} else if (m_ArmsState == THROWING_RELEASE) {
+		m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 	} else {
 		m_CanActivateBGItem = true;
 	}

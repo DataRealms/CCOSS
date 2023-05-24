@@ -271,6 +271,23 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int LuaAdaptersScene::CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
+		luaSelfObject->CalculatePath(start, end, luaSelfObject->m_ScenePath, digStrength, team);
+		if (!luaSelfObject->m_ScenePath.empty()) {
+			if (movePathToGround) {
+				for (Vector &scenePathPoint : luaSelfObject->m_ScenePath) {
+					scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+				}
+			}
+
+			return static_cast<int>(luaSelfObject->m_ScenePath.size());
+		}
+		return -1;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}

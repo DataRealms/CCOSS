@@ -12,6 +12,7 @@
 #include "MetaMan.h"
 
 #include "GAScripted.h"
+#include "SLTerrain.h"
 
 #include "EditorActivity.h"
 #include "SceneEditor.h"
@@ -34,6 +35,8 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_ActivityAllowsSaving = false;
+		m_ActiveSavingThreadCount = 0;
+		m_IsLoading = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
@@ -60,7 +63,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::SaveCurrentGame(const std::string &fileName) const {
+	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+		IncrementSavingThreadCount();
+
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
@@ -89,6 +98,10 @@ namespace RTE {
 		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 		modifiableScene->SetSavedGameInternal(true);
 
+		// Make sure the terrain is also treated as an original preset, otherwise it will screw up if we save then load then save again, since it'll try to be a CopyOf of itself.
+		modifiableScene->GetTerrain()->SetPresetName(fileName);
+		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
+
 		// Block the main thread for a bit to let the Writer access the relevant data.
 		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.FullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
@@ -102,9 +115,10 @@ namespace RTE {
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
-		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
+		auto saveWriterData = [this](std::unique_ptr<Writer> writerToSave) {
 			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
 			writerToSave->EndWrite();
+			DecrementSavingThreadCount();
 		};
 
 		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
@@ -120,7 +134,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) const {
+	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+		m_IsLoading = true;
+
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
@@ -150,12 +170,17 @@ namespace RTE {
 
 		// SetSceneToLoad() doesn't Clone(), but when the Activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally.
 		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
+		// Saved Scenes get their presetname set to their filename to ensure they're separate from the preset Scene they're based off of.
+		// However, saving a game you've already saved will end up with its OriginalScenePresetName set to the filename, which will screw up restarting the Activity, so we set its PresetName here.
+		scene->SetPresetName(originalScenePresetName);
 		// For starting Activity, we need to directly clone the Activity we want to start.
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
-		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
+		// When this method exits, our Scene object will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");
+
+		m_IsLoading = false;
 		return true;
 	}
 
@@ -268,7 +293,9 @@ namespace RTE {
 		g_AudioMan.StopMusic();
 
 		// Reset screen positions and shake
-		g_CameraMan.Reset();
+		for (int screen = 0; screen < c_MaxScreenCount; screen++) {
+			g_CameraMan.SetScreenShake(0, screen);
+		}
 
 		m_ActivityAllowsSaving = false;
 

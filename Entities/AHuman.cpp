@@ -57,7 +57,6 @@ void AHuman::Clear()
     m_StrideSound = nullptr;
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
-	m_LimbPushForcesAndCollisionsDisabled = false;
     m_ProneState = NOTPRONE;
     m_ProneTimer.Reset();
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
@@ -115,6 +114,10 @@ int AHuman::Create()
 {
 	if (Actor::Create() < 0) {
 		return -1;
+	}
+
+	if (m_AIMode == Actor::AIMODE_NONE) {
+		m_AIMode = Actor::AIMODE_BRAINHUNT;
 	}
 
     // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
@@ -215,8 +218,6 @@ int AHuman::Create(const AHuman &reference) {
     m_ArmsState = reference.m_ArmsState;
     m_MoveState = reference.m_MoveState;
     m_ProneState = reference.m_ProneState;
-
-	m_LimbPushForcesAndCollisionsDisabled = reference.m_LimbPushForcesAndCollisionsDisabled;
 
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);
@@ -3399,9 +3400,6 @@ void AHuman::Update()
 					}
 					if (thrownDevice->ActivatesWhenReleased()) { thrownDevice->Activate(); }
 					m_ThrowTmr.Reset();
-				} else {
-					//m_pFGArm->SetHandIdleRotation(adjustedAimAngle);
-					//m_pFGArm->AddHandTarget("Stance Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStanceOffset().RadRotate(adjustedAimAngle)); //TODO this can probably be replaced non-targeted handling, especially if I let you rotate idle offsets. Make sure to fix arm so TDs aren't excluded, to make this happen
 				}
 			} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 				m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
@@ -3412,6 +3410,15 @@ void AHuman::Update()
 				m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 			}
 		}
+	} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
+		if (m_pFGArm) {
+			m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
+			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		}
+		EquipShieldInBGArm();
+		m_ArmsState = WEAPON_READY;
+	} else if (m_ArmsState == THROWING_RELEASE) {
+		m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 	} else {
 		m_CanActivateBGItem = true;
 	}
@@ -4265,7 +4272,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				m_HUDStack -= 9;
             }
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-				std::string equippedItemsString = (fgHeldFirearm ? fgHeldFirearm->GetPresetName() : "EMPTY") + (bgHeldFirearm ? " | " + bgHeldFirearm->GetPresetName() : "");
+				HeldDevice *fgEquippedItem = GetEquippedItem();
+				HeldDevice *bgEquippedItem = GetEquippedBGItem();
+				std::string equippedItemsString = (fgEquippedItem ? fgEquippedItem->GetPresetName() : "EMPTY") + (bgEquippedItem ? " | " + bgEquippedItem->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}

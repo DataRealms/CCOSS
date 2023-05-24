@@ -564,10 +564,10 @@ protected:
 // Method:          UpdateIncomeCounting
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the Count Income animation
-// Arguments:       Whether to just set up the lines and funds as if we had a new round.
+// Arguments:       Whether to just set up the lines and funds as if we had a new round. Also skips changing funds to avoid an income/cost duplication glitch when saving a game at the start of a round.
 // Return value:    None.
 
-    void UpdateIncomeCounting(bool initOverride = false);
+	void UpdateIncomeCounting(bool initOverride = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

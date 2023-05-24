@@ -98,6 +98,12 @@ namespace RTE {
 		bool IsControllable() const override { return false; }
 
 		/// <summary>
+		/// Gets whether or not this ADoor's door material has been drawn.
+		/// </summary>
+		/// <returns>Whether or not this ADoor's door material has been drawn.</returns>
+		bool GetDoorMaterialDrawn() const { return m_DoorMaterialDrawn; }
+
+		/// <summary>
 		/// Gets this ADoor's door move start sound. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The SoundContainer for this ADoor's door move start sound.</returns>

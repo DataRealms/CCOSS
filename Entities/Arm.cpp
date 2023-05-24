@@ -240,16 +240,16 @@ namespace RTE {
 			if (m_HandTargets.empty()) {
 				if (m_HeldDevice) {
 					targetOffset = m_HeldDevice->GetStanceOffset();
-					if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(m_HeldDevice); heldFirearm && heldFirearm->GetReloadAngle() != 0) {
+					if (HDFirearm *heldFirearm = dynamic_cast<HDFirearm *>(m_HeldDevice); heldFirearm && heldFirearm->GetCurrentReloadAngle() != 0) {
 						if (heldFirearm->IsReloading()) {
 							float reloadProgressSin = std::sin(heldFirearm->GetReloadProgress() * c_PI);
 							// TODO: There are a few values available for customization here, but they need clear property names. The following plays out well as a default.
 							// Currently, non-supported always move to the same angle relative to the body. Supported items move halfway between the aim angle and body rotation.
 							// What needs to be decided upon is the property name(s) for the rate at which both the two-handed and one-handed reload angles move between the aim angle and body rotation.
-							float noSupportFactor = std::min(std::abs(heldFirearm->GetReloadAngle()), 1.0F);
+							float noSupportFactor = std::min(std::abs(heldFirearm->GetCurrentReloadAngle()), 1.0F);
 							float inheritedBodyAngle = m_Rotation.GetRadAngle() * noSupportFactor;
 							// m_Rotation corresponds to the aim angle here, since the arm hasn't been adjusted yet.
-							float reloadAngle = (heldFirearm->GetReloadAngle() - inheritedBodyAngle * GetFlipFactor()) * reloadProgressSin;
+							float reloadAngle = (heldFirearm->GetCurrentReloadAngle() - inheritedBodyAngle * GetFlipFactor()) * reloadProgressSin;
 							heldFirearm->SetInheritedRotAngleOffset(reloadAngle);
 							targetOffset.RadRotate(reloadAngle * GetFlipFactor());
 							float retractionRate = 0.5F * noSupportFactor;	// Another value potentially open for customization.

@@ -34,6 +34,7 @@ namespace RTE {
 		.def("GetPlayerBrain", &Activity::GetPlayerBrain)
 		.def("SetPlayerBrain", &Activity::SetPlayerBrain)
 		.def("PlayerHadBrain", &Activity::PlayerHadBrain)
+		.def("SetPlayerHadBrain", &Activity::SetPlayerHadBrain)
 		.def("SetBrainEvacuated", &Activity::SetBrainEvacuated)
 		.def("BrainWasEvacuated", &Activity::BrainWasEvacuated)
 		.def("IsAssignedBrain", &Activity::IsAssignedBrain)

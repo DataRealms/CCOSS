@@ -1541,7 +1541,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 		for (const Attachable *attachable : attachablesToSave) {
 			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
-				writer.NewProperty("Add" + attachable->GetClassName());
+				writer.NewProperty("AddAttachable");
 				SaveSceneObject(writer, attachable, true);
 			}
 		}
@@ -2963,11 +2963,13 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 // Description:     Recalculates all of the pathfinding data. This is very expensive, so
 //                  do very rarely!
 
-void Scene::ResetPathFinding()
-{
-    for (const std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
-        pathFinder->RecalculateAllCosts();
-    }
+void Scene::ResetPathFinding() {
+	GetPathFinder(Activity::Teams::NoTeam)->RecalculateAllCosts();
+	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+		g_MovableMan.OverrideMaterialDoors(true, team);
+		GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAllCosts();
+		g_MovableMan.OverrideMaterialDoors(false, team);
+	}
 }
 
 
@@ -3029,38 +3031,6 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     }
 
     return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateScenePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the least difficult path between two points on
-//                  the current scene. Takes both distance and materials into account.
-//                  A list of waypoints can be retrived from m_ScenePath;
-//                  For exposing CalculatePath to Lua.
-
-int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength) {
-    int pathSize = -1;
-
-	if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(Activity::Teams::NoTeam)) {
-        float notUsed;
-        pathFinder->CalculatePath(start, end, m_ScenePath, notUsed, digStrength);
-
-        // Process the new path we now have, if any
-        if (!m_ScenePath.empty()) {
-            pathSize = m_ScenePath.size();
-            if (movePathToGround) {
-                // Smash all airborne waypoints down to just above the ground
-                std::list<Vector>::iterator finalItr = m_ScenePath.end();
-				for (std::list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr) {
-					(*lItr) = g_SceneMan.MovePointToGround((*lItr), 20, 15);
-				}
-            }
-        }
-    }
-
-    return pathSize;
 }
 
 

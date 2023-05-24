@@ -22,7 +22,7 @@ namespace RTE {
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
-		m_BlipOnRevealUnseen = true;
+		m_BlipOnRevealUnseen = false;
 		m_UnheldItemsHUDDisplayRange = 25 * c_PPM;
 		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_SubPieMenuHoverOpenDelay = 1000;

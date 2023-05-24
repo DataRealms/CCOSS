@@ -61,6 +61,22 @@ namespace RTE {
 		void SetActivityAllowsSaving(bool activityAllowsSaving) { m_ActivityAllowsSaving = activityAllowsSaving; }
 
 		/// <summary>
+		/// Gets whether or not there is a game currently being saved.
+		/// </summary>
+		/// <returns>Whether or not there is a game currently being saved.</returns>
+		bool IsSaving() const { return m_ActiveSavingThreadCount > 0; }
+
+		/// <summary>
+		/// Increments the saving thread count.
+		/// </summary>
+		void IncrementSavingThreadCount() { m_ActiveSavingThreadCount++; }
+
+		/// <summary>
+		/// Decrements the saving thread count.
+		/// </summary>
+		void DecrementSavingThreadCount() { m_ActiveSavingThreadCount--; }
+
+		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
@@ -158,14 +174,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
 		/// <returns>Whether the game was successfully saved.</returns>
-		bool SaveCurrentGame(const std::string &fileName) const;
+		bool SaveCurrentGame(const std::string &fileName);
 
 		/// <summary>
 		/// Loads a saved game, and launches its Scene and Activity.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
 		/// <returns>Whether or not the saved game was successfully loaded.</returns>
-		bool LoadAndLaunchGame(const std::string &fileName) const;
+		bool LoadAndLaunchGame(const std::string &fileName);
 #pragma endregion
 
 #pragma region Activity Start Handling
@@ -271,6 +287,8 @@ namespace RTE {
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
 		bool m_ActivityAllowsSaving; //!< Whether or not the current Activity allows saving and loading. The details on whether or not an Activity allows this are set up when the Activity is started.
+		std::atomic<int> m_ActiveSavingThreadCount; //!< The number of threads currently saving.
+		bool m_IsLoading; //! Whether or not a game is loading.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.

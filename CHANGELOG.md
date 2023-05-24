@@ -531,7 +531,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `AHuman` Lua property (R/W) `ProneState`, that lets you get and set the `AHuman`'s `ProneState`. If you don't know what this does, you probably don't need or want it.
 
-- Added `AHuman` Lua property (R/W) `LimbPushForcesAndCollisionsDisabled`, that lets you disable limb (i.e. hand group and foot group) push forces and collisions. Effectively, if this is on, arms and legs won't do any movement and will just swing around with momentum.
+- Added `Actor` Lua property (R/W) `LimbPushForcesAndCollisionsDisabled`. If this is true, any of the `Actor`'s `Arm`s and `Leg`s won't do any movement or collide with terrain, and will just swing around with momentum.
 
 - Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
 
@@ -561,7 +561,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
 
-- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
+- New `HDFirearm` INI and Lua (R/W) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle in radians, the latter being used when the device is held with no supporting `Arm` available. 0 means the animation is disabled. 
+
+- New `HDFirearm` Lua (R) property `CurrentReloadAngle` which gets the reload angle being currently used. I.e. the `ReloadAngle` when there's a supporting `Arm` available, and the `OneHandedReloadAngle` when there isn't.
 
 - New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
 
@@ -601,9 +603,13 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `TerrainObject` INI property `ClearChildObjects` that lets you clear child objects when doing a `CopyOf` of another `TerrainObject`.
 
-- Added `Actor` Lua (R) property `MovePathEnd`, that gets you the last point in the `Actor`'s move path.
+- Added `Actor` Lua (R) property `MovePathEnd` that gets you the last point in the `Actor`'s move path.
 
-- Added `Actor` Lua (R) property `SceneWaypoints`, that lets you iterate over the `Actor`'s scene waypoints.
+- Added `Actor` Lua (R) property `SceneWaypoints` that lets you iterate over the `Actor`'s scene waypoints.
+
+- Added `MovableObject` Lua (R) property `HasEverBeenAddedToMovableMan` that tells you whether or not the `MovableObject` has ever been added to `MovableMan`.
+
+- Added alternate version of `Scene` Lua function `CalculatePath(startPos, endPos, movePathToGround, digStrength, team)` that works as the previous one, but lets you specify the team to calculate the path for, allowing you to ignore doors on your team.
 
 </details>
 
@@ -619,7 +625,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Swapped to SDL2 for window management and input handling.
 
-- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts (i.e. using `pieSlice:ReloadScripts()`, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
@@ -820,6 +826,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
 	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
+
+- New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
 
 </details>
 

@@ -407,7 +407,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
         // Start loading any additional stuff from the custom user file
         std::snprintf(loadoutPath, sizeof(loadoutPath), "%s/%s - LoadoutsMP%d.ini", c_UserConquestSavesModuleName.c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
-        if (!exists(loadoutPath))
+        if (!System::PathExistsCaseSensitive(loadoutPath))
         {
             // If the file doesn't exist, then we're not loading it, are we?
             loadoutPath[0] = 0;

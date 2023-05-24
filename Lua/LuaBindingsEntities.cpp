@@ -245,6 +245,7 @@ namespace RTE {
 		.property("PieMenu", &Actor::GetPieMenu, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPieMenu)
 		.property("AIBaseDigStrength", &Actor::GetAIBaseDigStrength, &Actor::SetAIBaseDigStrength)
 		.property("SceneWaypoints", &LuaAdaptersActor::GetSceneWaypoints, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.property("LimbPushForcesAndCollisionsDisabled", &Actor::GetLimbPushForcesAndCollisionsDisabled, &Actor::SetLimbPushForcesAndCollisionsDisabled)
 
 		.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
 		.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)
@@ -449,7 +450,6 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
-		.property("LimbPushForcesAndCollisionsDisabled", &AHuman::GetLimbPushForcesAndCollisionsDisabled, &AHuman::SetLimbPushForcesAndCollisionsDisabled)
 		.property("IsClimbing", &AHuman::IsClimbing)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 		.property("DeviceArmSwayRate", &AHuman::GetDeviceArmSwayRate, &AHuman::SetDeviceArmSwayRate)
@@ -682,6 +682,9 @@ namespace RTE {
 		.property("Reloadable", &HDFirearm::IsReloadable, &HDFirearm::SetReloadable)
 		.property("DualReloadable", &HDFirearm::IsDualReloadable, &HDFirearm::SetDualReloadable)
 		.property("OneHandedReloadTimeMultiplier", &HDFirearm::GetOneHandedReloadTimeMultiplier, &HDFirearm::SetOneHandedReloadTimeMultiplier)
+		.property("ReloadAngle", &HDFirearm::GetReloadAngle, &HDFirearm::SetReloadAngle)
+		.property("OneHandedReloadAngle", &HDFirearm::GetOneHandedReloadAngle, &HDFirearm::SetOneHandedReloadAngle)
+		.property("CurrentReloadAngle", &HDFirearm::GetCurrentReloadAngle)
 		.property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
 		.property("RoundInMagCapacity", &HDFirearm::GetRoundInMagCapacity)
 		.property("Magazine", &HDFirearm::GetMagazine, &LuaAdaptersPropertyOwnershipSafetyFaker::HDFirearmSetMagazine)
@@ -989,6 +992,7 @@ namespace RTE {
 		.property("RootID", &MovableObject::GetRootID)
 		.property("MOIDFootprint", &MovableObject::GetMOIDFootprint)
 		.property("Sharpness", &MovableObject::GetSharpness, &MovableObject::SetSharpness)
+		.property("HasEverBeenAddedToMovableMan", &MovableObject::HasEverBeenAddedToMovableMan)
 		.property("AboveHUDPos", &MovableObject::GetAboveHUDPos)
 		.property("HitsMOs", &MovableObject::HitsMOs, &MovableObject::SetToHitMOs)
 		.property("GetsHitByMOs", &MovableObject::GetsHitByMOs, &MovableObject::SetToGetHitByMOs)
@@ -1243,7 +1247,8 @@ namespace RTE {
 		.def("ResetPathFinding", &Scene::ResetPathFinding)
 		.def("UpdatePathFinding", &Scene::UpdatePathFinding)
 		.def("PathFindingUpdated", &Scene::PathFindingUpdated)
-		.def("CalculatePath", &Scene::CalculateScenePath)
+		.def("CalculatePath", &LuaAdaptersScene::CalculatePath1)
+		.def("CalculatePath", &LuaAdaptersScene::CalculatePath2)
 
 		.enum_("PlacedObjectSets")[
 			luabind::value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),

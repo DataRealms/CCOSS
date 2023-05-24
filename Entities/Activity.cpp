@@ -743,7 +743,9 @@ void Activity::Clear() {
 		}
 
 		m_ControlledActor[player] = actor;
-		m_ControlledActor[player]->SetTeam(team);
+		if (m_ControlledActor[player]->GetTeam() != team) {
+			m_ControlledActor[player]->SetTeam(team);
+		}
 		m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 		m_ControlledActor[player]->GetController()->SetDisabled(false);
 

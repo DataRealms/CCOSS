@@ -648,9 +648,6 @@ namespace RTE {
 				case InputState::Pressed:
 					return axisState == -1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
 				case InputState::Released:
-					if (axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0) {
-						std::cout << "Released " << whichAxis << " of " << whichJoy << std::endl;
-					}
 					return axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
 				default:
 					RTEAbort("Undefined InputState value passed in. See InputState enumeration");
@@ -663,9 +660,6 @@ namespace RTE {
 				case InputState::Pressed:
 					return axisState == 1 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] > 0;
 				case InputState::Released:
-					if (axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0) {
-						std::cout << "Released " << whichAxis << " of " << whichJoy << std::endl;
-					}
 					return axisState == 0 && s_ChangedJoystickStates[whichJoy].m_DigitalAxis[whichAxis] < 0;
 				default:
 					RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
@@ -1074,9 +1068,12 @@ namespace RTE {
 			for (size_t axis = 0; axis < s_PrevJoystickStates[i].m_DigitalAxis.size(); ++axis) {
 				int prevDigitalValue = s_PrevJoystickStates[i].m_DigitalAxis[axis];
 				int newDigitalValue = 0;
-				if (s_PrevJoystickStates[i].m_Axis[axis] > c_AxisDigitalThreshold) {
+				if (prevDigitalValue != 0 && std::abs(s_PrevJoystickStates[i].m_Axis[axis]) > c_AxisDigitalReleasedThreshold) {
+					newDigitalValue = prevDigitalValue;
+				}
+				if (s_PrevJoystickStates[i].m_Axis[axis] > c_AxisDigitalPressedThreshold) {
 					newDigitalValue = 1;
-				} else if (s_PrevJoystickStates[i].m_Axis[axis] < -c_AxisDigitalThreshold) {
+				} else if (s_PrevJoystickStates[i].m_Axis[axis] < -c_AxisDigitalPressedThreshold) {
 					newDigitalValue = -1;
 				}
 				s_ChangedJoystickStates[i].m_DigitalAxis[axis] = Sign(newDigitalValue - prevDigitalValue);

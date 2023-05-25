@@ -712,7 +712,8 @@ namespace RTE {
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
 
 		static constexpr double c_GamepadAxisLimit = 32767.0; //!< Maximum axis value as defined by SDL (int16 max).
-		static constexpr int c_AxisDigitalThreshold = 8192; //!< Digital Axis threshold value as defined by allegro.
+		static constexpr int c_AxisDigitalPressedThreshold = 8192; //!< Digital Axis threshold value as defined by allegro.
+		static constexpr int c_AxisDigitalReleasedThreshold = c_AxisDigitalPressedThreshold - 100; //!< Digital Axis release threshold, to debounce values.
 
 #pragma region Input State Handling
 		/// <summary>

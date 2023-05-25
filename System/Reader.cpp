@@ -23,20 +23,28 @@ namespace RTE {
 		m_OverwriteExisting = false;
 		m_SkipIncludes = false;
 		m_CanFail = false;
+		m_NonMudulePath = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Reader::Create(const std::string &fileName, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
-		m_FilePath = g_PresetMan.FullModulePath(std::filesystem::path(fileName).generic_string());
-
-		if (m_FilePath.empty()) {
+		if (fileName.empty()) {
 			return -1;
 		}
-		// Extract the file name and module name from the path
-		m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
-		m_DataModuleName = g_PresetMan.GetModuleNameFromPath(m_FilePath);
-		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
+
+		if (m_NonMudulePath) {
+			m_FilePath = std::filesystem::path(fileName).generic_string();
+			m_DataModuleName = "Base.rte";
+			m_DataModuleID = 0;
+		} else {
+			m_FilePath = g_PresetMan.FullModulePath(std::filesystem::path(fileName).generic_string());
+
+			// Extract the file name and module name from the path
+			m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
+			m_DataModuleName = g_PresetMan.GetModuleNameFromPath(m_FilePath);
+			m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
+		}
 
 		m_CanFail = failOK;
 

@@ -72,7 +72,7 @@ namespace RTE {
 	int SettingsMan::Initialize() {
 		if (const char *settingsTempPath = std::getenv("CCCP_SETTINGSPATH")) { m_SettingsPath = std::string(settingsTempPath); }
 
-		Reader settingsReader(m_SettingsPath, false, nullptr, true);
+		Reader settingsReader(m_SettingsPath, false, nullptr, true, true);
 
 		if (!settingsReader.ReaderOK()) {
 			Writer settingsWriter(m_SettingsPath);

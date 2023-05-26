@@ -305,6 +305,10 @@ int ACraft::Create()
     if (Actor::Create() < 0)
         return -1;
 
+	if (m_AIMode == Actor::AIMODE_NONE) {
+		m_AIMode = Actor::AIMODE_DELIVER;
+	}
+
     m_CurrentExit = m_Exits.begin();
 
     return 0;

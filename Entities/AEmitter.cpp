@@ -420,7 +420,7 @@ void AEmitter::Update()
     // Update and show flash if there is one
     if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
         m_pFlash->SetParentOffset(m_EmissionOffset);
-		m_pFlash->SetRotAngle(m_Rotation.GetRadAngle() + (m_HFlipped ? -m_EmitAngle.GetRadAngle() : m_EmitAngle.GetRadAngle()));
+		m_pFlash->SetRotAngle(m_Rotation.GetRadAngle() + (m_EmitAngle.GetRadAngle() * GetFlipFactor()));
         m_pFlash->SetScale(m_FlashScale);
         m_pFlash->SetNextFrame();
     }

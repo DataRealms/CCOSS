@@ -278,10 +278,34 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	void SetOneHandedReloadTimeMultiplier(float newOneHandedReloadTimeMultiplier) { m_OneHandedReloadTimeMultiplier = newOneHandedReloadTimeMultiplier; }
 
 	/// <summary>
-	/// Gets the default reload angle offset, if support is available, or the one handed reload angle offset, if not.
+	/// Gets the reload angle this HDFirearm will use when support is available.
 	/// </summary>
-	/// <returns>The appropriate reload angle to use, in radians.</returns>
-	float GetReloadAngle() const { return m_SupportAvailable ? m_ReloadAngle : m_OneHandedReloadAngle; }
+	/// <returns>The reload angle this HDFirearm will use when support is available, in radians.</returns>
+	float GetReloadAngle() const { return m_ReloadAngle; }
+
+	/// <summary>
+	/// Sets the reload angle this HDFirearm should use when support is available.
+	/// </summary>
+	/// <param name="newReloadAngle">The new reload angle this HDFirearm should use when support is available.</param>
+	void SetReloadAngle(float newReloadAngle) { m_ReloadAngle = newReloadAngle; }
+
+	/// <summary>
+	/// Gets the reload angle this HDFirearm will use when support is not available.
+	/// </summary>
+	/// <returns>The reload angle this HDFirearm will use when support is not available, in radians.</returns>
+	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
+
+	/// <summary>
+	/// Sets the reload angle this HDFirearm should use when support is not available.
+	/// </summary>
+	/// <param name="newOneHandedReloadAngle">The new reload angle this HDFirearm should use when support is not available.</param>
+	void SetOneHandedReloadAngle(float newOneHandedReloadAngle) { m_OneHandedReloadAngle = newOneHandedReloadAngle; }
+
+	/// <summary>
+	/// Gets the reload angle this HDFirearm is currently using, based on whether or not support is available.
+	/// </summary>
+	/// <returns>The current reload angle of this HDFirearm, in radians.</returns>
+	float GetCurrentReloadAngle() const { return m_SupportAvailable ? m_ReloadAngle : m_OneHandedReloadAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1199,21 +1199,6 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateScenePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the least difficult path between two points on
-//                  the current scene. Takes both distance and materials into account.
-//                  A list of waypoints can be retrived from Scene.ScenePath.
-//                  For exposing CalculatePath to Lua.
-// Arguments:       Start and end positions on the scene to find the path between.
-//                  If the path should be moved to the ground or not.
-//                  The maximum material strength any actor traveling along the path can dig through.
-// Return value:    The number of waypoints from start to goal, or -1 if no path.
-
-    int CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength = 1.0F);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetScenePathSize
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets how many waypoints there are in the ScenePath currently

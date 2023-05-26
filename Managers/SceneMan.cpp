@@ -47,6 +47,8 @@ std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 // Stored as a thread-local instead of in the class, because multithreaded Lua scripts will interfere otherwise
 thread_local Vector s_LastRayHitPos;
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";
@@ -77,6 +79,8 @@ void SceneMan::Clear()
 	if (m_pOrphanSearchBitmap)
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
+
+	m_ScrapCompactingHeight = 25;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -580,7 +584,7 @@ bool SceneMan::SceneIsLocked() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::RegisterDrawing(const BITMAP *bitmap, int moid, int left, int top, int right, int bottom) {
-    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) { 
+    if (m_pMOColorLayer && m_pMOColorLayer->GetBitmap() == bitmap) {
         m_pMOColorLayer->RegisterDrawing(left, top, right, bottom);
     } else if (m_pMOIDLayer && m_pMOIDLayer->GetBitmap() == bitmap) {
 #ifdef DRAW_MOID_LAYER
@@ -939,10 +943,9 @@ bool SceneMan::TryPenetrate(int posX,
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
         retardation = -(sceneMat->GetIntegrity() / std::sqrt(sqrImpMag));
-		int compactingHeight = g_SettingsMan.GetScrapCompactingHeight();
 
 		// If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles.
-		if (compactingHeight > 0 && (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)) {
+		if (m_ScrapCompactingHeight > 0 && (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)) {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
             BITMAP *pBGColor = m_pCurrentScene->GetTerrain()->GetBGColorBitmap();
@@ -954,7 +957,7 @@ bool SceneMan::TryPenetrate(int posX,
 			float sprayMag = std::sqrt(velocity.GetMagnitude() * sprayScale);
 			Vector sprayVel;
 
-			for (int testY = posY - 1; testY > posY - compactingHeight && testY >= 0; --testY) {
+			for (int testY = posY - 1; testY > posY - m_ScrapCompactingHeight && testY >= 0; --testY) {
 				if ((testMaterialID = _getpixel(pMaterial, posX, testY)) != g_MaterialAir) {
 					sceneMat = GetMaterialFromID(testMaterialID);
 
@@ -968,7 +971,7 @@ bool SceneMan::TryPenetrate(int posX,
 							}
 							if (spawnColor.GetIndex() != g_MaskColor) {
 								// Send terrain pixels flying at a diminishing rate the higher the column goes.
-								sprayVel.SetXY(0, -sprayMag * (1.0F - (static_cast<float>(posY - testY) / static_cast<float>(compactingHeight))));
+								sprayVel.SetXY(0, -sprayMag * (1.0F - (static_cast<float>(posY - testY) / static_cast<float>(m_ScrapCompactingHeight))));
 								sprayVel.RadRotate(RandomNum(-c_HalfPI, c_HalfPI));
 
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
@@ -1008,12 +1011,13 @@ bool SceneMan::TryPenetrate(int posX,
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
-	unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
-	if (materialID == g_MaterialAir) {
+	int materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
+	if (materialID <= MaterialColorKeys::g_MaterialAir) {
 		return nullptr;
 	}
-	Material const * sceneMat = GetMaterialFromID(materialID);
-	Material const * spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+	const Material *sceneMat = GetMaterialFromID(static_cast<uint8_t>(materialID));
+	const Material *spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+
 	Color spawnColor;
 	if (spawnMat->UsesOwnColor()) {
 		spawnColor = spawnMat->GetColor();
@@ -1021,16 +1025,17 @@ MovableObject * SceneMan::DislodgePixel(int posX, int posY) {
 		spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 	}
 	// No point generating a key-colored MOPixel.
-	if (spawnColor.GetIndex() == g_MaskColor) {
+	if (spawnColor.GetIndex() == ColorKeys::g_MaskColor) {
 		return nullptr;
 	}
-	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, posY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
+	Atom *pixelAtom = new Atom(Vector(), spawnMat->GetIndex(), nullptr, spawnColor, 2);
+	MOPixel *pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(static_cast<float>(posX), static_cast<float>(posY)), Vector(), pixelAtom, 0);
 	pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
 	g_MovableMan.AddParticle(pixelMO);
 
-	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
-	RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
-	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
+	m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, ColorKeys::g_MaskColor);
+	RegisterTerrainChange(posX, posY, 1, 1, ColorKeys::g_MaskColor, false);
+	m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, MaterialColorKeys::g_MaterialAir);
 
 	return pixelMO;
 }
@@ -2724,7 +2729,7 @@ void SceneMan::Update(int screenId) {
 
 	// Update the scene, only if doing the first screen, since it only needs done once per update.
 	if (screenId == 0) {
-		m_pCurrentScene->Update(); 
+		m_pCurrentScene->Update();
 	}
 
     g_CameraMan.Update(screenId);
@@ -2732,7 +2737,7 @@ void SceneMan::Update(int screenId) {
     const Vector &offset = g_CameraMan.GetOffset(screenId);
 	m_pMOColorLayer->SetOffset(offset);
 	m_pMOIDLayer->SetOffset(offset);
-	if (m_pDebugLayer) { 
+	if (m_pDebugLayer) {
         m_pDebugLayer->SetOffset(offset);
     }
 
@@ -2806,8 +2811,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			}
             if (!g_FrameMan.IsInMultiplayerMode()) {
                 int teamId = g_CameraMan.GetScreenTeam(m_LastUpdatedScreen);
-				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) { 
-                    unseenLayer->Draw(targetBitmap, targetBox); 
+				if (SceneLayer *unseenLayer = (teamId != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(teamId) : nullptr) {
+                    unseenLayer->Draw(targetBitmap, targetBox);
                 }
 			}
 
@@ -2815,8 +2820,8 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-			if (m_pDebugLayer) { 
-                m_pDebugLayer->Draw(targetBitmap, targetBox); 
+			if (m_pDebugLayer) {
+                m_pDebugLayer->Draw(targetBitmap, targetBox);
             }
 
 			break;

@@ -101,7 +101,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
-- New `Settings.ini` and `SettingsMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
+- New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
 
 - New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
 	A module defined as a merchant will stop being playable (in Conquest, etc.) but will have its buyable content available for purchase/placement when playing as any other faction (like how base content is).  
@@ -479,17 +479,17 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `ACrab` INI properties for setting individual foot `AtomGroup`s, as opposed to setting the same foot `AtomGroup`s for both `Legs` on the left or right side.  
 	These are `LeftFGFootGroup`, `LeftBGFootGroup`, `RightFGFootGroup` and `RightBGFootGroup`.
 
-- Buy Menu Quality-of-Life improvements.
-	Shift-clicking an item in the cart will now empty the entire cart.
-	Items in the cart will be indented to signify what actor's inventory they belong to.
-	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputing up/down.
+- Buy Menu Quality-of-Life improvements:  
+	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
+	Items in the cart will be indented to signify what actor's inventory they belong to.  
+	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
+	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
 - Added screen-shake. The screen-shake strength can be tweaked or disabled in the options menu.  
 	New `MOSRotating` INI property `GibScreenShakeAmount`, which determines how much this will shake the screen when gibbed. This defaults to automatically calculating a screen-shake amount based on the energy involved in the gib.  
-	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon whill shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
+	New `HDFirearm` INI property `RecoilScreenShakeAmount`, which determines how much this weapon will shake the screen when fired. This defaults to automatically calculating a screen-shake amount based on the recoil energy.  
 
 	New `Settings.ini` screen-shake properties:  
 	`ScreenShakeStrength` - a global multiplier applied to screen shaking strength.  
@@ -507,7 +507,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	```
 	Several `SceneMan` Lua functions have been moved into CameraMan. For the full list, see the Changed section below.
 
-- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam)` and `GetMOsInBox(box, ignoreTeam)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`.
+- Added `MovableMan` Lua functions `GetMOsInRadius(position, radius, ignoreTeam, getsHitByMOsOnly)` and `GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly)` that'll return all of the MOs either within a circular radius of a position, or in an axis-aligned-bounding-box. The `ignoreTeam` parameter defaults to `Team.NOTEAM`. The `getsHitByMOsOnly` defaults to false, which will get every `MovableObject`.
 
 - `SceneMan`s `GetMOIDPixel(x, y, ignoreTeam)` Lua function has a new optional `ignoreTeam` parameter. This defaults to `Team.NOTEAM`.
 
@@ -536,6 +536,12 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `AHuman` Lua property (R/W) `UpperBodyState`, that lets you get and set the `AHuman`'s `UpperBodyState`. If you don't know what this does, you probably don't need or want it.
 
+- Added `AHuman` Lua property (R/W) `MovementState`, that lets you get and set the `AHuman`'s `MovementState`. If you don't know what this does, you probably don't need or want it.
+
+- Added `AHuman` Lua property (R/W) `ProneState`, that lets you get and set the `AHuman`'s `ProneState`. If you don't know what this does, you probably don't need or want it.
+
+- Added `Actor` Lua property (R/W) `LimbPushForcesAndCollisionsDisabled`. If this is true, any of the `Actor`'s `Arm`s and `Leg`s won't do any movement or collide with terrain, and will just swing around with momentum.
+
 - Added `HeldDevice` INI and Lua (R/W) property `DualReloadable`, that determines whether or not a one-handed `HeldDevice` can be dual-reloaded (i.e. old reload behaviour). Note that for dual-reload to happen, both equipped `HDFirearms` must have this flag enabled.
 
 - Added `HeldDevice` INI and Lua (R/W) property `OneHandedReloadTimeMultiplier`, that determines how much faster or slower an `HeldDevice` is when reloading one-handed (i.e. if it's one-handed and the other `Arm` is missing, or is holding something).
@@ -545,26 +551,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `Timer` Lua function `GetSimTimeLimitMS()` that gets the sim time limit of the `Timer` in milliseconds.
 
 - Added `Timer` Lua function `GetSimTimeLimitS()` that gets the sim time limit of the `Timer` in seconds.
-
-- New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
-
-- New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
-
-- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
-
-- New `HDFirearm` INI and Lua (R) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle, the latter being used when the device is held with no supporting arm available. 0 means the animation is disabled. In radians. 
-
-- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
-
-- New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
-
-- New `Settings.ini` property `AutomaticGoldDeposit` which determines whether gold gathered by actors is automatically added into the team's funds. False means that gold needs to be manually transported into orbit via craft, the old school way. Enabled by default.  
-	A noteworthy change in comparison to previous logic is that gold is no longer converted into objects, and `GoldCarried` is now automatically transferred into craft upon entering them. This effectively allows the same actor to resume prospecting without having to return to orbit with the craft.  
-	Regardless of the setting, this behavior is always disabled for AI-only teams for the time being, until the actor AI is accommodated accordingly.
-
-- New `Actor` Lua function `AddGold(goldOz)` which adds the passed-in amount of gold either to the team's funds, or the `GoldCarried` of the actor in question, depending on whether automatic gold depositing is enabled. This effectively simulates the actor collecting gold.
-
-- New `Actor` Lua function `DropAllGold()` which converts all of the actor's `GoldCarried` into particles and spews them on the ground.
 
 - Ground pressure calculations revamp. Ground pressure, by default, is now calculated using a pseudo-3d model which takes into account the depth of an object colliding with terrain. This means actors cause much less terrain deformation from walking, especially large actors walking on smooth ground.
 
@@ -577,6 +563,28 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	New `AtomGroup` INI propery `AreaDistributionSurfaceAreaMultiplier`. This is a multiplier to the calculated surface area, i.e how "blunt" an object is. Large values lead to objects having lower ground pressure, and so dig into the terrain less. 
 	
 	The default values are `AreaDistributionType = Circle` and `AreaDistributionSurfaceAreaMultiplier = 0.5`, meaning that an object is assumed to be an oval with a depth of half it's width.
+
+- New `SceneMan` Lua function `DislodgePixel(posX, posY)` that removes a pixel of terrain at the passed in coordinates and turns it into a `MOPixel`. Returns the dislodged pixel as a `MovableObject`, or `nil` if no pixel terrain was found at the passed in position.
+
+- New `HDFirearm` Lua property `CanFire` which accurately indicates whether the firearm is ready to fire off another round.
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to `RateOfFire`.
+
+- New `HDFirearm` INI and Lua (R/W) properties `ReloadAngle` and `OneHandedReloadAngle` which determine the width of the reload animation angle in radians, the latter being used when the device is held with no supporting `Arm` available. 0 means the animation is disabled. 
+
+- New `HDFirearm` Lua (R) property `CurrentReloadAngle` which gets the reload angle being currently used. I.e. the `ReloadAngle` when there's a supporting `Arm` available, and the `OneHandedReloadAngle` when there isn't.
+
+- New `HDFirearm` Lua property `MSPerRound` which returns the minimum amount of MS in between shots, relative to`RateOfFire`.
+
+- New `Attachable` INI and Lua (R/W) property `GibWhenRemovedFromParent` which gibs the `Attachable` in question when it's removed from its parent. `DeleteWhenRemovedFromParent` will always override this.
+
+- New `Settings.ini` property `AutomaticGoldDeposit` which determines whether gold gathered by actors is automatically added into the team's funds. False means that gold needs to be manually transported into orbit via craft, the old school way. Enabled by default.  
+	A noteworthy change in comparison to previous logic is that gold is no longer converted into objects, and `GoldCarried` is now automatically transferred into craft upon entering them. This effectively allows the same actor to resume prospecting without having to return to orbit with the craft.  
+	Regardless of the setting, this behavior is always disabled for AI-only teams for the time being, until the actor AI is accommodated accordingly.
+
+- New `Actor` Lua function `AddGold(goldOz)` which adds the passed-in amount of gold either to the team's funds, or the `GoldCarried` of the actor in question, depending on whether automatic gold depositing is enabled. This effectively simulates the actor collecting gold.
+
+- New `Actor` Lua function `DropAllGold()` which converts all of the actor's `GoldCarried` into particles and spews them on the ground.
 
 - Added `Alt + F2` key combination to reload all cached sprites. This allows you to see changes made to sprites immediately in-game.
 
@@ -600,9 +608,23 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Settings.ini` property `IgnoreMultiDisplays` to ignore all displays except the one the window is currently positioned at when changing resolution.
 
+- Added Lua (R/W) properties for `ACrab` `AimRangeUpperLimit` and `AimRangeLowerLimit`. INI bindings already existed and are mentioned in an earlier changelog entry.
+
+- Added `TerrainObject` INI property `ClearChildObjects` that lets you clear child objects when doing a `CopyOf` of another `TerrainObject`.
+
+- Added `Actor` Lua (R) property `MovePathEnd` that gets you the last point in the `Actor`'s move path.
+
+- Added `Actor` Lua (R) property `SceneWaypoints` that lets you iterate over the `Actor`'s scene waypoints.
+
+- Added `MovableObject` Lua (R) property `HasEverBeenAddedToMovableMan` that tells you whether or not the `MovableObject` has ever been added to `MovableMan`.
+
+- Added alternate version of `Scene` Lua function `CalculatePath(startPos, endPos, movePathToGround, digStrength, team)` that works as the previous one, but lets you specify the team to calculate the path for, allowing you to ignore doors on your team.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Codebase now uses the C++20 standard.
 
 - Dramatic performance enhancements, especially with high actor counts and large maps. FPS has been more-than-doubled.
 
@@ -612,7 +634,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Swapped to SDL2 for window management and input handling.
 
-- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts, in order for their changes to be reflected in-game.  
+- Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts (i.e. using `pieSlice:ReloadScripts()`, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 
 - The landing zone cursor will now show the width of the selected delivery craft.
@@ -800,16 +822,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	If detecting by scancode (physical key location independent of layout) is absolutely necessary, the following functions have been added:  
 	`ScancodePressed`, `ScancodeReleased`, `ScancodeHeld`
 
-	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
+	Info on the keycode and scancode Lua tables and how to access them be found here: [SDL Keycode and Scancode enum values in Lua](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/wiki/SDL-Keycode-and-Scancode-enum-values-in-Lua).
 
 - Replace `PrintScreen` with `F12` for dumping a single screenshot, as `PrintScreen` was unreliable.
-
-- `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
-	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
-
-- Failing to create actor `FootGroup`s during loading will now crash with error message instead of straight to desktop.
-
-- `GameActivity` default gold INI properties have been renamed, so they all have `Difficulty` at the end. The full set of properties is: `DefaultGoldCakeDifficulty`, `DefaultGoldEasyDifficulty`, `DefaultGoldMediumDifficulty`, `DefaultGoldHardDifficulty`, `DefaultGoldNutsDifficulty`, `DefaultGoldMaxDifficulty`.
 
 - `AHuman`, `ACrab` and `ACRockt` will now attempt to fallback to using each `Leg`'s `Foot` attachable's `AtomGroup` as the appropriate `FootGroup`.  
 	This allows using auto-generated `AtomGroup`s instead of manually defining each `Atom` in a `FootGroup` when creating actors with larger or irregularly shaped feet simply by removing the `FootGroup` properties from the actor preset.
@@ -820,6 +835,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Jetpack burst fuel consumption is now scaled according to the total burst size instead of always being tenfold.  
 	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
+
+- New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
 
 </details>
 
@@ -842,7 +859,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fix advanced performance stats (graphs) peak values stuck at 0.
 
-- Fixed `Entity.ModuleName` returning and empty string for `Entities` defined in Base.rte. They now return "Base.rte", as they should.
+- Fix `MOSRotating` `GetWounds()` Lua function missing its implementation.
+
+- Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 - Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
 
@@ -997,7 +1016,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	**`ADoor`** - `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
 - Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
-`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
+`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder, 3 for ceiled remainder with the last decimal place rounded to the nearest 0 or 5 (i.e. if option 2 gave 10.1, this would give 10.5, if it gave 10.369 this would give 10.370, etc.)`
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
@@ -1117,6 +1136,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Area` Lua properties for `area.Center` and `area.RandomPoint`. They're exactly the same as the existing `area:GetCenterPoint()` and `area:GetRandomPoint()` functions, but a bit more convenient.
 
+- Added `SceneMan` Lua function `SceneMan:WrapBox(boxToWrap)` which takes a `Box` and, if it passes over the seam, splits it into multiple boxes and returns them. Useful for creating `Boxes` without having to worry about the seam.
+
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
 - New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.
@@ -1155,6 +1176,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
 
 - New Settings.ini flag `UseExperimentalMultiplayerSpeedBoosts = 1/0`. When turned on, it will use some code that **may** speed up multiplayer.
+
+- New `FrameMan` Lua function `SplitStringToFitWidth(stringToSplit, widthLimit, useSmallFont)`, which lets you split up a string so it fits within a given width limit for the specified font. Does not try to perfectly fit strings, and can be wonky if the width limit is small. Mostly used to ensure text fits on the screen!
 
 </details>
 
@@ -1317,6 +1340,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
 - Added support for multiple lines in DataModule descriptions in their Index.inis. See earlier entry on multiple lines in descriptions for details on how to use this.
+
+- `FrameMan` screen text will now always try to fit on the screen, splitting into multiple lines if needed. If you want more control of this, split your screen text manually with the `"\n"` new line character.
 
 </details>
 

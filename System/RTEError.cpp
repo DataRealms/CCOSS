@@ -9,9 +9,11 @@
 
 namespace RTE {
 
+	bool RTEError::s_CurrentlyAborting = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ShowMessageBox(const std::string &message, bool abortMessage) {
+	void RTEError::ShowMessageBox(const std::string &message, bool abortMessage) {
 		const char *messageBoxTitle = "RTE Warning! (>_<)";
 		int messageBoxFlags = SDL_MESSAGEBOX_WARNING;
 
@@ -25,19 +27,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEAbortFunc(const std::string &description, const std::string &file, int line) {
-		// We attempt to save the game when aborting, but this could potentially lead to a recursive fault if the saving itself is aborting.
-		static bool currentAborting = false;
-		if (currentAborting) {
-			// We're going in a loop! Just ignore all future aborts and let the saving hopefully complete, until the stack unrolls.
-			return;
-		}
-
-		currentAborting = true;
+	void RTEError::AbortFunc(const std::string &description, const std::string &file, int line) {
+		s_CurrentlyAborting = true;
 
 		if (!System::IsInExternalModuleValidationMode()) {
 			// Attempt to save the game itself, so the player can hopefully resume where they were.
-			g_ActivityMan.SaveCurrentGame("AbortSave");
+			bool abortSaveMade = g_ActivityMan.SaveCurrentGame("AbortSave");
 
 			// Save out the screen bitmap, after making a copy of it, faster sometimes.
 			if (screen) {
@@ -58,7 +53,11 @@ namespace RTE {
 			std::filesystem::path filePath = file;
 			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
 
-			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe game has attempted to save to 'AbortSave'.\nThe console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
+			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\n";
+			if (abortSaveMade) {
+				abortMessage += "The game has attempted to save to 'AbortSave'.\n";
+			}
+			abortMessage += "The console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
 
 			g_ConsoleMan.PrintString(abortMessage);
 			g_ConsoleMan.SaveAllText("AbortLog.txt");
@@ -66,15 +65,14 @@ namespace RTE {
 
 			ShowMessageBox(abortMessage, true);
 		}
-
-		currentAborting = false;
+		s_CurrentlyAborting = false;
 		AbortAction;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEAssertFunc(const std::string &description, const char *file, int line) {
+	void RTEError::AssertFunc(const std::string &description, const char *file, int line) {
 		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-		RTEAbortFunc(description, file, line);
+		AbortFunc(description, file, line);
 	}
 }

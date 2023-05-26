@@ -727,7 +727,7 @@ bool GibEditor::SaveObject(std::string saveAsName, bool forceOverwrite)
     std::string objectFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData/" + saveAsName + ".ini");
 
 	// Check if file exists
-	bool newDataFileExisted = exists(objectFilePath.c_str());
+	bool newDataFileExisted = System::PathExistsCaseSensitive(objectFilePath.c_str());
 
 	// Try to create NewData directory if file does not exist
 	if (!newDataFileExisted)
@@ -740,7 +740,7 @@ bool GibEditor::SaveObject(std::string saveAsName, bool forceOverwrite)
 //    if (g_PresetMan.AddEntityPreset(m_pEditedObject, m_ModuleSpaceID, true))
     {
         // Does ini already exist? If yes, then no need to add it to a objects.ini etc
-        bool objectFileExisted = exists(objectFilePath.c_str());
+        bool objectFileExisted = System::PathExistsCaseSensitive(objectFilePath.c_str());
         // If the ini file already exists, and then ask if overwrite first
         if (objectFileExisted && !forceOverwrite)
         {
@@ -763,7 +763,7 @@ bool GibEditor::SaveObject(std::string saveAsName, bool forceOverwrite)
                 {
                     // First find/create  a .rte/Scenes.ini file to include the new .ini into
                     string objectsFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
-                    bool objectsFileExisted = exists(objectsFilePath.c_str());
+                    bool objectsFileExisted = System::PathExistsCaseSensitive(objectsFilePath.c_str());
                     Writer objectsWriter(objectsFilePath.c_str(), true);
                     objectsWriter.NewProperty("\nIncludeFile");
                     objectsWriter << objectFilePath;

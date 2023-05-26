@@ -596,10 +596,16 @@ ClassInfoGetters;
     bool IsStaticPoint() const { return m_Segments.empty(); }
 
     /// <summary>
-    /// Returns the lowest point of this LimbPath, centred.
+    /// Returns the lowest y position of this LimbPath.
     /// </summary>
-    /// <returns>The lowest point of this LimbPath, centred.</returns>
-    Vector GetBottomMiddle() const;
+    /// <returns>The lowest y position of this LimbPath.</returns>
+    float GetLowestY() const;
+
+    /// <summary>
+    /// Returns the middle x position of this LimbPath.
+    /// </summary>
+    /// <returns>The middle x position of this LimbPath.</returns>
+    float GetMiddleX() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  Draw

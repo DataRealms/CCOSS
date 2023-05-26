@@ -302,7 +302,7 @@ namespace RTE {
 
 			FMOD::Sound *musicStream;
 
-			result = m_AudioSystem->createStream(filePath, FMOD_3D_HEADRELATIVE | ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
+			result = m_AudioSystem->createStream(filePath, ((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL), nullptr, &musicStream);
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -316,10 +316,6 @@ namespace RTE {
 			FMOD::Channel *musicChannel;
 			result = musicStream->set3DMinMaxDistance(c_SoundMaxAudibleDistance, c_SoundMaxAudibleDistance);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
-			if (result == FMOD_OK) {
-				FMOD_VECTOR zero_vector = GetAsFMODVector(Vector());
-				result = musicChannel->set3DAttributes(&zero_vector, nullptr);
-			}
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;

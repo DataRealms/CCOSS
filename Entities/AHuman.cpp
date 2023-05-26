@@ -76,7 +76,7 @@ void AHuman::Clear()
     m_JetTimeLeft = 0.0;
 	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
-	m_ActivateBGItem = false;
+	m_CanActivateBGItem = false;
 	m_TriggerPulled = false;
 	m_WaitingToReloadOffhand = false;
     m_ThrowTmr.Reset();
@@ -116,6 +116,10 @@ int AHuman::Create()
 {
 	if (Actor::Create() < 0) {
 		return -1;
+	}
+
+	if (m_AIMode == Actor::AIMODE_NONE) {
+		m_AIMode = Actor::AIMODE_BRAINHUNT;
 	}
 
     // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
@@ -3325,14 +3329,14 @@ void AHuman::Update()
 
 			if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
 				if (m_Controller.IsState(WEAPON_FIRE)) {
-					if (!m_ActivateBGItem) {
+					if (!m_CanActivateBGItem) {
 						if (deviceAsFirearm->IsFullAuto()) {
 							deviceAsFirearm->Activate();
-							m_ActivateBGItem = (deviceAsFirearm->FiredOnce() || deviceAsFirearm->IsReloading()) && deviceAsFirearm->HalfwayToNextRound();
+							m_CanActivateBGItem = deviceAsFirearm->FiredOnce() && deviceAsFirearm->HalfwayToNextRound();
 						} else if (!m_TriggerPulled) {
 							deviceAsFirearm->Activate();
 							if (deviceAsFirearm->FiredOnce()) {
-								m_ActivateBGItem = true;
+								m_CanActivateBGItem = true;
 								m_TriggerPulled = true;
 							}
 						}
@@ -3342,7 +3346,7 @@ void AHuman::Update()
 					m_TriggerPulled = false;
 				}
 			} else {
-				m_ActivateBGItem = true;
+				m_CanActivateBGItem = true;
 				if (m_Controller.IsState(WEAPON_FIRE)) {
 					device->Activate();
 					if (device->IsEmpty()) {
@@ -3358,13 +3362,13 @@ void AHuman::Update()
 			}
 
 			if (device->IsReloading()) {
-				m_ActivateBGItem = true;
+				m_CanActivateBGItem = true;
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 				device->SetSharpAim(m_SharpAimProgress);
 			}
 		} else {
-			m_ActivateBGItem = true;
+			m_CanActivateBGItem = true;
 			if (thrownDevice = dynamic_cast<ThrownDevice *>(device)) {
 				thrownDevice->SetSharpAim(isSharpAiming ? 1.0F : 0);
 				if (m_Controller.IsState(WEAPON_FIRE)) {
@@ -3399,9 +3403,6 @@ void AHuman::Update()
 					}
 					if (thrownDevice->ActivatesWhenReleased()) { thrownDevice->Activate(); }
 					m_ThrowTmr.Reset();
-				} else {
-					//m_pFGArm->SetHandIdleRotation(adjustedAimAngle);
-					//m_pFGArm->AddHandTarget("Stance Offset", m_pFGArm->GetJointPos() + thrownDevice->GetStanceOffset().RadRotate(adjustedAimAngle)); //TODO this can probably be replaced non-targeted handling, especially if I let you rotate idle offsets. Make sure to fix arm so TDs aren't excluded, to make this happen
 				}
 			} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 				m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
@@ -3412,17 +3413,24 @@ void AHuman::Update()
 				m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 			}
 		}
+	} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
+		m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
+		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		EquipShieldInBGArm();
+		m_ArmsState = WEAPON_READY;
+	} else if (m_ArmsState == THROWING_RELEASE) {
+		m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 	} else {
-		m_ActivateBGItem = true;
+		m_CanActivateBGItem = true;
 	}
 
 	if (HeldDevice *device = GetEquippedBGItem(); device && m_Status != INACTIVE) {
 		if (HDFirearm *deviceAsFirearm = dynamic_cast<HDFirearm*>(device)) {
 			if (m_Controller.IsState(WEAPON_FIRE)) {
-				if (m_ActivateBGItem && (!m_TriggerPulled || (deviceAsFirearm->IsFullAuto() && deviceAsFirearm->HalfwayToNextRound()))) {
+				if (m_CanActivateBGItem && (!m_TriggerPulled || (deviceAsFirearm->IsFullAuto() && deviceAsFirearm->HalfwayToNextRound()))) {
 					deviceAsFirearm->Activate();
 					if (deviceAsFirearm->FiredOnce()) {
-						m_ActivateBGItem = false;
+						m_CanActivateBGItem = false;
 						m_TriggerPulled = true;
 					}
 				}
@@ -3431,7 +3439,7 @@ void AHuman::Update()
 				m_TriggerPulled = false;
 			}
 		} else {
-			m_ActivateBGItem = false;
+			m_CanActivateBGItem = false;
 			if (m_Controller.IsState(WEAPON_FIRE)) {
 				device->Activate();
 			} else {
@@ -3445,13 +3453,13 @@ void AHuman::Update()
 		device->SetSharpAim(m_SharpAimProgress);
 
 		if (device->IsReloading()) {
-			m_ActivateBGItem = false;
+			m_CanActivateBGItem = false;
 			m_SharpAimTimer.Reset();
 			m_SharpAimProgress = 0;
 			device->SetSharpAim(m_SharpAimProgress);
 		}
 	} else {
-		m_ActivateBGItem = false;
+		m_CanActivateBGItem = false;
 	}
 
 	if (m_ArmsState == THROWING_PREP && !thrownDevice) {
@@ -3549,7 +3557,7 @@ void AHuman::Update()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
-    if (m_Status == STABLE && m_MoveState != NOMOVE)
+	if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled && m_MoveState != NOMOVE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
         if ((m_pFGFootGroup->GetAtomCount() == 0 && m_BackupFGFootGroup->GetAtomCount() > 0) != m_Paths[FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
@@ -3579,7 +3587,7 @@ void AHuman::Update()
 			if (m_pFGLeg && (!m_pBGLeg || !(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5F) || m_StrideStart)) {
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false, m_Paths[FGROUND][WALK].GetBottomMiddle());
+				m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false, Vector(0.0F, m_Paths[FGROUND][WALK].GetLowestY()));
 				if (restarted) { UpdateWalkAngle(FGROUND); }
 			} else {
 				m_ArmClimbing[BGROUND] = false;
@@ -3588,7 +3596,7 @@ void AHuman::Update()
 				m_StrideStart = false;
 				// Reset the stride timer if the path is about to restart.
 				if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false, m_Paths[BGROUND][WALK].GetBottomMiddle());
+				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false, Vector(0.0F, m_Paths[BGROUND][WALK].GetLowestY()));
 				if (restarted) { UpdateWalkAngle(BGROUND); }
 			} else {
 				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
@@ -3729,9 +3737,9 @@ void AHuman::Update()
 					m_Paths[FGROUND][ARMCRAWL].Terminate();
 					m_Paths[BGROUND][ARMCRAWL].Terminate();
 
-					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][STAND], deltaTime, nullptr, !m_pBGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][STAND], deltaTime, nullptr, !m_pBGLeg, Vector(0.0F, m_Paths[FGROUND][STAND].GetLowestY())); }
 
-					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][STAND], deltaTime, nullptr, !m_pFGLeg, m_Paths[FGROUND][STAND].GetBottomMiddle()); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][STAND], deltaTime, nullptr, !m_pFGLeg, Vector(0.0F, m_Paths[FGROUND][STAND].GetLowestY())); }
 				}
 			}
 		}
@@ -4265,7 +4273,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				m_HUDStack -= 9;
             }
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-				std::string equippedItemsString = (fgHeldFirearm ? fgHeldFirearm->GetPresetName() : "EMPTY") + (bgHeldFirearm ? " | " + bgHeldFirearm->GetPresetName() : "");
+				HeldDevice *fgEquippedItem = GetEquippedItem();
+				HeldDevice *bgEquippedItem = GetEquippedBGItem();
+				std::string equippedItemsString = (fgEquippedItem ? fgEquippedItem->GetPresetName() : "EMPTY") + (bgEquippedItem ? " | " + bgEquippedItem->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}

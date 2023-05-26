@@ -322,6 +322,47 @@ namespace RTE {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string FrameMan::SplitStringToFitWidth(const std::string &stringToSplit, int widthLimit, bool useSmallFont) {
+		GUIFont *fontToUse = GetFont(useSmallFont);
+		auto SplitSingleLineAsNeeded = [this, &widthLimit, &fontToUse](std::string &lineToSplitAsNeeded) {
+			int numberOfScreenWidthsForText = static_cast<int>(std::ceil(static_cast<float>(fontToUse->CalculateWidth(lineToSplitAsNeeded)) / static_cast<float>(widthLimit)));
+			if (numberOfScreenWidthsForText > 1) {
+				int splitInterval = static_cast<int>(std::ceil(static_cast<float>(lineToSplitAsNeeded.size()) / static_cast<float>(numberOfScreenWidthsForText)));
+				for (int i = 1; i <= numberOfScreenWidthsForText; i++) {
+					size_t newLineCharacterPosition = std::min(static_cast<size_t>(i * splitInterval + (i - 1)), lineToSplitAsNeeded.size());
+					if (newLineCharacterPosition == lineToSplitAsNeeded.size()) {
+						break;
+					}
+					lineToSplitAsNeeded.insert(newLineCharacterPosition, "\n");
+				}
+			}
+		};
+
+		std::string splitString;
+		size_t previousNewLinePos = 0;
+		size_t nextNewLinePos = stringToSplit.find("\n");
+		if (nextNewLinePos != std::string::npos) {
+			while (nextNewLinePos != std::string::npos) {
+				nextNewLinePos = stringToSplit.find("\n", previousNewLinePos);
+				std::string currentLine = stringToSplit.substr(previousNewLinePos, nextNewLinePos - previousNewLinePos);
+				previousNewLinePos = nextNewLinePos + 1;
+
+				SplitSingleLineAsNeeded(currentLine);
+				splitString += currentLine;
+				if (nextNewLinePos != std::string::npos) {
+					splitString += "\n";
+				}
+			}
+		} else {
+			splitString = stringToSplit;
+			SplitSingleLineAsNeeded(splitString);
+		}
+
+		return splitString;
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::CalculateTextWidth(const std::string &text, bool isSmall) {
@@ -455,24 +496,29 @@ namespace RTE {
 			return -1;
 		}
 
-		int fileNumber = 0;
-		int maxFileTrys = 1000;
-		char fullFileName[256];
+		// TODO: Remove this once GCC13 is released and switched to. std::format and std::chrono::time_zone are not part of latest libstdc++.
+#if _LINUX_OR_MACOSX_
+		std::chrono::time_point now = std::chrono::system_clock::now();
+		time_t currentTime = std::chrono::system_clock::to_time_t(now);
+		tm *localCurrentTime = std::localtime(&currentTime);
+		std::array<char, 32> formattedTimeAndDate = {};
+		std::strftime(formattedTimeAndDate.data(), sizeof(formattedTimeAndDate), "%F_%H-%M-%S", localCurrentTime);
 
-		while (fileNumber < maxFileTrys) {
-			// Check for the file namebase001.png; if it exists, try 002, etc.
-			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase.c_str(), fileNumber++, ".png");
-			if (!std::filesystem::exists(fullFileName)) {
-				break;
-			}
-		}
+		std::array<char, 128> fullFileNameBuffer = {};
+		// We can't get sub-second precision from timeBuffer so we'll append absolute time to not overwrite the same file when dumping multiple times per second.
+		std::snprintf(fullFileNameBuffer.data(), sizeof(fullFileNameBuffer), "%s/%s_%s.%zi.png", System::GetScreenshotDirectory().c_str(), nameBase.c_str(), formattedTimeAndDate.data(), g_TimerMan.GetAbsoluteTime());
+
+		std::string fullFileName(fullFileNameBuffer.data());
+#else
+		std::string fullFileName = std::format("{}/{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
+#endif
 
 		bool saveSuccess = false;
 
 		switch (modeToSave) {
 			case SingleBitmap:
 				if (bitmapToSave && save_png(nameBase.c_str(), bitmapToSave, m_Palette) == 0) {
-					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(nameBase));
+					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + nameBase);
 					saveSuccess = true;
 				}
 				break;
@@ -480,25 +526,23 @@ namespace RTE {
 				if (m_BackBuffer32 && m_ScreenDumpBuffer) {
 					blit(m_BackBuffer32.get(), m_ScreenDumpBuffer.get(), 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 
-					if (save_png(fullFileName, m_ScreenDumpNamePlaceholder.get(), nullptr) == 0) {
-						auto saveScreenDump = [fullFileName](BITMAP *screenDumpBuffer) {
-							// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
-							BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(screenDumpBuffer), screenDumpBuffer->w, screenDumpBuffer->h);
-							blit(screenDumpBuffer, outputBitmap, 0, 0, 0, 0, screenDumpBuffer->w, screenDumpBuffer->h);
-							// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
-							if (save_png(fullFileName, outputBitmap, nullptr) == 0) {
-								g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
-							} else {
-								g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
-							}
-							destroy_bitmap(outputBitmap);
-						};
-						std::thread saveThread(saveScreenDump, m_ScreenDumpBuffer.get());
-						// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
-						saveThread.detach();
+					// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
+					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
+					stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h, 0, 0, outputBitmap->w, outputBitmap->h);
 
-						saveSuccess = true;
-					}
+					auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
+						// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
+						if (save_png(fullFileName.c_str(), bitmapToSaveCopy, nullptr) == 0) {
+							g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + fullFileName);
+						} else {
+							g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + fullFileName);
+						}
+						destroy_bitmap(bitmapToSaveCopy);
+					};
+					std::thread saveThread(saveScreenDump, outputBitmap);
+					saveThread.detach();
+
+					saveSuccess = true;
 				}
 				break;
 			case ScenePreviewDump:
@@ -513,8 +557,8 @@ namespace RTE {
 					blit(m_ScenePreviewDumpGradient.get(), scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer.get(), scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					if (SaveIndexedPNG(fullFileName, scenePreviewDumpBuffer) == 0) {
-						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
+					if (SaveIndexedPNG(fullFileName.c_str(), scenePreviewDumpBuffer) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + fullFileName);
 						saveSuccess = true;
 					}
 					destroy_bitmap(scenePreviewDumpBuffer);
@@ -524,8 +568,8 @@ namespace RTE {
 					BITMAP *depthConvertBitmap = create_bitmap_ex(24, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
 					blit(m_WorldDumpBuffer.get(), depthConvertBitmap, 0, 0, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
 
-					if (save_png(fullFileName, depthConvertBitmap, nullptr) == 0) {
-						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
+					if (save_png(fullFileName.c_str(), depthConvertBitmap, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + fullFileName);
 						saveSuccess = true;
 					}
 					destroy_bitmap(depthConvertBitmap);
@@ -536,7 +580,7 @@ namespace RTE {
 				return -1;
 		}
 		if (!saveSuccess) {
-			g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
+			g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + fullFileName);
 			return -1;
 		} else {
 			return 0;
@@ -868,12 +912,12 @@ namespace RTE {
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= g_WindowMan.GetResX() / 2) { screenOcclusionOffsetX = 0; }
 
-				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
+				std::string screenTextToDraw = m_ScreenText[playerScreen];
 				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, ">>> " + m_ScreenText[playerScreen] + " <<<", GUIFont::Centre);
-				} else {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen], GUIFont::Centre);
+					screenTextToDraw = ">>> " + screenTextToDraw + " <<<";
 				}
+				screenTextToDraw = SplitStringToFitWidth(screenTextToDraw, bufferOrScreenWidth, false);
+				GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, screenTextToDraw, GUIFont::Centre);
 				textPosY += 12;
 			}
 

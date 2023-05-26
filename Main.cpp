@@ -353,7 +353,6 @@ namespace RTE {
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
-	set_config_file("Base.rte/AllegroConfig.txt");
 	install_allegro(SYSTEM_NONE, &errno, std::atexit);
 	loadpng_init();
 

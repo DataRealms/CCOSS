@@ -1375,6 +1375,18 @@ ClassInfoGetters;
 	bool IsMechanical() const { return m_Mechanical; }
 
 	/// <summary>
+	/// Gets whether or not this Actor's limb push forces have been disabled.
+	/// </summary>
+	/// <returns>Whether or not this Actor's limb push forces have been disabled.</returns>
+	bool GetLimbPushForcesAndCollisionsDisabled() const { return m_LimbPushForcesAndCollisionsDisabled; }
+
+	/// <summary>
+	/// Sets whether or not this Actor's limb push forces should be disabled.
+	/// </summary>
+	/// <param name="newLimbPushForcesAndCollisionsDisabled">Whether or not this Actor's limb push forces should be disabled.</param>
+	void SetLimbPushForcesAndCollisionsDisabled(bool newLimbPushForcesAndCollisionsDisabled) { m_LimbPushForcesAndCollisionsDisabled = newLimbPushForcesAndCollisionsDisabled; }
+
+	/// <summary>
 	/// Gets the default PieMenu name for this type.
 	/// </summary>
 	/// <returns>The default PieMenu name for this type.</returns>
@@ -1602,6 +1614,8 @@ protected:
 
 	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
 	bool m_Mechanical; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.
+
+	bool m_LimbPushForcesAndCollisionsDisabled; //<! Whether or limb push forces and collisions have been disabled (likely for Lua purposes).
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

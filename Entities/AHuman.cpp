@@ -3414,11 +3414,13 @@ void AHuman::Update()
 			}
 		}
 	} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
-		m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
-		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		if (m_pFGArm) {
+			m_pFGArm->SetHeldDevice(dynamic_cast<HeldDevice *>(SwapNextInventory()));
+			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
+		}
 		EquipShieldInBGArm();
 		m_ArmsState = WEAPON_READY;
-	} else if (m_ArmsState == THROWING_RELEASE) {
+	} else if (m_ArmsState == THROWING_RELEASE && m_pFGArm) {
 		m_pFGArm->AddHandTarget("Adjusted Aim Angle", m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 	} else {
 		m_CanActivateBGItem = true;

@@ -22,7 +22,7 @@ namespace RTE {
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
-		m_BlipOnRevealUnseen = true;
+		m_BlipOnRevealUnseen = false;
 		m_UnheldItemsHUDDisplayRange = 25 * c_PPM;
 		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_SubPieMenuHoverOpenDelay = 1000;
@@ -31,7 +31,6 @@ namespace RTE {
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
 		m_EnableSmartBuyMenuNavigation = true;
-		m_ScrapCompactingHeight = 25;
 		m_AutomaticGoldDeposit = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
@@ -163,7 +162,7 @@ namespace RTE {
 		} else if (propName == "SmartBuyMenuNavigation") {
 			reader >> m_EnableSmartBuyMenuNavigation;
 		} else if (propName == "ScrapCompactingHeight") {
-			reader >> m_ScrapCompactingHeight;
+			reader >> g_SceneMan.m_ScrapCompactingHeight;
 		} else if (propName == "AutomaticGoldDeposit") {
 			reader >> m_AutomaticGoldDeposit;
 		} else if (propName == "ScreenShakeStrength") {
@@ -357,7 +356,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
-		writer.NewPropertyWithValue("ScrapCompactingHeight", m_ScrapCompactingHeight);
+		writer.NewPropertyWithValue("ScrapCompactingHeight", g_SceneMan.m_ScrapCompactingHeight);
 		writer.NewPropertyWithValue("AutomaticGoldDeposit", m_AutomaticGoldDeposit);
 
 		writer.NewLine(false, 2);

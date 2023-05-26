@@ -28,9 +28,6 @@
     <Filter Include="Lua">
       <UniqueIdentifier>{ac503e37-087b-40b8-b1b8-427ab55a4f9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\glad">
-      <UniqueIdentifier>{767bbe15-b790-48a2-89dc-4d0f36143c71}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GUI\Wrappers">
       <UniqueIdentifier>{14ff3fdb-4366-4bed-8b6e-ddcf72987b81}</UniqueIdentifier>
     </Filter>
@@ -1070,9 +1067,6 @@
     </ClCompile>
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="System\glad\gl.c">
-      <Filter>System\glad</Filter>
     </ClCompile>
     <ClCompile Include="Managers\CameraMan.cpp">
       <Filter>Managers</Filter>

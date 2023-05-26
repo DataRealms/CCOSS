@@ -1206,8 +1206,8 @@ bool MetagameGUI::LoadGame()
                 return false;
             }
 
-            // Reconstruct income site lines
-            UpdateIncomeCounting(true);
+			// Reconstruct income site lines without changing funds
+			UpdateIncomeCounting(true);
 
             // Reconstruct the player action lines - they are important!
             for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
@@ -3413,8 +3413,8 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // Only charge rent if there's any brains left in pool
 // Make this rent variable somehow??
-            totalRent = g_MetaMan.m_Players[m_AnimMetaPlayer].GetBrainPoolCount() > 0 ? TRADESTARRENT : 0;
-            totalIncome = g_MetaMan.GetSceneIncomeOfPlayer(m_AnimMetaPlayer);
+            totalRent = initOverride ? 0 : g_MetaMan.m_Players[m_AnimMetaPlayer].GetBrainPoolCount() > 0 ? TRADESTARRENT : 0;
+            totalIncome = initOverride ? 0 : g_MetaMan.GetSceneIncomeOfPlayer(m_AnimMetaPlayer);
             totalEndFunds = g_MetaMan.m_Players[m_AnimMetaPlayer].m_PhaseStartFunds + totalIncome - totalRent;
             channelHeight = 60;
 
@@ -3428,14 +3428,16 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // SCENE INCOME
             // Loop through the scenes owned by that player, setting up the site line for each
-            while (m_pAnimScene = g_MetaMan.GetNextSceneOfPlayer(m_AnimMetaPlayer, m_pAnimScene))
-            {
-                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
-                // Star them at 0, make them go to the round income for this base
-                m_IncomeSiteLines.back().m_FundsAmount = 0;
-                m_IncomeSiteLines.back().m_FundsTarget = m_pAnimScene->GetRoundIncome();
-                channelHeight += 10;
-            }
+			if (!initOverride) {
+				while (m_pAnimScene = g_MetaMan.GetNextSceneOfPlayer(m_AnimMetaPlayer, m_pAnimScene))
+				{
+					m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
+					// Star them at 0, make them go to the round income for this base
+					m_IncomeSiteLines.back().m_FundsAmount = 0;
+					m_IncomeSiteLines.back().m_FundsTarget = m_pAnimScene->GetRoundIncome();
+					channelHeight += 10;
+				}
+			}
 
             // BRAIN LIQUIDATION if funds will end up under 0
             if (totalEndFunds <= 0 || g_MetaMan.GetTotalBrainCountOfPlayer(m_AnimMetaPlayer) <= 0)

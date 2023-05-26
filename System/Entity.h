@@ -374,29 +374,29 @@ namespace RTE {
 
 #pragma region Groups
 		/// <summary>
-		/// Gets the list of groups this is member of.
+		/// Gets the set of groups this is member of.
 		/// </summary>
 		/// <returns>A pointer to a list of strings which describes the groups this is added to. Ownership is NOT transferred!</returns>
-		const std::list<std::string> * GetGroupList() const { return &m_Groups; }
+		const std::unordered_set<std::string> * GetGroups() const { return &m_Groups; }
 
 		/// <summary>
-		/// Shows whether this is part of a specific group or not.
+		/// Gets whether this is part of a specific group or not.
 		/// </summary>
 		/// <param name="whichGroup">A string which describes the group to check for.</param>
 		/// <returns>Whether this Entity is in the specified group or not.</returns>
-		bool IsInGroup(const std::string &whichGroup);
+		bool IsInGroup(const std::string &whichGroup) const { return whichGroup == "None" ? false : (whichGroup == "All" || whichGroup == "Any" || m_Groups.contains(whichGroup)); }
 
 		/// <summary>
 		/// Adds this Entity to a new grouping.
 		/// </summary>
 		/// <param name="newGroup">A string which describes the group to add this to. Duplicates will be ignored.</param>
-		void AddToGroup(const std::string &newGroup) { m_Groups.push_back(newGroup); m_Groups.sort(); m_Groups.unique(); m_LastGroupSearch.clear(); }
+		void AddToGroup(const std::string &newGroup) { m_Groups.emplace(newGroup); }
 
 		/// <summary>
 		/// Removes this Entity from the specified grouping.
 		/// </summary>
 		/// <param name="groupToRemoveFrom">A string which describes the group to remove this from.</param>
-		void RemoveFromGroup(const std::string &groupToRemoveFrom) { m_Groups.remove(groupToRemoveFrom); m_LastGroupSearch.clear(); }
+		void RemoveFromGroup(const std::string &groupToRemoveFrom) { m_Groups.erase(groupToRemoveFrom); }
 
 		/// <summary>
 		/// Returns random weight used in PresetMan::GetRandomBuyableOfGroupFromTech.
@@ -465,10 +465,7 @@ namespace RTE {
 		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.
 		int m_DefinedInModule; //!< The DataModule ID that this was successfully added to at some point. -1 if not added to anything yet.
 
-		//TODO Consider replacing this with an unordered_set. See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/88
-		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.
-		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.
-		bool m_LastGroupResult; //!< Last group search result, for more efficient response on multiple tries for the same group name.
+		std::unordered_set<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.
 
 		int m_RandomWeight; //!< Random weight used when picking item using PresetMan::GetRandomBuyableOfGroupFromTech. From 0 to 100. 0 means item won't be ever picked.
 

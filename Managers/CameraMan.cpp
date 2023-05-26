@@ -261,6 +261,8 @@ namespace RTE {
 			screenShakeOffset *= screen.ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
 
 			newOffset += screenShakeOffset;
+		} else {
+			screen.ScreenShakeMagnitude = 0;
 		}
 
 		SetOffset(newOffset, screenId);

@@ -7,20 +7,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SeedRNG() {		
-		// Use a constant seed for determinism
-		// VERY IMPORTANT, DO NOT CHANGE THIS!...
-		// ...it's the name of my childhood pet ;)
-		constexpr std::string_view seedString = "Bubble";
+	void SeedRNG() {
+		// Use a constant seed for determinism.
+		static constexpr uint32_t constSeed = []() {
+			// VERY IMPORTANT, DO NOT CHANGE THIS!...
+			// ...it's the name of my childhood pet ;)
+			std::string_view seedString = "Bubble";
 
-		uint64_t seed = 0;
-		for(char c : seedString) {
-			// Biggest prime in a int64_t, because we want all bits to potentially be set (so let us overflow)
+			// Biggest prime in a int64_t, because we want all bits to potentially be set (so let us overflow).
 			const uint64_t hugePrime = 18446744073709551557;
-			seed += static_cast<uint64_t>(c) * hugePrime;
-		}
 
-		g_RNG.seed(seed);
+			uint64_t seedResult = 0;
+			for (char c : seedString) {
+				seedResult += static_cast<uint64_t>(c) * hugePrime;
+			}
+			return static_cast<uint32_t>(seedResult);
+		}();
+
+		g_RNG.seed(constSeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +184,12 @@ namespace RTE {
 					break;
 				case 2:
 					roundingBuffer = std::ceil(roundingBuffer);
+					break;
+				case 3:
+					roundingBuffer = std::ceil(roundingBuffer);
+					if (int remainder = static_cast<int>(roundingBuffer) % 10; remainder > 0) {
+						roundingBuffer = roundingBuffer - static_cast<float>(remainder) + (remainder <= 5 ? 5.0F : 10.0F);
+					}
 					break;
 				default:
 					RTEAbort("Error in RoundFloatToPrecision: INVALID ROUNDING MODE");

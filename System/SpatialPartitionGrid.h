@@ -64,7 +64,7 @@ namespace RTE {
 		/// <param name="ignoreTeam">The team to ignore when getting MovableObjects.</param>
 		/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
 		/// <returns>A vector of pointers to all MovableObjects within the given Box, who aren't of the ignored team.</returns>
-		std::vector<MovableObject*> GetMOsInBox(const Box& box, int ignoreTeam, bool getsHitByMOsOnly) const;
+		std::vector<MovableObject *> GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const;
 
 		/// <summary>
 		/// Get a vector of pointers to all the MovableObjects within the specified radius of the given center point, who aren't of the ignored team.

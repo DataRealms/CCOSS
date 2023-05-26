@@ -571,8 +571,13 @@ void ACRocket::Update()
         m_Paths[RIGHT][m_GearState].SetHFlip(m_HFlipped);
         m_Paths[LEFT][m_GearState].SetHFlip(!m_HFlipped);
 
-        if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][m_GearState], deltaTime, nullptr, true); }
-        if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][m_GearState], deltaTime, nullptr, true); }
+		if (!m_LimbPushForcesAndCollisionsDisabled) {
+			if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][m_GearState], deltaTime, nullptr, true); }
+			if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][m_GearState], deltaTime, nullptr, true); }
+		} else {
+			if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][m_GearState], deltaTime, nullptr, true); }
+			if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][m_GearState], deltaTime, nullptr, true); }
+		}
 	}
 
     /////////////////////////////////

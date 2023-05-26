@@ -299,6 +299,19 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Scene Lua Adapters
+	struct LuaAdaptersScene {
+		static int CalculatePath1(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePath2(luaSelfObject, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
+		static int CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
+	};
+#pragma endregion
+
+#pragma region Actor Lua Adapters
+	struct LuaAdaptersActor {
+		static std::vector<Vector> * GetSceneWaypoints(Actor *luaSelfObject);
+	};
+#pragma endregion
+
 #pragma region AHuman Lua Adapters
 	struct LuaAdaptersAHuman {
 		static void ReloadFirearms(AHuman *luaSelfObject);
@@ -447,6 +460,17 @@ namespace RTE {
 		/// <param name="className">The class name of the Entity to reload.</param>
 		/// <returns>Whether or not the Entity was reloaded.</returns>
 		static bool ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className);
+	};
+#pragma endregion
+
+#pragma region SceneMan Lua Adapters
+	struct LuaAdaptersSceneMan {
+		/// <summary>
+		/// Takes a Box and returns a list of Boxes that describe the Box, wrapped appropriately for the current Scene.
+		/// </summary>
+		/// <param name="boxToWrap">The Box to wrap.</param>
+		/// <returns>A list of Boxes that make up the Box to wrap, wrapped appropriately for the current Scene.</returns>
+		static const std::list<Box> * WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap);
 	};
 #pragma endregion
 

@@ -25,6 +25,7 @@
 #include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
+#include "Scene.h"
 
 namespace RTE {
 
@@ -240,16 +241,19 @@ void MovableMan::UnregisterObject(MovableObject * mo)
 	}
 }
 
-const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const {
     std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
-    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, false));
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly));
     return vectorForLua;
 }
 
-const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const
-{
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const {
     std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
-    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, false));
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, getsHitByMOsOnly));
     return vectorForLua;
 }
 
@@ -1029,6 +1033,17 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 	RemoveActorFromTeamRoster(pActor);
 	pActor->SetTeam(team);
 	AddActorToTeamRoster(pActor);
+
+	// Because doors affect the team-based pathfinders, we need to tell them there's been a change.
+	// This is hackily done by erasing the door material, updating the pathfinders, then redrawing it and updating them again so they properly account for the door's new team.
+	if (ADoor *actorAsADoor = dynamic_cast<ADoor *>(pActor); actorAsADoor && actorAsADoor->GetDoorMaterialDrawn()) {
+		actorAsADoor->TempEraseOrRedrawDoorMaterial(true);
+		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
+		g_SceneMan.GetScene()->UpdatePathFinding();
+		actorAsADoor->TempEraseOrRedrawDoorMaterial(false);
+		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
+		g_SceneMan.GetScene()->UpdatePathFinding();
+	}
 }
 
 
@@ -1380,7 +1395,7 @@ int MovableMan::GetAllActors(bool transferOwnership, std::list<SceneObject *> &a
             actorList.push_back(actor);
             addedCount++;
         }
-        else if (transferOwnership) 
+        else if (transferOwnership)
         {
             delete actor;
         }

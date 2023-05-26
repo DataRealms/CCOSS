@@ -17,7 +17,7 @@ namespace RTE {
 		m_Sensors.clear();
 		m_SensorTimer.Reset();
 		m_SensorInterval = 1000;
-		m_Door = 0;
+		m_Door = nullptr;
 		m_DoorState = CLOSED;
 		m_DoorStateOnStop = CLOSED;
 		m_ClosedByDefault = true;
@@ -199,7 +199,9 @@ namespace RTE {
 		for (ADSensor &sensor : m_Sensors) {
 			sensor.Destroy();
 		}
-		if (m_DoorMaterialDrawn) { EraseDoorMaterial(); }
+		if (m_DoorMaterialDrawn) {
+			EraseDoorMaterial();
+		}
 		Clear();
 	}
 
@@ -385,7 +387,7 @@ namespace RTE {
 
 	void ADoor::Update() {
 		if (m_Door) {
-			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
+			if (m_DoorState != STOPPED && m_Status != Actor::Status::INACTIVE && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
 				UpdateSensors(); 
 			}
 			UpdateDoorAttachableActions();

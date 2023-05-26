@@ -110,6 +110,7 @@ void BuyMenuGUI::Clear()
 	m_DeliveryWidth = 0;
     m_pCostLabel = 0;
     m_pBuyButton = 0;
+	m_ClearOrderButton = nullptr;
     m_pSaveButton = 0;
     m_pClearButton = 0;
     m_Loadouts.clear();
@@ -229,6 +230,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     m_pCostLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("TotalLabel"));
     m_pBuyButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("BuyButton"));
+	m_ClearOrderButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("OrderClearButton"));
     m_pSaveButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("SaveButton"));
     m_pClearButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ClearButton"));
     m_pSaveButton->SetVisible(false);
@@ -371,8 +373,8 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
         addedItems.push_back(newItem);
 
         currentIndex++;
-    } while (copyingActorWithInventory && 
-        currentIndex < m_pCartList->GetItemList()->size() - addedItems.size() && 
+    } while (copyingActorWithInventory &&
+        currentIndex < m_pCartList->GetItemList()->size() - addedItems.size() &&
         dynamic_cast<const HeldDevice *>(m_pCartList->GetItem(currentIndex)->m_pEntity));
 
     // Fix up the IDs of the items we're about to shift.
@@ -382,7 +384,7 @@ void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
 
     // Now shift all items up to make space.
     std::copy(m_pCartList->GetItemList()->begin() + itemIndex, m_pCartList->GetItemList()->end() - addedItems.size(), m_pCartList->GetItemList()->begin() + itemIndex + addedItems.size());
-    
+
     // And copy our new items into place.
     std::copy(addedItems.begin(), addedItems.end(), m_pCartList->GetItemList()->begin() + itemIndex);
 
@@ -405,7 +407,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
         // Start loading any additional stuff from the custom user file
         std::snprintf(loadoutPath, sizeof(loadoutPath), "%s/%s - LoadoutsMP%d.ini", c_UserConquestSavesModuleName.c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
-        if (!exists(loadoutPath))
+        if (!System::PathExistsCaseSensitive(loadoutPath))
         {
             // If the file doesn't exist, then we're not loading it, are we?
             loadoutPath[0] = 0;
@@ -1105,10 +1107,10 @@ void BuyMenuGUI::Update()
         m_MenuFocus++;
         m_FocusChange = 1;
 
-        // Went too far
-        if (m_MenuFocus >= FOCUSCOUNT)
+        // Went too far. Don't allow focusing the clear order button by pressing right, will most definitely lead to accidental clearing and rage.
+        if (m_MenuFocus >= MenuFocus::CLEARORDER)
         {
-            m_MenuFocus = FOCUSCOUNT - 1;
+            m_MenuFocus = MenuFocus::CLEARORDER - 1;
             m_FocusChange = 0;
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
@@ -1382,14 +1384,14 @@ void BuyMenuGUI::Update()
                 if (craftMaxMass == 0) {
                     description += "\nNO CARGO SPACE!";
                 } else if (craftMaxMass > 0) {
-                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, craftMaxMass < 9.95F ? 1 : 0) + " kg";
+                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, craftMaxMass < 50.0F ? 1 : 0, 3) + " kg";
                 }
                 if (craftMaxPassengers >= 0 && craftMaxMass != 0) { description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers); }
             } else {
 				// Items in the BuyMenu always have any remainder rounded up in their masses.
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
-					description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 10.0F ? 1 : 0, 2) + " kg");
+					description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
                     int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
@@ -1410,7 +1412,7 @@ void BuyMenuGUI::Update()
 								extraMass = itemAsMOSRotating->GetNumberValue("Belt Mass");
 							}
 						}
-                        description += "\nMass: " + (itemAsMO->GetMass() + extraMass < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, itemAsMO->GetMass() + extraMass < 10.0F ? 1 : 0, 2) + " kg");
+                        description += "\nMass: " + (itemAsMO->GetMass() + extraMass < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass() + extraMass, itemAsMO->GetMass() + extraMass < 50.0F ? 1 : 0, 3) + " kg");
                     }
                 }
             }
@@ -1554,7 +1556,9 @@ void BuyMenuGUI::Update()
                 m_ListItemIndex--;
                 if (m_ListItemIndex < 0) {
                     m_ListItemIndex = 0;
-                    g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+					// If at the top of the list and the player presses up, then switch focus to the CLEAR button.
+					m_FocusChange = 1;
+					m_MenuFocus = MenuFocus::CLEARORDER;
                 } else {
                     // Only do list change logic if we actually did change.
                     m_pCartList->SetSelectedIndex(m_ListItemIndex);
@@ -1572,7 +1576,7 @@ void BuyMenuGUI::Update()
             const Entity *currentItem = pItem->m_pEntity;
             const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
             if (itemAsActor) {
-				description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 10.0F ? 1 : 0, 2) + " kg");
+				description += "\nMass: " + (itemAsActor->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsActor->GetMass(), itemAsActor->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
 
                 int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                 if (passengerSlotsTaken > 1) {
@@ -1581,7 +1585,7 @@ void BuyMenuGUI::Update()
             } else {
                 const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                 if (itemAsMO) {
-					description += "\nMass: " + (itemAsMO->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass(), itemAsMO->GetMass() < 10.0F ? 1 : 0, 2) + " kg");
+					description += "\nMass: " + (itemAsMO->GetMass() < 0.1F ? "<0.1 kg" : RoundFloatToPrecision(itemAsMO->GetMass(), itemAsMO->GetMass() < 50.0F ? 1 : 0, 3) + " kg");
                 }
             }
         }
@@ -1602,31 +1606,36 @@ void BuyMenuGUI::Update()
         }
 
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging) {        
-            itemsChanged = true;
-            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
-                int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
-                for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
-                    GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
-                    if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
-                        lastItemToDelete = i - 1;
-                        break;
-                    }
-                } for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
-                    m_pCartList->DeleteItem(i);
-                }
-            }
-            m_pCartList->DeleteItem(m_ListItemIndex);
-            // If we're not at the bottom, then select the item in the same place as the one just deleted
-            if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
-                m_pCartList->SetSelectedIndex(m_ListItemIndex);
-            // If we're not at the top, then move selection up one
-            } else if (m_ListItemIndex > 0) {
-                m_pCartList->SetSelectedIndex(--m_ListItemIndex);
-            // Shift focus back to the item list
-            } else {
-                m_MenuFocus = ORDER;
-            }
+        if (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging) {
+			if (g_UInputMan.FlagShiftState()) {
+				ClearCartList();
+				pItem = nullptr;
+			} else {
+				itemsChanged = true;
+				if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman" && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
+					int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+					for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
+						GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
+						if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+							lastItemToDelete = i - 1;
+							break;
+						}
+					} for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
+						m_pCartList->DeleteItem(i);
+					}
+				}
+				m_pCartList->DeleteItem(m_ListItemIndex);
+				// If we're not at the bottom, then select the item in the same place as the one just deleted
+				if (m_pCartList->GetItemList()->size() > m_ListItemIndex) {
+					m_pCartList->SetSelectedIndex(m_ListItemIndex);
+					// If we're not at the top, then move selection up one
+				} else if (m_ListItemIndex > 0) {
+					m_pCartList->SetSelectedIndex(--m_ListItemIndex);
+					// Shift focus back to the item list
+				} else {
+					m_MenuFocus = ORDER;
+				}
+			}
         } else if (m_pController->IsState(WEAPON_PICKUP)) {
             itemsChanged = true;
             DuplicateCartItem(m_ListItemIndex);
@@ -1637,7 +1646,7 @@ void BuyMenuGUI::Update()
         } else if (m_pController->IsState(RELEASE_FACEBUTTON)) {
             m_DraggedItemIndex = -1;
             m_IsDragging = false;
-        } 
+        }
 
         if (itemsChanged) {
             UpdateTotalCostLabel(m_pController->GetTeam());
@@ -1649,6 +1658,27 @@ void BuyMenuGUI::Update()
             g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
         }
     }
+
+	/////////////////////////////////////////
+	// ORDER CLEAR BUTTON focus
+
+	 else if (m_MenuFocus == MenuFocus::CLEARORDER) {
+		 if (m_FocusChange) {
+			 m_ClearOrderButton->SetFocus();
+			 m_FocusChange = 0;
+		 }
+		 if (m_pController->IsState(ControlState::PRESS_FACEBUTTON)) {
+			 ClearCartList();
+			 g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+		 }
+		 // Switch back focus to the order list if the player presses down
+		 if (pressDown) {
+			 m_MenuFocus = MenuFocus::ORDER;
+			 m_FocusChange = -1;
+		 } else if (pressUp) {
+			 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+		 }
+	}
 
     /////////////////////////////////////////
     // OK BUTTON focus
@@ -1742,6 +1772,11 @@ void BuyMenuGUI::Update()
                 m_pBuyButton->SetFocus();
                 TryPurchase();
 //                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+			}
+
+			if (anEvent.GetControl() == m_ClearOrderButton) {
+				ClearCartList();
+				g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
 			}
         }
         else if (anEvent.GetType() == GUIEvent::Notification)
@@ -1903,7 +1938,7 @@ void BuyMenuGUI::Update()
             // Events on the Cart List
 
             else if (anEvent.GetControl() == m_pCartList)
-            {                
+            {
                 if (anEvent.GetMsg() == GUIListBox::MouseUp && !m_IsDragging) {
                     GUIListPanel::Item *pItem = m_pCartList->GetSelected();
                     if (pItem)
@@ -2005,13 +2040,11 @@ void BuyMenuGUI::Update()
                 }
             }
 
-            // We do this down here, outside the m_pCartList control, because if we have a mouse-up event even outside the cart, we should stop dragging.
-            // Note this still isn't perfect. We don't get sent any notification whatsoever if the mouseup occurs outside the GUI panel...
-            // So, meh. That one is too tricky to properly fix.
-            if (anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
+            // We do this down here, outside the m_pCartList control, because if we have a mouse-up event even outside the cart, we should stop dragging. We also check UInputMan in case the mouse is released entirely outside of the buy menu.
+            if ((anEvent.GetMsg() == GUIListBox::MouseUp && (anEvent.GetData() & GUIListBox::MOUSE_LEFT)) || g_UInputMan.MouseButtonReleased(MouseButtons::MOUSE_LEFT, m_pController->GetPlayer())) {
                 m_DraggedItemIndex = -1;
                 m_IsDragging = false;
-            } 
+            }
         }
     }
 }

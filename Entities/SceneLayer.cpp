@@ -3,6 +3,7 @@
 #include "FrameMan.h"
 #include "SceneMan.h"
 #include "SettingsMan.h"
+#include "ActivityMan.h"
 
 namespace RTE {
 
@@ -203,6 +204,7 @@ namespace RTE {
 		if (bitmapPath.empty()) {
 			return -1;
 		}
+		g_ActivityMan.IncrementSavingThreadCount();
 		if (m_MainBitmap) {
 			// Make a copy of the bitmap to pass to the thread because the bitmap may be offloaded mid thread and everything will be on fire.
 			BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
@@ -212,14 +214,13 @@ namespace RTE {
 				PALETTE palette;
 				get_palette(palette);
 				if (save_png(bitmapPath.c_str(), bitmapToSave, palette) != 0) {
-					// TODO: This will not kill the main thread. Figure this out!
 					RTEAbort(std::string("Failed to save SceneLayerImpl bitmap to path and name: " + bitmapPath));
 				}
 				destroy_bitmap(bitmapToSave);
+				g_ActivityMan.DecrementSavingThreadCount();
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
 			m_BitmapFile.SetDataPath(bitmapPath);
-			// TODO: Move this into some global thread container or a ThreadMan instead of detaching.
 			saveThread.detach();
 		}
 		return 0;

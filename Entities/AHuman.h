@@ -389,6 +389,28 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
 	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
 
+	/// Gets this AHuman's MovementState.
+	/// </summary>
+	/// <returns>This AHuman's MovementState.</returns>
+	MovementState GetMovementState() const { return m_MoveState; }
+
+	/// <summary>
+	/// Sets this AHuman's MovementState to the new state.
+	/// </summary>
+	/// <param name="newMovementState">This AHuman's new MovementState.</param>
+	void SetMovementState(MovementState newMovementState) { m_MoveState = newMovementState; }
+
+	/// Gets this AHuman's ProneState.
+	/// </summary>
+	/// <returns>This AHuman's ProneState.</returns>
+	ProneState GetProneState() const { return m_ProneState; }
+
+	/// <summary>
+	/// Sets this AHuman's ProneState to the new state.
+	/// </summary>
+	/// <param name="newProneState">This AHuman's new ProneState.</param>
+	void SetProneState(ProneState newProneState) { m_ProneState = newProneState; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
@@ -1010,7 +1032,7 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
-	bool m_ActivateBGItem; //!< A flag for whether or not the BG item is waiting to be activated separately. Used for dual-wielding. TODO: Should this be able to be toggled off per actor, device, or controller?
+	bool m_CanActivateBGItem; //!< A flag for whether or not the BG item is waiting to be activated separately. Used for dual-wielding. TODO: Should this be able to be toggled off per actor, device, or controller?
 	bool m_TriggerPulled; //!< Internal flag for whether this AHuman is currently holding down the trigger of a HDFirearm. Used for dual-wielding.
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
     // Blink timer

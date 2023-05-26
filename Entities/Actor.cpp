@@ -140,6 +140,8 @@ void Actor::Clear() {
 	m_Organic = false;
 	m_Mechanical = false;
 
+	m_LimbPushForcesAndCollisionsDisabled = false;
+
 	m_PieMenu.reset();
 }
 
@@ -160,8 +162,6 @@ int Actor::Create()
     // Default to an interesitng AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
-    if (m_AIMode == AIMODE_NONE)
-        m_AIMode = AIMODE_BRAINHUNT;
     m_UpdateMovePath = true;
 
     m_ViewPoint = m_Pos;
@@ -296,6 +296,8 @@ int Actor::Create(const Actor &reference)
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
+
+	m_LimbPushForcesAndCollisionsDisabled = reference.m_LimbPushForcesAndCollisionsDisabled;
 
 	RTEAssert(reference.m_PieMenu != nullptr, "Tried to clone actor with no pie menu.");
 	SetPieMenu(static_cast<PieMenu *>(reference.m_PieMenu->Clone()));
@@ -1707,7 +1709,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
 	int actorScreen = g_ActivityMan.GetActivity() ? g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) : -1;
-	if (m_PieMenu->IsVisible() && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && actorScreen == whichScreen))) {
+	bool screenTeamIsSameAsActorTeam = g_ActivityMan.GetActivity() ? g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) == m_Team : true;
+	if (m_PieMenu->IsVisible() && screenTeamIsSameAsActorTeam && (!m_PieMenu->IsInNormalAnimationMode() || (m_Controller.IsPlayerControlled() && actorScreen == whichScreen))) {
 		m_PieMenu->Draw(pTargetBitmap, targetPos);
 	}
 
@@ -1867,7 +1870,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         return;
 
     // AI waypoints or points of interest
-    if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))
+    if (m_DrawWaypoints && m_PlayerControllable && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD))
     {
         // Draw the AI paths, from the ultimate destination back up to the actor's position.
         // We do this backwards so the lines won't crawl and the dots can be evenly spaced throughout
@@ -1940,7 +1943,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI Mode team roster HUD lines
-	if (g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
+	if (m_PlayerControllable && g_ActivityMan.GetActivity()->GetViewState(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen)) == Activity::ViewState::ActorSelect && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < 100) {
 		draw_sprite(pTargetBitmap, GetAIModeIcon(), cpuPos.m_X - 6, cpuPos.m_Y - 6);
 	} else if (m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP)) {
         int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);

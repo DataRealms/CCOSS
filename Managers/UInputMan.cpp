@@ -1063,6 +1063,8 @@ namespace RTE {
 		}
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void UInputMan::UpdateJoystickDigitalAxis() {
 		for (size_t i = 0; i < s_PrevJoystickStates.size(); ++i) {
 			for (size_t axis = 0; axis < s_PrevJoystickStates[i].m_DigitalAxis.size(); ++axis) {

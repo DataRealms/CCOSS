@@ -38,7 +38,13 @@ bool GUISkin::Load(const std::string &directory, const std::string &fileName) {
 	// Destroy any previous instances
 	Destroy();
 
-	m_Directory = g_PresetMan.FullModulePath(!directory.empty() ? (directory + "/") : "");
+	if (!directory.empty()) {
+		m_Directory = g_PresetMan.FullModulePath(directory) + "/";
+	} else {
+		// Empty directory means file can be loaded from anywhere in the working directory so need to figure out in what data directory the file actually is from fileName.
+		std::string fileFullPath = g_PresetMan.FullModulePath(fileName);
+		m_Directory = fileFullPath.substr(0, fileFullPath.find_first_of("/\\") + 1);
+	}
 
 	GUIReader skinFile;
 	if (skinFile.Create(m_Directory + fileName) == -1) {

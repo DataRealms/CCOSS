@@ -20,8 +20,8 @@ namespace RTE {
 
 	ModManagerGUI::ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
-		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
-		m_GUIControlManager->Load("Data/Base.rte/GUIs/ModManagerGUI.ini");
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
+		m_GUIControlManager->Load("Base.rte/GUIs/ModManagerGUI.ini");
 
 		int rootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
 

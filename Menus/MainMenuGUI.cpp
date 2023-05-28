@@ -55,12 +55,12 @@ namespace RTE {
 
 	void MainMenuGUI::Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_MainMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
-		RTEAssert(m_MainMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuScreenSkin.ini");
-		m_MainMenuScreenGUIControlManager->Load("Data/Base.rte/GUIs/MainMenuGUI.ini");
+		RTEAssert(m_MainMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuScreenSkin.ini");
+		m_MainMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
 		m_SubMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
-		RTEAssert(m_SubMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
-		m_SubMenuScreenGUIControlManager->Load("Data/Base.rte/GUIs/MainMenuSubMenuGUI.ini");
+		RTEAssert(m_SubMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
+		m_SubMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuSubMenuGUI.ini");
 
 		m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
 

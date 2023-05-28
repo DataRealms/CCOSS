@@ -45,11 +45,11 @@ namespace RTE {
 		if (!m_GUIInput) { m_GUIInput = new GUIInputWrapper(-1); }
 		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
 
-		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Data/Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini")) {
+		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini")) {
 			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/ConsoleSkin.ini");
 		}
 
-		m_GUIControlManager->Load("Data/Base.rte/GUIs/ConsoleGUI.ini");
+		m_GUIControlManager->Load("Base.rte/GUIs/ConsoleGUI.ini");
 		m_GUIControlManager->EnableMouse(false);
 
 		// Stretch the invisible root box to fill the screen

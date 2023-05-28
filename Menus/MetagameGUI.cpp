@@ -373,10 +373,10 @@ int MetagameGUI::Create(Controller *pController)
         m_pGUIInput = new GUIInputWrapper(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Data/Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 	}
-    m_pGUIController->Load("Data/Base.rte/GUIs/MetagameGUI.ini");
+    m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
 	m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
 

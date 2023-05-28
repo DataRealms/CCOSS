@@ -1053,7 +1053,7 @@ int Scene::SaveData(std::string pathBase)
         {
             std::snprintf(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
-            if (m_apUnseenLayer[team]->SaveData(fullPathBase + " US" + str + ".bmp") < 0)
+            if (m_apUnseenLayer[team]->SaveData(fullPathBase + " US" + str + ".png") < 0)
             {
                 g_ConsoleMan.PrintString("ERROR: Saving unseen layer " + m_apUnseenLayer[team]->GetPresetName() + "\'s data failed!");
                 return -1;

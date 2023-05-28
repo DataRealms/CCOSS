@@ -177,14 +177,14 @@ public:
 	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
 	/// <returns>True if the module is an official data module, otherwise false.</returns>
     bool IsModuleOfficial(std::string moduleName);
-  
+
 
 	/// <summary>
 	/// Returns whether or not the module is vanilla.
 	/// </summary>
 	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
 	/// <returns>True if the module is a listed user data module, otherwise false.</returns>
-	bool IsModuleUserdata(std::string moduleName);
+	bool IsModuleUserdata(std::string moduleName) const;
 
     /// <summary>
     /// Returns the Full path to the module including Data/, Userdata/ or Mods/.
@@ -572,6 +572,9 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::array<std::string, 10> c_OfficialModules; // Array storing the names of all the official modules.
+	static const std::array<std::pair<std::string, std::string>, 3> c_UserdataModules; // Array storing the names of all the userdata modules.
 
 	std::array<std::string, 3> m_LastReloadedEntityPresetInfo; //!< Array storing the last reloaded Entity preset info (ClassName, PresetName and DataModule). Used for quick reloading via key combination.
 	bool m_ReloadEntityPresetCalledThisUpdate; //!< A flag for whether or not ReloadEntityPreset was called this update.

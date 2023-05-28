@@ -33,12 +33,12 @@
 
 namespace RTE {
 
-	static const std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
-	static const std::array<std::pair<std::string, std::string>, 3> userdataModules = { {
+	const std::array<std::string, 10> PresetMan::c_OfficialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	const std::array<std::pair<std::string, std::string>, 3> PresetMan::c_UserdataModules = {{
 		{c_UserScenesModuleName, "User Scenes"},
 		{c_UserConquestSavesModuleName, "Conquest Saves"},
 		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
-	} };
+	}};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -152,7 +152,7 @@ bool PresetMan::LoadAllDataModules() {
 	FindAndExtractZippedModules();
 
 	// Load all the official modules first!
-	for (const std::string &officialModule : officialModules) {
+	for (const std::string &officialModule : c_OfficialModules) {
 		if (!LoadDataModule(officialModule, true, false, LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
@@ -185,7 +185,7 @@ bool PresetMan::LoadAllDataModules() {
 		}
 
 		// Load userdata modules AFTER all other techs etc are loaded; might be referring to stuff in user mods.
-		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : userdataModules) {
+		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : c_UserdataModules) {
 			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
 				bool scanContentsAndIgnoreMissing = userdataModuleName == c_UserScenesModuleName;
 				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
@@ -334,16 +334,19 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PresetMan::IsModuleOfficial(std::string moduleName)
-{
-	return std::find(officialModules.begin(), officialModules.end(), moduleName) != officialModules.end();
+bool PresetMan::IsModuleOfficial(std::string moduleName) {
+	return std::find(c_OfficialModules.begin(), c_OfficialModules.end(), moduleName) != c_OfficialModules.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PresetMan::IsModuleUserdata(std::string moduleName) {
-	auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModulesEntry) { return userdataModulesEntry.first == moduleName; });
-	return userdataModuleItr != userdataModules.end();
+bool PresetMan::IsModuleUserdata(std::string moduleName) const {
+	auto userdataModuleItr = std::find_if(c_UserdataModules.begin(), c_UserdataModules.end(),
+		[&moduleName](const auto &userdataModulesEntry) {
+			return userdataModulesEntry.first == moduleName;
+		}
+	);
+	return userdataModuleItr != c_UserdataModules.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

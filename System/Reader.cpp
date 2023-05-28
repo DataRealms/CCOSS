@@ -23,7 +23,7 @@ namespace RTE {
 		m_OverwriteExisting = false;
 		m_SkipIncludes = false;
 		m_CanFail = false;
-		m_NonMudulePath = false;
+		m_NonModulePath = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ namespace RTE {
 			return -1;
 		}
 
-		if (m_NonMudulePath) {
+		if (m_NonModulePath) {
 			m_FilePath = std::filesystem::path(fileName).generic_string();
 			m_DataModuleName = "Base.rte";
 			m_DataModuleID = 0;

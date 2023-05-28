@@ -287,13 +287,15 @@ namespace RTE {
     void AudioMan::PlayMusic(const char *filePath, int loops, float volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
 			const std::string fullFilePath = g_PresetMan.FullModulePath(filePath);
-			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, fullFilePath.c_str(), loops); }
+			if (m_IsInMultiplayerMode) {
+				RegisterMusicEvent(-1, NetworkMusicState::MUSIC_PLAY, fullFilePath.c_str(), loops);
+			}
 
 			bool musicIsPlaying;
 			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&musicIsPlaying);
 			if (result == FMOD_OK && musicIsPlaying) {
 				bool doNotPlayNextStream = true;
-				FMOD_RESULT result = m_MusicChannelGroup->setUserData(&doNotPlayNextStream);
+				result = m_MusicChannelGroup->setUserData(&doNotPlayNextStream);
 				result = (result == FMOD_OK) ? m_MusicChannelGroup->stop() : result;
 				result = (result == FMOD_OK) ? m_MusicChannelGroup->setUserData(nullptr) : result;
 			}

@@ -55,12 +55,11 @@ namespace RTE {
 		/// <returns>Folder name of the mod directory.</returns>
 		static const std::string & GetModDirectory() { return s_ModDirectory; }
 
-
 		/// <summary>
 		/// Gets the userdata directory name.
 		/// </summary>
 		/// <returns>Folder name of the userdata directory.</returns>
-		static const std::string &GetUserdataDirectory() { return s_UserdataDirectory; }
+		static const std::string & GetUserdataDirectory() { return s_UserdataDirectory; }
 
 		/// <summary>
 		/// Gets the extension that determines a directory/file is an RTE module.

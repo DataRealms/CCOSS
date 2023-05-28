@@ -212,10 +212,9 @@ namespace RTE {
 			"\n"
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
 			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return SelectRand(lower, upper); elseif lower ~= nil then return SelectRand(1, lower); else return PosRand(); end end"
-		);
-		// Override dofile() to be able to account for Data/ or Mods/ subfolder
-		luaL_dostring(m_MasterState,
-			"OriginalDoFile = dofile dofile = function(filePath) filePath = PresetMan:FullModulePath(filePath) if filePath ~= '' then return OriginalDoFile(filePath) end end;"
+			"\n"
+			// Override "dofile" to be able to account for Data/ or Mods/ directory.
+			"OriginalDoFile = dofile; dofile = function(filePath) filePath = PresetMan:FullModulePath(filePath); if filePath ~= '' then return OriginalDoFile(filePath); end end;"
 		);
 	}
 

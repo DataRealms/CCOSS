@@ -547,16 +547,11 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	bool EquipDiggingTool(bool doEquip = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Estimates what material strength any digger this actor is carrying
-//                  can penetrate.
-// Arguments:       None.
-// Return value:    A default dig strength (what the actor can be expected to just walk through without tools), or the maximum material strength this actor's digger can penetrate.
-
-    float EstimateDigStrength() override;
+    /// <summary>
+    /// Estimates what material strength any digger this AHuman is carrying can penetrate.
+    /// </summary>
+    /// <returns>The maximum material strength this AHuman's digger can penetrate, or a default dig strength if they don't have a digger.</returns>
+    float EstimateDigStrength() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -796,7 +796,7 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 // Arguments:       None.
 // Return value:    The maximum material strength the regular or the tracer round can destroy.
 
-    float EstimateDigStrength();
+    float EstimateDigStrength() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

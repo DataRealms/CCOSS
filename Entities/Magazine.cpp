@@ -225,8 +225,7 @@ Round * Magazine::PopNextRound()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength the rounds in the magazine can destroy. 
 
-float Magazine::EstimateDigStrength()
-{
+float Magazine::EstimateDigStrength() const {
     float maxPenetration = 1;
     if (m_pTracerRound)
     {

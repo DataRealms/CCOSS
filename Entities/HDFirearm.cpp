@@ -1115,13 +1115,8 @@ void HDFirearm::Update()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength the rounds in the magazine can destroy. 
 
-float HDFirearm::EstimateDigStrength()
-{
-    if (m_pMagazine) {
-        return m_pMagazine->EstimateDigStrength();
-    }
-
-    return 1;
+float HDFirearm::EstimateDigStrength() const {
+	return m_pMagazine ? m_pMagazine->EstimateDigStrength() : m_pMagazineReference->EstimateDigStrength();
 }
 
 

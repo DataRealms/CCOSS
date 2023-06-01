@@ -1163,37 +1163,29 @@ bool AHuman::EquipDiggingTool(bool doEquip)
     return false;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Estimates what material strength this actor can move through.
 
-float AHuman::EstimateDigStrength()
-{
+float AHuman::EstimateDigStrength() const {
     float maxPenetration = Actor::EstimateDigStrength();
 
 	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
 		return maxPenetration;
 	}
 
-    if (HDFirearm *heldDeviceAsHDFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsHDFirearm && heldDeviceAsHDFirearm->IsInGroup("Tools - Diggers")) {
+    if (const HDFirearm *heldDeviceAsHDFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsHDFirearm && heldDeviceAsHDFirearm->IsInGroup("Tools - Diggers")) {
 		maxPenetration = std::max(heldDeviceAsHDFirearm->EstimateDigStrength(), maxPenetration);
     }
 
-    // Go through the inventory looking for the proper device
-    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-    {
-        HDFirearm *pTool = dynamic_cast<HDFirearm *>(*itr);
-        // Found proper device to equip, so make the switch!
-        if (pTool && pTool->IsInGroup("Tools - Diggers"))
-        {
-            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+	for (const MovableObject *inventoryItem : m_Inventory) {
+        if (const HDFirearm *inventoryItemAsFirearm = dynamic_cast<const HDFirearm *>(inventoryItem); inventoryItemAsFirearm && inventoryItemAsFirearm->IsInGroup("Tools - Diggers")) {
+            maxPenetration = std::max(inventoryItemAsFirearm->EstimateDigStrength(), maxPenetration);
         }
     }
 
     return maxPenetration;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

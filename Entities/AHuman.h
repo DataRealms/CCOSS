@@ -534,17 +534,11 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	bool EquipThrowable(bool doEquip = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EquipDiggingTool
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Switches the currently held device (if any) to the first found digging
-//                  tool in the inventory. If the held device already is a digging tool,
-//                  or no digging tool is in inventory, nothing happens.
-// Arguments:       Whether to actually equip any matching item found in the inventory,
-//                  or just report that it's there or not.
-// Return value:    Whether a digging tool was successfully switched to.
-
+	/// <summary>
+	/// Switches the currently held device (if any) to the strongest digging tool in the inventory.
+	/// </summary>
+	/// <param name="doEquip">Whether to actually equip the strongest digging tool, or just report whether a digging tool was found.</param>
+	/// <returns>Whether or not the strongest digging tool was successfully equipped.</returns>
 	bool EquipDiggingTool(bool doEquip = true);
 
     /// <summary>

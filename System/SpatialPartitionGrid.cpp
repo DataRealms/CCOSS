@@ -180,7 +180,7 @@ namespace RTE {
 		// Lua sometimes decides to give SceneMan an ignoreTeam value of... -2.
 		// Yeah, seriously.
 		// So let's sanity check this shit.
-		ignoreTeam = ignoreTeam < Activity::NoTeam || ignoreTeam > Activity::MaxTeamCount ? Activity::NoTeam : ignoreTeam;
+		ignoreTeam = ignoreTeam < Activity::NoTeam || ignoreTeam >= Activity::MaxTeamCount ? Activity::NoTeam : ignoreTeam;
 
 		auto &cells = getsHitByMOsOnly ? m_PhysicsCells : m_Cells;
 		return cells[ignoreTeam + 1][GetCellIdForCellCoords(cellX, cellY)];

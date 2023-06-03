@@ -67,6 +67,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
 		void SetTempEntityVector(const std::vector<const Entity *> &entityVector);
+
+		/// <summary>
+		/// Sets the proper package.path for the script to run.
+		/// </summary>
+		/// <param name="filePath">The path to the file to load and run.</param>
+		void SetLuaPath(const std::string &filePath);
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -118,13 +124,6 @@ namespace RTE {
 		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
-		
-		/// <summary>
-		/// Sets the proper package.path for the script to run.
-		/// </summary>
-		/// <param name="luaState">The script parent state.</param>
-		/// <param name="filePath">The path to the file to load and run.</param>
-		void SetLuaPath(lua_State* luaState, const std::string& filePath);
 #pragma endregion
 
 #pragma region

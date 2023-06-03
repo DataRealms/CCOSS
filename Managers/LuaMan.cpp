@@ -246,6 +246,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaMan::SetLuaPath(const std::string &filePath) {
+		const std::string moduleName = g_PresetMan.GetModuleNameFromPath(filePath);
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(moduleName) ? System::GetDataDirectory() : System::GetModDirectory();
+		const std::string scriptPath = moduleFolder + moduleName + "/?.lua";
+
+		lua_getglobal(m_MasterState, "package");
+		lua_getfield(m_MasterState, -1, "path"); // get field "path" from table at top of stack (-1).
+		std::string currentPath = lua_tostring(m_MasterState, -1); // grab path string from top of stack.
+
+		// check if scriptPath is already in there, if not add it.
+		if (currentPath.find(scriptPath) == std::string::npos) {
+			currentPath.append(";" + scriptPath);
+		}
+
+		lua_pop(m_MasterState, 1); // get rid of the string on the stack we just pushed previously.
+		lua_pushstring(m_MasterState, currentPath.c_str()); // push the new one.
+		lua_setfield(m_MasterState, -2, "path"); // set the field "path" in table at -2 with value at top of stack.
+		lua_pop(m_MasterState, 1); // get rid of package table from top of stack.
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
@@ -378,7 +400,7 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		SetLuaPath(m_MasterState, fullScriptPath);
+		SetLuaPath(fullScriptPath);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadfile(m_MasterState, fullScriptPath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_MasterState, -1);
@@ -393,27 +415,6 @@ namespace RTE {
 		lua_pop(m_MasterState, 1);
 
 		return error;
-	}
-
-	void LuaMan::SetLuaPath( lua_State *luaState, const std::string &filePath )
-	{
-		const std::string moduleName = g_PresetMan.GetModuleNameFromPath( filePath );
-		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(moduleName) ? "Data/" : System::GetModDirectory();
-		const std::string scriptPath = moduleFolder + moduleName + "/?.lua";
-
-		lua_getglobal( m_MasterState, "package" );
-		lua_getfield( m_MasterState, -1, "path" ); // get field "path" from table at top of stack (-1)
-		std::string cur_path = lua_tostring( m_MasterState, -1 ); // grab path string from top of stack
-
-		if (cur_path.find(scriptPath) == cur_path.npos) { // check if scriptPath is already in there
-			cur_path.append( ";" );
-			cur_path.append( scriptPath ); // if not add it
-		}
-
-		lua_pop( m_MasterState, 1 ); // get rid of the string on the stack we just pushed previously
-		lua_pushstring( m_MasterState, cur_path.c_str() ); // push the new one
-		lua_setfield( m_MasterState, -2, "path" ); // set the field "path" in table at -2 with value at top of stack
-		lua_pop( m_MasterState, 1 ); // get rid of package table from top of stack
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1954,7 +1954,7 @@ void BuyMenuGUI::Update()
                                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                                 for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
                                     GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
-                                    if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+                                    if (!cartItem || dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
                                         lastItemToDelete = i - 1;
                                         break;
                                     }

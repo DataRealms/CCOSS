@@ -206,7 +206,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    The material strength.
 
-    float EstimateDigStrength();
+    float EstimateDigStrength() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

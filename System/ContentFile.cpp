@@ -126,7 +126,7 @@ namespace RTE {
 			}
 		}
 		if (fetchFileInfo) {
-			std::string altDataPath = g_PresetMan.FullModulePath(m_DataPath);
+			std::string altDataPath = g_PresetMan.GetFullModulePath(m_DataPath);
 			FILE *imageFile = fopen(altDataPath.c_str(), "rb");
 			RTEAssert(imageFile, "Failed to open file prior to reading info of image file with following path and name:\n\n" + m_DataPath + "\n\nThe file may not exist or be corrupt.");
 
@@ -223,7 +223,7 @@ namespace RTE {
 		BITMAP *returnBitmap = nullptr;
 		const int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		dataPathToLoad = g_PresetMan.FullModulePath(dataPathToLoad);
+		dataPathToLoad = g_PresetMan.GetFullModulePath(dataPathToLoad);
 
 		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
 			ReloadBitmap(dataPathToLoad, conversionMode);
@@ -260,8 +260,8 @@ namespace RTE {
 		if (m_DataPath.empty() || frameCount < 1) {
 			return;
 		}
-		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
-		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension);
+		const std::string dataPathToLoad = g_PresetMan.GetFullModulePath(m_DataPath);
+		const std::string dataPathWithoutExtensionToLoad = g_PresetMan.GetFullModulePath(m_DataPathWithoutExtension);
 		vectorToFill.reserve(frameCount);
 
 		if (frameCount == 1) {
@@ -312,7 +312,7 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
+		const std::string dataPathToLoad = g_PresetMan.GetFullModulePath(m_DataPath);
 
 		FMOD::Sound *returnSample = nullptr;
 
@@ -334,11 +334,11 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		const std::string dataPathToLoad = g_PresetMan.FullModulePath(m_DataPath);
+		const std::string dataPathToLoad = g_PresetMan.GetFullModulePath(m_DataPath);
 		if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				const std::string altDataPathToLoad = g_PresetMan.FullModulePath(m_DataPathWithoutExtension + altFileExtension);
+				const std::string altDataPathToLoad = g_PresetMan.GetFullModulePath(m_DataPathWithoutExtension + altFileExtension);
 				if (System::PathExistsCaseSensitive(altDataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(altDataPathToLoad);

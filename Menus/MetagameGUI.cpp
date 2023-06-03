@@ -1249,7 +1249,7 @@ bool MetagameGUI::LoadGame()
 
 bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resaveSceneData)
 {
-    const std::string fullSavePath = g_PresetMan.FullModulePath(savePath);
+    const std::string fullSavePath = g_PresetMan.GetFullModulePath(savePath);
     // If specified, first load all bitmap data of all Scenes in the current Metagame that have once saved em, so we can re-save them to the new files
     if (resaveSceneData)
         g_MetaMan.LoadSceneData();

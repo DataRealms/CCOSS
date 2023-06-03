@@ -190,7 +190,7 @@ public:
     /// </summary>
     /// <param name="modulePath">The Path to be completed.</param>
     /// <returns>The complete path to the file, including Data/, Userdata/ or Mods/ based on whether or not it's part of an official module or userdata.</returns>
-    std::string FullModulePath(const std::string &modulePath);
+    std::string GetFullModulePath(const std::string &modulePath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalModuleCount

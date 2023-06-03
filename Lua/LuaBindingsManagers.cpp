@@ -204,7 +204,7 @@ namespace RTE {
 		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts)
 		.def("IsModuleOfficial", &PresetMan::IsModuleOfficial)
 		.def("IsModuleUserdata", &PresetMan::IsModuleUserdata)
-		.def("FullModulePath", &PresetMan::FullModulePath);
+		.def("GetFullModulePath", &PresetMan::GetFullModulePath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

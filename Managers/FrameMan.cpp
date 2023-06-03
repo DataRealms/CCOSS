@@ -473,7 +473,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(const std::string &palettePath) {
-		const std::string fullPalettePath = g_PresetMan.FullModulePath(palettePath);
+		const std::string fullPalettePath = g_PresetMan.GetFullModulePath(palettePath);
 		BITMAP *tempBitmap = load_bitmap(fullPalettePath.c_str(), m_Palette);
 		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + fullPalettePath).c_str());
 

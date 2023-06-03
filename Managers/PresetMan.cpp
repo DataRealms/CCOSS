@@ -351,7 +351,7 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string PresetMan::FullModulePath(const std::string &modulePath) {
+std::string PresetMan::GetFullModulePath(const std::string &modulePath) {
 	const std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
 	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/\\") + 1);
 	const std::string moduleName = GetModuleNameFromPath(modulePathGeneric);

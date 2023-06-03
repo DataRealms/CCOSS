@@ -1029,7 +1029,7 @@ int Scene::ExpandAIPlanAssemblySchemes()
 
 int Scene::SaveData(std::string pathBase)
 {
-    const std::string fullPathBase = g_PresetMan.FullModulePath(pathBase);
+    const std::string fullPathBase = g_PresetMan.GetFullModulePath(pathBase);
     if (fullPathBase.empty())
         return -1;
 

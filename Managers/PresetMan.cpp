@@ -184,7 +184,7 @@ bool PresetMan::LoadAllDataModules() {
 
 		// Load userdata modules AFTER all other techs etc are loaded; might be referring to stuff in user mods.
 		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : c_UserdataModules) {
-			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
+			if (!std::filesystem::exists(System::GetWorkingDirectory() + System::GetUserdataDirectory() + userdataModuleName)) {
 				bool scanContentsAndIgnoreMissing = userdataModuleName == c_UserScenesModuleName;
 				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
 			}

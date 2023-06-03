@@ -351,15 +351,19 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string PresetMan::FullModulePath(std::string modulePath)
-{
-    const std::string moduleName = GetModuleNameFromPath(modulePath);
-    const std::string moduleFolder = (IsModuleOfficial(moduleName) ? "Data/" : IsModuleUserdata(moduleName) ? System::GetUserdataDirectory() : System::GetModDirectory());
-    const std::string topFolder = modulePath.substr(0, modulePath.find_first_of("/\\") + 1);
-    if (topFolder == moduleFolder) {
-        return modulePath;
-    }
-    return moduleFolder + modulePath;
+std::string PresetMan::FullModulePath(const std::string &modulePath) {
+	const std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
+	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/\\") + 1);
+	const std::string moduleName = GetModuleNameFromPath(modulePathGeneric);
+
+	std::string moduleTopDir = System::GetModDirectory();
+
+	if (IsModuleOfficial(moduleName)) {
+		moduleTopDir = System::GetDataDirectory();
+	} else if (IsModuleUserdata(moduleName)) {
+		moduleTopDir = System::GetUserdataDirectory();
+	}
+	return (pathTopDir == moduleTopDir) ? modulePathGeneric : moduleTopDir + modulePathGeneric;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

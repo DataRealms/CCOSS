@@ -178,7 +178,6 @@ public:
 	/// <returns>True if the module is an official data module, otherwise false.</returns>
     bool IsModuleOfficial(std::string moduleName);
 
-
 	/// <summary>
 	/// Returns whether or not the module is vanilla.
 	/// </summary>
@@ -191,7 +190,7 @@ public:
     /// </summary>
     /// <param name="modulePath">The Path to be completed.</param>
     /// <returns>The complete path to the file, including Data/, Userdata/ or Mods/ based on whether or not it's part of an official module or userdata.</returns>
-    std::string FullModulePath(std::string modulePath);
+    std::string FullModulePath(const std::string &modulePath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalModuleCount

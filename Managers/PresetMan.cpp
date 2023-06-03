@@ -29,8 +29,6 @@
 #include "LoadingScreen.h"
 #include "SettingsMan.h"
 
-
-
 namespace RTE {
 
 	const std::array<std::string, 10> PresetMan::c_OfficialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
@@ -285,62 +283,46 @@ int PresetMan::GetModuleID(std::string moduleName)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string PresetMan::GetModuleNameFromPath(std::string dataPath)
-{
-    if (dataPath.empty()) {
-        return "";
-    }
+std::string PresetMan::GetModuleNameFromPath(const std::string &dataPath) const {
+	if (dataPath.empty()) {
+		return "";
+	}
+	size_t slashPos = dataPath.find_first_of("/\\");
 
-    int slashPos = dataPath.find_first_of( '/' );
-    if (slashPos == std::string::npos) {
-        slashPos = dataPath.find_first_of( '\\' );
-    }
+	// Include trailing slash in the substring range in case we need to match against the Data/Mods/Userdata directory.
+	std::string moduleName = (slashPos != std::string::npos) ? dataPath.substr(0, slashPos + 1) : dataPath;
 
-	// Include trailing slash in the substring range in case we need to match against the Data/Mods/Userdata directory
-	std::string moduleName = slashPos != std::string::npos ? dataPath.substr( 0, slashPos + 1 ) : dataPath;
+	// Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
+	if (moduleName == System::GetDataDirectory() || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
+		std::string shortenPath = dataPath.substr(slashPos + 1);
+		slashPos = shortenPath.find_first_of("/\\");
+		moduleName = shortenPath.substr(0, slashPos + 1);
+	}
 
-    // Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
-    if (moduleName == "Data/" || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
-        std::string shortenPath = dataPath.substr( slashPos + 1 );
-        slashPos = shortenPath.find_first_of( '/' );
-        if (slashPos == std::string::npos) {
-            slashPos = shortenPath.find_first_of( '\\' );
-        }
-        moduleName = shortenPath.substr( 0, slashPos + 1 );
-    }
-
-	// Remove trailing slash
 	if (!moduleName.empty() && moduleName.back() == '/') {
 		moduleName.pop_back();
 	}
-
-    return moduleName;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleIDFromPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ID of a loaded DataModule, from a full data file path.
-
-int PresetMan::GetModuleIDFromPath(std::string dataPath)
-{
-    if (dataPath.empty()) {
-        return -1;
-    }
-
-    const std::string moduleName = GetModuleNameFromPath(dataPath);
-    return GetModuleID(moduleName);
+	return moduleName;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PresetMan::IsModuleOfficial(std::string moduleName) {
+int PresetMan::GetModuleIDFromPath(const std::string &dataPath) {
+	if (dataPath.empty()) {
+		return -1;
+	}
+	return GetModuleID(GetModuleNameFromPath(dataPath));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::IsModuleOfficial(const std::string &moduleName) const {
 	return std::find(c_OfficialModules.begin(), c_OfficialModules.end(), moduleName) != c_OfficialModules.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PresetMan::IsModuleUserdata(std::string moduleName) const {
+bool PresetMan::IsModuleUserdata(const std::string &moduleName) const {
 	auto userdataModuleItr = std::find_if(c_UserdataModules.begin(), c_UserdataModules.end(),
 		[&moduleName](const auto &userdataModulesEntry) {
 			return userdataModulesEntry.first == moduleName;
@@ -351,7 +333,7 @@ bool PresetMan::IsModuleUserdata(std::string moduleName) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string PresetMan::GetFullModulePath(const std::string &modulePath) {
+std::string PresetMan::GetFullModulePath(const std::string &modulePath) const {
 	const std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
 	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/\\") + 1);
 	const std::string moduleName = GetModuleNameFromPath(modulePathGeneric);

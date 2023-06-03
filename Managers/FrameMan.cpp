@@ -512,7 +512,7 @@ namespace RTE {
 
 		std::string fullFileName(fullFileNameBuffer.data());
 #else
-		std::string fullFileName = std::format("{}/{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
+		std::string fullFileName = std::format("{}{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
 #endif
 
 		bool saveSuccess = false;

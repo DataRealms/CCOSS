@@ -160,37 +160,35 @@ public:
     /// </summary>
     /// <param name="dataPath">The full path to a data file inside the data module id you want to get.</param>
     /// <returns>The requested Name. If no module of the name was found, "" will be returned.</returns>
-    std::string GetModuleNameFromPath(std::string dataPath);
+    std::string GetModuleNameFromPath(const std::string &dataPath) const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleIDFromPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ID of a loaded DataModule, from a full data file path.
-// Arguments:       The full path to a data file inside the data module id you want to get.
-// Return value:    The requested ID. If no module of the name was found, -1 will be returned.
-
-    int GetModuleIDFromPath(std::string dataPath);
+    /// <summary>
+    /// Gets the ID of a loaded DataModule from a full data file path.
+    /// </summary>
+    /// <param name="dataPath">The full path to a data file inside the data module ID you want to get.</param>
+    /// <returns>The requested ID. If no module of the name was found, -1 will be returned.</returns>
+    int GetModuleIDFromPath(const std::string &dataPath);
 
 	/// <summary>
 	/// Returns whether or not the module is vanilla.
 	/// </summary>
 	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
 	/// <returns>True if the module is an official data module, otherwise false.</returns>
-    bool IsModuleOfficial(std::string moduleName);
+    bool IsModuleOfficial(const std::string &moduleName) const;
 
 	/// <summary>
 	/// Returns whether or not the module is vanilla.
 	/// </summary>
 	/// <param name="moduleName">The name of the module to check, in the form "[moduleName].rte"</param>
 	/// <returns>True if the module is a listed user data module, otherwise false.</returns>
-	bool IsModuleUserdata(std::string moduleName) const;
+	bool IsModuleUserdata(const std::string &moduleName) const;
 
     /// <summary>
     /// Returns the Full path to the module including Data/, Userdata/ or Mods/.
     /// </summary>
     /// <param name="modulePath">The Path to be completed.</param>
     /// <returns>The complete path to the file, including Data/, Userdata/ or Mods/ based on whether or not it's part of an official module or userdata.</returns>
-    std::string GetFullModulePath(const std::string &modulePath);
+    std::string GetFullModulePath(const std::string &modulePath) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalModuleCount

@@ -68,7 +68,6 @@ namespace RTE {
 			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
-		IncrementSavingThreadCount();
 
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
@@ -78,7 +77,7 @@ namespace RTE {
 			return false;
 		}
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function. Note that multiplayer and conquest games cannot be saved like this.");
+			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
 		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
@@ -86,6 +85,8 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
 		}
+
+		IncrementSavingThreadCount();
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
 		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));

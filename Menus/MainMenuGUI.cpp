@@ -14,6 +14,8 @@
 #include "GUIButton.h"
 #include "GUILabel.h"
 
+#include "Resources/Credits.h"
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,11 +153,9 @@ namespace RTE {
 
 		m_CreditsTextLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsLabel"));
 
-		std::string creditsText = Reader("Credits.txt").WholeFileAsString();
-
 		// TODO: Get Unicode going!
 		// Hack here to change the special characters over 128 in the ANSI ASCII table to match our font files
-		for (char &stringChar : creditsText) {
+		for (char &stringChar : s_CreditsText) {
 			if (stringChar == -60) {
 				stringChar = static_cast<unsigned char>(142); //'Ä'
 			} else if (stringChar == -42) {
@@ -164,7 +164,7 @@ namespace RTE {
 				stringChar = static_cast<unsigned char>(221); //'©'
 			}
 		}
-		m_CreditsTextLabel->SetText(creditsText);
+		m_CreditsTextLabel->SetText(s_CreditsText);
 		m_CreditsTextLabel->ResizeHeightToFit();
 	}
 

@@ -212,6 +212,9 @@ namespace RTE {
 			"\n"
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
 			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return SelectRand(lower, upper); elseif lower ~= nil then return SelectRand(1, lower); else return PosRand(); end end"
+			"\n"
+			// Override "dofile" to be able to account for Data/ or Mods/ directory.
+			"OriginalDoFile = dofile; dofile = function(filePath) filePath = PresetMan:GetFullModulePath(filePath); if filePath ~= '' then return OriginalDoFile(filePath); end end;"
 		);
 	}
 
@@ -239,6 +242,28 @@ namespace RTE {
 		for (const Entity *entity : entityVector) {
 			m_TempEntityVector.emplace_back(const_cast<Entity *>(entity));
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::SetLuaPath(const std::string &filePath) {
+		const std::string moduleName = g_PresetMan.GetModuleNameFromPath(filePath);
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(moduleName) ? System::GetDataDirectory() : System::GetModDirectory();
+		const std::string scriptPath = moduleFolder + moduleName + "/?.lua";
+
+		lua_getglobal(m_MasterState, "package");
+		lua_getfield(m_MasterState, -1, "path"); // get field "path" from table at top of stack (-1).
+		std::string currentPath = lua_tostring(m_MasterState, -1); // grab path string from top of stack.
+
+		// check if scriptPath is already in there, if not add it.
+		if (currentPath.find(scriptPath) == std::string::npos) {
+			currentPath.append(";" + scriptPath);
+		}
+
+		lua_pop(m_MasterState, 1); // get rid of the string on the stack we just pushed previously.
+		lua_pushstring(m_MasterState, currentPath.c_str()); // push the new one.
+		lua_setfield(m_MasterState, -2, "path"); // set the field "path" in table at -2 with value at top of stack.
+		lua_pop(m_MasterState, 1); // get rid of package table from top of stack.
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -357,12 +382,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
-		if (filePath.empty()) {
+		const std::string fullScriptPath = g_PresetMan.GetFullModulePath(filePath);
+		if (fullScriptPath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
 			return -1;
 		}
 
-		if (!System::PathExistsCaseSensitive(filePath)) {
+		if (!System::PathExistsCaseSensitive(fullScriptPath)) {
 			m_LastError = "Script file: " + filePath + " doesn't exist!";
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
@@ -374,8 +400,9 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
+		SetLuaPath(fullScriptPath);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
+		if (luaL_loadfile(m_MasterState, fullScriptPath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {

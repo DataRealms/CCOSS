@@ -136,7 +136,7 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 int GAScripted::Save(Writer &writer) const {
     // Call the script OnSave() function, if it exists
     g_LuaMan.RunScriptString("if " + m_LuaClassName + " and " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
-    
+
     GameActivity::Save(writer);
 
 	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
@@ -510,7 +510,7 @@ void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) {
 
 void GAScripted::CollectRequiredAreas() {
     // Open the script file so we can check it out
-    std::ifstream *pScriptFile = new std::ifstream(m_ScriptPath.c_str());
+    std::ifstream *pScriptFile = new std::ifstream(g_PresetMan.GetFullModulePath(m_ScriptPath.c_str()));
     if (!pScriptFile->good()) {
         return;
     }

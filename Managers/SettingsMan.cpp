@@ -18,7 +18,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-		m_SettingsPath = "Base.rte/Settings.ini";
+		m_SettingsPath = System::GetUserdataDirectory() + "Settings.ini";
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
@@ -72,7 +72,7 @@ namespace RTE {
 	int SettingsMan::Initialize() {
 		if (const char *settingsTempPath = std::getenv("CCCP_SETTINGSPATH")) { m_SettingsPath = std::string(settingsTempPath); }
 
-		Reader settingsReader(m_SettingsPath, false, nullptr, true);
+		Reader settingsReader(m_SettingsPath, false, nullptr, true, true);
 
 		if (!settingsReader.ReaderOK()) {
 			Writer settingsWriter(m_SettingsPath);

@@ -1,4 +1,11 @@
-C R E D I T S :
+#ifndef _RTECREDITS_
+#define _RTECREDITS_
+
+// DO NOT INDENT!
+// String literals are kinda trash and any whitespace/indentation will be part of the string.
+static std::string s_CreditsText =
+
+R"(C R E D I T S :
 
 Game Design - Engine and Physics Programming - Art Direction - Project Coordination
 D A N I E L   " D A T A "   T A B A R
@@ -39,8 +46,8 @@ In-game Song "Last Man" Composition and Production
 M I C H A E L   W A T T S,   E N C O R E   M U S I C
 
 Platform Porting
-C H R I S   K R U G E R (OSX)
-F R A N K   E A R L (Linux)
+C H R I S   K R U G E R   (OSX)
+F R A N K   E A R L   (Linux)
 
 Licensing System Design and Programming
 M A T I A S   N A H U E L   C A R B A L L O
@@ -61,4 +68,6 @@ FMOD Sound System, copyright © Firelight Technologies Pty, Ltd., 1994-2007.
 Portions Copyright © 2001, Xiphophorus
 
 
-Cortex Command is TM and © 2019 Data Realms, LLC
+Cortex Command is TM and © 2019 Data Realms, LLC)";
+
+#endif

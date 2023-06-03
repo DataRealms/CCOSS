@@ -564,6 +564,9 @@
     <ClInclude Include="Managers\WindowMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="Resources\Credits.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">

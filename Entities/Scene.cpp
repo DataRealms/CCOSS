@@ -1029,14 +1029,15 @@ int Scene::ExpandAIPlanAssemblySchemes()
 
 int Scene::SaveData(std::string pathBase)
 {
-    if (pathBase.empty())
+    const std::string fullPathBase = g_PresetMan.GetFullModulePath(pathBase);
+    if (fullPathBase.empty())
         return -1;
 
     if (!m_pTerrain)
         return 0;
 
     // Save Terrain's data
-    if (m_pTerrain->SaveData(pathBase) < 0)
+    if (m_pTerrain->SaveData(fullPathBase) < 0)
     {
         RTEAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
@@ -1052,7 +1053,7 @@ int Scene::SaveData(std::string pathBase)
         {
             std::snprintf(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
-            if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".png") < 0)
+            if (m_apUnseenLayer[team]->SaveData(fullPathBase + " US" + str + ".png") < 0)
             {
                 g_ConsoleMan.PrintString("ERROR: Saving unseen layer " + m_apUnseenLayer[team]->GetPresetName() + "\'s data failed!");
                 return -1;

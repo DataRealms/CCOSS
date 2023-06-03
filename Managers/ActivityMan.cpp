@@ -103,7 +103,7 @@ namespace RTE {
 		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 
 		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
@@ -144,7 +144,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, false);
+		Reader reader(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini", true, nullptr, false);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;

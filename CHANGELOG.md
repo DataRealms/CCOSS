@@ -625,6 +625,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Swapped to SDL2 for window management and input handling.
 
+- `Settings.ini` and player loadouts (BuyMenu presets) are now stored in the `Userdata` directory instead of `Base.rte`.
+
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts (i.e. using `pieSlice:ReloadScripts()`, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
 

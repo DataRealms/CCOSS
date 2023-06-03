@@ -31,6 +31,13 @@
 
 namespace RTE {
 
+	const std::array<std::string, 10> PresetMan::c_OfficialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	const std::array<std::pair<std::string, std::string>, 3> PresetMan::c_UserdataModules = {{
+		{c_UserScenesModuleName, "User Scenes"},
+		{c_UserConquestSavesModuleName, "Conquest Saves"},
+		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
+	}};
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -142,51 +149,42 @@ bool PresetMan::LoadAllDataModules() {
 
 	FindAndExtractZippedModules();
 
-	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
-	std::array<std::pair<std::string, std::string>, 3> userdataModules = {{
-		{c_UserScenesModuleName, "User Scenes"},
-		{c_UserConquestSavesModuleName, "Conquest Saves"},
-		{c_UserScriptedSavesModuleName, "Scripted Activity Saves" }
-	}};
-
 	// Load all the official modules first!
-	for (const std::string &officialModule : officialModules) {
+	for (const std::string &officialModule : c_OfficialModules) {
 		if (!LoadDataModule(officialModule, true, false, LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
-	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
+	if (!m_SingleModuleToLoad.empty() && !IsModuleOfficial(m_SingleModuleToLoad)) {
 		if (!LoadDataModule(m_SingleModuleToLoad, false, false, LoadingScreen::LoadingSplashProgressReport)) {
 			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
 			return false;
 		}
 	} else {
-		std::vector<std::filesystem::directory_entry> workingDirectoryFolders;
-		std::copy_if(std::filesystem::directory_iterator(System::GetWorkingDirectory()), std::filesystem::directory_iterator(), std::back_inserter(workingDirectoryFolders),
+		std::vector<std::filesystem::directory_entry> modDirectoryFolders;
+		const std::string modDirectory = System::GetWorkingDirectory() + System::GetModDirectory();
+		std::copy_if(std::filesystem::directory_iterator(modDirectory), std::filesystem::directory_iterator(), std::back_inserter(modDirectoryFolders),
 			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
 		);
-		std::sort(workingDirectoryFolders.begin(), workingDirectoryFolders.end());
+		std::sort(modDirectoryFolders.begin(), modDirectoryFolders.end());
 
-		for (const std::filesystem::directory_entry &directoryEntry : workingDirectoryFolders) {
+		for (const std::filesystem::directory_entry &directoryEntry : modDirectoryFolders) {
 			std::string directoryEntryPath = directoryEntry.path().generic_string();
 			if (std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
 				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
-				if (!g_SettingsMan.IsModDisabled(moduleName) && std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end()) {
-					auto userdataModuleItr = std::find_if(userdataModules.begin(), userdataModules.end(), [&moduleName](const auto &userdataModulesEntry) { return userdataModulesEntry.first == moduleName; });
-					if (userdataModuleItr == userdataModules.end()) {
-						int moduleID = GetModuleID(moduleName);
-						// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-						if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, LoadingScreen::LoadingSplashProgressReport); }
-					}
+				if (!g_SettingsMan.IsModDisabled(moduleName) && !IsModuleOfficial(moduleName) && !IsModuleUserdata(moduleName)) {
+					int moduleID = GetModuleID(moduleName);
+					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
+					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, false, LoadingScreen::LoadingSplashProgressReport); }
 				}
 			}
 		}
 
 		// Load userdata modules AFTER all other techs etc are loaded; might be referring to stuff in user mods.
-		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : userdataModules) {
-			if (!std::filesystem::exists(System::GetWorkingDirectory() + userdataModuleName)) {
+		for (const auto &[userdataModuleName, userdataModuleFriendlyName] : c_UserdataModules) {
+			if (!std::filesystem::exists(System::GetWorkingDirectory() + System::GetUserdataDirectory() + userdataModuleName)) {
 				bool scanContentsAndIgnoreMissing = userdataModuleName == c_UserScenesModuleName;
 				DataModule::CreateOnDiskAsUserdata(userdataModuleName, userdataModuleFriendlyName, scanContentsAndIgnoreMissing, scanContentsAndIgnoreMissing);
 			}
@@ -283,24 +281,72 @@ int PresetMan::GetModuleID(std::string moduleName)
     return -1;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetModuleIDFromPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ID of a loaded DataModule, from a full data file path.
+std::string PresetMan::GetModuleNameFromPath(const std::string &dataPath) const {
+	if (dataPath.empty()) {
+		return "";
+	}
+	size_t slashPos = dataPath.find_first_of("/\\");
 
-int PresetMan::GetModuleIDFromPath(std::string dataPath)
-{
-    if (dataPath.empty())
-        return -1;
+	// Include trailing slash in the substring range in case we need to match against the Data/Mods/Userdata directory.
+	std::string moduleName = (slashPos != std::string::npos) ? dataPath.substr(0, slashPos + 1) : dataPath;
 
-    int slashPos = dataPath.find_first_of('/');
-    if (slashPos == std::string::npos)
-        slashPos = dataPath.find_first_of('\\');
+	// Check if path starts with Data/ or the Mods/Userdata dir names and remove that part to get to the actual module name.
+	if (moduleName == System::GetDataDirectory() || moduleName == System::GetModDirectory() || moduleName == System::GetUserdataDirectory()) {
+		std::string shortenPath = dataPath.substr(slashPos + 1);
+		slashPos = shortenPath.find_first_of("/\\");
+		moduleName = shortenPath.substr(0, slashPos + 1);
+	}
 
-    return GetModuleID(dataPath.substr(0, slashPos));
+	if (!moduleName.empty() && moduleName.back() == '/') {
+		moduleName.pop_back();
+	}
+	return moduleName;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int PresetMan::GetModuleIDFromPath(const std::string &dataPath) {
+	if (dataPath.empty()) {
+		return -1;
+	}
+	return GetModuleID(GetModuleNameFromPath(dataPath));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::IsModuleOfficial(const std::string &moduleName) const {
+	return std::find(c_OfficialModules.begin(), c_OfficialModules.end(), moduleName) != c_OfficialModules.end();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::IsModuleUserdata(const std::string &moduleName) const {
+	auto userdataModuleItr = std::find_if(c_UserdataModules.begin(), c_UserdataModules.end(),
+		[&moduleName](const auto &userdataModulesEntry) {
+			return userdataModulesEntry.first == moduleName;
+		}
+	);
+	return userdataModuleItr != c_UserdataModules.end();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::string PresetMan::GetFullModulePath(const std::string &modulePath) const {
+	const std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
+	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/\\") + 1);
+	const std::string moduleName = GetModuleNameFromPath(modulePathGeneric);
+
+	std::string moduleTopDir = System::GetModDirectory();
+
+	if (IsModuleOfficial(moduleName)) {
+		moduleTopDir = System::GetDataDirectory();
+	} else if (IsModuleUserdata(moduleName)) {
+		moduleTopDir = System::GetUserdataDirectory();
+	}
+	return (pathTopDir == moduleTopDir) ? modulePathGeneric : moduleTopDir + modulePathGeneric;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddEntityPreset
@@ -1119,9 +1165,9 @@ Actor * PresetMan::GetLoadout(std::string loadoutName, int moduleNumber, bool sp
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PresetMan::FindAndExtractZippedModules() const {
-	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory() + System::GetModDirectory())) {
 		std::string zippedModulePath = std::filesystem::path(directoryEntry).generic_string();
-		if (zippedModulePath.find(System::GetZippedModulePackageExtension()) == zippedModulePath.length() - System::GetZippedModulePackageExtension().length()) {
+		if (zippedModulePath.ends_with(System::GetZippedModulePackageExtension())) {
 			LoadingScreen::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
 			LoadingScreen::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
 		}

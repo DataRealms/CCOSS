@@ -2966,6 +2966,13 @@ void MetagameGUI::CompletedActivity()
             pAlteredScene->SaveData(METASAVEPATH + std::string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over
             pAlteredScene->ClearData();
+
+			// Clear waypoints on resident brains, otherwise when they're cloned they try to update their move paths, which requires a material bitmap (which we destroyed when we cleared data above).
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (Actor *residentBrain = dynamic_cast<Actor *>(pAlteredScene->GetResidentBrain(player))) {
+					residentBrain->ClearAIWaypoints();
+				}
+			}
             // Deep copy over all the edits made to the newly played Scene
             m_pPlayingScene->Destroy();
             m_pPlayingScene->Create(*pAlteredScene);

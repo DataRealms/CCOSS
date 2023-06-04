@@ -836,11 +836,11 @@ void Activity::Clear() {
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (getForHuman) {
-				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			} else {
-				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			}

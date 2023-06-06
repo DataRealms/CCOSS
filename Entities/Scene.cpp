@@ -1361,29 +1361,6 @@ int Scene::Save(Writer &writer) const {
 	writer.NewPropertyWithValue("TotalInvestment", m_TotalInvestment);
 	writer.NewPropertyWithValue("Terrain", m_pTerrain);
 
-	writer.NewProperty("P1BuildBudget");
-	writer << m_BuildBudget[Players::PlayerOne];
-	writer.NewProperty("P2BuildBudget");
-	writer << m_BuildBudget[Players::PlayerTwo];
-	writer.NewProperty("P3BuildBudget");
-	writer << m_BuildBudget[Players::PlayerThree];
-	writer.NewProperty("P4BuildBudget");
-	writer << m_BuildBudget[Players::PlayerFour];
-	writer.NewProperty("P1BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerOne];
-	writer.NewProperty("P2BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerTwo];
-	writer.NewProperty("P3BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerThree];
-	writer.NewProperty("P4BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerFour];
-	writer.NewProperty("AutoDesigned");
-	writer << m_AutoDesigned;
-	writer.NewProperty("TotalInvestment");
-	writer << m_TotalInvestment;
-	writer.NewProperty("Terrain");
-	writer << m_pTerrain;
-
     for (int set = PlacedObjectSets::PLACEONLOAD; set < PlacedObjectSets::PLACEDSETSCOUNT; ++set) {
 		for (const SceneObject *placedObject : m_PlacedObjects[set]) {
 			if (placedObject->GetPresetName().empty() || placedObject->GetPresetName() == "None") {

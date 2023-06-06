@@ -28,6 +28,7 @@
 #include "BunkerAssemblyScheme.h"
 #include "BunkerAssembly.h"
 #include "SLBackground.h"
+#include "EditorActivity.h"
 
 #include "AEmitter.h"
 #include "ADoor.h"
@@ -1333,6 +1334,9 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
 
 int Scene::Save(Writer &writer) const {
     Entity::Save(writer);
+
+	bool doFullGameSave = !dynamic_cast<EditorActivity *>(g_ActivityMan.GetActivity());
+
     writer.NewPropertyWithValue("LocationOnPlanet", m_Location);
     writer.NewPropertyWithValue("MetagamePlayable", m_MetagamePlayable);
 	//Do not save preview if it's path is empty, for example in metagame
@@ -1354,9 +1358,10 @@ int Scene::Save(Writer &writer) const {
 		writer.NewPropertyWithValue(playerNumberString + "BuildBudgetRatio", m_BuildBudgetRatio[player]);
 		if (m_ResidentBrains[player]) {
 			writer.NewProperty(playerNumberString + "ResidentBrain");
-			SaveSceneObject(writer, m_ResidentBrains[player], false);
+			SaveSceneObject(writer, m_ResidentBrains[player], false, doFullGameSave);
 		}
 	}
+
 	writer.NewPropertyWithValue("AutoDesigned", m_AutoDesigned);
 	writer.NewPropertyWithValue("TotalInvestment", m_TotalInvestment);
 	writer.NewPropertyWithValue("Terrain", m_pTerrain);
@@ -1379,7 +1384,7 @@ int Scene::Save(Writer &writer) const {
 			}
 
 			//writer << placedObject;
-			SaveSceneObject(writer, placedObject, false);
+			SaveSceneObject(writer, placedObject, false, doFullGameSave);
 		}
     }
 
@@ -1465,11 +1470,11 @@ int Scene::Save(Writer &writer) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const {
-	auto WriteHardcodedAttachableOrNone = [this, &writer](const std::string &propertyName, const Attachable *harcodedAttachable) {
+void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable, bool saveFullData) const {
+	auto WriteHardcodedAttachableOrNone = [this, &writer, &saveFullData](const std::string &propertyName, const Attachable *harcodedAttachable) {
 		if (harcodedAttachable) {
 			writer.NewProperty(propertyName);
-			SaveSceneObject(writer, harcodedAttachable, true);
+			SaveSceneObject(writer, harcodedAttachable, true, saveFullData);
 		} else {
 			writer.NewPropertyWithValue(propertyName, "None");
 		}
@@ -1478,8 +1483,10 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
-	for (const std::string &group : *sceneObjectToSave->GetGroups()) {
-		writer.NewPropertyWithValue("AddToGroup", group);
+	if (saveFullData) {
+		for (const std::string &group : *sceneObjectToSave->GetGroups()) {
+			writer.NewPropertyWithValue("AddToGroup", group);
+		}
 	}
 
 	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
@@ -1487,13 +1494,15 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	if (!isChildAttachable) {
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
 	}
-	writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
+	if (saveFullData) {
+		writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
+	}
 
 	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
-	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave)) {
+	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && saveFullData) {
 		writer.NewPropertyWithValue("HUDVisible", movableObjectToSave->GetHUDVisible());
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
 		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
@@ -1503,30 +1512,37 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("HFlipped", moSpriteToSave->IsHFlipped());
-		writer.NewPropertyWithValue("Rotation", moSpriteToSave->GetRotMatrix());
-		writer.NewPropertyWithValue("AngularVel", moSpriteToSave->GetAngularVel());
+		if (saveFullData || dynamic_cast<const ADoor *>(moSpriteToSave)) {
+			writer.NewPropertyWithValue("Rotation", moSpriteToSave->GetRotMatrix());
+		}
+		if (saveFullData) {
+			writer.NewPropertyWithValue("AngularVel", moSpriteToSave->GetAngularVel());
+		}
 	}
 
 	if (const MOSRotating *mosRotatingToSave = dynamic_cast<const MOSRotating *>(sceneObjectToSave)) {
-		const std::list<Attachable *> &attachablesToSave = mosRotatingToSave->GetAttachableList();
+		if (saveFullData) {
+			const std::list<Attachable *> &attachablesToSave = mosRotatingToSave->GetAttachableList();
 
-		// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
-		// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
-		if (!attachablesToSave.empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
-		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
-		}
-
-		for (const Attachable *attachable : attachablesToSave) {
-			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
-				writer.NewProperty("AddAttachable");
-				SaveSceneObject(writer, attachable, true);
+			// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
+			// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
+			if (!attachablesToSave.empty()) {
+				writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
 			}
-		}
-		for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
-			writer.NewProperty("SpecialBehaviour_AddWound");
-			SaveSceneObject(writer, wound, true);
+			else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
+				writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
+			}
+
+			for (const Attachable *attachable : attachablesToSave) {
+				if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
+					writer.NewProperty("AddAttachable");
+					SaveSceneObject(writer, attachable, true, saveFullData);
+				}
+			}
+			for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
+				writer.NewProperty("SpecialBehaviour_AddWound");
+				SaveSceneObject(writer, wound, true, saveFullData);
+			}
 		}
 
 		for (auto &[key, value] : mosRotatingToSave->GetStringValueMap()) {
@@ -1544,7 +1560,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 		}
 	}
 
-	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave)) {
+	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave); attachableToSave && saveFullData) {
 		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
 		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
@@ -1606,23 +1622,26 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
-		writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
 		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
-		writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
-		int aiModeToSave = actorToSave->GetAIMode() == Actor::AIMode::AIMODE_SQUAD ? Actor::AIMode::AIMODE_GOTO : actorToSave->GetAIMode();
-		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO && (!actorToSave->GetMOMoveTarget() && g_SceneMan.ShortestDistance(actorToSave->GetMovePathEnd(), actorToSave->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(1.0F))) {
-			aiModeToSave = Actor::AIMode::AIMODE_SENTRY;
-		}
-		writer.NewPropertyWithValue("AIMode", aiModeToSave);
-		if (aiModeToSave == Actor::AIMode::AIMODE_GOTO) {
-			const std::string addWaypointPropertyName = "SpecialBehaviour_AddAISceneWaypoint";
-			if (const MovableObject *actorToSaveMOMoveTarget = actorToSave->GetMOMoveTarget()) {
-				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSaveMOMoveTarget->GetPos());
-			} else {
-				writer.NewPropertyWithValue(addWaypointPropertyName, actorToSave->GetMovePathEnd());
-				for (auto &[waypointPosition, waypointObject] : actorToSave->GetWaypointList()) {
-					writer.NewPropertyWithValue(addWaypointPropertyName, waypointPosition);
+		if (saveFullData) {
+			writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
+			writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
+
+			int aiModeToSave = actorToSave->GetAIMode() == Actor::AIMode::AIMODE_SQUAD ? Actor::AIMode::AIMODE_GOTO : actorToSave->GetAIMode();
+			if (aiModeToSave == Actor::AIMode::AIMODE_GOTO && (!actorToSave->GetMOMoveTarget() && g_SceneMan.ShortestDistance(actorToSave->GetMovePathEnd(), actorToSave->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(1.0F))) {
+				aiModeToSave = Actor::AIMode::AIMODE_SENTRY;
+			}
+			writer.NewPropertyWithValue("AIMode", aiModeToSave);
+			if (aiModeToSave == Actor::AIMode::AIMODE_GOTO) {
+				const std::string addWaypointPropertyName = "SpecialBehaviour_AddAISceneWaypoint";
+				if (const MovableObject *actorToSaveMOMoveTarget = actorToSave->GetMOMoveTarget()) {
+					writer.NewPropertyWithValue(addWaypointPropertyName, actorToSaveMOMoveTarget->GetPos());
+				} else {
+					writer.NewPropertyWithValue(addWaypointPropertyName, actorToSave->GetMovePathEnd());
+					for (auto &[waypointPosition, waypointObject] : actorToSave->GetWaypointList()) {
+						writer.NewPropertyWithValue(addWaypointPropertyName, waypointPosition);
+					}
 				}
 			}
 		}
@@ -1633,40 +1652,51 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
 		for (const MovableObject *inventoryItem : *actorToSave->GetInventory()) {
 			writer.NewProperty("AddInventory");
-			SaveSceneObject(writer, inventoryItem, true);
+			SaveSceneObject(writer, inventoryItem, true, saveFullData);
 		}
 
-		if (const ADoor *aDoorToSave = dynamic_cast<const ADoor *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Door", aDoorToSave->GetDoor());
+		if (saveFullData) {
+			if (const ADoor *aDoorToSave = dynamic_cast<const ADoor *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Door", aDoorToSave->GetDoor());
+			} else if (const AHuman *aHumanToSave = dynamic_cast<const AHuman *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Head", aHumanToSave->GetHead());
+				WriteHardcodedAttachableOrNone("Jetpack", aHumanToSave->GetJetpack());
+				WriteHardcodedAttachableOrNone("FGArm", aHumanToSave->GetFGArm());
+				WriteHardcodedAttachableOrNone("BGArm", aHumanToSave->GetBGArm());
+				WriteHardcodedAttachableOrNone("FGLeg", aHumanToSave->GetFGLeg());
+				WriteHardcodedAttachableOrNone("BGLeg", aHumanToSave->GetBGLeg());
+			} else if (const ACrab *aCrabToSave = dynamic_cast<const ACrab *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Turret", aCrabToSave->GetTurret());
+				WriteHardcodedAttachableOrNone("Jetpack", aCrabToSave->GetJetpack());
+				WriteHardcodedAttachableOrNone("LeftFGLeg", aCrabToSave->GetLeftFGLeg());
+				WriteHardcodedAttachableOrNone("LeftBGLeg", aCrabToSave->GetLeftBGLeg());
+				WriteHardcodedAttachableOrNone("RightFGLeg", aCrabToSave->GetRightFGLeg());
+				WriteHardcodedAttachableOrNone("RightBGLeg", aCrabToSave->GetRightBGLeg());
+			} else if (const ACRocket *acRocketToSave = dynamic_cast<const ACRocket *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("RightLeg", acRocketToSave->GetRightLeg());
+				WriteHardcodedAttachableOrNone("LeftLeg", acRocketToSave->GetLeftLeg());
+				WriteHardcodedAttachableOrNone("MainThruster", acRocketToSave->GetMainThruster());
+				WriteHardcodedAttachableOrNone("RightThruster", acRocketToSave->GetRightThruster());
+				WriteHardcodedAttachableOrNone("LeftThruster", acRocketToSave->GetLeftThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetURightThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetULeftThruster());
+			} else if (const ACDropShip *acDropShipToSave = dynamic_cast<const ACDropShip *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("RightThruster", acDropShipToSave->GetRightThruster());
+				WriteHardcodedAttachableOrNone("LeftThruster", acDropShipToSave->GetLeftThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acDropShipToSave->GetURightThruster());
+				WriteHardcodedAttachableOrNone("UpLeftThruster", acDropShipToSave->GetULeftThruster());
+				WriteHardcodedAttachableOrNone("RightHatchDoor", acDropShipToSave->GetRightHatch());
+				WriteHardcodedAttachableOrNone("LeftHatchDoor", acDropShipToSave->GetLeftHatch());
+			}
 		} else if (const AHuman *aHumanToSave = dynamic_cast<const AHuman *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Head", aHumanToSave->GetHead());
-			WriteHardcodedAttachableOrNone("Jetpack", aHumanToSave->GetJetpack());
-			WriteHardcodedAttachableOrNone("FGArm", aHumanToSave->GetFGArm());
-			WriteHardcodedAttachableOrNone("BGArm", aHumanToSave->GetBGArm());
-			WriteHardcodedAttachableOrNone("FGLeg", aHumanToSave->GetFGLeg());
-			WriteHardcodedAttachableOrNone("BGLeg", aHumanToSave->GetBGLeg());
-		} else if (const ACrab *aCrabToSave = dynamic_cast<const ACrab *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Turret", aCrabToSave->GetTurret());
-			WriteHardcodedAttachableOrNone("Jetpack", aCrabToSave->GetJetpack());
-			WriteHardcodedAttachableOrNone("LeftFGLeg", aCrabToSave->GetLeftFGLeg());
-			WriteHardcodedAttachableOrNone("LeftBGLeg", aCrabToSave->GetLeftBGLeg());
-			WriteHardcodedAttachableOrNone("RightFGLeg", aCrabToSave->GetRightFGLeg());
-			WriteHardcodedAttachableOrNone("RightBGLeg", aCrabToSave->GetRightBGLeg());
-		} else if (const ACRocket *acRocketToSave = dynamic_cast<const ACRocket *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("RightLeg", acRocketToSave->GetRightLeg());
-			WriteHardcodedAttachableOrNone("LeftLeg", acRocketToSave->GetLeftLeg());
-			WriteHardcodedAttachableOrNone("MainThruster", acRocketToSave->GetMainThruster());
-			WriteHardcodedAttachableOrNone("RightThruster", acRocketToSave->GetRightThruster());
-			WriteHardcodedAttachableOrNone("LeftThruster", acRocketToSave->GetLeftThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetURightThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetULeftThruster());
-		} else if (const ACDropShip *acDropShipToSave = dynamic_cast<const ACDropShip *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("RightThruster", acDropShipToSave->GetRightThruster());
-			WriteHardcodedAttachableOrNone("LeftThruster", acDropShipToSave->GetLeftThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acDropShipToSave->GetURightThruster());
-			WriteHardcodedAttachableOrNone("UpLeftThruster", acDropShipToSave->GetULeftThruster());
-			WriteHardcodedAttachableOrNone("RightHatchDoor", acDropShipToSave->GetRightHatch());
-			WriteHardcodedAttachableOrNone("LeftHatchDoor", acDropShipToSave->GetLeftHatch());
+			if (const HeldDevice *equippedItem = aHumanToSave->GetEquippedItem()) {
+				writer.NewProperty("AddInventory");
+				SaveSceneObject(writer, equippedItem, true, saveFullData);
+			}
+			if (const HeldDevice *bgEquippedItem = aHumanToSave->GetEquippedBGItem()) {
+				writer.NewProperty("AddInventory");
+				SaveSceneObject(writer, bgEquippedItem, true, saveFullData);
+			}
 		}
 	}
 	writer.ObjectEnd();

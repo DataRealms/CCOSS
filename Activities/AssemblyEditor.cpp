@@ -715,7 +715,7 @@ void AssemblyEditor::UpdateLoadDialog()
 					isValid = true;
 			} else {
 				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
-						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
+						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte" && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserScriptedSavesModuleName)
 					isValid = true;
 			}
 

@@ -1020,7 +1020,7 @@ namespace RTE {
 		.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 		.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 		.def("ReloadScripts", &MovableObject::ReloadScripts)
-		.def("HasScript", &MovableObject::HasScript)
+		.def("HasScript", &LuaAdaptersMovableObject::HasScript)
 		.def("AddScript", &LuaAdaptersMovableObject::AddScript)
 		.def("ScriptEnabled", &MovableObject::ScriptEnabled)
 		.def("EnableScript", &LuaAdaptersMovableObject::EnableScript)

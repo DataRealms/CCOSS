@@ -617,7 +617,7 @@ bool AreaEditor::SaveScene(const std::string &saveAsName, bool forceOverwrite) {
 
 	if (g_PresetMan.AddEntityPreset(editedScene, m_ModuleSpaceID, forceOverwrite, sceneSavePath)) {
 		if (Writer sceneWriter(sceneSavePath, false); !sceneWriter.WriterOK()) {
-			RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + sceneSavePath + "!\n\nTHE EDITED SCENE PRESET WAS NOT SAVED!!!");
+			RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + sceneSavePath + "\n\nTHE EDITED SCENE PRESET WAS NOT SAVED!!!");
 		} else {
 			// TODO: Check if the ini file already exists, and then ask if overwrite.
 			sceneWriter.NewPropertyWithValue("AddScene", editedScene);
@@ -632,7 +632,7 @@ bool AreaEditor::SaveScene(const std::string &saveAsName, bool forceOverwrite) {
 				bool scenesFileExists = System::PathExistsCaseSensitive(scenesFilePath);
 
 				if (Writer scenesFileWriter(scenesFilePath, true); !scenesFileWriter.WriterOK()) {
-					RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + scenesFilePath + "!\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
+					RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + scenesFilePath + "\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
 				} else {
 					scenesFileWriter.NewPropertyWithValue("IncludeFile", sceneSavePath);
 					scenesFileWriter.EndWrite();
@@ -643,7 +643,7 @@ bool AreaEditor::SaveScene(const std::string &saveAsName, bool forceOverwrite) {
 						std::string indexFilePath = dataModuleFullPath + "/Index.ini";
 
 						if (Writer indexWriter(indexFilePath, true); !indexWriter.WriterOK()) {
-							RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + indexFilePath + "!\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
+							RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + indexFilePath + "\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
 						} else {
 							// Add extra tab since the DataModule has everything indented.
 							indexWriter.NewProperty("\tIncludeFile");

@@ -576,6 +576,7 @@ int Scene::Create(const Scene &reference)
 		// Destination
 		m_pPreviewBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
 		RTEAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
+		m_PreviewBitmapFile = reference.m_PreviewBitmapFile;
 
 		// Copy!
 		blit(pCopyFrom, m_pPreviewBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);

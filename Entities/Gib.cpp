@@ -77,7 +77,8 @@ namespace RTE {
 		// All of this is needed to make a preset look like not original and save as CopyOf instead of separate preset.
 		std::unique_ptr<Entity> gibEntity(m_GibParticle->Clone());
 		gibEntity->ResetOriginalPresetFlag();
-		writer << gibEntity.get();
+		gibEntity->Entity::Save(writer);
+		writer.ObjectEnd();
 
 		writer.NewProperty("Offset");
 		writer << m_Offset;

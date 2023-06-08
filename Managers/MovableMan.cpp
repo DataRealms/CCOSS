@@ -927,6 +927,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             }
         }
 		RemoveActorFromTeamRoster(dynamic_cast<Actor *>(pActorToRem));
+		pActorToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -967,6 +968,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
                 }
             }
         }
+		pItemToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1082,6 +1084,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
                 }
             }
         }
+		pMOToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1111,11 +1114,7 @@ bool MovableMan::ValidateMOIDs() {
 //                  MO that's currently active in the simulation, and kept by this MovableMan.
 
 bool MovableMan::ValidMO(const MovableObject *pMOToCheck) {
-	if (pMOToCheck && pMOToCheck->GetID() != g_NoMOID && pMOToCheck->GetParent() == nullptr) {
-		return true;
-	} else {
-		return IsActor(pMOToCheck) || IsDevice(pMOToCheck) || IsParticle(pMOToCheck);
-	}
+	return pMOToCheck && pMOToCheck->ExistsInMovableMan();
 }
 
 

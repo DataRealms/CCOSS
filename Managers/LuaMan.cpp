@@ -201,9 +201,6 @@ namespace RTE {
 		luabind::globals(m_MasterState)["SettingsMan"] = &g_SettingsMan;
 
 		luaL_dostring(m_MasterState,
-			// Add package path to the defaults.
-			"package.path = package.path .. \";Base.rte/?.lua\";"
-			"\n"
 			// Add cls() as a shortcut to ConsoleMan:Clear().
 			"cls = function() ConsoleMan:Clear(); end"
 			"\n"

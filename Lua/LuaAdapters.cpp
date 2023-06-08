@@ -307,7 +307,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersMovableObject::AddScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		switch (std::string correctedScriptPath = g_PresetMan.GetFullModulePath(scriptPath); luaSelfObject->LoadScript(luaSelfObject->CorrectBackslashesInPath(correctedScriptPath))) {
+		switch (std::string correctedScriptPath = g_PresetMan.GetFullModulePath(scriptPath); luaSelfObject->LoadScript(correctedScriptPath)) {
 			case 0:
 				return true;
 			case -1:

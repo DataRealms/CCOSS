@@ -316,8 +316,8 @@ void Activity::Clear() {
 			if (int screenId = ScreenOfPlayer(player); screenId != -1) {
 				g_FrameMan.ClearScreenText(screenId);
 				g_CameraMan.SetScreenOcclusion(Vector(), screenId);
-				g_CameraMan.SetScreenShake(0.0F, screenId);
 			}
+			g_CameraMan.ResetAllScreenShake();
 
 			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {

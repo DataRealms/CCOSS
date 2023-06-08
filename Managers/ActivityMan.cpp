@@ -293,11 +293,6 @@ namespace RTE {
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
 
-		// Reset screen positions and shake
-		for (int screen = 0; screen < c_MaxScreenCount; screen++) {
-			g_CameraMan.SetScreenShake(0, screen);
-		}
-
 		m_ActivityAllowsSaving = false;
 
 		m_StartActivity.reset(activity);

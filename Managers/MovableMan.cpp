@@ -1110,9 +1110,12 @@ bool MovableMan::ValidateMOIDs() {
 // Description:     Indicates whether the passed in MovableObject pointer points to an
 //                  MO that's currently active in the simulation, and kept by this MovableMan.
 
-bool MovableMan::ValidMO(const MovableObject *pMOToCheck)
-{
-    return pMOToCheck && pMOToCheck->GetID() != g_NoMOID;
+bool MovableMan::ValidMO(const MovableObject *pMOToCheck) {
+	if (pMOToCheck && pMOToCheck->GetID() != g_NoMOID && pMOToCheck->GetParent() == nullptr) {
+		return true;
+	} else {
+		return IsActor(pMOToCheck) || IsDevice(pMOToCheck) || IsParticle(pMOToCheck);
+	}
 }
 
 

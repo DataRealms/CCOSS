@@ -21,8 +21,10 @@ on:
         required: false
         default: "release"
 
-jobs:
+env: 
+  MESON_VERSION: "0.60.3"
 
+jobs:
   build-linux:
 
     runs-on: ubuntu-latest
@@ -37,7 +39,7 @@ jobs:
         run: |
           sudo apt-get update -yq
           sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libopengl-dev libfuse2 ninja-build
-          sudo pip install meson==0.60.3
+          sudo pip install meson==${{env.MESON_VERSION}}
 
       - name: Install Clang
         # You may pin to the exact commit or the version.

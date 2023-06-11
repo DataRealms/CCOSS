@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   # Triggers the workflow for pushes to master or development, for pull request events, and for the merge queue
   push:
-    branches: [master, development]
+    branches: [development]
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
   merge_group:

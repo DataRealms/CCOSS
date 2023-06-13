@@ -41,5 +41,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Cortex Command.exe
-        path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/Cortex Command x64.exe
+        path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/Cortex Command.exe
         if-no-files-found: error

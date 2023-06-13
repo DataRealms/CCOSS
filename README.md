@@ -101,14 +101,10 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/build/CortexCommand . `
 
-2. 
-   - #### Linux:
-      Copy (link) all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
+2. (*optional*) Copy (link) all `libfmod` files from `external/lib/[os]/[arch]` into the **Data Repository**.
+  - Linux: `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
+  - macOS: `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/macOS/libfmod.dylib .`
 
-      `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
-
-   - #### macOS
-      macOS builds automatically resolve the relative path from `build/` where the executable exists to `external/lib/macos/`. If the executable is being launched via the symlink from Step 1 then this step is not required. 
 
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 

@@ -1338,8 +1338,9 @@ protected:
     SLTerrain *m_pTerrain;
 
     // Pathfinding graph and logic. Owned by this
-    // The array of PathFinders for each team. Because we also have a shared pathfinder using index 0, we need to use MaxTeamCount + 1 to handle all the Teams' PathFinders.
-    std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount + 1> m_pPathFinders;
+	std::unique_ptr<PathFinder> m_NoTeamPathFinder; //!< The shared pathfinder for when no team is specified.
+	std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount> m_PathFinders; //!< The array of pathfinders for each team.
+	std::array<std::unique_ptr<PathFinder>, Activity::Teams::MaxTeamCount> m_DefaultDigStrengthPathfinders; //!< The array of pathfinders for each team to be used for default dig strength.
     // Is set to true on any frame the pathfinding data has been updated
     bool m_PathfindingUpdated;
     // Timer for when to do an update of the pathfinding data
@@ -1394,8 +1395,9 @@ private:
 	/// Gets the pathfinder for a given team.
 	/// </summary>
 	/// <param name="team">The team to get the pathfinder for. NoTeam is valid, and will give a shared pathfinder.</param>
+	/// <param name="digStrength">The dig strength to get the pathfinder for. A different pathfinder will be used if it's the default dig strength. Defaults to -1 so the normal pathfinder will be used if no argument is passed in.</param>
 	/// <returns>A pointer to the pathfinder for the given team.</returns>
-	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team);
+	std::unique_ptr<PathFinder> & GetPathFinder(Activity::Teams team, float digStrength = -1);
 
 	/// <summary>
 	/// Serializes the SceneObject via the Writer. Necessary because full serialization doesn't know how to deal with duplicate properties.

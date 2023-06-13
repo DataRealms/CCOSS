@@ -42,4 +42,4 @@ jobs:
       with:
         name: Cortex Command.exe
         path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/Cortex Command x64.exe
-        if-no-files-found: fail
+        if-no-files-found: error

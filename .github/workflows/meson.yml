@@ -99,7 +99,7 @@ jobs:
         with:
           name: CortexCommand (Linux)
           path: CortexCommand.AppImage
-          if-no-files-found: fail
+          if-no-files-found: error
 
   build-macos:
     runs-on: macos-latest
@@ -128,4 +128,4 @@ jobs:
         with:
           name: CortexCommand (macOS)
           path: build/CortexCommand
-          if-no-files-found: fail
+          if-no-files-found: error

@@ -1465,8 +1465,7 @@ int Scene::Save(Writer &writer) const {
 	for (std::list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
 	{
 		// Only write the area if it has any boxes/area at all
-		if (!(*aItr).HasNoArea())
-		{
+		if (doFullGameSave || !(*aItr).HasNoArea()) {
 			writer.NewProperty("AddArea");
 			writer << *aItr;
 		}

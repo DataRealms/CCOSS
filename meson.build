@@ -34,6 +34,11 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
+  
+  if host_machine.system()=='darwin'
+  build_rpath = '@executable_path/../external/lib/macos' # Add a new R_PATH CCCP can find libfmod.dylib on Darwin TODO: Confirm and validate this.
+	endif
+
   #suffix = 'x86_64'
 	if host_machine.system()=='linux'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH

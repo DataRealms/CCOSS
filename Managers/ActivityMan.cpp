@@ -110,6 +110,11 @@ namespace RTE {
 		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
 		// This is done after the activity is saved, in case the activity wants to add anything to the scene while saving.
 		modifiableScene->RetrieveSceneObjects(false);
+		for (SceneObject *objectToSave : *modifiableScene->GetPlacedObjects(Scene::PlacedObjectSets::PLACEONLOAD)) {
+			if (MovableObject *objectToSaveAsMovableObject = dynamic_cast<MovableObject *>(objectToSave)) {
+				objectToSaveAsMovableObject->OnGameSave();
+			}
+		}
 
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());

@@ -392,6 +392,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
+- New hardcoded `MovableObject` function `OnGameSave(self)` that gets run for each `MovableObject` with it when the game is saved. This can be used in tandem with custom values (for `MOSRotatings` and child classes) to store data, which can be read during `Create` when the game is loaded.
+	
 - New Lua `AEmitter` properties:  
 	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
 	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  

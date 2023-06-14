@@ -1606,7 +1606,8 @@ void BuyMenuGUI::Update()
         }
 
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging) {
+		bool isKeyboardControlled = !m_pController->IsMouseControlled() && !m_pController->IsGamepadControlled();
+        if (isKeyboardControlled ? (m_pController->IsState(PRESS_FACEBUTTON) && !m_pController->IsState(AIM_SHARP)) : (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging)) {
 			if (g_UInputMan.FlagShiftState()) {
 				ClearCartList();
 				pItem = nullptr;
@@ -1641,7 +1642,7 @@ void BuyMenuGUI::Update()
             DuplicateCartItem(m_ListItemIndex);
         }
 
-        if (m_pController->IsState(PRESS_FACEBUTTON)) {
+        if (isKeyboardControlled ? m_pController->IsState(AIM_SHARP) : m_pController->IsState(PRESS_FACEBUTTON)) {
             m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
         } else if (m_pController->IsState(RELEASE_FACEBUTTON)) {
             m_DraggedItemIndex = -1;

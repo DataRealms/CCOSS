@@ -2049,21 +2049,18 @@ void BuyMenuGUI::Update()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the menu
-
-void BuyMenuGUI::Draw(BITMAP *drawBitmap) const
-{
-    AllegroScreen drawScreen(drawBitmap);
-    m_pGUIController->Draw(&drawScreen);
-
-    // Draw the cursor on top of everything
-    if (IsEnabled() && m_pController->IsMouseControlled())
-        m_pGUIController->DrawMouse();
-        //draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+void BuyMenuGUI::Draw(BITMAP *drawBitmap) const {
+	AllegroScreen drawScreen(drawBitmap);
+	m_pGUIController->Draw(&drawScreen);
+	if (IsEnabled() && m_pController->IsMouseControlled()) {
+		if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
+			draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+		} else {
+			m_pGUIController->DrawMouse();
+		}
+	}
 }
 
 /*

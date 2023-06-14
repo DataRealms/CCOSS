@@ -48,6 +48,7 @@ namespace RTE {
 		m_SimplifiedCollisionDetection = false;
 		m_SceneBackgroundAutoScaleMode = 1;
 		m_DisableFactionBuyMenuThemes = false;
+		m_DisableFactionBuyMenuThemeCursors = false;
 		m_PathFinderGridNodeSize = c_PPM;
 		m_AIUpdateInterval = 2;
 
@@ -195,6 +196,8 @@ namespace RTE {
 			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "DisableFactionBuyMenuThemes") {
 			reader >> m_DisableFactionBuyMenuThemes;
+		} else if (propName == "DisableFactionBuyMenuThemeCursors") {
+			reader >> m_DisableFactionBuyMenuThemeCursors;
 		} else if (propName == "PathFinderGridNodeSize") {
 			reader >> m_PathFinderGridNodeSize;
 		} else if (propName == "AIUpdateInterval") {
@@ -388,6 +391,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
 		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
 		writer.NewPropertyWithValue("DisableFactionBuyMenuThemes", m_DisableFactionBuyMenuThemes);
+		writer.NewPropertyWithValue("DisableFactionBuyMenuThemeCursors", m_DisableFactionBuyMenuThemeCursors);
 		writer.NewPropertyWithValue("PathFinderGridNodeSize", m_PathFinderGridNodeSize);
 		writer.NewPropertyWithValue("AIUpdateInterval", m_AIUpdateInterval);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);

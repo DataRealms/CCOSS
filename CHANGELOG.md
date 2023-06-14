@@ -476,7 +476,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
 	Items in the cart will be indented to signify what actor's inventory they belong to.  
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+	You can now reorganize the cart by click-dragging. For kbd-only you can do this by holding the sharp aim key and pressing up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 

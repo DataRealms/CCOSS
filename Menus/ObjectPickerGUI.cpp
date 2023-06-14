@@ -598,6 +598,9 @@ namespace RTE {
 	void ObjectPickerGUI::Draw(BITMAP *drawBitmap) const {
 		AllegroScreen drawScreen(drawBitmap);
 		m_GUIControlManager->Draw(&drawScreen);
-		if (IsEnabled() && m_Controller->IsMouseControlled()) { draw_sprite(drawBitmap, s_Cursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY()); }
+		if (IsEnabled() && m_Controller->IsMouseControlled()) {
+			m_GUIControlManager->DrawMouse();
+			//draw_sprite(drawBitmap, s_Cursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+		}
 	}
 }

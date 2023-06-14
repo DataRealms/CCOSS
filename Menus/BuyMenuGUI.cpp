@@ -148,7 +148,7 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pController = pController;
 
     if (!m_pGUIScreen)
-        m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
+        m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer8());
     if (!m_pGUIInput)
         m_pGUIInput = new GUIInputWrapper(pController->GetPlayer());
     if (!m_pGUIController)
@@ -2062,8 +2062,8 @@ void BuyMenuGUI::Draw(BITMAP *drawBitmap) const
 
     // Draw the cursor on top of everything
     if (IsEnabled() && m_pController->IsMouseControlled())
-//        m_pGUIController->DrawMouse();
-        draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+        m_pGUIController->DrawMouse();
+        //draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
 }
 
 /*

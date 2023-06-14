@@ -169,7 +169,7 @@ void GUIListPanel::ClearList() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GUIListPanel::AddItem(const std::string &Name, const std::string &rightText, GUIBitmap *pBitmap, const Entity *pEntity, const int extraIndex) {
+void GUIListPanel::AddItem(const std::string &Name, const std::string &rightText, GUIBitmap *pBitmap, const Entity *pEntity, const int extraIndex, const int offsetX) {
 	Item *I = new Item;
 	I->m_Name = Name;
 	I->m_RightText = rightText;
@@ -179,6 +179,7 @@ void GUIListPanel::AddItem(const std::string &Name, const std::string &rightText
 	I->m_pEntity = pEntity;
 	I->m_Height = GetItemHeight(I);
 	I->m_ID = m_Items.size();
+	I->m_OffsetX = offsetX;
 
 	m_Items.push_back(I);
 
@@ -297,7 +298,6 @@ void GUIListPanel::BuildDrawBitmap() {
 	int x = m_HorzScroll->GetValue();
 	int y = 1 + (m_VertScroll->_GetVisible() ? -m_VertScroll->GetValue() : 0);
 	int stackHeight = 0;
-	int thirdWidth = m_Width / 3;
 
 	// Go through each item
 	for (it = m_Items.begin(); it != m_Items.end(); it++, Count++) {
@@ -310,11 +310,17 @@ void GUIListPanel::BuildDrawBitmap() {
 
 		Item *I = *it;
 
+		int itemX = x - I->m_OffsetX;
+		int itemY = y;
+
+		int itemWidth = m_Width - itemX;
+		int thirdWidth = m_Width / 3;
+
 		// Alternate drawing mode
 		// TODO: REMOVE MORE H-CODING
 		if (m_AlternateDrawMode) {
 			int rightTextWidth = I->m_RightText.empty() ? 0 : RIGHTTEXTWIDTH;//thirdWidth / 2;
-			int mainTextWidth = (thirdWidth * 2) - rightTextWidth;
+			int mainTextWidth = ((thirdWidth * 2) - rightTextWidth) - I->m_OffsetX;
 			int bitmapWidth = I->m_pBitmap ? I->m_pBitmap->GetWidth() : 0;
 			int bitmapHeight = I->m_pBitmap ? I->m_pBitmap->GetHeight() : 0;
 			if (!I->m_Name.empty() && !I->m_RightText.empty() && bitmapWidth > thirdWidth) {
@@ -324,43 +330,43 @@ void GUIListPanel::BuildDrawBitmap() {
 
 			int textHeight = m_Font->CalculateHeight(I->m_Name, mainTextWidth);
 			int itemHeight = std::max(bitmapHeight + 4, textHeight + 2);
-			int textX = thirdWidth + 6 - x;
-			int textY = y + (itemHeight / 2) + 1;
-			int bitmapY = y + (itemHeight / 2) - (bitmapHeight / 2) + 1;
+			int textX = thirdWidth + 6 - itemX;
+			int textY = itemY + (itemHeight / 2) + 1;
+			int bitmapY = itemY + (itemHeight / 2) - (bitmapHeight / 2) + 1;
 
 			// Draw the associated bitmap
 			if (I->m_pBitmap) {
-				// If it was deemed too large, draw it scaled
 				if (bitmapWidth == thirdWidth) {
-					I->m_pBitmap->DrawTransScaled(m_DrawBitmap, 3 - x, bitmapY, bitmapWidth, bitmapHeight);
-					// There's text to compete for space with
+					// If it was deemed too large, draw it scaled
+					I->m_pBitmap->DrawTransScaled(m_DrawBitmap, 3 - itemX, bitmapY, bitmapWidth, bitmapHeight);
 				} else if (!I->m_Name.empty()) {
-					I->m_pBitmap->DrawTrans(m_DrawBitmap, ((thirdWidth / 2) - (bitmapWidth / 2)) - x + 2, bitmapY, 0);
-					// No text, just bitmap, so give it more room
+					// There's text to compete for space with
+					I->m_pBitmap->DrawTrans(m_DrawBitmap, ((thirdWidth / 2) - (bitmapWidth / 2)) - itemX + 2, bitmapY, 0);
 				} else {
-					I->m_pBitmap->DrawTrans(m_DrawBitmap, ((thirdWidth / 2) - (bitmapWidth / 2)) - x + 4, bitmapY, 0);
+					// No text, just bitmap, so give it more room
+					I->m_pBitmap->DrawTrans(m_DrawBitmap, ((thirdWidth / 2) - (bitmapWidth / 2)) - itemX + 4, bitmapY, 0);
 				}
 			}
 
 			// Selected item
 			if (I->m_Selected && m_GotFocus) {
-				m_DrawBitmap->DrawLine(4, y + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + 1, m_SelectedColorIndex);
-				m_DrawBitmap->DrawLine(4, y + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + itemHeight, m_SelectedColorIndex);
+				m_DrawBitmap->DrawLine(4, itemY + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), itemY + 1, m_SelectedColorIndex);
+				m_DrawBitmap->DrawLine(4, itemY + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), itemY + itemHeight, m_SelectedColorIndex);
 				m_Font->SetColor(m_FontSelectColor);
-				m_Font->DrawAligned(m_DrawBitmap, x - 6 - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0) + m_Width, textY, I->m_RightText, GUIFont::Right, GUIFont::Middle, m_Width, m_FontShadow);
+				m_Font->DrawAligned(m_DrawBitmap, itemX - 6 - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0) + itemWidth, textY, I->m_RightText, GUIFont::Right, GUIFont::Middle, itemWidth, m_FontShadow);
 				m_Font->DrawAligned(m_DrawBitmap, textX, textY, I->m_Name, GUIFont::Left, GUIFont::Middle, mainTextWidth);
 			} else {
 				// Unselected
-				m_DrawBitmap->DrawLine(4, y + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + 1, m_UnselectedColorIndex);
-				m_DrawBitmap->DrawLine(4, y + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), y + itemHeight, m_UnselectedColorIndex);
+				m_DrawBitmap->DrawLine(4, itemY + 1, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), itemY + 1, m_UnselectedColorIndex);
+				m_DrawBitmap->DrawLine(4, itemY + itemHeight, m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() + 2 : 5), itemY + itemHeight, m_UnselectedColorIndex);
 				m_Font->SetColor(m_FontColor);
 				m_Font->SetKerning(m_FontKerning);
-				m_Font->DrawAligned(m_DrawBitmap, x - 6 - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0) + m_Width, textY, I->m_RightText, GUIFont::Right, GUIFont::Middle, m_Width, m_FontShadow);
+				m_Font->DrawAligned(m_DrawBitmap, itemX - 6 - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0) + itemWidth, textY, I->m_RightText, GUIFont::Right, GUIFont::Middle, itemWidth, m_FontShadow);
 				m_Font->DrawAligned(m_DrawBitmap, textX, textY, I->m_Name, GUIFont::Left, GUIFont::Middle, mainTextWidth, m_FontShadow);
 			}
 
 			// Draw another line to make sure the last item has two
-			if (it == m_Items.end() - 1) { m_DrawBitmap->DrawLine(4, y + itemHeight + 1, m_Width - 5, y + itemHeight + 1, m_UnselectedColorIndex); }
+			if (it == m_Items.end() - 1) { m_DrawBitmap->DrawLine(4, itemY + itemHeight + 1, m_Width - 5, itemY + itemHeight + 1, m_UnselectedColorIndex); }
 
 			// Save the item height for later use in selection routines etc
 			I->m_Height = itemHeight;
@@ -370,19 +376,19 @@ void GUIListPanel::BuildDrawBitmap() {
 			// Selected item
 			if (I->m_Selected) {
 				m_Font->SetColor(m_SelectedColorIndex);
-				m_DrawBitmap->DrawRectangle(1, y, m_Width - 2, m_Font->GetFontHeight(), m_SelectedColorIndex, m_GotFocus); // Filled if we have focus
+				m_DrawBitmap->DrawRectangle(1, itemY, itemWidth - 2, m_Font->GetFontHeight(), m_SelectedColorIndex, m_GotFocus); // Filled if we have focus
 			}
 
 			if (I->m_Selected && m_GotFocus) {
 				m_Font->SetColor(m_FontSelectColor);
-				m_Font->DrawAligned(m_DrawBitmap, x - 3 + m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0), y, I->m_RightText, GUIFont::Right);
-				m_Font->Draw(m_DrawBitmap, 4 - x, y, I->m_Name);
+				m_Font->DrawAligned(m_DrawBitmap, itemX - 3 + itemWidth - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0), itemY, I->m_RightText, GUIFont::Right);
+				m_Font->Draw(m_DrawBitmap, 4 - itemX, itemY, I->m_Name);
 			} else {
 				// Unselected
 				m_Font->SetColor(m_FontColor);
 				m_Font->SetKerning(m_FontKerning);
-				m_Font->DrawAligned(m_DrawBitmap, x - 3 + m_Width - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0), y, I->m_RightText, GUIFont::Right, GUIFont::Top, m_Width, m_FontShadow);
-				m_Font->Draw(m_DrawBitmap, 4 - x, y, I->m_Name, m_FontShadow);
+				m_Font->DrawAligned(m_DrawBitmap, itemX - 3 + itemWidth - (m_VertScroll->_GetVisible() ? m_VertScroll->GetWidth() : 0), itemY, I->m_RightText, GUIFont::Right, GUIFont::Top, itemWidth, m_FontShadow);
+				m_Font->Draw(m_DrawBitmap, 4 - itemX, itemY, I->m_Name, m_FontShadow);
 			}
 
 			y += GetItemHeight(I);
@@ -423,7 +429,7 @@ void GUIListPanel::OnMouseDown(int X, int Y, int Buttons, int Modifier) {
 	// Give this panel focus
 	SetFocus();
 
-	if ((Buttons & MOUSE_LEFT) && PointInside(X, Y)) {
+	if (PointInside(X, Y)) {
 		SelectItem(X, Y, Modifier);
 		SendSignal(MouseDown, Buttons);
 	} else {
@@ -437,10 +443,12 @@ void GUIListPanel::OnMouseDown(int X, int Y, int Buttons, int Modifier) {
 void GUIListPanel::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	if (!m_MouseScroll) {
 		return;
-	} else if (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y)) {
+	} else if ((PointInsideList(x, y) && !m_MultiSelect) || (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y))) {
 		ScrollBarScrolling(mouseWheelChange);
-	} else if (PointInsideList(x, y) && !m_MultiSelect) {
-		SelectionListScrolling(mouseWheelChange);
+	}
+	
+	if (m_HotTracking && GetItem(x, y) != nullptr && (GetItem(x, y) != GetSelected())) {
+		SelectItem(x, y, modifier);
 	}
 }
 
@@ -723,7 +731,9 @@ void GUIListPanel::ScrollBarScrolling(int mouseWheelChange) {
 	if (mouseWheelChange < 0) {
 		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
 		int maxValue = GetStackHeight(lastItem) + GetItemHeight(lastItem) - m_VertScroll->GetPageSize();
-		newValue = std::clamp(newValue, maxValue, 0);
+		if (newValue > maxValue) {
+			newValue = maxValue;
+		}
 	} else {
 		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
 		if (newValue < 0) {

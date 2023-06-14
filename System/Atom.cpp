@@ -271,14 +271,14 @@ namespace RTE {
 			bool validHit = true;
 
 			// Check for the collision point in the dominant direction of travel.
-			if (m_Delta[m_Dom] && ((m_Dom == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Dom == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
+			if (m_Delta[m_Dom] && ((m_Dom == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID) || (m_Dom == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID))) {
 				hit[m_Dom] = true;
 				m_LastHit.HitPoint = (m_Dom == X) ? Vector(m_HitPos[X], m_IntPos[Y]) : Vector(m_IntPos[X], m_HitPos[Y]);
 				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom];
 			}
 
 			// Check for the collision point in the submissive direction of travel.
-			if (m_SubStepped && m_Delta[m_Sub] && ((m_Sub == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y]) != g_NoMOID) || (m_Sub == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y]) != g_NoMOID))) {
+			if (m_SubStepped && m_Delta[m_Sub] && ((m_Sub == X && g_SceneMan.GetMOIDPixel(m_HitPos[X], m_IntPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID) || (m_Sub == Y && g_SceneMan.GetMOIDPixel(m_IntPos[X], m_HitPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID))) {
 				hit[m_Sub] = true;
 				if (m_LastHit.HitPoint.IsZero()) {
 					m_LastHit.HitPoint = (m_Sub == X) ? Vector(m_HitPos[X], m_IntPos[Y]) : Vector(m_IntPos[X], m_HitPos[Y]);
@@ -424,13 +424,7 @@ namespace RTE {
 		} else {
 			m_TerrainHitsDisabled = false;
 		}
-		/*
-		if (m_OwnerMO->m_HitsMOs && (m_MOIDHit = g_SceneMan.GetMOIDPixel(m_IntPos[X], m_IntPos[Y])) != g_NoMOID) {
-			m_MOHitsDisabled = true;
-		} else {
-			m_MOHitsDisabled = false;
-		}
-		*/
+
 		return m_MOIDHit != g_NoMOID || m_TerrainMatHit != g_MaterialAir;
 	}
 
@@ -540,7 +534,7 @@ namespace RTE {
 
 				// Detect hits with non-ignored MO's, if enabled.
 				if (m_OwnerMO->m_HitsMOs) {
-					m_MOIDHit = g_SceneMan.GetMOIDPixel(m_IntPos[X], m_IntPos[Y]);
+					m_MOIDHit = g_SceneMan.GetMOIDPixel(m_IntPos[X], m_IntPos[Y], m_OwnerMO->GetTeam());
 					if (IsIgnoringMOID(m_MOIDHit)) { m_MOIDHit = g_NoMOID; }
 
 					if (m_MOIDHit != g_NoMOID) {
@@ -648,11 +642,11 @@ namespace RTE {
 		Vector segTraj;
 		Vector hitAccel;
 
-		std::vector<std::pair<int, int>> trailPoints;
+		// Static buffer to avoid having to realloc with every atom's travel
+		// This saves us time because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
+		thread_local std::vector<std::pair<int, int>> trailPoints;
+		trailPoints.clear();
 
-		// This saves us a few ms because Atom::Travel does a lot of allocations and reallocations if you have a lot of particles.
-		// 6 should be enough for most not so fast travels, everything above simply works as usual.
-		trailPoints.reserve(6);
 		didWrap = false;
 		int removeOrphansRadius = m_OwnerMO->m_RemoveOrphanTerrainRadius;
 		int removeOrphansMaxArea = m_OwnerMO->m_RemoveOrphanTerrainMaxArea;
@@ -765,9 +759,8 @@ namespace RTE {
 				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
-				m_MOIDHit = g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]);
-
-				if (m_OwnerMO->m_HitsMOs && m_MOIDHit != g_NoMOID && !IsIgnoringMOID(m_MOIDHit)) {
+				m_MOIDHit = m_OwnerMO->m_HitsMOs ? g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y], m_OwnerMO->GetTeam()) : g_NoMOID;
+				if (m_MOIDHit != g_NoMOID && !IsIgnoringMOID(m_MOIDHit)) {
 					m_OwnerMO->SetHitWhatMOID(m_MOIDHit);
 
 					++hitCount;
@@ -807,9 +800,8 @@ namespace RTE {
 					// Gold special collection case!
 					// TODO: Make material IDs more robust!")
 					if (m_Material->GetIndex() == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
-						Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.Body[HITEE]->GetRootID()));
-						if (pActor) {
-							pActor->AddGold(m_OwnerMO->GetMass() * g_SceneMan.GetOzPerKg() * removeOrphansRadius ? 1.25F : 1.0F);
+						if (Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.Body[HITEE]->GetRootID())); actor && !actor->IsDead()) {
+							actor->AddGold(m_OwnerMO->GetMass() * g_SceneMan.GetOzPerKg() * removeOrphansRadius ? 1.25F : 1.0F);
 							m_OwnerMO->SetToDelete(true);
 							// This is to break out of the do-while and the function properly.
 							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
@@ -818,14 +810,14 @@ namespace RTE {
 					}
 
 					// Check for the collision point in the dominant direction of travel.
-					if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+					if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID) || (dom == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID))) {
 						hit[dom] = true;
 						m_LastHit.HitPoint = (dom == X) ? Vector(hitPos[X], intPos[Y]) : Vector(intPos[X], hitPos[Y]);
 						m_LastHit.BitmapNormal[dom] = -increment[dom];
 					}
 
 					// Check for the collision point in the submissive direction of travel.
-					if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID))) {
+					if (subStepped && delta[sub] && ((sub == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID) || (sub == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y], m_OwnerMO->GetTeam()) != g_NoMOID))) {
 						hit[sub] = true;
 						if (m_LastHit.HitPoint.IsZero()) {
 							m_LastHit.HitPoint = (sub == X) ? Vector(hitPos[X], intPos[Y]) : Vector(intPos[X], hitPos[Y]);
@@ -900,7 +892,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= RandomNum() && velocity.MagnitudeIsGreaterThan(0.5F)) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
@@ -984,11 +976,21 @@ namespace RTE {
 		//RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segments!!");
 
 		// Draw the trail
-		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
+		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength && trailPoints.size() > 0) {
+			Vector topLeftExtent = Vector(trailPoints[0].first, trailPoints[0].second);
+			Vector bottomRightExtent = topLeftExtent + Vector(1.0F, 1.0F);
+
 			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
+
+				topLeftExtent.m_X = std::min(topLeftExtent.m_X, static_cast<float>(trailPoints[i].first));
+				topLeftExtent.m_Y = std::min(topLeftExtent.m_Y, static_cast<float>(trailPoints[i].second));
+				bottomRightExtent.m_X = std::max(bottomRightExtent.m_X, static_cast<float>(trailPoints[i].first));
+				bottomRightExtent.m_Y = std::max(bottomRightExtent.m_Y, static_cast<float>(trailPoints[i].second));
 			}
+
+			g_SceneMan.RegisterDrawing(trailBitmap, g_NoMOID, topLeftExtent.m_X, topLeftExtent.m_Y, bottomRightExtent.m_X + 1.0F, bottomRightExtent.m_Y + 1.0F);
 		}
 
 		// Unlock all bitmaps involved.

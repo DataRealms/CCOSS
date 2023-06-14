@@ -1,5 +1,6 @@
 sources += files(
 'MicroPather/micropather.cpp',
+#'glad/gl.c',
 'Semver200/Semver200_comparator.cpp',
 'Semver200/Semver200_modifier.cpp',
 'Semver200/Semver200_parser.cpp',
@@ -24,6 +25,9 @@ sources += files(
 'Timer.cpp',
 'RTEError.cpp',
 'Matrix.cpp',
+#'ScreenShader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
+#'GLCheck.cpp',
+'SpatialPartitionGrid.cpp',
 )

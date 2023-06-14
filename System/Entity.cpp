@@ -17,15 +17,12 @@ namespace RTE {
 		m_DefinedInModule = -1;
 		m_PresetDescription.clear();
 		m_Groups.clear();
-		m_LastGroupSearch.clear();
-		m_LastGroupResult = false;
 		m_RandomWeight = 100;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Entity::Create() {
-		m_Groups.push_back("All"); // Special "All" group that includes.. all
 		return 0;
 	}
 
@@ -38,7 +35,7 @@ namespace RTE {
 		m_PresetDescription = reference.m_PresetDescription;
 
 		for (const std::string &group : reference.m_Groups) {
-			m_Groups.push_back(group);
+			m_Groups.emplace(group);
 		}
 		m_RandomWeight = reference.m_RandomWeight;
 		return 0;
@@ -105,15 +102,18 @@ namespace RTE {
 		// Is an original preset definition
 		if (m_IsOriginalPreset) {
 			writer.NewPropertyWithValue("PresetName", m_PresetName);
+
+			if (!m_PresetDescription.empty()) {
+				writer.NewPropertyWithValue("Description", m_PresetDescription);
+			}
 		// Only write out a copy reference if there is one
 		} else if (!m_PresetName.empty() && m_PresetName != "None") {
 			writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		}
-		if (!m_PresetDescription.empty()) { writer.NewPropertyWithValue("Description", m_PresetDescription); }
 
 		// TODO: Make proper save system that knows not to save redundant data!
 		/*
-		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
+		for (auto itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
 			writer.NewPropertyWithValue("AddToGroup", *itr);
 		}
 		*/
@@ -169,33 +169,6 @@ namespace RTE {
 		m_IsOriginalPreset = true; // This now a unique snowflake
 		m_DefinedInModule = whichModule;
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool Entity::IsInGroup(const std::string &whichGroup) {
-		// Do quick check against last search try to see if we can answer without searching again
-		if (!whichGroup.empty() && m_LastGroupSearch == whichGroup) {
-			return m_LastGroupResult;
-		}
-		// Searched for Any or All yields ALL
-		if (whichGroup == "Any" || whichGroup == "All") {
-			return true;
-		}
-		// Searched for None returns false
-		if (whichGroup == "None") {
-			return false;
-		}
-		for (std::list<std::string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
-			if (whichGroup == *itr) {
-				// Save the search result for quicker response next time
-				m_LastGroupSearch = whichGroup;
-				return m_LastGroupResult = true;
-			}
-		}
-		// Save the search result for quicker response next time
-		m_LastGroupSearch = whichGroup;
-		return m_LastGroupResult = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

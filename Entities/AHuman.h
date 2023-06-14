@@ -157,16 +157,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGoldCarried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets how many ounces of gold this Actor is carrying.
-// Arguments:       None.
-// Return value:    The current amount of carried gold, in Oz.
-
-    float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total liquidation value of this Actor and all its carried
@@ -388,18 +378,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
-	/// <summary>
-	/// Gets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
-	/// </summary>
-	/// <returns>The angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</returns>
-	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
-
-	/// <summary>
-	/// Sets the angle to which this AHuman's HDFirearms should point when being reloaded one-handed.
-	/// </summary>
-	/// <param name="newValue">The new angle to which this AHuman's HDFirearms should point when being reloaded one-handed.</param>
-	void SetOneHandedReloadAngle(float newValue) { m_OneHandedReloadAngle = newValue; }
-
 	/// Gets this AHuman's UpperBodyState.
 	/// </summary>
 	/// <returns>This AHuman's UpperBodyState.</returns>
@@ -410,6 +388,28 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// </summary>
 	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
 	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
+
+	/// Gets this AHuman's MovementState.
+	/// </summary>
+	/// <returns>This AHuman's MovementState.</returns>
+	MovementState GetMovementState() const { return m_MoveState; }
+
+	/// <summary>
+	/// Sets this AHuman's MovementState to the new state.
+	/// </summary>
+	/// <param name="newMovementState">This AHuman's new MovementState.</param>
+	void SetMovementState(MovementState newMovementState) { m_MoveState = newMovementState; }
+
+	/// Gets this AHuman's ProneState.
+	/// </summary>
+	/// <returns>This AHuman's ProneState.</returns>
+	ProneState GetProneState() const { return m_ProneState; }
+
+	/// <summary>
+	/// Sets this AHuman's ProneState to the new state.
+	/// </summary>
+	/// <param name="newProneState">This AHuman's new ProneState.</param>
+	void SetProneState(ProneState newProneState) { m_ProneState = newProneState; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -534,29 +534,18 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 	bool EquipThrowable(bool doEquip = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EquipDiggingTool
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Switches the currently held device (if any) to the first found digging
-//                  tool in the inventory. If the held device already is a digging tool,
-//                  or no digging tool is in inventory, nothing happens.
-// Arguments:       Whether to actually equip any matching item found in the inventory,
-//                  or just report that it's there or not.
-// Return value:    Whether a digging tool was successfully switched to.
-
+	/// <summary>
+	/// Switches the currently held device (if any) to the strongest digging tool in the inventory.
+	/// </summary>
+	/// <param name="doEquip">Whether to actually equip the strongest digging tool, or just report whether a digging tool was found.</param>
+	/// <returns>Whether or not the strongest digging tool was successfully equipped.</returns>
 	bool EquipDiggingTool(bool doEquip = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Estimates what material strength any digger this actor is carrying
-//                  can penetrate.
-// Arguments:       None.
-// Return value:    A default dig strength (what the actor can be expected to just walk through without tools), or the maximum material strength this actor's digger can penetrate.
-
-    float EstimateDigStrength() override;
+    /// <summary>
+    /// Estimates what material strength any digger this AHuman is carrying can penetrate.
+    /// </summary>
+    /// <returns>The maximum material strength this AHuman's digger can penetrate, or a default dig strength if they don't have a digger.</returns>
+    float EstimateDigStrength() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -615,7 +604,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <summary>
 	/// Unequips whatever is in either of the arms and puts them into the inventory.
 	/// </summary>
-	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
+	void UnequipArms() { UnequipBGArm(); UnequipFGArm(); }
 
 	/// <summary>
 	/// Gets the FG Arm's HeldDevice. Ownership is NOT transferred.
@@ -991,17 +980,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 protected:
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ChunkGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Converts an appropriate amount of gold tracked by Actor, and puts it
-//                  in a MovableObject which is put into inventory.
-// Arguments:       None.
-// Return value:    None.
-
-    void ChunkGold();
-
-
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.
 	/// </summary>
@@ -1043,8 +1021,9 @@ protected:
 	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
+	bool m_CanActivateBGItem; //!< A flag for whether or not the BG item is waiting to be activated separately. Used for dual-wielding. TODO: Should this be able to be toggled off per actor, device, or controller?
+	bool m_TriggerPulled; //!< Internal flag for whether this AHuman is currently holding down the trigger of a HDFirearm. Used for dual-wielding.
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
-	float m_OneHandedReloadAngle; //!< The angle to which HDFirearms should point when they're being reloaded one-handed.
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.
@@ -1069,8 +1048,6 @@ protected:
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart
     Timer m_StrideTimer;
-    // How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-    int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
 	// The duration it takes this AHuman to fully charge a throw.

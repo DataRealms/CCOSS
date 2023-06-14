@@ -16,7 +16,7 @@ namespace RTE {
 		m_MinVelocity = 0;
 		m_MaxVelocity = 0;
 		m_LifeVariation = 0.1F;
-		m_InheritsVel = true;
+		m_InheritsVel = 1.0F;
 		m_IgnoresTeamHits = false;
 		m_SpreadMode = SpreadMode::SpreadRandom;
 	}
@@ -77,7 +77,8 @@ namespace RTE {
 		// All of this is needed to make a preset look like not original and save as CopyOf instead of separate preset.
 		std::unique_ptr<Entity> gibEntity(m_GibParticle->Clone());
 		gibEntity->ResetOriginalPresetFlag();
-		writer << gibEntity.get();
+		gibEntity->Entity::Save(writer);
+		writer.ObjectEnd();
 
 		writer.NewProperty("Offset");
 		writer << m_Offset;

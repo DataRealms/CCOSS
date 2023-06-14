@@ -311,9 +311,15 @@ BITMAP *gfx_directx_make_bitmap_from_surface(DDRAW_SURFACE *surf, int w, int h, 
    BITMAP *bmp;
    int i;
 
-   bmp = (BITMAP *) _AL_MALLOC(sizeof(BITMAP) + sizeof(char *) * h);
+   bmp = _AL_MALLOC(sizeof(BITMAP));
    if (!bmp)
       return NULL;
+
+   bmp->line = _AL_MALLOC(sizeof(char *) * h);
+   if (!bmp->line) {
+	   _AL_FREE(bmp);
+	   return NULL;
+   }
 
    bmp->w =w;
    bmp->cr = w;
@@ -667,8 +673,8 @@ void gfx_directx_destroy_system_bitmap(BITMAP *bmp)
            return;
       }
 
-      if (bmp->dat)
-        _AL_FREE(bmp->dat);
+      _AL_FREE(bmp->line);
+      _AL_FREE(bmp->dat);
 
       _AL_FREE(bmp);
 

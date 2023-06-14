@@ -42,6 +42,9 @@ namespace RTE {
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.
 
+	static constexpr int c_MinResX = 640; //!< Minimum game window width.
+	static constexpr int c_MinResY = 384; //!< Minimum game window height.
+
 	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
 	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.
 
@@ -53,6 +56,7 @@ namespace RTE {
 	static constexpr int c_BlendAmountStep = 5; //!< The multiple to round blend amounts to when creating new color maps. This is to reduce the ridiculous amount of color map variants that can be created.
 
 	enum ColorKeys {
+		g_InvalidColor = -1,
 		g_MaskColor = 0, //!< Mask color for all 8bpp bitmaps (palette index 0 (255,0,255)). This color is fully transparent.
 		//g_MOIDMaskColor = 0, //!< Mask color for 8bpp MOID layer bitmaps (palette index 0 (255,0,255)). This color is fully transparent.
 		g_MOIDMaskColor = 0xF81F, //!< Mask color for 16bpp MOID layer bitmaps (255,0,255). This color is fully transparent.
@@ -72,6 +76,7 @@ namespace RTE {
 		g_MaterialGold = 2,
 		g_MaterialSand = 8,
 		g_MaterialGrass = 128,
+		g_MaterialRubber = 176,
 		g_MaterialDoor = 181
 	};
 
@@ -244,9 +249,9 @@ namespace RTE {
 	/// </summary>
 	enum MouseButtons {
 		MOUSE_NONE = -1,
-		MOUSE_LEFT = 0,
-		MOUSE_RIGHT,
+		MOUSE_LEFT = 1,
 		MOUSE_MIDDLE,
+		MOUSE_RIGHT,
 		MAX_MOUSE_BUTTONS
 	};
 
@@ -267,6 +272,15 @@ namespace RTE {
 		JOY_10,
 		JOY_11,
 		JOY_12,
+		JOY_13,
+		JOY_15,
+		JOY_16,
+		JOY_17,
+		JOY_18,
+		JOY_19,
+		JOY_20,
+		JOY_21,
+		JOY_22,
 		MAX_JOY_BUTTONS
 	};
 

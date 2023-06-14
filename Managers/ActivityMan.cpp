@@ -1,15 +1,18 @@
 #include "ActivityMan.h"
 #include "Activity.h"
 
+#include "CameraMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "MetaMan.h"
 
 #include "GAScripted.h"
+#include "SLTerrain.h"
 
 #include "EditorActivity.h"
 #include "SceneEditor.h"
@@ -32,6 +35,8 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_ActivityAllowsSaving = false;
+		m_ActiveSavingThreadCount = 0;
+		m_IsLoading = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
@@ -58,7 +63,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::SaveCurrentGame(const std::string &fileName) const {
+	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
 
@@ -67,7 +77,7 @@ namespace RTE {
 			return false;
 		}
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function. Note that multiplayer and conquest games cannot be saved like this.");
+			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
 		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
@@ -76,31 +86,40 @@ namespace RTE {
 			return false;
 		}
 
+		IncrementSavingThreadCount();
+
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
 		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));
 
 		// Delete any existing objects from our scene - we don't want to replace broken doors or repair any stuff when we load.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, true);
 
-		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
-		modifiableScene->RetrieveSceneObjects(false);
-
 		// Become our own original preset, instead of being a copy of the Scene we got cloned from, so we don't still pick up the PlacedObjectSets from our parent when loading.
 		modifiableScene->SetPresetName(fileName);
 		modifiableScene->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 		modifiableScene->SetSavedGameInternal(true);
 
+		// Make sure the terrain is also treated as an original preset, otherwise it will screw up if we save then load then save again, since it'll try to be a CopyOf of itself.
+		modifiableScene->GetTerrain()->SetPresetName(fileName);
+		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
+
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
+
+		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
+		// This is done after the activity is saved, in case the activity wants to add anything to the scene while saving.
+		modifiableScene->RetrieveSceneObjects(false);
+
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
-		auto saveWriterData = [](std::unique_ptr<Writer> writerToSave) {
+		auto saveWriterData = [this](std::unique_ptr<Writer> writerToSave) {
 			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
 			writerToSave->EndWrite();
+			DecrementSavingThreadCount();
 		};
 
 		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
@@ -116,11 +135,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) const {
+	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {
+		if (IsSaving() || m_IsLoading) {
+			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
+			return false;
+		}
+		m_IsLoading = true;
+
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, true);
+		Reader reader(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini", true, nullptr, false);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
@@ -146,12 +171,17 @@ namespace RTE {
 
 		// SetSceneToLoad() doesn't Clone(), but when the Activity starts, it will eventually call LoadScene(), which does a Clone() of scene internally.
 		g_SceneMan.SetSceneToLoad(scene.get(), true, true);
+		// Saved Scenes get their presetname set to their filename to ensure they're separate from the preset Scene they're based off of.
+		// However, saving a game you've already saved will end up with its OriginalScenePresetName set to the filename, which will screw up restarting the Activity, so we set its PresetName here.
+		scene->SetPresetName(originalScenePresetName);
 		// For starting Activity, we need to directly clone the Activity we want to start.
 		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
-		// When this method exits, our Scene will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
+		// When this method exits, our Scene object will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");
+
+		m_IsLoading = false;
 		return true;
 	}
 
@@ -304,7 +334,7 @@ namespace RTE {
 		if (const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName)) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
 			if (GameActivity *newActivityAsGameActivity = dynamic_cast<GameActivity *>(newActivity)) {
-				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMedium());
+				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMediumDifficulty());
 				if (newActivityAsGameActivity->GetStartingGold() <= 0) {
 					newActivityAsGameActivity->SetStartingGold(static_cast<int>(newActivityAsGameActivity->GetTeamFunds(0)));
 				} else {
@@ -357,8 +387,8 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
+			g_FrameMan.ClearBackBuffer32();
+			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -371,8 +401,8 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.ClearBackBuffer32();
+		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

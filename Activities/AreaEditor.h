@@ -208,19 +208,13 @@ ClassInfoGetters;
 
 protected:
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the current scene to an appropriate ini file, and asks user if
-//                  they want to overwrite first if scene of this name exists.
-// Arguments:       The name of the new scene to be saved.
-//                  Whetehr to force any existing Scene of that name to be overwritten if
-//                  it already exists.
-// Return value:    Whether actually managed to save. Will return false both if a scene
-//                  of this name already exists, or if other error.
-
-    bool SaveScene(std::string saveAsName, bool forceOverwrite = false);
+	/// <summary>
+	/// Saves the current Scene to an appropriate ini file, and asks user if they want to overwrite first if scene of this name exists.
+	/// </summary>
+	/// <param name="saveAsName">The name of the new Scene to be saved.</param>
+	/// <param name="forceOverwrite">Whether to force any existing Scene of that name to be overwritten if it already exists.</param>
+	/// <returns>Whether actually managed to save. Will return false both if a scene of this name already exists, or if other error.</returns>
+	bool SaveScene(const std::string &saveAsName, bool forceOverwrite = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -281,7 +275,7 @@ protected:
 
     // The textbox for entering new Area names
     GUITextBox *m_pNewAreaName;
-//    // Number which  
+//    // Number which
 //    int m_NewAreaNumber;
 
 

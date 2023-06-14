@@ -28,6 +28,7 @@
 #include "BunkerAssemblyScheme.h"
 #include "BunkerAssembly.h"
 #include "SLBackground.h"
+#include "EditorActivity.h"
 
 #include "AEmitter.h"
 #include "ADoor.h"
@@ -38,6 +39,7 @@
 #include "ACDropShip.h"
 #include "HDFirearm.h"
 #include "Magazine.h"
+#include "ThrownDevice.h"
 
 namespace RTE {
 
@@ -392,8 +394,11 @@ Vector Scene::Area::GetCenterPoint() const
 {
     Vector areaCenter;
 
-    if (!m_BoxList.empty())
-    {
+    if (!m_BoxList.empty()) {
+		if (m_BoxList.size() == 1) {
+			return m_BoxList[0].GetCenter();
+		}
+
         float totalWeight = 0;
         for (std::vector<Box>::const_iterator itr = m_BoxList.begin(); itr != m_BoxList.end(); ++itr)
         {
@@ -447,9 +452,13 @@ void Scene::Clear()
     m_AutoDesigned = true;
     m_TotalInvestment = 0;
     m_pTerrain = 0;
-    for (std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
+	m_NoTeamPathFinder.reset();
+    for (std::unique_ptr<PathFinder> &pathFinder : m_PathFinders) {
         pathFinder.reset();
     }
+	for (std::unique_ptr<PathFinder> &defaultDigStrengthPathFinder : m_DefaultDigStrengthPathfinders) {
+		defaultDigStrengthPathFinder.reset();
+	}
     m_PathfindingUpdated = false;
     m_PartialPathUpdateTimer.Reset();
 
@@ -571,6 +580,7 @@ int Scene::Create(const Scene &reference)
 		// Destination
 		m_pPreviewBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
 		RTEAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
+		m_PreviewBitmapFile = reference.m_PreviewBitmapFile;
 
 		// Copy!
 		blit(pCopyFrom, m_pPreviewBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -919,16 +929,20 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // Pathfinding init
     if (initPathfinding)
     {
-        // Create the pathfinding stuff based on the current scene
+		// Create the pathfinding stuff based on the current scene
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-        // TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+		// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 		//int sceneArea = GetWidth() * GetHeight();
-        //unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
+		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
-        for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+		m_NoTeamPathFinder = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+		for (int i = 0; i < m_PathFinders.size(); ++i) {
+			m_PathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+		}
+		for (int i = 0; i < m_DefaultDigStrengthPathfinders.size(); ++i) {
+			m_DefaultDigStrengthPathfinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
         }
         ResetPathFinding();
     }
@@ -1025,14 +1039,15 @@ int Scene::ExpandAIPlanAssemblySchemes()
 
 int Scene::SaveData(std::string pathBase)
 {
-    if (pathBase.empty())
+    const std::string fullPathBase = g_PresetMan.GetFullModulePath(pathBase);
+    if (fullPathBase.empty())
         return -1;
 
     if (!m_pTerrain)
         return 0;
 
     // Save Terrain's data
-    if (m_pTerrain->SaveData(pathBase) < 0)
+    if (m_pTerrain->SaveData(fullPathBase) < 0)
     {
         RTEAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
@@ -1048,7 +1063,7 @@ int Scene::SaveData(std::string pathBase)
         {
             std::snprintf(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
-            if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".png") < 0)
+            if (m_apUnseenLayer[team]->SaveData(fullPathBase + " US" + str + ".png") < 0)
             {
                 g_ConsoleMan.PrintString("ERROR: Saving unseen layer " + m_apUnseenLayer[team]->GetPresetName() + "\'s data failed!");
                 return -1;
@@ -1328,6 +1343,9 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
 
 int Scene::Save(Writer &writer) const {
     Entity::Save(writer);
+
+	bool doFullGameSave = !dynamic_cast<EditorActivity *>(g_ActivityMan.GetActivity());
+
     writer.NewPropertyWithValue("LocationOnPlanet", m_Location);
     writer.NewPropertyWithValue("MetagamePlayable", m_MetagamePlayable);
 	//Do not save preview if it's path is empty, for example in metagame
@@ -1349,35 +1367,13 @@ int Scene::Save(Writer &writer) const {
 		writer.NewPropertyWithValue(playerNumberString + "BuildBudgetRatio", m_BuildBudgetRatio[player]);
 		if (m_ResidentBrains[player]) {
 			writer.NewProperty(playerNumberString + "ResidentBrain");
-			SaveSceneObject(writer, m_ResidentBrains[player], false);
+			SaveSceneObject(writer, m_ResidentBrains[player], false, doFullGameSave);
 		}
 	}
+
 	writer.NewPropertyWithValue("AutoDesigned", m_AutoDesigned);
 	writer.NewPropertyWithValue("TotalInvestment", m_TotalInvestment);
 	writer.NewPropertyWithValue("Terrain", m_pTerrain);
-
-	writer.NewProperty("P1BuildBudget");
-	writer << m_BuildBudget[Players::PlayerOne];
-	writer.NewProperty("P2BuildBudget");
-	writer << m_BuildBudget[Players::PlayerTwo];
-	writer.NewProperty("P3BuildBudget");
-	writer << m_BuildBudget[Players::PlayerThree];
-	writer.NewProperty("P4BuildBudget");
-	writer << m_BuildBudget[Players::PlayerFour];
-	writer.NewProperty("P1BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerOne];
-	writer.NewProperty("P2BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerTwo];
-	writer.NewProperty("P3BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerThree];
-	writer.NewProperty("P4BuildBudgetRatio");
-	writer << m_BuildBudgetRatio[Players::PlayerFour];
-	writer.NewProperty("AutoDesigned");
-	writer << m_AutoDesigned;
-	writer.NewProperty("TotalInvestment");
-	writer << m_TotalInvestment;
-	writer.NewProperty("Terrain");
-	writer << m_pTerrain;
 
     for (int set = PlacedObjectSets::PLACEONLOAD; set < PlacedObjectSets::PLACEDSETSCOUNT; ++set) {
 		for (const SceneObject *placedObject : m_PlacedObjects[set]) {
@@ -1397,7 +1393,7 @@ int Scene::Save(Writer &writer) const {
 			}
 
 			//writer << placedObject;
-			SaveSceneObject(writer, placedObject, false);
+			SaveSceneObject(writer, placedObject, false, doFullGameSave);
 		}
     }
 
@@ -1469,8 +1465,7 @@ int Scene::Save(Writer &writer) const {
 	for (std::list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
 	{
 		// Only write the area if it has any boxes/area at all
-		if (!(*aItr).HasNoArea())
-		{
+		if (doFullGameSave || !(*aItr).HasNoArea()) {
 			writer.NewProperty("AddArea");
 			writer << *aItr;
 		}
@@ -1483,11 +1478,11 @@ int Scene::Save(Writer &writer) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const {
-	auto WriteHardcodedAttachableOrNone = [this, &writer](const std::string &propertyName, const Attachable *harcodedAttachable) {
+void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable, bool saveFullData) const {
+	auto WriteHardcodedAttachableOrNone = [this, &writer, &saveFullData](const std::string &propertyName, const Attachable *harcodedAttachable) {
 		if (harcodedAttachable) {
 			writer.NewProperty(propertyName);
-			SaveSceneObject(writer, harcodedAttachable, true);
+			SaveSceneObject(writer, harcodedAttachable, true, saveFullData);
 		} else {
 			writer.NewPropertyWithValue(propertyName, "None");
 		}
@@ -1496,55 +1491,88 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	writer.ObjectStart(sceneObjectToSave->GetClassName());
 	writer.NewPropertyWithValue("CopyOf", sceneObjectToSave->GetModuleAndPresetName());
 
+	if (saveFullData) {
+		for (const std::string &group : *sceneObjectToSave->GetGroups()) {
+			writer.NewPropertyWithValue("AddToGroup", group);
+		}
+	}
+
+	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
+	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
 	if (!isChildAttachable) {
-		writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
-		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
+	}
+	if (saveFullData) {
+		writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
 	}
 
 	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
-	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && !movableObjectToSave->GetVel().IsZero() &&!isChildAttachable) {
+	if (const MovableObject *movableObjectToSave = dynamic_cast<const MovableObject *>(sceneObjectToSave); movableObjectToSave && saveFullData) {
+		writer.NewPropertyWithValue("HUDVisible", movableObjectToSave->GetHUDVisible());
 		writer.NewPropertyWithValue("Velocity", movableObjectToSave->GetVel());
 		writer.NewPropertyWithValue("LifeTime", movableObjectToSave->GetLifetime());
 		writer.NewPropertyWithValue("Age", movableObjectToSave->GetAge());
+		writer.NewPropertyWithValue("PinStrength", movableObjectToSave->GetPinStrength());
 	}
 
 	if (const MOSprite *moSpriteToSave = dynamic_cast<const MOSprite *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("HFlipped", moSpriteToSave->IsHFlipped());
-		writer.NewPropertyWithValue("Rotation", moSpriteToSave->GetRotMatrix());
-		writer.NewPropertyWithValue("AngularVel", moSpriteToSave->GetAngularVel());
+		if (saveFullData || dynamic_cast<const ADoor *>(moSpriteToSave)) {
+			writer.NewPropertyWithValue("Rotation", moSpriteToSave->GetRotMatrix());
+		}
+		if (saveFullData) {
+			writer.NewPropertyWithValue("AngularVel", moSpriteToSave->GetAngularVel());
+		}
 	}
 
 	if (const MOSRotating *mosRotatingToSave = dynamic_cast<const MOSRotating *>(sceneObjectToSave)) {
-		const std::list<Attachable *> &attachablesToSave = mosRotatingToSave->GetAttachableList();
+		if (saveFullData) {
+			const std::list<Attachable *> &attachablesToSave = mosRotatingToSave->GetAttachableList();
 
-		// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
-		// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
-		if (!attachablesToSave.empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
-		} else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
-			writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
-		}
+			// If this MOSRotating has any Attachables, we have to add a special behaviour property that'll delete them all so they can be re-read. This will allow us to handle Attachables with our limited serialization.
+			// Alternatively, if the MOSRotating has no Attachables but its preset does, we need to set the flag, because that means this is missing Attachables, and we don't want to magically regenerate them when a game is loaded.
+			if (!attachablesToSave.empty()) {
+				writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
+			}
+			else if (const MOSRotating *presetOfMOSRotatingToSave = dynamic_cast<const MOSRotating *>(g_PresetMan.GetEntityPreset(mosRotatingToSave->GetClassName(), mosRotatingToSave->GetPresetName(), mosRotatingToSave->GetModuleID())); presetOfMOSRotatingToSave && !presetOfMOSRotatingToSave->GetAttachableList().empty()) {
+				writer.NewPropertyWithValue("SpecialBehaviour_ClearAllAttachables", true);
+			}
 
-		for (const Attachable *attachable : attachablesToSave) {
-			if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
-				writer.NewProperty("Add" + attachable->GetClassName());
-				SaveSceneObject(writer, attachable, true);
+			for (const Attachable *attachable : attachablesToSave) {
+				if (!mosRotatingToSave->AttachableIsHardcoded(attachable)) {
+					writer.NewProperty("AddAttachable");
+					SaveSceneObject(writer, attachable, true, saveFullData);
+				}
+			}
+			for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
+				writer.NewProperty("SpecialBehaviour_AddWound");
+				SaveSceneObject(writer, wound, true, saveFullData);
 			}
 		}
-		for (const AEmitter *wound : mosRotatingToSave->GetWoundList()) {
-			writer.NewProperty("SpecialBehaviour_AddWound");
-			SaveSceneObject(writer, wound, true);
+
+		for (auto &[key, value] : mosRotatingToSave->GetStringValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("StringValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
+		}
+
+		for (auto &[key, value] : mosRotatingToSave->GetNumberValueMap()) {
+			writer.NewProperty("AddCustomValue");
+			writer.ObjectStart("NumberValue");
+			writer.NewPropertyWithValue(key, value);
+			writer.ObjectEnd();
 		}
 	}
 
-	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave)) {
+	if (const Attachable *attachableToSave = dynamic_cast<const Attachable *>(sceneObjectToSave); attachableToSave && saveFullData) {
 		writer.NewPropertyWithValue("ParentOffset", attachableToSave->GetParentOffset());
 		writer.NewPropertyWithValue("DrawAfterParent", attachableToSave->IsDrawnAfterParent());
 		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", attachableToSave->GetDeleteWhenRemovedFromParent());
+		writer.NewPropertyWithValue("GibWhenRemovedFromParent", attachableToSave->GetGibWhenRemovedFromParent());
 		writer.NewPropertyWithValue("JointStrength", attachableToSave->GetJointStrength());
 		writer.NewPropertyWithValue("JointStiffness", attachableToSave->GetJointStiffness());
 		writer.NewPropertyWithValue("JointOffset", attachableToSave->GetJointOffset());
@@ -1566,7 +1594,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmitterDamageMultiplier", aemitterToSave->GetEmitterDamageMultiplier());
 			writer.NewPropertyWithValue("BurstSpacing", aemitterToSave->GetBurstSpacing());
 			writer.NewPropertyWithValue("BurstTriggered", aemitterToSave->IsSetToBurst());
-			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngle());
+			writer.NewPropertyWithValue("EmissionAngle", aemitterToSave->GetEmitAngleMatrix());
 			writer.NewPropertyWithValue("EmissionOffset", aemitterToSave->GetEmitOffset());
 			writer.NewPropertyWithValue("EmissionDamage", aemitterToSave->GetEmitDamage());
 			WriteHardcodedAttachableOrNone("Flash", aemitterToSave->GetFlash());
@@ -1586,6 +1614,11 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			}
 		}
 
+		if (const HeldDevice *heldDeviceToSave = dynamic_cast<const HeldDevice *>(sceneObjectToSave)) {
+			writer.NewPropertyWithValue("SpecialBehaviour_Activated", heldDeviceToSave->IsActivated());
+			writer.NewPropertyWithValue("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", heldDeviceToSave->GetActivationTimer().GetElapsedSimTimeMS());
+		}
+
 		if (const HDFirearm *hdFirearmToSave = dynamic_cast<const HDFirearm *>(sceneObjectToSave)) {
 			WriteHardcodedAttachableOrNone("Magazine", hdFirearmToSave->GetMagazine());
 			WriteHardcodedAttachableOrNone("Flash", hdFirearmToSave->GetFlash());
@@ -1599,46 +1632,79 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
 		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
 		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
+		if (saveFullData) {
+			writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
+			writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
+
+			int aiModeToSave = actorToSave->GetAIMode() == Actor::AIMode::AIMODE_SQUAD ? Actor::AIMode::AIMODE_GOTO : actorToSave->GetAIMode();
+			if (aiModeToSave == Actor::AIMode::AIMODE_GOTO && (!actorToSave->GetMOMoveTarget() && g_SceneMan.ShortestDistance(actorToSave->GetMovePathEnd(), actorToSave->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(1.0F))) {
+				aiModeToSave = Actor::AIMode::AIMODE_SENTRY;
+			}
+			writer.NewPropertyWithValue("AIMode", aiModeToSave);
+			if (aiModeToSave == Actor::AIMode::AIMODE_GOTO) {
+				const std::string addWaypointPropertyName = "SpecialBehaviour_AddAISceneWaypoint";
+				if (const MovableObject *actorToSaveMOMoveTarget = actorToSave->GetMOMoveTarget()) {
+					writer.NewPropertyWithValue(addWaypointPropertyName, actorToSaveMOMoveTarget->GetPos());
+				} else {
+					writer.NewPropertyWithValue(addWaypointPropertyName, actorToSave->GetMovePathEnd());
+					for (auto &[waypointPosition, waypointObject] : actorToSave->GetWaypointList()) {
+						writer.NewPropertyWithValue(addWaypointPropertyName, waypointPosition);
+					}
+				}
+			}
+		}
+
 		if (actorToSave->GetDeploymentID()) {
 			writer.NewPropertyWithValue("DeploymentID", actorToSave->GetDeploymentID());
 		}
 
 		for (const MovableObject *inventoryItem : *actorToSave->GetInventory()) {
 			writer.NewProperty("AddInventory");
-			SaveSceneObject(writer, inventoryItem, true);
+			SaveSceneObject(writer, inventoryItem, true, saveFullData);
 		}
 
-		if (const ADoor *aDoorToSave = dynamic_cast<const ADoor *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Door", aDoorToSave->GetDoor());
+		if (saveFullData) {
+			if (const ADoor *aDoorToSave = dynamic_cast<const ADoor *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Door", aDoorToSave->GetDoor());
+			} else if (const AHuman *aHumanToSave = dynamic_cast<const AHuman *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Head", aHumanToSave->GetHead());
+				WriteHardcodedAttachableOrNone("Jetpack", aHumanToSave->GetJetpack());
+				WriteHardcodedAttachableOrNone("FGArm", aHumanToSave->GetFGArm());
+				WriteHardcodedAttachableOrNone("BGArm", aHumanToSave->GetBGArm());
+				WriteHardcodedAttachableOrNone("FGLeg", aHumanToSave->GetFGLeg());
+				WriteHardcodedAttachableOrNone("BGLeg", aHumanToSave->GetBGLeg());
+			} else if (const ACrab *aCrabToSave = dynamic_cast<const ACrab *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("Turret", aCrabToSave->GetTurret());
+				WriteHardcodedAttachableOrNone("Jetpack", aCrabToSave->GetJetpack());
+				WriteHardcodedAttachableOrNone("LeftFGLeg", aCrabToSave->GetLeftFGLeg());
+				WriteHardcodedAttachableOrNone("LeftBGLeg", aCrabToSave->GetLeftBGLeg());
+				WriteHardcodedAttachableOrNone("RightFGLeg", aCrabToSave->GetRightFGLeg());
+				WriteHardcodedAttachableOrNone("RightBGLeg", aCrabToSave->GetRightBGLeg());
+			} else if (const ACRocket *acRocketToSave = dynamic_cast<const ACRocket *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("RightLeg", acRocketToSave->GetRightLeg());
+				WriteHardcodedAttachableOrNone("LeftLeg", acRocketToSave->GetLeftLeg());
+				WriteHardcodedAttachableOrNone("MainThruster", acRocketToSave->GetMainThruster());
+				WriteHardcodedAttachableOrNone("RightThruster", acRocketToSave->GetRightThruster());
+				WriteHardcodedAttachableOrNone("LeftThruster", acRocketToSave->GetLeftThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetURightThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetULeftThruster());
+			} else if (const ACDropShip *acDropShipToSave = dynamic_cast<const ACDropShip *>(sceneObjectToSave)) {
+				WriteHardcodedAttachableOrNone("RightThruster", acDropShipToSave->GetRightThruster());
+				WriteHardcodedAttachableOrNone("LeftThruster", acDropShipToSave->GetLeftThruster());
+				WriteHardcodedAttachableOrNone("UpRightThruster", acDropShipToSave->GetURightThruster());
+				WriteHardcodedAttachableOrNone("UpLeftThruster", acDropShipToSave->GetULeftThruster());
+				WriteHardcodedAttachableOrNone("RightHatchDoor", acDropShipToSave->GetRightHatch());
+				WriteHardcodedAttachableOrNone("LeftHatchDoor", acDropShipToSave->GetLeftHatch());
+			}
 		} else if (const AHuman *aHumanToSave = dynamic_cast<const AHuman *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Head", aHumanToSave->GetHead());
-			WriteHardcodedAttachableOrNone("Jetpack", aHumanToSave->GetJetpack());
-			WriteHardcodedAttachableOrNone("FGArm", aHumanToSave->GetFGArm());
-			WriteHardcodedAttachableOrNone("BGArm", aHumanToSave->GetBGArm());
-			WriteHardcodedAttachableOrNone("FGLeg", aHumanToSave->GetFGLeg());
-			WriteHardcodedAttachableOrNone("BGLeg", aHumanToSave->GetBGLeg());
-		} else if (const ACrab *aCrabToSave = dynamic_cast<const ACrab *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("Turret", aCrabToSave->GetTurret());
-			WriteHardcodedAttachableOrNone("Jetpack", aCrabToSave->GetJetpack());
-			WriteHardcodedAttachableOrNone("LeftFGLeg", aCrabToSave->GetLeftFGLeg());
-			WriteHardcodedAttachableOrNone("LeftBGLeg", aCrabToSave->GetLeftBGLeg());
-			WriteHardcodedAttachableOrNone("RightFGLeg", aCrabToSave->GetRightFGLeg());
-			WriteHardcodedAttachableOrNone("RightBGLeg", aCrabToSave->GetRightBGLeg());
-		} else if (const ACRocket *acRocketToSave = dynamic_cast<const ACRocket *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("RightLeg", acRocketToSave->GetRightLeg());
-			WriteHardcodedAttachableOrNone("LeftLeg", acRocketToSave->GetLeftLeg());
-			WriteHardcodedAttachableOrNone("MainThruster", acRocketToSave->GetMainThruster());
-			WriteHardcodedAttachableOrNone("RightThruster", acRocketToSave->GetRightThruster());
-			WriteHardcodedAttachableOrNone("LeftThruster", acRocketToSave->GetLeftThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetURightThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acRocketToSave->GetULeftThruster());
-		} else if (const ACDropShip *acDropShipToSave = dynamic_cast<const ACDropShip *>(sceneObjectToSave)) {
-			WriteHardcodedAttachableOrNone("RightThruster", acDropShipToSave->GetRightThruster());
-			WriteHardcodedAttachableOrNone("LeftThruster", acDropShipToSave->GetLeftThruster());
-			WriteHardcodedAttachableOrNone("UpRightThruster", acDropShipToSave->GetURightThruster());
-			WriteHardcodedAttachableOrNone("UpLeftThruster", acDropShipToSave->GetULeftThruster());
-			WriteHardcodedAttachableOrNone("RightHatchDoor", acDropShipToSave->GetRightHatch());
-			WriteHardcodedAttachableOrNone("LeftHatchDoor", acDropShipToSave->GetLeftHatch());
+			if (const HeldDevice *equippedItem = aHumanToSave->GetEquippedItem()) {
+				writer.NewProperty("AddInventory");
+				SaveSceneObject(writer, equippedItem, true, saveFullData);
+			}
+			if (const HeldDevice *bgEquippedItem = aHumanToSave->GetEquippedBGItem()) {
+				writer.NewProperty("AddInventory");
+				SaveSceneObject(writer, bgEquippedItem, true, saveFullData);
+			}
 		}
 	}
 	writer.ObjectEnd();
@@ -2915,11 +2981,14 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 // Description:     Recalculates all of the pathfinding data. This is very expensive, so
 //                  do very rarely!
 
-void Scene::ResetPathFinding()
-{
-    for (const std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
-        pathFinder->RecalculateAllCosts();
-    }
+void Scene::ResetPathFinding() {
+	GetPathFinder(Activity::Teams::NoTeam)->RecalculateAllCosts();
+	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+		g_MovableMan.OverrideMaterialDoors(true, team);
+		GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAllCosts();
+		GetPathFinder(static_cast<Activity::Teams>(team), c_PathFindingDefaultDigStrength)->RecalculateAllCosts();
+		g_MovableMan.OverrideMaterialDoors(false, team);
+	}
 }
 
 
@@ -2931,9 +3000,18 @@ void Scene::ResetPathFinding()
 
 void Scene::UpdatePathFinding()
 {
+    constexpr int nodeUpdatesPerCall = 100;
+    constexpr int maxUnupdatedMaterialAreas = 1000;
+
+    int nodesToUpdate = nodeUpdatesPerCall / g_ActivityMan.GetActivity()->GetTeamCount();
+    if (m_pTerrain->GetUpdatedMaterialAreas().size() > maxUnupdatedMaterialAreas) {
+        // Our list of boxes is getting too big and a bit out of hand, so clear everything.
+        nodesToUpdate = std::numeric_limits<int>::max();
+    }
+
     // Update our shared pathFinder
-    bool updated = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
-    if (updated) {
+    std::vector<int> updatedNodes = GetPathFinder(Activity::Teams::NoTeam)->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas(), nodesToUpdate);
+    if (!updatedNodes.empty()) {
         // Update each team's pathFinder
         for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
             if (!g_ActivityMan.ActivityRunning() || !g_ActivityMan.GetActivity()->TeamActive(team)) {
@@ -2943,14 +3021,14 @@ void Scene::UpdatePathFinding()
             // Remove the material representation of all doors of this team so we can navigate through them (they'll open for us).
             g_MovableMan.OverrideMaterialDoors(true, team);
 
-            GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
+            GetPathFinder(static_cast<Activity::Teams>(team))->UpdateNodeList(updatedNodes);
+            GetPathFinder(static_cast<Activity::Teams>(team), c_PathFindingDefaultDigStrength)->UpdateNodeList(updatedNodes);
 
             // Place back the material representation of all doors of this team so they are as we found them.
             g_MovableMan.OverrideMaterialDoors(false, team);
         }
     }
 
-    m_pTerrain->ClearUpdatedMaterialAreas();
     m_PartialPathUpdateTimer.Reset();
     m_PathfindingUpdated = true;
 }
@@ -2965,7 +3043,7 @@ void Scene::UpdatePathFinding()
 float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength, Activity::Teams team) {
     float totalCostResult = -1;
 
-    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team, digStrength)) {
         int result = pathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
 
         // It's ok if start and end nodes happen to be the same, the exact pixel locations are added at the front and end of the result regardless
@@ -2973,38 +3051,6 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     }
 
     return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateScenePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the least difficult path between two points on
-//                  the current scene. Takes both distance and materials into account.
-//                  A list of waypoints can be retrived from m_ScenePath;
-//                  For exposing CalculatePath to Lua.
-
-int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength) {
-    int pathSize = -1;
-
-	if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(Activity::Teams::NoTeam)) {
-        float notUsed;
-        pathFinder->CalculatePath(start, end, m_ScenePath, notUsed, digStrength);
-
-        // Process the new path we now have, if any
-        if (!m_ScenePath.empty()) {
-            pathSize = m_ScenePath.size();
-            if (movePathToGround) {
-                // Smash all airborne waypoints down to just above the ground
-                std::list<Vector>::iterator finalItr = m_ScenePath.end();
-				for (std::list<Vector>::iterator lItr = m_ScenePath.begin(); lItr != finalItr; ++lItr) {
-					(*lItr) = g_SceneMan.MovePointToGround((*lItr), 20, 15);
-				}
-            }
-        }
-    }
-
-    return pathSize;
 }
 
 
@@ -3072,18 +3118,22 @@ void Scene::Update()
 		}
 	}
 
-    // Only update the pathfinding on occasion, as it's a costly operation
-    if (m_PartialPathUpdateTimer.IsPastRealMS(10000))
-    {
+    // Occasionally update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
+    if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {
         UpdatePathFinding();
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<PathFinder>& Scene::GetPathFinder(Activity::Teams team) {
-	// Note - we use + 1 when getting pathfinders by index, because our shared NoTeam pathfinder occupies index 0, and the rest come after that.
-	return m_pPathFinders[static_cast<int>(team) + 1];
+std::unique_ptr<PathFinder>& Scene::GetPathFinder(Activity::Teams team, float digStrength) {
+	if (team == Activity::Teams::NoTeam) {
+		return m_NoTeamPathFinder;
+	} else if (std::abs(digStrength - c_PathFindingDefaultDigStrength) < 1.0F) {
+		return m_DefaultDigStrengthPathfinders[team];
+	} else {
+		return m_PathFinders[static_cast<int>(team)];
+	}
 }
 
 } // namespace RTE

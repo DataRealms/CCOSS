@@ -18,7 +18,7 @@ namespace RTE {
 		/// Convenience macro to cut down on duplicate methods in classes that extend GraphicalPrimitive.
 		/// </summary>
 		#define GraphicalPrimitiveOverrideMethods \
-			const PrimitiveType GetPrimtiveType() const override { return c_PrimitiveType; } \
+			const PrimitiveType GetPrimitiveType() const override { return c_PrimitiveType; } \
 			void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 
 		/// <summary>
@@ -85,7 +85,7 @@ namespace RTE {
 		/// Gets the type identifier of this primitive.
 		/// </summary>
 		/// <returns>The type identifier of this primitive.</returns>
-		virtual const PrimitiveType GetPrimtiveType() const = 0;
+		virtual const PrimitiveType GetPrimitiveType() const = 0;
 
 	private:
 

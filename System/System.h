@@ -44,6 +44,12 @@ namespace RTE {
 		static const std::string & GetWorkingDirectory() { return s_WorkingDirectory; }
 
 		/// <summary>
+		/// Gets the game data directory name.
+		/// </summary>
+		/// <returns>Folder name of the game data directory.</returns>
+		static const std::string & GetDataDirectory() { return s_DataDirectory; }
+
+		/// <summary>
 		/// Gets the screenshot directory name.
 		/// </summary>
 		/// <returns>Folder name of the screenshots directory.</returns>
@@ -54,6 +60,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Folder name of the mod directory.</returns>
 		static const std::string & GetModDirectory() { return s_ModDirectory; }
+
+		/// <summary>
+		/// Gets the userdata directory name.
+		/// </summary>
+		/// <returns>Folder name of the userdata directory.</returns>
+		static const std::string & GetUserdataDirectory() { return s_UserdataDirectory; }
 
 		/// <summary>
 		/// Gets the extension that determines a directory/file is an RTE module.
@@ -168,8 +180,10 @@ namespace RTE {
 		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting.
 
 		static bool s_CaseSensitive; //!< Whether case sensitivity is enforced when checking for file existence.
+		static const std::string s_DataDirectory; //!< String containing the folder name of the game data directory.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
+		static const std::string s_UserdataDirectory; //!< String containing the folder name of the userdata directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
 		static const std::string s_ZippedModulePackageExtension; //!< The extension that determines a file is a zipped RTE module.
 

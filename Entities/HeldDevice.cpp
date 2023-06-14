@@ -212,9 +212,15 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GripStrengthMultiplier;
     } else if (propName == "SharpLength")
         reader >> m_MaxSharpLength;
-    else if (propName == "Loudness")
+    else if (propName == "Loudness") {
         reader >> m_Loudness;
-    else
+	} else if (propName == "SpecialBehaviour_Activated") {
+		reader >> m_Activated;
+	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
+		double elapsedSimTimeMS;
+		reader >> elapsedSimTimeMS;
+		m_ActivationTimer.SetElapsedSimTimeMS(elapsedSimTimeMS);
+	} else
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -523,8 +529,11 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 			m_SeenByPlayer.fill(false);
 			m_BlinkTimer.Reset();
 		} else {
-			// Only draw if the team viewing this has seen the space where this is located.
 			int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
+            if (viewingPlayer == -1) {
+                return;
+            }
+            // Only draw if the team viewing this has seen the space where this is located.
 			int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
 			if (viewingTeam == Activity::NoTeam || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
 				return;
@@ -560,11 +569,13 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 					const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(activity);
 					if (gameActivity && gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) { unheldItemDisplayRange = -1.0F; }
 				}
-				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
-				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
-				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+				if (!m_SeenByPlayer[viewingPlayer]) {
+					m_SeenByPlayer[viewingPlayer] = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && m_Vel.MagnitudeIsLessThan(2.0F) && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
+				} else {
+					// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
+					if (unheldItemDisplayRange > 0) { unheldItemDisplayRange += 4.0F; }
+					m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_CameraMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(unheldItemDisplayRange));
 
-				if (m_SeenByPlayer.at(viewingPlayer)) {
 					char pickupArrowString[64];
 					pickupArrowString[0] = 0;
 					if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {

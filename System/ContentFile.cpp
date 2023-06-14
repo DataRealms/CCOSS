@@ -6,6 +6,7 @@
 #include "png.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
+#include "boost/functional/hash.hpp"
 
 namespace RTE {
 
@@ -33,7 +34,6 @@ namespace RTE {
 
 	int ContentFile::Create(const char *filePath) {
 		SetDataPath(filePath);
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		return 0;
 	}
@@ -82,12 +82,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::GetDataModuleID() const { return (m_DataModuleID < 0) ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID; }
+	int ContentFile::GetDataModuleID() const {
+		return (m_DataModuleID < 0) ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
-		m_DataPath = CorrectBackslashesInPath(newDataPath);
+		m_DataPath = g_PresetMan.GetFullModulePath(newDataPath);
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
@@ -97,6 +99,13 @@ namespace RTE {
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
 		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	size_t ContentFile::GetHash() const {
+		// Use boost::hash for compiler independent hashing.
+		return boost::hash<std::string>()(m_DataPath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,18 +204,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ContentFile::ReloadAllBitmaps() {
+		for (const std::unordered_map<std::string, BITMAP *> &bitmapCache : s_LoadedBitmaps) {
+			for (const auto &[filePath, oldBitmap] : bitmapCache) {
+				ReloadBitmap(filePath);
+			}
+		}
+		g_ConsoleMan.PrintString("SYSTEM: Sprites reloaded");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
 		BITMAP *returnBitmap = nullptr;
-		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		const int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
+
+		if (g_PresetMan.GetReloadEntityPresetCalledThisUpdate()) {
+			ReloadBitmap(dataPathToLoad, conversionMode);
+		}
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(dataPathToLoad);
-		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
+		if (storeBitmap && foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
 			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
@@ -236,7 +259,6 @@ namespace RTE {
 			return;
 		}
 		vectorToFill.reserve(frameCount);
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		if (frameCount == 1) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
@@ -267,14 +289,13 @@ namespace RTE {
 			return nullptr;
 		}
 		const std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
-		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		BITMAP *returnBitmap = nullptr;
 
 		PALETTE currentPalette;
 		get_palette(currentPalette);
 
-		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
+		set_color_conversion((conversionMode == COLORCONV_NONE) ? COLORCONV_MOST : conversionMode);
 		returnBitmap = load_bitmap(dataPathToLoad.c_str(), currentPalette);
 		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
 
@@ -307,13 +328,13 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-
 		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
+				const std::string altDataPathToLoad = m_DataPathWithoutExtension + altFileExtension;
+				if (System::PathExistsCaseSensitive(altDataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					SetDataPath(altDataPathToLoad);
 					foundAltExtension = true;
 					break;
 				}
@@ -343,5 +364,30 @@ namespace RTE {
 			return returnSample;
 		}
 		return returnSample;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::ReloadBitmap(const std::string &filePath, int conversionMode) {
+		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+
+		auto bmpItr = s_LoadedBitmaps[bitDepth].find(filePath);
+		if (bmpItr == s_LoadedBitmaps[bitDepth].end()) {
+			return;
+		}
+
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+		set_color_conversion((conversionMode == COLORCONV_NONE) ? COLORCONV_MOST : conversionMode);
+
+		BITMAP *loadedBitmap = (*bmpItr).second;
+		BITMAP *newBitmap = load_bitmap(filePath.c_str(), currentPalette);
+		BITMAP swap;
+
+		std::memcpy(&swap, loadedBitmap, sizeof(BITMAP));
+		std::memcpy(loadedBitmap, newBitmap, sizeof(BITMAP));
+		std::memcpy(newBitmap, &swap, sizeof(BITMAP));
+
+		destroy_bitmap(newBitmap);
 	}
 }

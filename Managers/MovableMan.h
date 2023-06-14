@@ -30,6 +30,7 @@ class MovableObject;
 class Actor;
 class HeldDevice;
 class MOPixel;
+class MOSprite;
 class AHuman;
 class SceneLayer;
 
@@ -150,6 +151,23 @@ public:
 
     int GetMOIDCount() { return m_MOIDIndex.size(); }
 
+    /// <summary>
+    /// Tests whether the given MovableObject is currently at the specified pixel coordinates.
+    /// </summary>
+    /// <param name="mo">The MovableObject to test.</param>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
+    /// <returns>Whether the given MovableObject is currently at the specified pixel coordinates.</returns>
+    bool HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const;
+
+    /// <summary>
+    /// Gets a MOID from pixel coordinates in the Scene.
+    /// </summary>
+    /// <param name="pixelX">The X coordinate of the Scene pixel to get the MOID of.</param>
+    /// <param name="pixelY">The Y coordinate of the Scene pixel to get the MOID of.</param>
+    /// <param name="moidList">The collection of MOIDs to check the against the specified coordinates.</param>
+    /// <returns>The topmost MOID currently at the specified pixel coordinates.</returns>
+    MOID GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &moidList);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTeamMOIDCount
@@ -239,24 +257,30 @@ public:
 
     Actor * GetPrevTeamActor(int team = 0, Actor *pBeforeThis = 0);
 
+	/// <summary>
+	/// Get a pointer to an Actor in the internal Actor list that is of a specifc team and closest to a specific scene point.
+	/// </summary>
+	/// <param name="team">Which team to try to get an Actor for. 0 means first team, 1 means 2nd.</param>
+	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
+	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
+	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
+	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>
+	Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *excludeThis = nullptr) { return GetClosestTeamActor(team, player, scenePoint, maxRadius, getDistance, false, excludeThis); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetClosestTeamActor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to an Actor in the internal Actor list that is of a
-//                  specifc team and closest to a specific scene point.
-// Arguments:       Which team to try to get an Actor for. 0 means first team, 1 means 2nd.
-//                  The player to get the Actor for. This affects which brain can be marked.
-//                  The Scene point to search for the closest to.
-//                  The maximum radius around that scene point to search.
-//                  A float to be filled out with the distance of the returned closest to
-//                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
-// Return value:    An Actor pointer to the requested team's Actor closest to the Scene
-//                  point, but not outside the max radius. If no Actor other than the
-//                  excluded one was found within the radius of the point, 0 is returned.
-
-    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
+	/// <summary>
+	/// Get a pointer to an Actor in the internal Actor list that is of a specifc team and closest to a specific scene point.
+	/// </summary>
+	/// <param name="team">Which team to try to get an Actor for. 0 means first team, 1 means 2nd.</param>
+	/// <param name="player">The player to get the Actor for. This affects which brain can be marked.</param>
+	/// <param name="scenePoint">The Scene point to search for the closest to.</param>
+	/// <param name="maxRadius">The maximum radius around that scene point to search.</param>
+	/// <param name="getDistance">A Vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</param>
+	/// <param name="onlyPlayerControllableActors">Whether to only get Actors that are flagged as player controllable.</param>
+	/// <param name="excludeThis">An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!</param>
+	/// <returns>An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, nullptr is returned.</returns>
+	Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, bool onlyPlayerControllableActors, const Actor *excludeThis = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -695,29 +719,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSloMoThreshold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of new MO:s that need to be added in a single update
-//                  to trigger the slo motion effect.
-// Arguments:       None.
-// Return value:    The number of MO's needed to be added to the MovableMan in a single
-//                  update to trigger the slo-mo effect
-
-    int GetSloMoThreshold() { return m_SloMoThreshold; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSloMoDuration
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time, in ms, that the slow-motion effect is active
-//                  once it's triggered.
-// Arguments:       None.
-// Return value:    The amount of time the slow-motion effect runs for, in ms sim time.
-
-    int GetSloMoDuration() { return m_SloMoDuration; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsParticleSettlingEnabled
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows whetehr particles are set to get copied to the terrain upon
@@ -879,6 +880,57 @@ public:
 
 	unsigned int GetSimUpdateFrameNumber() const { return m_SimUpdateFrameNumber; }
 
+	/// <summary>
+	/// Gets pointers to the MOs that are within the given Box, and whose team is not ignored.
+	/// </summary>
+	/// <param name="box">The Box to get MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
+	/// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const;
+
+    /// <summary>
+    /// Gets pointers to the MOs that are within the given Box, and whose team is not ignored.
+    /// </summary>
+    /// <param name="box">The Box to get MOs within.</param>
+    /// <param name="ignoreTeam">The team to ignore.</param>
+    /// <returns>Pointers to the MOs that are within the given Box, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInBox(const Box &box, int ignoreTeam) const { return GetMOsInBox(box, ignoreTeam, false); }
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the given Box.
+	/// </summary>
+	/// <param name="box">The Box to get MOs within.</param>
+	/// <returns>Pointers to the MOs that are within the given Box.</returns>
+    const std::vector<MovableObject *> * GetMOsInBox(const Box &box) const { return GetMOsInBox(box, Activity::NoTeam); }
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <param name="getsHitByMOsOnly">Whether to only include MOs that have GetsHitByMOs enabled, or all MOs.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const;
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <param name="ignoreTeam">The team to ignore.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position, and whose team is not ignored.</returns>
+	const std::vector<MovableObject *> *GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const { return GetMOsInRadius(centre, radius, ignoreTeam, false); }
+
+	/// <summary>
+	/// Gets pointers to the MOs that are within the specified radius of the given centre position.
+	/// </summary>
+	/// <param name="centre">The position to check for MOs in.</param>
+	/// <param name="radius">The radius to check for MOs within.</param>
+	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position.</returns>
+    const std::vector<MovableObject *> * GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -906,11 +958,6 @@ protected:
 	// Every team's MO footprint
 	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
-    // Optimization implementation
-    // MO's that have already been asked whether they exist in the manager this frame, and the search result.
-    // Gets cleaned out each frame. Does NOT own any instances.
-    std::deque<std::pair<const MovableObject *, bool> > m_ValiditySearchResults;
-
     // The alarm events on the scene where something alarming happened, for use with AI firings awareness os they react to shots fired etc.
     // This is the last frame's events, is the one for Actors to poll for events, should be cleaned out and refilled each frame.
     std::list<AlarmEvent> m_AlarmEvents;
@@ -926,13 +973,6 @@ protected:
     float m_SplashRatio;
     // The maximum number of loose items allowed.
     int m_MaxDroppedItems;
-
-    // Timer for measuring periods of slo-mo effects
-    Timer m_SloMoTimer;
-    // The threshold for how many new MOs in one frame will trigger the slo-mo effect
-    int m_SloMoThreshold;
-    // The amount of time, in ms, that the slo-mo effect should be in effect when it is triggered
-    int m_SloMoDuration;
 
     // Whether settling of particles is enabled or not
     bool m_SettlingEnabled;

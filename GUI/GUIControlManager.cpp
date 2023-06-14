@@ -1,4 +1,5 @@
 #include "GUI.h"
+#include "PresetMan.h"
 
 using namespace RTE;
 
@@ -404,7 +405,8 @@ bool GUIControlManager::Save(GUIWriter *W) {
 
 bool GUIControlManager::Load(const std::string &Filename, bool keepOld) {
 	GUIReader reader;
-	if (reader.Create(Filename.c_str()) != 0) {
+	const std::string pathFile = g_PresetMan.GetFullModulePath(Filename);
+	if (reader.Create(pathFile.c_str()) != 0) {
 		return false;
 	}
 

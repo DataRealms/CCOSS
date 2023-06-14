@@ -4,6 +4,7 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
 
@@ -38,6 +39,7 @@ void Activity::Clear() {
 			m_IsHuman[player] = player == Players::PlayerOne;
 			m_PlayerScreen[player] = (player == Players::PlayerOne) ? Players::PlayerOne : Players::NoPlayer;
 			m_ViewState[player] = ViewState::Normal;
+			m_DeathTimer[player].Reset();
 			m_Team[player] = Teams::TeamOne;
 			m_TeamFundsShare[player] = 1.0F;
 			m_FundsContribution[player] = 0;
@@ -314,8 +316,8 @@ void Activity::Clear() {
 			if (int screenId = ScreenOfPlayer(player); screenId != -1) {
 				g_FrameMan.ClearScreenText(screenId);
 				g_CameraMan.SetScreenOcclusion(Vector(), screenId);
-				g_CameraMan.SetScreenShake(0.0F, screenId);
 			}
+			g_CameraMan.ResetAllScreenShake();
 
 			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {
@@ -331,6 +333,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
+		g_AudioMan.FinishAllLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
@@ -725,7 +728,7 @@ void Activity::Clear() {
 		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return false;
 		}
-		if (!actor || !g_MovableMan.IsActor(actor)) {
+		if (!actor || !g_MovableMan.IsActor(actor) || !actor->IsPlayerControllable()) {
 			return false;
 		}
 		if ((actor != m_Brain[player] && actor->IsPlayerControlled()) || IsOtherPlayerBrain(actor, player)) {
@@ -740,7 +743,9 @@ void Activity::Clear() {
 		}
 
 		m_ControlledActor[player] = actor;
-		m_ControlledActor[player]->SetTeam(team);
+		if (m_ControlledActor[player]->GetTeam() != team) {
+			m_ControlledActor[player]->SetTeam(team);
+		}
 		m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 		m_ControlledActor[player]->GetController()->SetDisabled(false);
 
@@ -748,7 +753,7 @@ void Activity::Clear() {
 		actorSwitchSoundToPlay->Play(player);
 
 		// If out of frame from the POV of the preswitch actor, play the camera travel noise
-		const int switchSoundThreshold = g_FrameMan.GetResX() / 2;
+		const int switchSoundThreshold = g_WindowMan.GetResX() / 2;
 		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX() || g_SceneMan.SceneWrapsY()).MagnitudeIsGreaterThan(static_cast<float>(switchSoundThreshold))) {
 			g_GUISound.CameraTravelSound()->Play(player);
 		}
@@ -757,6 +762,20 @@ void Activity::Clear() {
 		m_ViewState[player] = Normal;
 
 		return true;
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	void Activity::LoseControlOfActor(int player) {
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			if (Actor *actor = m_ControlledActor[player]; actor && g_MovableMan.IsActor(actor)) {
+				actor->SetControllerMode(Controller::CIM_AI);
+				actor->GetController()->SetDisabled(false);
+			}
+			m_ControlledActor[player] = nullptr;
+			m_ViewState[player] = ViewState::DeathWatch;
+			m_DeathTimer[player].Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -817,11 +836,11 @@ void Activity::Clear() {
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (getForHuman) {
-				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			} else {
-				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			}

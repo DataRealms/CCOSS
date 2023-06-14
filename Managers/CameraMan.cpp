@@ -1,6 +1,7 @@
 #include "CameraMan.h"
 
 #include "Activity.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
@@ -56,7 +57,7 @@ namespace RTE {
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2)));
 		} else {
-			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetResY() / 2)));
+			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_WindowMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_WindowMan.GetResY() / 2)));
 		}
 		CheckOffset(screenId);
 	}
@@ -156,8 +157,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector CameraMan::GetFrameSize(int screenId) {
-		int frameWidth = g_FrameMan.GetResX();
-		int frameHeight = g_FrameMan.GetResY();
+		int frameWidth = g_WindowMan.GetResX();
+		int frameHeight = g_WindowMan.GetResY();
 
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			frameWidth = g_FrameMan.GetPlayerFrameBufferWidth(screenId);
@@ -168,6 +169,16 @@ namespace RTE {
 		}
 
 		return Vector(static_cast<float>(frameWidth), static_cast<float>(frameHeight));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void CameraMan::ResetAllScreenShake() {
+		for (int screenId = 0; screenId < g_FrameMan.GetScreenCount(); ++screenId) {
+			Screen &screen = m_Screens[screenId];
+			screen.ScreenShakeMagnitude = 0;
+			screen.ScrollTimer.Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,22 +216,6 @@ namespace RTE {
 		Screen &screen = m_Screens[screenId];
 		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
 
-		// Don't let our screen shake beyond our max.
-		screen.ScreenShakeMagnitude = std::min(screen.ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
-
-		// Reduce screen shake over time.
-		screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedRealTimeS());
-		screen.ScreenShakeMagnitude = std::max(screen.ScreenShakeMagnitude, 0.0F);
-
-		// Feedback was that the best screen-shake strength was between 25% and 40% of default.
-		// As such, we want the default setting to reflect that, instead the default setting being 30%.
-		// So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything).
-		const float screenShakeScale = 0.3F;
-
-		Vector screenShakeOffset(1.0F, 0.0F);
-		screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
-		screenShakeOffset *= screen.ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
-
 		if (g_TimerMan.DrawnSimUpdate()) {
 			// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
 			if (screen.TargetWrapped) {
@@ -245,8 +240,8 @@ namespace RTE {
 			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2));
 			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2));
 		} else {
-			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
-			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
+			offsetTarget.SetX(screen.ScrollTarget.GetX() - static_cast<float>(g_WindowMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
+			offsetTarget.SetY(screen.ScrollTarget.GetY() - static_cast<float>(g_WindowMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
 		}
 		// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
 		offsetTarget -= (screen.ScreenOcclusion / 2);
@@ -258,7 +253,28 @@ namespace RTE {
 			newOffset += scrollVec * scrollProgress;
 		}
 
-		newOffset += screenShakeOffset;
+		if (g_ActivityMan.GetActivity()->GetActivityState() == Activity::ActivityState::Running) {
+			// Don't let our screen shake beyond our max.
+			screen.ScreenShakeMagnitude = std::min(screen.ScreenShakeMagnitude, m_ScreenShakeDecay * m_MaxScreenShakeTime);
+
+			// Reduce screen shake over time.
+			screen.ScreenShakeMagnitude -= m_ScreenShakeDecay * static_cast<float>(screen.ScrollTimer.GetElapsedRealTimeS());
+			screen.ScreenShakeMagnitude = std::max(screen.ScreenShakeMagnitude, 0.0F);
+
+			// Feedback was that the best screen-shake strength was between 25% and 40% of default.
+			// As such, we want the default setting to reflect that, instead the default setting being 30%.
+			// So just hard-coded multiply to make 100% in settings correspond to 30% here (much easier than rebalancing everything).
+			const float screenShakeScale = 0.3F;
+
+			Vector screenShakeOffset(1.0F, 0.0F);
+			screenShakeOffset.RadRotate(RandomNormalNum() * c_PI);
+			screenShakeOffset *= screen.ScreenShakeMagnitude * m_ScreenShakeStrength * screenShakeScale;
+
+			newOffset += screenShakeOffset;
+		} else {
+			screen.ScreenShakeMagnitude = 0;
+		}
+
 		SetOffset(newOffset, screenId);
 
 		screen.DeltaOffset = screen.Offset - oldOffset;

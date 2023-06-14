@@ -1,5 +1,6 @@
 #include "MainMenuGUI.h"
 
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "ActivityMan.h"
 #include "UInputMan.h"
@@ -10,16 +11,20 @@
 
 #include "GUI.h"
 #include "AllegroScreen.h"
-#include "AllegroInput.h"
+#include "GUIInputWrapper.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
+
+#include "Resources/Credits.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Clear() {
+		m_RootBoxMaxWidth = 0;
+
 		m_MainMenuScreenGUIControlManager = nullptr;
 		m_SubMenuScreenGUIControlManager = nullptr;
 		m_ActiveGUIControlManager = nullptr;
@@ -50,7 +55,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	void MainMenuGUI::Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
 		m_MainMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_MainMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuScreenSkin.ini");
 		m_MainMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
@@ -59,11 +64,13 @@ namespace RTE {
 		RTEAssert(m_SubMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 		m_SubMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuSubMenuGUI.ini");
 
+		m_RootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
+
 		GUICollectionBox *mainScreenRootBox = dynamic_cast<GUICollectionBox *>(m_MainMenuScreenGUIControlManager->GetControl("root"));
-		mainScreenRootBox->Resize(g_FrameMan.GetResX(), mainScreenRootBox->GetHeight());
+		mainScreenRootBox->Resize(m_RootBoxMaxWidth, mainScreenRootBox->GetHeight());
 
 		GUICollectionBox *subMenuScreenRootBox = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("root"));
-		subMenuScreenRootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		subMenuScreenRootBox->Resize(m_RootBoxMaxWidth, g_WindowMan.GetResY());
 
 		m_MainMenuButtons[MenuButton::BackToMainButton] = dynamic_cast<GUIButton*>(m_SubMenuScreenGUIControlManager->GetControl("ButtonBackToMain"));
 		m_MainMenuButtons[MenuButton::BackToMainButton]->CenterInParent(true, false);
@@ -78,7 +85,7 @@ namespace RTE {
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
 		// Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.
-		SetActiveMenuScreen(g_FrameMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen, false);
+		SetActiveMenuScreen(g_WindowMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +117,7 @@ namespace RTE {
 
 		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
 		m_VersionLabel->SetText("Community Project\nv" + c_GameVersion.str());
-		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
+		m_VersionLabel->SetPositionAbs(10, g_WindowMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,19 +147,17 @@ namespace RTE {
 
 	void MainMenuGUI::CreateCreditsScreen() {
 		m_MainMenuScreens[MenuScreen::CreditsScreen] = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsScreen"));
-		m_MainMenuScreens[MenuScreen::CreditsScreen]->Resize(m_MainMenuScreens[MenuScreen::CreditsScreen]->GetWidth(), g_FrameMan.GetResY());
+		m_MainMenuScreens[MenuScreen::CreditsScreen]->Resize(m_MainMenuScreens[MenuScreen::CreditsScreen]->GetWidth(), g_WindowMan.GetResY());
 		m_MainMenuScreens[MenuScreen::CreditsScreen]->CenterInParent(true, false);
 
 		m_CreditsScrollPanel = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsPanel"));
-		m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), g_FrameMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
+		m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), g_WindowMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
 
 		m_CreditsTextLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsLabel"));
 
-		std::string creditsText = Reader("Credits.txt").WholeFileAsString();
-
 		// TODO: Get Unicode going!
 		// Hack here to change the special characters over 128 in the ANSI ASCII table to match our font files
-		for (char &stringChar : creditsText) {
+		for (char &stringChar : s_CreditsText) {
 			if (stringChar == -60) {
 				stringChar = static_cast<unsigned char>(142); //'Ä'
 			} else if (stringChar == -42) {
@@ -161,7 +166,7 @@ namespace RTE {
 				stringChar = static_cast<unsigned char>(221); //'©'
 			}
 		}
-		m_CreditsTextLabel->SetText(creditsText);
+		m_CreditsTextLabel->SetText(s_CreditsText);
 		m_CreditsTextLabel->ResizeHeightToFit();
 	}
 
@@ -218,7 +223,7 @@ namespace RTE {
 		m_MainMenuScreens[MenuScreen::MetaGameNoticeScreen]->GUIPanel::AddChild(m_MainMenuButtons[MenuButton::BackToMainButton]);
 
 		m_MainMenuButtons[MenuButton::BackToMainButton]->SetVisible(true);
-		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, m_MainMenuButtons[MenuButton::MetaGameContinueButton]->GetYPos() + 25);
+		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((m_RootBoxMaxWidth - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, m_MainMenuButtons[MenuButton::MetaGameContinueButton]->GetYPos() + 25);
 
 		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("MetaLabel"));
 
@@ -256,11 +261,11 @@ namespace RTE {
 		m_MainMenuScreens[MenuScreen::CreditsScreen]->GUIPanel::AddChild(m_MainMenuButtons[MenuButton::BackToMainButton]);
 
 		m_MainMenuButtons[MenuButton::BackToMainButton]->SetVisible(true);
-		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, g_FrameMan.GetResY() - 35);
+		m_MainMenuButtons[MenuButton::BackToMainButton]->SetPositionAbs((m_RootBoxMaxWidth - m_MainMenuButtons[MenuButton::BackToMainButton]->GetWidth()) / 2, g_WindowMan.GetResY() - 35);
 
 		m_VersionLabel->SetVisible(false);
 
-		m_CreditsTextLabel->SetPositionRel(0, g_FrameMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
+		m_CreditsTextLabel->SetPositionRel(0, g_WindowMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
 		m_CreditsScrollTimer.Reset();
 
 		m_MenuScreenChange = false;
@@ -362,7 +367,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::HandleBackNavigation(bool backButtonPressed) {
-		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens[MenuScreen::QuitScreen]) && (backButtonPressed || g_UInputMan.KeyPressed(KEY_ESC))) {
+		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens[MenuScreen::QuitScreen]) && (backButtonPressed || g_UInputMan.KeyPressed(SDLK_ESCAPE))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) { m_SettingsMenu->RefreshActiveSettingsMenuScreen(); }
@@ -376,7 +381,7 @@ namespace RTE {
 			} else {
 				ShowQuitScreenOrQuit();
 			}
-		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(KEY_ESC)) {
+		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 			m_SettingsMenu->CloseActiveDialogBox();
 		}
 	}

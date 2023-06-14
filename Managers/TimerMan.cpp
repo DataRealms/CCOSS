@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#elif __unix__
+#elif _LINUX_OR_MACOSX_
 #include <time.h>
 #endif
 
@@ -14,8 +14,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::Clear() {
-		m_StartTime = 0;
-		m_TicksPerSecond = 1;
+		m_StartTime = std::chrono::steady_clock::now();
+		m_TicksPerSecond = 1000000;
 		m_RealTimeTicks = 0;
 		m_RealToSimCap = 0.0F;
 		m_SimTimeTicks = 0;
@@ -38,16 +38,6 @@ namespace RTE {
 
 	TimerMan::TimerMan() {
 		Clear();
-
-#ifdef _WIN32
-		LARGE_INTEGER tempLInt;
-		QueryPerformanceFrequency(&tempLInt);
-		m_TicksPerSecond = tempLInt.QuadPart;
-#elif __unix__
-		timespec my_TimeSpec;
-		clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
-		m_TicksPerSecond = ((1e9 / my_TimeSpec.tv_nsec) / 1000);
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,17 +51,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	long long TimerMan::GetAbsoluteTime() const {
-#ifdef _WIN32
-		LARGE_INTEGER tickReading;
-		QueryPerformanceCounter(&tickReading);
-		long long ticks = tickReading.QuadPart;
-#elif __unix__
-		timespec my_TimeSpec;
-		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-		// Get the nanoseconds value for right now and convert it to microseconds, since we don't honestly need anything more than that.
-		long long ticks = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
-#endif
-		return (ticks * 1000000) / m_TicksPerSecond;
+		return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,16 +63,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::ResetTime() {
-#ifdef _WIN32
-		LARGE_INTEGER tempLInt;
-		QueryPerformanceCounter(&tempLInt);
-		m_StartTime = tempLInt.QuadPart;
-#elif __unix__
-		timespec my_TimeSpec;
-		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-		// Get the nanoseconds value for right now and convert it to microseconds, since we don't honestly need anything more than that.
-		m_StartTime = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
-#endif
+		m_StartTime = std::chrono::steady_clock::now();
 
 		m_RealTimeTicks = 0;
 		m_SimAccumulator = 0;
@@ -125,19 +96,7 @@ namespace RTE {
 
 	void TimerMan::Update() {
 		long long prevTime = m_RealTimeTicks;
-		// Increase the real time ticks with the amount of actual time passed since the last Update.
-#ifdef _WIN32
-		LARGE_INTEGER tickReading;
-		QueryPerformanceCounter(&tickReading);
-		m_RealTimeTicks = tickReading.QuadPart - m_StartTime;
-#elif __unix__
-		std::uint64_t curTime;
-		timespec my_TimeSpec;
-		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-		curTime = static_cast<long long>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
-		m_RealTimeTicks = curTime - m_StartTime;
-#endif
-		// Figure the increase in real time.
+		m_RealTimeTicks = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
 		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
 		// Cap it if too long (as when the app went out of focus).
 		if (timeIncrease > m_RealToSimCap) { timeIncrease = m_RealToSimCap; }

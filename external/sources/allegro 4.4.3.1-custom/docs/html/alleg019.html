@@ -1,0 +1,757 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Polygon rendering
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Polygon rendering">Polygon rendering</a></h1>
+
+<ul>
+<li><a href="#clear_scene">clear_scene</a> &mdash; Initializes a scene.
+<li><a href="#clear_zbuffer">clear_zbuffer</a> &mdash; Writes a depth value into the given Z-buffer.
+<li><a href="#clip3d">clip3d</a> &mdash; Clips the polygon given in vtx using fixed point math.
+<li><a href="#clip3d_f">clip3d_f</a> &mdash; Clips the polygon given in vtx using floating point math,
+<li><a href="#create_scene">create_scene</a> &mdash; Allocates memory for a 3d scene.
+<li><a href="#create_sub_zbuffer">create_sub_zbuffer</a> &mdash; Creates a sub-z-buffer.
+<li><a href="#create_zbuffer">create_zbuffer</a> &mdash; Creates a Z-buffer for a bitmap.
+<li><a href="#destroy_scene">destroy_scene</a> &mdash; Deallocates the memory used by a scene.
+<li><a href="#destroy_zbuffer">destroy_zbuffer</a> &mdash; Destroys a Z-buffer.
+<li><a href="#polygon3d">polygon3d</a> &mdash; Draws a 3d polygon onto the specified bitmap.
+<li><a href="#polygon3d_f">polygon3d_f</a> &mdash; Draws a 3d polygon onto the specified bitmap.
+<li><a href="#POLYTYPE_ATEX">POLYTYPE_ATEX</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_ATEX_LIT">POLYTYPE_ATEX_LIT</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_ATEX_MASK">POLYTYPE_ATEX_MASK</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_ATEX_MASK_LIT">POLYTYPE_ATEX_MASK_LIT</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_ATEX_MASK_TRANS">POLYTYPE_ATEX_MASK_TRANS</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_ATEX_TRANS">POLYTYPE_ATEX_TRANS</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_FLAT">POLYTYPE_FLAT</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_GCOL">POLYTYPE_GCOL</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_GRGB">POLYTYPE_GRGB</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX">POLYTYPE_PTEX</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX_LIT">POLYTYPE_PTEX_LIT</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX_MASK">POLYTYPE_PTEX_MASK</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX_MASK_LIT">POLYTYPE_PTEX_MASK_LIT</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX_MASK_TRANS">POLYTYPE_PTEX_MASK_TRANS</a> &mdash; Polygon rendering mode type
+<li><a href="#POLYTYPE_PTEX_TRANS">POLYTYPE_PTEX_TRANS</a> &mdash; Polygon rendering mode type
+<li><a href="#quad3d">quad3d</a> &mdash; Draws a 3d quad onto the specified bitmap.
+<li><a href="#quad3d_f">quad3d_f</a> &mdash; Draws a 3d quad onto the specified bitmap.
+<li><a href="#render_scene">render_scene</a> &mdash; Renders all the queued scene polygons.
+<li><a href="#scene_gap">scene_gap</a> &mdash; Number controlling the scene z-sorting algorithm behaviour.
+<li><a href="#scene_polygon3d">scene_polygon3d</a> &mdash; Puts a polygon in the scene rendering list.
+<li><a href="#scene_polygon3d_f">scene_polygon3d_f</a> &mdash; Puts a polygon in the scene rendering list.
+<li><a href="#set_zbuffer">set_zbuffer</a> &mdash; Makes the given Z-buffer the active one.
+<li><a href="#triangle3d">triangle3d</a> &mdash; Draws a 3d triangle onto the specified bitmap.
+<li><a href="#triangle3d_f">triangle3d_f</a> &mdash; Draws a 3d triangle onto the specified bitmap.
+</ul>
+
+<p>
+All the 3d functions that accept a <tt>`type'</tt> parameter are asking for a polygon
+rendering mode, which can be any of the following POLYTYPE_* values. If the
+CPU_MMX flag of the cpu_capabilities global variable is set, the GRGB and
+truecolor *LIT routines will be optimised using MMX instructions. If the
+CPU_3DNOW flag is set, the truecolor PTEX*LIT routines will take advantage of
+the 3DNow! CPU extensions.
+
+<p>
+Using MMX for *LIT routines has a side effect: normally (without MMX), these
+routines use the blender functions used also for other lighting functions,
+set with set_trans_blender() or set_blender_mode(). The MMX versions only use
+the RGB value passed to set_trans_blender() and do the linear interpolation
+themselves. Therefore a new set of blender functions passed to
+set_blender_mode() is ignored.
+
+<p><br>
+<div class="al-api"><b>#define <a name="POLYTYPE_FLAT">POLYTYPE_FLAT</a></b></div><br>
+   A simple flat shaded polygon, taking the color from the <tt>`c'</tt> value of the
+   first vertex. This polygon type is affected by the drawing_mode() function,
+   so it can be used to render XOR or translucent polygons.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="alleg020.html#drawing_mode" title="Sets the graphics drawing mode.">drawing_mode</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_GCOL">POLYTYPE_GCOL</a></b></div><br>
+   A single-color gouraud shaded polygon. The colors for each vertex are taken
+   from the <tt>`c'</tt> value, and interpolated across the polygon. This is very fast,
+   but will only work in 256-color modes if your palette contains a smooth
+   gradient between the colors. In truecolor modes it interprets the color as
+   a packed, display-format value as produced by the makecol() function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>,
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>,
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_GRGB">POLYTYPE_GRGB</a></b></div><br>
+   A gouraud shaded polygon which interpolates RGB triplets rather than a
+   single color. In 256-color modes this uses the global rgb_map table to
+   convert the result to an 8-bit paletted color, so it must only be used
+   after you have set up the RGB mapping table! The colors for each vertex are
+   taken from the <tt>`c'</tt> value, which is interpreted as a 24-bit RGB triplet
+   (0xFF0000 is red, 0x00FF00 is green, and 0x0000FF is blue).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="alleg021.html#rgb_map" title="Look up table to speed up reducing RGB values to palette colors.">rgb_map</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX">POLYTYPE_ATEX</a></b></div><br>
+   An affine texture mapped polygon. This stretches the texture across the
+   polygon with a simple 2d linear interpolation, which is fast but not
+   mathematically correct. It can look OK if the polygon is fairly small or
+   flat-on to the camera, but because it doesn't deal with perspective
+   foreshortening, it can produce strange warping artifacts. To see what this
+   means, run Allegro's test program and see what happens to the polygon3d()
+   test when you zoom in very close to the cube.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_PTEX">POLYTYPE_PTEX</a></b></div><br>
+   A perspective-correct texture mapped polygon. This uses the <tt>`z'</tt> value from
+   the vertex structure as well as the u/v coordinates, so textures are
+   displayed correctly regardless of the angle they are viewed from. Because
+   it involves division calculations in the inner texture mapping loop, this
+   mode is a lot slower than POLYTYPE_ATEX, and it uses floating point so it
+   will be very slow on anything less than a Pentium (even with an FPU, a 486
+   can't overlap floating point division with other integer operations like
+   the Pentium can).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#POLYTYPE_ATEX" title="Polygon rendering mode type">POLYTYPE_ATEX</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX_MASK">POLYTYPE_ATEX_MASK</a></b></div><br>
+<div class="al-api-cont"><b>#define <a name="POLYTYPE_PTEX_MASK">POLYTYPE_PTEX_MASK</a></b></div><br>
+   Like POLYTYPE_ATEX and POLYTYPE_PTEX, but zero texture map pixels are
+   skipped, allowing parts of the texture map to be transparent.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#POLYTYPE_ATEX" title="Polygon rendering mode type">POLYTYPE_ATEX</a>,
+<a class="xref" href="#POLYTYPE_PTEX" title="Polygon rendering mode type">POLYTYPE_PTEX</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX_LIT">POLYTYPE_ATEX_LIT</a></b></div><br>
+<div class="al-api-cont"><b>#define <a name="POLYTYPE_PTEX_LIT">POLYTYPE_PTEX_LIT</a></b></div><br>
+   Like POLYTYPE_ATEX and POLYTYPE_PTEX, but the global color_map table (for
+   256-color modes) or blender function (for non-MMX truecolor modes) is used
+   to blend the texture with a light level taken from the <tt>`c'</tt> value in the
+   vertex structure. This must only be used after you have set up the color
+   mapping table or blender functions!
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#POLYTYPE_ATEX" title="Polygon rendering mode type">POLYTYPE_ATEX</a>,
+<a class="xref" href="#POLYTYPE_PTEX" title="Polygon rendering mode type">POLYTYPE_PTEX</a>,
+<a class="xref" href="alleg020.html#color_map" title="Global pointer to the color mapping table.">color_map</a>,
+<a class="xref" href="alleg020.html#Truecolor transparency" title="">Truecolor transparency</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX_MASK_LIT">POLYTYPE_ATEX_MASK_LIT</a></b></div><br>
+<div class="al-api-cont"><b>#define <a name="POLYTYPE_PTEX_MASK_LIT">POLYTYPE_PTEX_MASK_LIT</a></b></div><br>
+   Like POLYTYPE_ATEX_LIT and POLYTYPE_PTEX_LIT, but zero texture map pixels
+   are skipped, allowing parts of the texture map to be transparent.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#POLYTYPE_ATEX_LIT" title="Polygon rendering mode type">POLYTYPE_ATEX_LIT</a>,
+<a class="xref" href="#POLYTYPE_PTEX_LIT" title="Polygon rendering mode type">POLYTYPE_PTEX_LIT</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX_TRANS">POLYTYPE_ATEX_TRANS</a></b></div><br>
+<div class="al-api-cont"><b>#define <a name="POLYTYPE_PTEX_TRANS">POLYTYPE_PTEX_TRANS</a></b></div><br>
+   Render translucent textures. All the general rules for drawing
+   translucent things apply. However, these modes have a major
+   limitation: they only work with memory bitmaps or linear frame
+   buffers (not with banked frame buffers). Don't even try, they do not
+   check and your program will die horribly (or at least draw wrong
+   things).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>#define <a name="POLYTYPE_ATEX_MASK_TRANS">POLYTYPE_ATEX_MASK_TRANS</a></b></div><br>
+<div class="al-api-cont"><b>#define <a name="POLYTYPE_PTEX_MASK_TRANS">POLYTYPE_PTEX_MASK_TRANS</a></b></div><br>
+   Like POLYTYPE_ATEX_TRANS and POLYTYPE_PTEX_TRANS, but zero texture map 
+   pixels are skipped.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>void <a name="polygon3d">polygon3d</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *texture, int vc, <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *vtx[]);</b></div><br>
+<div class="al-api-cont"><b>void <a name="polygon3d_f">polygon3d_f</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *texture, int vc, <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *vtx[]);</b></div><br>
+   Draw 3d polygons onto the specified bitmap, using the specified rendering 
+   mode. Unlike the regular polygon() function, these routines don't support 
+   concave or self-intersecting shapes, and they can't draw onto mode-X 
+   screen bitmaps (if you want to write 3d code in mode-X, draw onto a 
+   memory bitmap and then blit to the screen). The width and height of the 
+   texture bitmap must be powers of two, but can be different, eg. a 64x16 
+   texture is fine, but a 17x3 one is not. The vertex count parameter (vc) 
+   should be followed by an array containing the appropriate number of 
+   pointers to vertex structures: polygon3d() uses the fixed point V3D 
+   structure, while polygon3d_f() uses the floating point V3D_f structure. 
+   These are defined as:
+<blockquote class="code"><pre>
+      typedef struct <a href="alleg001.html#V3D" class="autotype" title="Fixed point vertex structure used by 3d functions.">V3D</a>
+      {
+         <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> x, y, z;       - position
+         <a href="alleg001.html#fixed" class="autotype" title="Fixed point integer to replace floats.">fixed</a> u, v;          - texture map coordinates
+         int c;               - color
+      } <a href="alleg001.html#V3D" class="autotype" title="Fixed point vertex structure used by 3d functions.">V3D</a>;
+   
+      typedef struct <a href="alleg001.html#V3D_f" class="autotype" title="Floating point vertex structure used by 3d functions.">V3D_f</a>
+      {
+         float x, y, z;       - position
+         float u, v;          - texture map coordinates
+         int c;               - color
+      } <a href="alleg001.html#V3D_f" class="autotype" title="Floating point vertex structure used by 3d functions.">V3D_f</a>;
+</pre></blockquote>
+   How the vertex data is used depends on the rendering mode:
+
+<p>
+   The <tt>`x'</tt> and <tt>`y'</tt> values specify the position of the vertex in 2d screen
+   coordinates.
+
+<p>
+   The <tt>`z'</tt> value is only required when doing perspective correct texture
+   mapping, and specifies the depth of the point in 3d world coordinates.
+
+<p>
+   The <tt>`u'</tt> and <tt>`v'</tt> coordinates are only required when doing texture mapping,
+   and specify a point on the texture plane to be mapped on to this vertex.
+   The texture plane is an infinite plane with the texture bitmap tiled
+   across it. Each vertex in the polygon has a corresponding vertex on the
+   texture plane, and the image of the resulting polygon in the texture plane
+   will be mapped on to the polygon on the screen.
+
+<p>
+   We refer to pixels in the texture plane as texels. Each texel is a block, 
+   not just a point, and whole numbers for u and v refer to the top-left 
+   corner of a texel. This has a few implications. If you want to draw a 
+   rectangular polygon and map a texture sized 32x32 on to it, you would use 
+   the texture coordinates (0,0), (0,32), (32,32) and (32,0), assuming the 
+   vertices are specified in anticlockwise order. The texture will then be 
+   mapped perfectly on to the polygon. However, note that when we set u=32, 
+   the last column of texels seen on the screen is the one at u=31, and the 
+   same goes for v. This is because the coordinates refer to the top-left 
+   corner of the texels. In effect, texture coordinates at the right and 
+   bottom on the texture plane are exclusive.
+
+<p>
+   There is another interesting point here. If you have two polygons side 
+   by side sharing two vertices (like the two parts of folded piece of 
+   cardboard), and you want to map a texture across them seamlessly, the 
+   values of u and v on the vertices at the join will be the same for both 
+   polygons. For example, if they are both rectangular, one polygon may use 
+   (0,0), (0,32), (32,32) and (32,0), and the other may use (32,0), (32,32), 
+   (64,32), (64,0). This would create a seamless join.
+
+<p>
+   Of course you can specify fractional numbers for u and v to indicate a 
+   point part-way across a texel. In addition, since the texture plane is 
+   infinite, you can specify larger values than the size of the texture. 
+   This can be used to tile the texture several times across the polygon.
+
+<p>
+   The <tt>`c'</tt> value specifies the vertex color, and is interpreted differently
+   by various rendering modes. Read the beginning of chapter "Polygon
+   rendering" for a list of rendering types you can use with this function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#triangle3d" title="Draws a 3d triangle onto the specified bitmap.">triangle3d</a>,
+<a class="xref" href="#quad3d" title="Draws a 3d quad onto the specified bitmap.">quad3d</a>,
+<a class="xref" href="alleg013.html#polygon" title="Draws a filled polygon.">polygon</a>,
+<a class="xref" href="#clip3d" title="Clips the polygon given in vtx using fixed point math.">clip3d</a>,
+<a class="xref" href="alleg000.html#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>.</blockquote>
+<div class="al-api"><b>void <a name="triangle3d">triangle3d</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *tex, <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *v1, *v2, *v3);</b></div><br>
+<div class="al-api-cont"><b>void <a name="triangle3d_f">triangle3d_f</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *tex, <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *v1, *v2, *v3);</b></div><br>
+   Draw 3d triangles, using either fixed or floating point vertex structures.
+   Unlike quad3d[_f](), triangle3d[_f]() functions are not wrappers of
+   polygon3d[_f](). The triangle3d[_f]() functions use their own routines
+   taking into account the constantness of the gradients. Therefore
+   triangle3d[_f](bmp, type, tex, v1, v2, v3) is faster than
+   polygon3d[_f](bmp, type, tex, 3, v[]).
+
+<p>
+   Read the beginning of chapter "Polygon rendering" for a list of rendering
+   types you can use with this function.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#quad3d" title="Draws a 3d quad onto the specified bitmap.">quad3d</a>,
+<a class="xref" href="alleg013.html#triangle" title="Draws a filled triangle.">triangle</a>,
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>.</blockquote>
+<div class="al-api"><b>void <a name="quad3d">quad3d</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *tex, <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *v1, *v2, *v3, *v4);</b></div><br>
+<div class="al-api-cont"><b>void <a name="quad3d_f">quad3d_f</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *tex, <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *v1, *v2, *v3, *v4);</b></div><br>
+   Draw 3d quads, using either fixed or floating point vertex structures. 
+   These are equivalent to calling polygon3d(bmp, type, tex, 4, v[]) or
+   polygon3d_f(bmp, type, tex, 4, v[]).
+
+<p>
+   Read the beginning of chapter "Polygon rendering" for a list of rendering
+   types you can use with this function.
+   
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#triangle3d" title="Draws a 3d triangle onto the specified bitmap.">triangle3d</a>,
+<a class="xref" href="#Polygon rendering" title="">Polygon rendering</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3d" title="3d 'bouncy cubes' demo.">ex3d</a>.</blockquote>
+<div class="al-api"><b>int <a name="clip3d_f">clip3d_f</a>(int type, float min_z, float max_z, int vc,
+             const <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *vtx[], <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *vout[], <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *vtmp[], int out[]);</b></div><br>
+   Clips the polygon given in <tt>`vtx'</tt>. The number of vertices is <tt>`vc'</tt>, the
+   result goes in <tt>`vout'</tt>, and <tt>`vtmp'</tt> and <tt>`out'</tt> are needed for internal
+   purposes. The pointers in <tt>`vtx'</tt>, <tt>`vout'</tt> and <tt>`vtmp'</tt> must point to valid
+   V3D_f structures.
+   
+<p>
+   As additional vertices may appear in the process of clipping, so the 
+   size of <tt>`vout'</tt>, <tt>`vtmp'</tt> and <tt>`out'</tt> should be at least vc * (1.5 ^ n), where
+   <tt>`n'</tt> is the number of clipping planes (5 or 6), and <tt>`^'</tt> denotes "to the
+   power of".
+   
+<p>
+   The frustum (viewing volume) is defined by -z&lt;x&lt;z, -z&lt;y&lt;z,
+   0&lt;min_z&lt;z&lt;max_z. If  max_z&lt;=min_z, the z&lt;max_z clipping is
+   not done. As you can see, clipping is done in the camera space, with
+   perspective in mind, so this routine should be called after you apply
+   the camera matrix, but before the perspective projection. The routine
+   will correctly interpolate u, v, and c in the vertex structure. However,
+   no provision is made for high/truecolor GCOL.
+<p><b>Return value:</b>
+   Returns the number of vertices after clipping is done.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#clip3d" title="Clips the polygon given in vtx using fixed point math.">clip3d</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excamera" title="Viewing a 3d world from an arbitrary camera position.">excamera</a>,
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>int <a name="clip3d">clip3d</a>(int type, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> min_z, <a class="autotype" href="alleg001.html#fixed" title="Fixed point integer to replace floats.">fixed</a> max_z, int vc,
+           const <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *vtx[], <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *vout[], <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *vtmp[], int out[]);</b></div><br>
+   Fixed point version of clip3d_f(). This function should be used with 
+   caution, due to the limited precision of fixed point arithmetic and high 
+   chance of rounding errors: the floating point code is better for most 
+   situations.
+<p><b>Return value:</b>
+   Returns the number of vertices after clipping is done.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="#clip3d_f" title="Clips the polygon given in vtx using floating point math,">clip3d_f</a>.</blockquote>
+<br><center><h2><a name="Zbuffered rendering">Zbuffered rendering</a></h2></center><p>
+A Z-buffer stores the depth of each pixel that is drawn on a viewport.
+When a 3D object is rendered, the depth of each of its pixels is compared
+against the value stored into the Z-buffer: if the pixel is closer it is
+drawn, otherwise it is skipped.
+
+<p>
+No polygon sorting is needed. However, backface culling should be done
+because it prevents many invisible polygons being compared against the
+Z-buffer. Z-buffered rendering is the only algorithm supported by Allegro
+that directly solves penetrating shapes (see example exzbuf.c, for instance).
+The price to pay is more complex (and slower) routines.
+
+<p>
+Z-buffered polygons are designed as an extension of the normal POLYTYPE_*
+rendering styles. Just OR the POLYTYPE with the value POLYTYPE_ZBUF, and
+the normal polygon3d(), polygon3d_f(), quad3d(), etc. functions will
+render z-buffered polygons.
+
+<p>
+Example:
+<blockquote class="code"><pre>
+   <a href="#polygon3d" class="autotype" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>(bmp, <a href="#POLYTYPE_ATEX" class="autotype" title="Polygon rendering mode type">POLYTYPE_ATEX</a> | POLYTYPE_ZBUF, tex, vc, vtx);</pre></blockquote>
+
+<p>
+Of course, the z coordinates have to be valid regardless of rendering style.
+
+<p>
+A Z-buffered rendering procedure looks like a double-buffered rendering
+procedure. You should follow four steps: create a Z-buffer at the beginning
+of the program and make the library use it by calling set_zbuffer(). Then,
+for each frame, clear the Z-buffer and draw polygons with
+POLYTYPE_* | POLYTYPE_ZBUF and finally destroy the Z-buffer when leaving the
+program.
+
+<p>
+Notes on Z-buffered renderers:
+<ul><li>
+Unlike the normal POLYTYPE_FLAT renderers, the Z-buffered ones don't use
+the hline() routine. Therefore DRAW_MODE has no effect.
+<li>
+The *LIT* routines work the traditional way - through the set of
+blender routines.
+<li>
+All the Z-buffered routines are much slower than their normal counterparts
+(they all use the FPU to interpolate and test 1/z values).
+</ul>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *<a name="create_zbuffer">create_zbuffer</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp);</b></div><br>
+   Creates a Z-buffer using the size of the BITMAP you are planning to draw
+   on. Several Z-buffers can be defined but only one can be used at the same
+   time, so you must call set_zbuffer() to make this Z-buffer active.
+<p><b>Return value:</b>
+   Returns the pointer to the ZBUFFER or NULL if there was an error. Remember
+   to destroy the ZBUFFER once you are done with it, to avoid having memory
+   leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_sub_zbuffer" title="Creates a sub-z-buffer.">create_sub_zbuffer</a>,
+<a class="xref" href="#set_zbuffer" title="Makes the given Z-buffer the active one.">set_zbuffer</a>,
+<a class="xref" href="#clear_zbuffer" title="Writes a depth value into the given Z-buffer.">clear_zbuffer</a>,
+<a class="xref" href="#destroy_zbuffer" title="Destroys a Z-buffer.">destroy_zbuffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *<a name="create_sub_zbuffer">create_sub_zbuffer</a>(<a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *parent, int x, int y, int width, int height);</b></div><br>
+   Creates a sub-z-buffer, ie. a z-buffer sharing drawing memory with a
+   pre-existing z-buffer, but possibly with a different size. The same rules
+   as for sub-bitmaps apply: the sub-z-buffer width and height can extend
+   beyond the right and bottom edges of the parent (they will be clipped), 
+   but the origin point must lie within the parent region.
+
+<p>
+   When drawing z-buffered to a bitmap, the top left corner of the bitmap is
+   always mapped to the top left corner of the current z-buffer. So this
+   function is primarily useful if you want to draw to a sub-bitmap and use
+   the corresponding sub-area of the z-buffer. In other cases, eg. if you
+   just want to draw to a sub-bitmap of screen (and not to other parts of
+   screen), then you would usually want to create a normal z-buffer (not
+   sub-z-buffer) the size of the visible screen. You don't need to first
+   create a z-buffer the size of the virtual screen and then a sub-z-buffer
+   of that.
+<p><b>Return value:</b>
+   Returns the pointer to the sub ZBUFFER or NULL if there was an error.
+   Remember to destroy the ZBUFFER once you are done with it, to avoid having
+   memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_zbuffer" title="Creates a Z-buffer for a bitmap.">create_zbuffer</a>,
+<a class="xref" href="alleg009.html#create_sub_bitmap" title="Creates a memory sub bitmap.">create_sub_bitmap</a>,
+<a class="xref" href="#destroy_zbuffer" title="Destroys a Z-buffer.">destroy_zbuffer</a>.</blockquote>
+<div class="al-api"><b>void <a name="set_zbuffer">set_zbuffer</a>(<a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *zbuf);</b></div><br>
+   Makes the given Z-buffer be the active one. This should have been
+   previously created with create_zbuffer().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_zbuffer" title="Creates a Z-buffer for a bitmap.">create_zbuffer</a>,
+<a class="xref" href="#clear_zbuffer" title="Writes a depth value into the given Z-buffer.">clear_zbuffer</a>,
+<a class="xref" href="#destroy_zbuffer" title="Destroys a Z-buffer.">destroy_zbuffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>void <a name="clear_zbuffer">clear_zbuffer</a>(<a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *zbuf, float z);</b></div><br>
+   Writes z into the given Z-buffer (0 means far away). This function should
+   be used to initialize the Z-buffer before each frame. Actually, low-level
+   routines compare depth of the current pixel with 1/z: for example, if you
+   want to clip polygons farther than 10, you must call
+   clear_zbuffer(zbuf, 0.1).
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_zbuffer" title="Creates a Z-buffer for a bitmap.">create_zbuffer</a>,
+<a class="xref" href="#set_zbuffer" title="Makes the given Z-buffer the active one.">set_zbuffer</a>,
+<a class="xref" href="#destroy_zbuffer" title="Destroys a Z-buffer.">destroy_zbuffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_zbuffer">destroy_zbuffer</a>(<a class="autotype" href="alleg001.html#ZBUFFER" title="Stores 3d zbuffer information.">ZBUFFER</a> *zbuf);</b></div><br>
+   Destroys the Z-buffer when you are finished with it. Use this to avoid
+   memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_zbuffer" title="Creates a Z-buffer for a bitmap.">create_zbuffer</a>,
+<a class="xref" href="#set_zbuffer" title="Makes the given Z-buffer the active one.">set_zbuffer</a>,
+<a class="xref" href="#clear_zbuffer" title="Writes a depth value into the given Z-buffer.">clear_zbuffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exzbuf" title="Z-buffered polygons demo.">exzbuf</a>.</blockquote>
+<br><center><h2><a name="Scene rendering">Scene rendering</a></h2></center><p>
+Allegro provides two simple approaches to remove hidden surfaces:
+<ul><li>
+   Z-buffering - (see above)
+<li>
+   Scan-line algorithms - along each scanline on your screen, you keep
+   track of what polygons you are "in" and which is the nearest. This
+   status changes only where the scanline crosses some polygon edge. So you
+   have to juggle an edge list and a polygon list. And you have to sort the
+   edges for each scanline (this can be countered by keeping the order of
+   the previous scanline - it won't change much). The BIG advantage is that
+   you write each pixel only once. If you have a lot of overlapping
+   polygons you can get incredible speeds compared to any of the previous
+   algorithms. This algorithm is covered by the *_scene routines.
+</ul>
+
+<p>
+The scene rendering has approximately the following steps:
+<ul><li>
+   Initialize the scene (set the clip area, clear the bitmap, blit a
+   background, etc.)
+<li>
+   Call clear_scene().
+<li>
+   Transform all your points to camera space.
+<li>
+   Clip polygons.
+<li>
+   Project with persp_project() or persp_project_f().
+<li>
+   "Draw" polygons with scene_polygon3d() and/or scene_polygon3d_f().
+   This doesn't do any actual drawing, only initializes tables.
+<li>
+   Render all the polygons defined previously to the bitmap with
+   render_scene().
+<li>
+   Overlay some non-3D graphics.
+<li>
+   Show the bitmap (blit it to screen, flip the page, etc).
+</ul>
+
+<p>
+For each horizontal line in the viewport an x-sorted edge list is used to
+keep track of what polygons are "in" and which is the nearest. Vertical
+coherency is used - the edge list for a scanline is sorted starting from
+the previous one - it won't change much. The scene rendering routines use
+the same low-level asm routines as normal polygon3d().
+
+<p>
+Notes on scene rendering:
+<ul><li>
+   Unlike polygon3d(), scene_polygon3d() requires valid z coordinates
+   for all vertices, regardless of rendering style (unlike
+   polygon3d(), which only uses z coordinate for *PTEX*).
+<li>
+   All polygons passed to scene_polygon3d() have to be
+   persp_project()'ed.
+<li>
+   After render_scene() the mode is reset to SOLID.
+</ul>
+Using a lot of *MASK* polygons drastically reduces performance, because
+when a MASKed polygon is the first in line of sight, the polygons
+underneath have to be drawn too. The same applies to FLAT polygons drawn
+with DRAW_MODE_TRANS.
+
+<p>
+Z-buffered rendering works also within the scene renderer. It may be
+helpful when you have a few intersecting polygons, but most of the
+polygons may be safely rendered by the normal scanline sorting algorithm.
+Same as before: just OR the POLYTYPE with POLYTYPE_ZBUF. Also, you
+have to clear the z-buffer at the start of the frame. Example:
+<blockquote class="code"><pre>
+   <a href="#clear_scene" class="autotype" title="Initializes a scene.">clear_scene</a>(buffer);
+   if (some_polys_are_zbuf) <a href="#clear_zbuffer" class="autotype" title="Writes a depth value into the given Z-buffer.">clear_zbuffer</a>(0.);
+   while (polygons) {
+      ...
+      if (this_poly_is_zbuf) type |= POLYTYPE_ZBUF;
+      <a href="#scene_polygon3d" class="autotype" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>(type, tex, vc, vtx);
+   }
+   <a href="#render_scene" class="autotype" title="Renders all the queued scene polygons.">render_scene</a>();</pre></blockquote>
+
+<p><br>
+<div class="al-api"><b>int <a name="create_scene">create_scene</a>(int nedge, int npoly);</b></div><br>
+   Allocates memory for a scene, <tt>`nedge'</tt> and <tt>`npoly'</tt> are your estimates of how
+   many edges and how many polygons you will render (you cannot get over the
+   limit specified here). If you use same values in successive calls, the
+   space will be reused (no new malloc()).
+
+<p>
+   The memory allocated is a little less than 150 * (nedge + npoly) bytes.
+<p><b>Return value:</b>
+   Returns zero on success, or a negative number if allocations fail.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#scene_polygon3d" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>,
+<a class="xref" href="#render_scene" title="Renders all the queued scene polygons.">render_scene</a>,
+<a class="xref" href="#clear_scene" title="Initializes a scene.">clear_scene</a>,
+<a class="xref" href="#destroy_scene" title="Deallocates the memory used by a scene.">destroy_scene</a>,
+<a class="xref" href="#scene_gap" title="Number controlling the scene z-sorting algorithm behaviour.">scene_gap</a>,
+<a class="xref" href="#create_zbuffer" title="Creates a Z-buffer for a bitmap.">create_zbuffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>void <a name="clear_scene">clear_scene</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp);</b></div><br>
+   Initializes a scene. The bitmap is the bitmap you will eventually render
+   on.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_scene" title="Allocates memory for a 3d scene.">create_scene</a>,
+<a class="xref" href="#scene_polygon3d" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>,
+<a class="xref" href="#render_scene" title="Renders all the queued scene polygons.">render_scene</a>,
+<a class="xref" href="#destroy_scene" title="Deallocates the memory used by a scene.">destroy_scene</a>,
+<a class="xref" href="#scene_gap" title="Number controlling the scene z-sorting algorithm behaviour.">scene_gap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_scene">destroy_scene</a>();</b></div><br>
+   Deallocate memory previously allocated by create_scene. Use this to avoid
+   memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_scene" title="Allocates memory for a 3d scene.">create_scene</a>,
+<a class="xref" href="#scene_polygon3d" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>,
+<a class="xref" href="#clear_scene" title="Initializes a scene.">clear_scene</a>,
+<a class="xref" href="#render_scene" title="Renders all the queued scene polygons.">render_scene</a>,
+<a class="xref" href="#scene_gap" title="Number controlling the scene z-sorting algorithm behaviour.">scene_gap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>int <a name="scene_polygon3d">scene_polygon3d</a>(int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *texture, int vc, <a class="autotype" href="alleg001.html#V3D" title="Fixed point vertex structure used by 3d functions.">V3D</a> *vtx[]);</b></div><br>
+<div class="al-api-cont"><b>int <a name="scene_polygon3d_f">scene_polygon3d_f</a>(int type, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *texture, int vc, <a class="autotype" href="alleg001.html#V3D_f" title="Floating point vertex structure used by 3d functions.">V3D_f</a> *vtx[]);</b></div><br>
+   Puts a polygon in the rendering list. Nothing is really rendered at this
+   moment. Should be called between clear_scene() and render_scene().
+
+<p>
+   Arguments are the same as for polygon3d(), except the bitmap is missing.
+   The one passed to clear_scene() will be used.
+
+<p>
+   Unlike polygon3d(), the polygon may be concave or self-intersecting.
+   Shapes that penetrate one another may look OK, but they are not really
+   handled by this code.
+
+<p>
+   Note that the texture is stored as a pointer only, and you should keep
+   the actual bitmap around until render_scene(), where it is used.
+
+<p>
+   Since the FLAT style is implemented with the low-level hline() function,
+   the FLAT style is subject to DRAW_MODEs. All these modes are valid. Along
+   with the polygon, this mode will be stored for the rendering moment, and
+   also all the other related variables (color_map pointer, pattern pointer,
+   anchor, blender values).
+
+<p>
+   The settings of the CPU_MMX and CPU_3DNOW flags of the cpu_capabilities 
+   global variable on entry in this routine affect the choice of low-level 
+   asm routine that will be used by render_scene() for this polygon.
+<p><b>Return value:</b>
+   Returns zero on success, or a negative number if it won't be rendered for
+   lack of a rendering routine.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_scene" title="Allocates memory for a 3d scene.">create_scene</a>,
+<a class="xref" href="#clear_scene" title="Initializes a scene.">clear_scene</a>,
+<a class="xref" href="#render_scene" title="Renders all the queued scene polygons.">render_scene</a>,
+<a class="xref" href="#destroy_scene" title="Deallocates the memory used by a scene.">destroy_scene</a>,
+<a class="xref" href="#polygon3d" title="Draws a 3d polygon onto the specified bitmap.">polygon3d</a>,
+<a class="xref" href="alleg000.html#cpu_capabilities" title="Contains the capability flags of the CPU.">cpu_capabilities</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>void <a name="render_scene">render_scene</a>();</b></div><br>
+   Renders all the specified scene_polygon3d()'s on the bitmap passed to
+   clear_scene(). Rendering is done one scanline at a time, with no pixel
+   being processed more than once.
+
+<p>
+   Note that between clear_scene() and render_scene() you shouldn't change
+   the clip rectangle of the destination bitmap. For speed reasons, you
+   should set the clip rectangle to the minimum.
+
+<p>
+   Note also that all the textures passed to scene_polygon3d() are stored as
+   pointers only and actually used in render_scene().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_scene" title="Allocates memory for a 3d scene.">create_scene</a>,
+<a class="xref" href="#clear_scene" title="Initializes a scene.">clear_scene</a>,
+<a class="xref" href="#destroy_scene" title="Deallocates the memory used by a scene.">destroy_scene</a>,
+<a class="xref" href="#scene_gap" title="Number controlling the scene z-sorting algorithm behaviour.">scene_gap</a>,
+<a class="xref" href="#scene_polygon3d" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscn3d" title="Using the 3d scene functions.">exscn3d</a>.</blockquote>
+<div class="al-api"><b>extern float <a name="scene_gap">scene_gap</a>;</b></div><br>
+   This number (default value = 100.0) controls the behaviour of the
+   z-sorting algorithm. When an edge is very close to another's polygon
+   plane, there is an interval of uncertainty in which you cannot tell which
+   object is visible (which z is smaller). This is due to cumulative
+   numerical errors for edges that have undergone a lot of transformations
+   and interpolations.
+
+<p>
+   The default value means that if the 1/z values (in projected space)
+   differ by only 1/100 (one percent), they are considered to be equal and
+   the x-slopes of the planes are used to find out which plane is getting
+   closer when we move to the right.
+
+<p>
+   Larger values means narrower margins, and increasing the chance of
+   missing true adjacent edges/planes. Smaller values means larger margins,
+   and increasing the chance of mistaking close polygons for adjacent ones.
+   The value of 100 is close to the optimum. However, the optimum shifts
+   slightly with resolution, and may be application-dependent. It is here 
+   for you to fine-tune.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_scene" title="Allocates memory for a 3d scene.">create_scene</a>,
+<a class="xref" href="#clear_scene" title="Initializes a scene.">clear_scene</a>,
+<a class="xref" href="#destroy_scene" title="Deallocates the memory used by a scene.">destroy_scene</a>,
+<a class="xref" href="#render_scene" title="Renders all the queued scene polygons.">render_scene</a>,
+<a class="xref" href="#scene_polygon3d" title="Puts a polygon in the scene rendering list.">scene_polygon3d</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

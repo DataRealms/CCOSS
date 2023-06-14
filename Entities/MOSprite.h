@@ -391,6 +391,11 @@ public:
 	/// <returns>The height of the GUI icon bitmap.</returns>
 	int GetIconHeight() const { return GetGraphicalIcon()->h; }
 
+	/// <summary>
+	/// Forces this MOSprite out of resting conditions.
+	/// </summary>
+	void NotResting() override { MovableObject::NotResting(); m_AngOscillations = 0; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsTooFast
@@ -400,19 +405,18 @@ public:
 // Arguments:       None.
 // Return value:    Whether this is either moving or rotating too fast.
 
-	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (GetRadius() + 1.0f)); }
-    //bool IsTooFast() const override { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
+	bool IsTooFast() const override { return m_Vel.MagnitudeIsGreaterThan(500.0F) || std::fabs(m_AngularVel) > (2000.0F / (GetRadius() + 1.0F)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  FixTooFast
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Slows the speed of anyhting that is deemed to be too fast to within
+// Description:     Slows the speed of anything that is deemed to be too fast to within
 //                  acceptable rates.
 // Arguments:       None.
 // Return value:    None.
 
-	void FixTooFast() override { while (IsTooFast()) { m_Vel *= 0.5; m_AngularVel *= 0.5; } }
+	void FixTooFast() override { while (IsTooFast()) { m_Vel *= 0.5F; m_AngularVel *= 0.5F; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -585,8 +589,7 @@ protected:
     // The precalculated maximum possible radius and diameter of this, in pixels
     float m_SpriteRadius;
     float m_SpriteDiameter;
-    // A counter to count the oscillations in rotation, in order to detect settling.
-    int m_AngOscillations;
+	int m_AngOscillations; //!< A counter for oscillations in rotation, in order to detect settling.
     // Whether to disable the settle material ID when this gets drawn as material
     bool m_SettleMaterialDisabled;
     // Entry wound template

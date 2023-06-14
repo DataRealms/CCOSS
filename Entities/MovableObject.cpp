@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MovableObject.h"
+
 #include "PresetMan.h"
 #include "SceneMan.h"
 #include "ConsoleMan.h"
@@ -40,6 +41,7 @@ void MovableObject::Clear()
     m_Vel.Reset();
     m_PrevPos.Reset();
     m_PrevVel.Reset();
+	m_DistanceTravelled = 0;
     m_Scale = 1.0;
     m_GlobalAccScalar = 1.0;
     m_AirResistance = 0;
@@ -69,9 +71,10 @@ void MovableObject::Clear()
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;
     m_HasEverBeenAddedToMovableMan = false;
+	m_ExistsInMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
-    m_VelOscillations = 0;
+	m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
@@ -224,7 +227,7 @@ int MovableObject::Create(const MovableObject &reference)
     if (reference.m_pScreenEffect)
     {
         m_ScreenEffectFile = reference.m_ScreenEffectFile;
-        m_pScreenEffect = reference.m_pScreenEffect;
+        m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 
     }
 	m_EffectRotAngle = reference.m_EffectRotAngle;
@@ -332,7 +335,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	else if (propName == "HUDVisible")
 		reader >> m_HUDVisible;
 	else if (propName == "ScriptPath") {
-		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
+		std::string scriptPath = g_PresetMan.GetFullModulePath(reader.ReadPropValue());
         switch (LoadScript(scriptPath)) {
             case 0:
                 break;
@@ -488,7 +491,7 @@ int MovableObject::Save(Writer &writer) const
     writer << m_IgnoreTerrain;
     writer.NewProperty("SimUpdatesBetweenScriptedUpdates");
     writer << m_SimUpdatesBetweenScriptedUpdates;
-    
+
     return 0;
 }
 
@@ -629,14 +632,16 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
     int status = 0;
-    if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end() || m_FunctionsAndScripts.find(functionName)->second.empty()) {
+
+    auto itr = m_FunctionsAndScripts.find(functionName);
+    if (itr == m_FunctionsAndScripts.end() || itr->second.empty()) {
         status = -1;
     } else if (!ObjectScriptsInitialized()) {
         status = InitializeObjectScripts();
     }
 
     if (status >= 0) {
-        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
+        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
             if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
 				status = g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
                 if (status < 0 && stopOnError) {
@@ -683,7 +688,7 @@ MovableObject::MovableObject(const MovableObject &reference):
     m_AgeTimer(reference.GetAge()),
     m_Lifetime(reference.GetLifetime())
 {
-    
+
 }
 */
 
@@ -698,54 +703,30 @@ float MovableObject::GetAltitude(int max, int accuracy)
     return g_SceneMan.FindAltitude(m_Pos, max, accuracy);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-
-void MovableObject::RestDetection()
-{
-    if (m_PinStrength)
-        return;
-
-    // Translational settling detection
-    if ((m_Vel.Dot(m_PrevVel) < 0)) {
-        if (m_VelOscillations >= 2 && m_RestThreshold >= 0)
-            m_ToSettle = true;
-        else
-            ++m_VelOscillations;
-    }
-    else
-        m_VelOscillations = 0;
-
-//    if (fabs(m_Vel.m_X) >= 0.25 || fabs(m_Vel.m_Y) >= 0.25)
-//        m_RestTimer.Reset();
-
-    if (fabs(m_Pos.m_X - m_PrevPos.m_X) >= 1.0f || fabs(m_Pos.m_Y - m_PrevPos.m_Y) >= 1.0f)
-        m_RestTimer.Reset();
+void MovableObject::RestDetection() {
+	// Translational settling detection.
+	if (m_Vel.Dot(m_PrevVel) < 0) {
+		++m_VelOscillations;
+	} else {
+		m_VelOscillations = 0;
+	}
+	if ((m_Pos - m_PrevPos).MagnitudeIsGreaterThan(1.0F)) { m_RestTimer.Reset(); }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for
-//                  more than one (1) second.
-
-bool MovableObject::IsAtRest()
-{
-    if (m_PinStrength)
-        return false;
-
-    if (m_RestThreshold < 0)
-        return false;
-    else
-        return m_RestTimer.IsPastSimMS(m_RestThreshold);
+bool MovableObject::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength) {
+		return false;
+	} else {
+		if (m_VelOscillations > 2) {
+			return true;
+		}
+		return m_RestTimer.IsPastSimMS(m_RestThreshold);
+	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  OnMOHit
@@ -773,6 +754,15 @@ void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
     RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Vector MovableObject::GetTotalForce() {
+	Vector totalForceVector;
+	for (const auto &[force, forceOffset] : m_Forces) {
+		totalForceVector += force;
+	}
+	return totalForceVector;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ApplyForces
@@ -801,13 +791,11 @@ void MovableObject::ApplyForces()
     if (m_AirResistance > 0 && m_Vel.GetLargest() >= m_AirThreshold)
         m_Vel *= 1.0 - (m_AirResistance * deltaTime);
 
-    // Apply the translational effects of all the forces accumulated during the Update()
-    for (auto fItr = m_Forces.begin(); fItr != m_Forces.end(); ++fItr)
-    {
-        // Continuous force application to transformational velocity.
-        // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime);
-    }
+	// Apply the translational effects of all the forces accumulated during the Update().
+	if (m_Forces.size() > 0) {
+		// Continuous force application to transformational velocity (F = m * a -> a = F / m).
+		m_Vel += GetTotalForce() / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime;
+	}
 
     // Clear out the forces list
     m_Forces.clear();
@@ -854,11 +842,12 @@ void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
-		if (g_SettingsMan.SimplifiedCollisionDetection()) {
-			m_IsTraveling = true;
-		} else {
+        m_IsTraveling = true;
+#ifdef DRAW_MOID_LAYER
+		if (!g_SettingsMan.SimplifiedCollisionDetection()) {
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
 		}
+#endif
 	}
 
     // Save previous position and velocities before moving
@@ -878,7 +867,7 @@ void MovableObject::PreTravel()
 
 void MovableObject::Travel()
 {
-    
+
 }
 
 
@@ -891,38 +880,45 @@ void MovableObject::Travel()
 void MovableObject::PostTravel()
 {
     // Toggle whether this gets hit by other AtomGroup MOs depending on whether it's going slower than a set threshold
-    if (m_IgnoresAGHitsWhenSlowerThan > 0)
-        m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
+    if (m_IgnoresAGHitsWhenSlowerThan > 0) {
+        m_IgnoresAtomGroupHits = m_Vel.MagnitudeIsLessThan(m_IgnoresAGHitsWhenSlowerThan);
+    }
 
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
-			if (g_SettingsMan.SimplifiedCollisionDetection()) {
-				m_IsTraveling = false;
-			} else {
-				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
+            m_IsTraveling = false;
+#ifdef DRAW_MOID_LAYER
+			if (!g_SettingsMan.SimplifiedCollisionDetection()) {
+                Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
 			}
+#endif
 		}
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;
 
     // Check for age expiration
-    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime)
+    if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) {
         m_ToDelete = true;
+    }
 
-    // Check for stupid positions and velocities, but critical stuff can't go too fast
-    if (!g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 100))
+    // Check for stupid positions
+    if (!GetParent() && !g_SceneMan.IsWithinBounds(m_Pos.m_X, m_Pos.m_Y, 1000)) {
         m_ToDelete = true;
+    }
 
     // Fix speeds that are too high
     FixTooFast();
 
     // Never let mission critical stuff settle or delete
-    if (m_MissionCritical)
+    if (m_MissionCritical) {
         m_ToSettle = false;
+    }
 
     // Reset the terrain intersection warning
     m_CheckTerrIntersection = false;
+
+	m_DistanceTravelled += m_Vel.GetMagnitude() * c_PPM * g_TimerMan.GetDeltaTimeSecs();
 }
 
 /*
@@ -943,6 +939,16 @@ void MovableObject::Update()
 
 void MovableObject::Update() {
 	if (m_RandomizeEffectRotAngleEveryFrame) { m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum(); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode mode, bool onlyPhysical) const {
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
+        return;
+    }
+
+    g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1.0F);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

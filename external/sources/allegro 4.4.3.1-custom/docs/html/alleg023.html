@@ -1,0 +1,277 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: FLIC routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="FLIC routines">FLIC routines</a></h1>
+
+<ul>
+<li><a href="#close_fli">close_fli</a> &mdash; Closes a FLI file previously opened.
+<li><a href="#fli_bitmap">fli_bitmap</a> &mdash; Contains the current frame of the animation.
+<li><a href="#fli_bmp_dirty_from">fli_bmp_dirty_from</a> &mdash; Indicate which parts of the image have changed.
+<li><a href="#fli_bmp_dirty_to">fli_bmp_dirty_to</a> &mdash; Indicate which parts of the image have changed.
+<li><a href="#fli_frame">fli_frame</a> &mdash; Stores the current frame number of the animation.
+<li><a href="#fli_pal_dirty_from">fli_pal_dirty_from</a> &mdash; Indicate which parts of the palette have changed.
+<li><a href="#fli_pal_dirty_to">fli_pal_dirty_to</a> &mdash; Indicate which parts of the palette have changed.
+<li><a href="#fli_palette">fli_palette</a> &mdash; Contains the current palette of the animation.
+<li><a href="#fli_timer">fli_timer</a> &mdash; Global variable for timing FLI playback.
+<li><a href="#next_fli_frame">next_fli_frame</a> &mdash; Reads the next frame of the current animation file.
+<li><a href="#open_fli">open_fli</a> &mdash; Makes a FLI file open and ready for playing.
+<li><a href="#open_memory_fli">open_memory_fli</a> &mdash; Makes a FLI file open and ready for playing.
+<li><a href="#play_fli">play_fli</a> &mdash; Plays a FLI or FLC animation from disk.
+<li><a href="#play_memory_fli">play_memory_fli</a> &mdash; Plays a FLI or FLC animation from memory.
+<li><a href="#reset_fli_variables">reset_fli_variables</a> &mdash; Resets the bitmap and palette dirty global variables.
+</ul>
+
+<p>
+There are two high level functions for playing FLI/FLC animations: 
+play_fli(), which reads the data directly from disk, and play_memory_fli(), 
+which uses data that has already been loaded into RAM. Apart from the 
+different sources of the data, these two functions behave identically. They 
+draw the animation onto the specified bitmap, which should normally be the 
+screen. Frames will be aligned with the top left corner of the bitmap: if 
+you want to position them somewhere else you will need to create a 
+sub-bitmap for the FLI player to draw onto.
+
+<p>
+If the callback function is not NULL it will be called once for each frame,
+allowing you to perform background tasks of your own. This callback should
+normally return zero: if it returns non-zero the player will terminate (this
+is the only way to stop an animation that is playing in looped mode).
+
+<p>
+The FLI player returns FLI_OK if it reached the end of the file, FLI_ERROR
+if something went wrong, and the value returned by the callback function if
+that was what stopped it. If you need to distinguish between different return
+values, your callback should return positive integers, since FLI_OK is zero
+and FLI_ERROR is negative.
+
+<p>
+Note that the FLI player will only work when the timer module is installed, 
+and that it will alter the palette according to whatever palette data is 
+present in the animation file.
+
+<p>
+Occasionally you may need more detailed control over how an FLI is played, 
+for example if you want to superimpose a text scroller on top of the 
+animation, or to play it back at a different speed. You could do both of 
+these with the lower level functions described below.
+
+<p><br>
+<div class="al-api"><b>int <a name="play_fli">play_fli</a>(const char *filename, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int loop, int (*callback)());</b></div><br>
+   Plays an Autodesk Animator FLI or FLC animation file on the specified
+   BITMAP, reading the data from disk as it is required. If <tt>`loop'</tt> is not
+   zero, the player will cycle when it reaches the end of the file, otherwise
+   it will play through the animation once and then return. Read the beginning
+   of chapter "FLIC routines" for a description of the callback parameter.
+   Example:
+<blockquote class="code"><pre>
+      /* Let users skip looped animations. */
+      int check_escape_key(void)
+      {
+         if (<a href="alleg006.html#key" class="autotype" title="Array of flags indicating key state.">key</a>[KEY_ESC])
+            return 1;
+         else
+            return 0;
+      }
+      ...
+         int ret = <a href="#play_fli" class="autotype" title="Plays a FLI or FLC animation from disk.">play_fli</a>("animlogo.fli", <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 1,
+                             check_escape_key);
+         if (ret == FLI_ERROR)
+            abort_on_error("Error playing intro!");</pre></blockquote>
+<p><b>Return value:</b>
+   The FLI player returns FLI_OK if it reached the end of the file, FLI_ERROR
+   if something went wrong, and the value returned by the callback function if
+   that was what stopped it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_memory_fli" title="Plays a FLI or FLC animation from memory.">play_memory_fli</a>,
+<a class="xref" href="alleg005.html#install_timer" title="Installs the Allegro timer interrupt handler.">install_timer</a>,
+<a class="xref" href="#fli_frame" title="Stores the current frame number of the animation.">fli_frame</a>.</blockquote>
+<div class="al-api"><b>int <a name="play_memory_fli">play_memory_fli</a>(const void *fli_data, <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, int loop,
+                    int (*callback)());</b></div><br>
+   Plays an Autodesk Animator FLI or FLC animation on the specified BITMAP,
+   reading the data from a copy of the file which is held in memory. You can
+   obtain the <tt>`fli_data'</tt> pointer by allocating a block of memory and reading
+   an FLI file into it, or by importing an FLI into a grabber datafile. If
+   <tt>`loop'</tt> is not zero, the player will cycle when it reaches the end of the
+   file, otherwise it will play through the animation once and then return.
+   Read the beginning of chapter "FLIC routines" for a description of the
+   callback parameter.
+
+<p>
+   Playing animations from memory is obviously faster than cuing them
+   directly from disk, and is particularly useful with short, looped FLI's.
+   Animations can easily get very large, though, so in most cases you will
+   probably be better just using play_fli(). You can think of this function
+   as a wrapper on top of open_memory_fli(), next_fli_frame() and close_fli().
+   Example:
+<blockquote class="code"><pre>
+      int ret = <a href="#play_memory_fli" class="autotype" title="Plays a FLI or FLC animation from memory.">play_memory_fli</a>(anim_data, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, NULL);
+      if (ret == FLI_ERROR)
+         abort_on_error("Corrupted animation data?");</pre></blockquote>
+<p><b>Return value:</b>
+   The FLI player returns FLI_OK if it reached the end of the file, FLI_ERROR
+   if something went wrong, and the value returned by the callback function if
+   that was what stopped it.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_fli" title="Plays a FLI or FLC animation from disk.">play_fli</a>,
+<a class="xref" href="alleg005.html#install_timer" title="Installs the Allegro timer interrupt handler.">install_timer</a>,
+<a class="xref" href="#fli_frame" title="Stores the current frame number of the animation.">fli_frame</a>.</blockquote>
+<div class="al-api"><b>int <a name="open_fli">open_fli</a>(const char *filename);</b></div><br>
+<div class="al-api-cont"><b>int <a name="open_memory_fli">open_memory_fli</a>(const void *fli_data);</b></div><br>
+   Open FLI files ready for playing, reading the data from disk or memory
+   respectively. Information about the current FLI is held in the global
+   variables fli_bitmap and fli_palette, which you can use if this function
+   succeeds. However, you can only have one animation open at a time.
+   Example:
+<blockquote class="code"><pre>
+      if (<a href="#open_fli" class="autotype" title="Makes a FLI file open and ready for playing.">open_fli</a>("intro.fli") == FLI_ERROR)
+         abort_on_error("Error playing intro");</pre></blockquote>
+<p><b>Return value:</b>
+   Returns FLI_OK on success, FLI_ERROR if something went wrong, like trying
+   to open another FLI file without closing the previous one.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#close_fli" title="Closes a FLI file previously opened.">close_fli</a>,
+<a class="xref" href="#next_fli_frame" title="Reads the next frame of the current animation file.">next_fli_frame</a>,
+<a class="xref" href="#fli_bitmap" title="Contains the current frame of the animation.">fli_bitmap</a>,
+<a class="xref" href="#fli_palette" title="Contains the current palette of the animation.">fli_palette</a>.</blockquote>
+<div class="al-api"><b>void <a name="close_fli">close_fli</a>();</b></div><br>
+   Closes an FLI file when you have finished reading from it. Remember to do
+   this to avoid having memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#open_fli" title="Makes a FLI file open and ready for playing.">open_fli</a>.</blockquote>
+<div class="al-api"><b>int <a name="next_fli_frame">next_fli_frame</a>(int loop);</b></div><br>
+   Reads the next frame of the current animation file. If <tt>`loop'</tt> is not zero,
+   the player will cycle when it reaches the end of the file, otherwise it
+   will return FLI_EOF. The frame is read into the global variables
+   fli_bitmap and fli_palette. Example:
+<blockquote class="code"><pre>
+      while (<a href="#next_fli_frame" class="autotype" title="Reads the next frame of the current animation file.">next_fli_frame</a>(0) == FLI_OK) {
+         /* Do stuff, like play audio stream
+            or check keys to skip animation. */
+         /* Rest some time until next frame... */
+      }</pre></blockquote>
+<p><b>Return value:</b>
+   Returns FLI_OK on success, FLI_ERROR or FLI_NOT_OPEN on error, and FLI_EOF
+   on reaching the end of the file.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#open_fli" title="Makes a FLI file open and ready for playing.">open_fli</a>,
+<a class="xref" href="#fli_bitmap" title="Contains the current frame of the animation.">fli_bitmap</a>,
+<a class="xref" href="#fli_palette" title="Contains the current palette of the animation.">fli_palette</a>,
+<a class="xref" href="#fli_timer" title="Global variable for timing FLI playback.">fli_timer</a>,
+<a class="xref" href="#fli_frame" title="Stores the current frame number of the animation.">fli_frame</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *<a name="fli_bitmap">fli_bitmap</a>;</b></div><br>
+   Contains the current frame of the FLI/FLC animation. If there is no open
+   animation, its value will be NULL.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#next_fli_frame" title="Reads the next frame of the current animation file.">next_fli_frame</a>,
+<a class="xref" href="#fli_bmp_dirty_from" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a>,
+<a class="xref" href="#fli_palette" title="Contains the current palette of the animation.">fli_palette</a>.</blockquote>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#PALETTE" title="Stores palette information.">PALETTE</a> <a name="fli_palette">fli_palette</a>;</b></div><br>
+   Contains the current FLI palette.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#next_fli_frame" title="Reads the next frame of the current animation file.">next_fli_frame</a>,
+<a class="xref" href="#fli_pal_dirty_from" title="Indicate which parts of the palette have changed.">fli_pal_dirty_from</a>,
+<a class="xref" href="#fli_bitmap" title="Contains the current frame of the animation.">fli_bitmap</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="fli_bmp_dirty_from">fli_bmp_dirty_from</a>;</b></div><br>
+<div class="al-api-cont"><b>extern int <a name="fli_bmp_dirty_to">fli_bmp_dirty_to</a>;</b></div><br>
+   These variables are set by next_fli_frame() to indicate which part of the 
+   fli_bitmap has changed since the last call to reset_fli_variables(). If 
+   fli_bmp_dirty_from is greater than fli_bmp_dirty_to, the bitmap has not 
+   changed, otherwise lines fli_bmp_dirty_from to fli_bmp_dirty_to 
+   (inclusive) have altered. You can use these when copying the fli_bitmap 
+   onto the screen, to avoid moving data unnecessarily. Example:
+<blockquote class="code"><pre>
+      if (<a href="#fli_bmp_dirty_from" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a> &lt;= <a href="#fli_bmp_dirty_to" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_to</a>)
+         <a href="alleg014.html#blit" class="autotype" title="Copies a rectangular area from one bitmap to another.">blit</a>(<a href="#fli_bitmap" class="autotype" title="Contains the current frame of the animation.">fli_bitmap</a>, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, <a href="#fli_bmp_dirty_from" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a>,
+              0, <a href="#fli_bmp_dirty_from" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a>, <a href="#fli_bitmap" class="autotype" title="Contains the current frame of the animation.">fli_bitmap</a>->w,
+              <a href="#fli_bmp_dirty_to" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_to</a> - <a href="#fli_bmp_dirty_from" class="autotype" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a> + 1);</pre></blockquote>
+              
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fli_bitmap" title="Contains the current frame of the animation.">fli_bitmap</a>,
+<a class="xref" href="#reset_fli_variables" title="Resets the bitmap and palette dirty global variables.">reset_fli_variables</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="fli_pal_dirty_from">fli_pal_dirty_from</a>;</b></div><br>
+<div class="al-api-cont"><b>extern int <a name="fli_pal_dirty_to">fli_pal_dirty_to</a>;</b></div><br>
+   These variables are set by next_fli_frame() to indicate which part of the 
+   fli_palette has changed since the last call to reset_fli_variables(). If 
+   fli_pal_dirty_from is greater than fli_pal_dirty_to, the palette has not 
+   changed, otherwise colors fli_pal_dirty_from to fli_pal_dirty_to 
+   (inclusive) have altered. You can use these when updating the hardware 
+   palette, to avoid unnecessary calls to set_palette(). Example:
+<blockquote class="code"><pre>
+      if (<a href="#fli_pal_dirty_from" class="autotype" title="Indicate which parts of the palette have changed.">fli_pal_dirty_from</a> &lt;= <a href="#fli_pal_dirty_to" class="autotype" title="Indicate which parts of the palette have changed.">fli_pal_dirty_to</a>)
+         <a href="alleg011.html#set_palette_range" class="autotype" title="Sets a specific range of the palette.">set_palette_range</a>(<a href="#fli_palette" class="autotype" title="Contains the current palette of the animation.">fli_palette</a>, <a href="#fli_pal_dirty_from" class="autotype" title="Indicate which parts of the palette have changed.">fli_pal_dirty_from</a>,
+                           <a href="#fli_pal_dirty_to" class="autotype" title="Indicate which parts of the palette have changed.">fli_pal_dirty_to</a>, 1);</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fli_palette" title="Contains the current palette of the animation.">fli_palette</a>,
+<a class="xref" href="#reset_fli_variables" title="Resets the bitmap and palette dirty global variables.">reset_fli_variables</a>.</blockquote>
+<div class="al-api"><b>void <a name="reset_fli_variables">reset_fli_variables</a>();</b></div><br>
+   Once you have done whatever you are going to do with the fli_bitmap and 
+   fli_palette, call this function to reset the fli_bmp_dirty_* and 
+   fli_pal_dirty_* variables.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#fli_bmp_dirty_from" title="Indicate which parts of the image have changed.">fli_bmp_dirty_from</a>,
+<a class="xref" href="#fli_pal_dirty_from" title="Indicate which parts of the palette have changed.">fli_pal_dirty_from</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="fli_frame">fli_frame</a>;</b></div><br>
+   Global variable containing the current frame number in the FLI file. This 
+   is useful for synchronising other events with the animation, for instance 
+   you could check it in a play_fli() callback function and use it to 
+   trigger a sample at a particular point. Example:
+<blockquote class="code"><pre>
+      while (<a href="#next_fli_frame" class="autotype" title="Reads the next frame of the current animation file.">next_fli_frame</a>(0) == FLI_OK) {
+         if (<a href="#fli_frame" class="autotype" title="Stores the current frame number of the animation.">fli_frame</a> == 345)
+            <a href="alleg026.html#play_sample" class="autotype" title="Plays a sample.">play_sample</a>(trumpet_sound, 255, 128, 1000, 0);
+         /* Rest some time until next frame... */
+      }</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#play_fli" title="Plays a FLI or FLC animation from disk.">play_fli</a>,
+<a class="xref" href="#play_memory_fli" title="Plays a FLI or FLC animation from memory.">play_memory_fli</a>,
+<a class="xref" href="#next_fli_frame" title="Reads the next frame of the current animation file.">next_fli_frame</a>.</blockquote>
+<div class="al-api"><b>extern volatile int <a name="fli_timer">fli_timer</a>;</b></div><br>
+   Global variable for timing FLI playback. When you open an FLI file, a 
+   timer interrupt is installed which increments this variable every time a 
+   new frame should be displayed. Calling next_fli_frame() decrements it, so 
+   you can test it and know that it is time to display a new frame if it is 
+   greater than zero. Example:
+<blockquote class="code"><pre>
+      while (<a href="#next_fli_frame" class="autotype" title="Reads the next frame of the current animation file.">next_fli_frame</a>(0) == FLI_OK) {
+         /* Do stuff, like play audio stream
+            or check keys to skip animation. */
+         /* Rest some time until next frame... */
+         while (<a href="#fli_timer" class="autotype" title="Global variable for timing FLI playback.">fli_timer</a> &lt;= 0)
+            <a href="alleg005.html#rest" class="autotype" title="Waits a specified number of milliseconds or yields CPU.">rest</a>(0);
+      }</pre></blockquote>
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg005.html#install_timer" title="Installs the Allegro timer interrupt handler.">install_timer</a>,
+<a class="xref" href="#next_fli_frame" title="Reads the next frame of the current animation file.">next_fli_frame</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

@@ -16,6 +16,7 @@
 #include "CameraMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "WindowMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
@@ -62,7 +63,6 @@ void GameActivity::Clear()
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
-        m_DeathTimer[player].Reset();
         m_ActorSelectTimer[player].Reset();
         m_ActorCursor[player].Reset();
         m_pLastMarkedActor[player] = 0;
@@ -90,11 +90,12 @@ void GameActivity::Clear()
 	m_DefaultFogOfWar = -1;
 	m_DefaultRequireClearPathToOrbit = -1;
 	m_DefaultDeployUnits = 1;
-	m_DefaultGoldCake = -1;
-	m_DefaultGoldEasy = -1;
-	m_DefaultGoldMedium = -1;
-	m_DefaultGoldHard = -1;
-	m_DefaultGoldNuts = -1;
+	m_DefaultGoldCakeDifficulty = -1;
+	m_DefaultGoldEasyDifficulty = -1;
+	m_DefaultGoldMediumDifficulty = -1;
+	m_DefaultGoldHardDifficulty = -1;
+	m_DefaultGoldNutsDifficulty = -1;
+	m_DefaultGoldMaxDifficulty = -1;
 	m_FogOfWarSwitchEnabled = true;
 	m_DeployUnitsSwitchEnabled = false;
 	m_GoldSwitchEnabled = true;
@@ -164,7 +165,6 @@ int GameActivity::Create(const GameActivity &reference)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
-//        m_DeathTimer[player] = reference.m_DeathTimer[player];
         m_ActorCursor[player] = reference.m_ActorCursor[player];
         m_pLastMarkedActor[player] = reference.m_pLastMarkedActor[player];
         m_LandingZone[player] = reference.m_LandingZone[player];
@@ -194,11 +194,12 @@ int GameActivity::Create(const GameActivity &reference)
 	m_DefaultFogOfWar = reference.m_DefaultFogOfWar;
 	m_DefaultRequireClearPathToOrbit = reference.m_DefaultRequireClearPathToOrbit;
 	m_DefaultDeployUnits = reference.m_DefaultDeployUnits;
-	m_DefaultGoldCake = reference.m_DefaultGoldCake;
-	m_DefaultGoldEasy = reference.m_DefaultGoldEasy;
-	m_DefaultGoldMedium = reference.m_DefaultGoldMedium;
-	m_DefaultGoldHard = reference.m_DefaultGoldHard;
-	m_DefaultGoldNuts = reference.m_DefaultGoldNuts;
+	m_DefaultGoldCakeDifficulty = reference.m_DefaultGoldCakeDifficulty;
+	m_DefaultGoldEasyDifficulty = reference.m_DefaultGoldEasyDifficulty;
+	m_DefaultGoldMediumDifficulty = reference.m_DefaultGoldMediumDifficulty;
+	m_DefaultGoldHardDifficulty = reference.m_DefaultGoldHardDifficulty;
+	m_DefaultGoldNutsDifficulty = reference.m_DefaultGoldNutsDifficulty;
+	m_DefaultGoldMaxDifficulty = reference.m_DefaultGoldMaxDifficulty;
 	m_FogOfWarSwitchEnabled = reference.m_FogOfWarSwitchEnabled;
 	m_DeployUnitsSwitchEnabled = reference.m_DeployUnitsSwitchEnabled;
 	m_GoldSwitchEnabled = reference.m_GoldSwitchEnabled;
@@ -239,16 +240,18 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_DefaultRequireClearPathToOrbit;
     else if (propName == "DefaultDeployUnits")
         reader >> m_DefaultDeployUnits;
-    else if (propName == "DefaultGoldCake")
-        reader >> m_DefaultGoldCake;
-    else if (propName == "DefaultGoldEasy")
-        reader >> m_DefaultGoldEasy;
-    else if (propName == "DefaultGoldMedium")
-        reader >> m_DefaultGoldMedium;
-    else if (propName == "DefaultGoldHard")
-        reader >> m_DefaultGoldHard;
-    else if (propName == "DefaultGoldNuts")
-        reader >> m_DefaultGoldNuts;
+    else if (propName == "DefaultGoldCakeDifficulty")
+        reader >> m_DefaultGoldCakeDifficulty;
+    else if (propName == "DefaultGoldEasyDifficulty")
+        reader >> m_DefaultGoldEasyDifficulty;
+    else if (propName == "DefaultGoldMediumDifficulty")
+        reader >> m_DefaultGoldMediumDifficulty;
+    else if (propName == "DefaultGoldHardDifficulty")
+        reader >> m_DefaultGoldHardDifficulty;
+    else if (propName == "DefaultGoldNutsDifficulty")
+        reader >> m_DefaultGoldNutsDifficulty;
+	else if (propName == "DefaultGoldMaxDifficulty")
+        reader >> m_DefaultGoldMaxDifficulty;
     else if (propName == "FogOfWarSwitchEnabled")
         reader >> m_FogOfWarSwitchEnabled;
     else if (propName == "DeployUnitsSwitchEnabled")
@@ -259,6 +262,18 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_RequireClearPathToOrbitSwitchEnabled;
 	else if (propName == "BuyMenuEnabled") {
 		reader >> m_BuyMenuEnabled;
+	} else if (propName == "Team1Tech" || propName == "Team2Tech" || propName == "Team3Tech" || propName == "Team4Tech") {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+			if (propName == "Team" + std::to_string(team + 1) + "Tech") {
+				std::string techName;
+				reader >> techName;
+				SetTeamTech(team, techName);
+			}
+		}
+	} else if (propName == "SpecialBehaviour_StartingGold") {
+		reader >> m_StartingGold;
+	} else if (propName == "SpecialBehaviour_FogOfWarEnabled") {
+		reader >> m_FogOfWarEnabled;
 	} else
         return Activity::ReadProperty(propName, reader);
 
@@ -278,6 +293,14 @@ int GameActivity::Save(Writer &writer) const {
 	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
 	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 	writer.NewPropertyWithValue("BuyMenuEnabled", m_BuyMenuEnabled);
+
+	// Note - these special behaviour properties are for saving and loading. Normally these fields are set by the Activity config GUI.
+	writer.NewPropertyWithValue("SpecialBehaviour_StartingGold", m_StartingGold);
+	writer.NewPropertyWithValue("SpecialBehaviour_FogOfWarEnabled", m_FogOfWarEnabled);
+
+	for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
+		writer.NewPropertyWithValue("Team" + std::to_string(team + 1) + "Tech", GetTeamTech(team));
+	}
 
 	return 0;
 }
@@ -847,7 +870,7 @@ int GameActivity::Start()
     // Set the split screen config before the Scene (and it SceneLayers, specifially) are loaded
     int humanCount = GetHumanCount();
     // Depending on the resolution aspect ratio, split first horizontally (if wide screen)
-    if (((float)g_FrameMan.GetResX() / (float)g_FrameMan.GetResY()) >= 1.6)
+    if (((float)g_WindowMan.GetResX() / (float)g_WindowMan.GetResY()) >= 1.6)
         g_FrameMan.ResetSplitScreens(humanCount > 1, humanCount > 2);
     // or vertically (if 4:3-ish)
     else
@@ -894,7 +917,7 @@ int GameActivity::Start()
             continue;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
         // And occlusion
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
@@ -956,27 +979,27 @@ int GameActivity::Start()
 					// If both splits, or just Vsplit, then in upper right quadrant
 					if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetVSplit()))
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
-						m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, 0);
+						m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
+						m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, 0);
 					}
 					// If only hsplit, then lower left quadrant
 					else
 					{
-						m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-						m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+						m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+						m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 					}
 				}
 				// Screen 3 is lower left quadrant
 				else if (ScreenOfPlayer(player) == 2)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(0, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(0, g_WindowMan.GetResY() / 2);
 				}
 				// Screen 4 is lower right quadrant
 				else if (ScreenOfPlayer(player) == 3)
 				{
-					m_pEditorGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-					m_pBuyGUI[player]->SetPosOnScreen(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					m_pEditorGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
+					m_pBuyGUI[player]->SetPosOnScreen(g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
 				}
 			}
 		}
@@ -1161,7 +1184,7 @@ void GameActivity::UpdateEditing()
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), m_Team[player]);
+        g_CameraMan.SetScreenTeam(m_Team[player], ScreenOfPlayer(player));
 
         // Check if the player says he's done editing, and if so, make sure he really is good to go
         if (m_pEditorGUI[player]->GetEditorGUIMode() == SceneEditorGUI::DONEEDITING)
@@ -1322,7 +1345,7 @@ void GameActivity::Update()
         bool skipBuyUpdate = false;
 
         // Set the team associations with each screen displayed
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(player), team);
+        g_CameraMan.SetScreenTeam(team, ScreenOfPlayer(player));
 
         //////////////////////////////////////////////////////
         // Assure that Controlled Actor is a safe pointer
@@ -1348,14 +1371,13 @@ void GameActivity::Update()
                 if (g_MovableMan.IsActor(m_ControlledActor[player]))
                 {
                     m_DeathViewTarget[player] = m_ControlledActor[player]->GetPos();
+					m_DeathTimer[player].Reset();
                 }
                 // Add delay after death before switching so the death comedy can be witnessed
                 // Died, so enter death watch mode
                 else
                 {
-                    m_ControlledActor[player] = 0;
-                    m_ViewState[player] = ViewState::DeathWatch;
-                    m_DeathTimer[player].Reset();
+					LoseControlOfActor(player);
                 }
             }
             // Ok, done watching death comedy, now automatically switch
@@ -1375,9 +1397,7 @@ void GameActivity::Update()
             // Any other viewing mode and the actor died... go to deathwatch
             else if (m_ControlledActor[player] && !g_MovableMan.IsActor(m_ControlledActor[player]))
             {
-                m_ControlledActor[player] = 0;
-                m_ViewState[player] = ViewState::DeathWatch;
-                m_DeathTimer[player].Reset();
+				LoseControlOfActor(player);
             }
         }
         // Player brain is now gone! Remove any control he may have had
@@ -1475,7 +1495,7 @@ void GameActivity::Update()
 
             // Find the actor closest to the cursor, if any within the radius
 			Vector markedDistance;
-            Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_SceneMan.GetSceneWidth(), markedDistance);
+            Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_SceneMan.GetSceneWidth(), markedDistance, true);
 //            Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_FrameMan.GetPlayerScreenWidth() / 4);
 
             // Player canceled selection of actor
@@ -1485,10 +1505,12 @@ void GameActivity::Update()
 
 				m_ViewState[player] = ViewState::Normal;
                 g_GUISound.UserErrorSound()->Play(player);
-				if (m_ControlledActor[player] && m_ControlledActor[player]->GetPieMenu()) {
-					m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+				if (m_ControlledActor[player]) {
+					if (m_ControlledActor[player]->GetPieMenu()) {
+						m_ControlledActor[player]->GetPieMenu()->DoDisableAnimation();
+					}
+					m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 				}
-				m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
 				if (pMarkedActor && pMarkedActor->GetPieMenu()) {
 					pMarkedActor->GetPieMenu()->DoDisableAnimation();
 				}

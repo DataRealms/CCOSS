@@ -1,4 +1,5 @@
 #include "MOSParticle.h"
+
 #include "Atom.h"
 #include "PostProcessMan.h"
 
@@ -92,6 +93,7 @@ namespace RTE {
 
 		// If we seem to be about to settle, make sure we're not still flying in the air
 		if ((m_ToSettle || IsAtRest()) && g_SceneMan.OverAltitude(m_Pos, (m_aSprite[m_Frame]->h / 2) + 3, 2)) {
+			m_VelOscillations = 0;
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}
@@ -149,8 +151,9 @@ namespace RTE {
 		RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw " + GetPresetName());
 		RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds for " + GetPresetName());
 
-		if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+		if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
 			return;
+		}
 
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
 
@@ -187,29 +190,32 @@ namespace RTE {
 			int spriteY = drawPositions.at(i).GetFloorIntY();
 			switch (mode) {
 				case g_DrawMaterial:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
+					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
 					break;
 				case g_DrawWhite:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), g_WhiteColor, -1);
+					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_WhiteColor, -1);
 					break;
 				case g_DrawMOID:
+#ifdef DRAW_MOID_LAYER
 					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, m_MOID, -1);
-					g_SceneMan.RegisterMOIDDrawing(spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
+#endif
 					break;
 				case g_DrawNoMOID:
-					draw_character_ex(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY(), g_NoMOID, -1);
+					draw_character_ex(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY, g_NoMOID, -1);
 					break;
 				case g_DrawTrans:
-					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY());
+					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
 					break;
 				case g_DrawAlpha:
 					set_alpha_blender();
-					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY());
+					draw_trans_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
 					break;
 				default:
-					draw_sprite(targetBitmap, m_aSprite[m_Frame], drawPositions.at(i).GetFloorIntX(), drawPositions.at(i).GetFloorIntY());
+					draw_sprite(targetBitmap, m_aSprite[m_Frame], spriteX, spriteY);
 					break;
 			}
+
+			g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
 		}
 
 		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { SetPostScreenEffectToDraw(); }

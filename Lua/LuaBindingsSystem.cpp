@@ -98,6 +98,7 @@ namespace RTE {
 			luabind::value("RELEASE_PRIMARY", ControlState::RELEASE_PRIMARY),
 			luabind::value("RELEASE_SECONDARY", ControlState::RELEASE_SECONDARY),
 			luabind::value("PRESS_FACEBUTTON", ControlState::PRESS_FACEBUTTON),
+			luabind::value("RELEASE_FACEBUTTON", ControlState::RELEASE_FACEBUTTON),
 			luabind::value("SCROLL_UP", ControlState::SCROLL_UP),
 			luabind::value("SCROLL_DOWN", ControlState::SCROLL_DOWN),
 			luabind::value("DEBUG_ONE", ControlState::DEBUG_ONE),
@@ -134,6 +135,8 @@ namespace RTE {
 		return luabind::class_<Timer>("Timer")
 
 		.def(luabind::constructor<>())
+		.def(luabind::constructor<double>())
+		.def(luabind::constructor<double, double>())
 
 		.property("StartRealTimeMS", &Timer::GetStartRealTimeMS, &Timer::SetStartRealTimeMS)
 		.property("ElapsedRealTimeS", &Timer::GetElapsedRealTimeS, &Timer::SetElapsedRealTimeS)
@@ -141,6 +144,8 @@ namespace RTE {
 		.property("StartSimTimeMS", &Timer::GetStartSimTimeMS, &Timer::SetStartSimTimeMS)
 		.property("ElapsedSimTimeS", &Timer::GetElapsedSimTimeS, &Timer::SetElapsedSimTimeS)
 		.property("ElapsedSimTimeMS", &Timer::GetElapsedSimTimeMS, &Timer::SetElapsedSimTimeMS)
+		.property("RealTimeLimitProgress", &Timer::RealTimeLimitProgress)
+		.property("SimTimeLimitProgress", &Timer::SimTimeLimitProgress)
 
 		.def("Reset", &Timer::Reset)
 		.def("SetRealTimeLimitMS", &Timer::SetRealTimeLimitMS)

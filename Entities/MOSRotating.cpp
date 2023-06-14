@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+
 #include "CameraMan.h"
 #include "SettingsMan.h"
+#include "PresetMan.h"
 #include "AtomGroup.h"
 #include "SLTerrain.h"
 #include "MOPixel.h"
@@ -121,10 +123,13 @@ int MOSRotating::Create()
     m_SpriteCenter.SetXY(m_aSprite[m_Frame]->w / 2, m_aSprite[m_Frame]->h / 2);
     m_SpriteCenter += m_SpriteOffset;
 
-/* Allocated in lazy fashion as needed when drawing flipped
-    if (!m_pFlipBitmap && m_aSprite[0])
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+
 /* Not anymore; points to shared static bitmaps
     if (!m_pTempBitmap && m_aSprite[0])
         m_pTempBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
@@ -207,6 +212,14 @@ int MOSRotating::Create(ContentFile spriteFile,
                         const unsigned long lifetime)
 {
     MOSprite::Create(spriteFile, frameCount, mass, position, velocity, lifetime);
+	
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+
     return 0;
 }
 
@@ -275,16 +288,15 @@ int MOSRotating::Create(const MOSRotating &reference) {
 	m_DamageMultiplier = reference.m_DamageMultiplier;
     m_NoSetDamageMultiplier = reference.m_NoSetDamageMultiplier;
 
-/* Allocated in lazy fashion as needed when drawing flipped
-    if (!m_pFlipBitmap && m_aSprite[0])
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
-/* Not anymore; points to shared static bitmaps
-    if (!m_pTempBitmap && m_aSprite[0])
-        m_pTempBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-*/
     m_pTempBitmap = reference.m_pTempBitmap;
     m_pTempBitmapS = reference.m_pTempBitmapS;
+	
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+	if (!m_pFlipBitmapS && m_aSprite[0]) {
+		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
 
     return 0;
 }
@@ -324,21 +336,17 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
 		}
-	} else if (propName == "AddAEmitter" || propName == "AddEmitter")
-    {
-        AEmitter *pEmitter = new AEmitter;
-        reader >> pEmitter;
-		m_Attachables.push_back(pEmitter);
-    }
-    else if (propName == "AddAttachable")
-    {
-        Attachable *pAttachable = new Attachable;
-        reader >> pAttachable;
-        m_Attachables.push_back(pAttachable);
+	} else if (propName == "AddAttachable" || propName == "AddAEmitter" || propName == "AddEmitter") {
+		Entity *readerEntity = g_PresetMan.ReadReflectedPreset(reader);
+		if (Attachable *readerAttachable = dynamic_cast<Attachable *>(readerEntity)) {
+			AddAttachable(readerAttachable);
+		} else {
+			reader.ReportError("Tried to AddAttachable a non-Attachable type!");
+		}
 	} else if (propName == "SpecialBehaviour_AddWound") {
 		AEmitter *wound = new AEmitter;
 		reader >> wound;
-		m_Wounds.push_back(wound);
+		AddWound(wound, wound->GetParentOffset());
 	}
     else if (propName == "AddGib")
     {
@@ -488,13 +496,13 @@ int MOSRotating::GetWoundCount(bool includePositiveDamageAttachables, bool inclu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) const {
+Attachable * MOSRotating::GetNearestDetachableAttachableToOffset(const Vector &offset) const {
 	Attachable *nearestAttachable = nullptr;
-	float closestRadius = -1.0F;
+	float closestRadius = m_SpriteRadius;
 	for (Attachable *attachable : m_Attachables) {
-		if (attachable->GetsHitByMOs() && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0) {
+		if (attachable->GetsHitByMOs() && attachable->GetGibImpulseLimit() > 0 && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0 && offset.Dot(attachable->GetParentOffset()) > 0) {
 			float radius = (offset - attachable->GetParentOffset()).GetMagnitude();
-			if (closestRadius < 0 || radius < closestRadius) {
+			if (radius < closestRadius) {
 				closestRadius = radius;
 				nearestAttachable = attachable;
 			}
@@ -505,14 +513,36 @@ Attachable * MOSRotating::GetNearestAttachableToOffset(const Vector &offset) con
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::DetachAttachablesFromImpulse(Vector &impulseVector) {
+	float impulseRemainder = impulseVector.GetMagnitude();
+	// Find the attachable closest to the impact point by using an inverted impulse vector.
+	Vector invertedImpulseOffset = Vector(impulseVector.GetX(), impulseVector.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation;
+	Attachable *nearestAttachableToImpulse = GetNearestDetachableAttachableToOffset(invertedImpulseOffset);
+	while (nearestAttachableToImpulse) {
+		float attachableImpulseLimit = nearestAttachableToImpulse->GetGibImpulseLimit();
+		float attachableJointStrength = nearestAttachableToImpulse->GetJointStrength();
+		if (impulseRemainder > attachableImpulseLimit) {
+			nearestAttachableToImpulse->GibThis(impulseVector.SetMagnitude(attachableImpulseLimit));
+			impulseRemainder -= attachableImpulseLimit;
+		} else if (impulseRemainder > attachableJointStrength) {
+			RemoveAttachable(nearestAttachableToImpulse, true, true);
+			impulseRemainder -= attachableJointStrength;
+		} else {
+			break;
+		}
+		nearestAttachableToImpulse = GetNearestDetachableAttachableToOffset(invertedImpulseOffset);
+	}
+	impulseVector.SetMagnitude(impulseRemainder);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
-    if (woundToAdd && !ToDelete()) {
+    if (woundToAdd && !m_ToDelete) {
 		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
-			// Find and detach an attachable near the new wound before gibbing the object itself.
-			if (m_DetachAttachablesBeforeGibbingFromWounds && RandomNum() < 0.5F) {
-				if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
-					RemoveAttachable(attachableToDetach, true, true);
-				}
+			// Find and detach an attachable near the new wound before gibbing the object itself. TODO: Perhaps move this to Actor, since it's more relevant there?
+			if (Attachable *attachableToDetach = GetNearestDetachableAttachableToOffset(parentOffsetToSet); attachableToDetach && m_DetachAttachablesBeforeGibbingFromWounds) {
+				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
@@ -522,7 +552,6 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 		}
         woundToAdd->SetCollidesWithTerrainWhileAttached(false);
         woundToAdd->SetParentOffset(parentOffsetToSet);
-        woundToAdd->SetInheritsHFlipped(false);
         woundToAdd->SetParent(this);
         woundToAdd->SetIsWound(true);
         if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
@@ -719,6 +748,10 @@ void MOSRotating::AddRecoil()
 
 bool MOSRotating::CollideAtPoint(HitData &hd)
 {
+	if (m_ToDelete) {
+		return false;	// TODO: Add a settings flag to enable old school particle sponges!
+	}
+
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
 
@@ -948,11 +981,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         {
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
-            pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
+			pEntryWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle() + c_PI);
             float damageMultiplier = pEntryWound->HasNoSetDamageMultiplier() ? 1.0F : pEntryWound->GetDamageMultiplier();
 			pEntryWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
-            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
+            entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteWidth() / 2);
 			AddWound(pEntryWound, entryPos + m_SpriteOffset);
             pEntryWound = 0;
         }
@@ -967,8 +1000,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             {
                 AEmitter *pExitWound = dynamic_cast<AEmitter *>(m_pExitWound->Clone());
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
-                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
-                pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
+                exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteWidth() / 2);
+				pExitWound->SetInheritedRotAngleOffset(dir.GetAbsRadAngle());
                 float damageMultiplier = pExitWound->HasNoSetDamageMultiplier() ? 1.0F : pExitWound->GetDamageMultiplier();
 				pExitWound->SetDamageMultiplier(damageMultiplier * hd.Body[HITOR]->WoundDamageMultiplier());
 				AddWound(pExitWound, exitPos + m_SpriteOffset);
@@ -1084,7 +1117,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				}
 				gibParticleClone->SetRotAngle(gibVelocity.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0));
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);
@@ -1117,14 +1150,14 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				// TODO: Figure out how much the magnitude of an offset should affect spread
 				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
 
-				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() > 0 ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
 				}
-				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				gibParticleClone->SetVel(gibVelocity + ((m_PrevVel + m_Vel) / 2) * gibSettingsObject.InheritsVelocity());
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 				if (gibSettingsObject.IgnoresTeamHits()) {
 					gibParticleClone->SetTeam(m_Team);
@@ -1144,7 +1177,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
 	for (Attachable *attachable : nonVolatileAttachablesVectorForLuaSafety) {
         RTEAssert(attachable, "Broken Attachable when Gibbing!");
 
-        if (RandomNum() < attachable->GetGibWithParentChance()) {
+        if (RandomNum() < attachable->GetGibWithParentChance() || attachable->GetGibWhenRemovedFromParent()) {
             attachable->GibThis();
             continue;
         }
@@ -1210,15 +1243,9 @@ void MOSRotating::ApplyImpulses() {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && totalImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
-				}
-			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(averagedImpulseForceOffset.SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && totalImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis(totalImpulse);
+			DetachAttachablesFromImpulse(totalImpulse);
+			// Use the remainder of the impulses left over from detaching to gib the parent object.
+			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 		}
 	}
 
@@ -1246,47 +1273,53 @@ void MOSRotating::ResetAllTimers()
         (*attachable)->ResetAllTimers();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
+void MOSRotating::RestDetection() {
+	MOSprite::RestDetection();
 
-void MOSRotating::RestDetection()
-{
-    MOSprite::RestDetection();
+	// Rotational settling detection.
+	if ((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) {
+		++m_AngOscillations;
+	} else {
+		m_AngOscillations = 0;
+	}
 
-    // Rotational settling detection.
-    if (((m_AngularVel > 0 && m_PrevAngVel < 0) || (m_AngularVel < 0 && m_PrevAngVel > 0)) && m_RestThreshold >= 0) {
-        if (m_AngOscillations >= 2)
-            m_ToSettle = true;
-        else
-            ++m_AngOscillations;
-    }
-    else
-        m_AngOscillations = 0;
+	if (std::abs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01) { m_RestTimer.Reset(); }
 
-//    if (fabs(m_AngularVel) >= 1.0)
-//        m_RestTimer.Reset();
+	// If about to settle, make sure the object isn't flying in the air.
+	// Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
+	if (m_ToSettle || IsAtRest()) {
+		bool resting = true;
+		if (g_SceneMan.OverAltitude(m_Pos, static_cast<int>(m_SpriteRadius) + 4, 3)) {
+			resting = false;
+			for (const Attachable *attachable : m_Attachables) {
+				if (attachable->GetCollidesWithTerrainWhileAttached() && !g_SceneMan.OverAltitude(attachable->GetPos(), static_cast<int>(attachable->GetIndividualRadius()) + 2, 3)) {
+					resting = true;
+					break;
+				}
+			}
+		}
+		if (!resting) {
+			m_VelOscillations = 0;
+			m_AngOscillations = 0;
+			m_RestTimer.Reset();
+			m_ToSettle = false;
+		}
+	}
+	m_PrevRotation = m_Rotation;
+	m_PrevAngVel = m_AngularVel;
+}
 
-    if (fabs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01)
-        m_RestTimer.Reset();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // If we seem to be about to settle, make sure we're not flying in the air still.
-    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
-    if (m_ToSettle || IsAtRest())
-    {
-        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
-        {
-            m_RestTimer.Reset();
-            m_ToSettle = false;
-        }
-    }
-
-    m_PrevRotation = m_Rotation;
-    m_PrevAngVel = m_AngularVel;
+bool MOSRotating::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength != 0) {
+		return false;
+	} else if (m_VelOscillations > 2 || m_AngOscillations > 2) {
+		return true;
+	}
+	return m_RestTimer.IsPastSimMS(m_RestThreshold);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1428,8 +1461,10 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 void MOSRotating::PreTravel() {
 	MOSprite::PreTravel();
 
+#ifdef DRAW_MOID_LAYER
 	// If this is going slow enough, check for and redraw the MOID representations of any other MOSRotatings that may be overlapping this
 	if (m_GetsHitByMOs && m_HitsMOs && m_Vel.GetX() < 2.0F && m_Vel.GetY() < 2.0F) { g_MovableMan.RedrawOverlappingMOIDs(this); }
+#endif
 }
 
 
@@ -1482,8 +1517,7 @@ void MOSRotating::Travel()
 void MOSRotating::PostTravel()
 {
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
-    if (IsTooFast())
-        GibThis();
+	if (IsTooFast()) { GibThis(); }
 
 	// For some reason MovableObject lifetime death is in post travel rather than update, so this is done here too
 	if (m_GibAtEndOfLifetime && m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime) { GibThis(); }
@@ -1497,15 +1531,10 @@ void MOSRotating::PostTravel()
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (m_TravelImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetGibWithParentChance() == 0 && m_TravelImpulse.MagnitudeIsGreaterThan(attachable->GetGibImpulseLimit())) {
-					attachable->SetGibWithParentChance(0.33F);
-				}
-			}
-			if (Attachable *nearestAttachableToImpulse = GetNearestAttachableToOffset(Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation); nearestAttachableToImpulse && m_TravelImpulse.MagnitudeIsGreaterThan(nearestAttachableToImpulse->GetGibImpulseLimit())) {
-				nearestAttachableToImpulse->SetGibWithParentChance(1.0F);
-			}
-			GibThis();
+			Vector totalImpulse(m_TravelImpulse.GetX(), m_TravelImpulse.GetY());
+			DetachAttachablesFromImpulse(totalImpulse);
+			// Use the remainder of the impulses left over from detaching to gib the parent object.
+			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(); }
 		}
 	}
     // Reset
@@ -1534,10 +1563,6 @@ void MOSRotating::PostTravel()
 // Description:     Updates this MOSRotating. Supposed to be done every frame.
 
 void MOSRotating::Update() {
-#ifndef RELEASE_BUILD
-	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-#endif
-
     MOSprite::Update();
 
     if (m_InheritEffectRotAngle) { m_EffectRotAngle = m_Rotation.GetRadAngle(); }
@@ -1591,32 +1616,22 @@ void MOSRotating::Update() {
             TransferForcesFromAttachable(attachable);
         }
     }
-
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); }
-    if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) { m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawMOIDIfOverlapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the MOID representation of this to the SceneMan's MOID layer if
-//                  this is found to potentially overlap another MovableObject.
+bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO) {
+    if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
+        return false;
+    }
 
-bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
-{
-    if (pOverlapMO != this && m_GetsHitByMOs)
-    {
-        float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
-        Vector otherPos = pOverlapMO->GetPos();
+    if (m_IgnoresTeamHits && pOverlapMO->IgnoresTeamHits() && m_Team == pOverlapMO->GetTeam()) {
+        return false;
+    }
 
-        // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(combinedRadii))
-        {
-            // They may be overlapping, so draw the MOID rep of this to the MOID layer
-            Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-            return true;
-        }
+    if (g_SceneMan.ShortestDistance(m_Pos, pOverlapMO->GetPos(), g_SceneMan.SceneWrapsX()).MagnitudeIsLessThan(GetRadius() + pOverlapMO->GetRadius())) {
+        Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+        return true;
     }
 
     return false;
@@ -1705,7 +1720,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());
             if (parentBreakWound) {
 				parentBreakWound->SetDrawnAfterParent(attachable->IsDrawnAfterParent());
-                parentBreakWound->SetEmitAngle((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
+				parentBreakWound->SetInheritedRotAngleOffset((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
                 AddWound(parentBreakWound, attachable->GetParentOffset(), false);
                 parentBreakWound = nullptr;
             }
@@ -1713,7 +1728,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
         if (!attachable->IsSetToDelete() && attachable->GetBreakWound()) {
             AEmitter *childBreakWound = dynamic_cast<AEmitter *>(attachable->GetBreakWound()->Clone());
             if (childBreakWound) {
-                childBreakWound->SetEmitAngle(attachable->GetJointOffset().GetAbsRadAngle());
+				childBreakWound->SetInheritedRotAngleOffset(attachable->GetJointOffset().GetAbsRadAngle());
                 attachable->AddWound(childBreakWound, attachable->GetJointOffset());
                 childBreakWound = nullptr;
             }
@@ -1734,6 +1749,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
     if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
     if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);
+		if (attachable->GetGibWhenRemovedFromParent()) { attachable->GibThis(); }
         return nullptr;
     }
 
@@ -1768,6 +1784,7 @@ void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const {
+    MOIDs.reserve(GetMOIDFootprint());
     MOSprite::GetMOIDs(MOIDs);
     for (const Attachable *attachable : m_Attachables) {
         if (attachable->GetsHitByMOs()) { attachable->GetMOIDs(MOIDs); }
@@ -1789,17 +1806,14 @@ void MOSRotating::SetWhichMOToNotHit(MovableObject *moToNotHit, float forHowLong
 // Description:     Draws this MOSRotating's current graphical representation to a
 //                  BITMAP of choice.
 
-void MOSRotating::Draw(BITMAP *pTargetBitmap,
-                       const Vector &targetPos,
-                       DrawMode mode,
-                       bool onlyPhysical) const
-{
+void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
 
-    // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
-    if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
+    // Only draw MOID if this has a valid MOID assigned to it
+    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
+    }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before
@@ -1819,8 +1833,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 	int keyColor = g_MaskColor;
 
 	// Switch to non 8-bit drawing mode if we're drawing onto MO layer
-	if (mode == g_DrawMOID || mode == g_DrawNoMOID)
-	{
+	if (mode == g_DrawMOID || mode == g_DrawNoMOID) {
 		pTempBitmap = m_pTempBitmapS;
 		pFlipBitmap = m_pFlipBitmapS;
 		keyColor = g_MOIDMaskColor;
@@ -1828,30 +1841,34 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
     Vector spritePos(m_Pos.GetRounded() - targetPos);
 
-    if (m_Recoiled)
+    if (m_Recoiled) {
         spritePos += m_RecoilOffset;
+    }
 
     // If we're drawing a material silhouette, then create an intermediate material bitmap as well
-    if (mode != g_DrawColor && mode != g_DrawTrans)
-    {
+#ifdef DRAW_MOID_LAYER
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans;
+#else
+    bool intermediateBitmapUsed = mode != g_DrawColor && mode != g_DrawTrans && mode != g_DrawMOID;
+    RTEAssert(mode != g_DrawNoMOID, "DrawNoMOID drawing mode used with no MOID layer!");
+#endif
+    if (intermediateBitmapUsed) {
         clear_to_color(pTempBitmap, keyColor);
 
-// TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
+        // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
         // Draw the requested material silhouette on the material bitmap
-        if (mode == g_DrawMaterial)
+        if (mode == g_DrawMaterial) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
-        else if (mode == g_DrawWhite)
+        } else if (mode == g_DrawWhite) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);
-        else if (mode == g_DrawMOID)
+        } else if (mode == g_DrawMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_MOID, -1);
-        else if (mode == g_DrawNoMOID)
+        } else if (mode == g_DrawNoMOID) {
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
-		else if (mode == g_DrawDoor)
+        } else if (mode == g_DrawDoor) {
 			draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialDoor, -1);
-        else
-        {
-//            return;
-//            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
+        } else {
+            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
         }
     }
 
@@ -1861,36 +1878,26 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
     aDrawPos[0] = spritePos;
 
-    // Only bother with wrap drawing if the scene actually wraps around
-    if (g_SceneMan.SceneWrapsX())
-    {
+    if (g_SceneMan.SceneWrapsX()) {
         // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-        if (targetPos.IsZero() && m_WrapDoubleDraw)
-        {
-            if (spritePos.m_X < m_SpriteDiameter)
-            {
+        if (targetPos.IsZero() && m_WrapDoubleDraw) {
+            if (spritePos.m_X < m_SpriteDiameter) {
                 aDrawPos[passes] = spritePos;
                 aDrawPos[passes].m_X += pTargetBitmap->w;
                 passes++;
-            }
-            else if (spritePos.m_X > pTargetBitmap->w - m_SpriteDiameter)
-            {
+            } else if (spritePos.m_X > pTargetBitmap->w - m_SpriteDiameter) {
                 aDrawPos[passes] = spritePos;
                 aDrawPos[passes].m_X -= pTargetBitmap->w;
                 passes++;
             }
-        }
-        // Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
-        else if (m_WrapDoubleDraw)
-        {
-            if (targetPos.m_X < 0)
-            {
+        } else if (m_WrapDoubleDraw) {
+			// Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
+            if (targetPos.m_X < 0) {
                 aDrawPos[passes] = aDrawPos[0];
                 aDrawPos[passes].m_X -= g_SceneMan.GetSceneWidth();
                 passes++;
             }
-            if (targetPos.m_X + pTargetBitmap->w > g_SceneMan.GetSceneWidth())
-            {
+            if (targetPos.m_X + pTargetBitmap->w > g_SceneMan.GetSceneWidth()) {
                 aDrawPos[passes] = aDrawPos[0];
                 aDrawPos[passes].m_X += g_SceneMan.GetSceneWidth();
                 passes++;
@@ -1898,107 +1905,77 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         }
     }
 
-    //////////////////
-    // FLIPPED
-    if (m_HFlipped && pFlipBitmap)
-    {
+    if (m_HFlipped && pFlipBitmap) {
         // Don't size the intermediate bitmaps to the m_Scale, because the scaling happens after they are done
         clear_to_color(pFlipBitmap, keyColor);
-        // Draw eitehr the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
-        if (mode == g_DrawColor || mode == g_DrawTrans)
-            draw_sprite_h_flip(pFlipBitmap, m_aSprite[m_Frame], 0, 0);
-        // If using the temp bitmap (which is always larger than the sprite) make sure the flipped image ends up in the upper right corner as if it was just as small as the sprite bitmap
-        else
-            draw_sprite_h_flip(pFlipBitmap, pTempBitmap, -(pTempBitmap->w - m_aSprite[m_Frame]->w), 0);
 
-        // Transparent mode
-        if (mode == g_DrawTrans)
-        {
+        // Draw either the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
+		if (mode == g_DrawColor || mode == g_DrawTrans) {
+			draw_sprite_h_flip(pFlipBitmap, m_aSprite[m_Frame], 0, 0);
+		} else {
+			// If using the temp bitmap (which is always larger than the sprite) make sure the flipped image ends up in the upper right corner as if it was just as small as the sprite bitmap
+            draw_sprite_h_flip(pFlipBitmap, pTempBitmap, -(pTempBitmap->w - m_aSprite[m_Frame]->w), 0);
+		}
+
+        if (mode == g_DrawTrans) {
             clear_to_color(pTempBitmap, keyColor);
+
             // Draw the rotated thing onto the intermediate bitmap so its COM position aligns with the middle of the temp bitmap.
             // The temp bitmap should be able to hold the full size since it is larger than the max diameter.
             // Take into account the h-flipped pivot point
-            pivot_scaled_sprite(pTempBitmap,
-                                pFlipBitmap,
-                                pTempBitmap->w / 2,
-                                pTempBitmap->h / 2,
-                                pFlipBitmap->w + m_SpriteOffset.m_X,
-                                -(m_SpriteOffset.m_Y),
-                                ftofix(m_Rotation.GetAllegroAngle()),
-                                ftofix(m_Scale));
+            pivot_scaled_sprite(pTempBitmap, pFlipBitmap, pTempBitmap->w / 2, pTempBitmap->h / 2, pFlipBitmap->w + m_SpriteOffset.m_X, -(m_SpriteOffset.m_Y), ftofix(m_Rotation.GetAllegroAngle()), ftofix(m_Scale));
 
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-            for (int i = 0; i < passes; ++i)
-                draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
-        }
-        // Non-transparent mode
-        else
-        {
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
+            }
+        } else {
             // Do the passes loop in here so the flipping operation doesn't get done multiple times
-            for (int i = 0; i < passes; ++i)
-            {
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX();
+                int spriteY = aDrawPos[i].GetFloorIntY();
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX + m_SpriteOffset.m_X - (m_SpriteRadius * m_Scale), spriteY + m_SpriteOffset.m_Y - (m_SpriteRadius * m_Scale), spriteX - m_SpriteOffset.m_X + (m_SpriteRadius * m_Scale), spriteY - m_SpriteOffset.m_Y + (m_SpriteRadius * m_Scale));
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
                 // Take into account the h-flipped pivot point
-                pivot_scaled_sprite(pTargetBitmap,
-                                    pFlipBitmap,
-                                    aDrawPos[i].GetFloorIntX(),
-                                    aDrawPos[i].GetFloorIntY(),
-                                    pFlipBitmap->w + m_SpriteOffset.m_X,
-                                    -(m_SpriteOffset.m_Y),
-                                    ftofix(m_Rotation.GetAllegroAngle()),
-                                    ftofix(m_Scale));
-
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+                pivot_scaled_sprite(pTargetBitmap, pFlipBitmap, spriteX, spriteY, pFlipBitmap->w + m_SpriteOffset.GetFloorIntX(), -(m_SpriteOffset.GetFloorIntY()), ftofix(m_Rotation.GetAllegroAngle()), ftofix(m_Scale));
             }
         }
-    }
-    /////////////////
-    // NON-FLIPPED
-    else
-    {
-//        spritePos += m_SpriteOffset;
-//        spritePos += (m_SpriteCenter * m_Rotation - m_SpriteCenter);
-
-        // Transparent mode
-        if (mode == g_DrawTrans)
-        {
+    } else {
+        if (mode == g_DrawTrans) {
             clear_to_color(pTempBitmap, keyColor);
+
             // Draw the rotated thing onto the intermediate bitmap so its COM position aligns with the middle of the temp bitmap.
             // The temp bitmap should be able to hold the full size since it is larger than the max diameter.
             // Take into account the h-flipped pivot point
-            pivot_scaled_sprite(pTempBitmap,
-                                m_aSprite[m_Frame],
-                                pTempBitmap->w / 2,
-                                pTempBitmap->h / 2,
-                                -(m_SpriteOffset.m_X),
-                                -(m_SpriteOffset.m_Y),
-                                ftofix(m_Rotation.GetAllegroAngle()),
-                                ftofix(m_Scale));
+            pivot_scaled_sprite(pTempBitmap, m_aSprite[m_Frame], pTempBitmap->w / 2, pTempBitmap->h / 2, -m_SpriteOffset.GetFloorIntX(), -m_SpriteOffset.GetFloorIntY(), ftofix(m_Rotation.GetAllegroAngle()), ftofix(m_Scale));
 
             // Draw the now rotated object's temporary bitmap onto the final drawing bitmap with transperency
             // Do the passes loop in here so the intermediate drawing doesn't get done multiple times
-            for (int i = 0; i < passes; ++i)
-                draw_trans_sprite(pTargetBitmap, pTempBitmap, aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2), aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2));
-        }
-        // Non-transparent mode
-        else
-        {
-            for (int i = 0; i < passes; ++i)
-            {
-                pivot_scaled_sprite(pTargetBitmap,
-                                    mode == g_DrawColor ? m_aSprite[m_Frame] : pTempBitmap,
-                                    aDrawPos[i].GetFloorIntX(),
-                                    aDrawPos[i].GetFloorIntY(),
-                                    -(m_SpriteOffset.m_X),
-                                    -(m_SpriteOffset.m_Y),
-                                    ftofix(m_Rotation.GetAllegroAngle()),
-                                    ftofix(m_Scale));
-
-                // Register potential MOID drawing
-                if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX() - (pTempBitmap->w / 2);
+                int spriteY = aDrawPos[i].GetFloorIntY() - (pTempBitmap->h / 2);
+                g_SceneMan.RegisterDrawing(pTargetBitmap, g_NoMOID, spriteX, spriteY, spriteX + pTempBitmap->w, spriteY + pTempBitmap->h);
+                draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
+            }
+        } else {
+            for (int i = 0; i < passes; ++i) {
+                int spriteX = aDrawPos[i].GetFloorIntX();
+                int spriteY = aDrawPos[i].GetFloorIntY();
+                g_SceneMan.RegisterDrawing(pTargetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX + m_SpriteOffset.m_X - (m_SpriteRadius * m_Scale), spriteY + m_SpriteOffset.m_Y - (m_SpriteRadius * m_Scale), spriteX - m_SpriteOffset.m_X + (m_SpriteRadius * m_Scale), spriteY - m_SpriteOffset.m_Y + (m_SpriteRadius * m_Scale));
+#ifndef DRAW_MOID_LAYER
+                if (mode == g_DrawMOID) {
+                    continue;
+                }
+#endif
+                pivot_scaled_sprite(pTargetBitmap, mode == g_DrawColor ? m_aSprite[m_Frame] : pTempBitmap, spriteX, spriteY, -m_SpriteOffset.GetFloorIntX(), -m_SpriteOffset.GetFloorIntY(), ftofix(m_Rotation.GetAllegroAngle()), ftofix(m_Scale));
             }
         }
     }

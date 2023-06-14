@@ -271,6 +271,12 @@ enum MOType
 	/// <returns>A Vector describing the previous velocity vector.</returns>
 	const Vector & GetPrevVel() const { return m_PrevVel; }
 
+	/// <summary>
+	/// Gets the amount of distance this MO has travelled since its creation, in pixels.	
+	/// </summary>
+	/// <returns>The amount of distance this MO has travelled, in pixels.</returns>
+	float GetDistanceTravelled() const { return m_DistanceTravelled; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAngularVel
@@ -435,10 +441,16 @@ enum MOType
     int GetMOIDFootprint() const { return m_MOIDFootprint; }
 
     /// <summary>
-    /// Returns whether or not this object has ever been added to MovableMan. Does not account for removal from MovableMan.
+    /// Returns whether or not this MovableObject has ever been added to MovableMan. Does not account for removal from MovableMan.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Whether or not this MovableObject has ever been added to MovableMan.</returns>
     bool HasEverBeenAddedToMovableMan() const { return m_HasEverBeenAddedToMovableMan; }
+
+	/// <summary>
+	/// Returns whether or not this MovableObject exists in MovableMan, accounting for removal from MovableMan.
+	/// </summary>
+	/// <returns>Whether or not this MovableObject currently exists in MovableMan.</returns>
+	bool ExistsInMovableMan() const { return m_ExistsInMovableMan; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -768,10 +780,11 @@ enum MOType
     /// </summary>
     virtual void SetAsNoID() { m_MOID = g_NoMOID; }
 
-    /// <summary>
-    /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
+	/// <summary>
+    /// Sets this MovableObject as having been added to MovableMan. Should only really be done in MovableMan::Add/Remove Actor/Item/Particle.
     /// </summary>
-	void SetAsAddedToMovableMan() { m_HasEverBeenAddedToMovableMan = true; }
+	/// <param name="addedToMovableMan">Whether or not this MovableObject has been added to MovableMan.</param>
+	void SetAsAddedToMovableMan(bool addedToMovableMan = true) { if (addedToMovableMan) { m_HasEverBeenAddedToMovableMan = true; } m_ExistsInMovableMan = addedToMovableMan; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -922,9 +935,9 @@ enum MOType
 // Description:     Indicates whether this MO is moving or rotating stupidly fast in a way
 //                  that will screw up the simulation.
 // Arguments:       None.
-// Return value:    Whetehr this is eitehr moving or rotating too fast.
+// Return value:    Whether this is either moving or rotating too fast.
 
-    virtual bool IsTooFast() const { return m_Vel.GetLargest() > 500; }
+    virtual bool IsTooFast() const { return m_Vel.MagnitudeIsGreaterThan(500.0F); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -935,7 +948,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void FixTooFast() { if (IsTooFast()) { m_Vel.SetMagnitude(450); } }
+    virtual void FixTooFast() { if (IsTooFast()) { m_Vel.SetMagnitude(450.0F); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1076,8 +1089,8 @@ enum MOType
 	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
 
 #ifndef RELEASE_BUILD
-		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+		RTEAssert(impulse.MagnitudeIsLessThan(500000.0F), "HUEG IMPULSE FORCE");
+		RTEAssert(offset.MagnitudeIsLessThan(5000.0F), "HUGE IMPULSE FORCE OFFSET");
 #endif
 
         m_ImpulseForces.push_back({impulse, offset});
@@ -1160,40 +1173,20 @@ enum MOType
 
 	virtual void ResetAllTimers() {}
 
+	/// <summary>
+	/// Does the calculations necessary to detect whether this MovableObject is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	virtual void RestDetection();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
+	/// <summary>
+	/// Forces this MovableObject out of resting conditions.
+	/// </summary>
+	virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; m_VelOscillations = 0; }
 
-    virtual void RestDetection();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NotResting
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO reset its tiemr that keeps track of how long it's been
-//                  at rest, effectively delaying it.
-// Arguments:       None.
-// Return value:    None.
-
-	void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsAtRest
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates wheter the MovableObject has been at rest (no velocity) for more
-//                  than one (1) second.
-// Arguments:       None.
-// Return value:    Wheter the MovableObject has been at rest for more than one full second.
-
-	bool IsAtRest();
-
+	/// <summary>
+	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
+	virtual bool IsAtRest();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsUpdated
@@ -1382,6 +1375,11 @@ enum MOType
 
 	Vector GetForceVector(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].first; else return Vector(0, 0); }
 
+	/// <summary>
+	/// Gets the total sum of all forces applied to this MovableObject in a single Vector.
+	/// </summary>
+	/// <returns>The total sum of all forces applied to this MovableObject.</returns>
+	virtual Vector GetTotalForce();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetForceOffset()
@@ -1474,7 +1472,7 @@ enum MOType
     int GetSimUpdatesBetweenScriptedUpdates() const { return m_SimUpdatesBetweenScriptedUpdates; }
 
     /// <summary>
-    /// sets the number of Sim updates that run between each script update for this MovableObject.
+    /// Sets the number of Sim updates that run between each script update for this MovableObject.
     /// </summary>
     /// <param name="newSimUpdatesBetweenScriptedUpdates">The new number of Sim updates that run between each script update for this MovableObject.</param>
     void SetSimUpdatesBetweenScriptedUpdates(int newSimUpdatesBetweenScriptedUpdates) { m_SimUpdatesBetweenScriptedUpdates = std::max(1, newSimUpdatesBetweenScriptedUpdates); }
@@ -1522,6 +1520,8 @@ enum MOType
 // Return value:    None.
 
 	void Update() override;
+
+    void Draw(BITMAP* pTargetBitmap, const Vector& targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1792,6 +1792,12 @@ enum MOType
     /// <returns>Whether this MO's RootParent can GetHitByMOs and is currently traveling.</returns>
     bool GetTraveling() const { return GetRootParent()->m_IsTraveling; }
 
+    /// <summary>
+    /// Sets whether this MO's RootParent is currently traveling.
+    /// </summary>
+    /// <param name="newValue">Whether this MO's RootParent is currently traveling.</param>
+    void SetTraveling(bool newValue) { GetRootParent()->m_IsTraveling = newValue; }
+
 	/// <summary>
 	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
 	/// </summary>
@@ -1867,6 +1873,7 @@ protected:
     Vector m_Vel; // In meters per second (m/s).
     Vector m_PrevPos; // Previous frame's position.
     Vector m_PrevVel; // Previous frame's velocity.
+	float m_DistanceTravelled; //!< An estimate of how many pixels this MO has travelled since its creation.
     float m_Scale; // The scale that this MovableObject's representation will be drawn in. 1.0 being 1:1;
     // How this is affected by global effects, from +1.0 to -1.0. Something with a negative value will 'float' upward
     float m_GlobalAccScalar;
@@ -1927,12 +1934,12 @@ protected:
     // How many total (subsequent) MOID's this MO and all its children are taking up this frame.
     // ie if this MO has no children, this will likely be 1.
     int m_MOIDFootprint;
-    // Whether or not this object has been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will.
+    // Whether or not this object has ever been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will, cause objects are usually only removed when they're deleted.
     bool m_HasEverBeenAddedToMovableMan;
+	bool m_ExistsInMovableMan; //<! Whether or not this object currently exists in MovableMan. Takes into account the object being removed from MovableMan.
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
-    // A counter to count the oscillations in translational velocity, in order to detect settling.
-    int m_VelOscillations;
+	int m_VelOscillations; //!< A counter for oscillations in translational velocity, in order to detect settling.
     // Mark to have the MovableMan copy this the terrain layers at the end
     // of update.
     bool m_ToSettle;
@@ -1941,7 +1948,7 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-	bool m_IsTraveling; //!< Prevents self-intersection while traveling when simplified collision detection is used.
+	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.

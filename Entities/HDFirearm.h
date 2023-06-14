@@ -130,6 +130,12 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
+	/// <summary>
+	/// Gets the minimum time in between shots, in MS.
+	/// </summary>
+	/// <returns>The minimum time in between shots, in MS.</returns>
+	double GetMSPerRound() const { return 60000.0 / static_cast<double>(m_RateOfFire); }
+
     /// <summary>
     /// Gets the Magazine of this HDFirearm.
     /// </summary>
@@ -230,16 +236,22 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
     void SetDeactivationDelay(int delay) { m_DeactivationDelay = delay; };
 
 	/// <summary>
-	/// Gets how long this HDFirearm takes to reload, in milliseconds.
+	/// Gets the base time this HDFirearm takes to reload, in milliseconds.
 	/// </summary>
-	/// <returns>How long this HeldDevice takes to reload, in milliseconds.</returns>
-	int GetReloadTime() const { return m_ReloadTmr.GetSimTimeLimitMS() <= 0 ? m_ReloadTime : static_cast<int>(std::floor(m_ReloadTmr.GetSimTimeLimitMS())); };
+	/// <returns>The base time this HeldDevice takes to reload, in milliseconds.</returns>
+	int GetBaseReloadTime() const { return m_BaseReloadTime; };
 
-    /// <summary>
-    /// Sets how long this HDFirearm takes to reload, in milliseconds.
-    /// </summary>
-    /// <param name="delay">How long this HDFirearm should take to reload, in milliseconds.</param>
-	void SetReloadTime(int newReloadTime) { m_ReloadTime = newReloadTime; CorrectReloadTimerForSupportAvailable(); };
+	/// <summary>
+	/// Sets the base time this HDFirearm takes to reload, in milliseconds.
+	/// </summary>
+	/// <param name="delay">The base time this HDFirearm should take to reload, in milliseconds.</param>
+	void SetBaseReloadTime(int newReloadTime) { m_BaseReloadTime = newReloadTime; CorrectReloadTimerForSupportAvailable(); };
+
+	/// <summary>
+	/// Gets how long this HDFirearm currently takes to reload, in milliseconds.
+	/// </summary>
+	/// <returns>How long this HDFirearm currently takes to reload, in milliseconds.</returns>
+	int GetReloadTime() const { return m_ReloadTmr.GetSimTimeLimitMS() <= 0 ? m_BaseReloadTime : static_cast<int>(std::floor(m_ReloadTmr.GetSimTimeLimitMS())); };
 
 	/// <summary>
 	/// Gets whether or not this HDFirearm allows dual-reload, i.e. if it's one-handed and dual-wieldable, it can reload at the same time as another weapon that also allows dual-reload.
@@ -264,6 +276,36 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// </summary>
 	/// <param name="newDualReloadTimeMultiplier">The new multiplier to be applied to reload time when this HDFirearm is being reloaded one-handed.</param>
 	void SetOneHandedReloadTimeMultiplier(float newOneHandedReloadTimeMultiplier) { m_OneHandedReloadTimeMultiplier = newOneHandedReloadTimeMultiplier; }
+
+	/// <summary>
+	/// Gets the reload angle this HDFirearm will use when support is available.
+	/// </summary>
+	/// <returns>The reload angle this HDFirearm will use when support is available, in radians.</returns>
+	float GetReloadAngle() const { return m_ReloadAngle; }
+
+	/// <summary>
+	/// Sets the reload angle this HDFirearm should use when support is available.
+	/// </summary>
+	/// <param name="newReloadAngle">The new reload angle this HDFirearm should use when support is available.</param>
+	void SetReloadAngle(float newReloadAngle) { m_ReloadAngle = newReloadAngle; }
+
+	/// <summary>
+	/// Gets the reload angle this HDFirearm will use when support is not available.
+	/// </summary>
+	/// <returns>The reload angle this HDFirearm will use when support is not available, in radians.</returns>
+	float GetOneHandedReloadAngle() const { return m_OneHandedReloadAngle; }
+
+	/// <summary>
+	/// Sets the reload angle this HDFirearm should use when support is not available.
+	/// </summary>
+	/// <param name="newOneHandedReloadAngle">The new reload angle this HDFirearm should use when support is not available.</param>
+	void SetOneHandedReloadAngle(float newOneHandedReloadAngle) { m_OneHandedReloadAngle = newOneHandedReloadAngle; }
+
+	/// <summary>
+	/// Gets the reload angle this HDFirearm is currently using, based on whether or not support is available.
+	/// </summary>
+	/// <returns>The current reload angle of this HDFirearm, in radians.</returns>
+	float GetCurrentReloadAngle() const { return m_SupportAvailable ? m_ReloadAngle : m_OneHandedReloadAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -583,18 +625,12 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// Gets this HDFirearm's reload progress as a scalar from 0 to 1.
 	/// </summary>
 	/// <returns>The reload progress as a scalar from 0 to 1.</returns>
-	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? static_cast<float>(m_ReloadTmr.SimTimeLimitProgress()) : 1.0F; }
+	float GetReloadProgress() const { return IsReloading() && m_BaseReloadTime > 0 ? static_cast<float>(m_ReloadTmr.SimTimeLimitProgress()) : 1.0F; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    void RestDetection() override;
+	/// <summary>
+	/// Does the calculations necessary to detect whether this HDFirearm is at rest or not. IsAtRest() retrieves the answer.
+	/// </summary>
+	void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -760,7 +796,7 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 // Arguments:       None.
 // Return value:    The maximum material strength the regular or the tracer round can destroy.
 
-    float EstimateDigStrength();
+    float EstimateDigStrength() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -781,6 +817,17 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
 	bool FiredFrame() const { return m_FireFrame; }
 
+	/// <summary>
+	/// Gets whether this HDFirearm is ready to be fired.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is ready to pop another Round.</returns>
+	bool CanFire() const { return m_ActivationTimer.IsPastSimMS(GetMSPerRound()); }
+
+	/// <summary>
+	/// Gets whether this HDFirearm is halfway to be fired. Used for evenly spacing out dual-wielded fire.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is halfway to pop another Round.</returns>
+	bool HalfwayToNextRound() const { return m_LastFireTmr.IsPastSimMS(GetMSPerRound() / 2.0); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  RoundsFired
@@ -860,8 +907,8 @@ protected:
     bool m_Reloading;
     // Just done reloading this frame
     bool m_DoneReloading;
-    // Reload time in millisecs.
-    int m_ReloadTime;
+    // Base reload time in millisecs.
+    int m_BaseReloadTime;
     // Whether this HDFirearm is full or semi-auto.
     bool m_FullAuto;
     // Whether particles fired from this HDFirearm will ignore hits with itself,
@@ -870,6 +917,8 @@ protected:
 	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
 	float m_OneHandedReloadTimeMultiplier; //!< The multiplier for how long this weapon takes to reload when being used one-handed. Only relevant for one-handed weapons.
 	bool m_DualReloadable; //!< Whether or not this weapon can be dual-reloaded, i.e. both guns can reload at once instead of having to wait til the other dual-wielded gun isn't being reloaded. Only relevant for one-handed weapons.
+	float m_ReloadAngle; //!< The angle offset for the default reload animation, in radians.
+	float m_OneHandedReloadAngle; //!< The angle offset for one-handed reload animation, in radians.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;
@@ -942,7 +991,7 @@ private:
 	/// <summary>
 	/// Ensures the reload Timer's time limit is set accordingly, based on whether the HDFirearm has support available.
 	/// </summary>
-	void CorrectReloadTimerForSupportAvailable() { m_ReloadTmr.SetSimTimeLimitMS(static_cast<double>(static_cast<float>(m_ReloadTime) * (m_SupportAvailable ? 1.0F : m_OneHandedReloadTimeMultiplier))); }
+	void CorrectReloadTimerForSupportAvailable() { m_ReloadTmr.SetSimTimeLimitMS(static_cast<double>(static_cast<float>(m_BaseReloadTime) * (m_SupportAvailable ? 1.0F : m_OneHandedReloadTimeMultiplier))); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

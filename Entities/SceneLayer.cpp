@@ -3,16 +3,22 @@
 #include "FrameMan.h"
 #include "SceneMan.h"
 #include "SettingsMan.h"
+#include "ActivityMan.h"
 
 namespace RTE {
 
+	ConcreteClassInfo(SceneLayerTracked, Entity, 0);
 	ConcreteClassInfo(SceneLayer, Entity, 0);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::Clear() {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::Clear() {
 		m_BitmapFile.Reset();
 		m_MainBitmap = nullptr;
+		m_BackBitmap = nullptr;
+		m_LastClearColor = ColorKeys::g_InvalidColor;
+		m_Drawings.clear();
 		m_MainBitmapOwned = false;
 		m_DrawMasked = true;
 		m_WrapX = true;
@@ -27,10 +33,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_BitmapFile = bitmapFile;
 		m_MainBitmap = m_BitmapFile.GetAsBitmap();
 		Create(m_MainBitmap, drawMasked, offset, wrapX, wrapY, scrollInfo);
+
 		m_MainBitmapOwned = false;
 
 		return 0;
@@ -38,11 +46,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Create(BITMAP *bitmap, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::Create(BITMAP *bitmap, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_MainBitmap = bitmap;
-		RTEAssert(m_MainBitmap, "Null bitmap passed in when creating SceneLayer");
+		RTEAssert(m_MainBitmap, "Null bitmap passed in when creating SceneLayerImpl!");
 
 		m_MainBitmapOwned = true;
+
+		m_BackBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
+		m_LastClearColor = ColorKeys::g_InvalidColor;
 
 		m_DrawMasked = drawMasked;
 		m_Offset = offset;
@@ -57,7 +69,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Create(const SceneLayer &reference) {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::Create(const SceneLayerImpl &reference) {
 		Entity::Create(reference);
 
 		m_BitmapFile = reference.m_BitmapFile;
@@ -73,11 +86,14 @@ namespace RTE {
 		if (reference.m_MainBitmap) {
 			// Make a copy of the bitmap because it can be modified in some use cases.
 			BITMAP *bitmapToCopy = reference.m_MainBitmap;
-			RTEAssert(bitmapToCopy, "Couldn't load the bitmap file specified for SceneLayer!");
+			RTEAssert(bitmapToCopy, "Couldn't load the bitmap file specified for SceneLayerImpl!");
 
-			m_MainBitmap = create_bitmap_ex(8, bitmapToCopy->w, bitmapToCopy->h);
-			RTEAssert(m_MainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
+			m_MainBitmap = create_bitmap_ex(bitmap_color_depth(bitmapToCopy), bitmapToCopy->w, bitmapToCopy->h);
+			RTEAssert(m_MainBitmap, "Failed to allocate BITMAP in SceneLayerImpl::Create");
 			blit(bitmapToCopy, m_MainBitmap, 0, 0, 0, 0, bitmapToCopy->w, bitmapToCopy->h);
+
+			m_BackBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
+			m_LastClearColor = ColorKeys::g_InvalidColor;
 
 			InitScrollRatios();
 
@@ -91,7 +107,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader) {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "WrapX") {
 			reader >> m_WrapX;
 		} else if (propName == "WrapY") {
@@ -106,7 +123,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Save(Writer &writer) const {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::Save(Writer &writer) const {
 		Entity::Save(writer);
 
 		writer.NewPropertyWithValue("WrapX", m_WrapX);
@@ -118,15 +136,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::Destroy(bool notInherited) {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::Destroy(bool notInherited) {
 		if (m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
+		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::InitScrollRatios(bool initForNetworkPlayer, int player) {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::InitScrollRatios(bool initForNetworkPlayer, int player) {
 		float mainBitmapWidth = static_cast<float>(m_MainBitmap->w);
 		float mainBitmapHeight = static_cast<float>(m_MainBitmap->h);
 		float playerScreenWidth = static_cast<float>(initForNetworkPlayer ? g_FrameMan.GetPlayerFrameBufferWidth(player) : g_FrameMan.GetPlayerScreenWidth());
@@ -163,37 +184,43 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::LoadData() {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::LoadData() {
 		// Load from disk and take ownership. Don't cache because the bitmap will be modified.
 		m_MainBitmap = m_BitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 		m_MainBitmapOwned = true;
+
+		m_BackBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
+		m_LastClearColor = ColorKeys::g_InvalidColor;
+
 		InitScrollRatios();
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::SaveData(const std::string &bitmapPath) {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::SaveData(const std::string &bitmapPath) {
 		if (bitmapPath.empty()) {
 			return -1;
 		}
+		g_ActivityMan.IncrementSavingThreadCount();
 		if (m_MainBitmap) {
 			// Make a copy of the bitmap to pass to the thread because the bitmap may be offloaded mid thread and everything will be on fire.
-			BITMAP *outputBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+			BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
 			blit(m_MainBitmap, outputBitmap, 0, 0, 0, 0, m_MainBitmap->w, m_MainBitmap->h);
 
 			auto saveLayerBitmap = [bitmapPath](BITMAP *bitmapToSave) {
 				PALETTE palette;
 				get_palette(palette);
 				if (save_png(bitmapPath.c_str(), bitmapToSave, palette) != 0) {
-					// TODO: This will not kill the main thread. Figure this out!
-					RTEAbort(std::string("Failed to save SceneLayer bitmap to path and name: " + bitmapPath));
+					RTEAbort(std::string("Failed to save SceneLayerImpl bitmap to path and name: " + bitmapPath));
 				}
 				destroy_bitmap(bitmapToSave);
+				g_ActivityMan.DecrementSavingThreadCount();
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
 			m_BitmapFile.SetDataPath(bitmapPath);
-			// TODO: Move this into some global thread container or a ThreadMan™ instead of detaching.
 			saveThread.detach();
 		}
 		return 0;
@@ -201,30 +228,39 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::ClearData() {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::ClearData() {
 		if (m_MainBitmap && m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
 		m_MainBitmap = nullptr;
 		m_MainBitmapOwned = false;
+
+		if (m_BackBitmap) { destroy_bitmap(m_BackBitmap); }
+		m_BackBitmap = nullptr;
+		m_LastClearColor = ColorKeys::g_InvalidColor;
+
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::SetScaleFactor(const Vector &newScale) {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::SetScaleFactor(const Vector &newScale) {
 		m_ScaleFactor = newScale;
 		if (m_MainBitmap) { m_ScaledDimensions.SetXY(static_cast<float>(m_MainBitmap->w) * newScale.GetX(), static_cast<float>(m_MainBitmap->h) * newScale.GetY()); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::GetPixel(int pixelX, int pixelY) const {
+	template <bool TRACK_DRAWINGS>
+	int SceneLayerImpl<TRACK_DRAWINGS>::GetPixel(int pixelX, int pixelY) const {
 		WrapPosition(pixelX, pixelY);
 		return (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(m_MainBitmap, pixelX, pixelY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::SetPixel(int pixelX, int pixelY, int materialID) const {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::SetPixel(int pixelX, int pixelY, int materialID) {
 		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
 		WrapPosition(pixelX, pixelY);
@@ -233,18 +269,49 @@ namespace RTE {
 			return;
 		}
 		_putpixel(m_MainBitmap, pixelX, pixelY, materialID);
+
+		RegisterDrawing(pixelX, pixelY, pixelX, pixelY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SceneLayer::IsWithinBounds(const int pixelX, const int pixelY, const int margin) const {
-		// TODO: This doesn't take Y wrapping into account!
-		return (m_WrapX || (pixelX >= -margin) && pixelX < (m_MainBitmap->w + margin)) && (pixelY >= -1000) && (pixelY < (m_MainBitmap->h + margin));
+	template <bool TRACK_DRAWINGS>
+	bool SceneLayerImpl<TRACK_DRAWINGS>::IsWithinBounds(const int pixelX, const int pixelY, const int margin) const {
+		return (m_WrapX || (pixelX >= -margin && pixelX < m_MainBitmap->w + margin)) && (m_WrapY || (pixelY >= -margin && pixelY < m_MainBitmap->h + margin));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SceneLayer::WrapPosition(int &posX, int &posY) const {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::ClearBitmap(ColorKeys clearTo) {
+		RTEAssert(m_MainBitmapOwned, "Bitmap not owned! We shouldn't be clearing this!");
+
+		std::scoped_lock<std::mutex> bitmapClearLock(m_BitmapClearMutex);
+
+		if (m_LastClearColor != clearTo) {
+			// Note: We're clearing to a different color than expected, which is expensive! We should always aim to clear to the same color to avoid it as much as possible.
+			clear_to_color(m_BackBitmap, clearTo);
+			m_LastClearColor = clearTo;
+		}
+
+		std::swap(m_MainBitmap, m_BackBitmap);
+
+		// Start a new thread to clear the backbuffer bitmap asynchronously.
+		std::thread clearBackBitmapThread([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
+			this->m_BitmapClearMutex.lock();
+			ClearDrawings(bitmap, drawings, clearTo);
+			this->m_BitmapClearMutex.unlock();
+		}, m_BackBitmap, m_Drawings);
+
+		clearBackBitmapThread.detach();
+
+		m_Drawings.clear(); // This was copied into the new thread, so can be safely deleted.
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	bool SceneLayerImpl<TRACK_DRAWINGS>::WrapPosition(int &posX, int &posY) const {
 		bool wrapped = false;
 		int width = m_ScaledDimensions.GetFloorIntX();
 		int height = m_ScaledDimensions.GetFloorIntY();
@@ -276,7 +343,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SceneLayer::ForceBounds(int &posX, int &posY) const {
+	template <bool TRACK_DRAWINGS>
+	bool SceneLayerImpl<TRACK_DRAWINGS>::ForceBounds(int &posX, int &posY) const {
 		bool wrapped = false;
 		int width = m_ScaledDimensions.GetFloorIntX();
 		int height = m_ScaledDimensions.GetFloorIntY();
@@ -322,7 +390,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SceneLayer::ForceBoundsOrWrapPosition(Vector &pos, bool forceBounds) const {
+	template <bool TRACK_DRAWINGS>
+	bool SceneLayerImpl<TRACK_DRAWINGS>::ForceBoundsOrWrapPosition(Vector &pos, bool forceBounds) const {
 		int posX = pos.GetFloorIntX();
 		int posY = pos.GetFloorIntY();
 		bool wrapped = forceBounds ? ForceBounds(posX, posY) : WrapPosition(posX, posY);
@@ -333,8 +402,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment) {
-		RTEAssert(m_MainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::RegisterDrawing(int left, int top, int right, int bottom) {
+		if constexpr (TRACK_DRAWINGS) {
+			m_Drawings.emplace_back(left, top, right, bottom);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::RegisterDrawing(const Vector &center, float radius) {
+		if (radius != 0.0F) {
+			RegisterDrawing(static_cast<int>(center.GetX() - radius), static_cast<int>(center.GetY() - radius), static_cast<int>(center.GetX() + radius), static_cast<int>(center.GetY() + radius));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment) {
+		RTEAssert(m_MainBitmap, "Data of this SceneLayerImpl has not been loaded before trying to draw!");
 
 		if (offsetNeedsScrollRatioAdjustment) { m_Offset.SetXY(std::floor(m_Offset.GetX() * m_ScrollRatio.GetX()), std::floor(m_Offset.GetY() * m_ScrollRatio.GetY())); }
 		if (targetBox.IsEmpty()) { targetBox = Box(Vector(), static_cast<float>(targetBitmap->w), static_cast<float>(targetBitmap->h)); }
@@ -357,7 +445,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const {
 		if (!drawScaled) {
 			std::array<int, 2> sourcePosX = { m_Offset.GetFloorIntX(), 0 };
 			std::array<int, 2> sourcePosY = { m_Offset.GetFloorIntY(), 0 };
@@ -395,7 +484,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const {
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const {
 		int bitmapWidth = m_ScaledDimensions.GetFloorIntX();
 		int bitmapHeight = m_ScaledDimensions.GetFloorIntY();
 		int areaToCoverX = m_Offset.GetFloorIntX() + targetBox.GetCorner().GetFloorIntX() + std::min(targetBitmap->w, static_cast<int>(targetBox.GetWidth()));
@@ -431,4 +521,56 @@ namespace RTE {
 			tiledOffsetX += bitmapWidth;
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	template <bool TRACK_DRAWINGS>
+	void SceneLayerImpl<TRACK_DRAWINGS>::ClearDrawings(BITMAP* bitmap, const std::vector<IntRect> &drawings, ColorKeys clearTo) const {
+		if constexpr (TRACK_DRAWINGS) {
+			for (const IntRect &rect : drawings) {
+				int left = rect.m_Left;
+				int top = rect.m_Top;
+				int bottom = rect.m_Bottom;
+				int right = rect.m_Right;
+
+				rectfill(bitmap, left, top, right, bottom, clearTo);
+
+				if (m_WrapX) {
+					if (left < 0) {
+						int wrapLeft = left + bitmap->w;
+						int wrapRight = bitmap->w - 1;
+						rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
+					}
+
+					if (right >= bitmap->w) {
+						int wrapLeft = 0;
+						int wrapRight = right - bitmap->w;
+						rectfill(bitmap, wrapLeft, top, wrapRight, bottom, clearTo);
+					}
+				}
+
+				if (m_WrapY) {
+					if (top < 0) {
+						int wrapTop = top + bitmap->h;
+						int wrapBottom = bitmap->h - 1;
+						rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
+					}
+
+					if (bottom >= bitmap->h) {
+						int wrapTop = 0;
+						int wrapBottom = bottom - bitmap->h;
+						rectfill(bitmap, left, wrapTop, right, wrapBottom, clearTo);
+					}
+				}
+			}
+		} else {
+			clear_to_color(bitmap, clearTo);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Force instantiation
+	template class SceneLayerImpl<false>;
+	template class SceneLayerImpl<true>;
 }

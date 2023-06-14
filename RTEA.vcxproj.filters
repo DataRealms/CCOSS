@@ -30,6 +30,8 @@
     </Filter>
     <Filter Include="System\Semver200">
       <UniqueIdentifier>{60f9b310-81f7-4bf6-a829-c893dc59537a}</UniqueIdentifier>
+    <Filter Include="GUI\Wrappers">
+      <UniqueIdentifier>{14ff3fdb-4366-4bed-8b6e-ddcf72987b81}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,15 +115,6 @@
     </ClInclude>
     <ClInclude Include="Managers\UInputMan.h">
       <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\AllegroBitmap.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\AllegroInput.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\AllegroScreen.h">
-      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\GUI.h">
       <Filter>GUI</Filter>
@@ -546,14 +539,35 @@
     <ClInclude Include="System\PieQuadrant.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\Gamepad.h">
+      <Filter>System</Filter>
+    </ClInclude>
     <ClInclude Include="Managers\CameraMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Lua\LuaAdapterDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="System\SpatialPartitionGrid.h">
+      <Filter>System</Filter>
+    </ClInclude>
     <ClInclude Include="System\GenericSavedData.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Wrappers\GUIInputWrapper.h">
+      <Filter>GUI\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Wrappers\AllegroScreen.h">
+      <Filter>GUI\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Wrappers\AllegroBitmap.h">
+      <Filter>GUI\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\WindowMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Credits.h">
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="System\Semver200\semver200.h">
       <Filter>System\Semver200</Filter>
@@ -640,15 +654,6 @@
     </ClCompile>
     <ClCompile Include="Managers\UInputMan.cpp">
       <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\AllegroBitmap.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\AllegroInput.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\AllegroScreen.cpp">
-      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUIBanner.cpp">
       <Filter>GUI</Filter>
@@ -1050,6 +1055,9 @@
     <ClCompile Include="Lua\LuaBindingsMisc.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsInput.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
     <ClCompile Include="Lua\LuaBindingsActivities.cpp">
       <Filter>Lua</Filter>
     </ClCompile>
@@ -1086,6 +1094,21 @@
     <ClCompile Include="System\GenericSavedData.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="System\SpatialPartitionGrid.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Wrappers\GUIInputWrapper.cpp">
+      <Filter>GUI\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Wrappers\AllegroScreen.cpp">
+      <Filter>GUI\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Wrappers\AllegroBitmap.cpp">
+      <Filter>GUI\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\WindowMan.cpp">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClCompile Include="System\Semver200\Semver200_comparator.cpp">
       <Filter>System\Semver200</Filter>
     </ClCompile>

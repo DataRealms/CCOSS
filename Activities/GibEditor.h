@@ -210,19 +210,13 @@ ClassInfoGetters;
 
 protected:
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the current object to an appropriate ini file, and asks user if
-//                  they want to overwrite first if object of this name exists.
-// Arguments:       The name of the new object to be saved.
-//                  Whetehr to force any existing Object of that name to be overwritten if
-//                  it already exists.
-// Return value:    Whether actually managed to save. Will return false both if an object
-//                  of this name already exists (and not overwriting), or if other error.
-
-    bool SaveObject(std::string saveAsName, bool forceOverwrite = false);
+	/// <summary>
+	/// Saves the current object to an appropriate ini file, and asks user if they want to overwrite first if object of this name exists.
+	/// </summary>
+	/// <param name="saveAsName">The name of the new object to be saved.</param>
+	/// <param name="forceOverwrite">Whether to force any existing Object of that name to be overwritten if it already exists.</param>
+	/// <returns>Whether actually managed to save. Will return false both if an object of this name already exists (and not overwriting), or if other error.</returns>
+	bool SaveObject(const std::string &saveAsName, bool forceOverwrite = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -258,6 +258,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::vector<Vector> * LuaAdaptersActor::GetSceneWaypoints(Actor *luaSelfObject) {
+		std::vector<Vector> *sceneWaypoints = new std::vector<Vector>();
+		sceneWaypoints->reserve(luaSelfObject->GetWaypointsSize());
+		for (auto &[sceneWaypoint, movableObjectWaypoint] : luaSelfObject->GetWaypointList()) {
+			if (movableObjectWaypoint == nullptr) {
+				sceneWaypoints->emplace_back(sceneWaypoint);
+			}
+		}
+		return sceneWaypoints;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaAdaptersScene::CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
+		luaSelfObject->CalculatePath(start, end, luaSelfObject->m_ScenePath, digStrength, team);
+		if (!luaSelfObject->m_ScenePath.empty()) {
+			if (movePathToGround) {
+				for (Vector &scenePathPoint : luaSelfObject->m_ScenePath) {
+					scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+				}
+			}
+
+			return static_cast<int>(luaSelfObject->m_ScenePath.size());
+		}
+		return -1;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}
@@ -270,24 +300,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool LuaAdaptersMovableObject::HasScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
+		return luaSelfObject->HasScript(g_PresetMan.GetFullModulePath(scriptPath));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool LuaAdaptersMovableObject::AddScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		switch (luaSelfObject->LoadScript(luaSelfObject->CorrectBackslashesInPath(scriptPath))) {
+		switch (std::string correctedScriptPath = g_PresetMan.GetFullModulePath(scriptPath); luaSelfObject->LoadScript(correctedScriptPath)) {
 			case 0:
 				return true;
 			case -1:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " was empty.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + " was empty.");
 				break;
 			case -2:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + "  did not point to a valid file.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + "  did not point to a valid file.");
 				break;
 			case -3:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + " is already loaded onto this object.");
 				break;
 			case -4:
-				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + correctedScriptPath + ". This has nothing to do with your script, please report it to a developer.");
 				break;
 			case -5:
-				g_ConsoleMan.PrintString("ERROR: The file with script path " + scriptPath + " could not be run. Please check that this is a valid Lua file.");
+				g_ConsoleMan.PrintString("ERROR: The file with script path " + correctedScriptPath + " could not be run. Please check that this is a valid Lua file.");
 				break;
 			default:
 				RTEAbort("Reached default case while adding script. This should never happen!");
@@ -299,19 +335,51 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersMovableObject::EnableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		return luaSelfObject->EnableOrDisableScript(scriptPath, true);
+		return luaSelfObject->EnableOrDisableScript(g_PresetMan.GetFullModulePath(scriptPath), true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersMovableObject::DisableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		return luaSelfObject->EnableOrDisableScript(scriptPath, false);
+		return luaSelfObject->EnableOrDisableScript(g_PresetMan.GetFullModulePath(scriptPath), false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaAdaptersMOSRotating::GibThis(MOSRotating *luaSelfObject) {
 		luaSelfObject->GibThis();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds1(const MOSRotating *luaSelfObject) {
+		return GetWounds2(luaSelfObject, true, false, false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<AEmitter *> * LuaAdaptersMOSRotating::GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) {
+		auto *wounds = new std::vector<AEmitter *>();
+		GetWoundsImpl(luaSelfObject, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, *wounds);
+		return wounds;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMOSRotating::GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds) {
+		wounds.insert(wounds.end(), luaSelfObject->GetWoundList().begin(), luaSelfObject->GetWoundList().end());
+
+		if (includePositiveDamageAttachables || includeNegativeDamageAttachables || includeNoDamageAttachables) {
+			for (const Attachable *attachable : luaSelfObject->GetAttachables()) {
+				bool attachableSatisfiesConditions = (includePositiveDamageAttachables && attachable->GetDamageMultiplier() > 0) ||
+				                                     (includeNegativeDamageAttachables && attachable->GetDamageMultiplier() < 0) ||
+				                                     (includeNoDamageAttachables && attachable->GetDamageMultiplier() == 0);
+
+				if (attachableSatisfiesConditions) {
+					GetWoundsImpl(attachable, includePositiveDamageAttachables, includeNegativeDamageAttachables, includeNoDamageAttachables, wounds);
+				}
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,6 +510,14 @@ namespace RTE {
 
 	bool LuaAdaptersPresetMan::ReloadEntityPreset2(PresetMan &presetMan, const std::string &presetName, const std::string &className) {
 		return ReloadEntityPreset1(presetMan, presetName, className, "");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::list<Box> * LuaAdaptersSceneMan::WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap) {
+		std::list<Box> *wrappedBoxes = new std::list<Box>();
+		sceneMan.WrapBox(boxToWrap, *wrappedBoxes);
+		return wrappedBoxes;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

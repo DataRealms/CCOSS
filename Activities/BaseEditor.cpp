@@ -31,20 +31,6 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI.h"
-#include "GUIFont.h"
-#include "AllegroScreen.h"
-#include "AllegroBitmap.h"
-#include "AllegroInput.h"
-#include "GUIControlManager.h"
-#include "GUICollectionBox.h"
-#include "GUITab.h"
-#include "GUIListBox.h"
-#include "GUITextBox.h"
-#include "GUIButton.h"
-#include "GUILabel.h"
-#include "GUIComboBox.h"
-
 #include "SceneEditorGUI.h"
 
 namespace RTE {
@@ -197,7 +183,7 @@ int BaseEditor::Start()
         m_ViewState[editingPlayer] = ViewState::Normal;
         g_FrameMan.ClearScreenText(ScreenOfPlayer(editingPlayer));
         // Set the team associations with the first screen so that the correct unseen are shows up
-        g_CameraMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
+        g_CameraMan.SetScreenTeam(m_Team[editingPlayer], ScreenOfPlayer(editingPlayer));
         g_CameraMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
         m_PlayerController[editingPlayer].Reset();
@@ -377,7 +363,7 @@ bool BaseEditor::SaveScene(std::string saveAsName, bool forceOverwrite)
     if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
     {
         // Does ini already exist? If yes, then no need to add it to a scenes.ini etc
-        bool sceneFileExisted = exists(sceneFilePath.c_str());
+        bool sceneFileExisted = System::PathExistsCaseSensitive(sceneFilePath.c_str());
         // Create the writer
         Writer sceneWriter(sceneFilePath.c_str(), false);
         sceneWriter.NewProperty("AddScene");
@@ -389,7 +375,7 @@ bool BaseEditor::SaveScene(std::string saveAsName, bool forceOverwrite)
         {
             // First find/create  a .rte/Scenes.ini file to include the new .ini into
             string scenesFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
-            bool scenesFileExisted = exists(scenesFilePath.c_str());
+            bool scenesFileExisted = System::PathExistsCaseSensitive(scenesFilePath.c_str());
             Writer scenesWriter(scenesFilePath.c_str(), true);
             scenesWriter.NewProperty("\nIncludeFile");
             scenesWriter << sceneFilePath;

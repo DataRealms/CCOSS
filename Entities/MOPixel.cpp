@@ -1,4 +1,5 @@
 #include "MOPixel.h"
+
 #include "Atom.h"
 #include "PostProcessMan.h"
 
@@ -11,8 +12,7 @@ namespace RTE {
 	void MOPixel::Clear() {
 		m_Atom = 0;
 		m_Color.Reset();
-		m_DistanceTraveled = 0;
-		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / c_MPP;
+		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight());
 		m_MinLethalRange = 1;
 		m_MaxLethalRange = 1;
 		m_LethalSharpness = 1;
@@ -127,9 +127,6 @@ namespace RTE {
 	void MOPixel::SetLethalRange(float range) {
 		m_LethalRange = range;
 		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RandomNum(m_MinLethalRange, m_MaxLethalRange); }
-
-		// convert to meters
-		m_LethalRange /= c_PPM;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,6 +190,7 @@ namespace RTE {
 
 		// If we seem to be about to settle, make sure we're not still flying in the air
 		if ((m_ToSettle || IsAtRest()) && g_SceneMan.OverAltitude(m_Pos, 2, 0)) {
+			m_VelOscillations = 0;
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}
@@ -205,8 +203,7 @@ namespace RTE {
 
 		// TODO: Rework this once we figure out how we want to handle it
 		if (m_HitsMOs && m_Sharpness > 0) {
-			m_DistanceTraveled += m_Vel.GetLargest() * g_TimerMan.GetDeltaTimeSecs();
-			if (m_DistanceTraveled > m_LethalRange) {
+			if (m_DistanceTravelled > m_LethalRange) {
 				if (m_Sharpness < m_LethalSharpness) {
 					m_Sharpness = std::max(m_Sharpness * (1.0F - (20.0F * g_TimerMan.GetDeltaTimeSecs())) - 0.1F, 0.0F);
 					if (m_LethalRange > 0) {
@@ -230,7 +227,7 @@ namespace RTE {
 			return;
 		}
 
-		unsigned char drawColor = 0;
+		int drawColor = -1;
 
 		switch (mode) {
 			case g_DrawMaterial:
@@ -247,13 +244,21 @@ namespace RTE {
 				break;
 		}
 
-		acquire_bitmap(targetBitmap);
-		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
-		release_bitmap(targetBitmap);
+		bool shouldDraw = true;
 
-		if (mode == g_DrawMOID) {
-			g_SceneMan.RegisterMOIDDrawing(m_Pos - targetPos, 1);
-		} else if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
+#ifndef DRAW_MOID_LAYER
+		shouldDraw = mode != DrawMode::g_DrawMOID;
+#endif
+
+		Vector pixelPos = m_Pos - targetPos;
+
+		if (shouldDraw) {
+			putpixel(targetBitmap, pixelPos.GetFloorIntX(), pixelPos.GetFloorIntY(), drawColor);
+		}
+
+		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, pixelPos, 1.0F);
+
+		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
 			SetPostScreenEffectToDraw();
 		}
 	}

@@ -201,6 +201,9 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
 
         const MovableObject *mo = GetMOFromID(moid);
         RTEAssert(mo, "Null MO found in MOID list!");
+		if (mo && mo->GetScale() == 0) {
+			return g_NoMOID;
+		}
         if (mo && HitTestMOAtPixel(*mo, pixelX, pixelY)) {
             return moid;
         }

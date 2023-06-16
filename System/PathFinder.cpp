@@ -118,7 +118,7 @@ namespace RTE {
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
 
-		if (std::abs(digStrength - m_DigStrength) > 1.0F) {
+		if (m_DigStrength != digStrength) {
 			// Unfortunately, DigStrength-aware pathing means that we're adjusting node transition costs, so we need to reset our path cache on every call.
 			// In future we'll potentially store a different pather for different mobility bands, and reuse pathing costs.
 			// But then again it's probably more fruitful to optimize the graph node to make searches faster, instead.

@@ -101,6 +101,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
 
+- New `Settings.ini` property `DisableFactionBuyMenuThemeCursors = 0/1` which will cause custom faction theme cursor definitions in all modules to be ignored and the default cursors to be used instead.
+
 - New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
 
 - New `DataModule` INI and Lua (R/O) property `IsMerchant` which determines whether a module is an independent merchant. Defaults to false (0). ([Issue #401](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/401))  
@@ -392,6 +394,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
+- New hardcoded `MovableObject` function `OnGameSave(self)` that gets run for each `MovableObject` with it when the game is saved. This can be used in tandem with custom values (for `MOSRotatings` and child classes) to store data, which can be read during `Create` when the game is loaded.
+	
 - New Lua `AEmitter` properties:  
 	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
 	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
@@ -474,7 +478,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
 	Items in the cart will be indented to signify what actor's inventory they belong to.  
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+	You can now reorganize the cart by click-dragging. For kbd-only you can do this by holding the sharp aim key and pressing up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 

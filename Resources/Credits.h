@@ -20,12 +20,14 @@ R I K U   " 4 Z K "   K
 H E L I U M A N T
 C A U S E L E S S
 S T E W I E
+M Y N A M E I S T R E Z
 H A R D S P H E R E
 F R I S 0 U M A N
 Z A L O
 
-Platform Porting
+Platform Porting And Automation
 H E L I U M A N T
+S T E W I E
 
 Online Multiplayer Implementation
 E V G E N I Y   " W E E G E E "   V I G O V S K I Y
@@ -54,6 +56,7 @@ M A X   " M A X I M D U D E "   K
 K E N   " C A V E "   V U   D O
 
 Additional Programming
+J U S T   A L E X   :/
 M A X S H A D O W
 T O P K E K
 O O A A A O A O A O

@@ -7,6 +7,17 @@ static std::string s_CreditsText =
 
 R"(C R E D I T S :
 
+A huge thank you to every single person who has contributed to the Cortex Command Community Project!
+
+Community Project Team Leads:
+G A C Y R
+M A X I M D U D E
+4 Z K
+M Y   N A M E   I S   T R E Z
+C A V E
+
+______________________________
+
 Game Design - Engine and Physics Programming - Art Direction - Project Coordination
 D A N I E L   " D A T A "   T A B A R
 

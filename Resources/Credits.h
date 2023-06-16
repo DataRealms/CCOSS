@@ -11,12 +11,12 @@ R"(- C O R T E X   C O M M A N D   C O M M U N I T Y   P R O J E C T -
 Project Coordination
 G A R E T H   " G A C Y R "   Y R
 M A X   " M A X I M D U D E "   K
-R I K U " 4 Z K " K
+R I K U   " 4 Z K "   K
 
 Engine Programming
 G A R E T H   " G A C Y R "   Y R
 M A X   " M A X I M D U D E "   K
-R I K U " 4 Z K " K
+R I K U   " 4 Z K "   K
 H E L I U M A N T
 C A U S E L E S S
 S T E W I E
@@ -31,7 +31,7 @@ Online Multiplayer Implementation
 E V G E N I Y   " W E E G E E "   V I G O V S K I Y
 
 Art and Content Production
-R I K U " 4 Z K " K
+R I K U   " 4 Z K "   K
 G O T C H A
 G A R E T H   " G A C Y R "   Y R
 M A X   " M A X I M D U D E "   K
@@ -44,7 +44,7 @@ Z E T A
 
 Audio Design
 M O S S
-R I K U " 4 Z K " K
+R I K U   " 4 Z K "   K
 G O S T S
 
 Tools Programming

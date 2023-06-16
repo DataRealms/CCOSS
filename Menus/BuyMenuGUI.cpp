@@ -356,6 +356,10 @@ void BuyMenuGUI::AddCartItem(const std::string &name, const std::string &rightTe
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
+	if (m_pCartList->GetItemList()->empty()) {
+		return;
+	}
+
     std::vector<GUIListPanel::Item*> addedItems;
 
     auto addDuplicateItemAtEnd = [&](const GUIListPanel::Item *itemToCopy) {

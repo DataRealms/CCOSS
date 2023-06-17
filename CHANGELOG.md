@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+</details>
+
+<details><summary><b>Changed</b></summary>
+</details>
+
+<details><summary><b>Fixed</b></summary>
+</details>
+
+<details><summary><b>Removed</b></summary>
+</details>
+
+***
+
+## [0.1.0 pre-release 5.0][0.1.0-pre5.0] - 2023/06/17
+
+<details><summary><b>Added</b></summary>
 
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
@@ -2095,3 +2111,4 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
 [0.1.0-pre4.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre4.0
+[0.1.0-pre5.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre5.0

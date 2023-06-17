@@ -78,6 +78,11 @@ Website Design
 T O M
 P O C K E T S
 
+Special Thanks
+D A N I E L   " D A T A "   T A B A R
+E V G E N I Y   " W E E G E E "   V I G O V S K I Y
+P A W N I S
+
 A huge thank you to every single person who has been a part of the Cortex Command Community Project!
 
 

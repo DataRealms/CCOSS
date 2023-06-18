@@ -23,20 +23,29 @@ namespace RTE {
 		m_OverwriteExisting = false;
 		m_SkipIncludes = false;
 		m_CanFail = false;
+		m_NonModulePath = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Reader::Create(const std::string &fileName, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
-		m_FilePath = std::filesystem::path(fileName).generic_string();
-
-		if (m_FilePath.empty()) {
+		if (fileName.empty()) {
 			return -1;
 		}
-		// Extract the file name and module name from the path
-		m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
-		m_DataModuleName = m_FilePath.substr(0, m_FilePath.find_first_of("/\\"));
-		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
+
+		if (m_NonModulePath) {
+			m_FilePath = std::filesystem::path(fileName).generic_string();
+			// Associate non-module paths with Base to prevent implosions when dealing with creating Entities.
+			m_DataModuleName = "Base.rte";
+			m_DataModuleID = 0;
+		} else {
+			m_FilePath = g_PresetMan.GetFullModulePath(fileName);
+
+			// Extract the file name and module name from the path
+			m_FileName = m_FilePath.substr(m_FilePath.find_last_of("/\\") + 1);
+			m_DataModuleName = g_PresetMan.GetModuleNameFromPath(m_FilePath);
+			m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
+		}
 
 		m_CanFail = failOK;
 
@@ -292,7 +301,7 @@ namespace RTE {
 		if (m_ReportProgress) { m_ReportProgress(m_ReportTabs + m_FileName + " on line " + std::to_string(m_CurrentLine) + " includes:", false); }
 
 		// Get the file path from the current stream before pushing it into the StreamStack, otherwise we can't open a new stream after releasing it because we can't read.
-		std::string includeFilePath = std::filesystem::path(ReadPropValue()).generic_string();
+		std::string includeFilePath = g_PresetMan.GetFullModulePath(ReadPropValue());
 
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
 		m_StreamStack.push(StreamInfo(m_Stream.release(), m_FilePath, m_CurrentLine, m_PreviousIndent));

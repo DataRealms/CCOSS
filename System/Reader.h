@@ -25,7 +25,8 @@ namespace RTE {
 		/// <param name="overwrites">Whether object definitions read here overwrite existing ones with the same names.</param>
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
-		Reader(const std::string &fileName, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false) { Clear(); Create(fileName, overwrites, progressCallback, failOK); }
+		/// <param name="nonModulePath">Whether this Reader is reading from path that is not a DataModule and should just read it as provided.</param>
+		Reader(const std::string &fileName, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false, bool nonModulePath = false) { Clear(); m_NonModulePath = nonModulePath; Create(fileName, overwrites, progressCallback, failOK); }
 
 		/// <summary>
 		/// Makes the Reader object ready for use.
@@ -175,7 +176,7 @@ namespace RTE {
 		Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		// Yeah, this is dumb - read as double and cast. 
+		// Yeah, this is dumb - read as double and cast.
 		// This is because, for whatever fucking reason, iostream can save out floats at a precision that it's then unable to read...
 		Reader & operator>>(float &var) { DiscardEmptySpace(); double var2; *m_Stream >> var2; var = static_cast<float>(var2); return *this; }
 		Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
@@ -220,6 +221,7 @@ namespace RTE {
 		bool m_OverwriteExisting; //!< Whether object instances read from this should overwrite any already existing ones with the same names.
 		bool m_SkipIncludes; //!< Indicates whether reader should skip included files.
 		bool m_CanFail; //!< Whether it's ok for the Reader to fail reading a file and fail silently instead of aborting.
+		bool m_NonModulePath; //!< Whether this Reader is reading from path that is not a DataModule and should just read it as provided.
 
 		std::stack<int> m_BlockCommentOpenTagLines; //<! Stores lines on which block comment open tags are encountered. Used for error reporting when a file stream ends with an open block comment.
 

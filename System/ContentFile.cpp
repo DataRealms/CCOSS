@@ -89,7 +89,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
-		m_DataPath = CorrectBackslashesInPath(newDataPath);
+		m_DataPath = g_PresetMan.GetFullModulePath(newDataPath);
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
@@ -328,13 +328,13 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-
 		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
+				const std::string altDataPathToLoad = m_DataPathWithoutExtension + altFileExtension;
+				if (System::PathExistsCaseSensitive(altDataPathToLoad)) {
 					g_ConsoleMan.AddLoadWarningLogExtensionMismatchEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					SetDataPath(altDataPathToLoad);
 					foundAltExtension = true;
 					break;
 				}

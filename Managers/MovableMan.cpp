@@ -216,6 +216,9 @@ MOID MovableMan::GetMOIDPixel(int pixelX, int pixelY, const std::vector<int> &mo
 
         const MovableObject *mo = GetMOFromID(moid);
         RTEAssert(mo, "Null MO found in MOID list!");
+		if (mo && mo->GetScale() == 0) {
+			return g_NoMOID;
+		}
         if (mo && HitTestMOAtPixel(*mo, pixelX, pixelY)) {
             return moid;
         }
@@ -957,6 +960,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             }
         }
 		RemoveActorFromTeamRoster(dynamic_cast<Actor *>(pActorToRem));
+		pActorToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -999,6 +1003,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
                 }
             }
         }
+		pItemToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1120,6 +1125,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
                 }
             }
         }
+		pMOToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1148,9 +1154,8 @@ bool MovableMan::ValidateMOIDs() {
 // Description:     Indicates whether the passed in MovableObject pointer points to an
 //                  MO that's currently active in the simulation, and kept by this MovableMan.
 
-bool MovableMan::ValidMO(const MovableObject *pMOToCheck)
-{
-    return pMOToCheck && pMOToCheck->GetID() != g_NoMOID;
+bool MovableMan::ValidMO(const MovableObject *pMOToCheck) {
+	return pMOToCheck && pMOToCheck->ExistsInMovableMan();
 }
 
 

@@ -2,6 +2,7 @@
 
 #include "WindowMan.h"
 #include "PostProcessMan.h"
+#include "PresetMan.h"
 #include "PrimitiveMan.h"
 #include "PerformanceMan.h"
 #include "ActivityMan.h"
@@ -472,8 +473,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(const std::string &palettePath) {
-		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), m_Palette);
-		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
+		const std::string fullPalettePath = g_PresetMan.GetFullModulePath(palettePath);
+		BITMAP *tempBitmap = load_bitmap(fullPalettePath.c_str(), m_Palette);
+		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + fullPalettePath).c_str());
 
 		set_palette(m_Palette);
 
@@ -510,7 +512,7 @@ namespace RTE {
 
 		std::string fullFileName(fullFileNameBuffer.data());
 #else
-		std::string fullFileName = std::format("{}/{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
+		std::string fullFileName = std::format("{}{}_{:%F_%H-%M-%S}.png", System::GetScreenshotDirectory(), nameBase, std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
 #endif
 
 		bool saveSuccess = false;

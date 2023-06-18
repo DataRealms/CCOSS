@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+</details>
+
+<details><summary><b>Changed</b></summary>
+</details>
+
+<details><summary><b>Fixed</b></summary>
+</details>
+
+<details><summary><b>Removed</b></summary>
+</details>
+
+***
+
+## [0.1.0 pre-release 5.0][0.1.0-pre5.0] - 2023/06/17
+
+<details><summary><b>Added</b></summary>
 
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
@@ -100,6 +116,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	The skin and background color are also applied to the `ObjectPicker` (scene object placer) for visual consistency.
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
+
+- New `Settings.ini` property `DisableFactionBuyMenuThemeCursors = 0/1` which will cause custom faction theme cursor definitions in all modules to be ignored and the default cursors to be used instead.
 
 - New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
 
@@ -401,6 +419,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
+- New hardcoded `MovableObject` function `OnGameSave(self)` that gets run for each `MovableObject` with it when the game is saved. This can be used in tandem with custom values (for `MOSRotatings` and child classes) to store data, which can be read during `Create` when the game is loaded.
+	
 - New Lua `AEmitter` properties:  
 	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
 	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
@@ -483,7 +503,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
 	Items in the cart will be indented to signify what actor's inventory they belong to.  
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+	You can now reorganize the cart by click-dragging. For kbd-only you can do this by holding the sharp aim key and pressing up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
@@ -633,6 +653,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Swapped MoonJIT to LuaJIT. Compiled from [d0e88930ddde28ff662503f9f20facf34f7265aa](https://github.com/LuaJIT/LuaJIT/commit/d0e88930ddde28ff662503f9f20facf34f7265aa).
 
 - Swapped to SDL2 for window management and input handling.
+
+- `Settings.ini` and player loadouts (BuyMenu presets) are now stored in the `Userdata` directory instead of `Base.rte`.
 
 - Lua scripts are now run in a more efficient way. As part of this change, `PieSlice` scripts need to be reloaded like `MovableObject` scripts (i.e. using `pieSlice:ReloadScripts()`, in order for their changes to be reflected in-game.  
 	`PresetMan:ReloadAllScripts()` will reload `PieSlice` preset scripts, like it does for `MovableObject`s.
@@ -2098,3 +2120,4 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
 [0.1.0-pre4.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre4.0
+[0.1.0-pre5.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre5.0

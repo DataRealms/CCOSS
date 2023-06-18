@@ -1249,6 +1249,7 @@ bool MetagameGUI::LoadGame()
 
 bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resaveSceneData)
 {
+    const std::string fullSavePath = g_PresetMan.GetFullModulePath(savePath);
     // If specified, first load all bitmap data of all Scenes in the current Metagame that have once saved em, so we can re-save them to the new files
     if (resaveSceneData)
         g_MetaMan.LoadSceneData();
@@ -1261,7 +1262,7 @@ bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resa
     g_MetaMan.SaveSceneData(METASAVEPATH + saveName);
 
     // Whichever new or existing, create a writer with the path
-    Writer metaWriter(savePath.c_str());
+    Writer metaWriter(fullSavePath.c_str());
     // Now that all the updated data files have been written to disk and their paths updated, send the MetaMan state for actual writing to an ini
     if (g_MetaMan.Save(metaWriter) < 0)
         return false;
@@ -1274,7 +1275,7 @@ bool MetagameGUI::SaveGame(std::string saveName, std::string savePath, bool resa
     // Create a new MetaSave preset that will hold the runtime info of this new save (so it shows up as something we can overwrite later this same runtime)
     MetaSave newSave;
     // This will automatically set all internal members to represent what MetaMan's current state is
-    newSave.Create(savePath);
+    newSave.Create(fullSavePath);
     newSave.SetPresetName(saveName);
 
     // Now add or update the actual Preset
@@ -2965,6 +2966,13 @@ void MetagameGUI::CompletedActivity()
             pAlteredScene->SaveData(METASAVEPATH + std::string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over
             pAlteredScene->ClearData();
+
+			// Clear waypoints on resident brains, otherwise when they're cloned they try to update their move paths, which requires a material bitmap (which we destroyed when we cleared data above).
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (Actor *residentBrain = dynamic_cast<Actor *>(pAlteredScene->GetResidentBrain(player))) {
+					residentBrain->ClearAIWaypoints();
+				}
+			}
             // Deep copy over all the edits made to the newly played Scene
             m_pPlayingScene->Destroy();
             m_pPlayingScene->Create(*pAlteredScene);

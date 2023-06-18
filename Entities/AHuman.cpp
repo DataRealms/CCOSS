@@ -1109,94 +1109,62 @@ bool AHuman::EquipThrowable(bool doEquip)
     return false;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EquipDiggingTool
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Switches the currently held device (if any) to the first found digging
-//                  tool in the inventory. If the held device already is a digging tool,
-//                  or no digging tool is in inventory, nothing happens.
 
-bool AHuman::EquipDiggingTool(bool doEquip)
-{
+bool AHuman::EquipDiggingTool(bool doEquip) {
 	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
 		return false;
 	}
 
-	if (HDFirearm *heldDeviceAsFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsFirearm && heldDeviceAsFirearm->IsInGroup("Tools - Diggers")) {
-		return true;
+	const HDFirearm *strongestDigger = nullptr;
+	float strongestDiggerDigStrength = 0;
+	bool strongestDiggerIsHeld = false;
+	if (const HDFirearm *heldDeviceAsFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsFirearm && heldDeviceAsFirearm->IsInGroup("Tools - Diggers")) {
+		strongestDigger = heldDeviceAsFirearm;
+		strongestDiggerDigStrength = heldDeviceAsFirearm->EstimateDigStrength();
+		strongestDiggerIsHeld = true;
     }
 
-    // Go through the inventory looking for the proper device
-    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-    {
-        HDFirearm *pTool = dynamic_cast<HDFirearm *>(*itr);
-        // Found proper device to equip, so make the switch!
-        if (pTool && pTool->IsInGroup("Tools - Diggers"))
-        {
-            if (doEquip)
-            {
-                // Erase the inventory entry containing the device we now have switched to
-                *itr = 0;
-                m_Inventory.erase(itr);
-
-                // Put back into the inventory what we had in our hands, if anything
-                if (HeldDevice *heldDevice = m_pFGArm->GetHeldDevice())
-                {
-                    heldDevice->Deactivate();
-                    AddToInventoryBack(m_pFGArm->RemoveAttachable(heldDevice));
-                }
-
-                // Now put the device we were looking for and found into the hand
-                m_pFGArm->SetHeldDevice(pTool);
-                // Move the hand to a poisition so it looks like the new device was drawn from inventory
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-
-                // Equip shield in BG arm is applicable
-                EquipShieldInBGArm();
-
-                // Play the device switching sound
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+	if (doEquip || !strongestDigger) {
+		for (MovableObject *inventoryItem : m_Inventory) {
+			if (const HDFirearm *inventoryItemAsFirearm = dynamic_cast<HDFirearm *>(inventoryItem); inventoryItemAsFirearm && inventoryItemAsFirearm->IsInGroup("Tools - Diggers") && inventoryItemAsFirearm->EstimateDigStrength() > strongestDiggerDigStrength) {
+				strongestDigger = inventoryItemAsFirearm;
+				strongestDiggerDigStrength = inventoryItemAsFirearm->EstimateDigStrength();
+				strongestDiggerIsHeld = false;
 			}
+		}
+	}
 
-            return true;
-        }
-    }
+	if (doEquip && strongestDigger && !strongestDiggerIsHeld) {
+		EquipNamedDevice(strongestDigger->GetModuleName(), strongestDigger->GetPresetName(), true);
+	}
 
-    return false;
+    return strongestDigger != nullptr;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EstimateDigStrength
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Estimates what material strength this actor can move through.
 
-float AHuman::EstimateDigStrength()
-{
+float AHuman::EstimateDigStrength() const {
     float maxPenetration = Actor::EstimateDigStrength();
 
 	if (!(m_pFGArm && m_pFGArm->IsAttached())) {
 		return maxPenetration;
 	}
 
-    if (HDFirearm *heldDeviceAsHDFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsHDFirearm && heldDeviceAsHDFirearm->IsInGroup("Tools - Diggers")) {
+    if (const HDFirearm *heldDeviceAsHDFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice()); heldDeviceAsHDFirearm && heldDeviceAsHDFirearm->IsInGroup("Tools - Diggers")) {
 		maxPenetration = std::max(heldDeviceAsHDFirearm->EstimateDigStrength(), maxPenetration);
     }
 
-    // Go through the inventory looking for the proper device
-    for (std::deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-    {
-        HDFirearm *pTool = dynamic_cast<HDFirearm *>(*itr);
-        // Found proper device to equip, so make the switch!
-        if (pTool && pTool->IsInGroup("Tools - Diggers"))
-        {
-            maxPenetration = std::max(pTool->EstimateDigStrength(), maxPenetration);
+	for (const MovableObject *inventoryItem : m_Inventory) {
+        if (const HDFirearm *inventoryItemAsFirearm = dynamic_cast<const HDFirearm *>(inventoryItem); inventoryItemAsFirearm && inventoryItemAsFirearm->IsInGroup("Tools - Diggers")) {
+            maxPenetration = std::max(inventoryItemAsFirearm->EstimateDigStrength(), maxPenetration);
         }
     }
 
     return maxPenetration;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

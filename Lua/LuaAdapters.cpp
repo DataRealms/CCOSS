@@ -301,24 +301,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool LuaAdaptersMovableObject::HasScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
+		return luaSelfObject->HasScript(g_PresetMan.GetFullModulePath(scriptPath));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool LuaAdaptersMovableObject::AddScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		switch (luaSelfObject->LoadScript(luaSelfObject->CorrectBackslashesInPath(scriptPath))) {
+		switch (std::string correctedScriptPath = g_PresetMan.GetFullModulePath(scriptPath); luaSelfObject->LoadScript(correctedScriptPath)) {
 			case 0:
 				return true;
 			case -1:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " was empty.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + " was empty.");
 				break;
 			case -2:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + "  did not point to a valid file.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + "  did not point to a valid file.");
 				break;
 			case -3:
-				g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
+				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + " is already loaded onto this object.");
 				break;
 			case -4:
-				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + correctedScriptPath + ". This has nothing to do with your script, please report it to a developer.");
 				break;
 			case -5:
-				g_ConsoleMan.PrintString("ERROR: The file with script path " + scriptPath + " could not be run. Please check that this is a valid Lua file.");
+				g_ConsoleMan.PrintString("ERROR: The file with script path " + correctedScriptPath + " could not be run. Please check that this is a valid Lua file.");
 				break;
 			default:
 				RTEAbort("Reached default case while adding script. This should never happen!");
@@ -330,13 +336,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersMovableObject::EnableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		return luaSelfObject->EnableOrDisableScript(scriptPath, true);
+		return luaSelfObject->EnableOrDisableScript(g_PresetMan.GetFullModulePath(scriptPath), true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersMovableObject::DisableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
-		return luaSelfObject->EnableOrDisableScript(scriptPath, false);
+		return luaSelfObject->EnableOrDisableScript(g_PresetMan.GetFullModulePath(scriptPath), false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

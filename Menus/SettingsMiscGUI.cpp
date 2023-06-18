@@ -37,6 +37,9 @@ namespace RTE {
 		m_DisableFactionBuyMenuThemesCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDisableFactionBuyMenuThemes"));
 		m_DisableFactionBuyMenuThemesCheckbox->SetCheck(g_SettingsMan.FactionBuyMenuThemesDisabled());
 
+		m_DisableFactionBuyMenuThemeCursorsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDisableFactionBuyMenuThemeCursors"));
+		m_DisableFactionBuyMenuThemeCursorsCheckbox->SetCheck(g_SettingsMan.FactionBuyMenuThemeCursorsDisabled());
+
 		m_SceneBackgroundAutoScaleLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSceneBackgroundAutoScaleSetting"));
 		UpdateSceneBackgroundAutoScaleLabel();
 
@@ -85,6 +88,8 @@ namespace RTE {
 				g_ConsoleMan.SetConsoleUseMonospaceFont(m_UseMonospaceConsoleFontCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_DisableFactionBuyMenuThemesCheckbox) {
 				g_SettingsMan.SetFactionBuyMenuThemesDisabled(m_DisableFactionBuyMenuThemesCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_DisableFactionBuyMenuThemeCursorsCheckbox) {
+				g_SettingsMan.SetFactionBuyMenuThemeCursorsDisabled(m_DisableFactionBuyMenuThemeCursorsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_SceneBackgroundAutoScaleSlider) {
 				g_SettingsMan.SetSceneBackgroundAutoScaleMode(m_SceneBackgroundAutoScaleSlider->GetValue());
 				UpdateSceneBackgroundAutoScaleLabel();

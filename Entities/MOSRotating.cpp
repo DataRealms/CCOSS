@@ -2040,6 +2040,18 @@ void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::OnGameSave() {
+	MovableObject::OnGameSave();
+	for (AEmitter *wound : m_Wounds) {
+		wound->OnGameSave();
+	}
+	for (Attachable *attachable : m_Attachables) {
+		attachable->OnGameSave();
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
     Vector forces;

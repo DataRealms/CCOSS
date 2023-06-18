@@ -69,7 +69,6 @@ namespace RTE {
 			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
-		IncrementSavingThreadCount();
 
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
@@ -79,7 +78,7 @@ namespace RTE {
 			return false;
 		}
 		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			g_ConsoleMan.PrintString("ERROR: This activity does not support saving! Make sure it's a scripted activity, and that it has an OnSave function. Note that multiplayer and conquest games cannot be saved like this.");
+			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
 		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
@@ -87,6 +86,8 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
 		}
+
+		IncrementSavingThreadCount();
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
 		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));
@@ -104,12 +105,17 @@ namespace RTE {
 		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(c_UserScriptedSavesModuleName + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 
 		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
 		// This is done after the activity is saved, in case the activity wants to add anything to the scene while saving.
 		modifiableScene->RetrieveSceneObjects(false);
+		for (SceneObject *objectToSave : *modifiableScene->GetPlacedObjects(Scene::PlacedObjectSets::PLACEONLOAD)) {
+			if (MovableObject *objectToSaveAsMovableObject = dynamic_cast<MovableObject *>(objectToSave)) {
+				objectToSaveAsMovableObject->OnGameSave();
+			}
+		}
 
 		writer->NewPropertyWithValue("OriginalScenePresetName", scene->GetPresetName());
 		writer->NewPropertyWithValue("PlaceObjectsIfSceneIsRestarted", g_SceneMan.GetPlaceObjectsOnLoad());
@@ -145,7 +151,7 @@ namespace RTE {
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
 
-		Reader reader(c_UserScriptedSavesModuleName + "/" + fileName + ".ini", true, nullptr, false);
+		Reader reader(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini", true, nullptr, false);
 		if (!reader.ReaderOK()) {
 			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
@@ -292,11 +298,6 @@ namespace RTE {
 
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
-
-		// Reset screen positions and shake
-		for (int screen = 0; screen < c_MaxScreenCount; screen++) {
-			g_CameraMan.SetScreenShake(0, screen);
-		}
 
 		m_ActivityAllowsSaving = false;
 

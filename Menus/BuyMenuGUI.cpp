@@ -148,7 +148,7 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pController = pController;
 
     if (!m_pGUIScreen)
-        m_pGUIScreen = new AllegroScreen(g_FrameMan.GetNetworkBackBufferGUI8Current(pController->GetPlayer()));
+        m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer8());
     if (!m_pGUIInput)
         m_pGUIInput = new GUIInputWrapper(pController->GetPlayer());
     if (!m_pGUIController)
@@ -356,6 +356,10 @@ void BuyMenuGUI::AddCartItem(const std::string &name, const std::string &rightTe
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::DuplicateCartItem(const int itemIndex) {
+	if (m_pCartList->GetItemList()->empty()) {
+		return;
+	}
+
     std::vector<GUIListPanel::Item*> addedItems;
 
     auto addDuplicateItemAtEnd = [&](const GUIListPanel::Item *itemToCopy) {
@@ -405,7 +409,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     if (m_MetaPlayer != Players::NoPlayer)
     {
         // Start loading any additional stuff from the custom user file
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "%s/%s - LoadoutsMP%d.ini", c_UserConquestSavesModuleName.c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
         if (!System::PathExistsCaseSensitive(loadoutPath))
         {
@@ -416,12 +420,12 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     // Not a metagame player, just a regular scenario player
     else
 	{
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "%sLoadoutsP%d.ini", System::GetUserdataDirectory().c_str(), m_pController->GetPlayer() + 1);
 
 	}
 
     // Open the file
-    Reader loadoutFile(loadoutPath, false, 0, true);
+    Reader loadoutFile(loadoutPath, false, nullptr, true, true);
 
     // Read any and all loadout presets from file
     while (loadoutFile.ReaderOK() && loadoutFile.NextProperty())
@@ -518,12 +522,12 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
         // So we should start fresh with new loadouts loaded from tech defaults for each player
         if (g_MetaMan.GetGameName() == DEFAULTGAMENAME)
-            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s/%s - LoadoutsMP%d.ini", c_UserConquestSavesModuleName.c_str(), AUTOSAVENAME, m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), AUTOSAVENAME, m_MetaPlayer + 1);
         else
-            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s/%s - LoadoutsMP%d.ini", c_UserConquestSavesModuleName.c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
     }
     else
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "%sLoadoutsP%d.ini", System::GetUserdataDirectory().c_str(), m_pController->GetPlayer() + 1);
 
     // Open the file
     Writer loadoutFile(loadoutPath, false);
@@ -1606,7 +1610,8 @@ void BuyMenuGUI::Update()
         }
 
         // Fire button removes items from the order list, including equipment on AHumans
-        if (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging) {
+		bool isKeyboardControlled = !m_pController->IsMouseControlled() && !m_pController->IsGamepadControlled();
+        if (isKeyboardControlled ? (m_pController->IsState(PRESS_FACEBUTTON) && !m_pController->IsState(AIM_SHARP)) : (m_pController->IsState(RELEASE_FACEBUTTON) && !m_IsDragging)) {
 			if (g_UInputMan.FlagShiftState()) {
 				ClearCartList();
 				pItem = nullptr;
@@ -1641,7 +1646,7 @@ void BuyMenuGUI::Update()
             DuplicateCartItem(m_ListItemIndex);
         }
 
-        if (m_pController->IsState(PRESS_FACEBUTTON)) {
+        if (isKeyboardControlled ? m_pController->IsState(AIM_SHARP) : m_pController->IsState(PRESS_FACEBUTTON)) {
             m_DraggedItemIndex = m_pCartList->GetSelectedIndex();
         } else if (m_pController->IsState(RELEASE_FACEBUTTON)) {
             m_DraggedItemIndex = -1;
@@ -1954,7 +1959,7 @@ void BuyMenuGUI::Update()
                                 int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
                                 for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
                                     GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
-                                    if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+                                    if (!cartItem || dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
                                         lastItemToDelete = i - 1;
                                         break;
                                     }
@@ -2049,21 +2054,18 @@ void BuyMenuGUI::Update()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the menu
-
-void BuyMenuGUI::Draw(BITMAP *drawBitmap) const
-{
-    AllegroScreen drawScreen(drawBitmap);
-    m_pGUIController->Draw(&drawScreen);
-
-    // Draw the cursor on top of everything
-    if (IsEnabled() && m_pController->IsMouseControlled())
-//        m_pGUIController->DrawMouse();
-        draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+void BuyMenuGUI::Draw(BITMAP *drawBitmap) const {
+	AllegroScreen drawScreen(drawBitmap);
+	m_pGUIController->Draw(&drawScreen);
+	if (IsEnabled() && m_pController->IsMouseControlled()) {
+		if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
+			draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+		} else {
+			m_pGUIController->DrawMouse();
+		}
+	}
 }
 
 /*

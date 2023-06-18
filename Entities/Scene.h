@@ -1403,7 +1403,8 @@ private:
 	/// <param name="writer">The Writer being used for serialization.</param>
 	/// <param name="sceneObjectToSave">The SceneObject to save.</param>
 	/// <param name="isChildAttachable">Convenience flag for whether or not this SceneObject is a child Attachable, and certain properties shouldn't be saved.</param>
-	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable) const;
+	/// <param name="saveFullData">Whether or not to save most data. Turned off for stuff like SceneEditor saves.</param>
+	void SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave, bool isChildAttachable, bool saveFullData) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

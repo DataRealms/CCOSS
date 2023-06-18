@@ -615,6 +615,7 @@
     <ClInclude Include="Menus\SettingsMiscGUI.h" />
     <ClInclude Include="Menus\SettingsVideoGUI.h" />
     <ClInclude Include="Menus\TitleScreen.h" />
+    <ClInclude Include="Resources\Credits.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Atom.h" />
     <ClInclude Include="System\Constants.h" />

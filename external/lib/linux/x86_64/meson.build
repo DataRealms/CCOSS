@@ -4,6 +4,6 @@ if get_option('install_fmod')
   install_data(fmod_so, install_dir:get_option('fmod_dir'), install_mode:'rwxr-xr-x')
 endif
 
-fmod = compiler.find_library('libfmod', dirs: meson.current_source_dir())
+fmod = compiler.find_library('fmod', dirs: meson.current_source_dir())
 
 deps += fmod

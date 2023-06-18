@@ -102,11 +102,14 @@ namespace RTE {
 		// Is an original preset definition
 		if (m_IsOriginalPreset) {
 			writer.NewPropertyWithValue("PresetName", m_PresetName);
+
+			if (!m_PresetDescription.empty()) {
+				writer.NewPropertyWithValue("Description", m_PresetDescription);
+			}
 		// Only write out a copy reference if there is one
 		} else if (!m_PresetName.empty() && m_PresetName != "None") {
 			writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		}
-		if (!m_PresetDescription.empty()) { writer.NewPropertyWithValue("Description", m_PresetDescription); }
 
 		// TODO: Make proper save system that knows not to save redundant data!
 		/*

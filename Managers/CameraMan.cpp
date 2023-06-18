@@ -173,6 +173,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void CameraMan::ResetAllScreenShake() {
+		for (int screenId = 0; screenId < g_FrameMan.GetScreenCount(); ++screenId) {
+			Screen &screen = m_Screens[screenId];
+			screen.ScreenShakeMagnitude = 0;
+			screen.ScrollTimer.Reset();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void CameraMan::AddScreenShake(float magnitude, const Vector &position) {
 		for (int screenId = 0; screenId < g_FrameMan.GetScreenCount(); ++screenId) {
 			Screen &screen = m_Screens[screenId];

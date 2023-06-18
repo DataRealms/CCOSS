@@ -316,8 +316,8 @@ void Activity::Clear() {
 			if (int screenId = ScreenOfPlayer(player); screenId != -1) {
 				g_FrameMan.ClearScreenText(screenId);
 				g_CameraMan.SetScreenOcclusion(Vector(), screenId);
-				g_CameraMan.SetScreenShake(0.0F, screenId);
 			}
+			g_CameraMan.ResetAllScreenShake();
 
 			//TODO currently this sets brains to players arbitrarily. We should save information on which brain is for which player in the scene so we can set them properly!
 			if (m_IsActive[player]) {
@@ -836,11 +836,11 @@ void Activity::Clear() {
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (getForHuman) {
-				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			} else {
-				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && (g_MovableMan.IsActor(m_Brain[player]) || (m_Brain[player] && m_Brain[player]->HasObjectInGroup("Brains")))) {
+				if (m_IsActive[player] && !m_IsHuman[player] && m_HadBrain[player] && g_MovableMan.IsActor(m_Brain[player]) && m_Brain[player]->HasObjectInGroup("Brains")) {
 					brainCount++;
 				}
 			}

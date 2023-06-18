@@ -198,7 +198,7 @@ namespace RTE {
 		GameActivity *gameActivity = dynamic_cast<GameActivity *>(m_SelectedActivity->Clone());
 
 		gameActivity->SetDifficulty(m_ActivityDifficultySlider->GetValue());
-		gameActivity->SetStartingGold((m_StartingGoldSlider->GetValue() == m_StartingGoldSlider->GetMaximum()) ? 1000000000 : m_StartingGoldSlider->GetValue() - (m_StartingGoldSlider->GetValue() % 500));
+		gameActivity->SetStartingGold((m_StartingGoldSlider->GetValue() == m_StartingGoldSlider->GetMaximum()) ? 1000000000 : static_cast<int>(std::floor(m_StartingGoldSlider->GetValue())));
 
 		gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
 		gameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());

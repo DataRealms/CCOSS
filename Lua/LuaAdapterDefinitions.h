@@ -333,6 +333,7 @@ namespace RTE {
 
 #pragma region MovableObject Lua Adapters
 	struct LuaAdaptersMovableObject {
+		static bool HasScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool AddScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool EnableScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool DisableScript(MovableObject *luaSelfObject, const std::string &scriptPath);

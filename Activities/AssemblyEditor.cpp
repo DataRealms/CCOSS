@@ -609,107 +609,74 @@ BunkerAssembly * AssemblyEditor::BuildAssembly(std::string saveAsName)
 	return pBA;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveAssembly
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the current scene to an appropriate ini file, and asks user if
-//                  they want to overwrite first if scene of this name exists.
+bool AssemblyEditor::SaveAssembly(const std::string &saveAsName, bool forceOverwrite) {
+	std::unique_ptr<BunkerAssembly> editedAssembly(BuildAssembly(saveAsName));
 
-bool AssemblyEditor::SaveAssembly(std::string saveAsName, bool forceOverwrite)
-{
-	BunkerAssembly *pBA = BuildAssembly(saveAsName);
+	std::string dataModuleName = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName();
+	bool savingToUserScenesModule = (dataModuleName == c_UserScenesModuleName);
 
-	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == c_UserScenesModuleName)
-	{
-        std::string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
-		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
-		{
-			// Does ini already exist? If yes, then no need to add it to a scenes.ini etc
-			bool sceneFileExisted = System::PathExistsCaseSensitive(sceneFilePath.c_str());
-			// Create the writer
-			Writer sceneWriter(sceneFilePath.c_str(), false);
-			sceneWriter.NewProperty("AddBunkerAssembly");
-			// Write the scene out to the new ini
-			sceneWriter << pBA;
-			delete pBA;
-			pBA = 0;
-			return m_HasEverBeenSaved = true;
-		}
-		else
-		{
-			// Gotto ask if we can overwrite the existing scene
-			m_PreviousMode = EditorActivity::SAVEDIALOG;
-			m_EditorMode = EditorActivity::OVERWRITEDIALOG;
-			m_ModeChange = true;
+	std::string dataModuleFullPath = g_PresetMan.GetFullModulePath(dataModuleName);
+	std::string assemblySavePath;
+
+	if (savingToUserScenesModule) {
+		assemblySavePath = dataModuleFullPath + "/" + saveAsName + ".ini";
+	} else {
+		if (dataModuleName == "Base.rte") {
+			assemblySavePath = dataModuleFullPath + "/Scenes/Objects/Bunkers/BunkerAssemblies/" + saveAsName + ".ini";
+		} else {
+			System::MakeDirectory((dataModuleFullPath + "/BunkerAssemblies").c_str());
+			assemblySavePath = dataModuleFullPath + "/BunkerAssemblies/" + saveAsName + ".ini";
 		}
 	}
-	else
-	{
-        std::string sceneFilePath;
 
-		// Try to save to the data module
-		if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
-			sceneFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/Objects/Bunkers/BunkerAssemblies/" + saveAsName + ".ini";
-		else
-		{
-			sceneFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies/" + saveAsName + ".ini";
-			System::MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
-		}
+	if (g_PresetMan.AddEntityPreset(editedAssembly.get(), m_ModuleSpaceID, forceOverwrite, assemblySavePath)) {
+		if (Writer assemblyWriter(assemblySavePath, false); !assemblyWriter.WriterOK()) {
+			RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + assemblySavePath + "\n\nTHE EDITED BUNKER ASSEMBLY PRESET WAS NOT SAVED!!!");
+		} else {
+			// TODO: Check if the ini file already exists, and then ask if overwrite.
+			assemblyWriter.NewPropertyWithValue("AddBunkerAssembly", editedAssembly.get());
+			assemblyWriter.EndWrite();
 
-		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))
-		{
-			// Does ini already exist? If yes, then no need to add it to a scenes.ini etc
-			bool sceneFileExisted = System::PathExistsCaseSensitive(sceneFilePath.c_str());
-			// Create the writer
-			Writer sceneWriter(sceneFilePath.c_str(), false);
-			sceneWriter.NewProperty("AddBunkerAssembly");
-			// Write the scene out to the new ini
-			BunkerAssembly *pBA = BuildAssembly(saveAsName);
-			sceneWriter << pBA;
-			delete pBA;
-			pBA = 0;
+			m_HasEverBeenSaved = true;
 
-			if (!sceneFileExisted)
-			{
-				// First find/create a .rte/Scenes.ini file to include the new .ini into
-                std::string scenesFilePath;
+			if (!savingToUserScenesModule) {
+				// First find/create a BunkerAssemblies.ini file to include the new .ini into.
+				std::string assembliesFilePath = dataModuleFullPath + ((dataModuleName == "Base.rte") ? "/Scenes/Objects/Bunkers/BunkerAssemblies/BunkerAssemblies.ini" : "/BunkerAssemblies/BunkerAssemblies.ini");
+				bool assembliesFileExists = System::PathExistsCaseSensitive(assembliesFilePath);
 
-				if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Base.rte")
-					scenesFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/Objects/Bunkers/BunkerAssemblies/BunkerAssemblies.ini";
-				else
-					scenesFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies/BunkerAssemblies.ini";
+				if (Writer assembliesFileWriter(assembliesFilePath, true); !assembliesFileWriter.WriterOK()) {
+					RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + assembliesFilePath + "\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
+				} else {
+					assembliesFileWriter.NewPropertyWithValue("IncludeFile", assemblySavePath);
+					assembliesFileWriter.EndWrite();
 
-				bool scenesFileExisted = System::PathExistsCaseSensitive(scenesFilePath.c_str());
-				Writer scenesWriter(scenesFilePath.c_str(), true);
-				scenesWriter.NewProperty("\nIncludeFile");
-				scenesWriter << sceneFilePath;
+					// Append to the end of the modules' Index.ini to include the newly created Scenes.ini next startup.
+					// If it's somehow already included without actually existing, it doesn't matter, the definitions will just bounce the second time.
+					if (!assembliesFileExists) {
+						std::string indexFilePath = dataModuleFullPath + "/Index.ini";
 
-				// Also add a line to the end of the modules' Index.ini to include the newly created Scenes.ini next startup
-				// If it's already included, it doens't matter, the definitions will just bounce the second time
-				if (!scenesFileExisted)
-				{
-                    std::string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
-					Writer indexWriter(indexFilePath.c_str(), true);
-					// Add extra tab since the DataModule has everything indented
-					indexWriter.NewProperty("\tIncludeFile");
-					indexWriter << scenesFilePath;
+						if (Writer indexWriter(indexFilePath, true); !indexWriter.WriterOK()) {
+							RTEError::ShowMessageBox("Failed to create Writer to path:\n\n" + indexFilePath + "\n\nThe edited Scene preset was saved but will not be loaded on next game start!\nPlease include the Scene preset manually!");
+						} else {
+							// Add extra tab since the DataModule has everything indented.
+							indexWriter.NewProperty("\tIncludeFile");
+							indexWriter << assembliesFilePath;
+							indexWriter.EndWrite();
+						}
+					}
 				}
 			}
-			return m_HasEverBeenSaved = true;
+			return true;
 		}
-		else
-		{
-			// Gotto ask if we can overwrite the existing scene
-			m_PreviousMode = EditorActivity::SAVEDIALOG;
-			m_EditorMode = EditorActivity::OVERWRITEDIALOG;
-			m_ModeChange = true;
-		}
+	} else {
+		// Got to ask if we can overwrite the existing preset.
+		m_PreviousMode = EditorMode::SAVEDIALOG;
+		m_EditorMode = EditorMode::OVERWRITEDIALOG;
+		m_ModeChange = true;
 	}
-
-	delete pBA;
-	pBA = 0;
-    return false;
+	return false;
 }
 
 
@@ -749,7 +716,7 @@ void AssemblyEditor::UpdateLoadDialog()
 					isValid = true;
 			} else {
 				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserConquestSavesModuleName
-						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
+						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte" && g_PresetMan.GetDataModule(module)->GetFileName() != c_UserScriptedSavesModuleName)
 					isValid = true;
 			}
 

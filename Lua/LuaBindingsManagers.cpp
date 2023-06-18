@@ -201,7 +201,10 @@ namespace RTE {
 		.def("ReadReflectedPreset", &PresetMan::ReadReflectedPreset)
 		.def("ReloadEntityPreset", &LuaAdaptersPresetMan::ReloadEntityPreset1)
 		.def("ReloadEntityPreset", &LuaAdaptersPresetMan::ReloadEntityPreset2)
-		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts);
+		.def("ReloadAllScripts", &PresetMan::ReloadAllScripts)
+		.def("IsModuleOfficial", &PresetMan::IsModuleOfficial)
+		.def("IsModuleUserdata", &PresetMan::IsModuleUserdata)
+		.def("GetFullModulePath", &PresetMan::GetFullModulePath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

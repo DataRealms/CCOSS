@@ -115,7 +115,7 @@ int GAScripted::Create(const GAScripted &reference) {
 
 int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 	if (propName == "ScriptPath") {
-		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
+		m_ScriptPath = g_PresetMan.GetFullModulePath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName") {
 		reader >> m_LuaClassName;
 	} else if (propName == "AddPieSlice") {
@@ -137,7 +137,7 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 int GAScripted::Save(Writer &writer) const {
     // Call the script OnSave() function, if it exists
     g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + " and " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
-    
+
     GameActivity::Save(writer);
 
 	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
@@ -511,7 +511,7 @@ void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) {
 
 void GAScripted::CollectRequiredAreas() {
     // Open the script file so we can check it out
-    std::ifstream *pScriptFile = new std::ifstream(m_ScriptPath.c_str());
+    std::ifstream *pScriptFile = new std::ifstream(g_PresetMan.GetFullModulePath(m_ScriptPath.c_str()));
     if (!pScriptFile->good()) {
         return;
     }

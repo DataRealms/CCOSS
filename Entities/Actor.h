@@ -1127,7 +1127,7 @@ ClassInfoGetters;
     /// Estimates what material strength this actor can penetrate.
     /// </summary>
 	/// <returns>The actor's dig strength.</returns>
-    virtual float EstimateDigStrength();
+    virtual float EstimateDigStrength() const;
 
     /// <summary>
     /// Gets this Actor's base dig strength, or the strength of terrain they can expect to walk through without tools.

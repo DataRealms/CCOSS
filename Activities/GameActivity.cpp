@@ -270,6 +270,10 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 				SetTeamTech(team, techName);
 			}
 		}
+	} else if (propName == "SpecialBehaviour_StartingGold") {
+		reader >> m_StartingGold;
+	} else if (propName == "SpecialBehaviour_FogOfWarEnabled") {
+		reader >> m_FogOfWarEnabled;
 	} else
         return Activity::ReadProperty(propName, reader);
 
@@ -289,6 +293,10 @@ int GameActivity::Save(Writer &writer) const {
 	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
 	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 	writer.NewPropertyWithValue("BuyMenuEnabled", m_BuyMenuEnabled);
+
+	// Note - these special behaviour properties are for saving and loading. Normally these fields are set by the Activity config GUI.
+	writer.NewPropertyWithValue("SpecialBehaviour_StartingGold", m_StartingGold);
+	writer.NewPropertyWithValue("SpecialBehaviour_FogOfWarEnabled", m_FogOfWarEnabled);
 
 	for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 		writer.NewPropertyWithValue("Team" + std::to_string(team + 1) + "Tech", GetTeamTech(team));

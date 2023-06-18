@@ -63,6 +63,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
 		void SetTempEntityVector(const std::vector<const Entity *> &entityVector);
+
+		/// <summary>
+		/// Sets the proper package.path for the script to run.
+		/// </summary>
+		/// <param name="filePath">The path to the file to load and run.</param>
+		void SetLuaPath(const std::string &filePath);
 #pragma endregion
 
 #pragma region Script Execution Handling

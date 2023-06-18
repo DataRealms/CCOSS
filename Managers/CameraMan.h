@@ -201,6 +201,11 @@ namespace RTE {
 
 #pragma region Screen Shake Actions
 		/// <summary>
+		/// Resets all screen shake and the screen scroll timers that affect it.
+		/// </summary>
+		void ResetAllScreenShake();
+
+		/// <summary>
 		/// Increases the magnitude of screen shake.
 		/// This is used for spatially located screen-shake, and will automatically determine which screens have shake applied
 		/// If the screen-shake position is outside our view, it'll gradually weaken and fade away depending on distance.

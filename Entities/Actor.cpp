@@ -1224,6 +1224,10 @@ MOID Actor::GetAIMOWaypointID() const
 
 bool Actor::UpdateMovePath()
 {
+
+	if (g_SceneMan.GetScene() == nullptr) {
+		return false;
+	}
     // TODO: Do throttling of calls for this function over time??
 
     // Estimate how much material this actor can dig through

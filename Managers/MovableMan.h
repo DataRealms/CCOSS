@@ -782,6 +782,13 @@ public:
 	/// </summary>
     void UpdateControllers();
 
+    /// <summary>
+	/// Updates all things that need to be done before we update the controllers.
+    /// This is needed because of a very awkward and ugly old code path where controllers were updated in the middle of update, and various mods relied of this behaviour for actions that were therefore delayed by a frame
+    /// Ideally we wouldn't need this, but this is all very fragile code and I'd prefer to avoid breaking things.
+	/// </summary>
+	void PreControllerUpdate();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMatter

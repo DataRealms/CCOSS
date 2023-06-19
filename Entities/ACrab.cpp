@@ -2114,13 +2114,9 @@ void ACrab::UpdateAI()
     }
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this ACrab. Supposed to be done every frame.
 
-void ACrab::Update()
+void ACrab::PreControllerUpdate()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
@@ -2519,11 +2515,12 @@ void ACrab::Update()
         m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
         m_pRBGLeg->SetTargetPosition(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
     }
+}
 
+//////////////////////////////////////////////////////////////////////////////////////////
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc
-    // NOTE: this also updates the controller, so any setstates of it will be wiped!
+void ACrab::Update() 
+{
     Actor::Update();
 
     ////////////////////////////////////

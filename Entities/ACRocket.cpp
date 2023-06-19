@@ -482,11 +482,8 @@ void ACRocket::UpdateAI()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this ACRocket. Supposed to be done every frame.
 
-void ACRocket::Update()
+void ACRocket::PreControllerUpdate()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
@@ -589,9 +586,12 @@ void ACRocket::Update()
     if (m_pLLeg && m_pLLeg->IsAttached()) {
         m_pLLeg->SetTargetPosition(m_pLFootGroup->GetLimbPos(!m_HFlipped));
     }
+}
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc, updated viewpoint
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::Update()
+{
     ACraft::Update();
 
     ////////////////////////////////////////

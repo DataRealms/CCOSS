@@ -1648,15 +1648,28 @@ void MovableMan::Update()
     }
     m_AddedAlarmEvents.clear();
 
+    // ---TEMP ---
+    // These are here for multithreaded AI, but will be unnecessary when multithreaded-sim-and-render is in!
+    // Clear the MO color layer only if this is a drawn update
+    if (g_TimerMan.DrawnSimUpdate()) {
+        g_SceneMan.ClearMOColorLayer();
+    }
+
+    // If this is the first sim update since a drawn one, then clear the post effects
+    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
+        g_PostProcessMan.ClearScenePostEffects();
+    }
+    // ---TEMP---
+
     // Travel MOs
-    g_MovableMan.Travel();
+    Travel();
 
     // Updates everything needed prior to AI/user input being processed
     // Fugly hack to keep backwards compat with scripts that rely on weird frame-delay-ordering behaviours
-	g_MovableMan.PreControllerUpdate();
+	PreControllerUpdate();
 
     // Updates AI/user input
-	g_MovableMan.UpdateControllers();
+	UpdateControllers();
 
     // Will use some common iterators
     std::deque<Actor *>::iterator aIt;
@@ -1934,19 +1947,6 @@ void MovableMan::Update()
 
 void MovableMan::Travel()
 {
-    // ---TEMP ---
-    // These are here for multithreaded AI, but will be unnecessary when multithreaded-sim-and-render is in!
-    // Clear the MO color layer only if this is a drawn update
-    if (g_TimerMan.DrawnSimUpdate()) {
-        g_SceneMan.ClearMOColorLayer();
-    }
-
-    // If this is the first sim update since a drawn one, then clear the post effects
-    if (g_TimerMan.SimUpdatesSinceDrawn() == 0) {
-        g_PostProcessMan.ClearScenePostEffects();
-    }
-    // ---TEMP---
-
     // Travel Actors
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
     {

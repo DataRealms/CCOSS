@@ -389,10 +389,12 @@ namespace RTE {
 			UpdateScripts();
 		}
 
-		m_PrevPos = m_Pos;
-		m_PrevVel = m_Vel;
-		m_PrevParentOffset = m_ParentOffset;
-		m_PrevJointOffset = m_JointOffset;
+		if (m_Parent) {
+			m_PrevPos = m_Pos;
+			m_PrevVel = m_Vel;
+			m_PrevParentOffset = m_ParentOffset;
+			m_PrevJointOffset = m_JointOffset;
+		}
 
 		m_PreUpdateHasRunThisFrame = false;
 	}

@@ -31,7 +31,6 @@ namespace RTE {
 			ParticlesTravel,
 			ParticlesUpdate,
 			ActivityUpdate,
-			ScriptsUpdate,
 			PerfCounterCount
 		};
 

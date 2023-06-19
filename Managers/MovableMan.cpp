@@ -1655,66 +1655,50 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator parIt;
     std::deque<MovableObject *>::iterator midIt;
 
-    // Update all scripts for all objects
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
-        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-
-        // seq for now, until we add the option to enable threading for lua scripts
-        // todo - each lua state should keep a list of their owned instances
-        // Then we can also dynamically assign MOs to states with the least instances
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
-            [&](LuaStateWrapper& luaState) {
-                g_LuaMan.SetThreadLuaStateOverride(&luaState);
-
-                for (Actor* actor : m_Actors) {
-                    updateAllScripts(actor, luaState);
-                }
-
-                for (MovableObject* item : m_Items) {
-                    updateAllScripts(item, luaState);
-                }
-
-                for (MovableObject* particle : m_Particles) {
-                    updateAllScripts(particle, luaState);
-                }
-
-                g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
-    }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-
-    {
+        // Actors
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
-        for (Actor *actor : m_Actors) {
-            actor->Update();
-            actor->ApplyImpulses();
+        {
+            for (Actor *actor : m_Actors) {
+                actor->Update();
+                actor->UpdateScripts();
+                actor->ApplyImpulses();
+            }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
-        int count = 0;
-        int itemLimit = m_Items.size() - m_MaxDroppedItems;
-        for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
-            (*iIt)->Update();
-            (*iIt)->ApplyImpulses();
-            if (count <= itemLimit) {
-                (*iIt)->SetToSettle(true);
+        // Items
+        {
+            int count = 0;
+            int itemLimit = m_Items.size() - m_MaxDroppedItems;
+            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
+            {
+                (*iIt)->Update();
+                (*iIt)->UpdateScripts();
+                (*iIt)->ApplyImpulses();
+                if (count <= itemLimit)
+                {
+                    (*iIt)->SetToSettle(true);
+                }
             }
         }
 
+        // Particles
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        for (MovableObject* particle : m_Particles) {
-            particle->Update();
-            particle->ApplyImpulses();
-            particle->RestDetection();
-            // Copy particles that are at rest to the terrain and mark them for deletion.
-            if (particle->IsAtRest()) {
-                particle->SetToSettle(true);
+        {
+            for (MovableObject* particle : m_Particles) {
+                particle->Update();
+                particle->UpdateScripts();
+                particle->ApplyImpulses();
+                particle->RestDetection();
+                // Copy particles that are at rest to the terrain and mark them for deletion.
+                if (particle->IsAtRest()) {
+                    particle->SetToSettle(true);
+                }
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
-
 
     ///////////////////////////////////////////////////
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex

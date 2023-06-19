@@ -390,7 +390,7 @@ namespace RTE {
 			}
 			scriptString << " then ";
 		}
-		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
+		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities(); "; }
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		// Lock here, even though we also lock in RunScriptString(), to ensure that the temp entity vector isn't stomped by separate threads.

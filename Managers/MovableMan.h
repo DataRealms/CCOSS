@@ -770,25 +770,6 @@ public:
 
 	void Update();
 
-    /// <summary>
-	/// Travels all of our MOs, updating their location/velocity/physical characteristics.
-	/// </summary>
-	void Travel();
-
-    /// <summary>
-	/// Updates the controllers of all the actors we own.
-    /// This is needed for a tricky reason - we want the controller from the activity to override the normal controller state
-    /// So we need to update the controller state prior to activity, so the changes from activity are layered on top.
-	/// </summary>
-    void UpdateControllers();
-
-    /// <summary>
-	/// Updates all things that need to be done before we update the controllers.
-    /// This is needed because of a very awkward and ugly old code path where controllers were updated in the middle of update, and various mods relied of this behaviour for actions that were therefore delayed by a frame
-    /// Ideally we wouldn't need this, but this is all very fragile code and I'd prefer to avoid breaking things.
-	/// </summary>
-	void PreControllerUpdate();
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMatter
@@ -1039,6 +1020,24 @@ private:
 
     void Clear();
 
+    /// <summary>
+    /// Travels all of our MOs, updating their location/velocity/physical characteristics.
+    /// </summary>
+    void Travel();
+
+    /// <summary>
+    /// Updates the controllers of all the actors we own.
+    /// This is needed for a tricky reason - we want the controller from the activity to override the normal controller state
+    /// So we need to update the controller state prior to activity, so the changes from activity are layered on top.
+    /// </summary>
+    void UpdateControllers();
+
+    /// <summary>
+    /// Updates all things that need to be done before we update the controllers.
+    /// This is needed because of a very awkward and ugly old code path where controllers were updated in the middle of update, and various mods relied of this behaviour for actions that were therefore delayed by a frame
+    /// Ideally we wouldn't need this, but this is all very fragile code and I'd prefer to avoid breaking things.
+    /// </summary>
+    void PreControllerUpdate();
 
     // Disallow the use of some implicit methods.
 	MovableMan(const MovableMan &reference) = delete;

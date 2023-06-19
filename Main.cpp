@@ -282,11 +282,8 @@ namespace RTE {
 				}
 				g_FrameMan.Update();
 				g_LuaMan.Update();
-
 				g_ActivityMan.Update();
-
 				g_MovableMan.Update();
-
 				g_AudioMan.Update();
 
 				g_ActivityMan.LateUpdateGlobalScripts();

@@ -1629,8 +1629,9 @@ void updateAllScripts(MovableObject* mo, LuaStateWrapper& luaState) {
 void MovableMan::Update()
 {
     // Don't update if paused
-    if (g_ActivityMan.GetActivity() && g_ActivityMan.ActivityPaused())
+    if (g_ActivityMan.GetActivity() && g_ActivityMan.ActivityPaused()) {
         return;
+    }
 
 	m_SimUpdateFrameNumber++;
 
@@ -1646,6 +1647,16 @@ void MovableMan::Update()
         m_AlarmEvents.push_back(*aeItr);
     }
     m_AddedAlarmEvents.clear();
+
+    // Travel MOs
+    g_MovableMan.Travel();
+
+    // Updates everything needed prior to AI/user input being processed
+    // Fugly hack to keep backwards compat with scripts that rely on weird frame-delay-ordering behaviours
+	g_MovableMan.PreControllerUpdate();
+
+    // Updates AI/user input
+	g_MovableMan.UpdateControllers();
 
     // Will use some common iterators
     std::deque<Actor *>::iterator aIt;
@@ -2013,6 +2024,17 @@ void MovableMan::UpdateControllers()
             });
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::PreControllerUpdate()
+{
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
+    for (Actor *actor : m_Actors) {
+        actor->PreControllerUpdate();
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

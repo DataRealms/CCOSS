@@ -153,13 +153,13 @@ ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame.
-// Arguments:       Nosssssssne.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
+// Arguments:       None.
 // Return value:    None.
 
-	void Update() override;
+	void PreControllerUpdate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

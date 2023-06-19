@@ -3022,11 +3022,8 @@ void AHuman::UpdateAI()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this AHuman. Supposed to be done every frame.
 
-void AHuman::Update()
+void AHuman::PreControllerUpdate()
 {
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
@@ -3851,10 +3848,14 @@ void AHuman::Update()
 			}
 		}
 	}
+}
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc
-    // NOTE: this also updates the controller, so any setstates of it will be wiped!
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::Update()
+{
+    float rot = m_Rotation.GetRadAngle(); // eugh, for backwards compat to be the same behaviour as with multithreaded AI
+
     Actor::Update();
 
     ////////////////////////////////////

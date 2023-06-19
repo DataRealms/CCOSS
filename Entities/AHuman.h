@@ -830,6 +830,7 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 // Arguments:       None.
 // Return value:    None.
 
+	void PreControllerUpdate() override;
 	void Update() override;
 
 

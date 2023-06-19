@@ -2000,6 +2000,13 @@ void MovableMan::UpdateControllers()
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
+
+        // Update actors without any lua state 
+        for (Actor* actor : m_Actors) {
+            if (actor->GetLuaState() == nullptr) {
+                actor->GetController()->Update();
+            }
+        }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

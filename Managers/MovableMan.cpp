@@ -1599,35 +1599,6 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
-void updateAllScripts(MovableObject* mo, LuaStateWrapper& luaState) {
-    if (mo->GetLuaState() == &luaState) {
-        mo->UpdateScripts();
-    }
-
-    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
-        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
-            Attachable* attachable = *attachablrItr;
-            ++attachablrItr;
-
-            if (attachable->GetLuaState() == &luaState) {
-                attachable->UpdateScripts();
-            }
-            updateAllScripts(attachable, luaState);
-        }
-
-        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
-            AEmitter* wound = *woundItr;
-            ++woundItr;
-
-            if (wound->GetLuaState() == &luaState) {
-                wound->UpdateScripts();
-            }
-            updateAllScripts(wound, luaState);
-        }
-    }
-};
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1642,19 +1613,6 @@ void MovableMan::Update()
 
 	m_SimUpdateFrameNumber++;
 
-    // Reset the draw HUD roster line settings
-    m_SortTeamRoster[Activity::TeamOne] = false;
-    m_SortTeamRoster[Activity::TeamTwo] = false;
-    m_SortTeamRoster[Activity::TeamThree] = false;
-    m_SortTeamRoster[Activity::TeamFour] = false;
-
-    // Move all last frame's alarm events into the proper buffer, and clear out the new one to fill up with this frame's
-    m_AlarmEvents.clear();
-    for (std::vector<AlarmEvent>::iterator aeItr = m_AddedAlarmEvents.begin(); aeItr != m_AddedAlarmEvents.end(); ++aeItr) {
-        m_AlarmEvents.push_back(*aeItr);
-    }
-    m_AddedAlarmEvents.clear();
-
     // ---TEMP ---
     // These are here for multithreaded AI, but will be unnecessary when multithreaded-sim-and-render is in!
     // Clear the MO color layer only if this is a drawn update
@@ -1667,6 +1625,19 @@ void MovableMan::Update()
         g_PostProcessMan.ClearScenePostEffects();
     }
     // ---TEMP---
+    
+    // Reset the draw HUD roster line settings
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
+
+    // Move all last frame's alarm events into the proper buffer, and clear out the new one to fill up with this frame's
+    m_AlarmEvents.clear();
+    for (std::vector<AlarmEvent>::iterator aeItr = m_AddedAlarmEvents.begin(); aeItr != m_AddedAlarmEvents.end(); ++aeItr) {
+        m_AlarmEvents.push_back(*aeItr);
+    }
+    m_AddedAlarmEvents.clear();
 
     // Travel MOs
     Travel();

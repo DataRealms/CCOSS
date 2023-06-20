@@ -851,6 +851,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
 
+- Changed `LuaMan:FileOpen` access modes so it only allows `"r", "r+", "w", "w+", "a", "a+"`, i.e. specifying type (text, binary) is not supported. See [this reference page](https://cplusplus.com/reference/cstdio/fopen) for details on the access modes.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

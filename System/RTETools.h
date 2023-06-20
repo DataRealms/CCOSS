@@ -145,6 +145,7 @@ namespace RTE {
 	/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
 	/// </summary>
 	/// <param name="inputFloat">The input float to round.</param>
+	/// <param name="precision">The precision to round to, i.e. the number of digits after the decimal points.</param>
 	/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
 	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
 	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);

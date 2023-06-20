@@ -25,7 +25,7 @@ H A R D S P H E R E
 F R I S 0 U M A N
 Z A L O
 
-Platform Porting And Automation
+Platform Porting and Automation
 H E L I U M A N T
 S T E W I E
 
@@ -73,6 +73,10 @@ K E N   " C A V E "   V U   D O
 G O T C H A
 Z E T A
 M A X
+
+Mod Portal Management
+M Y N A M E I S T R E Z
+G O T C H A
 
 Website Design
 T O M

@@ -567,6 +567,9 @@
     <ClInclude Include="Resources\Credits.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\PauseMenuGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1097,6 +1100,9 @@
     </ClCompile>
     <ClCompile Include="Managers\WindowMan.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\PauseMenuGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

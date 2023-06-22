@@ -27,6 +27,8 @@ namespace RTE {
 
 	public:
 
+		static constexpr int c_BPP = 32; //!< Color depth (bits per pixel).
+
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
 #pragma region Creation
@@ -465,8 +467,6 @@ namespace RTE {
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
 		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
-
-		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 

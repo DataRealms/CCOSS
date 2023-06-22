@@ -233,11 +233,10 @@ namespace RTE {
 			FMOD::Sound *musicSound;
 			result = (result == FMOD_OK) ? musicChannel->getCurrentSound(&musicSound) : result;
 
-			unsigned int musicLength;
+			unsigned int musicLength = 0;
 			result = (result == FMOD_OK) ? musicSound->getLength(&musicLength, FMOD_TIMEUNIT_MS) : result;
 
-			position = std::clamp(position, 0.0F, static_cast<float>(musicLength)) / 1000.0F;
-			result = (result == FMOD_OK) ? musicChannel->setPosition(static_cast<unsigned int>(position), FMOD_TIMEUNIT_MS) : result;
+			result = (result == FMOD_OK) ? musicChannel->setPosition(std::clamp(static_cast<unsigned int>(position * 1000.0F), 0U, musicLength), FMOD_TIMEUNIT_MS) : result;
 
 			if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not set music position: " + std::string(FMOD_ErrorString(result))); }
 		}

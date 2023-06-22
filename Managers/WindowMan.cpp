@@ -570,7 +570,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() const {
-		static constexpr int bytesPerPixel = FrameMan::m_BPP / 8;
+		static constexpr int bytesPerPixel = FrameMan::c_BPP / 8;
 
 		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
 

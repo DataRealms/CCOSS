@@ -59,10 +59,10 @@ namespace RTE {
 		g_NetworkServer.Initialize();
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
-		g_PerformanceMan.Initialize();
 		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
+		g_PerformanceMan.Initialize();
 
 		if (g_AudioMan.Initialize()) { g_GUISound.Initialize(); }
 

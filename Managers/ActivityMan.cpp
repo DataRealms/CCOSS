@@ -392,9 +392,6 @@ namespace RTE {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
 
-			g_FrameMan.ClearBackBuffer32();
-			g_WindowMan.UploadFrame();
-
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
 		}

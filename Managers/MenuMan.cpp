@@ -15,6 +15,7 @@
 #include "TitleScreen.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
+#include "PauseMenuGUI.h"
 #include "MetagameGUI.h"
 #include "LoadingScreen.h"
 
@@ -33,6 +34,7 @@ namespace RTE {
 		m_TitleScreen = std::make_unique<TitleScreen>(m_GUIScreen.get());
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());
+		m_PauseMenu = std::make_unique<PauseMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 
 		// TODO: MetaGameGUI doesn't seem to actually do anything with the Controller but removing conflicts with the second Create() method so that needs to be sorted out sometime in the year 3000.
 		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
@@ -44,6 +46,7 @@ namespace RTE {
 	void MenuMan::Reinitialize() {
 		g_MetaMan.GetGUI()->Destroy();
 
+		m_PauseMenu.reset();
 		m_ScenarioMenu.reset();
 		m_MainMenu.reset();
 		m_TitleScreen.reset();
@@ -67,6 +70,9 @@ namespace RTE {
 				break;
 			case TitleScreen::TitleTransition::MetaGameMenu:
 				newActiveMenu = ActiveMenu::MetaGameMenuActive;
+				break;
+			case TitleScreen::TitleTransition::PauseMenu:
+				newActiveMenu = ActiveMenu::PauseMenuActive;
 				break;
 			default:
 				break;
@@ -105,6 +111,9 @@ namespace RTE {
 				break;
 			case ActiveMenu::MetaGameMenuActive:
 				quitResult = UpdateMetaGameMenu();
+				break;
+			case ActiveMenu::PauseMenuActive:
+				UpdatePauseMenu();
 				break;
 			default:
 				break;
@@ -197,6 +206,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MenuMan::UpdatePauseMenu() const {
+		switch (m_PauseMenu->Update()) {
+			case PauseMenuGUI::PauseMenuUpdateResult::ActivityResumed:
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
+				g_ActivityMan.SetResumeActivity();
+				break;
+			case PauseMenuGUI::PauseMenuUpdateResult::BackToMain:
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+				break;
+			default:
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void MenuMan::Draw() const {
 		g_FrameMan.ClearBackBuffer32();
 
@@ -216,6 +241,9 @@ namespace RTE {
 				break;
 			case ActiveMenu::MetaGameMenuActive:
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
+				break;
+			case ActiveMenu::PauseMenuActive:
+				m_PauseMenu->Draw();
 				break;
 			default:
 				break;

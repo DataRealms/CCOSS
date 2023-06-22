@@ -28,6 +28,7 @@
 
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
+#include "PauseMenuGUI.h"
 #include "TitleScreen.h"
 
 #include "MenuMan.h"
@@ -294,6 +295,7 @@ namespace RTE {
 
 				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
+					g_MenuMan.GetPauseMenu()->StoreFrameForUseAsBackdrop();
 					if (g_MetaMan.GameInProgress()) {
 						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
 					} else if (!g_ActivityMan.ActivitySetToRestart()) {
@@ -302,7 +304,8 @@ namespace RTE {
 						if (activity && activity->GetPresetName() == "None") {
 							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 						} else {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+							//g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
 						}
 					}
 					if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }

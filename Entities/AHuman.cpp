@@ -1298,7 +1298,7 @@ bool AHuman::UnequipBGArm() {
 	if (m_pBGArm) {
 		if (HeldDevice *heldDevice = m_pBGArm->GetHeldDevice()) {
 			heldDevice->Deactivate();
-			AddToInventoryBack(m_pBGArm->RemoveAttachable(heldDevice));
+			AddToInventoryFront(m_pBGArm->RemoveAttachable(heldDevice));
 			m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			return true;
 		}
@@ -3151,7 +3151,10 @@ void AHuman::Update()
             }
         }
         // Disengage the prone state as soon as crouch is released.
-        if (!crouching) { m_ProneState = NOTPRONE; }
+        if (!crouching && m_ProneState != NOTPRONE) { 
+			EquipShieldInBGArm();
+			m_ProneState = NOTPRONE; 
+		}
     }
 
 	////////////////////////////////////

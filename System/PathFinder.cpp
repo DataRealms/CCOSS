@@ -174,8 +174,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAllCosts() {
-		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength)
+    {
+		// Start an async pathing request
+		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
+
+		std::thread pathThread([this, start, end, digStrength](std::shared_ptr<volatile PathRequest> volRequest) {
+			// cast away the volatile-ness - only matters outside (and complicates the API otherwise)
+			PathRequest &request = const_cast<PathRequest &>(*volRequest);
+
+			int status = this->CalculatePath(start, end, request.path, request.totalCost, digStrength);
+			request.status = status;
+			request.complete = true;
+
+			this->m_CurrentPathingRequests--;
+		}, pathRequest);
+
+		pathThread.detach();
+		return pathRequest;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void PathFinder::RecalculateAllCosts()
+    {
+        RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+
+		// Deadlock until all path requests are complete
+		while (m_CurrentPathingRequests.load() != 0) { };
 
 		// I hate this copy, but fuck it.
 		std::vector<int> pathNodesIdsVec;
@@ -185,11 +211,20 @@ namespace RTE {
 		}
 
 		UpdateNodeList(pathNodesIdsVec);
-	}
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		if (m_CurrentPathingRequests.load() != 0)
+		{
+			// Don't update yet, wait until all pathing requests are complete
+			// TODO - this can indefinitely block updates if pathing requests are made every frame. Figure out a solution for this
+			// Either force-complete pathing requests occasionally, or delay starting new pathing requests if we've not updated in a while
+			std::vector<int> nodeVec;
+			return nodeVec;
+		}
+		
 		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {

@@ -16,6 +16,7 @@
 
 #include "MOSRotating.h"
 #include "PieMenu.h"
+#include "Pathfinder.h"
 
 namespace RTE
 {
@@ -1597,6 +1598,8 @@ protected:
     Vector m_MoveVector;
     // The calculated path to get to that move-to target
     std::list<Vector> m_MovePath;
+    // The current pathfinding request
+    std::shared_ptr<volatile PathRequest> m_PathRequest;
     // Whether it's time to update the path
     bool m_UpdateMovePath;
     // The minimum range to consider having reached a move target is considered

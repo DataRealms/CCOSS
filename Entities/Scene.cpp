@@ -3044,35 +3044,13 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateScenePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the least difficult path between two points on
-//                  the current scene. Takes both distance and materials into account.
-//                  A list of waypoints can be retrived from s_ScenePath;
-//                  For exposing CalculatePath to Lua.
-
-int Scene::CalculateScenePath(const Vector &start, const Vector &end, bool movePathToGround, float digStrength) {
-    int pathSize = -1;
-
-	if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(Activity::Teams::NoTeam)) {
-        float notUsed;
-        pathFinder->CalculatePath(start, end, s_ScenePath, notUsed, digStrength);
-
-        // Process the new path we now have, if any
-        if (!s_ScenePath.empty()) {
-            pathSize = s_ScenePath.size();
-            if (movePathToGround) {
-                // Smash all airborne waypoints down to just above the ground
-                for (auto itr = s_ScenePath.begin(), itrEnd = s_ScenePath.end(); itr != itrEnd; ++itr) {
-					(*itr) = g_SceneMan.MovePointToGround((*itr), 20, 15);
-				}
-            }
-        }
+std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team)
+{
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
+        return pathFinder->CalculatePathAsync(start, end, digStrength);
     }
 
-    return pathSize;
+    return nullptr;
 }
 
 int Scene::GetScenePathSize() const {

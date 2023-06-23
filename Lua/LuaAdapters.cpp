@@ -288,7 +288,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::shared_ptr<volatile PathRequest> LuaAdaptersScene::CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+	PathRequest LuaAdaptersScene::CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
 		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
 
 		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
@@ -306,7 +306,8 @@ namespace RTE {
 		};
 
 		std::shared_ptr<volatile PathRequest> pathRequest = luaSelfObject->CalculatePathAsync(start, end, digStrength, team, callLuaCallback);
-		return pathRequest;
+		// Ugh. Ugly const cast (and copy, instead of returning shared_ptr!) because luabind sees volatile PathRequest as != PathRequest
+		return const_cast<PathRequest &>(*pathRequest);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

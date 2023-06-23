@@ -123,6 +123,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="resumingFromPauseMenu">Whether the game simulation is being resumed from the pause menu.</param>
 		void SetResumeActivity(bool resumingFromPauseMenu = false) { m_ActivityNeedsResume = true; m_ResumingFromPauseMenu = resumingFromPauseMenu; }
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		bool SkipPauseMenu() const { return m_SkipPauseMenu; }
 #pragma endregion
 
 #pragma region Default Activity Handling
@@ -250,7 +256,8 @@ namespace RTE {
 		/// Pauses/unpauses the game and saving/resuming in-game music if possible, or queuing default music if not.
 		/// </summary>
 		/// <param name="pause">Whether to pause the game or not.</param>
-		void PauseActivity(bool pause = true);
+		/// <param name="skipPauseMenu"></param>
+		void PauseActivity(bool pause = true, bool skipPauseMenu = false);
 
 		/// <summary>
 		/// Start the game simulation back up after the current Activity was unpaused.
@@ -295,6 +302,7 @@ namespace RTE {
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.
 		bool m_ActivityNeedsResume; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
 		bool m_ResumingFromPauseMenu; //!< Whether the game simulation is being resumed from the pause menu.
+		bool m_SkipPauseMenu; //!<
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.

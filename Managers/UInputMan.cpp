@@ -823,7 +823,7 @@ namespace RTE {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			// Don't allow pausing and returning to main menu when running in server mode to not disrupt the simulation for the clients
 			if (!g_NetworkServer.IsServerModeEnabled() && AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
-				g_ActivityMan.PauseActivity();
+				g_ActivityMan.PauseActivity(true, FlagShiftState());
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.

@@ -297,15 +297,22 @@ namespace RTE {
 					g_TimerMan.PauseSim(true);
 					g_MenuMan.GetPauseMenu()->StoreFrameForUseAsBackdrop();
 					if (g_MetaMan.GameInProgress()) {
-						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
+						if (g_ActivityMan.SkipPauseMenu()) {
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
+						} else {
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+						}
 					} else if (!g_ActivityMan.ActivitySetToRestart()) {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu.
 						if (activity && activity->GetPresetName() == "None") {
 							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 						} else {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
-							//g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+							if (g_ActivityMan.SkipPauseMenu()) {
+								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+							} else {
+								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+							}
 						}
 					}
 					if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }

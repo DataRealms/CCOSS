@@ -356,7 +356,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::PauseActivity(bool pause) {
+	void ActivityMan::PauseActivity(bool pause, bool skipPauseMenu) {
 		if (!m_Activity) {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
 			return;
@@ -384,6 +384,7 @@ namespace RTE {
 		m_Activity->SetPaused(pause);
 		m_InActivity = !pause;
 		m_ResumingFromPauseMenu = false;
+		m_SkipPauseMenu = skipPauseMenu;
 		g_AudioMan.PauseAllMobileSounds(pause);
 		g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 	}

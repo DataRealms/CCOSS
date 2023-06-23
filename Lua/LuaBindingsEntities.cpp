@@ -240,6 +240,7 @@ namespace RTE {
 		.property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
 		.property("MovePathSize", &Actor::GetMovePathSize)
 		.property("MovePathEnd", &Actor::GetMovePathEnd)
+		.property("IsWaitingOnNewMovePath", &Actor::IsWaitingOnNewMovePath)
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 		.property("PieMenu", &Actor::GetPieMenu, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPieMenu)

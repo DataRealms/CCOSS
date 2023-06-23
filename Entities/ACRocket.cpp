@@ -485,6 +485,8 @@ void ACRocket::UpdateAI()
 
 void ACRocket::PreControllerUpdate()
 {
+    ACraft::PreControllerUpdate();
+
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
     // Look/aim update, make the scanner point aftward if the rocket is falling

@@ -1172,7 +1172,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void PreControllerUpdate() {};
+	virtual void PreControllerUpdate();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update

@@ -3026,6 +3026,8 @@ void AHuman::UpdateAI()
 
 void AHuman::PreControllerUpdate()
 {
+    Actor::PreControllerUpdate();
+    
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
 

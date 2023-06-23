@@ -2118,6 +2118,8 @@ void ACrab::UpdateAI()
 
 void ACrab::PreControllerUpdate()
 {
+    Actor::PreControllerUpdate();
+    
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
 

@@ -27,6 +27,8 @@ namespace RTE {
 
 	public:
 
+		static constexpr int c_BPP = 32; //!< Color depth (bits per pixel).
+
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
 #pragma region Creation
@@ -174,14 +176,16 @@ namespace RTE {
 		/// <summary>
 		/// Gets the small font from the GUI engine's current skin. Ownership is NOT transferred!
 		/// </summary>
+		/// <param name="trueColor">Whether to get the 32bpp color version of the font.</param>
 		/// <returns>A pointer to the requested font, or 0 if no small font was found.</returns>
-		GUIFont * GetSmallFont() { return GetFont(true); }
+		GUIFont * GetSmallFont(bool trueColor = false) { return GetFont(true, trueColor); }
 
 		/// <summary>
 		/// Gets the large font from the GUI engine's current skin. Ownership is NOT transferred!
 		/// </summary>
+		/// <param name="trueColor">Whether to get the 32bpp color version of the font.</param>
 		/// <returns>A pointer to the requested font, or 0 if no large font was found.</returns>
-		GUIFont * GetLargeFont() { return GetFont(false); }
+		GUIFont * GetLargeFont(bool trueColor = false) { return GetFont(false, trueColor); }
 
 		/// <summary>
 		/// Calculates the width of a text string using the given font size.
@@ -466,8 +470,6 @@ namespace RTE {
 		/// </summary>
 		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
-		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
-
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
@@ -493,9 +495,9 @@ namespace RTE {
 		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
 		int m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 
-		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
-		GUIFont *m_SmallFont; //!< Pointer to the standard small font for quick access.
-		GUIFont *m_LargeFont; //!< Pointer to the standard large font for quick access.
+		std::array<AllegroScreen *, 2> m_GUIScreens; //!< GUI screen objects kept and owned just for the fonts.
+		std::array<GUIFont *, 2> m_SmallFonts; //!< Pointers to the standard small font for quick access.
+		std::array<GUIFont *, 2> m_LargeFonts; //!< Pointers to the standard large font for quick access.
 
 		std::string m_ScreenText[c_MaxScreenCount]; //!< The text to be displayed on each player's screen.
 		bool m_TextCentered[c_MaxScreenCount]; //!< Whether screen text is centered vertically.
@@ -626,8 +628,9 @@ namespace RTE {
 		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="isSmall">Size of font to get. True for small font, false for large font.</param>
+		/// <param name="trueColor">Whether to get the 32bpp color version of the font.</param>
 		/// <returns>A pointer to the requested font, or 0 if no font was found.</returns>
-		GUIFont * GetFont(bool isSmall);
+		GUIFont * GetFont(bool isSmall, bool trueColor);
 
 		/// <summary>
 		/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.

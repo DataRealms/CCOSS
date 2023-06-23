@@ -1637,6 +1637,7 @@ void MovableMan::Update()
 
     // Updates everything needed prior to AI/user input being processed
     // Fugly hack to keep backwards compat with scripts that rely on weird frame-delay-ordering behaviours
+    // TODO, cleanup the pre-controller update and post-controller updates to have some consistent logic of what goes where
 	PreControllerUpdate();
 
     // Updates AI/user input
@@ -1982,6 +1983,7 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
+#ifdef AI_MULTITHREADING
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
             [&](LuaStateWrapper &luaState) {
@@ -2000,6 +2002,11 @@ void MovableMan::UpdateControllers()
                 actor->GetController()->Update();
             }
         }
+#else
+        for (Actor* actor : m_Actors) {
+            actor->GetController()->Update();
+        }
+#endif
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

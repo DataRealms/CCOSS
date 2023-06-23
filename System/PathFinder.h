@@ -21,6 +21,8 @@ namespace RTE {
 		float totalCost = 0.0f;
 	};
 
+	typedef std::function<void(std::shared_ptr<volatile PathRequest>)> PathCompleteCallback;
+
 	/// <summary>
 	/// Contains everything related to a PathNode on the path grid used by PathFinder.
 	/// </summary>
@@ -120,7 +122,7 @@ namespace RTE {
 		/// Calculates and returns the least difficult path between two points on the current scene.
 		/// This is asynchronous
 		/// </summary>
-		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength);
+		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback = nullptr);
 
 		/// <summary>
 		/// Recalculates all the costs between all the PathNodes by tracing lines in the material layer and summing all the material strengths for each encountered pixel. Also resets the pather itself.

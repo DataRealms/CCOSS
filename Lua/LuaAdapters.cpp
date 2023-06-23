@@ -288,6 +288,29 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::shared_ptr<volatile PathRequest> LuaAdaptersScene::CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
+
+		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
+			// TODO. make sure this isn't called during lua update, duh ;)
+			PathRequest pathRequest = const_cast<PathRequest &>(*pathRequestVol); // erh, to work with luabind etc
+			if (movePathToGround) {
+				for (Vector &scenePathPoint : pathRequest.path) {
+					scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+				}
+			}
+			
+			if (callback.is_valid()) {
+				luabind::call_function<void>(callback, pathRequest);
+			}
+		};
+
+		std::shared_ptr<volatile PathRequest> pathRequest = luaSelfObject->CalculatePathAsync(start, end, digStrength, team, callLuaCallback);
+		return pathRequest;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}

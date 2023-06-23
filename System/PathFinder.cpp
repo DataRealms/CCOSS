@@ -174,20 +174,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength)
+	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback)
     {
 		// Start an async pathing request
 		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
 
-		std::thread pathThread([this, start, end, digStrength](std::shared_ptr<volatile PathRequest> volRequest) {
+		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
 			// cast away the volatile-ness - only matters outside (and complicates the API otherwise)
 			PathRequest &request = const_cast<PathRequest &>(*volRequest);
 
 			int status = this->CalculatePath(start, end, request.path, request.totalCost, digStrength);
+			
+			this->m_CurrentPathingRequests--;
 			request.status = status;
 			request.complete = true;
 
-			this->m_CurrentPathingRequests--;
+			if (callback) {
+				callback(volRequest);
+			}
 		}, pathRequest);
 
 		pathThread.detach();

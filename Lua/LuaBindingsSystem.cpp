@@ -233,4 +233,15 @@ namespace RTE {
 		.def("AbsRotateTo", &Vector::AbsRotateTo)
 		.def("SetXY", &Vector::SetXY);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(SystemLuaBindings, PathRequest) {
+		return luabind::class_<PathRequest>("PathRequest")
+
+		.def_readonly("Complete", &PathRequest::complete)
+		.def_readonly("Path", &PathRequest::path, luabind::return_stl_iterator)
+		.def_readonly("Status", &PathRequest::status)
+		.def_readonly("TotalCost", &PathRequest::totalCost);
+	}
 }

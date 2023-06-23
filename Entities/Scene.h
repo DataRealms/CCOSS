@@ -1195,7 +1195,17 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1.0F, Activity::Teams team = Activity::Teams::NoTeam);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam);
+    
+    /// <summary>
+	/// Asynchronously Calculates the least difficult path between two points on the current scene. Takes both distance and materials into account.
+    /// When pathing using the NoTeam pathFinder, no doors are considered passable.
+	/// </summary>
+	/// <param name="start">Start position of the pathfinding request.</param>
+	/// <param name="end">End position of the pathfinding request.</param>
+	/// <param name="digStrength">The maximum material strength any actor traveling along the path can dig through.</param>
+    /// <param name="team">The team we're pathing for (doors for this team will be considered passable)</param>
+    std::shared_ptr<volatile PathRequest> CalculatePathAsync(const Vector &start, const Vector &end, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

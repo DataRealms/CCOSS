@@ -3042,6 +3042,15 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     return false;
 }
 
+std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team)
+{
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
+        return pathFinder->CalculatePathAsync(start, end, digStrength);
+    }
+
+    return nullptr;
+}
+
 int Scene::GetScenePathSize() const {
     return s_ScenePath.size();
 }

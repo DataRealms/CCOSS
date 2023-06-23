@@ -3306,6 +3306,8 @@ void AHuman::Update()
 							if (deviceAsFirearm->FiredOnce()) {
 								m_CanActivateBGItem = true;
 								m_TriggerPulled = true;
+							} else {
+								m_CanActivateBGItem = !deviceAsFirearm->CanFire();
 							}
 						}
 					}
@@ -3402,6 +3404,8 @@ void AHuman::Update()
 					if (deviceAsFirearm->FiredOnce()) {
 						m_CanActivateBGItem = false;
 						m_TriggerPulled = true;
+					} else {
+						m_CanActivateBGItem = deviceAsFirearm->CanFire();
 					}
 				}
 			} else {

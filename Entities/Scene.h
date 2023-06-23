@@ -1205,7 +1205,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// <param name="end">End position of the pathfinding request.</param>
 	/// <param name="digStrength">The maximum material strength any actor traveling along the path can dig through.</param>
     /// <param name="team">The team we're pathing for (doors for this team will be considered passable)</param>
-    std::shared_ptr<volatile PathRequest> CalculatePathAsync(const Vector &start, const Vector &end, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam);
+    std::shared_ptr<volatile PathRequest> CalculatePathAsync(const Vector &start, const Vector &end, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam, PathCompleteCallback callback = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -121,7 +121,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the game simulation to be started back up after the current Activity was unpaused.
 		/// </summary>
-		void SetResumeActivity() { m_ActivityNeedsResume = true; }
+		/// <param name="resumingFromPauseMenu">Whether the game simulation is being resumed from the pause menu.</param>
+		void SetResumeActivity(bool resumingFromPauseMenu = false) { m_ActivityNeedsResume = true; m_ResumingFromPauseMenu = resumingFromPauseMenu; }
 #pragma endregion
 
 #pragma region Default Activity Handling
@@ -293,6 +294,7 @@ namespace RTE {
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.
 		bool m_ActivityNeedsResume; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
+		bool m_ResumingFromPauseMenu; //!< Whether the game simulation is being resumed from the pause menu.
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.

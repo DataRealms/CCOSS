@@ -210,7 +210,7 @@ namespace RTE {
 		switch (m_PauseMenu->Update()) {
 			case PauseMenuGUI::PauseMenuUpdateResult::ActivityResumed:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
-				g_ActivityMan.SetResumeActivity();
+				g_ActivityMan.SetResumeActivity(true);
 				break;
 			case PauseMenuGUI::PauseMenuUpdateResult::BackToMain:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);

@@ -1540,7 +1540,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-	if (m_Status != DYING && m_Status != DEAD && std::round(m_Health) <= 0) {
+	if (m_Status != DYING && m_Status != DEAD && m_Health <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();
@@ -1803,7 +1803,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            std::snprintf(str, sizeof(str), "%.0f", m_Health);
+			std::snprintf(str, sizeof(str), "%.0f", std::ceil(m_Health));
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
             m_HUDStack += -12;

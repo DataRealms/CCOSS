@@ -1,6 +1,8 @@
 #ifndef _RTEPAUSEMENUGUI_
 #define _RTEPAUSEMENUGUI_
 
+#include "Timer.h"
+
 struct BITMAP;
 
 namespace RTE {
@@ -81,10 +83,33 @@ namespace RTE {
 
 		BITMAP *m_BackdropBitmap; //!<
 
+		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
+
+		// TODO: Rework this hacky garbage implementation when setting button font at runtime without loading a different skin is fixed.
+		// Right now the way this works is the font graphic has different character visuals for uppercase and lowercase and the visual change happens by applying the appropriate case string when hovering/unhovering.
+		std::array<std::string, PauseMenuButton::ButtonCount> m_ButtonHoveredText; //!< Array containing uppercase strings of the pause menu buttons text that are used to display the larger font when a button is hovered over.
+		std::array<std::string, PauseMenuButton::ButtonCount> m_ButtonUnhoveredText; //!< Array containing lowercase strings of the pause menu buttons text that are used to display the smaller font when a button is not hovered over.
+		GUIButton *m_HoveredButton; //!< The currently hovered pause menu button.
+		int m_PrevHoveredButtonIndex; //!< The index of the previously hovered pause menu button in the main menu button array.
+
 		/// <summary>
 		/// GUI elements that compose the main menu screen.
 		/// </summary>
+		GUICollectionBox *m_PauseMenuBox;
 		std::array<GUIButton *, PauseMenuButton::ButtonCount> m_PauseMenuButtons;
+
+#pragma region Update Breakdown
+		/// <summary>
+		/// Animates (blinking) the resume game button.
+		/// </summary>
+		void BlinkResumeButton();
+
+		/// <summary>
+		/// Updates the currently hovered button text to give the hovered visual and updates the previously hovered button to remove the hovered visual.
+		/// </summary>
+		/// <param name="hoveredButton">Pointer to the currently hovered button, if any. Acquired by GUIControlManager::GetControlUnderPoint.</param>
+		void UpdateHoveredButton(const GUIButton *hoveredButton);
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this PauseMenuGUI, effectively resetting the members of this object.

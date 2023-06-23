@@ -167,20 +167,27 @@ namespace RTE {
 		m_StationOrbitRotation = LERP(0, 1.0F, c_PI, -c_PI, m_StationOrbitProgress);
 
 		if (!m_FinishedPlayingIntro) {
-			float introScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_IntroScrollStartTime) / m_IntroScrollDuration;
+			if (m_TitleTransitionState == TitleTransition::PauseMenu) {
+				// When launching into Activity (or skipping the intro) the intro is not actually finished playing because the transition state is set to the last stage of the intro so we get a nice scroll into the main menu when pausing for the first time.
+				// This screws up the pause menu and throws us to the main menu because the state is overridden in UpdateIntroPreMainMenuSequence().
+				// We deal with this by setting the intro to be finished if the pause menu was activated. This way we preserve the nice scroll in case the pause menu is skipped with the key combo for the first time.
+				m_FinishedPlayingIntro = true;
+			} else {
+				float introScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_IntroScrollStartTime) / m_IntroScrollDuration;
 
-			if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
-				UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
-			} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
-				m_ScrollOffset.SetY(LERP(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
-				UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
-			} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
-				if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
-				UpdateIntroPreMainMenuSequence();
-			}
-			if (m_SectionElapsedTime >= m_SectionDuration) {
-				m_SectionSwitch = true;
-				m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
+				if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+					UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
+				} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
+					m_ScrollOffset.SetY(LERP(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
+					UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
+				} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
+					if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
+					UpdateIntroPreMainMenuSequence();
+				}
+				if (m_SectionElapsedTime >= m_SectionDuration) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
+				}
 			}
 		} else {
 			UpdateTitleTransitions();

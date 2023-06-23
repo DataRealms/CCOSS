@@ -1222,10 +1222,10 @@ MOID Actor::GetAIMOWaypointID() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the path to move along to the currently set movetarget.
 
-bool Actor::UpdateMovePath()
+void Actor::UpdateMovePath()
 {
 	if (g_SceneMan.GetScene() == nullptr) {
-		return false;
+		return;
 	}
 
     // Estimate how much material this actor can dig through
@@ -1264,9 +1264,8 @@ bool Actor::UpdateMovePath()
             m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), digStrength, static_cast<Activity::Teams>(m_Team));
         }
     }
+    
     m_UpdateMovePath = false;
-
-    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1378,43 +1377,46 @@ void Actor::VerifyMOIDs()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+void Actor::OnNewMovePath()
+{
+    // Process the new path we now have, if any
+    if (!m_MovePath.empty()) {
+        // Remove the first one; it's our position
+        m_PrevPathTarget = m_MovePath.front();
+        m_MovePath.pop_front();
+        // Also remove the one after that; it may move in opposite direction since it heads to the nearest PathNode center
+        // Unless it is the last one, in which case it shouldn't be removed
+        if (m_MovePath.size() > 1)
+        {
+            m_PrevPathTarget = m_MovePath.front();
+            m_MovePath.pop_front();
+        }
+    } else if (m_pMOMoveTarget) {
+        // We're following an MO, so just keep doing that
+        m_MoveTarget = m_pMOMoveTarget->GetPos();
+    } else {
+        // Nowhere to gooooo
+        m_MoveTarget = m_PrevPathTarget = m_Pos;
+    }
+
+    // Reset the proximity logic
+    m_StuckTimer.Reset();
+    m_ProgressTimer.Reset();
+    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
+
+    // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
+    m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Actor::PreControllerUpdate()
 {
      // Update our movepath if our pathfinding request is complete
-    if (m_PathRequest && m_PathRequest->complete)
-    {
+    if (m_PathRequest && m_PathRequest->complete) {
         m_MovePath = const_cast<std::list<Vector>&>(m_PathRequest->path);
         m_PathRequest.reset();
-
-        // Process the new path we now have, if any
-        if (!m_MovePath.empty())
-        {
-            // Remove the first one; it's our position
-            m_PrevPathTarget = m_MovePath.front();
-            m_MovePath.pop_front();
-            // Also remove the one after that; it may move in opposite direction since it heads to the nearest PathNode center
-            // Unless it is the last one, in which case it shouldn't be removed
-            if (m_MovePath.size() > 1)
-            {
-                m_PrevPathTarget = m_MovePath.front();
-                m_MovePath.pop_front();
-            }
-        }
-        // We're following an MO, so just keep doing that
-        else if (m_pMOMoveTarget) {
-            m_MoveTarget = m_pMOMoveTarget->GetPos();
-        } else {
-            // Nowhere to gooooo
-            m_MoveTarget = m_PrevPathTarget = m_Pos;
-        }
-
-        // Reset the proximity logic
-        m_StuckTimer.Reset();
-        m_ProgressTimer.Reset();
-        m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
-
-        // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
-        m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
+        OnNewMovePath();
     }
 }
 

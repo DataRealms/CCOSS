@@ -982,17 +982,9 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     return pSeenMO;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
-
-bool ACrab::UpdateMovePath()
+void ACrab::OnNewMovePath()
 {
-    // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
-    if (!Actor::UpdateMovePath())
-        return false;
+    Actor::OnNewMovePath();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())
@@ -1026,8 +1018,6 @@ bool ACrab::UpdateMovePath()
             previousPoint = (*lItr);
         }
     }
-
-    return true;
 }
 
 
@@ -2119,7 +2109,7 @@ void ACrab::UpdateAI()
 void ACrab::PreControllerUpdate()
 {
     Actor::PreControllerUpdate();
-    
+
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
 

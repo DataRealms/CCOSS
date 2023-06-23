@@ -420,16 +420,6 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
-// Arguments:       None.
-// Return value:    None.
-
-	bool UpdateMovePath() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' AI state. Supposed to be done every frame that this has
@@ -581,6 +571,11 @@ int FirearmActivationDelay() const;
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath
+    /// </summary>
+    void OnNewMovePath() override;
 
 	// Member variables
 	static Entity::ClassInfo m_sClass;

@@ -456,10 +456,9 @@ void ACDropShip::UpdateAI()
 
 void ACDropShip::PreControllerUpdate()
 {
-	/////////////////////////////////
-	// Controller update and handling
+	ACraft::PreControllerUpdate();
 
-// TODO: Improve and make optional thrusters more robust!
+    // TODO: Improve and make optional thrusters more robust!
 	if (m_Status != DEAD && m_Status != DYING)
 	{
 		float targetYVel = 0;

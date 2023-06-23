@@ -1377,22 +1377,10 @@ void Actor::VerifyMOIDs()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this Actor. Supposed to be done every frame.
 
-void Actor::Update()
+void Actor::PreControllerUpdate()
 {
-    /////////////////////////////////
-    // Hit Body update and handling
-    MOSRotating::Update();
-
-	m_PieMenu->Update();
-
-    // Update the viewpoint to be at least what the position is
-    m_ViewPoint = m_Pos;
-
-    // Update our movepath if our pathfinding request is complete
+     // Update our movepath if our pathfinding request is complete
     if (m_PathRequest && m_PathRequest->complete)
     {
         m_MovePath = const_cast<std::list<Vector>&>(m_PathRequest->path);
@@ -1428,6 +1416,20 @@ void Actor::Update()
         // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
         m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
     }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Actor::Update()
+{
+    /////////////////////////////////
+    // Hit Body update and handling
+    MOSRotating::Update();
+
+	m_PieMenu->Update();
+
+    // Update the viewpoint to be at least what the position is
+    m_ViewPoint = m_Pos;
 
     // Update the best progress made, if we're any closer to the currently pursued waypoint
     float sqrTargetProximity = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetSqrMagnitude();

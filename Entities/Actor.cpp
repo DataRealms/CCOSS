@@ -1424,7 +1424,6 @@ void Actor::Update()
         m_StuckTimer.Reset();
         m_ProgressTimer.Reset();
         m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
-        m_UpdateMovePath = false;
 
         // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
         m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);

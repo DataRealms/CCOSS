@@ -230,22 +230,24 @@ namespace RTE {
 			return;
 		}
 
-		m_TitleScreen->Draw();
-
 		switch (m_ActiveMenu) {
 			case ActiveMenu::MainMenuActive:
+				m_TitleScreen->Draw();
 				m_MainMenu->Draw();
 				break;
 			case ActiveMenu::ScenarioMenuActive:
+				m_TitleScreen->Draw();
 				m_ScenarioMenu->Draw();
 				break;
 			case ActiveMenu::MetaGameMenuActive:
+				m_TitleScreen->Draw();
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
 				break;
 			case ActiveMenu::PauseMenuActive:
 				m_PauseMenu->Draw();
 				break;
 			default:
+				m_TitleScreen->Draw();
 				break;
 		}
 		if (m_ActiveMenu != ActiveMenu::MenusDisabled && g_UInputMan.GetJoystickCount() > 0) {

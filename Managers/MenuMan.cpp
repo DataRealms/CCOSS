@@ -107,6 +107,35 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MenuMan::HandleTransitionIntoMenuLoop() {
+		if (g_MetaMan.GameInProgress()) {
+			if (g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
+			} else {
+				m_PauseMenu->StoreFrameForUseAsBackdrop();
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+			}
+		} else if (!g_ActivityMan.ActivitySetToRestart()) {
+			if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
+				if (activity->GetPresetName() == "None") {
+					// If we're in the editors or in online multiplayer then return to main menu instead of scenario menu.
+					m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+				} else {
+					if (g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
+						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+					} else {
+						m_PauseMenu->StoreFrameForUseAsBackdrop();
+						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+					}
+				}
+			} else {
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool MenuMan::Update() {
 		m_TitleScreen->Update();
 		SetActiveMenu();

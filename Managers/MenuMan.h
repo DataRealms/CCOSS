@@ -40,21 +40,12 @@ namespace RTE {
 		void Reinitialize();
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// Gets the TitleScreen of this MenuMan.
-		/// </summary>
-		/// <returns>Pointer to the TitleScreen object of this MenuMan. Ownership is NOT transferred!</returns>
-		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <returns></returns>
-		PauseMenuGUI * GetPauseMenu() const { return m_PauseMenu.get(); }
-#pragma endregion
-
 #pragma region Concrete Methods
+		/// <summary>
+		/// Sets the appropriate TitleScreen transition before entering the menu loop.
+		/// </summary>
+		void HandleTransitionIntoMenuLoop();
+
 		/// <summary>
 		/// Updates the MenuMan state.
 		/// </summary>

@@ -300,27 +300,11 @@ namespace RTE {
 
 				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
-					g_MenuMan.GetPauseMenu()->StoreFrameForUseAsBackdrop();
-					if (g_MetaMan.GameInProgress()) {
-						if (g_ActivityMan.SkipPauseMenu()) {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
-						} else {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
-						}
-					} else if (!g_ActivityMan.ActivitySetToRestart()) {
-						const Activity *activity = g_ActivityMan.GetActivity();
-						// If we edited something then return to main menu instead of scenario menu.
-						if (activity && activity->GetPresetName() == "None") {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
-						} else {
-							if (g_ActivityMan.SkipPauseMenu()) {
-								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
-							} else {
-								g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
-							}
-						}
+
+					if (!g_ActivityMan.ActivitySetToRestart()) {
+						g_MenuMan.HandleTransitionIntoMenuLoop();
+						RunMenuLoop();
 					}
-					if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }
 				}
 				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
 					break;

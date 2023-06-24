@@ -52,9 +52,13 @@ namespace RTE {
 		if (reader.Create(indexPath, true, progressCallback) >= 0) {
 			int result = Serializable::Create(reader);
 
-			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && !m_IsUserdata && m_SupportedGameVersion != c_GameVersion) {
-				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
-				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_GameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+			size_t lastPeriodPosition = m_SupportedGameVersion.find_last_of(".");
+			std::string supportedMajorGameVersion = m_SupportedGameVersion.substr(0, lastPeriodPosition);
+			std::string supportedMinorGameVersion = lastPeriodPosition == std::string::npos ? ".0" : m_SupportedGameVersion.substr(lastPeriodPosition, m_SupportedGameVersion.length());
+			if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && !m_IsUserdata && (supportedMajorGameVersion != c_MajorGameVersion || supportedMinorGameVersion > c_MinorGameVersion)) {
+				RTEAssert(!m_SupportedGameVersion.empty(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_MajorGameVersion + c_MinorGameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
+				RTEAssert(supportedMinorGameVersion <= c_MinorGameVersion, m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", which is ahead of this version of Cortex Command (" + c_MajorGameVersion + c_MinorGameVersion + ").\nPlease update your game to the newest version to use this mod.");
+				RTEAbort(m_FileName + " supports Cortex Command version " + m_SupportedGameVersion + ", so it is not compatible with this version of Cortex Command (" + c_MajorGameVersion + c_MinorGameVersion + ").\nPlease contact the mod author or ask for help in the CCCP discord server.");
 			}
 
 			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.

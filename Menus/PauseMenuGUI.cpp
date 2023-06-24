@@ -3,6 +3,7 @@
 #include "WindowMan.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
+#include "ActivityMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
 
@@ -173,6 +174,20 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
 					g_GUISound.BackButtonPressSound()->Play();
 					return true;
+				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SaveGameButton]) {
+					if (g_ActivityMan.GetActivityAllowsSaving() && g_ActivityMan.SaveCurrentGame("QuickSave")) {
+						g_GUISound.ConfirmSound()->Play();
+						return true;
+					} else {
+						g_GUISound.UserErrorSound()->Play();
+					}
+				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::LoadLastSaveButton]) {
+					if (g_ActivityMan.LoadAndLaunchGame("QuickSave")) {
+						g_GUISound.ConfirmSound()->Play();
+						return true;
+					} else {
+						g_GUISound.UserErrorSound()->Play();
+					}
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SettingsButton]) {
 					SetActiveMenuScreen(PauseMenuScreen::SettingsScreen);
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ModManagerButton]) {

@@ -300,7 +300,7 @@ namespace RTE {
 					}
 				}
 			
-				if (callback.is_valid()) {
+				if (luabind::type(callback) == LUA_TFUNCTION && callback.is_valid()) {
 					luabind::call_function<void>(callback, pathRequest);
 				}
 			});

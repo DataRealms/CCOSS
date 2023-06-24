@@ -146,16 +146,19 @@ namespace RTE {
 			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
+
+		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini";
+
+		if (!System::PathExistsCaseSensitive(saveFilePath)) {
+			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
+			return false;
+		}
+
+		Reader reader(saveFilePath, true, nullptr, false);
 		m_IsLoading = true;
 
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
-
-		Reader reader(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini", true, nullptr, false);
-		if (!reader.ReaderOK()) {
-			g_ConsoleMan.PrintString("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
-			return false;
-		}
 
 		std::string originalScenePresetName = fileName;
 		bool placeObjectsIfSceneIsRestarted = true;

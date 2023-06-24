@@ -11,7 +11,7 @@ namespace RTE {
 
 #pragma region Game Version
 	static constexpr const char *c_MajorGameVersion = "Pre-Release 5";
-	static constexpr const char *c_MinorGameVersion = ".0";
+	static constexpr const char *c_MinorGameVersion = ".1";
 #pragma endregion
 
 #pragma region Userdata Constants

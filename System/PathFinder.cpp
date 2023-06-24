@@ -9,7 +9,19 @@
 namespace RTE {
 
 	// One pathfinder per thread, lazily initialized. Shouldn't access this directly, use GetPather() instead.
-	thread_local MicroPather* s_Pather = nullptr;
+	struct MicroPatherWrapper {
+		MicroPatherWrapper() {
+			m_Instance = nullptr;
+		}
+
+		~MicroPatherWrapper() {
+			delete m_Instance;
+		}
+
+		MicroPather *m_Instance;
+	};
+
+	thread_local MicroPatherWrapper s_Pather;
 
 	// What material strength the search is capable of digging through.
 	// Needs to be thread-local because of how it's passed around, unfortunately it doesn't seem we can give userdata for a path agent in MicroPather.
@@ -107,18 +119,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MicroPather * PathFinder::GetPather() {
-		if (!s_Pather || s_Pather->GetGraph() != this) {
+		// Todo, cache a collection of pathers. For async pathfinding right now we create a new pather for every thread!
+		if (!s_Pather.m_Instance || s_Pather.m_Instance->GetGraph() != this) {
 			// First time this thread has asked for a pather, let's initialize it
-			delete s_Pather; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
+			delete s_Pather.m_Instance; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
 			
 			// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 			//int sceneArea = m_GridWidth * m_GridHeight;
 			//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (m_NodeDimension * m_NodeDimension));
 			unsigned int numberOfBlocksToAllocate = 4000;
-			s_Pather = new MicroPather(this, numberOfBlocksToAllocate, PathNode::c_MaxAdjacentNodeCount, false);
+			s_Pather.m_Instance = new MicroPather(this, numberOfBlocksToAllocate, PathNode::c_MaxAdjacentNodeCount, false);
 		}
 
-		return s_Pather;
+		return s_Pather.m_Instance;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

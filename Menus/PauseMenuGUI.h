@@ -13,6 +13,7 @@ namespace RTE {
 	class GUICollectionBox;
 	class GUIButton;
 	class SettingsGUI;
+	class ModManagerGUI;
 
 	/// <summary>
 	///
@@ -72,6 +73,7 @@ namespace RTE {
 		enum PauseMenuScreen {
 			MainScreen,
 			SettingsScreen,
+			ModManagerScreen,
 			ScreenCount
 		};
 
@@ -83,6 +85,7 @@ namespace RTE {
 			SaveGameButton,
 			LoadLastSaveButton,
 			SettingsButton,
+			ModManagerButton,
 			ResumeButton,
 			ButtonCount
 		};
@@ -98,6 +101,8 @@ namespace RTE {
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 
 		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!< The settings menu screen.
+		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!< The mod manager menu screen.
+
 		// TODO: Rework this hacky garbage implementation when setting button font at runtime without loading a different skin is fixed.
 		// Right now the way this works is the font graphic has different character visuals for uppercase and lowercase and the visual change happens by applying the appropriate case string when hovering/unhovering.
 		std::array<std::string, PauseMenuButton::ButtonCount> m_ButtonHoveredText; //!< Array containing uppercase strings of the pause menu buttons text that are used to display the larger font when a button is hovered over.

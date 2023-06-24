@@ -7,6 +7,7 @@
 #include "SettingsMan.h"
 
 #include "SettingsGUI.h"
+#include "ModManagerGUI.h"
 
 #include "GUI.h"
 #include "AllegroScreen.h"
@@ -29,6 +30,7 @@ namespace RTE {
 		m_ResumeButtonBlinkTimer.Reset();
 
 		m_SettingsMenu = nullptr;
+		m_ModManagerMenu = nullptr;
 
 		m_ButtonHoveredText.fill(std::string());
 		m_ButtonUnhoveredText.fill(std::string());
@@ -57,6 +59,7 @@ namespace RTE {
 		m_PauseMenuButtons[PauseMenuButton::SaveGameButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSaveGame"));
 		m_PauseMenuButtons[PauseMenuButton::LoadLastSaveButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonLoadLastSave"));
 		m_PauseMenuButtons[PauseMenuButton::SettingsButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSettings"));
+		m_PauseMenuButtons[PauseMenuButton::ModManagerButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonModManager"));
 		m_PauseMenuButtons[PauseMenuButton::ResumeButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
 
 		for (size_t pauseMenuButton = 0; pauseMenuButton < m_PauseMenuButtons.size(); ++pauseMenuButton) {
@@ -76,6 +79,7 @@ namespace RTE {
 		m_BackdropBitmap = create_bitmap_ex(FrameMan::c_BPP, backbuffer->w, backbuffer->h);
 
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
+		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +123,9 @@ namespace RTE {
 				backToMainScreen = m_SettingsMenu->HandleInputEvents();
 				m_ActiveDialogBox = m_SettingsMenu->GetActiveDialogBox();
 				break;
+			case PauseMenuScreen::ModManagerScreen:
+				backToMainScreen = m_ModManagerMenu->HandleInputEvents();
+				break;
 			default:
 				break;
 		}
@@ -132,7 +139,7 @@ namespace RTE {
 	void PauseMenuGUI::HandleBackNavigation(bool backButtonPressed) {
 		if (!m_ActiveDialogBox && (backButtonPressed || g_UInputMan.KeyPressed(SDLK_ESCAPE))) {
 			if (m_ActiveMenuScreen != PauseMenuScreen::MainScreen) {
-				if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen) {
+				if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen || m_ActiveMenuScreen == PauseMenuScreen::ModManagerScreen) {
 					if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen) {
 						m_SettingsMenu->RefreshActiveSettingsMenuScreen();
 					}
@@ -168,6 +175,8 @@ namespace RTE {
 					return true;
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SettingsButton]) {
 					SetActiveMenuScreen(PauseMenuScreen::SettingsScreen);
+				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ModManagerButton]) {
+					SetActiveMenuScreen(PauseMenuScreen::ModManagerScreen);
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::BackToMainButton]) {
 					g_GUISound.BackButtonPressSound()->Play();
 					m_UpdateResult = PauseMenuUpdateResult::BackToMain;
@@ -220,6 +229,9 @@ namespace RTE {
 		switch (m_ActiveMenuScreen) {
 			case PauseMenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();
+				break;
+			case PauseMenuScreen::ModManagerScreen:
+				m_ModManagerMenu->Draw();
 				break;
 			default:
 				m_GUIControlManager->Draw();

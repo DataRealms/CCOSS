@@ -307,6 +307,17 @@ namespace RTE {
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
 		/// </summary>
 		void ClearUserModuleCache();
+
+		/// <summary>
+		/// Adds a function to be called prior to executing lua scripts. This is used to callback into lua from other threads safely.
+		/// </summary>
+		/// <param name="callback">The callback function that will be executed.</returns>
+		void AddLuaScriptCallback(std::function<void()> callback);
+
+		/// <summary>
+		/// Executes and clears all pending script callbacks.
+		/// </summary>
+		void ExecuteLuaScriptCallbacks();
 #pragma endregion
 
 #pragma region File I/O Handling
@@ -384,6 +395,9 @@ namespace RTE {
 
 		LuaStateWrapper m_MasterScriptState;
 		LuaStatesArray m_ScriptStates;
+
+		std::vector<std::function<void()>> m_ScriptCallbacks; //!< A list of callback functions we'll trigger before processing lua scripts. This allows other threads (i.e pathing requests) to safely trigger callbacks in lua
+		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
 

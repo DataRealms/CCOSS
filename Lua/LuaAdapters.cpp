@@ -292,17 +292,18 @@ namespace RTE {
 		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
 
 		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
-			// TODO. make sure this isn't called during lua update, duh ;)
-			PathRequest pathRequest = const_cast<PathRequest &>(*pathRequestVol); // erh, to work with luabind etc
-			if (movePathToGround) {
-				for (Vector &scenePathPoint : pathRequest.path) {
-					scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+			g_LuaMan.AddLuaScriptCallback([callback, movePathToGround, pathRequestVol]() {
+				PathRequest pathRequest = const_cast<PathRequest &>(*pathRequestVol); // erh, to work with luabind etc
+				if (movePathToGround) {
+					for (Vector &scenePathPoint : pathRequest.path) {
+						scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+					}
 				}
-			}
 			
-			if (callback.is_valid()) {
-				luabind::call_function<void>(callback, pathRequest);
-			}
+				if (callback.is_valid()) {
+					luabind::call_function<void>(callback, pathRequest);
+				}
+			});
 		};
 
 		luaSelfObject->CalculatePathAsync(start, end, digStrength, team, callLuaCallback);

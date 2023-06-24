@@ -3,6 +3,10 @@
 #include "WindowMan.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
+#include "UInputMan.h"
+#include "SettingsMan.h"
+
+#include "SettingsGUI.h"
 
 #include "GUI.h"
 #include "AllegroScreen.h"
@@ -16,10 +20,15 @@ namespace RTE {
 
 	void PauseMenuGUI::Clear() {
 		m_GUIControlManager = nullptr;
+		m_ActiveDialogBox = nullptr;
 
+		m_BackdropBitmap = nullptr;
+
+		m_ActiveMenuScreen = PauseMenuScreen::MainScreen;
 		m_UpdateResult = PauseMenuUpdateResult::NoEvent;
 		m_ResumeButtonBlinkTimer.Reset();
-		m_BackdropBitmap = nullptr;
+
+		m_SettingsMenu = nullptr;
 
 		m_ButtonHoveredText.fill(std::string());
 		m_ButtonUnhoveredText.fill(std::string());
@@ -63,8 +72,21 @@ namespace RTE {
 		if (m_BackdropBitmap) {
 			destroy_bitmap(m_BackdropBitmap);
 		}
-		BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
-		m_BackdropBitmap = create_bitmap_ex(bitmap_color_depth(backbuffer), backbuffer->w, backbuffer->h);
+		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
+		m_BackdropBitmap = create_bitmap_ex(FrameMan::c_BPP, backbuffer->w, backbuffer->h);
+
+		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PauseMenuGUI::SetActiveMenuScreen(PauseMenuScreen screenToShow, bool playButtonPressSound) {
+		if (screenToShow != m_ActiveMenuScreen) {
+			m_ActiveMenuScreen = screenToShow;
+			if (playButtonPressSound) {
+				g_GUISound.ButtonPressSound()->Play();
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,11 +108,56 @@ namespace RTE {
 			return m_UpdateResult;
 		}
 
-		int mousePosX;
-		int mousePosY;
-		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
-		UpdateHoveredButton(dynamic_cast<GUIButton *>(m_GUIControlManager->GetControlUnderPoint(mousePosX, mousePosY, m_PauseMenuBox, 1)));
+		bool backToMainScreen = false;
 
+		switch (m_ActiveMenuScreen) {
+			case PauseMenuScreen::MainScreen:
+				backToMainScreen = HandleInputEvents();
+				BlinkResumeButton();
+				break;
+			case PauseMenuScreen::SettingsScreen:
+				backToMainScreen = m_SettingsMenu->HandleInputEvents();
+				m_ActiveDialogBox = m_SettingsMenu->GetActiveDialogBox();
+				break;
+			default:
+				break;
+		}
+		HandleBackNavigation(backToMainScreen);
+
+		return m_UpdateResult;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PauseMenuGUI::HandleBackNavigation(bool backButtonPressed) {
+		if (!m_ActiveDialogBox && (backButtonPressed || g_UInputMan.KeyPressed(SDLK_ESCAPE))) {
+			if (m_ActiveMenuScreen != PauseMenuScreen::MainScreen) {
+				if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen) {
+					if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen) {
+						m_SettingsMenu->RefreshActiveSettingsMenuScreen();
+					}
+					g_SettingsMan.UpdateSettingsFile();
+				}
+				m_ActiveDialogBox = nullptr;
+				SetActiveMenuScreen(PauseMenuScreen::MainScreen, false);
+				g_GUISound.BackButtonPressSound()->Play();
+			} else {
+				m_UpdateResult = PauseMenuUpdateResult::ActivityResumed;
+			}
+		} else if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
+			m_SettingsMenu->CloseActiveDialogBox();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool PauseMenuGUI::HandleInputEvents() {
+		if (m_ActiveMenuScreen == PauseMenuScreen::MainScreen) {
+			int mousePosX;
+			int mousePosY;
+			m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
+			UpdateHoveredButton(dynamic_cast<GUIButton *>(m_GUIControlManager->GetControlUnderPoint(mousePosX, mousePosY, m_PauseMenuBox, 1)));
+		}
 		m_GUIControlManager->Update();
 
 		GUIEvent guiEvent;
@@ -98,7 +165,9 @@ namespace RTE {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
 					g_GUISound.BackButtonPressSound()->Play();
-					m_UpdateResult = PauseMenuUpdateResult::ActivityResumed;
+					return true;
+				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SettingsButton]) {
+					SetActiveMenuScreen(PauseMenuScreen::SettingsScreen);
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::BackToMainButton]) {
 					g_GUISound.BackButtonPressSound()->Play();
 					m_UpdateResult = PauseMenuUpdateResult::BackToMain;
@@ -108,20 +177,7 @@ namespace RTE {
 				g_GUISound.SelectionChangeSound()->Play();
 			}
 		}
-
-		BlinkResumeButton();
-
-		return m_UpdateResult;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PauseMenuGUI::BlinkResumeButton() {
-		if (m_HoveredButton && m_HoveredButton == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
-			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_ButtonHoveredText[PauseMenuButton::ResumeButton] : "]" + m_ButtonHoveredText[PauseMenuButton::ResumeButton] + "[");
-		} else {
-			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_ButtonUnhoveredText[PauseMenuButton::ResumeButton] : ">" + m_ButtonUnhoveredText[PauseMenuButton::ResumeButton] + "<");
-		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,9 +204,33 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PauseMenuGUI::BlinkResumeButton() {
+		if (m_HoveredButton && m_HoveredButton == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
+			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_ButtonHoveredText[PauseMenuButton::ResumeButton] : "]" + m_ButtonHoveredText[PauseMenuButton::ResumeButton] + "[");
+		} else {
+			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_ButtonUnhoveredText[PauseMenuButton::ResumeButton] : ">" + m_ButtonUnhoveredText[PauseMenuButton::ResumeButton] + "<");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PauseMenuGUI::Draw() {
 		blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
-		m_GUIControlManager->Draw();
+
+		switch (m_ActiveMenuScreen) {
+			case PauseMenuScreen::SettingsScreen:
+				m_SettingsMenu->Draw();
+				break;
+			default:
+				m_GUIControlManager->Draw();
+				break;
+		}
+		if (m_ActiveDialogBox) {
+			set_trans_blender(128, 128, 128, 128);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
+			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
+			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());
+		}
 		m_GUIControlManager->DrawMouse();
 	}
 }

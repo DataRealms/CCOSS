@@ -28,7 +28,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
+		/// <param name="pauseMenuSettingsMode">Whether this SettingsGUI is part of PauseMenuGUI and should have a slightly different layout.</param>
+		SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool pauseMenuSettingsMode = false);
 #pragma endregion
 
 #pragma region Getters

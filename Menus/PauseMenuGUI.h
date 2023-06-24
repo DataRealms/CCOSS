@@ -12,6 +12,7 @@ namespace RTE {
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIButton;
+	class SettingsGUI;
 
 	/// <summary>
 	///
@@ -66,6 +67,15 @@ namespace RTE {
 	private:
 
 		/// <summary>
+		/// Enumeration for the different sub-menu screens of the pause menu.
+		/// </summary>
+		enum PauseMenuScreen {
+			MainScreen,
+			SettingsScreen,
+			ScreenCount
+		};
+
+		/// <summary>
 		/// Enumeration for all the different buttons of the pause menu.
 		/// </summary>
 		enum PauseMenuButton {
@@ -78,13 +88,16 @@ namespace RTE {
 		};
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the PauseMenuGUI.
-
-		PauseMenuUpdateResult m_UpdateResult; //!< The result of the PauseMenuGUI update. See PauseMenuUpdateResult enumeration.
+		GUICollectionBox *m_ActiveDialogBox; // The currently active GUICollectionBox in any of the pause menu screens that acts as a dialog box and requires drawing an overlay.
 
 		BITMAP *m_BackdropBitmap; //!<
 
+		PauseMenuScreen m_ActiveMenuScreen; //!< The currently active pause menu screen that is being updated and drawn to the screen. See PauseMenuScreen enumeration.
+		PauseMenuUpdateResult m_UpdateResult; //!< The result of the PauseMenuGUI update. See PauseMenuUpdateResult enumeration.
+
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 
+		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!< The settings menu screen.
 		// TODO: Rework this hacky garbage implementation when setting button font at runtime without loading a different skin is fixed.
 		// Right now the way this works is the font graphic has different character visuals for uppercase and lowercase and the visual change happens by applying the appropriate case string when hovering/unhovering.
 		std::array<std::string, PauseMenuButton::ButtonCount> m_ButtonHoveredText; //!< Array containing uppercase strings of the pause menu buttons text that are used to display the larger font when a button is hovered over.
@@ -98,17 +111,38 @@ namespace RTE {
 		GUICollectionBox *m_PauseMenuBox;
 		std::array<GUIButton *, PauseMenuButton::ButtonCount> m_PauseMenuButtons;
 
+#pragma region Menu Screen Handling
+		/// <summary>
+		/// Sets the PauseMenuGUI to display a menu screen.
+		/// </summary>
+		/// <param name="screenToShow">Which menu screen to display. See PauseMenuScreen enumeration.</param>
+		/// <param name="playButtonPressSound">Whether to play a sound if the menu screen change is triggered by a button press.</param>
+		void SetActiveMenuScreen(PauseMenuScreen screenToShow, bool playButtonPressSound = true);
+#pragma endregion
+
 #pragma region Update Breakdown
 		/// <summary>
-		/// Animates (blinking) the resume game button.
+		/// Handles returning to the pause menu from one of the sub-menus if the player requested to return via the back button or the esc key. Also handles closing active dialog boxes with the esc key.
 		/// </summary>
-		void BlinkResumeButton();
+		/// <param name="backButtonPressed">Whether the player requested to return to the pause menu from one of the sub-menus via back button.</param>
+		void HandleBackNavigation(bool backButtonPressed);
+
+		/// <summary>
+		/// Handles the player interaction with the PauseMenuGUI GUI elements.
+		/// </summary>
+		/// <returns>Whether the player requested to return to the main menu.</returns>
+		bool HandleInputEvents();
 
 		/// <summary>
 		/// Updates the currently hovered button text to give the hovered visual and updates the previously hovered button to remove the hovered visual.
 		/// </summary>
 		/// <param name="hoveredButton">Pointer to the currently hovered button, if any. Acquired by GUIControlManager::GetControlUnderPoint.</param>
 		void UpdateHoveredButton(const GUIButton *hoveredButton);
+
+		/// <summary>
+		/// Animates (blinking) the resume game button.
+		/// </summary>
+		void BlinkResumeButton();
 #pragma endregion
 
 		/// <summary>

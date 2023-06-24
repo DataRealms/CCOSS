@@ -64,13 +64,15 @@ namespace RTE {
 		m_PauseMenuButtons[PauseMenuButton::ResumeButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
 
 		for (size_t pauseMenuButton = 0; pauseMenuButton < m_PauseMenuButtons.size(); ++pauseMenuButton) {
-			m_PauseMenuButtons[pauseMenuButton]->CenterInParent(true, false);
 			std::string buttonText = m_PauseMenuButtons[pauseMenuButton]->GetText();
+
 			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::toupper);
 			m_ButtonHoveredText[pauseMenuButton] = buttonText;
 			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::tolower);
 			m_ButtonUnhoveredText[pauseMenuButton] = buttonText;
+
 			m_PauseMenuButtons[pauseMenuButton]->SetText(m_ButtonUnhoveredText[pauseMenuButton]);
+			m_PauseMenuButtons[pauseMenuButton]->CenterInParent(true, false);
 		}
 
 		if (m_BackdropBitmap) {
@@ -81,6 +83,23 @@ namespace RTE {
 
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PauseMenuGUI::SetBackButtonTargetName(const std::string &menuName) {
+		std::string newButtonText = "Back to " + menuName + " Menu";
+
+		std::transform(newButtonText.begin(), newButtonText.end(), newButtonText.begin(), ::toupper);
+		m_ButtonHoveredText[PauseMenuButton::BackToMainButton] = newButtonText;
+		std::transform(newButtonText.begin(), newButtonText.end(), newButtonText.begin(), ::tolower);
+		m_ButtonUnhoveredText[PauseMenuButton::BackToMainButton] = newButtonText;
+
+		int newButtonWidth = m_GUIControlManager->GetSkin()->GetFont("FontMainMenu.png")->CalculateWidth(newButtonText) + 50;
+
+		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->SetSize(newButtonWidth, m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->GetHeight());
+		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->SetText(m_ButtonUnhoveredText[PauseMenuButton::BackToMainButton]);
+		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->CenterInParent(true, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -47,6 +47,14 @@ namespace RTE {
 		void Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
 #pragma endregion
 
+#pragma region Setters
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="menuName"></param>
+		void SetBackButtonTargetName(const std::string &menuName);
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		///

@@ -88,6 +88,17 @@ namespace RTE {
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					g_MetaMan.GetGUI()->SetEnabled();
 					break;
+				case ActiveMenu::PauseMenuActive:
+					if (g_MetaMan.GameInProgress()) {
+						m_PauseMenu->SetBackButtonTargetName("Conquest");
+					} else {
+						if (const Activity *activity = g_ActivityMan.GetActivity(); activity && activity->GetPresetName() == "None") {
+							m_PauseMenu->SetBackButtonTargetName("Main");
+						} else {
+							m_PauseMenu->SetBackButtonTargetName("Scenario");
+						}
+					}
+					break;
 				default:
 					break;
 			}

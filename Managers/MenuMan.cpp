@@ -224,7 +224,7 @@ namespace RTE {
 				g_ActivityMan.SetResumeActivity(true);
 				break;
 			case PauseMenuGUI::PauseMenuUpdateResult::BackToMain:
-				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+				m_TitleScreen->SetTitleTransitionState(g_MetaMan.GameInProgress() ? TitleScreen::TitleTransition::MetaGameFadeIn : TitleScreen::TitleTransition::ScenarioFadeIn);
 				break;
 			default:
 				break;

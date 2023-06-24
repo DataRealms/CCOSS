@@ -40,7 +40,8 @@ namespace RTE {
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
-		m_ResumingFromPauseMenu = false;
+		m_ResumingActivityFromPauseMenu = false;
+		m_SkipPauseMenuWhenPausingActivity = false;
 		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
 		m_LaunchIntoActivity = false;
@@ -373,7 +374,7 @@ namespace RTE {
 			m_LastMusicPath = g_AudioMan.GetMusicPath();
 			m_LastMusicPos = g_AudioMan.GetMusicPosition();
 		} else {
-			if (!m_ResumingFromPauseMenu && (!m_LastMusicPath.empty() && m_LastMusicPos > 0)) {
+			if (!m_ResumingActivityFromPauseMenu && (!m_LastMusicPath.empty() && m_LastMusicPos > 0)) {
 				g_AudioMan.ClearMusicQueue();
 				g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
 				g_AudioMan.SetMusicPosition(m_LastMusicPos);
@@ -386,8 +387,8 @@ namespace RTE {
 
 		m_Activity->SetPaused(pause);
 		m_InActivity = !pause;
-		m_ResumingFromPauseMenu = false;
-		m_SkipPauseMenu = skipPauseMenu;
+		m_ResumingActivityFromPauseMenu = false;
+		m_SkipPauseMenuWhenPausingActivity = skipPauseMenu;
 		g_AudioMan.PauseAllMobileSounds(pause);
 		g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 	}

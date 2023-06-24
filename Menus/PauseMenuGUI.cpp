@@ -167,10 +167,10 @@ namespace RTE {
 				}
 				m_ActiveDialogBox = nullptr;
 				SetActiveMenuScreen(PauseMenuScreen::MainScreen, false);
-				g_GUISound.BackButtonPressSound()->Play();
 			} else {
 				m_UpdateResult = PauseMenuUpdateResult::ActivityResumed;
 			}
+			g_GUISound.BackButtonPressSound()->Play();
 		} else if (m_ActiveMenuScreen == PauseMenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(SDLK_ESCAPE)) {
 			m_SettingsMenu->CloseActiveDialogBox();
 		}
@@ -191,7 +191,6 @@ namespace RTE {
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
-					g_GUISound.BackButtonPressSound()->Play();
 					return true;
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SaveGameButton]) {
 					if (g_ActivityMan.GetActivityAllowsSaving() && g_ActivityMan.SaveCurrentGame("QuickSave")) {

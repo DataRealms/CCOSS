@@ -16,7 +16,7 @@ namespace RTE {
 	class ModManagerGUI;
 
 	/// <summary>
-	///
+	/// Handling for the pause menu screen composition and interaction.
 	/// </summary>
 	class PauseMenuGUI {
 
@@ -49,15 +49,15 @@ namespace RTE {
 
 #pragma region Setters
 		/// <summary>
-		///
+		/// Sets the "Back to Main Menu" button text to the menu we will be going back to.
 		/// </summary>
-		/// <param name="menuName"></param>
+		/// <param name="menuName">The target menu name, e.g. "Conquest" will result in "Back to Conquest Menu".</param>
 		void SetBackButtonTargetName(const std::string &menuName);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		///
+		/// Stores the current frame to be used as a backdrop of the PauseMenuGUI to fake the pausing of the Activity.
 		/// </summary>
 		void StoreFrameForUseAsBackdrop();
 
@@ -101,7 +101,12 @@ namespace RTE {
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the PauseMenuGUI.
 		GUICollectionBox *m_ActiveDialogBox; // The currently active GUICollectionBox in any of the pause menu screens that acts as a dialog box and requires drawing an overlay.
 
-		BITMAP *m_BackdropBitmap; //!<
+		/// <summary>
+		/// BITMAP that is used for the backdrop of the pause menu.
+		/// This will store the current frame to fake pausing the Activity and make it seem like it's just frozen in the background, while in reality we completely left the game loop and entered an alternative "main menu".
+		/// This is the trick behind this whole bullshit implementation, because we can't ACTUALLY pause the sim and remain in Activity since input stops being processed.
+		/// </summary>
+		BITMAP *m_BackdropBitmap;
 
 		PauseMenuScreen m_ActiveMenuScreen; //!< The currently active pause menu screen that is being updated and drawn to the screen. See PauseMenuScreen enumeration.
 		PauseMenuUpdateResult m_UpdateResult; //!< The result of the PauseMenuGUI update. See PauseMenuUpdateResult enumeration.
@@ -119,7 +124,7 @@ namespace RTE {
 		int m_PrevHoveredButtonIndex; //!< The index of the previously hovered pause menu button in the main menu button array.
 
 		/// <summary>
-		/// GUI elements that compose the main menu screen.
+		/// GUI elements that compose the pause menu screen.
 		/// </summary>
 		GUICollectionBox *m_PauseMenuBox;
 		std::array<GUIButton *, PauseMenuButton::ButtonCount> m_PauseMenuButtons;

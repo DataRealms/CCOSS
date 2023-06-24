@@ -115,7 +115,7 @@ namespace RTE {
 		bool UpdateMetaGameMenu() const;
 
 		/// <summary>
-		/// 
+		/// Updates the pause menu screen and handles the update results.
 		/// </summary>
 		void UpdatePauseMenu() const;
 #pragma endregion

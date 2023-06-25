@@ -108,6 +108,21 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
+## Debugger Support
+
+This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/).
+
+They require the following editor extensions:
+- [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)
+- [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild)
+
+These are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide two profiles to build the game:
+
+- **Run** - Build the game in Release mode
+- **Debug** - Build the game in Debug mode with debugging symbols.
+
+Both will run the required pre-launch tasks to configure Meson and build using the ninja backend before launching the game.
+
 ## Installing Dependencies
 
 **macOS additional dependencies:**  

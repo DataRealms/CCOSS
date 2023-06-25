@@ -159,6 +159,11 @@ namespace RTE {
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path.
 		std::vector<void *> statePath;
 		int result = GetPather()->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+		if (result == MicroPather::NO_SOLUTION) {
+			// Otherwise micropather inits it to zero :)
+			totalCostResult = std::numeric_limits<float>::max();
+			return result;
+		}
 
 		if (!statePath.empty()) {
 			// Replace the approximate first point from the pathfound path with the exact starting point.

@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/CortexCommand_debug",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "Build Debug",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+    },
+    {
+      "name": "Launch (Release)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/CortexCommand",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "Build Release",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+    }
+  ]
+}

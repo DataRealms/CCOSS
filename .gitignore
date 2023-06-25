@@ -22,4 +22,7 @@ compile_commands.json
 MemCleanupInfo.txt
 RTEA.vcxproj.user
 .DS_Store
-.vscode
+.vscode/**
+
+!.vscode/tasks.json
+!.vscode/launch.json

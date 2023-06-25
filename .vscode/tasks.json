@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Debug",
+      "dependsOn": ["Configure Debug", "Meson: Build all targets"]
+    },
+    {
+      "label": "Build Release",
+      "dependsOn": ["Configure Release", "Meson: Build all targets"]
+    },
+    {
+      "label": "Configure Debug",
+      "type": "process",
+      "options": {
+        "env": {
+          "CC": "gcc-12",
+          "CXX": "g++-12",
+          "CXX_LD": "g++-12"
+        }
+      },
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=full",
+        "-Db_lto=false",
+        "build"
+      ]
+    },
+    {
+      "label": "Configure Release",
+      "type": "process",
+      "options": {
+        "env": {
+          "CC": "gcc-12",
+          "CXX": "g++-12",
+          "CXX_LD": "g++-12"
+        }
+      },
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "args": [
+        "configure",
+        "--buildtype=release",
+        "-Ddebug_type=full",
+        "-Db_lto=true",
+        "build"
+      ]
+    },
+    {
+      "type": "meson",
+      "mode": "build",
+      "problemMatcher": ["$meson-gcc"],
+      "options": {
+        "env": {
+          "CC": "gcc-12",
+          "CXX": "g++-12",
+          "CXX_LD": "g++-12"
+        }
+      },
+      "group": "build"
+    }
+  ]
+}

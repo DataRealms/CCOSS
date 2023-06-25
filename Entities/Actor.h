@@ -16,7 +16,7 @@
 
 #include "MOSRotating.h"
 #include "PieMenu.h"
-#include "Pathfinder.h"
+#include "PathFinder.h"
 
 namespace RTE
 {

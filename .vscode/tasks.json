@@ -26,7 +26,7 @@
       "args": [
         "configure",
         "--buildtype=debug",
-        "-Ddebug_type=full",
+        "-Ddebug_type=${input:debug_type}",
         "-Db_lto=false",
         "build"
       ]
@@ -46,7 +46,7 @@
       "args": [
         "configure",
         "--buildtype=release",
-        "-Ddebug_type=full",
+        "-Ddebug_type=release",
         "-Db_lto=true",
         "build"
       ]
@@ -63,6 +63,15 @@
         }
       },
       "group": "build"
+    }
+  ],
+  "inputs": [
+    {
+      "type": "pickString",
+      "id": "debug_type",
+      "description": "What debug level the game should compile at.",
+      "default": "minimal",
+      "options": ["release", "minimal", "full"]
     }
   ]
 }

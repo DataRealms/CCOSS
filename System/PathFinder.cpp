@@ -162,7 +162,6 @@ namespace RTE {
 		if (result == MicroPather::NO_SOLUTION) {
 			// Otherwise micropather inits it to zero :)
 			totalCostResult = std::numeric_limits<float>::max();
-			return result;
 		}
 
 		if (!statePath.empty()) {

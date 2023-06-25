@@ -3,11 +3,13 @@
   "tasks": [
     {
       "label": "Build Debug",
-      "dependsOn": ["Configure Debug", "Meson: Build all targets"]
+      "dependsOn": ["Configure Debug", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
     },
     {
       "label": "Build Release",
-      "dependsOn": ["Configure Release", "Meson: Build all targets"]
+      "dependsOn": ["Configure Release", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
     },
     {
       "label": "Configure Debug",

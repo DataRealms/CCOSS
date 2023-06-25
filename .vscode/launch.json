@@ -14,7 +14,7 @@
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
     },
     {
-      "name": "Launch (Release)",
+      "name": "Run",
       "type": "lldb",
       "request": "launch",
       "program": "${workspaceFolder}/build/CortexCommand",

@@ -62,10 +62,6 @@ namespace RTE {
 		.property("RightFGLeg", &ACrab::GetRightFGLeg, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetRightFGLeg)
 		.property("RightBGLeg", &ACrab::GetRightBGLeg, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetRightBGLeg)
 		.property("StrideSound", &ACrab::GetStrideSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetStrideSound)
-		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
-		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
-		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
-		.property("JetAngleRange", &ACrab::GetJetAngleRange, &ACrab::SetJetAngleRange)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -417,6 +413,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, AEJetpack) {
+		return ConcreteTypeLuaClassDefinition(AEJetpack, AEmitter)
+
+		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
+		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
+		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
+		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, AHuman) {
 		return ConcreteTypeLuaClassDefinition(AHuman, Actor)
 
@@ -431,10 +438,6 @@ namespace RTE {
 		.property("FGFoot", &AHuman::GetFGFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetFGFoot)
 		.property("BGFoot", &AHuman::GetBGFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetBGFoot)
 		.property("StrideSound", &AHuman::GetStrideSound, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetStrideSound)
-		.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
-		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
-		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
-		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
 		.property("MovementState", &AHuman::GetMovementState, &AHuman::SetMovementState)
 		.property("ProneState", &AHuman::GetProneState, &AHuman::SetProneState)

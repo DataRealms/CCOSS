@@ -576,6 +576,7 @@
   <ItemGroup>
     <ClInclude Include="Entities\Activity.h" />
     <ClInclude Include="Entities\ADSensor.h" />
+    <ClInclude Include="Entities\AEJetpack.h" />
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\Gib.h" />
     <ClInclude Include="Entities\MetaSave.h" />
@@ -754,6 +755,7 @@
     <ClInclude Include="Menus\SceneEditorGUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Entities\AEJetpack.cpp" />
     <ClCompile Include="GUI\Wrappers\AllegroBitmap.cpp" />
     <ClCompile Include="GUI\Wrappers\AllegroScreen.cpp" />
     <ClCompile Include="GUI\Wrappers\GUIInputWrapper.cpp" />

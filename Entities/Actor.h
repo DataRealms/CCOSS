@@ -56,6 +56,21 @@ public:
         StatusCount
     };
 
+    // TODO - move into ALocomotable intermediate class under ACrab/AHuman
+    enum MovementState
+    {
+        NOMOVE = 0,
+        STAND,
+        WALK,
+        JUMP,
+        DISLODGE,
+        CROUCH,
+        CRAWL,
+        ARMCRAWL,
+        CLIMB,
+        MOVEMENTSTATECOUNT
+    };
+
     enum AIMode
     {
         AIMODE_NONE = 0,
@@ -460,6 +475,16 @@ ClassInfoGetters;
 
 	void SetStatus(Actor::Status newStatus) { m_Status = newStatus; if (newStatus == Actor::Status::UNSTABLE) { m_StableRecoverTimer.Reset(); } }
 
+	/// Gets this Actor's MovementState.
+	/// </summary>
+	/// <returns>This Actor's MovementState.</returns>
+	MovementState GetMovementState() const { return m_MoveState; }
+
+	/// <summary>
+	/// Sets this Actor's MovementState to the new state.
+	/// </summary>
+	/// <param name="newMovementState">This Actor's new MovementState.</param>
+	void SetMovementState(MovementState newMovementState) { m_MoveState = newMovementState; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetTeam
@@ -1594,6 +1619,8 @@ protected:
     float m_MoveProximityLimit;
     // Whether the AI is trying to progress to the right, left, or stand still
     LateralMoveState m_LateralMoveState;
+    // Current movement state.
+	MovementState m_MoveState;
     // Timer for how long to keep going before switching directions when moving along a path
     Timer m_MoveOvershootTimer;
     // Whether the AI is in the process of proceeding, backstepping to get out of being stuck, or jumping over stuff

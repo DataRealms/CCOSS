@@ -31,6 +31,7 @@
 #include "EditorActivity.h"
 
 #include "AEmitter.h"
+#include "AEJetpack.h"
 #include "ADoor.h"
 #include "AHuman.h"
 #include "ACrab.h"
@@ -1591,6 +1592,23 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 			writer.NewPropertyWithValue("EmissionDamage", aemitterToSave->GetEmitDamage());
 			WriteHardcodedAttachableOrNone("Flash", aemitterToSave->GetFlash());
 		}
+
+        if (const AEJetpack *jetpackToSave = dynamic_cast<const AEJetpack *>(sceneObjectToSave)) {
+            writer.NewProperty("JetpackType");
+            switch (jetpackToSave->GetJetpackType()) {
+            default:
+            case AEJetpack::JetpackType::Standard:
+                writer << "Standard";
+                break;
+            case AEJetpack::JetpackType::JumpPack:
+                writer << "JumpPack";
+                break;
+            }
+
+            writer.NewPropertyWithValue("JumpTime", jetpackToSave->GetJetTimeTotal() / 1000.0f); // Convert to seconds
+            writer.NewPropertyWithValue("JumpReplenishRate", jetpackToSave->GetJetReplenishRate());
+            writer.NewPropertyWithValue("JumpAngleRange", jetpackToSave->GetJetAngleRange());
+        }
 
 		if (const Arm *armToSave = dynamic_cast<const Arm *>(sceneObjectToSave)) {
 			WriteHardcodedAttachableOrNone("HeldDevice", armToSave->GetHeldDevice());

@@ -12,10 +12,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool pauseMenuSettingsMode) {
+	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool createForPauseMenu) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
-		m_GUIControlManager->Load(pauseMenuSettingsMode ? "Base.rte/GUIs/SettingsPauseGUI.ini" : "Base.rte/GUIs/SettingsGUI.ini");
+		m_GUIControlManager->Load(createForPauseMenu ? "Base.rte/GUIs/SettingsPauseGUI.ini" : "Base.rte/GUIs/SettingsGUI.ini");
 
 		int rootBoxMaxWidth = g_WindowMan.FullyCoversAllDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() / g_WindowMan.GetResMultiplier() : g_WindowMan.GetResX();
 
@@ -41,7 +41,7 @@ namespace RTE {
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());
 
-		if (pauseMenuSettingsMode) {
+		if (createForPauseMenu) {
 			m_SettingsTabberBox->SetPositionAbs((rootBox->GetWidth() - m_SettingsTabberBox->GetWidth()) / 2, (rootBox->GetHeight() - m_SettingsTabberBox->GetHeight() - 30) / 2);
 			m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, m_SettingsTabberBox->GetYPos() + m_SettingsTabberBox->GetHeight() + 10);
 

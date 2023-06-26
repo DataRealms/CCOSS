@@ -10,6 +10,7 @@ namespace RTE
     /// A jetpack MO, which can be used to generate thrust
     /// </summary>
     class AEJetpack : public AEmitter {
+        friend struct EntityLuaBindings;
 
     public:
 

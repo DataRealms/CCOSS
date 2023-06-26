@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed music resuming from incorrect position when unpausing.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

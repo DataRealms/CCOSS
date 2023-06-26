@@ -39,6 +39,8 @@ namespace RTE {
 		m_PrevHoveredButtonIndex = 0;
 
 		m_SavingButtonsDisabled = false;
+		m_ModManagerButtonDisabled = false;
+
 		m_PauseMenuBox = nullptr;
 		m_PauseMenuButtons.fill(nullptr);
 	}
@@ -107,9 +109,11 @@ namespace RTE {
 
 	void PauseMenuGUI::EnableOrDisablePauseMenuFeatures() {
 		bool disableSaving = true;
+		bool disableModManager = true;
 
 		if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
 			disableSaving = !activity->ActivityCanBeSaved();
+			disableModManager = activity->GetClassName() != "GAScripted";
 		}
 
 		if (m_SavingButtonsDisabled != disableSaving) {
@@ -127,6 +131,19 @@ namespace RTE {
 			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
 		}
 		m_SavingButtonsDisabled = disableSaving;
+
+		if (m_ModManagerButtonDisabled != disableModManager) {
+			GUIButton *modManagerButton = m_PauseMenuButtons[PauseMenuButton::ModManagerButton];
+
+			modManagerButton->SetEnabled(!disableModManager);
+			modManagerButton->SetVisible(!disableModManager);
+
+			int yOffset = m_PauseMenuButtons[PauseMenuButton::ModManagerButton]->GetHeight();
+
+			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->MoveRelative(0, yOffset * (disableModManager ? -1 : 1));
+			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
+		}
+		m_ModManagerButtonDisabled = disableModManager;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

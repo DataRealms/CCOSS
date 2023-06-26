@@ -129,6 +129,8 @@ namespace RTE {
 		int m_PrevHoveredButtonIndex; //!< The index of the previously hovered pause menu button in the main menu button array.
 
 		bool m_SavingButtonsDisabled; //!< Whether the save and load buttons are disabled and hidden.
+		bool m_ModManagerButtonDisabled; //!< Whether the mod manager button is disabled and hidden.
+
 		/// <summary>
 		/// GUI elements that compose the pause menu screen.
 		/// </summary>

@@ -140,9 +140,21 @@ namespace RTE
 
         /// <summary>
         /// Sets the type of this jetpack.
-        /// </summary>K
+        /// </summary>
         /// <param name="newType">The new type of this jetpack.</param>
         void SetJetpackType(JetpackType newType) { m_JetpackType = newType; }
+
+        /// <summary>
+        /// Returns whether the angle of this jetpack can adjust while firing, or if it can only be aimed while off.
+        /// </summary>
+        /// <returns>Whether the angle of this jetpack can adjust while firing.</returns>
+        bool GetCanAdjustAngleWhileFiring() const { return m_CanAdjustAngleWhileFiring; }
+
+        /// <summary>
+        /// Sets whether the angle of this can adjust while firing, or if it can only be aimed while off.
+        /// </summary>
+        /// <param name="newValue">The new value for whether the angle of this jetpack can adjust while firing.</param>
+        void SetCanAdjustAngleWhileFiring(bool newValue) { m_CanAdjustAngleWhileFiring = newValue; }
 
     protected:
         static Entity::ClassInfo m_sClass;
@@ -152,6 +164,7 @@ namespace RTE
         float m_JetTimeLeft; //!< How much time left the jetpack can go, in ms
         float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
+        bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
 
     private:
         void BurstStart(Actor& parentActor);

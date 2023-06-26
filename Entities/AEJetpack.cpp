@@ -15,6 +15,7 @@ namespace RTE {
         m_JetTimeLeft = 0.0;
         m_JetReplenishRate = 1.0F;
         m_JetAngleRange = 0.25F;
+		m_CanAdjustAngleWhileFiring = true;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +43,7 @@ namespace RTE {
         m_JetTimeLeft = reference.m_JetTimeLeft;
         m_JetReplenishRate = reference.m_JetReplenishRate;
         m_JetAngleRange = reference.m_JetAngleRange;
+		m_CanAdjustAngleWhileFiring = reference.m_CanAdjustAngleWhileFiring;
 
 		return 0;
     }
@@ -66,6 +68,8 @@ namespace RTE {
             reader >> m_JetReplenishRate;
         } else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
             reader >> m_JetAngleRange; 
+        } else if (propName == "CanAdjustAngleWhileFiring") {
+            reader >> m_CanAdjustAngleWhileFiring; 
         } else {
 			return AEmitter::ReadProperty(propName, reader);
 		}
@@ -88,9 +92,10 @@ namespace RTE {
 			break;
 		}
 
-		writer.NewPropertyWithValue("JumpTime", GetJetTimeTotal() / 1000.0f); // Convert to seconds
-		writer.NewPropertyWithValue("JumpReplenishRate", GetJetReplenishRate());
-		writer.NewPropertyWithValue("JumpAngleRange", GetJetAngleRange());
+		writer.NewPropertyWithValue("JumpTime", m_JetTimeTotal / 1000.0f); // Convert to seconds
+		writer.NewPropertyWithValue("JumpReplenishRate", m_JetReplenishRate);
+		writer.NewPropertyWithValue("JumpAngleRange", m_JetAngleRange);
+		writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", m_CanAdjustAngleWhileFiring);
 
 		return 0;
 	}
@@ -142,7 +147,8 @@ namespace RTE {
 		float maxAngle = c_HalfPI * m_JetAngleRange;
 
 		// If pie menu is on, keep the angle to what it was before.
-		if (!controller.IsState(PIE_MENU_ACTIVE)) {
+		bool canAdjustAngle = !controller.IsState(PIE_MENU_ACTIVE) && (m_CanAdjustAngleWhileFiring || !IsEmitting());
+		if (canAdjustAngle) {
 			// Direct the jetpack nozzle according to either analog stick input or aim angle.
             const float analogDeadzone = 0.1F;
 			if (controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {

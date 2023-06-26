@@ -167,8 +167,19 @@ namespace RTE
         bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
 
     private:
-        void BurstStart(Actor& parentActor);
-        void BurstContinue(Actor& parentActor);
+        /// <summary>
+        /// The logic to run when bursting.
+        /// </summary>
+        void Burst(Actor& parentActor);
+
+        /// <summary>
+        /// The logic to run when thrusting.
+        /// </summary>
+        void Thrust(Actor& parentActor);
+
+        /// <summary>
+        /// The logic to run when recharging.
+        /// </summary>
         void Recharge(Actor& parentActor);
 
     	/// <summary>

@@ -126,18 +126,18 @@ namespace RTE {
 		{
 		case JetpackType::Standard:
 			if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && parentActor.GetStatus() != Actor::INACTIVE) {
-				BurstStart(parentActor);
+				Burst(parentActor);
 			} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && parentActor.GetStatus() != Actor::INACTIVE) {
-				BurstContinue(parentActor);
+				Thrust(parentActor);
 			} else {
 				Recharge(parentActor);
 			}
 			break;
 		case JetpackType::JumpPack:
 			if (wasEmittingLastFrame && !IsOutOfFuel()) {
-				BurstContinue(parentActor);
+				Thrust(parentActor);
 			} else if (controller.IsState(BODY_JUMPSTART) && IsFullyFueled()) {
-				BurstStart(parentActor);
+				Burst(parentActor);
 			} else {
 				Recharge(parentActor);
 			}
@@ -169,16 +169,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AEJetpack::BurstStart(Actor& parentActor) {
+	void AEJetpack::Burst(Actor& parentActor) {
 		parentActor.ForceDeepCheck(true); // This is to make sure we get loose from being stuck. In future, it'd be better to try to move the actor out. Deepchecks are a bad solution
 		TriggerBurst();
 		EnableEmission(true);
+		AlarmOnEmit(m_Team); // Jetpacks are noisy!
 		m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(GetTotalBurstSize(), 2)) * (CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AEJetpack::BurstContinue(Actor& parentActor) {
+	void AEJetpack::Thrust(Actor& parentActor) {
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!
 		m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);

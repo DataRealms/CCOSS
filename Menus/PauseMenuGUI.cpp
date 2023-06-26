@@ -82,7 +82,7 @@ namespace RTE {
 		m_BackdropBitmap = create_bitmap_ex(FrameMan::c_BPP, backbuffer->w, backbuffer->h);
 
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
-		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
+		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput, true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

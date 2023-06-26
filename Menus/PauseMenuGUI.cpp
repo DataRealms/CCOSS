@@ -38,6 +38,7 @@ namespace RTE {
 		m_HoveredButton = nullptr;
 		m_PrevHoveredButtonIndex = 0;
 
+		m_SavingButtonsDisabled = false;
 		m_PauseMenuBox = nullptr;
 		m_PauseMenuButtons.fill(nullptr);
 	}
@@ -100,6 +101,32 @@ namespace RTE {
 		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->SetSize(newButtonWidth, m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->GetHeight());
 		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->SetText(m_ButtonUnhoveredText[PauseMenuButton::BackToMainButton]);
 		m_PauseMenuButtons[PauseMenuButton::BackToMainButton]->CenterInParent(true, false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PauseMenuGUI::EnableOrDisablePauseMenuFeatures() {
+		bool disableSaving = true;
+
+		if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
+			disableSaving = !activity->ActivityCanBeSaved();
+		}
+
+		if (m_SavingButtonsDisabled != disableSaving) {
+			int yOffset = 0;
+
+			for (size_t pauseMenuButton = PauseMenuButton::SaveGameButton; pauseMenuButton < PauseMenuButton::SettingsButton; ++pauseMenuButton) {
+				m_PauseMenuButtons[pauseMenuButton]->SetEnabled(!disableSaving);
+				m_PauseMenuButtons[pauseMenuButton]->SetVisible(!disableSaving);
+				yOffset += m_PauseMenuButtons[pauseMenuButton]->GetHeight();
+			}
+
+			for (size_t pauseMenuButton = PauseMenuButton::SettingsButton; pauseMenuButton < PauseMenuButton::ButtonCount; ++pauseMenuButton) {
+				m_PauseMenuButtons[pauseMenuButton]->MoveRelative(0, yOffset * (disableSaving ? -1 : 1));
+			}
+			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
+		}
+		m_SavingButtonsDisabled = disableSaving;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

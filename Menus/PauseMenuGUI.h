@@ -57,6 +57,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Enables or disables buttons depending on the current Activity.
+		/// </summary>
+		void EnableOrDisablePauseMenuFeatures();
+
+		/// <summary>
 		/// Stores the current frame to be used as a backdrop of the PauseMenuGUI to fake the pausing of the Activity.
 		/// </summary>
 		void StoreFrameForUseAsBackdrop();
@@ -123,6 +128,7 @@ namespace RTE {
 		GUIButton *m_HoveredButton; //!< The currently hovered pause menu button.
 		int m_PrevHoveredButtonIndex; //!< The index of the previously hovered pause menu button in the main menu button array.
 
+		bool m_SavingButtonsDisabled; //!< Whether the save and load buttons are disabled and hidden.
 		/// <summary>
 		/// GUI elements that compose the pause menu screen.
 		/// </summary>

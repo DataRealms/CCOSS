@@ -89,6 +89,7 @@ namespace RTE {
 					g_MetaMan.GetGUI()->SetEnabled();
 					break;
 				case ActiveMenu::PauseMenuActive:
+					m_PauseMenu->EnableOrDisablePauseMenuFeatures();
 					if (g_MetaMan.GameInProgress()) {
 						m_PauseMenu->SetBackButtonTargetName("Conquest");
 					} else {

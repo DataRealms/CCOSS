@@ -140,7 +140,7 @@ namespace RTE
 
         /// <summary>
         /// Sets the type of this jetpack.
-        /// </summary>
+        /// </summary>K
         /// <param name="newType">The new type of this jetpack.</param>
         void SetJetpackType(JetpackType newType) { m_JetpackType = newType; }
 
@@ -154,6 +154,10 @@ namespace RTE
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
 
     private:
+        void BurstStart(Actor& parentActor);
+        void BurstContinue(Actor& parentActor);
+        void Recharge(Actor& parentActor);
+
     	/// <summary>
 		/// Clears all the member variables of this AEJetpack, effectively resetting the members of this abstraction level only.
 		/// </summary>

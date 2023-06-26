@@ -107,17 +107,8 @@ namespace RTE {
 
         if (m_JetTimeTotal > 0.0F) {
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
-			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
+			float jetTimeRatio = GetJetTimeRatio();
 			SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-		}
-
-		if (parentActor.GetStatus() == Actor::INACTIVE) {
-			EnableEmission(false);
-			if (parentActor.GetMovementState() == Actor::JUMP) {
-				parentActor.SetMovementState(Actor::STAND);
-			}
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
-			return;
 		}
 
 		bool wasEmittingLastFrame = IsEmitting();

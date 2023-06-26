@@ -18,15 +18,9 @@ namespace RTE
         SerializableOverrideMethods;
         ClassInfoGetters;
 
-        enum class JetpackType {
+        enum JetpackType {
             Standard,   // Can be intermittently tapped to produce small amounts of thrust
             JumpPack    // Spends all of it's fuel until empty, and cannot fire again until recharged
-        };
-
-        enum class Status {
-            Off,
-            BurstStart,
-            Bursting
         };
 
     #pragma region Creation

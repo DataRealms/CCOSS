@@ -3,6 +3,9 @@
   "tasks": [
     {
         "label": "Setup Meson",
+        "runOptions": {
+          "runOn": "folderOpen"
+        },
         "type": "process",
         "problemMatcher": ["$meson-gcc"],
         "command": "meson",

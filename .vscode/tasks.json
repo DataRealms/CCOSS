@@ -21,8 +21,18 @@
         }
     },
     {
-      "label": "Build Debug",
-      "dependsOn": ["Configure Debug", "Meson: Build all targets"],
+      "label": "Build Debug (Release)",
+      "dependsOn": ["Configure Debug (Release)", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "Build Debug (Minimal)",
+      "dependsOn": ["Configure Debug (Minimal)", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "Build Debug (Full)",
+      "dependsOn": ["Configure Debug (Full)", "Meson: Build all targets"],
       "dependsOrder": "sequence"
     },
     {
@@ -31,14 +41,40 @@
       "dependsOrder": "sequence"
     },
     {
-      "label": "Configure Debug",
+      "label": "Configure Debug (Release)",
       "type": "process",
       "problemMatcher": ["$meson-gcc"],
       "command": "meson",
       "args": [
         "configure",
         "--buildtype=debug",
-        "-Ddebug_type=${input:debug_type}",
+        "-Ddebug_type=release",
+        "-Db_lto=false",
+        "${config:mesonbuild.buildFolder}"
+      ]
+    },
+    {
+      "label": "Configure Debug (Minimal)",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=minimal",
+        "-Db_lto=false",
+        "${config:mesonbuild.buildFolder}"
+      ]
+    },
+    {
+      "label": "Configure Debug (Full)",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=full",
         "-Db_lto=false",
         "${config:mesonbuild.buildFolder}"
       ]
@@ -61,15 +97,6 @@
       "mode": "build",
       "problemMatcher": ["$meson-gcc"],
       "group": "build"
-    }
-  ],
-  "inputs": [
-    {
-      "type": "pickString",
-      "id": "debug_type",
-      "description": "What debug level the game should compile at.",
-      "default": "minimal",
-      "options": ["release", "minimal", "full"]
     }
   ]
 }

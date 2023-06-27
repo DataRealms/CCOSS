@@ -5,21 +5,51 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/CortexCommand_debug",
-      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
-      "preLaunchTask": "Build Debug",
-      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
-    },
-    {
-      "name": "Run",
-      "type": "lldb",
+      "name": "Launch (Release)",
+      "type": "cppdbg",
+      "osx": {
+        "MIMode": "lldb"
+      },
       "request": "launch",
       "program": "${workspaceFolder}/build/CortexCommand",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Release",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+    },
+    {
+      "name": "Debug (Release)",
+      "type": "cppdbg",
+      "osx": {
+        "MIMode": "lldb"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/build/CortexCommand_debug",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "Build Debug (Release)",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+    },
+    {
+      "name": "Debug (Minimal)",
+      "type": "cppdbg",
+      "osx": {
+        "MIMode": "lldb"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/build/CortexCommand_debug",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "Build Debug (Minimal)",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+    },
+    {
+      "name": "Debug (Full)",
+      "type": "cppdbg",
+      "osx": {
+        "MIMode": "lldb"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/build/CortexCommand_debug",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "Build Debug (Full)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
     }
   ]

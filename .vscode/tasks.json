@@ -8,7 +8,7 @@
         "command": "meson",
         "args": [
           "setup",
-          "build"
+          "${config:mesonbuild.buildFolder}"
         ],
         "osx":{
           "options": {
@@ -40,7 +40,7 @@
         "--buildtype=debug",
         "-Ddebug_type=${input:debug_type}",
         "-Db_lto=false",
-        "build"
+        "${config:mesonbuild.buildFolder}"
       ]
     },
     {
@@ -53,7 +53,7 @@
         "--buildtype=release",
         "-Ddebug_type=release",
         "-Db_lto=true",
-        "build"
+        "${config:mesonbuild.buildFolder}"
       ]
     },
     {

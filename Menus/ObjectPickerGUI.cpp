@@ -602,7 +602,7 @@ namespace RTE {
 			if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
 				draw_sprite(drawBitmap, s_Cursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
 			} else {
-				m_GUIControlManager->DrawMouse();
+				m_GUIControlManager->DrawMouse(&drawScreen);
 			}
 		}
 	}

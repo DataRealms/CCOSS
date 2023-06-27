@@ -2063,7 +2063,7 @@ void BuyMenuGUI::Draw(BITMAP *drawBitmap) const {
 		if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
 			draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
 		} else {
-			m_pGUIController->DrawMouse();
+			m_pGUIController->DrawMouse(&drawScreen);
 		}
 	}
 }

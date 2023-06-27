@@ -411,9 +411,6 @@ namespace RTE {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
-		g_FrameMan.ClearBackBuffer32();
-		g_WindowMan.UploadFrame();
-
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();
 		// Have to reset TimerMan before creating anything else because all timers are reset against it.

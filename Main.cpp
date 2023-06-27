@@ -30,6 +30,7 @@
 #include "ScenarioGUI.h"
 #include "PauseMenuGUI.h"
 #include "TitleScreen.h"
+#include "LoadingScreen.h"
 
 #include "MenuMan.h"
 #include "ConsoleMan.h"
@@ -216,6 +217,7 @@ namespace RTE {
 				g_MenuMan.Reinitialize();
 				g_ConsoleMan.Destroy();
 				g_ConsoleMan.Initialize();
+				g_LoadingScreen.CreateLoadingSplash();
 				g_WindowMan.CompleteResolutionChange();
 			}
 
@@ -241,11 +243,15 @@ namespace RTE {
 		}
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
-			// This doesn't work.
-			// Somewhat related to https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/472
-			// Deal with later.
-			// g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+		if (g_ActivityMan.ActivitySetToRestart()) {
+			g_LoadingScreen.DrawLoadingSplash();
+			g_WindowMan.UploadFrame();
+			if (!g_ActivityMan.RestartActivity()) {
+				// This doesn't work.
+				// Somewhat related to https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/472
+				// Deal with later.
+				// g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+			}
 		}
 
 		long long updateStartTime = 0;
@@ -306,8 +312,12 @@ namespace RTE {
 						RunMenuLoop();
 					}
 				}
-				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
-					break;
+				if (g_ActivityMan.ActivitySetToRestart()) {
+					g_LoadingScreen.DrawLoadingSplash();
+					g_WindowMan.UploadFrame();
+					if (!g_ActivityMan.RestartActivity()) {
+						break;
+					}
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {
 					g_ActivityMan.ResumeActivity();

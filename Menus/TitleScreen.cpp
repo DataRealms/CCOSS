@@ -402,6 +402,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::UpdateTitleTransitions() {
+		static const float endDelay = 0.2F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+
 		switch (m_TitleTransitionState) {
 			case TitleTransition::MainMenu:
 				if (m_SectionSwitch) {
@@ -465,7 +467,7 @@ namespace RTE {
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				g_AudioMan.SetTempMusicVolume(EaseIn(1.0F, 0, m_SectionProgress));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
-				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::TransitionEnd); }
+				if (m_SectionElapsedTime >= (m_SectionDuration + endDelay)) { SetTitleTransitionState(TitleTransition::TransitionEnd); }
 				break;
 			case TitleTransition::ScrollingFadeIn:
 				if (m_SectionSwitch) {
@@ -486,7 +488,7 @@ namespace RTE {
 				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_TitleScreenMaxWidth / 2), EaseIn(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
-				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScrollingFadeOutQuit) ? TitleTransition::TransitionEndQuit : TitleTransition::TransitionEnd); }
+				if (m_SectionElapsedTime >= (m_SectionDuration + endDelay)) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScrollingFadeOutQuit) ? TitleTransition::TransitionEndQuit : TitleTransition::TransitionEnd); }
 				break;
 			case TitleTransition::TransitionEnd:
 				if (m_SectionSwitch) {

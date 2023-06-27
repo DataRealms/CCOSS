@@ -2,6 +2,25 @@
   "version": "2.0.0",
   "tasks": [
     {
+        "label": "Setup Meson",
+        "type": "process",
+        "problemMatcher": ["$meson-gcc"],
+        "command": "meson",
+        "args": [
+          "setup",
+          "build"
+        ],
+        "osx":{
+          "options": {
+            "env": {
+              "CC": "gcc-12",
+              "CXX": "g++-12",
+              "CXX_LD": "g++-12"
+            }
+          }
+        }
+    },
+    {
       "label": "Build Debug",
       "dependsOn": ["Configure Debug", "Meson: Build all targets"],
       "dependsOrder": "sequence"

@@ -373,9 +373,18 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window.
 		if (g_WindowMan.AnyWindowHasFocus() && !m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			int limitX = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_X), x, x + width);
-			int limitY = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_Y), y, y + height);
-			SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
+			int mousePosX = m_AbsoluteMousePos.GetFloorIntX();
+			int mousePosY = m_AbsoluteMousePos.GetFloorIntY();
+
+			// -1 because the max mouse position inside the window is -1 its dimensions.
+			int rightMostPos = x + width - 1;
+			int bottomMostPos = y + height - 1;
+
+			if (mousePosX <= x || mousePosX >= rightMostPos || mousePosY <= y || mousePosY >= bottomMostPos) {
+				int limitX = std::clamp(mousePosX, x, rightMostPos);
+				int limitY = std::clamp(mousePosY, y, bottomMostPos);
+				SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
+			}
 		}
 	}
 

@@ -108,7 +108,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
-## IDE Integration
+## Debugging with VS Code
 
 This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/).
 

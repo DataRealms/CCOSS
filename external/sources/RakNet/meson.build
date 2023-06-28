@@ -4,6 +4,7 @@ subdir('src')
 raknet_include = include_directories('.', 'include')
 
 cxx = meson.get_compiler('cpp')
+cpp_options = []
 
 if cxx.get_argument_syntax() == 'gcc'
   cpp_args = ['-w', '-fpermissive']

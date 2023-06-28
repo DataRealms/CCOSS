@@ -6,7 +6,7 @@ aluconfig = configuration_data()
 c_args = []
 
 if host_machine.system() in ['linux', 'darwin']
-  allegro_defines += 'ALLEGRO_UNIX'
+  allegro_defines += ['ALLEGRO_UNIX']
   aluconfig.set('ALLEGRO_COLOR8', true)
   aluconfig.set('ALLEGRO_COLOR16', true)
   aluconfig.set('ALLEGRO_COLOR24', true)
@@ -87,11 +87,11 @@ else
 endif
 
 allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
-allegro_args = ['-DALLEGRO_NO_COMPATIBILITY', allegro_defines, c_args]
+allegro_args = ['-DALLEGRO_NO_COMPATIBILITY']
 
 loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
 
-allegro_dep = declare_dependency(link_with: allegro, include_directories: allegro_include, compile_args: allegro_args)
+allegro_dep = declare_dependency(link_with: allegro, include_directories: allegro_include, compile_args: allegro_args + allegro_defines + c_args)
 loadpng_dep = declare_dependency(link_with: loadpng, include_directories: loadpng_include)
 
 meson.override_dependency('allegro', allegro_dep)

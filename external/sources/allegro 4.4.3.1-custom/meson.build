@@ -2,39 +2,38 @@ project('allegro', 'c')
 
 c = meson.get_compiler('c')
 allegro_defines = []
-aluconfig = configuration_data()
+alconfig = configuration_data()
 c_args = []
 
 if host_machine.system() in ['linux', 'darwin']
-  allegro_defines += ['ALLEGRO_UNIX']
-  aluconfig.set('ALLEGRO_COLOR8', true)
-  aluconfig.set('ALLEGRO_COLOR16', true)
-  aluconfig.set('ALLEGRO_COLOR24', true)
-  aluconfig.set('ALLEGRO_COLOR32', true)
-  aluconfig.set('ALLEGRO_BIG_ENDIAN', host_machine.endian() == 'big')
-  aluconfig.set('ALLEGRO_LITTLE_ENDIAN', host_machine.endian() == 'little')
+  alconfig.set('ALLEGRO_COLOR8', true)
+  alconfig.set('ALLEGRO_COLOR16', true)
+  alconfig.set('ALLEGRO_COLOR24', true)
+  alconfig.set('ALLEGRO_COLOR32', true)
+  alconfig.set('ALLEGRO_BIG_ENDIAN', host_machine.endian() == 'big')
+  alconfig.set('ALLEGRO_LITTLE_ENDIAN', host_machine.endian() == 'little')
 
 
-  aluconfig.set('ALLEGRO_UNIX', true)
-  aluconfig.set('ALLEGRO_HAVE_LIBPTHREAD', c.find_library('pthread', required:false).found())
-  aluconfig.set('ALLEGRO_HAVE_STDINT_H', c.has_header('stdint.h'))
-  aluconfig.set('ALLEGRO_HAVE_INTTYPES_H', c.has_header('inttypes.h'))
-  aluconfig.set('ALLEGRO_HAVE_SYS_TIME_H', c.has_header('sys/time.h'))
-  aluconfig.set('ALLEGRO_HAVE_SYS_IO_H', c.has_header('sys/io.h'))
-  aluconfig.set('ALLEGRO_HAVE_DIRENT_H', c.has_header('dirent.h'))
-  aluconfig.set('ALLEGRO_HAVE_SYS_STAT_H', c.has_header('sys/stat.h'))
-  aluconfig.set('ALLEGRO_HAVE_SYS_UTSNAME_H', c.has_header('sys/utsname.h'))
+  alconfig.set('ALLEGRO_UNIX', true)
+  alconfig.set('ALLEGRO_HAVE_LIBPTHREAD', c.find_library('pthread', required:false).found())
+  alconfig.set('ALLEGRO_HAVE_STDINT_H', c.has_header('stdint.h'))
+  alconfig.set('ALLEGRO_HAVE_INTTYPES_H', c.has_header('inttypes.h'))
+  alconfig.set('ALLEGRO_HAVE_SYS_TIME_H', c.has_header('sys/time.h'))
+  alconfig.set('ALLEGRO_HAVE_SYS_IO_H', c.has_header('sys/io.h'))
+  alconfig.set('ALLEGRO_HAVE_DIRENT_H', c.has_header('dirent.h'))
+  alconfig.set('ALLEGRO_HAVE_SYS_STAT_H', c.has_header('sys/stat.h'))
+  alconfig.set('ALLEGRO_HAVE_SYS_UTSNAME_H', c.has_header('sys/utsname.h'))
 
-  aluconfig.set('ALLEGRO_HAVE_MKSTEMP', c.has_function('mkstemp'))
-  aluconfig.set('ALLEGRO_HAVE_MEMCMP', c.has_function('memcmp'))
-  aluconfig.set('ALLEGRO_HAVE_MPROTECT', c.has_function('mprotect'))
-  aluconfig.set('ALLEGRO_HAVE_MMAP', c.has_function('mmap'))
-  aluconfig.set('ALLEGRO_HAVE_SCHED_YIELD', c.has_function('sched_yield'))
-  aluconfig.set('ALLEGRO_HAVE_STRICMP', c.has_function('stricmp'))
-  aluconfig.set('ALLEGRO_HAVE_STRLWR', c.has_function('strlwr'))
-  aluconfig.set('ALLEGRO_HAVE_STRUPR', c.has_function('strupr'))
+  alconfig.set('ALLEGRO_HAVE_MKSTEMP', c.has_function('mkstemp'))
+  alconfig.set('ALLEGRO_HAVE_MEMCMP', c.has_function('memcmp'))
+  alconfig.set('ALLEGRO_HAVE_MPROTECT', c.has_function('mprotect'))
+  alconfig.set('ALLEGRO_HAVE_MMAP', c.has_function('mmap'))
+  alconfig.set('ALLEGRO_HAVE_SCHED_YIELD', c.has_function('sched_yield'))
+  alconfig.set('ALLEGRO_HAVE_STRICMP', c.has_function('stricmp'))
+  alconfig.set('ALLEGRO_HAVE_STRLWR', c.has_function('strlwr'))
+  alconfig.set('ALLEGRO_HAVE_STRUPR', c.has_function('strupr'))
 
-  aluconfig.set('MAP_FAILED_DEFINED', c.compiles('''
+  alconfig.set('MAP_FAILED_DEFINED', c.compiles('''
     #include <unistd.h>
     #include <sys/mman.h>
     int main(void) {
@@ -42,8 +41,8 @@ if host_machine.system() in ['linux', 'darwin']
     }"
     MAP_FAILED_DEFINED
   '''))
-  aluconfig.set('ALLEGRO_USE_CONSTRUCTOR', true) # TODO: dont understand if constructors work or not, or if that even makes any difference
-  aluconfig.set('ALLEGRO_HAVE_POSIX_MONOTONIC_CLOCK', c.compiles('''
+  alconfig.set('ALLEGRO_USE_CONSTRUCTOR', true) # TODO: dont understand if constructors work or not, or if that even makes any difference
+  alconfig.set('ALLEGRO_HAVE_POSIX_MONOTONIC_CLOCK', c.compiles('''
     #include <time.h>
     int main(void) {
         struct timespec new_time_ns;
@@ -55,11 +54,10 @@ if host_machine.system() in ['linux', 'darwin']
 
 elif host_machine.system() == 'windows'
   if c.get_argument_syntax() == 'msvc'
-    allegro_defines += ['-DALLEGRO_NO_MAGIC_MAIN', '-DALLEGRO_STATICLINK', '-D_CRT_NONSTDC_NO_DEPRECATE', '-D_CRT_SECURE_NO_DEPRECATE']
-    aluconfig.set('ALLEGRO_MSVC', true)
+    c_args += ['-DALLEGRO_NO_MAGIC_MAIN', '-DALLEGRO_STATICLINK', '-D_CRT_NONSTDC_NO_DEPRECATE', '-D_CRT_SECURE_NO_DEPRECATE']
+    alconfig.set('ALLEGRO_MSVC', true)
   else
-    allegro_defines += '-DALLEGRO_MINGW32'
-    aluconfig.set('ALLEGRO_MINGW32', true)
+    alconfig.set('ALLEGRO_MINGW32', true)
   endif
 
 
@@ -91,7 +89,7 @@ allegro_args = ['-DALLEGRO_NO_COMPATIBILITY']
 
 loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
 
-allegro_dep = declare_dependency(link_with: allegro, include_directories: allegro_include, compile_args: allegro_args + allegro_defines + c_args)
+allegro_dep = declare_dependency(link_with: allegro, include_directories: allegro_include, compile_args: allegro_args + c_args)
 loadpng_dep = declare_dependency(link_with: loadpng, include_directories: loadpng_include)
 
 meson.override_dependency('allegro', allegro_dep)

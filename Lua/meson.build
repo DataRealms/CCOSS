@@ -22,4 +22,4 @@ else
 error('Unsupported compiler')
 endif
 
-lua_bindings = static_library('lua_bindings', lua_sources, dependencies:deps + luabind_dep, include_directories: source_inc_dirs, cpp_args: luabindings_cpp_args, cpp_pch:pch, override_options: defaults_override)
+lua_bindings = static_library('lua_bindings', lua_sources, dependencies:deps + luabind_dep, include_directories: [source_inc_dirs, external_inc_dirs], cpp_args: luabindings_cpp_args, cpp_pch:pch, override_options: defaults_override)

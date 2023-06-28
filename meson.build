@@ -23,6 +23,7 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
+override_options = []
 suffix=''
 
 if compiler.get_id() == 'clang'
@@ -77,7 +78,7 @@ elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
 message('cl detected')
   elfname = 'Cortex Command'
-  extra_args += ['-permissive-', '-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
+  extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1', '-bigobj']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x64'
     elfname += ' x64'
@@ -124,9 +125,10 @@ else
 endif
 
 #### Sources Setup ####
-pch = 'System/StandardIncludes.h'
+pch = meson.current_source_dir()/'System/StandardIncludes.h'
 sources = []
 source_inc_dirs = include_directories(
+  '.',
   'Activities',
   'Entities',
   'GUI',
@@ -166,7 +168,7 @@ deps += [allegro_dep, loadpng_dep, luabind_dep, raknet_dep]
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
+  link_with:[external_libs, lua_bindings, luaman], objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options

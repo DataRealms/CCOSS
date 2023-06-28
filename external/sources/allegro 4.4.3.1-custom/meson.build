@@ -2,9 +2,11 @@ project('allegro', 'c')
 
 c = meson.get_compiler('c')
 allegro_defines = []
+aluconfig = configuration_data()
+c_args = []
+
 if host_machine.system() in ['linux', 'darwin']
   allegro_defines += 'ALLEGRO_UNIX'
-  aluconfig = configuration_data()
   aluconfig.set('ALLEGRO_COLOR8', true)
   aluconfig.set('ALLEGRO_COLOR16', true)
   aluconfig.set('ALLEGRO_COLOR24', true)
@@ -50,10 +52,21 @@ if host_machine.system() in ['linux', 'darwin']
     }
   '''))
 
-  subdir('include/allegro/platform')
-endif
 
-allegro_defines += 'ALLEGRO_SRC'
+elif host_machine.system() == 'windows'
+  if c.get_argument_syntax() == 'msvc'
+    allegro_defines += ['-DALLEGRO_NO_MAGIC_MAIN', '-DALLEGRO_STATICLINK', '-D_CRT_NONSTDC_NO_DEPRECATE', '-D_CRT_SECURE_NO_DEPRECATE']
+    aluconfig.set('ALLEGRO_MSVC', true)
+  else
+    allegro_defines += '-DALLEGRO_MINGW32'
+    aluconfig.set('ALLEGRO_MINGW32', true)
+  endif
+
+
+endif
+subdir('include/allegro/platform')
+
+allegro_defines += '-DALLEGRO_SRC'
 
 allegro_sources = []
 subdir('src')
@@ -65,8 +78,16 @@ loadpng_dependencies = [dependency('libpng')]
 
 loadpng_sources = []
 subdir('addons/loadpng')
-allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args:['-Wno-deprecated-declarations'])
-allegro_args = ['-DALLEGRO_NO_COMPATIBILITY', '-Wno-deprecated-declarations']
+
+compiler = meson.get_compiler('c')
+
+if compiler.get_argument_syntax() == 'gcc' 
+  c_args = ['-Wno-deprecated-declarations']
+else
+endif
+
+allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
+allegro_args = ['-DALLEGRO_NO_COMPATIBILITY', allegro_defines, c_args]
 
 loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
 

@@ -223,7 +223,6 @@ namespace RTE {
 				break;
 			case GamepadType::AnalogXbox:
 				m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::PresetGamepadXbox360);
-				SetEnabled(false);
 				break;
 			default:
 				RTEAbort("Invalid GamepadType passed to SettingsInputMappingWizardGUI::ApplyGamepadInputPreset!");

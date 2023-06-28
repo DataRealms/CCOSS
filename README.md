@@ -112,15 +112,18 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/).
 
-They require all the dependencies listed above and the following editor extensions:
-- [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb) (macOS)
-- [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild)
+**Requirements:**
 
-These are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options).
+- All the dependencies listed above
+- The [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) editor extension
 
-Both will run the required pre-launch tasks to configure Meson and build using the ninja backend before launching the game.
+- The [`lldb`](https://lldb.llvm.org/) debugger *(macOS only*)
 
-These tasks are also configured to run the `meson setup` command on editor startup. This will automatically execute Step 4 of the [Build](#Building) section.
+These launch configurations are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options).
+
+All configurations will run pre-launch tasks to configure Meson and build using the ninja backend before launching the game.
+
+These tasks are also configured to run the `meson setup` command on editor startup. This will automatically execute Step 4 of the [Build](#Building) section each time the repository is opened as a workspace.
 
 ## Installing Dependencies
 

@@ -361,7 +361,14 @@ namespace RTE {
 			m_ControlStates[ControlState::WEAPON_FIRE] = false;
 			m_ControlStates[ControlState::AIM_UP] = false;
 			m_ControlStates[ControlState::AIM_DOWN] = false;
-		} 
+			
+			if (IsKeyboardOnlyControlled()) {
+				m_ControlStates[ControlState::MOVE_RIGHT] = false;
+				m_ControlStates[ControlState::MOVE_LEFT] = false;
+				m_ControlStates[ControlState::MOVE_UP] = false;
+				m_ControlStates[ControlState::MOVE_DOWN] = false;
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

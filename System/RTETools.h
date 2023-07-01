@@ -203,7 +203,7 @@ namespace RTE {
 	/// <param name="width">Width of the box.</param>
 	/// <param name="height">Height of the box.</param>
 	/// <returns>True if point is inside box bounds.</returns>
-	bool WithinBox(Vector &point, Vector &boxPos, float width, float height);
+	bool WithinBox(const Vector &point, const Vector &boxPos, float width, float height);
 
 	/// <summary>
 	/// Tells whether a point is within a specified box.
@@ -214,7 +214,7 @@ namespace RTE {
 	/// <param name="right">Position of box right plane (X end).</param>
 	/// <param name="bottom">Position of box bottom plane (Y end).</param>
 	/// <returns>True if point is inside box bounds.</returns>
-	bool WithinBox(Vector &point, float left, float top, float right, float bottom);
+	bool WithinBox(const Vector &point, float left, float top, float right, float bottom);
 #pragma endregion
 
 #pragma region Conversion

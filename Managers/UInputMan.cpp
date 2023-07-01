@@ -385,18 +385,33 @@ namespace RTE {
 			int rightMostPos = m_PlayerScreenMouseBounds.x + m_PlayerScreenMouseBounds.w;
 			int bottomMostPos = m_PlayerScreenMouseBounds.y + m_PlayerScreenMouseBounds.h;
 
-			SDL_Rect newMouseBounds = {
-				std::clamp(m_PlayerScreenMouseBounds.x + x, m_PlayerScreenMouseBounds.x, rightMostPos),
-				std::clamp(m_PlayerScreenMouseBounds.y + y, m_PlayerScreenMouseBounds.y, bottomMostPos),
-				std::clamp(width, 0, rightMostPos - x),
-				std::clamp(height, 0, bottomMostPos - y)
-			};
+			if (g_WindowMan.FullyCoversAllDisplays()) {
+				int leftPos = std::clamp(m_PlayerScreenMouseBounds.x + x, m_PlayerScreenMouseBounds.x, rightMostPos);
+				int topPos = std::clamp(m_PlayerScreenMouseBounds.y + y, m_PlayerScreenMouseBounds.y, bottomMostPos);
 
-			if (newMouseBounds.x >= rightMostPos || newMouseBounds.y >= bottomMostPos) {
-				g_ConsoleMan.PrintString("ERROR: Trying to force mouse wihin a box that is outside the player screen bounds!");
-				newMouseBounds = m_PlayerScreenMouseBounds;
+				// The max mouse position inside the window is -1 its dimensions so we have to -1 for this to work on the right and bottom edges of the window.
+				rightMostPos = std::clamp(leftPos + width, leftPos, rightMostPos - 1);
+				bottomMostPos = std::clamp(topPos + height, topPos, bottomMostPos - 1);
+
+				if (!WithinBox(m_AbsoluteMousePos, static_cast<float>(leftPos), static_cast<float>(topPos), static_cast<float>(rightMostPos), static_cast<float>(bottomMostPos))) {
+					int limitX = std::clamp(m_AbsoluteMousePos.GetFloorIntX(), leftPos, rightMostPos);
+					int limitY = std::clamp(m_AbsoluteMousePos.GetFloorIntY(), topPos, bottomMostPos);
+					SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
+				}
+			} else {
+				SDL_Rect newMouseBounds = {
+					std::clamp(m_PlayerScreenMouseBounds.x + x, m_PlayerScreenMouseBounds.x, rightMostPos),
+					std::clamp(m_PlayerScreenMouseBounds.y + y, m_PlayerScreenMouseBounds.y, bottomMostPos),
+					std::clamp(width, 0, rightMostPos - x),
+					std::clamp(height, 0, bottomMostPos - y)
+				};
+
+				if (newMouseBounds.x >= rightMostPos || newMouseBounds.y >= bottomMostPos) {
+					g_ConsoleMan.PrintString("ERROR: Trying to force mouse wihin a box that is outside the player screen bounds!");
+					newMouseBounds = m_PlayerScreenMouseBounds;
+				}
+				SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &newMouseBounds);
 			}
-			SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &newMouseBounds);
 		}
 	}
 
@@ -434,7 +449,11 @@ namespace RTE {
 		}
 
 		if (force) {
-			SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &m_PlayerScreenMouseBounds);
+			if (g_WindowMan.FullyCoversAllDisplays()) {
+				ForceMouseWithinBox(0, 0, m_PlayerScreenMouseBounds.w, m_PlayerScreenMouseBounds.h);
+			} else {
+				SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &m_PlayerScreenMouseBounds);
+			}
 		} else {
 			// Set the mouse bounds to the whole window so ForceMouseWithinBox is not stuck being relative to some player screen, because it can still bind the mouse even if this doesn't.
 			m_PlayerScreenMouseBounds = { 0, 0, g_WindowMan.GetResX() * resMultiplier, g_WindowMan.GetResY() * resMultiplier };

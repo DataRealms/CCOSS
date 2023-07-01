@@ -632,6 +632,9 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added alternate version of `Scene` Lua function `CalculatePath(startPos, endPos, movePathToGround, digStrength, team)` that works as the previous one, but lets you specify the team to calculate the path for, allowing you to ignore doors on your team.
 
 - Added `Controller` Lua function `IsKeyboardOnlyControlled` that tells you whether the `Controller` is being controlled by keyboard only. Previously the only way to do this was to check that it's not mouse controlled and not gamepad controlled.
+
+- Added `Controller` control state `PIE_MENU_OPENED` that is true for the first Update in which the `PieMenu` is opened.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

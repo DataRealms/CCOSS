@@ -245,6 +245,12 @@ namespace RTE {
 		bool IsMouseControlled() const;
 
 		/// <summary>
+		/// Indicates whether this is only listening to keyboard input.
+		/// </summary>
+		/// <returns>Whether this is only using keyboard input.</returns>
+		bool IsKeyboardOnlyControlled() const;
+
+		/// <summary>
 		/// Indicates whether this is listening to gamepad at all.
 		/// </summary>
 		/// <returns>Whether this is using gamepad input at all.</returns>

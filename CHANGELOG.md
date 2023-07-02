@@ -635,6 +635,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Controller` control state `PIE_MENU_OPENED` that is true for the first Update in which the `PieMenu` is opened.
 
+- Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

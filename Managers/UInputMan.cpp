@@ -922,9 +922,6 @@ namespace RTE {
 		} else if (!FlagCtrlState() && FlagAltState()) {
 			if (KeyPressed(SDLK_F2)) {
 				ContentFile::ReloadAllBitmaps();
-			} else if (KeyPressed(SDLK_F4)) {
-				// Alt+F4 OS event doesn't seem to work when in multi-display fullscreen, probably because multiple windows, so just handle it here all the time.
-				System::SetQuit();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
 				g_WindowMan.ChangeResolutionMultiplier();

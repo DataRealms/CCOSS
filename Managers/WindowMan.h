@@ -193,10 +193,10 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Handles window events coming from the SDL event queue.
+		/// Adds an SDL_Event to the Event queue for processing on Update.
 		/// </summary>
-		/// <param name="windowEvent">The SDL event to handle.</param>
-		void HandleWindowEvent(const SDL_Event &windowEvent);
+		/// <param name="windowEvent">The SDL window event to queue.</param>
+		void QueueWindowEvent(const SDL_Event &windowEvent);
 
 		/// <summary>
 		/// Updates the state of this WindowMan.
@@ -216,6 +216,11 @@ namespace RTE {
 
 	private:
 
+		std::vector<SDL_Event> m_EventQueue; //!< List of incoming window events.
+
+		bool m_FocusEventsDispatchedByMovingBetweenWindows; //!< Whether queued events were dispatched due to raising windows when moving between windows in multi-display fullscreen in the previous update.
+		bool m_FocusEventsDispatchedByDisplaySwitchIn; //!< Whether queued events were dispatched due to raising windows when taking focus of any game window in the previous update.
+
 		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
 		std::shared_ptr<SDL_Renderer> m_PrimaryRenderer; //!< The main window renderer, draws to the main window.
 		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture; //!< The main window renderer's drawing surface.
@@ -226,7 +231,6 @@ namespace RTE {
 		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		bool m_AnyWindowHasFocus; //!< Whether any game window has focus.
-		bool m_FocusLostDueToMovingBetweenGameWindows; //!< Whether the focus lost event was due to moving between displays while in multi-display fullscreen.
 		bool m_ResolutionChanged; //!< Whether the resolution was changed through the settings.
 
 		int m_NumDisplays; //!< Number of physical displays.
@@ -311,7 +315,8 @@ namespace RTE {
 		/// <summary>
 		/// Handles focus gain when switching back to the game window.
 		/// </summary>
-		void DisplaySwitchIn() const;
+		/// <param name="windowThatShouldTakeInputFocus">The window that should take focus of input after all the windows are raised. This is only relevant in multi-display fullscreen.</param>
+		void DisplaySwitchIn(SDL_Window *windowThatShouldTakeInputFocus) const;
 
 		/// <summary>
 		/// Handles focus loss when switching away from the game window.

@@ -171,7 +171,7 @@ namespace RTE {
 						System::SetQuit(true);
 						return;
 					}
-					g_WindowMan.HandleWindowEvent(sdlEvent);
+					g_WindowMan.QueueWindowEvent(sdlEvent);
 					break;
 				case SDL_KEYUP:
 				case SDL_KEYDOWN:

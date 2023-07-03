@@ -511,6 +511,8 @@ namespace RTE {
 
 	void WindowMan::DisplaySwitchIn(SDL_Window *windowThatShouldTakeInputFocus) const {
 		g_UInputMan.DisableMouseMoving(false);
+		g_UInputMan.DisableKeys(false);
+
 		if (!m_MultiDisplayWindows.empty()) {
 			for (const auto &window : m_MultiDisplayWindows) {
 				SDL_RaiseWindow(window.get());
@@ -526,6 +528,7 @@ namespace RTE {
 
 	void WindowMan::DisplaySwitchOut() const {
 		g_UInputMan.DisableMouseMoving(true);
+		g_UInputMan.DisableKeys(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

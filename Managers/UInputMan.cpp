@@ -766,6 +766,9 @@ namespace RTE {
 					break;
 				}
 				case SDL_MOUSEMOTION:
+					if (m_DisableMouseMoving) {
+						break;
+					}
 					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
 					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
 					if (g_WindowMan.FullyCoversAllDisplays()) {

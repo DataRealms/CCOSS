@@ -522,6 +522,8 @@ namespace RTE {
 		} else {
 			SDL_RaiseWindow(m_PrimaryWindow.get());
 		}
+
+		SDL_ShowCursor(SDL_DISABLE);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -529,6 +531,10 @@ namespace RTE {
 	void WindowMan::DisplaySwitchOut() const {
 		g_UInputMan.DisableMouseMoving(true);
 		g_UInputMan.DisableKeys(true);
+
+		SDL_ShowCursor(SDL_ENABLE);
+		// Sometimes the cursor will not be visible after disabling relative mode. Setting it to nullptr forces it to redraw, though this doesn't always work either.
+		SDL_SetCursor(nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

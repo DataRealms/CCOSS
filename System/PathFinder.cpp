@@ -137,7 +137,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
-		++this->m_CurrentPathingRequests;
+		++m_CurrentPathingRequests;
 		
 		// Make sure start and end are within scene bounds.
 		g_SceneMan.ForceBounds(start);
@@ -188,8 +188,8 @@ namespace RTE {
 			pathResult.push_back(end);
 		}
 
-		--this->m_CurrentPathingRequests;
-		
+		--m_CurrentPathingRequests;
+
 		// TODO: Clean up the path, remove series of nodes in the same direction etc?
 		return result;
 	}

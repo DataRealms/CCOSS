@@ -2,7 +2,23 @@ name: Windows Build
 
 on:
   workflow_dispatch:
-
+    inputs:
+      upload_artefacts:
+        description: "Upload build artefacts for this run"
+        type: boolean
+        required: false
+        default: false
+      build_configuration: # "Final"
+        description: "Build Configuration"
+        type: choice
+        required: false
+        default: "Final"
+        options:
+          - "Final"
+          - "Debug Release"
+          - "Debug Minimal"
+          - "Debug Full"
+          
   # Triggers the workflow when called by a top-level workflow
   workflow_call:
     inputs:

@@ -3,7 +3,31 @@ name: Meson Build (Linux, macOS)
 on:
   # Triggers the workflow when manually dispatched
   workflow_dispatch:
-
+    inputs:
+      upload_artefacts:
+        description: "Upload build artefacts for this run"
+        type: boolean
+        required: false
+        default: false
+      build_type: # "release", "debug"
+        description: "Build Configuration"
+        type: choice
+        required: false
+        default: "release"
+        options:
+          - "release"
+          - "debug"
+      debug_level:  # "full", "minimal", "release" 
+      # TODO: Standardise these, so capitalization is preserved between the windows/linux builds.
+        description: "Debug Level"
+        type: choice
+        required: false
+        default: "release"
+        options:
+          - "release"
+          - "minimal"
+          - "full"
+          
   # Triggers the workflow when called by a top-level workflow
   workflow_call:
     inputs:

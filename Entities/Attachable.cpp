@@ -238,6 +238,9 @@ namespace RTE {
 
 		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
+			// Need this bullshit counter-force looked at :V -ComradeShook
+			m_ImpulseForces.push_back(std::pair<Vector, Vector> {-totalImpulseForce, Vector{ 0, 0 }});
+			MOSprite::ApplyImpulses(); // Makes gibs inherit the velocity of the attached attachable when gibbed by violence
 			GibThis();
 			return false;
 		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {

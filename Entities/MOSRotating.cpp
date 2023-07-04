@@ -545,6 +545,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
+                MOSprite::ApplyImpulses(); // Makes gibs inherit the impulse when the object is gibbed by wounds
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
 				delete woundToAdd;
 				return;
@@ -1186,7 +1187,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
             attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
             Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5F + (attachableGibBlastStrength * RandomNum()));
-            attachable->SetVel(m_Vel + gibBlastVel + impactImpulse);
+            attachable->SetVel(m_Vel + gibBlastVel); // "+ impactImpulse" was redundant, as attachables already inherit velocity by default
 
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
@@ -1237,6 +1238,8 @@ void MOSRotating::ApplyImpulses() {
 	}
 	averagedImpulseForceOffset /= static_cast<float>(m_ImpulseForces.size());
 
+    MOSprite::ApplyImpulses(); // Moved up here so velocity is updated before gibs are generated
+
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
@@ -1248,8 +1251,6 @@ void MOSRotating::ApplyImpulses() {
 			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 		}
 	}
-
-	MOSprite::ApplyImpulses();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

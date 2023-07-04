@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       upload_artefacts:
-        description: "Upload build artefacts for this run"
+        description: "Upload build artefacts"
         type: boolean
         required: false
         default: false
@@ -27,7 +27,7 @@ on:
           - "release"
           - "minimal"
           - "full"
-          
+
   # Triggers the workflow when called by a top-level workflow
   workflow_call:
     inputs:

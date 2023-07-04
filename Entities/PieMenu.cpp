@@ -844,8 +844,12 @@ namespace RTE {
 			m_ActivatedPieSlice = m_HoveredPieSlice->IsEnabled() ? m_HoveredPieSlice : m_ActivatedPieSlice;
 			m_AlreadyActivatedPieSlice = m_ActivatedPieSlice;
 
-			SoundContainer *soundToPlay = m_HoveredPieSlice->IsEnabled() ? g_GUISound.SlicePickedSound() : g_GUISound.DisabledPickedSound();
-			soundToPlay->Play();
+			if (m_HoveredPieSlice->GetSubPieMenu() && controller->IsState(ControlState::RELEASE_SECONDARY)) {
+				g_GUISound.UserErrorSound()->Play();
+			} else {
+				SoundContainer *soundToPlay = m_HoveredPieSlice->IsEnabled() ? g_GUISound.SlicePickedSound() : g_GUISound.DisabledPickedSound();
+				soundToPlay->Play();
+			}
 		}
 
 		if (IsEnabled()) {

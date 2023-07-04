@@ -34,8 +34,17 @@ on:
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: RTEA.sln
-  NAME_MAPPING: "{\"Final\": \"Cortex Command.exe\", \"Debug Release\": \"Cortex Command.debug.release.exe\", \"Debug Minimal\": \"Cortex Command.debug.minimal.exe\", \"Debug Full\": \"Cortex Command.debug.full.exe\"}"
-  
+  # NAME_MAPPING: |
+  #   "{"Final\": \"Cortex Command.exe\",
+  #    \"Debug Release\": \"Cortex Command.debug.release.exe\",
+  #    \"Debug Minimal\": \"Cortex Command.debug.minimal.exe\",
+  #    \"Debug Full\": \"Cortex Command.debug.full.exe\"}"
+
+  NAME_MAPPING: |
+    {"Final": "Cortex Command.exe",
+    "Debug Release": "Cortex Command.debug.release.exe",
+    "Debug Minimal": "Cortex Command.debug.minimal.exe",
+    "Debug Full": "Cortex Command.debug.full.exe"}
 
 jobs:
   build:
@@ -45,6 +54,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Determine executable name
+      id: executable_name
+      if: ${{inputs.upload_artefacts}}
+      run: |
+        echo 'EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}' >> "$GITHUB_OUTPUT"
+    
+    - run: |
+        echo ${{ steps.executable_name.outputs.EXECUTABLE_NAME }}
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
 
@@ -53,12 +71,6 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration="${{inputs.build_configuration}}" ${{env.SOLUTION_FILE_PATH}}
-
-    - name: Determine executable name
-      id: executable_name
-      if: ${{inputs.upload_artefacts}}
-      run: |
-        echo 'EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}' >> "$GITHUB_OUTPUT"
 
     - name: Upload Artifact
       if: ${{inputs.upload_artefacts}}

@@ -39,6 +39,7 @@ env:
   #    \"Debug Release\": \"Cortex Command.debug.release.exe\",
   #    \"Debug Minimal\": \"Cortex Command.debug.minimal.exe\",
   #    \"Debug Full\": \"Cortex Command.debug.full.exe\"}"
+  EXECUTABLE_NAME: "Cortex Command.exe"
 
   NAME_MAPPING: |
     {"Final": "Cortex Command.exe",
@@ -54,14 +55,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Set color
+      id: random-color-generator
+      run: echo "SELECTED_COLOR=green" >> $GITHUB_OUTPUT
+      
+    - name: Get color
+      run: echo "The selected color is ${{ steps.random-color-generator.outputs.SELECTED_COLOR }}"
+
     - name: Determine executable name
       id: executable_name
       if: ${{inputs.upload_artefacts}}
       run: |
-        echo "EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}" >> "$GITHUB_OUTPUT"
+        echo -e "EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}" >> "$GITHUB_ENV"
     
     - run: |
-        echo ${{ steps.executable_name.outputs.EXECUTABLE_NAME }}
+        echo ${{ env.EXECUTABLE_NAME }}
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1

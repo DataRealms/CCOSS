@@ -45,6 +45,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Determine executable name
+      id: executable_name
+      if: ${{inputs.upload_artefacts}}
+      run: |
+        echo 'EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}' >> "$GITHUB_OUTPUT"
+
+        
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
 
@@ -55,10 +62,6 @@ jobs:
       run: msbuild /m /p:Configuration="${{inputs.build_configuration}}" ${{env.SOLUTION_FILE_PATH}}
 
 
-    - id: executable_name
-      if: ${{inputs.upload_artefacts}}
-      run: |
-        echo "EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}" >> "$GITHUB_OUTPUT"
 
     - name: Upload Artifact
       if: ${{inputs.upload_artefacts}}

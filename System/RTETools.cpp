@@ -153,13 +153,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WithinBox(Vector &point, float left, float top, float right, float bottom) {
+	bool WithinBox(const Vector &point, float left, float top, float right, float bottom) {
 		return point.m_X >= left && point.m_X < right && point.m_Y >= top && point.m_Y < bottom;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WithinBox(Vector &point, Vector &boxPos, float width, float height) {
+	bool WithinBox(const Vector &point, const Vector &boxPos, float width, float height) {
 		return point.m_X >= boxPos.m_X && point.m_X < (boxPos.m_X + width) && point.m_Y >= boxPos.m_Y && point.m_Y < (boxPos.m_Y + height);
 	}
 

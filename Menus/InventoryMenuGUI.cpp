@@ -1330,7 +1330,9 @@ namespace RTE {
 		if (m_CarouselAnimationDirection != CarouselAnimationDirection::None && (m_CarouselExitingItemBox->Item || m_CarouselDrawEmptyBoxes)) {
 			if (m_CarouselExitingItemBox->Item) {
 				DrawCarouselItemBoxBackground(*m_CarouselExitingItemBox);
-				DrawCarouselItemBoxForeground(*m_CarouselExitingItemBox, &carouselAllegroBitmap);
+				if (m_CarouselExitingItemBox->Item->GetUniqueID() != 0) {
+					DrawCarouselItemBoxForeground(*m_CarouselExitingItemBox, &carouselAllegroBitmap);
+				}
 			} else if (m_CarouselDrawEmptyBoxes) {
 				DrawCarouselItemBoxBackground(*m_CarouselExitingItemBox);
 				m_SmallFont->DrawAligned(&carouselAllegroBitmap, m_CarouselExitingItemBox->IconCenterPosition.GetFloorIntX(), m_CarouselExitingItemBox->IconCenterPosition.GetFloorIntY() - (m_SmallFont->GetFontHeight() / 2), "Empty", GUIFont::Centre);

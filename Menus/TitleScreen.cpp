@@ -502,7 +502,7 @@ namespace RTE {
 			if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::DataRealmsLogoFadeOut) {
 				draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (m_TitleScreenMaxWidth - m_DataRealmsLogo->w) / 2, (g_WindowMan.GetResY() - m_DataRealmsLogo->h) / 2);
 				std::string copyrightNotice(64, '\0');
-				std::snprintf(copyrightNotice.data(), copyrightNotice.size(), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+				std::snprintf(copyrightNotice.data(), copyrightNotice.size(), "Cortex Command is TM and %c 2023 Data Realms, LLC", -35);
 				AllegroBitmap guiBackBuffer(g_FrameMan.GetBackBuffer32());
 				m_IntroTextFont->DrawAligned(&guiBackBuffer, m_TitleScreenMaxWidth / 2, g_WindowMan.GetResY() - m_IntroTextFont->GetFontHeight() - 5, copyrightNotice, GUIFont::Centre);
 			} else if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {

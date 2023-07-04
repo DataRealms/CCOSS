@@ -63,7 +63,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen");
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnGameSave");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -1804,6 +1804,11 @@ enum MOType
 	/// <param name="terrain">The SLTerrain to draw this MovableObject to. Ownership is NOT transferred!</param>
 	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
 	bool DrawToTerrain(SLTerrain *terrain);
+
+	/// <summary>
+	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
+	/// </summary>
+	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

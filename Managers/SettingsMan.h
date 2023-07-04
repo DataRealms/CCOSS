@@ -94,6 +94,18 @@ namespace RTE {
 		void SetFactionBuyMenuThemesDisabled(bool disable) { m_DisableFactionBuyMenuThemes = disable; }
 
 		/// <summary>
+		/// Gets whether custom cursor support in faction BuyMenu themes is disabled.
+		/// </summary>
+		/// <returns>Whether faction BuyMenu theme support is disabled.</returns>
+		bool FactionBuyMenuThemeCursorsDisabled() const { return m_DisableFactionBuyMenuThemeCursors; }
+
+		/// <summary>
+		/// Sets whether custom cursor support in faction BuyMenu themes is disabled.
+		/// </summary>
+		/// <param name="disable">Whether custom cursor support in faction BuyMenu themes is disabled or not.</param>
+		void SetFactionBuyMenuThemeCursorsDisabled(bool disable) { m_DisableFactionBuyMenuThemeCursors = disable; }
+
+		/// <summary>
 		/// Gets the PathFinder grid node size.
 		/// </summary>
 		/// <returns>The PathFinder grid node size.</returns>
@@ -521,6 +533,7 @@ namespace RTE {
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
 		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 		bool m_DisableFactionBuyMenuThemes; //!< Whether faction BuyMenu theme support is disabled.
+		bool m_DisableFactionBuyMenuThemeCursors; //!< Whether custom cursor support in faction BuyMenu themes is disabled.
 		int m_PathFinderGridNodeSize; //!< The grid size used by the PathFinder, in pixels.
 		int m_AIUpdateInterval; //!< How often actor's AI should be updated, i.e. every n simulation updates.
 

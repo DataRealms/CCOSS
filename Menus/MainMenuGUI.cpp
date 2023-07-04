@@ -114,7 +114,7 @@ namespace RTE {
 		}
 
 		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
-		m_VersionLabel->SetText("Community Project\n" + std::string(c_GameVersion));
+		m_VersionLabel->SetText("Community Project\n" + std::string(c_MajorGameVersion) + std::string(c_MinorGameVersion));
 		m_VersionLabel->SetPositionAbs(10, g_WindowMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
 	}
 

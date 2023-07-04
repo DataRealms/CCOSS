@@ -54,6 +54,7 @@ namespace RTE {
 		GUICheckbox *m_MeasureLoadTimeCheckbox;
 		GUICheckbox *m_UseMonospaceConsoleFontCheckbox;
 		GUICheckbox *m_DisableFactionBuyMenuThemesCheckbox;
+		GUICheckbox *m_DisableFactionBuyMenuThemeCursorsCheckbox;
 		GUILabel *m_SceneBackgroundAutoScaleLabel;
 		GUISlider *m_SceneBackgroundAutoScaleSlider;
 

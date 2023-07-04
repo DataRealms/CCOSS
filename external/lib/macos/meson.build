@@ -1,3 +1,2 @@
-fmod_so = files('libfmod.dylib')
-
-external_objects += fmod_so
+fmod = compiler.find_library('fmod', dirs:meson.current_source_dir())
+deps += fmod

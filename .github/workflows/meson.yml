@@ -1,5 +1,5 @@
 name: Meson Build (Linux, macOS)
-# Controls when the action will run.
+
 on:
   # Triggers the workflow when manually dispatched
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: boolean
         required: false
         default: false
-      build_type: # "release", "debug"
+      build_type:
         description: "Build Configuration"
         type: choice
         required: false
@@ -17,8 +17,7 @@ on:
         options:
           - "release"
           - "debug"
-      debug_level:  # "full", "minimal", "release" 
-      # TODO: Standardise these, so capitalization is preserved between the windows/linux builds.
+      debug_level:
         description: "Debug Level"
         type: choice
         required: false
@@ -40,7 +39,6 @@ on:
         required: false
         default: "release"
       debug_level:  # "full", "minimal", "release" 
-      # TODO: Standardise these, so capitalization is preserved between the windows/linux builds.
         type: string
         required: false
         default: "release"

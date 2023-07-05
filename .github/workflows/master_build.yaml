@@ -1,13 +1,10 @@
-name: Continuous Integration
+
+name: Master Build
 
 on:
-  # Triggers the workflow for pushes to development, for pull request events, and for the merge queue
+  # Triggers the workflow for pushes to master
   push:
-    branches: [development]
-  pull_request:
-    types: [opened, reopened, ready_for_review, synchronize]
-  merge_group:
-    types: [checks_requested]
+    branches: [master]
 
   workflow_dispatch:
 
@@ -16,10 +13,15 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Build the game on all platforms and store build artefacts of both jobs
 jobs:
   meson:
     uses: ./.github/workflows/meson.yml
-    
+    with: 
+        upload_artefacts: true
+
   msbuild:
     uses: ./.github/workflows/msbuild.yml
+    with:
+        upload_artefacts: true
 

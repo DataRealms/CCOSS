@@ -35,10 +35,12 @@ env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: RTEA.sln
   NAME_MAPPING: |
-    {"Final": "Cortex Command.exe",
-    "Debug Release": "Cortex Command.debug.release.exe",
-    "Debug Minimal": "Cortex Command.debug.minimal.exe",
-    "Debug Full": "Cortex Command.debug.full.exe"}
+    {
+      "Final": "Cortex Command.exe",
+      "Debug Release": "Cortex Command.debug.release.exe",
+      "Debug Minimal": "Cortex Command.debug.minimal.exe",
+      "Debug Full": "Cortex Command.debug.full.exe"
+    }
 
 jobs:
   build:

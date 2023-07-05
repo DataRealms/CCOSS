@@ -43,6 +43,7 @@ namespace RTE {
 		.def("HumanBrainCount", &Activity::HumanBrainCount)
 		.def("AIBrainCount", &Activity::AIBrainCount)
 		.def("GetControlledActor", &Activity::GetControlledActor)
+		.def("GetPlayerController", &Activity::GetPlayerController)
 		.def("SetTeamFunds", &Activity::SetTeamFunds)
 		.def("GetTeamFunds", &Activity::GetTeamFunds)
 		.def("SetTeamAISkill", &Activity::SetTeamAISkill)

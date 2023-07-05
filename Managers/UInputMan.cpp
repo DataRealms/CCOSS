@@ -38,6 +38,7 @@ namespace RTE {
 		m_MouseSensitivity = 0.6F;
 		m_MouseWheelChange = 0;
 		m_TrapMousePos = false;
+		m_PlayerScreenMouseBounds = { 0, 0, 0, 0 };
 		m_MouseTrapRadius = 350;
 		m_LastDeviceWhichControlledGUICursor = InputDevice::DEVICE_KEYB_ONLY;
 		m_DisableKeyboard = false;
@@ -120,6 +121,14 @@ namespace RTE {
 				m_NumJoysticks++;
 			}
 		}
+
+		m_PlayerScreenMouseBounds = {
+			0,
+			0,
+			g_FrameMan.GetPlayerFrameBufferWidth(Players::NoPlayer) * g_WindowMan.GetResMultiplier(),
+			g_FrameMan.GetPlayerFrameBufferHeight(Players::NoPlayer) * g_WindowMan.GetResMultiplier()
+		};
+
 		return 0;
 	}
 
@@ -372,41 +381,83 @@ namespace RTE {
 
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window.
-		if (g_WindowMan.AnyWindowHasFocus() && !m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			int limitX = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_X), x, x + width);
-			int limitY = std::clamp(static_cast<int>(m_AbsoluteMousePos.m_Y), y, y + height);
-			SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
+		if (g_WindowMan.AnyWindowHasFocus() && !m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+			int rightMostPos = m_PlayerScreenMouseBounds.x + m_PlayerScreenMouseBounds.w;
+			int bottomMostPos = m_PlayerScreenMouseBounds.y + m_PlayerScreenMouseBounds.h;
+
+			if (g_WindowMan.FullyCoversAllDisplays()) {
+				int leftPos = std::clamp(m_PlayerScreenMouseBounds.x + x, m_PlayerScreenMouseBounds.x, rightMostPos);
+				int topPos = std::clamp(m_PlayerScreenMouseBounds.y + y, m_PlayerScreenMouseBounds.y, bottomMostPos);
+
+				// The max mouse position inside the window is -1 its dimensions so we have to -1 for this to work on the right and bottom edges of the window.
+				rightMostPos = std::clamp(leftPos + width, leftPos, rightMostPos - 1);
+				bottomMostPos = std::clamp(topPos + height, topPos, bottomMostPos - 1);
+
+				if (!WithinBox(m_AbsoluteMousePos, static_cast<float>(leftPos), static_cast<float>(topPos), static_cast<float>(rightMostPos), static_cast<float>(bottomMostPos))) {
+					int limitX = std::clamp(m_AbsoluteMousePos.GetFloorIntX(), leftPos, rightMostPos);
+					int limitY = std::clamp(m_AbsoluteMousePos.GetFloorIntY(), topPos, bottomMostPos);
+					SDL_WarpMouseInWindow(g_WindowMan.GetWindow(), limitX, limitY);
+				}
+			} else {
+				SDL_Rect newMouseBounds = {
+					std::clamp(m_PlayerScreenMouseBounds.x + x, m_PlayerScreenMouseBounds.x, rightMostPos),
+					std::clamp(m_PlayerScreenMouseBounds.y + y, m_PlayerScreenMouseBounds.y, bottomMostPos),
+					std::clamp(width, 0, rightMostPos - x),
+					std::clamp(height, 0, bottomMostPos - y)
+				};
+
+				if (newMouseBounds.x >= rightMostPos || newMouseBounds.y >= bottomMostPos) {
+					g_ConsoleMan.PrintString("ERROR: Trying to force mouse wihin a box that is outside the player screen bounds!");
+					newMouseBounds = m_PlayerScreenMouseBounds;
+				}
+				SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &newMouseBounds);
+			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer) const {
-		if (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
-			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * g_WindowMan.GetResMultiplier();
-			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * g_WindowMan.GetResMultiplier();
+	void UInputMan::ForceMouseWithinPlayerScreen(bool force, int whichPlayer) {
+		int resMultiplier = g_WindowMan.GetResMultiplier();
+
+		if (force && (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount)) {
+			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * resMultiplier;
+			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * resMultiplier;
 
 			switch (g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer)) {
 				case 0:
-					ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+					m_PlayerScreenMouseBounds = { 0, 0, screenWidth, screenHeight };
 					break;
 				case 1:
 					if (g_FrameMan.GetVSplit()) {
-						ForceMouseWithinBox(screenWidth, 0, screenWidth, screenHeight, whichPlayer);
+						m_PlayerScreenMouseBounds = { screenWidth, 0, screenWidth, screenHeight };
 					} else {
-						ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
+						m_PlayerScreenMouseBounds = { 0, screenHeight, screenWidth, screenHeight };
 					}
 					break;
 				case 2:
-					ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
+					m_PlayerScreenMouseBounds = { 0, screenHeight, screenWidth, screenHeight };
 					break;
 				case 3:
-					ForceMouseWithinBox(screenWidth, screenHeight, screenWidth, screenHeight, whichPlayer);
+					m_PlayerScreenMouseBounds = { screenWidth, screenHeight, screenWidth, screenHeight };
 					break;
 				default:
-					// ScreenOfPlayer will return -1 for inactive player so do nothing.
-					break;
+					force = false;
 			}
+		} else {
+			force = false;
+		}
+
+		if (force) {
+			if (g_WindowMan.FullyCoversAllDisplays()) {
+				ForceMouseWithinBox(0, 0, m_PlayerScreenMouseBounds.w, m_PlayerScreenMouseBounds.h);
+			} else {
+				SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), &m_PlayerScreenMouseBounds);
+			}
+		} else {
+			// Set the mouse bounds to the whole window so ForceMouseWithinBox is not stuck being relative to some player screen, because it can still bind the mouse even if this doesn't.
+			m_PlayerScreenMouseBounds = { 0, 0, g_WindowMan.GetResX() * resMultiplier, g_WindowMan.GetResY() * resMultiplier };
+			SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), nullptr);
 		}
 	}
 
@@ -715,6 +766,9 @@ namespace RTE {
 					break;
 				}
 				case SDL_MOUSEMOTION:
+					if (m_DisableMouseMoving) {
+						break;
+					}
 					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
 					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
 					if (g_WindowMan.FullyCoversAllDisplays()) {
@@ -871,9 +925,6 @@ namespace RTE {
 		} else if (!FlagCtrlState() && FlagAltState()) {
 			if (KeyPressed(SDLK_F2)) {
 				ContentFile::ReloadAllBitmaps();
-			} else if (KeyPressed(SDLK_F4)) {
-				// Alt+F4 OS event doesn't seem to work when in multi-display fullscreen, probably because multiple windows, so just handle it here all the time.
-				System::SetQuit();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
 				g_WindowMan.ChangeResolutionMultiplier();
@@ -973,14 +1024,9 @@ namespace RTE {
 			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
 
 			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
-				if (m_TrapMousePos && g_WindowMan.AnyWindowHasFocus()) {
-					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					// SDL_WarpMouseInWindow(g_FrameMan.GetWindow(), g_WindowMan.GetResX() / 2, g_WindowMan.GetResY() / 2);
-				} else if (g_ActivityMan.IsInActivity()) {
-					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
-					ForceMouseWithinPlayerScreen(mousePlayer);
-				}
+			if (g_WindowMan.AnyWindowHasFocus() && !IsInMultiplayerMode() && !m_DisableMouseMoving && !m_TrapMousePos) {
+				// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
+				ForceMouseWithinPlayerScreen(g_ActivityMan.IsInActivity(), mousePlayer);
 			}
 
 			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it

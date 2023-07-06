@@ -1187,7 +1187,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
             attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
             Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5F + (attachableGibBlastStrength * RandomNum()));
-            attachable->SetVel(m_Vel + gibBlastVel); // "+ impactImpulse" was redundant, as attachables already inherit velocity by default
+            attachable->SetVel(m_Vel + gibBlastVel);
 
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
@@ -1238,7 +1238,7 @@ void MOSRotating::ApplyImpulses() {
 	}
 	averagedImpulseForceOffset /= static_cast<float>(m_ImpulseForces.size());
 
-    MOSprite::ApplyImpulses(); // Moved up here so velocity is updated before gibs are generated
+    MOSprite::ApplyImpulses(); // Ensure velocity is updated before gibs are generated
 
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;

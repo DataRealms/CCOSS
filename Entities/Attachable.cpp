@@ -236,15 +236,27 @@ namespace RTE {
 			}
 		}
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
-			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
-			// Need this bullshit counter-force looked at :V -ComradeShook
-			m_ImpulseForces.push_back(std::pair<Vector, Vector> {-totalImpulseForce, Vector{ 0, 0 }});
+		if (gibImpulseLimitValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
+			Vector impulseToJoint = totalImpulseForce;
+			impulseToJoint.SetMagnitude(gibImpulseLimitValueToUse);
+
+			jointImpulses += impulseToJoint;
+
+			m_ImpulseForces.clear();
+			m_ImpulseForces.push_back(std::pair<Vector, Vector> {totalImpulseForce - impulseToJoint, Vector()});
+
 			MOSprite::ApplyImpulses(); // Makes gibs inherit the velocity of the attached attachable when gibbed by violence
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
-			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
+		} else if (jointStrengthValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
+			Vector impulseToJoint = totalImpulseForce;
+			impulseToJoint.SetMagnitude(jointStrengthValueToUse);
+			
+			jointImpulses += impulseToJoint;
+
+			m_ImpulseForces.clear();
+			m_ImpulseForces.push_back(std::pair<Vector, Vector> {totalImpulseForce - impulseToJoint, Vector()});
+
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
 		} else {

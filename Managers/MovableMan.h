@@ -942,13 +942,13 @@ protected:
     // A map to give a unique contiguous identifier per-actor. This is re-created per frame.
     std::unordered_map<const Actor *, int> m_ContiguousActorIDs;
     // List of items that are pickup-able by actors
-    std::deque<MovableObject *> m_Items;
+	std::deque<HeldDevice *> m_Items;
     // List of free, dead particles flying around
     std::deque<MovableObject *> m_Particles;
     // These are the actors/items/particles which were added during a frame.
     // They are moved to the containers above at the end of the frame.
     std::deque<Actor *> m_AddedActors;
-    std::deque<MovableObject *> m_AddedItems;
+	std::deque<HeldDevice *> m_AddedItems;
     std::deque<MovableObject *> m_AddedParticles;
 
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here

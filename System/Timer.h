@@ -169,7 +169,7 @@ namespace RTE {
 		/// Returns true if the elapsed real time is past a certain amount of time after the start previously set by SetRealTimeLimit.
 		/// </summary>
 		/// <returns>A bool only yielding true if the elapsed real time is greater than the set limit value. If no limit has been set, this returns false.</returns>
-		bool IsPastRealTimeLimit() { return (m_RealTimeLimit == 0) ? true : (m_RealTimeLimit > 0 && (g_TimerMan.GetRealTickCount() - m_StartRealTime) > m_RealTimeLimit); }
+		bool IsPastRealTimeLimit() const { return (m_RealTimeLimit == 0) ? true : (m_RealTimeLimit > 0 && (g_TimerMan.GetRealTickCount() - m_StartRealTime) > m_RealTimeLimit); }
 
 		/// <summary>
 		/// Returns how much progress has been made toward the set time limit previously set by SetRealTimeLimitMS.

@@ -109,8 +109,6 @@ void Actor::Clear() {
 	m_MaxInventoryMass = -1.0F;
 	m_pItemInReach = nullptr;
     m_HUDStack = 0;
-    m_FlashWhiteMS = 0;
-    m_WhiteFlashTimer.Reset();
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
@@ -1588,15 +1586,6 @@ void Actor::Update()
         g_MovableMan.SortTeamRoster(m_Team);
     }
 
-    // Reduce the remaining white flash time
-    if (m_FlashWhiteMS)
-    {
-        m_FlashWhiteMS -= m_WhiteFlashTimer.GetElapsedRealTimeMS();
-        m_WhiteFlashTimer.Reset();
-        if (m_FlashWhiteMS < 0)
-            m_FlashWhiteMS = 0;
-    }
-
 	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {
 		if (m_PrevHealth - m_Health > 1.5F) {
@@ -1628,22 +1617,6 @@ void Actor::Update()
         m_aSprite->SetFrame(frame);
     }
 */
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Actor's current graphical representation to a
-//                  BITMAP of choice.
-
-void Actor::Draw(BITMAP *pTargetBitmap,
-                 const Vector &targetPos,
-                 DrawMode mode,
-                 bool onlyPhysical) const
-{
-    // Make it draw white if is going to be drawn as color
-    MOSRotating::Draw(pTargetBitmap, targetPos, mode == g_DrawColor && m_FlashWhiteMS ? g_DrawWhite : mode, onlyPhysical);
 }
 
 

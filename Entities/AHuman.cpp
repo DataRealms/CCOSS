@@ -4048,7 +4048,7 @@ void AHuman::DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos, 
 void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
+    DrawMode realMode = (mode == g_DrawColor && !m_FlashWhiteTimer.IsPastRealTimeLimit()) ? g_DrawWhite : mode;
     // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
     if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
     if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }

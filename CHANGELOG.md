@@ -859,6 +859,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Changed `LuaMan:FileOpen` access modes so it only allows `"r", "r+", "w", "w+", "a", "a+"`, i.e. specifying type (text, binary) is not supported. See [this reference page](https://cplusplus.com/reference/cstdio/fopen) for details on the access modes.
 
+- Moved `FlashWhite` function from `Actor` to `MOSRotating`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

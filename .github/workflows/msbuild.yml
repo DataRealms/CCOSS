@@ -8,7 +8,7 @@ on:
         type: boolean
         required: false
         default: false
-      build_configuration: # "Final"
+      build_configuration:
         description: "Build Configuration"
         type: choice
         required: false
@@ -26,7 +26,7 @@ on:
         type: boolean
         required: false
         default: false
-      build_configuration: # "Final"
+      build_configuration: # "Final" | "Debug Release" | "Debug Minimal" | "Debug Full"
         type: string
         required: false
         default: "Final"

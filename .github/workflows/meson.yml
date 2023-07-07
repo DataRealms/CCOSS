@@ -34,11 +34,11 @@ on:
         type: boolean
         required: false
         default: false
-      build_type: # "release", "debug"
+      build_type: # "release" | "debug"
         type: string
         required: false
         default: "release"
-      debug_level:  # "full", "minimal", "release" 
+      debug_level:  # "full" | "minimal" | "release" 
         type: string
         required: false
         default: "release"

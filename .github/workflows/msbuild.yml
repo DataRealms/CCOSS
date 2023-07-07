@@ -1,6 +1,7 @@
 name: Windows Build
 
 on:
+  # Triggers the workflow when manually dispatched
   workflow_dispatch:
     inputs:
       upload_artefacts:

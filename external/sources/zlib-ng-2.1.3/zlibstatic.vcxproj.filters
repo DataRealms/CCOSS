@@ -138,15 +138,6 @@
     <ClInclude Include="src\fallback_builtins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="zconf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib_name_mangling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\adler32_p.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -650,7 +650,7 @@ option COLORSPACE enables GAMMA disabled
 # be used to hide data from libpng using applications, but it doesn't seem
 # possible to damage them.
 
-setting sRGB_PROFILE_CHECKS default 2
+setting sRGB_PROFILE_CHECKS default 0
 
 # Artificially align memory - the code typically aligns to 8 byte
 # boundaries if this is switched on, it's a small waste of space

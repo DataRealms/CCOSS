@@ -149,5 +149,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: CortexCommand (macOS)
-          path: build/CortexCommand
+          path: build/CortexCommand*(_debug)
           if-no-files-found: error

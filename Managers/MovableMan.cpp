@@ -31,6 +31,7 @@
 #include "Scene.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
+#include "SettingsMan.h"
 #include "LuaMan.h"
 
 #include <execution>
@@ -1990,30 +1991,31 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
-#ifdef AI_MULTITHREADING
-        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-            [&](LuaStateWrapper &luaState) {
-                g_LuaMan.SetThreadLuaStateOverride(&luaState);
-                for (Actor *actor : m_Actors) {
-                    if (actor->GetLuaState() == &luaState) {
-                        actor->GetController()->Update();
+        if (g_SettingsMan.GetEnableMultithreadedAI()) {
+            LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+                [&](LuaStateWrapper &luaState) {
+                    g_LuaMan.SetThreadLuaStateOverride(&luaState);
+                    for (Actor *actor : m_Actors) {
+                        if (actor->GetLuaState() == &luaState) {
+                            actor->GetController()->Update();
+                        }
                     }
-                }
-                g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
+                    g_LuaMan.SetThreadLuaStateOverride(nullptr);
+                });
 
-        // Update actors without any lua state 
-        for (Actor* actor : m_Actors) {
-            if (actor->GetLuaState() == nullptr) {
+            for (Actor* actor : m_Actors) {
+                if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
+                    actor->GetController()->Update();
+                }
+            }
+        }
+        else
+        {
+            for (Actor* actor : m_Actors) {
                 actor->GetController()->Update();
             }
         }
-#else
-        for (Actor* actor : m_Actors) {
-            actor->GetController()->Update();
-        }
-#endif
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

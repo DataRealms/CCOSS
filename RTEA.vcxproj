@@ -155,7 +155,7 @@
       <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;setupapi.lib;version.lib;imm32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-32.lib;loadpng-debug-32.lib;liblz4_debug_static.lib;luajit-debug-32.lib;luabind-debug-32.lib;raknet-debug-32.lib;sdl2main-debug-32.lib;sdl2-debug-32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic-32.lib;setupapi.lib;version.lib;imm32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-32.lib;loadpng-debug-32.lib;liblz4_debug_static.lib;luajit-debug-32.lib;luabind-debug-32.lib;raknet-debug-32.lib;sdl2main-debug-32.lib;sdl2-debug-32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -258,7 +258,7 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;setupapi.lib;version.lib;imm32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-32.lib;loadpng-debug-32.lib;liblz4_debug_static.lib;luajit-debug-release-32.lib;luabind-debug-32.lib;raknet-debug-32.lib;sdl2main-debug-32.lib;sdl2-debug-32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic-32.lib;setupapi.lib;version.lib;imm32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-32.lib;loadpng-debug-32.lib;liblz4_debug_static.lib;luajit-debug-release-32.lib;luabind-debug-32.lib;raknet-debug-32.lib;sdl2main-debug-32.lib;sdl2-debug-32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -367,7 +367,7 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-release-32.lib;loadpng-debug-release-32.lib;liblz4_release_static.lib;luajit-debug-release-32.lib;luabind-debug-release-32.lib;raknet-release-32.lib;opengl32.lib;SDL2-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic-32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-debug-release-32.lib;loadpng-debug-release-32.lib;liblz4_release_static.lib;luajit-debug-release-32.lib;luabind-debug-release-32.lib;raknet-release-32.lib;opengl32.lib;SDL2-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -487,7 +487,7 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libpng16_static.lib;fmodL_vc.lib;allegro-release-32.lib;loadpng-release-32.lib;liblz4_release_static.lib;luajit-release-32.lib;luabind-release-32.lib;raknet-release-32.lib;opengl32.lib;SDL2-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic-32.lib;libpng16_static.lib;fmodL_vc.lib;allegro-release-32.lib;loadpng-release-32.lib;liblz4_release_static.lib;luajit-release-32.lib;luabind-release-32.lib;raknet-release-32.lib;opengl32.lib;SDL2-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\lib\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

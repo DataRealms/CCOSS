@@ -864,8 +864,6 @@ protected:
 	int m_DeliveryWidth; //!< The width of the currently selected delivery craft, which will determine the width of the LZ marker.
     // The cursor image shared by all buy menus
     static BITMAP *s_pCursor;
-    // Screen position of the cursor
-    Vector m_CursorPos;
 
 	// If true UI won't afford to order a craft with more passengers than allowed by craft
 	bool m_EnforceMaxPassengersConstraint;

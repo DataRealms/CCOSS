@@ -26,6 +26,7 @@ namespace RTE {
 		AIM_SHARP,
 		WEAPON_FIRE,
 		WEAPON_RELOAD,
+		PIE_MENU_OPENED,
 		PIE_MENU_ACTIVE,
 		WEAPON_CHANGE_NEXT,
 		WEAPON_CHANGE_PREV,
@@ -243,6 +244,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this is using mouse input at all.</returns>
 		bool IsMouseControlled() const;
+
+		/// <summary>
+		/// Indicates whether this is only listening to keyboard input.
+		/// </summary>
+		/// <returns>Whether this is only using keyboard input.</returns>
+		bool IsKeyboardOnlyControlled() const;
 
 		/// <summary>
 		/// Indicates whether this is listening to gamepad at all.

@@ -54,6 +54,7 @@ namespace RTE {
 		.def("IsPlayerControlled", &Controller::IsPlayerControlled)
 		.def("RelativeCursorMovement", &Controller::RelativeCursorMovement)
 		.def("IsMouseControlled", &Controller::IsMouseControlled)
+		.def("IsKeyboardOnlyControlled", &Controller::IsKeyboardOnlyControlled)
 		.def("IsGamepadControlled", &Controller::IsGamepadControlled)
 		.def("SetState", &Controller::SetState)
 		.def("IsState", &Controller::IsState)
@@ -75,6 +76,7 @@ namespace RTE {
 			luabind::value("AIM_SHARP", ControlState::AIM_SHARP),
 			luabind::value("WEAPON_FIRE", ControlState::WEAPON_FIRE),
 			luabind::value("WEAPON_RELOAD", ControlState::WEAPON_RELOAD),
+			luabind::value("PIE_MENU_OPENED", ControlState::PIE_MENU_OPENED),
 			luabind::value("PIE_MENU_ACTIVE", ControlState::PIE_MENU_ACTIVE),
 			luabind::value("WEAPON_CHANGE_NEXT", ControlState::WEAPON_CHANGE_NEXT),
 			luabind::value("WEAPON_CHANGE_PREV", ControlState::WEAPON_CHANGE_PREV),

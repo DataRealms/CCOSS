@@ -3085,7 +3085,7 @@ void AHuman::PreControllerUpdate()
     // If the pie menu is on, try to preserve whatever move state we had before it going into effect.
     // This is only done for digital input, where the user needs to use the keyboard to choose pie slices.
     // For analog input, this doesn't matter - the mouse or aiming analog stick controls the pie menu.
-    bool keepOldState = !m_Controller.IsMouseControlled() && !m_Controller.IsGamepadControlled() && m_Controller.IsState(PIE_MENU_ACTIVE);
+    bool keepOldState = m_Controller.IsKeyboardOnlyControlled() && m_Controller.IsState(PIE_MENU_ACTIVE);
 
 	if (!keepOldState) {
         bool crouching = m_Controller.IsState(BODY_CROUCH);

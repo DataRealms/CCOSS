@@ -51,6 +51,7 @@ namespace RTE {
 		m_DisableFactionBuyMenuThemes = false;
 		m_DisableFactionBuyMenuThemeCursors = false;
 		m_PathFinderGridNodeSize = c_PPM;
+		m_EnableMultithreadedAI = false;
 		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;
@@ -89,7 +90,15 @@ namespace RTE {
 			Reader newSettingsReader(m_SettingsPath);
 			return Serializable::Create(newSettingsReader);
 		}
-		return Serializable::Create(settingsReader);
+
+		int failureCode = Serializable::Create(settingsReader);
+
+		if (GetAnyExperimentalSettingsEnabled()) {
+			// Show a message box to annoy people as much as possible while they're using experimental settings, so they can't leave it on accidentally
+			RTEError::ShowMessageBox("Experimental settings are enabled!\nThis may break mods, crash the game, corrupt saves or worse.\nUse at your own risk.");
+		}
+
+		return failureCode;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +210,8 @@ namespace RTE {
 			reader >> m_DisableFactionBuyMenuThemeCursors;
 		} else if (propName == "PathFinderGridNodeSize") {
 			reader >> m_PathFinderGridNodeSize;
+		} else if (propName == "EnableMultithreadedAI") {
+			reader >> m_EnableMultithreadedAI;
 		} else if (propName == "AIUpdateInterval") {
 			reader >> m_AIUpdateInterval;
 		} else if (propName == "EnableParticleSettling") {
@@ -399,6 +410,13 @@ namespace RTE {
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
 		writer.NewPropertyWithValue("RealToSimCap", g_TimerMan.GetRealToSimCap());
+		
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Engine Settings - EXPERIMENTAL", false);
+		writer.NewLineString("// These settings are experimental! They may break mods, crash the game, corrupt saves or worse. Use at your own risk.", false);
+		writer.NewLine(false);
+		writer.NewPropertyWithValue("EnableMultithreadedAI", m_EnableMultithreadedAI);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

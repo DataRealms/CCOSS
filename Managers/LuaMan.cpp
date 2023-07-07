@@ -286,7 +286,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaStateWrapper * LuaMan::GetAndLockFreeScriptState() {
-#ifdef AI_MULTITHREADING
+		if (!g_SettingsMan.GetEnableMultithreadedAI()) {
+			// If multithreaded AI is disabled, all scripts are placed in the master script state
+			bool success = m_MasterScriptState.GetMutex().try_lock();
+			RTEAssert(success, "Our lua state override for our thread already belongs to another thread!")
+			return &m_MasterScriptState;
+		}
+
 		if (s_luaStateOverride) {
 			// We're creating this object in a multithreaded environment, ensure that it's assigned to the same script state as us
 			bool success = s_luaStateOverride->GetMutex().try_lock();
@@ -301,11 +307,6 @@ namespace RTE {
 		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");
 
 		return &m_ScriptStates[ourState];	
-#else
-		bool success = m_MasterScriptState.GetMutex().try_lock();
-		RTEAssert(success, "Our lua state override for our thread already belongs to another thread!")
-		return &m_MasterScriptState;
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

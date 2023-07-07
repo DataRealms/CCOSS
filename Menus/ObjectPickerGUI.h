@@ -163,7 +163,6 @@ namespace RTE {
 		enum class PickerFocus { GroupList, ObjectList };
 
 		static BITMAP *s_Cursor; //!< The cursor image shared by all pickers.
-		Vector m_CursorPos; //!< Screen position of the cursor.
 
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this ObjectPickerGUI's GUIControlManager.
 		std::unique_ptr<GUIInputWrapper> m_GUIInput; //!< The GUIInput interface that will be used by this ObjectPickerGUI's GUIControlManager.

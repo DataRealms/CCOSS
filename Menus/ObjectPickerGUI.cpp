@@ -30,7 +30,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::Clear() {
-		m_CursorPos.Reset();
 		m_GUIScreen = nullptr;
 		m_GUIInput = nullptr;
 		m_GUIControlManager = nullptr;
@@ -128,8 +127,8 @@ namespace RTE {
 		if (enable && m_PickerState != PickerState::Enabled && m_PickerState != PickerState::Enabling) {
 			m_PickerState = PickerState::Enabling;
 			g_UInputMan.TrapMousePos(false, m_Controller->GetPlayer());
-			m_CursorPos.SetXY(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer()) / 2), static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(m_Controller->GetPlayer()) / 2));
-			g_UInputMan.SetMousePos(m_CursorPos, m_Controller->GetPlayer());
+			Vector playerFramebufferCenter = Vector(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer())), static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(m_Controller->GetPlayer()))) / 2;
+			g_UInputMan.SetMousePos(playerFramebufferCenter, m_Controller->GetPlayer());
 
 			SetListFocus(m_ObjectsList->GetItemList()->empty() ? PickerFocus::GroupList : PickerFocus::ObjectList);
 
@@ -514,10 +513,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ObjectPickerGUI::HandleMouseEvents() {
-		int mouseX;
-		int mouseY;
-		m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-		m_CursorPos.SetXY(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		int mousePosX;
+		int mousePosY;
+		m_GUIInput->GetMousePosition(&mousePosX, &mousePosY);
 
 		GUIEvent guiEvent;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
@@ -526,7 +524,7 @@ namespace RTE {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown && (guiEvent.GetData() & GUIListBox::MOUSE_LEFT)) {
 						SelectGroupByIndex(m_GroupsList->GetSelectedIndex());
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
-						const GUIListPanel::Item *groupListItem = m_GroupsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+						const GUIListPanel::Item *groupListItem = m_GroupsList->GetItem(mousePosX, mousePosY);
 						if (groupListItem && m_SelectedGroupIndex != groupListItem->m_ID) { SelectGroupByIndex(groupListItem->m_ID, false); }
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseEnter) {
 						SetListFocus(PickerFocus::GroupList);
@@ -545,13 +543,13 @@ namespace RTE {
 							}
 						}
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
-						const GUIListPanel::Item *objectListItem = m_ObjectsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+						const GUIListPanel::Item *objectListItem = m_ObjectsList->GetItem(mousePosX, mousePosY);
 						if (objectListItem && m_SelectedObjectIndex != objectListItem->m_ID) { SelectObjectByIndex(objectListItem->m_ID); }
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseEnter) {
 						SetListFocus(PickerFocus::ObjectList);
 					}
 				} else {
-					if (guiEvent.GetMsg() == GUIListBox::Click && m_CursorPos.GetFloorIntX() < m_ParentBox->GetXPos()) {
+					if (guiEvent.GetMsg() == GUIListBox::Click && mousePosX < m_ParentBox->GetXPos()) {
 						return true;
 					}
 				}
@@ -600,9 +598,12 @@ namespace RTE {
 		m_GUIControlManager->Draw(&drawScreen);
 		if (IsEnabled() && m_Controller->IsMouseControlled()) {
 			if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
-				draw_sprite(drawBitmap, s_Cursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+				int mousePosX;
+				int mousePosY;
+				m_GUIInput->GetMousePosition(&mousePosX, &mousePosY);
+				draw_sprite(drawBitmap, s_Cursor, mousePosX, mousePosY);
 			} else {
-				m_GUIControlManager->DrawMouse();
+				m_GUIControlManager->DrawMouse(&drawScreen);
 			}
 		}
 	}

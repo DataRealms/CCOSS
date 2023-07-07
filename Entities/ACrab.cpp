@@ -2193,50 +2193,57 @@ void ACrab::PreControllerUpdate()
     const float movementThreshold = 1.0F;
 	bool isStill = (m_Vel + m_PrevVel).MagnitudeIsLessThan(movementThreshold);
 
-	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
-        if (m_MoveState != JUMP)
-        {
-            // Restart the stride if we're just starting to walk or crawl
-            if (m_MoveState != WALK)
-            {
-                m_StrideStart[LEFTSIDE] = true;
-                m_StrideStart[RIGHTSIDE] = true;
-                MoveOutOfTerrain(g_MaterialGrass);
-            }
+	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
+	// This is only done for digital input, where the user needs to use the keyboard to choose pie slices.
+	// For analog input, this doesn't matter - the mouse or aiming analog stick controls the pie menu.
+	bool keepOldState = m_Controller.IsKeyboardOnlyControlled() && m_Controller.IsState(PIE_MENU_ACTIVE);
 
-            m_MoveState = WALK;
+	if (!keepOldState) {
+		if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
+			if (m_MoveState != JUMP)
+			{
+				// Restart the stride if we're just starting to walk or crawl
+				if (m_MoveState != WALK)
+				{
+					m_StrideStart[LEFTSIDE] = true;
+					m_StrideStart[RIGHTSIDE] = true;
+					MoveOutOfTerrain(g_MaterialGrass);
+				}
 
-            for (int side = 0; side < SIDECOUNT; ++side)
-            {
-                m_Paths[side][FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-                m_Paths[side][BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-            }
-        }
+				m_MoveState = WALK;
 
-		// Walk backwards if the aiming is already focused in the opposite direction of travel.
-		if (std::abs(analogAim.m_X) > 0 || m_Controller.IsState(AIM_SHARP)) {
-			for (int side = 0; side < SIDECOUNT; ++side) {
-                m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-                m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-            }
-		} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
-            m_HFlipped = !m_HFlipped;
-            m_CheckTerrIntersection = true;
-            MoveOutOfTerrain(g_MaterialGrass);
-            for (int side = 0; side < SIDECOUNT; ++side)
-            {
-                for (int layer = 0; layer < LAYERCOUNT; ++layer)
-                {
-                    m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
-                    m_Paths[side][layer][WALK].Terminate();
-                    m_Paths[side][layer][STAND].Terminate();
-                }
-                m_StrideStart[side] = true;
-            }
-        }
-    }
-    else
-        m_MoveState = STAND;
+				for (int side = 0; side < SIDECOUNT; ++side)
+				{
+					m_Paths[side][FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+					m_Paths[side][BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+				}
+			}
+
+			// Walk backwards if the aiming is already focused in the opposite direction of travel.
+			if (std::abs(analogAim.m_X) > 0 || m_Controller.IsState(AIM_SHARP)) {
+				for (int side = 0; side < SIDECOUNT; ++side) {
+					m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+					m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+				}
+			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
+				m_HFlipped = !m_HFlipped;
+				m_CheckTerrIntersection = true;
+				MoveOutOfTerrain(g_MaterialGrass);
+				for (int side = 0; side < SIDECOUNT; ++side)
+				{
+					for (int layer = 0; layer < LAYERCOUNT; ++layer)
+					{
+						m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
+						m_Paths[side][layer][WALK].Terminate();
+						m_Paths[side][layer][STAND].Terminate();
+					}
+					m_StrideStart[side] = true;
+				}
+			}
+		} else {
+			m_MoveState = STAND;
+		}
+	}
 
     ////////////////////////////////////
     // Reload held MO, if applicable

@@ -43,7 +43,7 @@ namespace RTE {
 				int backbufferHeight = g_FrameMan.GetBackBuffer32()->h;
 				BITMAP *abortScreenBuffer = create_bitmap(backbufferWidth, backbufferHeight);
 				blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, backbufferWidth, backbufferHeight);
-				save_bmp("AbortScreen.bmp", abortScreenBuffer, nullptr);
+				save_png("AbortScreen.png", abortScreenBuffer, nullptr);
 				destroy_bitmap(abortScreenBuffer);
 			}
 

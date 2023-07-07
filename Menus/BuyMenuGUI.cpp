@@ -115,7 +115,6 @@ void BuyMenuGUI::Clear()
     m_pClearButton = 0;
     m_Loadouts.clear();
     m_PurchaseMade = false;
-    m_CursorPos.Reset();
 
 	m_EnforceMaxPassengersConstraint = true;
 	m_EnforceMaxMassConstraint = true;
@@ -1019,9 +1018,9 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////////////////
     // Mouse cursor logic
 
-    int mouseX, mouseY;
-    m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
-    m_CursorPos.SetXY(mouseX, mouseY);
+	int mousePosX;
+	int mousePosY;
+    m_pGUIInput->GetMousePosition(&mousePosX, &mousePosY);
 
     ////////////////////////////////////////////
     // Notification blinking logic
@@ -1227,7 +1226,7 @@ void BuyMenuGUI::Update()
     for (int category = 0; category < CATEGORYCOUNT; ++category) {
         if (!m_pCategoryTabs[category]->IsEnabled()) {
             if (m_MenuCategory == category) { m_pCategoryTabs[m_MenuCategory]->SetEnabled(true); }
-            if (m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX() + 3, m_CursorPos.GetFloorIntY())) {
+            if (m_pCategoryTabs[category]->PointInside(mousePosX + 3, mousePosY)) {
                 if (m_pController->IsState(PRESS_PRIMARY)) {
                     m_MenuCategory = category;
                     m_pCategoryTabs[m_MenuCategory]->SetFocus();
@@ -1715,7 +1714,7 @@ void BuyMenuGUI::Update()
     if (m_MenuEnabled == ENABLED) {
         if (m_pController->IsState(WEAPON_RELOAD)) {
             TryPurchase();
-        } else if (m_pController->IsMouseControlled() && (m_pController->IsState(PRESS_PRIMARY) || m_pController->IsState(PRESS_SECONDARY)) && m_CursorPos.m_X > m_pParentBox->GetWidth()) {
+        } else if (m_pController->IsMouseControlled() && (m_pController->IsState(PRESS_PRIMARY) || m_pController->IsState(PRESS_SECONDARY)) && mousePosX > m_pParentBox->GetWidth()) {
             if (m_pController->IsState(PRESS_PRIMARY)) {
                 TryPurchase();
             } else {
@@ -1822,7 +1821,7 @@ void BuyMenuGUI::Update()
                     m_pShopList->SetFocus();
                     m_MenuFocus = ITEMS;
 
-                    GUIListPanel::Item *pItem = m_pShopList->GetItem(m_CursorPos.m_X, m_CursorPos.m_Y);
+                    GUIListPanel::Item *pItem = m_pShopList->GetItem(mousePosX, mousePosY);
 
                     // If a module group list item, toggle its expansion and update the list
                     if (pItem && pItem->m_ExtraIndex >= 0)
@@ -1920,7 +1919,7 @@ void BuyMenuGUI::Update()
                     m_MenuFocus = ITEMS;
 
                     // See if it's hovering over any item
-                    GUIListPanel::Item *pItem = m_pShopList->GetItem(m_CursorPos.m_X, m_CursorPos.m_Y);
+                    GUIListPanel::Item *pItem = m_pShopList->GetItem(mousePosX, mousePosY);
                     if (pItem)
                     {
                         // Don't let mouse movement change the index if it's still hovering inside the same item.
@@ -1998,7 +1997,7 @@ void BuyMenuGUI::Update()
                     m_MenuFocus = ORDER;
 
                     // See if it's hovering over any item
-                    GUIListPanel::Item *pItem = m_pCartList->GetItem(m_CursorPos.m_X, m_CursorPos.m_Y);
+                    GUIListPanel::Item *pItem = m_pCartList->GetItem(mousePosX, mousePosY);
                     if (pItem)
                     {
                         // Don't let mouse movement change the index if it's still hovering inside the same item.
@@ -2061,9 +2060,12 @@ void BuyMenuGUI::Draw(BITMAP *drawBitmap) const {
 	m_pGUIController->Draw(&drawScreen);
 	if (IsEnabled() && m_pController->IsMouseControlled()) {
 		if (g_SettingsMan.FactionBuyMenuThemeCursorsDisabled()) {
-			draw_sprite(drawBitmap, s_pCursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+			int mousePosX;
+			int mousePosY;
+			m_pGUIInput->GetMousePosition(&mousePosX, &mousePosY);
+			draw_sprite(drawBitmap, s_pCursor, mousePosX, mousePosY);
 		} else {
-			m_pGUIController->DrawMouse();
+			m_pGUIController->DrawMouse(&drawScreen);
 		}
 	}
 }

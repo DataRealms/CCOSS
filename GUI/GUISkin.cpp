@@ -292,10 +292,12 @@ GUIBitmap * GUISkin::LoadMousePointer(const std::string &Section) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GUISkin::DrawMouse(int Image, int X, int Y) {
+void GUISkin::DrawMouse(int Image, int X, int Y, GUIScreen *guiScreenOverride) {
 	assert(Image >= 0 && Image <= 2);
 
-	if (m_MousePointers[Image]) { m_Screen->DrawBitmapTrans(m_MousePointers[Image], X - 1, Y - 1, nullptr); }
+	GUIScreen *targetScreen = guiScreenOverride ? guiScreenOverride : m_Screen;
+
+	if (m_MousePointers[Image]) { targetScreen->DrawBitmapTrans(m_MousePointers[Image], X - 1, Y - 1, nullptr); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

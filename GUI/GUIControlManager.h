@@ -115,13 +115,11 @@ public:
     void Draw(GUIScreen *pScreen);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawMouse
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the mouse.
-// Arguments:       None.
-
-    void DrawMouse();
+	/// <summary>
+	/// Draws the mouse to the backbuffer.
+	/// </summary>
+	/// <param name="pScreen">The GUIScreen to draw to, overriding the one passed in on construction.</param>
+	void DrawMouse(GUIScreen *guiScreen = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +222,7 @@ public:
 // Description:     Gets an event from the queue.
 // Arguments:       Pointer to variable receiving the Event.
 // Returns:         Returns true when an event was grabbed.
-//                  Returns false when there was no more events in the queue 
+//                  Returns false when there was no more events in the queue
 //                  OR the Event pointer is 0.
 
     bool GetEvent(GUIEvent *Event);

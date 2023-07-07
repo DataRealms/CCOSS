@@ -1017,7 +1017,8 @@ namespace RTE {
 	void UInputMan::UpdateMouseInput() {
 		// Detect and store mouse movement input, translated to analog stick emulation
 		int mousePlayer = MouseUsedByPlayer();
-		if (mousePlayer != Players::NoPlayer) {
+		// TODO: Figure out a less shit solution to updating the mouse in GUIs when there are no mouse players configured, i.e. no player input scheme is using mouse+keyboard. For not just check if we're out of Activity.
+		if (!g_ActivityMan.IsInActivity() || mousePlayer != Players::NoPlayer) {
 			// Multiplying by 30 for sensitivity. TODO: Make sensitivity slider 1-50;
 			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
 			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;

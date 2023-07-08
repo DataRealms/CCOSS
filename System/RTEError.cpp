@@ -26,10 +26,13 @@ namespace RTE {
 			SDL_MessageBoxButtonData(SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, AbortMessageButton::ButtonExit, "OK")
 		};
 
+		// Don't even show the restart button in debug builds.
+#ifdef RELEASE_BUILD
 		// Getting a junk path from argv[0] is, or should be, impossible but check anyway.
 		if (std::filesystem::exists(System::GetThisExePathAndName())) {
 			abortMessageBoxButtons.emplace_back(SDL_MessageBoxButtonData(0, AbortMessageButton::ButtonRestart, "Restart Game"));
 		}
+#endif
 
 		SDL_MessageBoxData abortMessageBox = {
 			SDL_MESSAGEBOX_ERROR,
@@ -89,10 +92,15 @@ namespace RTE {
 			System::PrintToCLI(abortMessage);
 
 			if (ShowAbortMessageBox(abortMessage)) {
+				// Enable restarting in release builds only.
+				// Once this exits the debugger is detached and there doesn't seem to be a way to programatically re-attach it to the new instance.
+				// This will prevent your day from being ruined when your breakpoints don't trigger during a meltdown because you launched a new instance and didn't realize you're not attached to it.
+#ifdef RELEASE_BUILD
 #ifdef _WIN32
 				std::system(std::string(R"(start "" ")" + System::GetThisExePathAndName() + "\"").c_str());
 #else
 				std::system(std::string("\"" + System::GetThisExePathAndName() + "\"").c_str());
+#endif
 #endif
 			}
 		}

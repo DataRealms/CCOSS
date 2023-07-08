@@ -78,44 +78,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEError::AbortFunc(const std::string &description, const std::string &file, int line) {
+	void RTEError::AbortFunc(const std::string &description, const std::source_location &srcLocation) {
 		s_CurrentlyAborting = true;
 
 		if (!System::IsInExternalModuleValidationMode()) {
-			// Attempt to save the game itself, so the player can hopefully resume where they were.
-			bool abortSaveMade = false;
-			if (g_ActivityMan.GetActivityAllowsSaving()) {
-				abortSaveMade = g_ActivityMan.SaveCurrentGame("AbortSave");
+			// This typically contains the absolute path to the file on whatever machine this was compiled on, so in that case get only the file name.
+			std::filesystem::path filePath = srcLocation.file_name();
+			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : srcLocation.file_name();
+
+			std::string lineNum = std::to_string(srcLocation.line());
+			std::string funcName = srcLocation.function_name();
+
+			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n";
+
+			if (DumpAbortSave()) {
+				abortMessage += "\nThe game has saved to 'AbortSave'.";
+			}
+			if (DumpAbortScreen()) {
+				abortMessage += "\nThe last frame has been dumped to 'AbortScreen.png'.";
 			}
 
-			// Save out the screen bitmap, after making a copy of it, faster sometimes.
-			if (screen) {
-				int backbufferWidth = g_FrameMan.GetBackBuffer32()->w;
-				int backbufferHeight = g_FrameMan.GetBackBuffer32()->h;
-				BITMAP *abortScreenBuffer = create_bitmap(backbufferWidth, backbufferHeight);
-				blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, backbufferWidth, backbufferHeight);
-				save_png("AbortScreen.png", abortScreenBuffer, nullptr);
-				destroy_bitmap(abortScreenBuffer);
+			g_ConsoleMan.PrintString(abortMessage);
+			if (g_ConsoleMan.SaveAllText("AbortLog.txt")) {
+				abortMessage += "\nThe console has been dumped to 'AbortLog.txt'.";
 			}
+			System::PrintToCLI(abortMessage);
 
 			// Ditch the video mode so the message box appears without problems.
 			if (g_WindowMan.GetWindow()) {
 				SDL_SetWindowFullscreen(g_WindowMan.GetWindow(), 0);
 			}
-
-			// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
-			std::filesystem::path filePath = file;
-			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
-
-			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\n";
-			if (abortSaveMade) {
-				abortMessage += "The game has saved to 'AbortSave'.\n";
-			}
-			abortMessage += "The console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.png'.";
-
-			g_ConsoleMan.PrintString(abortMessage);
-			g_ConsoleMan.SaveAllText("AbortLog.txt");
-			System::PrintToCLI(abortMessage);
 
 			if (ShowAbortMessageBox(abortMessage)) {
 				// Enable restarting in release builds only.
@@ -136,15 +128,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEError::AssertFunc(const std::string &description, const char *file, int line) {
-		// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
-		std::filesystem::path filePath = file;
-		std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
+	void RTEError::AssertFunc(const std::string &description, const std::source_location &srcLocation) {
+		// This typically contains the absolute path to the file on whatever machine this was compiled on, so in that case get only the file name.
+		std::filesystem::path filePath = srcLocation.file_name();
+		std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : srcLocation.file_name();
 
-		std::string assertMessage = "Assert triggered in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nYou may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
+		std::string lineNum = std::to_string(srcLocation.line());
+		std::string funcName = srcLocation.function_name();
+
+		std::string assertMessage =
+			"Assertion in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n\n"
+			"You may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
 
 		if (ShowAssertMessageBox(assertMessage)) {
-			AbortFunc(description, file, line);
+			AbortFunc(description, srcLocation);
 		}
 	}
 

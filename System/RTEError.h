@@ -39,17 +39,15 @@ namespace RTE {
 		/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.
 		/// </summary>
 		/// <param name="description">Message explaining the reason for aborting.</param>
-		/// <param name="file">The source file from which abort was called.</param>
-		/// <param name="line">The line abort was called from in the source file.</param>
-		[[noreturn]] static void AbortFunc(const std::string &description, const std::string &file, int line);
+		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
+		[[noreturn]] static void AbortFunc(const std::string &description, const std::source_location &srcLocation);
 
 		/// <summary>
 		/// An assert, which upon failure will abort.
 		/// </summary>
 		/// <param name="description">The description of the assertion.</param>
-		/// <param name="file">The source file in which the assertion is made.</param>
-		/// <param name="line">The line where the assertion is made.</param>
-		[[noreturn]] static void AssertFunc(const std::string &description, const char *file, int line);
+		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
+		[[noreturn]] static void AssertFunc(const std::string &description, const std::source_location &srcLocation);
 
 	private:
 
@@ -81,13 +79,13 @@ namespace RTE {
 	};
 
 #define RTEAbort(description) \
-	if (!RTEError::s_CurrentlyAborting) {						\
-		RTEError::AbortFunc(description, __FILE__, __LINE__);	\
+	if (!RTEError::s_CurrentlyAborting) {										\
+		RTEError::AbortFunc(description, std::source_location::current());		\
 	}
 
 #define RTEAssert(expression, description) \
-	if (!(expression)) {										\
-		RTEError::AssertFunc(description, __FILE__, __LINE__);	\
+	if (!(expression)) {														\
+		RTEError::AssertFunc(description, std::source_location::current());		\
 	}
 }
 #endif

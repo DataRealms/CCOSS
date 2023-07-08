@@ -632,7 +632,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetDifficultyString(int difficulty) {
-		if (difficulty < DifficultySetting::CakeDifficulty) {
+		if (difficulty <= DifficultySetting::CakeDifficulty) {
 			return "Cake";
 		} else if (difficulty <= DifficultySetting::EasyDifficulty) {
 			return "Easy";

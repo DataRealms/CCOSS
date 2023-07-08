@@ -129,6 +129,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void RTEError::AssertFunc(const std::string &description, const std::source_location &srcLocation) {
+		if (System::IsInExternalModuleValidationMode()) {
+			AbortFunc(description, srcLocation);
+		}
+
 		// This typically contains the absolute path to the file on whatever machine this was compiled on, so in that case get only the file name.
 		std::filesystem::path filePath = srcLocation.file_name();
 		std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : srcLocation.file_name();

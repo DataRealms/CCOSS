@@ -6,15 +6,11 @@ if host_machine.cpu_family() == 'x86_64'
   external_objects += files(
       'fmod_vc.lib',
       'liblz4_debug_static.lib',
-      'libpng16_static.lib',
-      'zlibstat.lib'
     )
   else
     external_objects += files(
       'fmod_vc.lib',
       'liblz4_release_static.lib',
-      'libpng16_static.lib',
-      'zlibstat.lib',
     )
   endif
 else
@@ -24,15 +20,11 @@ message('using x86 libs')
   external_objects += files(
     'x86/fmodL_vc.lib',
     'x86/liblz4_debug_static.lib',
-    'x86/libpng16_static.lib',
-    'x86/zlibstat.lib',
     )
   else
     external_objects += files(
      'x86/fmodL_vc.lib',
      'x86/liblz4_release_static.lib',
-     'x86/libpng16_static.lib',
-     'x86/zlibstat.lib',
     )
   endif
 endif

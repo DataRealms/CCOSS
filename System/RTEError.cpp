@@ -13,16 +13,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEError::ShowMessageBox(const std::string &message, bool abortMessage) {
-		const char *messageBoxTitle = "RTE Warning! (>_<)";
-		int messageBoxFlags = SDL_MESSAGEBOX_WARNING;
-
-		if (abortMessage) {
-			messageBoxTitle = "RTE Aborted! (x_x)";
-			messageBoxFlags = SDL_MESSAGEBOX_ERROR;
-		}
-
-		SDL_ShowSimpleMessageBox(messageBoxFlags, messageBoxTitle, message.c_str(), nullptr);
+	void RTEError::ShowMessageBox(const std::string &message) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "RTE Warning! (>_<)", message.c_str(), nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

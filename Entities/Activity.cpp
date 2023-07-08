@@ -804,9 +804,7 @@ void Activity::Clear() {
 		}
 
 		float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
-		if (totalValue > std::numeric_limits<float>::epsilon()) {
-			std::snprintf(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
-		}
+		std::snprintf(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (m_IsActive[player]) {

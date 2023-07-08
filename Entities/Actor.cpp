@@ -1642,6 +1642,11 @@ void Actor::Update()
 */
 }
 
+void Actor::FullUpdate() {
+    PreControllerUpdate();
+    m_Controller.Update();
+    Update();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

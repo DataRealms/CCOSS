@@ -36,13 +36,6 @@ namespace RTE {
 		static void ShowMessageBox(const std::string &message);
 
 		/// <summary>
-		/// Pops up the abort message box dialog in the OS, notifying the user about a runtime error.
-		/// </summary>
-		/// <param name="message">The string that the message box should display.</param>
-		/// <returns>Whether to restart the game by launching a new instance, or proceed to exit.</returns>
-		static bool ShowAbortMessageBox(const std::string &message);
-
-		/// <summary>
 		/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.
 		/// </summary>
 		/// <param name="description">Message explaining the reason for aborting.</param>
@@ -57,6 +50,15 @@ namespace RTE {
 		/// <param name="file">The source file in which the assertion is made.</param>
 		/// <param name="line">The line where the assertion is made.</param>
 		[[noreturn]] static void AssertFunc(const std::string &description, const char *file, int line);
+
+	private:
+
+		/// <summary>
+		/// Pops up the abort message box dialog in the OS, notifying the user about a runtime error.
+		/// </summary>
+		/// <param name="message">The string that the message box should display.</param>
+		/// <returns>Whether to restart the game by launching a new instance, or proceed to exit.</returns>
+		static bool ShowAbortMessageBox(const std::string &message);
 	};
 
 #define RTEAbort(description) \

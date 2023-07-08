@@ -19,6 +19,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool RTEError::ShowAbortMessageBox(const std::string &message) {
+		enum AbortMessageButton { ButtonInvalid, ButtonExit, ButtonRestart };
+
+		std::vector<SDL_MessageBoxButtonData> abortMessageBoxButtons = {
+			SDL_MessageBoxButtonData(SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, AbortMessageButton::ButtonExit, "OK")
+		};
+
+		// Getting a junk path from argv[0] is, or should be, impossible but check anyway.
+		if (std::filesystem::exists(System::GetThisExePathAndName())) {
+			abortMessageBoxButtons.emplace_back(SDL_MessageBoxButtonData(0, AbortMessageButton::ButtonRestart, "Restart Game"));
+		}
+
+		SDL_MessageBoxData abortMessageBox = {
+			SDL_MESSAGEBOX_ERROR,
+			nullptr,
+			"RTE Aborted! (x_x)",
+			message.c_str(),
+			static_cast<int>(abortMessageBoxButtons.size()),
+			abortMessageBoxButtons.data(),
+			nullptr
+		};
+
+		int pressedButton = AbortMessageButton::ButtonInvalid;
+		SDL_ShowMessageBox(&abortMessageBox, &pressedButton);
+
+		return pressedButton == AbortMessageButton::ButtonRestart;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void RTEError::AbortFunc(const std::string &description, const std::string &file, int line) {
 		s_CurrentlyAborting = true;
 

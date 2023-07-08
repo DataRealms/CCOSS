@@ -2243,12 +2243,12 @@ void Scene::UpdatePlacedObjects(int whichSet)
     {
         for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             if (m_ResidentBrains[player])
-                m_ResidentBrains[player]->Update();
+                m_ResidentBrains[player]->FullUpdate();
     }
 
     for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
     {
-        (*itr)->Update();
+        (*itr)->FullUpdate();
     }
 }
 

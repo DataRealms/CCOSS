@@ -137,7 +137,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void RTEError::AssertFunc(const std::string &description, const char *file, int line) {
-		// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-		AbortFunc(description, file, line);
+		// This typically gets passed __FILE__ which contains the full path to the file from whatever machine this was compiled on, so in that case get only the file name.
+		std::filesystem::path filePath = file;
+		std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : file;
+
+		std::string assertMessage = "Assert triggered in file '" + fileName + "', line " + std::to_string(line) + ", because:\n\n" + description + "\n\nYou may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
+
+		if (ShowAssertMessageBox(assertMessage)) {
+			AbortFunc(description, file, line);
+		}
 	}
 }

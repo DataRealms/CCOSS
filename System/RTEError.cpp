@@ -144,6 +144,8 @@ namespace RTE {
 			"Assertion in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n\n"
 			"You may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
 
+		g_ConsoleMan.PrintString("\nAssertion in file '" + fileName + "', line " + lineNum + ", in function '" + funcName + "' because: " + description + "\n");
+
 		if (ShowAssertMessageBox(assertMessage)) {
 			AbortFunc(description, srcLocation);
 		}

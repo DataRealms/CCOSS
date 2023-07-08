@@ -59,6 +59,13 @@ namespace RTE {
 		/// <param name="message">The string that the message box should display.</param>
 		/// <returns>Whether to restart the game by launching a new instance, or proceed to exit.</returns>
 		static bool ShowAbortMessageBox(const std::string &message);
+
+		/// <summary>
+		/// Pops up the assert message box dialog in the OS, notifying the user about a runtime error.
+		/// </summary>
+		/// <param name="message">The string that the message box should display.</param>
+		/// <returns>Whether to abort, or ignore the assert and continue execution.</returns>
+		static bool ShowAssertMessageBox(const std::string &message);
 	};
 
 #define RTEAbort(description) \

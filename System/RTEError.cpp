@@ -30,13 +30,13 @@ namespace RTE {
 #ifdef RELEASE_BUILD
 		// Getting a junk path from argv[0] is, or should be, impossible but check anyway.
 		if (std::filesystem::exists(System::GetThisExePathAndName())) {
-			abortMessageBoxButtons.emplace_back(SDL_MessageBoxButtonData(0, AbortMessageButton::ButtonRestart, "Restart Game"));
+			abortMessageBoxButtons.emplace_back(0, AbortMessageButton::ButtonRestart, "Restart Game");
 		}
 #endif
 
 		SDL_MessageBoxData abortMessageBox = {
 			SDL_MESSAGEBOX_ERROR,
-			nullptr,
+			g_WindowMan.GetWindow(),
 			"RTE Aborted! (x_x)",
 			message.c_str(),
 			static_cast<int>(abortMessageBoxButtons.size()),
@@ -48,6 +48,32 @@ namespace RTE {
 		SDL_ShowMessageBox(&abortMessageBox, &pressedButton);
 
 		return pressedButton == AbortMessageButton::ButtonRestart;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool RTEError::ShowAssertMessageBox(const std::string &message) {
+		enum AssertMessageButton { ButtonInvalid, ButtonAbort, ButtonIgnore };
+
+		std::vector<SDL_MessageBoxButtonData> abortMessageBoxButtons = {
+			SDL_MessageBoxButtonData(SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, AssertMessageButton::ButtonAbort, "Abort"),
+			SDL_MessageBoxButtonData(0, AssertMessageButton::ButtonIgnore, "Ignore")
+		};
+
+		SDL_MessageBoxData assertMessageBox = {
+			SDL_MESSAGEBOX_ERROR,
+			g_WindowMan.GetWindow(),
+			"RTE Assert! (x_x)",
+			message.c_str(),
+			static_cast<int>(abortMessageBoxButtons.size()),
+			abortMessageBoxButtons.data(),
+			nullptr
+		};
+
+		int pressedButton = AssertMessageButton::ButtonInvalid;
+		SDL_ShowMessageBox(&assertMessageBox, &pressedButton);
+
+		return pressedButton == AssertMessageButton::ButtonAbort;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +111,7 @@ namespace RTE {
 			if (abortSaveMade) {
 				abortMessage += "The game has saved to 'AbortSave'.\n";
 			}
-			abortMessage += "The console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.bmp'.";
+			abortMessage += "The console has been dumped to 'AbortLog.txt'.\nThe last frame has been dumped to 'AbortScreen.png'.";
 
 			g_ConsoleMan.PrintString(abortMessage);
 			g_ConsoleMan.SaveAllText("AbortLog.txt");

@@ -147,4 +147,28 @@ namespace RTE {
 			AbortFunc(description, file, line);
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool RTEError::DumpAbortScreen() {
+		int success = -1;
+		if (BITMAP *backbuffer = g_FrameMan.GetBackBuffer32(); backbuffer) {
+			// Have to convert the 32bpp backbuffer to 24bpp otherwise the saved file is blank for reasons that don't matter.
+			BITMAP *abortScreenBuffer = create_bitmap_ex(24, backbuffer->w, backbuffer->h);
+			blit(backbuffer, abortScreenBuffer, 0, 0, 0, 0, backbuffer->w, backbuffer->h);
+			success = save_png("AbortScreen.png", abortScreenBuffer, nullptr);
+			destroy_bitmap(abortScreenBuffer);
+		}
+		return success == 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool RTEError::DumpAbortSave() {
+		bool success = false;
+		if (g_ActivityMan.GetActivityAllowsSaving()) {
+			success = g_ActivityMan.SaveCurrentGame("AbortSave");
+		}
+		return success;
+	}
 }

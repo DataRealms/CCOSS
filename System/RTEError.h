@@ -66,6 +66,18 @@ namespace RTE {
 		/// <param name="message">The string that the message box should display.</param>
 		/// <returns>Whether to abort, or ignore the assert and continue execution.</returns>
 		static bool ShowAssertMessageBox(const std::string &message);
+
+		/// <summary>
+		/// Saves the current frame to a file.
+		/// </summary>
+		/// <returns>Whether the file was saved successfully.<returns>
+		static bool DumpAbortScreen();
+
+		/// <summary>
+		/// Attempts to save the current running Activity, so the player can hopefully resume where they were.
+		/// </summary>
+		/// <returns>Whether the Activity was saved successfully.</returns>
+		static bool DumpAbortSave();
 	};
 
 #define RTEAbort(description) \

@@ -7,12 +7,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+
+- New `Settings.ini` property `EnableMultithreadedAI`, which can be used to enable experimental support for multithreaded AI. Please note that this is in a testing phase and is likely to cause bugs, especially with mods.
+
+- Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
+	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  
+	New Lua `SceneMan` function `CalculatePathAsync` for asynchronous pathfinding:
+	```lua
+	-- No return value
+	SceneMan.Scene:CalculatePathAsync(
+		function(pathRequest) -- Callback that is triggered when the path has finished calculating, passing the pathRequest object
+			pathRequest.Path; -- The calculated path, list of Vector
+			pathRequest.Status; -- The status of the path, int 
+								--	SOLVED			== 0,
+								--	NO_SOLUTION		== 1,
+								--	START_END_SAME	== 2
+			pathRequest.TotalCost; -- The total cost of path, float
+		end,
+		-- All other arguments are the same as Scene:CalculatePath():
+		startPos, -- Start position, Vector
+		endPos,  -- End position, Vector
+		movePathToGround,  -- Whether or not to move the path points to the ground, bool
+		GetPathFindingDefaultDigStrength(), -- The dig strength we're using, float
+		team -- Team that is doing the pathfinding. Their doors will be ignored, Team, optional parameter that defaults to Team.NOTEAM (no doors are ignored)
+	);
+	```
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Lua `Scene.ScenePath` property has been changed to a function `Scene:GetScenePath()`. This was done for thread-safety with multithreading, but can be used in the same way.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed frame spiking on Decision Day activity.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

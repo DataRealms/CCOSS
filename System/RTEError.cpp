@@ -88,7 +88,13 @@ namespace RTE {
 			g_ConsoleMan.SaveAllText("AbortLog.txt");
 			System::PrintToCLI(abortMessage);
 
-			ShowMessageBox(abortMessage, true);
+			if (ShowAbortMessageBox(abortMessage)) {
+#ifdef _WIN32
+				std::system(std::string(R"(start "" ")" + System::GetThisExePathAndName() + "\"").c_str());
+#else
+				std::system(std::string("\"" + System::GetThisExePathAndName() + "\"").c_str());
+#endif
+			}
 		}
 		s_CurrentlyAborting = false;
 		AbortAction;

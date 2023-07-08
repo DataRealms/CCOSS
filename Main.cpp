@@ -371,7 +371,7 @@ int main(int argc, char **argv) {
 		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
 	}
 
-	System::Initialize();
+	System::Initialize(argv[0]);
 	SeedRNG();
 
 	InitializeManagers();

@@ -55,7 +55,7 @@ namespace RTE {
 	bool RTEError::ShowAssertMessageBox(const std::string &message) {
 		enum AssertMessageButton { ButtonInvalid, ButtonAbort, ButtonIgnore };
 
-		std::vector<SDL_MessageBoxButtonData> abortMessageBoxButtons = {
+		std::vector<SDL_MessageBoxButtonData> assertMessageBoxButtons = {
 			SDL_MessageBoxButtonData(SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, AssertMessageButton::ButtonAbort, "Abort"),
 			SDL_MessageBoxButtonData(0, AssertMessageButton::ButtonIgnore, "Ignore")
 		};
@@ -65,8 +65,8 @@ namespace RTE {
 			g_WindowMan.GetWindow(),
 			"RTE Assert! (x_x)",
 			message.c_str(),
-			static_cast<int>(abortMessageBoxButtons.size()),
-			abortMessageBoxButtons.data(),
+			static_cast<int>(assertMessageBoxButtons.size()),
+			assertMessageBoxButtons.data(),
 			nullptr
 		};
 

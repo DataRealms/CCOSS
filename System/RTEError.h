@@ -27,7 +27,7 @@ namespace RTE {
 
 	public:
 
-		static bool s_CurrentlyAborting; // Flag to prevent a potential recursive fault while attempting to save the game when aborting.
+		static bool s_CurrentlyAborting; //!< Flag to prevent a potential recursive fault while attempting to save the game when aborting.
 
 		/// <summary>
 		/// Pops up a message box dialog in the OS. For debug purposes mostly.
@@ -36,14 +36,14 @@ namespace RTE {
 		static void ShowMessageBox(const std::string &message);
 
 		/// <summary>
-		/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.
+		/// Abort on Error function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
 		/// </summary>
 		/// <param name="description">Message explaining the reason for aborting.</param>
 		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
 		[[noreturn]] static void AbortFunc(const std::string &description, const std::source_location &srcLocation);
 
 		/// <summary>
-		/// An assert, which upon failure will abort.
+		/// An assert, which will prompt to abort or ignore it.
 		/// </summary>
 		/// <param name="description">The description of the assertion.</param>
 		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>

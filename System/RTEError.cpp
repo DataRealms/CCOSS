@@ -10,6 +10,9 @@
 namespace RTE {
 
 	bool RTEError::s_CurrentlyAborting = false;
+	bool RTEError::s_IgnoreAllAsserts = false;
+	std::string RTEError::s_LastIgnoredAssertDescription = "";
+	std::source_location RTEError::s_LastIgnoredAssertLocation = {};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,11 +56,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool RTEError::ShowAssertMessageBox(const std::string &message) {
-		enum AssertMessageButton { ButtonInvalid, ButtonAbort, ButtonIgnore };
+		enum AssertMessageButton { ButtonInvalid, ButtonAbort, ButtonIgnore, ButtonIgnoreAll };
 
 		std::vector<SDL_MessageBoxButtonData> assertMessageBoxButtons = {
 			SDL_MessageBoxButtonData(SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, AssertMessageButton::ButtonAbort, "Abort"),
-			SDL_MessageBoxButtonData(0, AssertMessageButton::ButtonIgnore, "Ignore")
+			SDL_MessageBoxButtonData(0, AssertMessageButton::ButtonIgnore, "Ignore"),
+			SDL_MessageBoxButtonData(0, AssertMessageButton::ButtonIgnoreAll, "Ignore All")
 		};
 
 		SDL_MessageBoxData assertMessageBox = {
@@ -72,6 +76,10 @@ namespace RTE {
 
 		int pressedButton = AssertMessageButton::ButtonInvalid;
 		SDL_ShowMessageBox(&assertMessageBox, &pressedButton);
+
+		if (pressedButton == AssertMessageButton::ButtonIgnoreAll) {
+			s_IgnoreAllAsserts = true;
+		}
 
 		return pressedButton == AssertMessageButton::ButtonAbort;
 	}
@@ -140,14 +148,27 @@ namespace RTE {
 		std::string lineNum = std::to_string(srcLocation.line());
 		std::string funcName = srcLocation.function_name();
 
-		std::string assertMessage =
-			"Assertion in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n\n"
-			"You may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
+		g_ConsoleMan.PrintString("ERROR: Assertion in file '" + fileName + "', line " + lineNum + ", in function '" + funcName + "' because: " + description);
 
-		g_ConsoleMan.PrintString("\nAssertion in file '" + fileName + "', line " + lineNum + ", in function '" + funcName + "' because: " + description + "\n");
+		bool storeAssertInfo = false;
 
-		if (ShowAssertMessageBox(assertMessage)) {
-			AbortFunc(description, srcLocation);
+		if (!s_IgnoreAllAsserts) {
+			std::string assertMessage =
+				"Assertion in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n\n"
+				"You may choose to ignore this and crash immediately\nor at some unexpected point later on.\n\nProceed at your own risk!";
+
+			if (ShowAssertMessageBox(assertMessage)) {
+				AbortFunc(description, srcLocation);
+			} else {
+				storeAssertInfo = true;
+			}
+		} else {
+			storeAssertInfo = true;
+		}
+
+		if (storeAssertInfo) {
+			s_LastIgnoredAssertDescription = description;
+			s_LastIgnoredAssertLocation = srcLocation;
 		}
 	}
 

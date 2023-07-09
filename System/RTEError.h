@@ -28,6 +28,9 @@ namespace RTE {
 	public:
 
 		static bool s_CurrentlyAborting; //!< Flag to prevent a potential recursive fault while attempting to save the game when aborting.
+		static bool s_IgnoreAllAsserts; //!< Whether to skip the assert dialog and just let everything burn at whatever point that happens.
+		static std::string s_LastIgnoredAssertDescription; //!< The last ignored assert message.
+		static std::source_location s_LastIgnoredAssertLocation; //!< The last ignored assert call site.
 
 		/// <summary>
 		/// Pops up a message box dialog in the OS. For debug purposes mostly.

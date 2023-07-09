@@ -355,6 +355,8 @@ namespace RTE {
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
+	RTEError::SetExceptionHandler();
+
 	install_allegro(SYSTEM_NONE, &errno, std::atexit);
 	loadpng_init();
 

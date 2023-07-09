@@ -7,12 +7,130 @@
 
 #include "SDL_messagebox.h"
 
+#ifdef _WIN32
+#include "Windows.h"
+#include "DbgHelp.h"
+#endif
+
 namespace RTE {
 
 	bool RTEError::s_CurrentlyAborting = false;
 	bool RTEError::s_IgnoreAllAsserts = false;
 	std::string RTEError::s_LastIgnoredAssertDescription = "";
 	std::source_location RTEError::s_LastIgnoredAssertLocation = {};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef _WIN32
+	/// <summary>
+	/// Custom exception handler for Windows exceptions.
+	/// </summary>
+	/// <param name="exceptPtr">Struct containing information about the exception. This will be provided by the OS exception handler.</param>
+	static LONG WINAPI RTEWindowsExceptionHandler([[maybe_unused]] EXCEPTION_POINTERS *exceptPtr) {
+		// This sorta half-assedly works in x86 because exception handling is slightly different, but since the main target is x64 we can just not care about it.
+		// Something something ESP. ESP is a guitar brand.
+#ifndef TARGET_MACHINE_X86
+
+		// Returns the last Win32 error in string format. Returns an empty string if there is no error.
+		static auto getLastWinErrorAsString = []() -> std::string {
+			DWORD errorMessageID = GetLastError();
+			if (errorMessageID == 0) {
+				return "";
+			}
+			LPSTR messageBuffer = nullptr;
+			DWORD messageFlags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+
+			// This bullshit makes the error string and returns the size because we can't know it in advance. Don't think we actually care about the size when we construct string from a buffer but whatever.
+			size_t messageSize = FormatMessage(messageFlags, nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
+			std::string message(messageBuffer, messageSize);
+			LocalFree(messageBuffer);
+			return message;
+		};
+
+		// Returns a string with the type of the exception from the passed in code.
+		static auto getExceptionDescriptionFromCode = [](const DWORD &exceptCode) -> std::string {
+			switch (exceptCode) {
+				case EXCEPTION_ACCESS_VIOLATION:			return "EXCEPTION_ACCESS_VIOLATION";
+				case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:		return "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
+				case EXCEPTION_BREAKPOINT:					return "EXCEPTION_BREAKPOINT";
+				case EXCEPTION_DATATYPE_MISALIGNMENT:		return "EXCEPTION_DATATYPE_MISALIGNMENT";
+				case EXCEPTION_FLT_DENORMAL_OPERAND:		return "EXCEPTION_FLT_DENORMAL_OPERAND";
+				case EXCEPTION_FLT_DIVIDE_BY_ZERO:			return "EXCEPTION_FLT_DIVIDE_BY_ZERO";
+				case EXCEPTION_FLT_INEXACT_RESULT:			return "EXCEPTION_FLT_INEXACT_RESULT";
+				case EXCEPTION_FLT_INVALID_OPERATION:		return "EXCEPTION_FLT_INVALID_OPERATION";
+				case EXCEPTION_FLT_OVERFLOW:				return "EXCEPTION_FLT_OVERFLOW";
+				case EXCEPTION_FLT_STACK_CHECK:				return "EXCEPTION_FLT_STACK_CHECK";
+				case EXCEPTION_FLT_UNDERFLOW:				return "EXCEPTION_FLT_UNDERFLOW";
+				case EXCEPTION_ILLEGAL_INSTRUCTION:			return "EXCEPTION_ILLEGAL_INSTRUCTION";
+				case EXCEPTION_IN_PAGE_ERROR:				return "EXCEPTION_IN_PAGE_ERROR";
+				case EXCEPTION_INT_DIVIDE_BY_ZERO:			return "EXCEPTION_INT_DIVIDE_BY_ZERO";
+				case EXCEPTION_INT_OVERFLOW:				return "EXCEPTION_INT_OVERFLOW";
+				case EXCEPTION_INVALID_DISPOSITION:			return "EXCEPTION_INVALID_DISPOSITION";
+				case EXCEPTION_NONCONTINUABLE_EXCEPTION:	return "EXCEPTION_NONCONTINUABLE_EXCEPTION";
+				case EXCEPTION_PRIV_INSTRUCTION:			return "EXCEPTION_PRIV_INSTRUCTION";
+				case EXCEPTION_SINGLE_STEP:					return "EXCEPTION_SINGLE_STEP";
+				case EXCEPTION_STACK_OVERFLOW:				return "EXCEPTION_STACK_OVERFLOW";
+				default:
+					return "UNKNOWN EXCEPTION";
+			}
+		};
+
+		// Attempts to get a symbol name from the exception address.
+		static auto getSymbolNameFromAddress = [](HANDLE64 &procHandle, const size_t &exceptAddr) {
+			if (SymInitialize(procHandle, nullptr, TRUE)) {
+				SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+
+				char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(char)];
+				PSYMBOL_INFO symbolInfo = reinterpret_cast<PSYMBOL_INFO>(symbolBuffer);
+
+				symbolInfo->SizeOfStruct = sizeof(SYMBOL_INFO);
+				symbolInfo->MaxNameLen = MAX_SYM_NAME;
+
+				if (SymFromAddr(procHandle, exceptAddr, nullptr, symbolInfo)) {
+					std::string symbolName = symbolInfo->Name;
+					return "The symbol name at this address is " + (symbolName.empty() ? "empty for reasons unknown to man." : "'" + symbolName + "'.");
+				} else {
+					return "Unable to get symbol name at address because:\n\n" + getLastWinErrorAsString();
+				}
+			}
+			std::string error = getLastWinErrorAsString();
+			return "Unable to get symbol name at address.\nSymbol Handler failed to initialize " + (error.empty() ? "for reasons unknown to man." : "because\n\n" + error);
+		};
+
+		HANDLE64 processHandle = GetCurrentProcess();
+
+		std::stringstream exceptionDescription;
+		DWORD exceptionCode = exceptPtr->ExceptionRecord->ExceptionCode;
+		size_t exceptionAddress = reinterpret_cast<size_t>(exceptPtr->ExceptionRecord->ExceptionAddress);
+
+		if (exceptionCode == EXCEPTION_BREAKPOINT) {
+			// Advance to the next instruction otherwise this handler will be called for all eternity.
+			exceptPtr->ContextRecord->Rip++;
+			return EXCEPTION_CONTINUE_EXECUTION;
+		}
+
+		exceptionDescription << getExceptionDescriptionFromCode(exceptionCode) << " at address 0x" << std::uppercase << std::hex << exceptionAddress << ".\n\n" << getSymbolNameFromAddress(processHandle, exceptionAddress) << std::endl;
+
+		RTEError::UnhandledExceptionFunc(exceptionDescription.str());
+		return EXCEPTION_EXECUTE_HANDLER;
+#endif
+	}
+#endif
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void RTEError::SetExceptionHandler() {
+#ifdef _WIN32
+#ifndef TARGET_MACHINE_X86
+		SetUnhandledExceptionFilter(RTEWindowsExceptionHandler);
+#endif
+#else
+		// TODO: Deal with other systems.
+		//std::set_terminate([]() {
+		//	AbortFunc(s_LastIgnoredAssertDescription, s_LastIgnoredAssertLocation);
+		//});
+#endif
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

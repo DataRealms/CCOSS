@@ -47,7 +47,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="description">The description of the assertion.</param>
 		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
-		[[noreturn]] static void AssertFunc(const std::string &description, const std::source_location &srcLocation);
+		static void AssertFunc(const std::string &description, const std::source_location &srcLocation);
 
 	private:
 

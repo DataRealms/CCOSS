@@ -39,6 +39,11 @@ namespace RTE {
 		static void ShowMessageBox(const std::string &message);
 
 		/// <summary>
+		/// Abort on unhandled exception function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
+		/// </summary>
+		[[noreturn]] static void UnhandledExceptionFunc(const std::string &description);
+
+		/// <summary>
 		/// Abort on Error function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
 		/// </summary>
 		/// <param name="description">Message explaining the reason for aborting.</param>

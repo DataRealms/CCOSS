@@ -86,6 +86,52 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void RTEError::UnhandledExceptionFunc(const std::string &description) {
+		s_CurrentlyAborting = true;
+
+		std::string exceptionMessage = "Runtime Error due to unhandled exception!\n\n" + description;
+
+		if (!s_LastIgnoredAssertDescription.empty()) {
+			exceptionMessage += "\nThe last ignored Assertion was: " + s_LastIgnoredAssertDescription;
+		}
+
+		if (s_LastIgnoredAssertLocation.line() > 0) {
+			// This typically contains the absolute path to the file on whatever machine this was compiled on, so in that case get only the file name.
+			std::filesystem::path filePath = s_LastIgnoredAssertLocation.file_name();
+			std::string fileName = (filePath.has_root_name() || filePath.has_root_directory()) ? filePath.filename().generic_string() : s_LastIgnoredAssertLocation.file_name();
+			std::string srcLocation = "file '" + fileName + "', line " + std::to_string(s_LastIgnoredAssertLocation.line()) + ",\nin function '" + s_LastIgnoredAssertLocation.function_name() + "'";
+
+			if (!s_LastIgnoredAssertDescription.empty()) {
+				exceptionMessage += "\nIn " + srcLocation + ".\n";
+			} else {
+				exceptionMessage += "\nThe last ignored Assertion was in " + srcLocation + ".\n";
+			}
+		}
+
+		if (DumpAbortSave()) {
+			exceptionMessage += "\nThe game has saved to 'AbortSave'.";
+		}
+		if (DumpAbortScreen()) {
+			exceptionMessage += "\nThe last frame has been dumped to 'AbortScreen.png'.";
+		}
+
+		g_ConsoleMan.PrintString(exceptionMessage);
+		if (g_ConsoleMan.SaveAllText("AbortLog.txt")) {
+			exceptionMessage += "\nThe console has been dumped to 'AbortLog.txt'.";
+		}
+		System::PrintToCLI(exceptionMessage);
+
+		// Ditch the video mode so the message box appears without problems.
+		if (g_WindowMan.GetWindow()) {
+			SDL_SetWindowFullscreen(g_WindowMan.GetWindow(), 0);
+		}
+
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "RTE CATASTROPHIC ERROR!!! (X_X)", exceptionMessage.c_str(), nullptr);
+		AbortAction;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void RTEError::AbortFunc(const std::string &description, const std::source_location &srcLocation) {
 		s_CurrentlyAborting = true;
 

@@ -971,7 +971,7 @@ protected:
 
     /// <summary>
     /// Function that is called when we get a new movepath.
-    /// This processes and cleans up the movepath
+    /// This processes and cleans up the movepath.
     /// </summary>
     void OnNewMovePath() override;
 

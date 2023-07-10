@@ -297,7 +297,7 @@ namespace RTE {
 		// Even if we did literally nothing with it except capture it into a no-op lambda.
 		// Doing this seems to fix it. And, well, turns 3 copies into 1. So I guess that's good.
 		// Anyways, touch this at your peril. It's scary shit.
-		luabind::object* callback = new luabind::object(callbackParam);
+		luabind::object *callback = new luabind::object(callbackParam);
 
 		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
 			// This callback is called from the async pathing thread, so we need to further delay this logic into the main thread (via AddLuaScriptCallback)

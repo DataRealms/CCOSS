@@ -1197,14 +1197,15 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
     float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam);
     
-    /// <summary>
-	/// Asynchronously Calculates the least difficult path between two points on the current scene. Takes both distance and materials into account.
-    /// When pathing using the NoTeam pathFinder, no doors are considered passable.
+	/// <summary>
+	/// Asynchronously calculates the least difficult path between two points on the current Scene. Takes both distance and materials into account.
+	/// When pathing using the NoTeam pathFinder, no doors are considered passable.
 	/// </summary>
 	/// <param name="start">Start position of the pathfinding request.</param>
 	/// <param name="end">End position of the pathfinding request.</param>
 	/// <param name="digStrength">The maximum material strength any actor traveling along the path can dig through.</param>
-    /// <param name="team">The team we're pathing for (doors for this team will be considered passable)</param>
+	/// <param name="team">The team we're pathing for (doors for this team will be considered passable)</param>
+    /// <returns>A shared pointer to the volatile PathRequest to be used to track whehter the asynchrnous path calculation has been completed, and check its results.</returns>
     std::shared_ptr<volatile PathRequest> CalculatePathAsync(const Vector &start, const Vector &end, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam, PathCompleteCallback callback = nullptr);
 
 

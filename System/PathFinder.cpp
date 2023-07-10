@@ -119,7 +119,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MicroPather * PathFinder::GetPather() {
-		// Todo, cache a collection of pathers. For async pathfinding right now we create a new pather for every thread!
+		// TODO: cache a collection of pathers. For async pathfinding right now we create a new pather for every thread!
 		if (!s_Pather.m_Instance || s_Pather.m_Instance->GetGraph() != this) {
 			// First time this thread has asked for a pather, let's initialize it
 			delete s_Pather.m_Instance; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one

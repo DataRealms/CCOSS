@@ -196,7 +196,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, const PathCompleteCallback &callback) {
+	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback) {
 		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
 
 		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {

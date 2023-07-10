@@ -322,26 +322,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void LuaMan::AddLuaScriptCallback(std::function<void()> callback)
-    {
+    void LuaMan::AddLuaScriptCallback(const std::function<void()> &callback) {
 		std::scoped_lock lock(m_ScriptCallbacksMutex);
-		m_ScriptCallbacks.push_back(callback);
+		m_ScriptCallbacks.emplace_back(callback);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void LuaMan::ExecuteLuaScriptCallbacks()
-    {
+    void LuaMan::ExecuteLuaScriptCallbacks() {
 		std::vector<std::function<void()>> callbacks;
 		
 		// Move our functions into the local buffer to clear the existing callbacks and to lock for as little time as possible
-		{
-			std::scoped_lock lock(m_ScriptCallbacksMutex);
-			callbacks.swap(m_ScriptCallbacks);
-		}
+		std::scoped_lock lock(m_ScriptCallbacksMutex);
+		callbacks.swap(m_ScriptCallbacks);
 		
-		for (std::function<void()>& callback : callbacks)
-		{
+		for (const std::function<void()> &callback : callbacks) {
 			callback();
 		}
     }

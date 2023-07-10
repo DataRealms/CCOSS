@@ -3042,8 +3042,7 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     return false;
 }
 
-std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team, PathCompleteCallback callback)
-{
+std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team, PathCompleteCallback callback) {
     if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
         return pathFinder->CalculatePathAsync(start, end, digStrength, callback);
     }

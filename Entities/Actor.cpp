@@ -1377,29 +1377,24 @@ void Actor::VerifyMOIDs()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void Actor::OnNewMovePath()
-{
-    // Process the new path we now have, if any
+void Actor::OnNewMovePath() {
     if (!m_MovePath.empty()) {
         // Remove the first one; it's our position
         m_PrevPathTarget = m_MovePath.front();
         m_MovePath.pop_front();
         // Also remove the one after that; it may move in opposite direction since it heads to the nearest PathNode center
         // Unless it is the last one, in which case it shouldn't be removed
-        if (m_MovePath.size() > 1)
-        {
+        if (m_MovePath.size() > 1) {
             m_PrevPathTarget = m_MovePath.front();
             m_MovePath.pop_front();
         }
     } else if (m_pMOMoveTarget) {
-        // We're following an MO, so just keep doing that
         m_MoveTarget = m_pMOMoveTarget->GetPos();
     } else {
         // Nowhere to gooooo
         m_MoveTarget = m_PrevPathTarget = m_Pos;
     }
 
-    // Reset the proximity logic
     m_StuckTimer.Reset();
     m_ProgressTimer.Reset();
     m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
@@ -1410,11 +1405,9 @@ void Actor::OnNewMovePath()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void Actor::PreControllerUpdate()
-{
-     // Update our movepath if our pathfinding request is complete
+void Actor::PreControllerUpdate() {
     if (m_PathRequest && m_PathRequest->complete) {
-        m_MovePath = const_cast<std::list<Vector>&>(m_PathRequest->path);
+        m_MovePath = const_cast<std::list<Vector> &>(m_PathRequest->path);
         m_PathRequest.reset();
         OnNewMovePath();
     }

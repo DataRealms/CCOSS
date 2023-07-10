@@ -120,8 +120,13 @@ namespace RTE {
 
 		/// <summary>
 		/// Calculates and returns the least difficult path between two points on the current scene.
-		/// This is asynchronous
+		/// This is asynchronous and thus will not block the current thread.
 		/// </summary>
+		/// <param name="start">Start positions on the scene to find the path between.</param>
+		/// <param name="end">End positions on the scene to find the path between.</param>
+		/// <param name="digStrength">What material strength the search is capable of digging through.</param>
+		/// <param name="callback">The callback function to be run when the path calculation is completed.</param>
+		/// <returns>A shared pointer to the volatile PathRequest to be used to track whehter the asynchrnous path calculation has been completed, and check its results.</returns>
 		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback = nullptr);
 
 		/// <summary>

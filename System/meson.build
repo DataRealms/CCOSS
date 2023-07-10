@@ -1,6 +1,6 @@
 sources += files(
 'MicroPather/micropather.cpp',
-#'glad/gl.c',
+'glad/gl.c',
 'StandardIncludes.cpp',
 'Atom.cpp',
 'ContentFile.cpp',
@@ -23,8 +23,9 @@ sources += files(
 'RTEError.cpp',
 'Matrix.cpp',
 #'ScreenShader.cpp',
+'Shader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
-#'GLCheck.cpp',
+'GLCheck.cpp',
 'SpatialPartitionGrid.cpp',
 )

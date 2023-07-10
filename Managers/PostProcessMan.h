@@ -4,11 +4,14 @@
 #include "Singleton.h"
 #include "Box.h"
 #include "SceneMan.h"
+#include "glad/gl.h"
+#include <glm/glm.hpp>
+#include "Shader.h"
 
 #define g_PostProcessMan PostProcessMan::Instance()
 
 namespace RTE {
-
+	class ScreenShader;
 	/// <summary>
 	/// Structure for storing a post-process screen effect to be applied at the last stage of 32bpp rendering.
 	/// </summary>
@@ -43,6 +46,8 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Initialize();
+
+		void CreateGLBackBuffers();
 #pragma endregion
 
 #pragma region Destruction
@@ -179,6 +184,8 @@ namespace RTE {
 		void SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> &inputList);
 #pragma endregion
 
+		GLuint GetPostProcessColorBuffer() { return m_BackBuffer32; }
+
 	protected:
 
 		std::list<PostEffect> m_PostScreenEffects; //!< List of effects to apply at the end of each frame. This list gets cleared out and re-filled each frame.
@@ -201,6 +208,19 @@ namespace RTE {
 		std::unordered_map<int, BITMAP *> m_TempEffectBitmaps; //!< Stores temporary bitmaps to rotate post effects in for quick access.
 
 	private:
+		GLuint m_BackBuffer8;
+		GLuint m_BackBuffer32;
+		GLuint m_Palette8Texture;
+		std::vector<GLuint> m_BitmapTextures;
+		size_t m_BitmapTexturesSize;
+		GLuint m_BlitFramebuffer;
+		GLuint m_PostProcessFramebuffer;
+		GLuint m_PostProcessDepthBuffer;
+		glm::mat4 m_ProjectionMatrix;
+		GLuint m_VertexBuffer;
+		GLuint m_VertexArray;
+		std::unique_ptr<Shader> m_Blit8;
+		std::unique_ptr<Shader> m_PostProcessShader;
 
 #pragma region Post Effect Handling
 		/// <summary>
@@ -259,6 +279,17 @@ namespace RTE {
 		/// Clears all the member variables of this PostProcessMan, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
+		void InitializeGLPointers();
+		
+		void DestroyGLPointers();
+		void UpdatePalette();
+
+		/// <summary>
+		/// Creates and upload a new GL texture. The texture pointer is stored in the BITMAP->extra field.
+		/// </summary>
+		/// <param name="bitmap">The bitmap to create a texture for.</param>
+		void LazyInitBitmap(BITMAP *bitmap);
 
 		// Disallow the use of some implicit methods.
 		PostProcessMan(const PostProcessMan &reference) = delete;

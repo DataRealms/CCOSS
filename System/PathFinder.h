@@ -21,7 +21,7 @@ namespace RTE {
 		float totalCost = 0.0f;
 	};
 
-	typedef std::function<void(std::shared_ptr<volatile PathRequest>)> PathCompleteCallback;
+	using PathCompleteCallback = std::function<void (std::shared_ptr<volatile PathRequest>)>;
 
 	/// <summary>
 	/// Contains everything related to a PathNode on the path grid used by PathFinder.
@@ -127,7 +127,7 @@ namespace RTE {
 		/// <param name="digStrength">What material strength the search is capable of digging through.</param>
 		/// <param name="callback">The callback function to be run when the path calculation is completed.</param>
 		/// <returns>A shared pointer to the volatile PathRequest to be used to track whehter the asynchrnous path calculation has been completed, and check its results.</returns>
-		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback = nullptr);
+		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength, const PathCompleteCallback &callback = nullptr);
 
 		/// <summary>
 		/// Recalculates all the costs between all the PathNodes by tracing lines in the material layer and summing all the material strengths for each encountered pixel. Also resets the pather itself.

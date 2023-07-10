@@ -129,6 +129,11 @@ namespace RTE {
 	#define c_PlayerSlotColorDefault makecol(161, 109, 20)
 	#define c_PlayerSlotColorHovered makecol(203, 130, 56)
 	#define c_PlayerSlotColorDisabled makecol(104, 67, 15)
+	static constexpr std::array<float, 16> c_Quad {
+			1.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, -1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 0.0f, 0.0f,
+			-1.0f, -1.0f, 0.0f, 1.0f};
 #pragma endregion
 
 #pragma region Math Constants

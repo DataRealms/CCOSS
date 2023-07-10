@@ -312,7 +312,7 @@ namespace RTE {
 		/// Adds a function to be called prior to executing lua scripts. This is used to callback into lua from other threads safely.
 		/// </summary>
 		/// <param name="callback">The callback function that will be executed.</returns>
-		void AddLuaScriptCallback(std::function<void()> callback);
+		void AddLuaScriptCallback(const std::function<void()> &callback);
 
 		/// <summary>
 		/// Executes and clears all pending script callbacks.

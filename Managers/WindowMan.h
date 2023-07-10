@@ -2,7 +2,8 @@
 #define _RTEWINDOWMAN_
 
 #include "Singleton.h"
-
+#include "System/Shader.h"
+#include "glad/gl.h"
 #define g_WindowMan WindowMan::Instance()
 
 extern "C" {
@@ -15,6 +16,8 @@ extern "C" {
 
 namespace RTE {
 
+	class Shader;
+
 	struct SDLWindowDeleter {
 		void operator() (SDL_Window *window) const;
 	};
@@ -25,6 +28,10 @@ namespace RTE {
 
 	struct SDLTextureDeleter {
 		void operator()(SDL_Texture *texture) const;
+	};
+
+	struct SDLContextDeleter {
+		void operator()(void *context) const;
 	};
 
 	/// <summary>
@@ -206,12 +213,12 @@ namespace RTE {
 		/// <summary>
 		/// Clears the primary renderer, or all the renderers if in multi-display fullscreen.
 		/// </summary>
-		void ClearRenderer() const;
+		void ClearRenderer();
 
 		/// <summary>
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
-		void UploadFrame() const;
+		void UploadFrame();
 #pragma endregion
 
 	private:
@@ -222,13 +229,18 @@ namespace RTE {
 		bool m_FocusEventsDispatchedByDisplaySwitchIn; //!< Whether queued events were dispatched due to raising windows when taking focus of any game window in the previous update.
 
 		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
-		std::shared_ptr<SDL_Renderer> m_PrimaryRenderer; //!< The main window renderer, draws to the main window.
-		std::unique_ptr<SDL_Texture, SDLTextureDeleter> m_PrimaryTexture; //!< The main window renderer's drawing surface.
+		GLuint m_BackBuffer32Texture; //!< The main window renderer's drawing surface.
+		glm::mat4 m_PrimaryWindowProjection;
 
 		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
-		std::vector<std::shared_ptr<SDL_Renderer>> m_MultiDisplayRenderers; //!< Additional renderers for multi-display fullscreen.
-		std::vector<std::unique_ptr<SDL_Texture, SDLTextureDeleter>> m_MultiDisplayTextures; //!< Additional textures when drawing to multiple displays.
+		std::vector<GLuint> m_MultiDisplayTextures; //!< Additional textures when drawing to multiple displays.
 		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
+
+		std::unique_ptr<void, SDLContextDeleter> m_GLContext; //!< OpenGL context.
+		GLuint m_ScreenVAO;
+		GLuint m_ScreenVBO;
+
+		std::unique_ptr<Shader> m_ScreenBlitShader;
 
 		bool m_AnyWindowHasFocus; //!< Whether any game window has focus.
 		bool m_ResolutionChanged; //!< Whether the resolution was changed through the settings.
@@ -260,10 +272,7 @@ namespace RTE {
 		/// </summary>
 		void CreatePrimaryWindow();
 
-		/// <summary>
-		/// Creates the main game window's renderer.
-		/// </summary>
-		void CreatePrimaryRenderer();
+		void InitializeOpenGL();
 
 		/// <summary>
 		/// Creates the main game window renderer's drawing surface.

@@ -913,8 +913,8 @@ namespace RTE {
 		if (g_ActivityMan.IsInActivity()) { g_PostProcessMan.PostProcess(); }
 
 		// Draw the performance stats and console on top of everything.
-		g_PerformanceMan.Draw(m_BackBuffer32.get());
-		g_ConsoleMan.Draw(m_BackBuffer32.get());
+		// g_PerformanceMan.Draw(m_BackBuffer32.get());
+		// g_ConsoleMan.Draw(m_BackBuffer32.get());
 
 #ifdef DEBUG_BUILD
 		// Draw scene seam

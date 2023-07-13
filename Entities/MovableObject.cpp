@@ -744,8 +744,7 @@ bool MovableObject::OnMOHit(HitData &hd)
 }
 
 bool MovableObject::OnMOHit(MovableObject *pOtherMO) {
-    if (pOtherMO != this) { RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {pOtherMO, pOtherMO ? pOtherMO->GetRootParent() : nullptr}); }
-    return false;
+	return false;
 }
 
 void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {

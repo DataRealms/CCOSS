@@ -74,6 +74,8 @@
 #include "PieMenu.h"
 #include "PieSlice.h"
 
+#include "System/MicroPather/micropather.h"
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"

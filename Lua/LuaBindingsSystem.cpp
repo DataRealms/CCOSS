@@ -237,11 +237,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaBindingRegisterFunctionDefinitionForType(SystemLuaBindings, PathRequest) {
+		using namespace micropather;
 		return luabind::class_<PathRequest>("PathRequest")
 
-		.def_readonly("Complete", &PathRequest::complete)
 		.def_readonly("Path", &PathRequest::path, luabind::return_stl_iterator)
+		.def_readonly("PathLength", &PathRequest::pathLength)
 		.def_readonly("Status", &PathRequest::status)
-		.def_readonly("TotalCost", &PathRequest::totalCost);
+		.def_readonly("TotalCost", &PathRequest::totalCost)
+
+		.enum_("Status")[
+			luabind::value("Solved", micropather::MicroPather::SOLVED),
+			luabind::value("NoSolution", micropather::MicroPather::NO_SOLUTION),
+			luabind::value("StartEndSame", micropather::MicroPather::START_END_SAME)
+		];
 	}
 }

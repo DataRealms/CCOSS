@@ -669,6 +669,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
+- New `Actor` Lua (R) property `DigStrength`, that gets the calculated dig strength of the given `Actor`, based on whether or not they have any digging tools.
 </details>
 
 <details><summary><b>Changed</b></summary>

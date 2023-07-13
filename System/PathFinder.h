@@ -18,6 +18,7 @@ namespace RTE {
 		bool complete = false;
 		int status = MicroPather::NO_SOLUTION;
 		std::list<Vector> path;
+		float pathLength;
 		float totalCost = 0.0f;
 	};
 

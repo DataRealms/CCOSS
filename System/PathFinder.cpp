@@ -207,6 +207,7 @@ namespace RTE {
 			
 			request.status = status;
 			request.complete = true;
+			request.pathLength = request.path.size();
 
 			if (callback) {
 				callback(volRequest);

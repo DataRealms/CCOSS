@@ -511,27 +511,24 @@ void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) {
 
 void GAScripted::CollectRequiredAreas() {
     // Open the script file so we can check it out
-    std::ifstream *pScriptFile = new std::ifstream(g_PresetMan.GetFullModulePath(m_ScriptPath.c_str()));
-    if (!pScriptFile->good()) {
+    std::ifstream scriptFile = std::ifstream(g_PresetMan.GetFullModulePath(m_ScriptPath.c_str()));
+    if (!scriptFile.good()) {
         return;
     }
 
     // Harvest the required Area:s from the file
     m_RequiredAreas.clear();
 
-    char rawLine[512];
-    std::string line;
-    std::string::size_type pos = 0;
-    std::string::size_type endPos = 0;
-    std::string::size_type commentPos = std::string::npos;
     bool blockCommented = false;
 
-    while (!pScriptFile->eof()) {
+    while (!scriptFile.eof()) {
         // Go through the script file, line by line
-        pScriptFile->getline(rawLine, 512);
-        line = rawLine;
-        pos = endPos = 0;
-        commentPos = std::string::npos;
+        char rawLine[512];
+        scriptFile.getline(rawLine, 512);
+        std::string line = rawLine;
+        std::string::size_type pos = 0;
+        std::string::size_type endPos = 0;
+        std::string::size_type commentPos = std::string::npos;
 
         // Check for block comments
         if (!blockCommented && (commentPos = line.find("--[[", 0)) != std::string::npos) {
@@ -566,9 +563,6 @@ void GAScripted::CollectRequiredAreas() {
             } while(pos != std::string::npos && pos < commentPos);
         }
     }
-
-    delete pScriptFile;
-    pScriptFile = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

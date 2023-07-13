@@ -3582,6 +3582,7 @@ void AHuman::Update()
 			}
 			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
+            }
 			if (restarted) {
 				if (!climbing) {
 					if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
@@ -3732,6 +3733,9 @@ void AHuman::Update()
 
         if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel * m_pBGLeg->GetJointStiffness(), m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
 	}
+    if (m_MoveState != WALK && m_StrideSound && m_StrideSound->GetLoopSetting() < 0) {
+        m_StrideSound->Stop();
+    }
 
     /////////////////////////////////
     // Manage Attachables

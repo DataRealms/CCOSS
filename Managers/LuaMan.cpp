@@ -313,11 +313,42 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool LuaMan::IsScriptThreadSafe(const std::string &scriptPath) {
+		// First check our cache
+		auto itr = m_ScriptThreadSafetyMap.find(scriptPath);
+		if (itr != m_ScriptThreadSafetyMap.end()) {
+			return itr->second;
+		}
+
+		// Actually open the file and check if it has the multithread-safe mark
+		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
+		if (!scriptFile.good()) {
+			return false;
+		}
+
+		while (!scriptFile.eof()) {
+			char rawLine[512];
+			scriptFile.getline(rawLine, 512);
+			std::string line = rawLine;
+
+			if (line.find("--[[FORCE_SINGLETHREADED]]--", 0) != std::string::npos) {
+				m_ScriptThreadSafetyMap.insert({scriptPath, false});
+				return false;
+			}
+		}
+
+		m_ScriptThreadSafetyMap.insert({scriptPath, true});
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void LuaMan::ClearUserModuleCache() {
 		m_MasterScriptState.ClearUserModuleCache();
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.ClearUserModuleCache();
 		}
+		m_ScriptThreadSafetyMap.clear();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

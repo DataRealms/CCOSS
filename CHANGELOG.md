@@ -637,6 +637,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
+- Added `Leg` Lua (R/W) property `MoveSpeed`, which lets you get and set the `Leg`'s `MoveSpeed` scalar, similar to `Arm`s. 1 means instant movement and 0 means no movement.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -769,7 +769,8 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Leg) {
 		return ConcreteTypeLuaClassDefinition(Leg, Attachable)
 
-		.property("Foot", &Leg::GetFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::LegSetFoot);
+		.property("Foot", &Leg::GetFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::LegSetFoot)
+		.property("MoveSpeed", &Leg::GetMoveSpeed, &Leg::SetMoveSpeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

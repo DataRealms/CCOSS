@@ -833,6 +833,7 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
 
 void MovableMan::AddActor(Actor *actorToAdd) {
 	if (actorToAdd) {
+		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(actorToAdd->GetTeam());
 		actorToAdd->SetAsAddedToMovableMan();
 		actorToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
@@ -855,6 +856,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 
 void MovableMan::AddItem(HeldDevice *itemToAdd) {
     if (itemToAdd) {
+		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(itemToAdd->GetTeam());
 		itemToAdd->SetAsAddedToMovableMan();
 		itemToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
@@ -874,6 +876,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 
 void MovableMan::AddParticle(MovableObject *particleToAdd){
     if (particleToAdd) {
+		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(particleToAdd->GetTeam());
         particleToAdd->SetAsAddedToMovableMan();
 		if (MOSRotating *particleToAddAsMOSRotating = dynamic_cast<MOSRotating *>(particleToAdd)) { particleToAddAsMOSRotating->CorrectAttachableAndWoundPositionsAndRotations(); }
 

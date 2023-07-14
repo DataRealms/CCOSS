@@ -1222,21 +1222,19 @@ MOID Actor::GetAIMOWaypointID() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the path to move along to the currently set movetarget.
 
-bool Actor::UpdateMovePath()
+void Actor::UpdateMovePath()
 {
 	if (g_SceneMan.GetScene() == nullptr) {
-		return false;
+		return;
 	}
-    // TODO: Do throttling of calls for this function over time??
 
     // Estimate how much material this actor can dig through
     float digStrength = EstimateDigStrength();
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
-    if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
-    else
-    {
+    if (g_MovableMan.ValidMO(m_pMOMoveTarget)) {
+        m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), digStrength, static_cast<Activity::Teams>(m_Team));
+    } else {
         // Do we currently have a path to a static target we would like to still pursue?
         if (m_MovePath.empty())
         {
@@ -1244,55 +1242,30 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
+                m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, digStrength, static_cast<Activity::Teams>(m_Team));
+                
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
-                if (g_MovableMan.ValidMO(m_Waypoints.front().second))
+                if (g_MovableMan.ValidMO(m_Waypoints.front().second)) {
                     m_pMOMoveTarget = m_Waypoints.front().second;
-                else
+                } else {
                     m_pMOMoveTarget = 0;
+                }
+
                 // We loaded the waypoint, no need to keep it
                 m_Waypoints.pop_front();
             }
             // Just try to get to the last Move Target
-            else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
+            else {
+                m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, digStrength, static_cast<Activity::Teams>(m_Team));
+            }
         }
         // We had a path before trying to update, so use its last point as the final destination
-        else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, digStrength, static_cast<Activity::Teams>(m_Team));
-    }
-
-    // Process the new path we now have, if any
-    if (!m_MovePath.empty())
-    {
-        // Remove the first one; it's our position
-        m_PrevPathTarget = m_MovePath.front();
-        m_MovePath.pop_front();
-        // Also remove the one after that; it may move in opposite direciton since it heads to the nearest PathNode center
-        // Unless it is the last one, in which case it shouldn't be removed
-        if (m_MovePath.size() > 1)
-        {
-            m_PrevPathTarget = m_MovePath.front();
-            m_MovePath.pop_front();
+        else {
+            m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), digStrength, static_cast<Activity::Teams>(m_Team));
         }
     }
-    // We're following an MO, so just keep doing that
-    else if (m_pMOMoveTarget)
-        m_MoveTarget = m_pMOMoveTarget->GetPos();
-    // Nowhere to gooooo
-    else
-        m_MoveTarget = m_PrevPathTarget = m_Pos;
-
-    // Reset the proximity logic
-    m_StuckTimer.Reset();
-    m_ProgressTimer.Reset();
-    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
+    
     m_UpdateMovePath = false;
-
-    // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
-    m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
-
-    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1403,9 +1376,44 @@ void Actor::VerifyMOIDs()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
+
+void Actor::OnNewMovePath() {
+    if (!m_MovePath.empty()) {
+        // Remove the first one; it's our position
+        m_PrevPathTarget = m_MovePath.front();
+        m_MovePath.pop_front();
+        // Also remove the one after that; it may move in opposite direction since it heads to the nearest PathNode center
+        // Unless it is the last one, in which case it shouldn't be removed
+        if (m_MovePath.size() > 1) {
+            m_PrevPathTarget = m_MovePath.front();
+            m_MovePath.pop_front();
+        }
+    } else if (m_pMOMoveTarget) {
+        m_MoveTarget = m_pMOMoveTarget->GetPos();
+    } else {
+        // Nowhere to gooooo
+        m_MoveTarget = m_PrevPathTarget = m_Pos;
+    }
+
+    m_StuckTimer.Reset();
+    m_ProgressTimer.Reset();
+    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
+
+    // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
+    m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this Actor. Supposed to be done every frame.
+
+void Actor::PreControllerUpdate() {
+    if (m_PathRequest && m_PathRequest->complete) {
+        m_MovePath = const_cast<std::list<Vector> &>(m_PathRequest->path);
+        m_PathRequest.reset();
+        OnNewMovePath();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Actor::Update()
 {
@@ -1627,6 +1635,11 @@ void Actor::Update()
 */
 }
 
+void Actor::FullUpdate() {
+    PreControllerUpdate();
+    m_Controller.Update();
+    Update();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

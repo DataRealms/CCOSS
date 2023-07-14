@@ -1798,10 +1798,10 @@ enum MOType
 	bool DrawToTerrain(SLTerrain *terrain);
 
 	/// <summary>
-	/// Used to get the Lua state that handles our scripts.
+	/// Used to get the Lua state that handles our multithread-safe scripts.
 	/// </summary>
     /// <returns>Our lua state. Can potentially be nullptr.</returns>
-    LuaStateWrapper* GetLuaState() { return m_OwningState; }
+    LuaStateWrapper* GetLuaState() { return m_ThreadedLuaState; }
 
 	/// <summary>
 	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
@@ -1827,7 +1827,7 @@ protected:
 	/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 	/// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>()) const;
+	int RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs
@@ -1953,7 +1953,9 @@ protected:
 
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
-    LuaStateWrapper *m_OwningState; //!< The lua state that owns us.
+    LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our multithreaded lua scripts.
+    bool m_HasSinglethreadedScripts; //!< Whether or not we have any single-threaded scripts attached to us.
+
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
@@ -2028,6 +2030,13 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+    /// Returns the script state to use for a given script path.
+    /// This will be locked to our thread and safe to use - ensure that it'll be unlocked after use!
+    /// </summary>
+    /// <returns>A script state.</returns>
+    LuaStateWrapper & GetAndLockStateForScript(const std::string& scriptPath);
 
 	// Disallow the use of some implicit methods.
 	MovableObject(const MovableObject &reference) = delete;

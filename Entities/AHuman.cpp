@@ -1675,17 +1675,11 @@ void AHuman::ResetAllTimers()
         m_pFGArm->GetHeldDevice()->ResetAllTimers();
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
 
-bool AHuman::UpdateMovePath()
+void AHuman::OnNewMovePath()
 {
-    // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
-    if (!Actor::UpdateMovePath())
-        return false;
+    Actor::OnNewMovePath();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())
@@ -1719,8 +1713,6 @@ bool AHuman::UpdateMovePath()
             previousPoint = (*lItr);
         }
     }
-
-    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -3026,6 +3018,8 @@ void AHuman::UpdateAI()
 
 void AHuman::PreControllerUpdate()
 {
+    Actor::PreControllerUpdate();
+
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
 

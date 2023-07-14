@@ -399,7 +399,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
 
-=========
 - The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
 	```lua
 	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity. The save result will be printed to the console.
@@ -646,6 +645,30 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
+- New `Actor` Lua (R) property `DigStrength`, that gets the calculated dig strength of the given `Actor`, based on whether or not they have any digging tools.
+
+- New `Settings.ini` property `EnableMultithreadedAI`, which can be used to enable experimental support for multithreaded AI. Please note that this is in a testing phase and is likely to cause bugs, especially with mods.
+
+- Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
+	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  
+	New Lua `SceneMan` function `CalculatePathAsync` for asynchronous pathfinding. This function has no return value, and is used as follows:
+	```lua
+	SceneMan.Scene:CalculatePathAsync(
+		function(pathRequest) -- Callback function that is run when the path has finished calculating, passing in the pathRequest object.
+			pathRequest.Path; -- A list of Vectors that make up the calculated path.
+			pathRequest.PathLength -- The number of points in the calculated path.
+			pathRequest.Status; -- The enum status of the path, the options are PathRequest.Solved, PathRequest.NoSolution, and PathRequest.StartEndSame.
+			pathRequest.TotalCost; -- The total cost of path.
+		end,
+		-- All other arguments are the same as Scene:CalculatePath():
+		startPos, -- The start position of the path to calculate.
+		endPos,  -- The end position of the path to calculate.
+		movePathToGround,  -- Whether or not to move the points in the calculated path to ground level.
+		digStrength, -- The dig strength to use when calculating the path.
+		team -- The team to use when calculating the path, allowing the path to ignore that team's doors. If not specified, it will default to `Activity.NOTEAM`, and no doors will be ignored.
+	);
+	```
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -867,6 +890,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
 
 - Changed `LuaMan:FileOpen` access modes so it only allows `"r", "r+", "w", "w+", "a", "a+"`, i.e. specifying type (text, binary) is not supported. See [this reference page](https://cplusplus.com/reference/cstdio/fopen) for details on the access modes.
+
+- Lua `Scene.ScenePath` property has been changed to a function `Scene:GetScenePath()`. This was done for thread-safety with multithreading, but can be used in the same way.
 
 </details>
 

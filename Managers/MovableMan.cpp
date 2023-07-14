@@ -1643,6 +1643,9 @@ void MovableMan::Update()
     // Travel MOs
     Travel();
 
+    // Prior to controller/AI update, execute lua callbacks
+    g_LuaMan.ExecuteLuaScriptCallbacks();
+
     // Updates everything needed prior to AI/user input being processed
     // Fugly hack to keep backwards compat with scripts that rely on weird frame-delay-ordering behaviours
     // TODO, cleanup the pre-controller update and post-controller updates to have some consistent logic of what goes where

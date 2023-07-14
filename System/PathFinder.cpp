@@ -7,7 +7,19 @@
 namespace RTE {
 
 	// One pathfinder per thread, lazily initialized. Shouldn't access this directly, use GetPather() instead.
-	thread_local MicroPather* s_Pather = nullptr;
+	struct MicroPatherWrapper {
+		MicroPatherWrapper() {
+			m_Instance = nullptr;
+		}
+
+		~MicroPatherWrapper() {
+			delete m_Instance;
+		}
+
+		MicroPather *m_Instance;
+	};
+
+	thread_local MicroPatherWrapper s_Pather;
 
 	// What material strength the search is capable of digging through.
 	// Needs to be thread-local because of how it's passed around, unfortunately it doesn't seem we can give userdata for a path agent in MicroPather.
@@ -105,23 +117,26 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MicroPather * PathFinder::GetPather() {
-		if (!s_Pather || s_Pather->GetGraph() != this) {
+		// TODO: cache a collection of pathers. For async pathfinding right now we create a new pather for every thread!
+		if (!s_Pather.m_Instance || s_Pather.m_Instance->GetGraph() != this) {
 			// First time this thread has asked for a pather, let's initialize it
-			delete s_Pather; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
+			delete s_Pather.m_Instance; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
 			
 			// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
 			//int sceneArea = m_GridWidth * m_GridHeight;
 			//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (m_NodeDimension * m_NodeDimension));
 			unsigned int numberOfBlocksToAllocate = 4000;
-			s_Pather = new MicroPather(this, numberOfBlocksToAllocate, PathNode::c_MaxAdjacentNodeCount, false);
+			s_Pather.m_Instance = new MicroPather(this, numberOfBlocksToAllocate, PathNode::c_MaxAdjacentNodeCount, false);
 		}
 
-		return s_Pather;
+		return s_Pather.m_Instance;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
+		++m_CurrentPathingRequests;
+		
 		// Make sure start and end are within scene bounds.
 		g_SceneMan.ForceBounds(start);
 		g_SceneMan.ForceBounds(end);
@@ -144,6 +159,10 @@ namespace RTE {
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path.
 		std::vector<void *> statePath;
 		int result = GetPather()->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+		if (result == MicroPather::NO_SOLUTION) {
+			// Otherwise micropather inits it to zero :)
+			totalCostResult = std::numeric_limits<float>::max();
+		}
 
 		if (!statePath.empty()) {
 			// Replace the approximate first point from the pathfound path with the exact starting point.
@@ -166,14 +185,44 @@ namespace RTE {
 			pathResult.push_back(start);
 			pathResult.push_back(end);
 		}
+
+		--m_CurrentPathingRequests;
+
 		// TODO: Clean up the path, remove series of nodes in the same direction etc?
 		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAllCosts() {
-		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback) {
+		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
+
+		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
+			// Cast away the volatile-ness - only matters outside (and complicates the API otherwise)
+			PathRequest &request = const_cast<PathRequest &>(*volRequest);
+
+			int status = this->CalculatePath(start, end, request.path, request.totalCost, digStrength);
+			
+			request.status = status;
+			request.complete = true;
+			request.pathLength = request.path.size();
+
+			if (callback) {
+				callback(volRequest);
+			}
+		}, pathRequest);
+
+		pathThread.detach();
+		return pathRequest;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void PathFinder::RecalculateAllCosts() {
+        RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+
+		// Deadlock until all path requests are complete
+		while (m_CurrentPathingRequests.load() != 0) { };
 
 		// I hate this copy, but fuck it.
 		std::vector<int> pathNodesIdsVec;
@@ -183,11 +232,19 @@ namespace RTE {
 		}
 
 		UpdateNodeList(pathNodesIdsVec);
-	}
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		if (m_CurrentPathingRequests.load() != 0) {
+			// Don't update yet, wait until all pathing requests are complete
+			// TODO: this can indefinitely block updates if pathing requests are made every frame. Figure out a solution for this
+			// Either force-complete pathing requests occasionally, or delay starting new pathing requests if we've not updated in a while
+			std::vector<int> nodeVec;
+			return nodeVec;
+		}
+		
 		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {

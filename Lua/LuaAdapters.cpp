@@ -289,6 +289,42 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersScene::CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callbackParam, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
+		
+		// >:(
+		// So, we're copying into a newed ptr and passing ownership down through these lambdas instead of copying.
+		// That's because - for some god-knows-why reason - capturing the callback (by value) into the lambdas would eventually fuck up the lua state and cause random crashes elsewhere
+		// Even if we did literally nothing with it except capture it into a no-op lambda.
+		// Doing this seems to fix it. And, well, turns 3 copies into 1. So I guess that's good.
+		// Anyways, touch this at your peril. It's scary shit.
+		luabind::object *callback = new luabind::object(callbackParam);
+
+		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
+			// This callback is called from the async pathing thread, so we need to further delay this logic into the main thread (via AddLuaScriptCallback)
+			g_LuaMan.AddLuaScriptCallback([callback, movePathToGround, pathRequestVol]() {
+				PathRequest pathRequest = const_cast<PathRequest &>(*pathRequestVol); // erh, to work with luabind etc
+				if (movePathToGround) {
+					for (Vector &scenePathPoint : pathRequest.path) {
+						scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
+					}
+				}
+			
+				if (callback && luabind::type(*callback) == LUA_TFUNCTION && callback->is_valid()) {
+					lua_pushcfunction(callback->interpreter(), &AddFileAndLineToError);
+					luabind::call_function<void>(*callback, pathRequest);
+					lua_pop(callback->interpreter(), 1);
+				}
+
+				delete callback;
+			});
+		};
+
+		luaSelfObject->CalculatePathAsync(start, end, digStrength, team, callLuaCallback);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersAHuman::ReloadFirearms(AHuman *luaSelfObject) {
 		luaSelfObject->ReloadFirearms(false);
 	}

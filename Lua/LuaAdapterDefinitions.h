@@ -22,6 +22,7 @@
 #include "Controller.h"
 #include "DataModule.h"
 #include "GraphicalPrimitive.h"
+#include "PathFinder.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -72,6 +73,8 @@
 #include "Turret.h"
 #include "PieMenu.h"
 #include "PieSlice.h"
+
+#include "System/MicroPather/micropather.h"
 
 #ifndef _MSC_VER
 #pragma GCC diagnostic push
@@ -303,6 +306,9 @@ namespace RTE {
 	struct LuaAdaptersScene {
 		static int CalculatePath1(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePath2(luaSelfObject, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
 		static int CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
+
+		static void CalculatePathAsync1(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePathAsync2(luaSelfObject, callback, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
+		static void CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
 	};
 #pragma endregion
 

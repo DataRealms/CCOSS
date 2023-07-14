@@ -16,6 +16,7 @@
 
 #include "MOSRotating.h"
 #include "PieMenu.h"
+#include "PathFinder.h"
 
 namespace RTE
 {
@@ -1108,20 +1109,16 @@ ClassInfoGetters;
 
 	int GetMovePathSize() const { return m_MovePath.size(); }
 
+    /// <summary>
+    /// Starts updating this Actor's movepath.
+    /// </summary>
+    virtual void UpdateMovePath();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' move path RIGHT NOW. Will update the path to the
-//                  current waypoint, if any. CAVEAT: this only actually updates if a queue
-//                  index number passed in is sufficiently close to 0 to allow this to
-//                  compute, based on an internal global assessment of how often this very
-//                  expensive computation is allowed to run.
-// Arguments:       The queue number this was given the last time
-// Return value:    Whether the update was performed, or if it should be tried again next
-//                  frame.
-
-    virtual bool UpdateMovePath();
+    /// <summary>
+    /// Returns whether we're waiting on a new pending movepath.
+    /// </summary>
+    /// <returns>Whether we're waiting on a new pending movepath.</returns>
+    bool IsWaitingOnNewMovePath() const { return m_PathRequest != nullptr; }
 
     /// <summary>
     /// Estimates what material strength this actor can penetrate.
@@ -1171,7 +1168,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void PreControllerUpdate() {};
+	virtual void PreControllerUpdate();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -1182,6 +1179,14 @@ ClassInfoGetters;
 
 	void Update() override;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  FullUpdate
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Updates the full state of this object in one call. (PreControllerUpdate(), Controller::Update(), and Update())
+// Arguments:       None.
+// Return value:    None.
+
+    virtual void FullUpdate() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDeploymentID
@@ -1418,6 +1423,12 @@ ClassInfoGetters;
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath.
+    /// </summary>
+    virtual void OnNewMovePath();
+
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1597,6 +1608,8 @@ protected:
     Vector m_MoveVector;
     // The calculated path to get to that move-to target
     std::list<Vector> m_MovePath;
+    // The current pathfinding request
+    std::shared_ptr<volatile PathRequest> m_PathRequest;
     // Whether it's time to update the path
     bool m_UpdateMovePath;
     // The minimum range to consider having reached a move target is considered

@@ -2243,12 +2243,12 @@ void Scene::UpdatePlacedObjects(int whichSet)
     {
         for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             if (m_ResidentBrains[player])
-                m_ResidentBrains[player]->Update();
+                m_ResidentBrains[player]->FullUpdate();
     }
 
     for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
     {
-        (*itr)->Update();
+        (*itr)->FullUpdate();
     }
 }
 
@@ -3040,6 +3040,14 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     }
 
     return false;
+}
+
+std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team, PathCompleteCallback callback) {
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
+        return pathFinder->CalculatePathAsync(start, end, digStrength, callback);
+    }
+
+    return nullptr;
 }
 
 int Scene::GetScenePathSize() const {

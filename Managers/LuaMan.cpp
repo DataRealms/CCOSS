@@ -123,6 +123,7 @@ namespace RTE {
 			RegisterLuaBindingsOfType(EntityLuaBindings, Gib),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Controller),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Timer),
+			RegisterLuaBindingsOfType(SystemLuaBindings, PathRequest),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
 			RegisterLuaBindingsOfType(EntityLuaBindings, SceneArea),
 			RegisterLuaBindingsOfType(EntityLuaBindings, SceneLayer),
@@ -280,6 +281,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	thread_local LuaStateWrapper * s_luaStateOverride = nullptr;
+    LuaStateWrapper * LuaMan::GetThreadLuaStateOverride() const {
+		return s_luaStateOverride;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaMan::SetThreadLuaStateOverride(LuaStateWrapper * luaState) {
 		s_luaStateOverride = luaState;
 	}
@@ -312,10 +319,64 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool LuaMan::IsScriptThreadSafe(const std::string &scriptPath) {
+		// First check our cache
+		auto itr = m_ScriptThreadSafetyMap.find(scriptPath);
+		if (itr != m_ScriptThreadSafetyMap.end()) {
+			return itr->second;
+		}
+
+		// Actually open the file and check if it has the multithread-safe mark
+		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
+		if (!scriptFile.good()) {
+			return false;
+		}
+
+		while (!scriptFile.eof()) {
+			char rawLine[512];
+			scriptFile.getline(rawLine, 512);
+			std::string line = rawLine;
+
+			if (line.find("--[[FORCE_SINGLETHREADED]]--", 0) != std::string::npos) {
+				m_ScriptThreadSafetyMap.insert({scriptPath, false});
+				return false;
+			}
+		}
+
+		m_ScriptThreadSafetyMap.insert({scriptPath, true});
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void LuaMan::ClearUserModuleCache() {
 		m_MasterScriptState.ClearUserModuleCache();
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.ClearUserModuleCache();
+		}
+		m_ScriptThreadSafetyMap.clear();
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void LuaMan::AddLuaScriptCallback(const std::function<void()> &callback) {
+		std::scoped_lock lock(m_ScriptCallbacksMutex);
+		m_ScriptCallbacks.emplace_back(callback);
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void LuaMan::ExecuteLuaScriptCallbacks() {
+		std::vector<std::function<void()>> callbacks;
+		
+		// Move our functions into the local buffer to clear the existing callbacks and to lock for as little time as possible
+		{
+			std::scoped_lock lock(m_ScriptCallbacksMutex);
+			callbacks.swap(m_ScriptCallbacks);
+		}
+		
+		for (const std::function<void()> &callback : callbacks) {
+			callback();
 		}
     }
 

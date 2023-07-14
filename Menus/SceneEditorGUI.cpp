@@ -535,7 +535,7 @@ void SceneEditorGUI::Update()
             // Set the std::list order to be at the end so new objects are added there
             m_ObjectListOrder = -1;
             // Update the object
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
 
@@ -619,7 +619,7 @@ void SceneEditorGUI::Update()
             {
                 // Set and update the cursor object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
         else if (m_pController->IsState(SCROLL_DOWN) || m_pController->IsState(ControlState::ACTOR_PREV))
@@ -630,7 +630,7 @@ void SceneEditorGUI::Update()
             {
                 // Set and update the object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
 
@@ -878,7 +878,7 @@ void SceneEditorGUI::Update()
         // Only place if the picker and pie menus are completely out of view, to avoid immediate placing after picking
         else if (m_pCurrentObject && m_pController->IsState(RELEASE_PRIMARY) && !m_pPicker->IsVisible())
         {
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
 
             // Placing governor brain, which actually just puts it back into the resident brain roster
             if (m_PreviousMode == INSTALLINGBRAIN)
@@ -1363,7 +1363,7 @@ void SceneEditorGUI::Update()
             pCurrentActor->SetStatus(Actor::INACTIVE);
             pCurrentActor->GetController()->SetDisabled(true);
         }
-        m_pCurrentObject->Update();
+        m_pCurrentObject->FullUpdate();
     }
 
     // Animate the reveal index so it is clear which order blueprint things are placed/built

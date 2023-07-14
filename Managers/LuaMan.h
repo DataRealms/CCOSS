@@ -288,6 +288,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A list of threaded script states.</returns>
 		LuaStatesArray & GetThreadedScriptStates();
+		
+		/// <summary>
+		/// Gets the current thread lua state override that new objects created will be assigned to.
+		/// </summary>
+		/// <param name="luaState">The current lua state to force objects to be assigned to.</returns>
+		LuaStateWrapper * GetThreadLuaStateOverride() const;
 
 		/// <summary>
 		/// Forces all new MOs created in this thread to be assigned to a particular lua state.
@@ -304,9 +310,26 @@ namespace RTE {
 		LuaStateWrapper * GetAndLockFreeScriptState();
 
 		/// <summary>
+		/// Returns whether a script is safe to run in a multithreaded manner.
+		/// </summary>
+		/// <returns>Whether the script is thread-safe.</returns>
+		bool IsScriptThreadSafe(const std::string &scriptPath);
+
+		/// <summary>
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
 		/// </summary>
 		void ClearUserModuleCache();
+
+		/// <summary>
+		/// Adds a function to be called prior to executing lua scripts. This is used to callback into lua from other threads safely.
+		/// </summary>
+		/// <param name="callback">The callback function that will be executed.</returns>
+		void AddLuaScriptCallback(const std::function<void()> &callback);
+
+		/// <summary>
+		/// Executes and clears all pending script callbacks.
+		/// </summary>
+		void ExecuteLuaScriptCallbacks();
 #pragma endregion
 
 #pragma region File I/O Handling
@@ -384,6 +407,11 @@ namespace RTE {
 
 		LuaStateWrapper m_MasterScriptState;
 		LuaStatesArray m_ScriptStates;
+
+		std::unordered_map<std::string, bool> m_ScriptThreadSafetyMap;
+
+		std::vector<std::function<void()>> m_ScriptCallbacks; //!< A list of callback functions we'll trigger before processing lua scripts. This allows other threads (i.e pathing requests) to safely trigger callbacks in lua
+		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
 

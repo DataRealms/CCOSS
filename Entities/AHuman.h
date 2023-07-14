@@ -774,17 +774,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
     void ResetAllTimers() override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
-// Arguments:       None.
-// Return value:    None.
-
-	bool UpdateMovePath() override;
-
-
 	/// <summary>
 	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
 	/// </summary>
@@ -980,6 +969,11 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath.
+    /// </summary>
+    void OnNewMovePath() override;
 
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.

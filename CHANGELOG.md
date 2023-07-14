@@ -601,8 +601,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `MovableObject` Lua (R) property `DistanceTravelled` which returns the amount of pixels the object has travelled since its creation.
 
-- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
-
 - Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.
 
 - Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).

@@ -526,7 +526,7 @@ void MovableObject::Destroy(bool notInherited) {
 
         if (m_HasSinglethreadedScripts) {
             // Shouldn't ever happen, but lets check just in case
-            if (!g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
+            if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
                 RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
             } else {
                 std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex(), std::adopt_lock);
@@ -636,7 +636,7 @@ int MovableObject::InitializeObjectScripts() {
 
     if (m_HasSinglethreadedScripts) {
         // There's potentially a deadlock if thread-safe scripts construct objects that are single-threaded
-        if (!g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
+        if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
             m_ScriptObjectName = "ERROR";
             RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ", due to a multithreaded script creating a non-thread-safe object. Please don't do this!");
             return -1;

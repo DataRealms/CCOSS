@@ -288,6 +288,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A list of threaded script states.</returns>
 		LuaStatesArray & GetThreadedScriptStates();
+		
+		/// <summary>
+		/// Gets the current thread lua state override that new objects created will be assigned to.
+		/// </summary>
+		/// <param name="luaState">The current lua state to force objects to be assigned to.</returns>
+		LuaStateWrapper * GetThreadLuaStateOverride() const;
 
 		/// <summary>
 		/// Forces all new MOs created in this thread to be assigned to a particular lua state.

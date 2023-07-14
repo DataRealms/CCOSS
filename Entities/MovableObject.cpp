@@ -529,7 +529,7 @@ void MovableObject::Destroy(bool notInherited) {
             if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
                 RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
             } else {
-                std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex(), std::adopt_lock);
+                std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
                 g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
             }
         }
@@ -642,7 +642,7 @@ int MovableObject::InitializeObjectScripts() {
             return -1;
         }
 
-        std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex(), std::adopt_lock);
+        std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
         createScriptedObjectInState(g_LuaMan.GetMasterScriptState());
     }
 

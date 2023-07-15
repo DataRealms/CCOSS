@@ -453,9 +453,11 @@ namespace RTE {
 		bool HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) override;
 
 		/// <summary>
-		/// Updates scripts for this Attachable. Supposed to be done every frame.
+		/// Updates this Attachable's Lua scripts.
 		/// </summary>
-		int UpdateScripts() override;
+		/// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int UpdateScripts(MovableObject::ThreadScriptsToRun scriptsToRun) override;
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.

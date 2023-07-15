@@ -527,7 +527,7 @@ void MovableObject::Destroy(bool notInherited) {
         }
 
         if (m_HasSinglethreadedScripts) {
-            // Shouldn't ever happen, but lets check just in case
+            // Shouldn't ever happen (destruction is delayed in movableman to happen in singlethreaded manner), but lets check just in case
             if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
                 RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
             } else {
@@ -685,7 +685,7 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, ThreadScriptsToRun scriptsToRun) {
     int status = 0;
 
     auto itr = m_FunctionsAndScripts.find(functionName);
@@ -699,7 +699,15 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
 
     if (status >= 0) {
         for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
-            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
+            bool scriptIsThreadSafe = g_LuaMan.IsScriptThreadSafe(functionObjectWrapper->GetFilePath());
+            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !scriptIsThreadSafe :
+                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? scriptIsThreadSafe :
+                                                                                                  true;
+            if (!scriptIsSuitableForThread) {
+                continue;
+            }
+
+            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath())) {
                 LuaStateWrapper& usedState = GetAndLockStateForScript(functionObjectWrapper->GetFilePath());
                 std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);   
 				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
@@ -1023,7 +1031,7 @@ void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::UpdateScripts() {
+int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 	m_SimUpdatesSinceLastScriptedUpdate++;
 
 	if (m_AllLoadedScripts.empty()) {
@@ -1042,7 +1050,7 @@ int MovableObject::UpdateScripts() {
 	m_SimUpdatesSinceLastScriptedUpdate = 0;
 
 	if (status >= 0) {
-		status = RunScriptedFunctionInAppropriateScripts("Update", false, true);
+		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, { }, { }, scriptsToRun);
 	}
 
 	return status;

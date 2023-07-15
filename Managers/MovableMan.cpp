@@ -1593,9 +1593,9 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
-void updateAllScripts(MovableObject* mo, LuaStateWrapper& luaState) {
-    if (mo->GetLuaState() == &luaState) {
-        mo->UpdateScripts();
+void updateAllScripts(MovableObject* mo, LuaStateWrapper* luaState, MovableObject::ThreadScriptsToRun scriptsToRun) {
+    if (!luaState || mo->GetLuaState() == luaState) {
+        mo->UpdateScripts(scriptsToRun);
     }
 
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
@@ -1603,20 +1603,20 @@ void updateAllScripts(MovableObject* mo, LuaStateWrapper& luaState) {
             Attachable* attachable = *attachablrItr;
             ++attachablrItr;
 
-            if (attachable->GetLuaState() == &luaState) {
-                attachable->UpdateScripts();
+            if (!luaState || attachable->GetLuaState() == luaState) {
+                attachable->UpdateScripts(scriptsToRun);
             }
-            updateAllScripts(attachable, luaState);
+            updateAllScripts(attachable, luaState, scriptsToRun);
         }
 
         for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
             AEmitter* wound = *woundItr;
             ++woundItr;
 
-            if (wound->GetLuaState() == &luaState) {
-                wound->UpdateScripts();
+            if (!luaState || wound->GetLuaState() == luaState) {
+                wound->UpdateScripts(scriptsToRun);
             }
-            updateAllScripts(wound, luaState);
+            updateAllScripts(wound, luaState, scriptsToRun);
         }
     }
 };
@@ -1692,30 +1692,30 @@ void MovableMan::Update()
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
                 for (Actor* actor : m_Actors) {
-                    updateAllScripts(actor, luaState);
+                    updateAllScripts(actor, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
                 }
 
                 for (MovableObject* item : m_Items) {
-                    updateAllScripts(item, luaState);
+                    updateAllScripts(item, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
                 }
 
                 for (MovableObject* particle : m_Particles) {
-                    updateAllScripts(particle, luaState);
+                    updateAllScripts(particle, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
 
         for (Actor* actor : m_Actors) {
-            updateAllScripts(actor, g_LuaMan.GetMasterScriptState());
+            updateAllScripts(actor, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
         }
 
         for (MovableObject* item : m_Items) {
-            updateAllScripts(item, g_LuaMan.GetMasterScriptState());
+            updateAllScripts(item, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
         }
 
         for (MovableObject* particle : m_Particles) {
-            updateAllScripts(particle, g_LuaMan.GetMasterScriptState());
+            updateAllScripts(particle, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
         }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);

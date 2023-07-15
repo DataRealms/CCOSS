@@ -348,11 +348,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Update() {
-		if (!m_PreUpdateHasRunThisFrame) { PreUpdate(); }
+		if (!m_PreUpdateHasRunThisFrame) { 
+			PreUpdate(); 
+		}
+
+		UpdatePositionAndJointPositionBasedOnOffsets();
+
 		if (m_Parent) {
-			UpdatePositionAndJointPositionBasedOnOffsets();
-			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
-			SetVel(m_Parent->GetVel());
+			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { 
+				m_PrevParentOffset = m_ParentOffset;
+				m_PrevJointOffset = m_JointOffset;
+				m_Parent->HandlePotentialRadiusAffectingAttachable(this); 
+			}
+
+			m_PrevVel = m_Vel;
+			m_Vel = m_Parent->GetVel();
+
 			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
@@ -371,8 +382,6 @@ namespace RTE {
 			}
 			m_DeepCheck = false;
 			m_PrevRotAngleOffset = currentRotAngleOffset;
-		} else {
-			UpdatePositionAndJointPositionBasedOnOffsets();
 		}
 
 		MOSRotating::Update();
@@ -389,12 +398,6 @@ namespace RTE {
 			UpdateScripts();
 		}
 
-		if (m_Parent) {
-			m_PrevPos = m_Pos;
-			m_PrevVel = m_Vel;
-			m_PrevParentOffset = m_ParentOffset;
-			m_PrevJointOffset = m_JointOffset;
-		}
 
 		m_PreUpdateHasRunThisFrame = false;
 	}
@@ -537,6 +540,7 @@ namespace RTE {
 	void Attachable::UpdatePositionAndJointPositionBasedOnOffsets() {
 		if (m_Parent) {
 			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
+			m_PrevPos = m_Pos;
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 		} else {
 			m_JointPos = m_Pos + RotateOffset(m_JointOffset);

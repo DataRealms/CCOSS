@@ -121,13 +121,13 @@ namespace RTE {
 		/// Returns whether or not any experimental settings are used.
 		/// </summary>
 		/// <returns>Whether or not any experimental settings are used.</returns>
-		bool GetAnyExperimentalSettingsEnabled() const { return m_EnableMultithreadedAI; }
+		bool GetAnyExperimentalSettingsEnabled() const { return m_EnableMultithreadedLua; }
 
 		/// <summary>
-		/// Returns whether or not multithreaded AI is enabled.
+		/// Returns whether or not multithreaded Lua is enabled.
 		/// </summary>
-		/// <returns>Whether or not multithreaded AI is enabled.</returns>
-		bool GetEnableMultithreadedAI() const { return m_EnableMultithreadedAI; }
+		/// <returns>Whether or not multithreaded Lua is enabled.</returns>
+		bool GetEnableMultithreadedLua() const { return m_EnableMultithreadedLua; }
 
 		/// <summary>
 		/// Gets the AI update interval.
@@ -554,7 +554,7 @@ namespace RTE {
 		bool m_DisableFactionBuyMenuThemes; //!< Whether faction BuyMenu theme support is disabled.
 		bool m_DisableFactionBuyMenuThemeCursors; //!< Whether custom cursor support in faction BuyMenu themes is disabled.
 		int m_PathFinderGridNodeSize; //!< The grid size used by the PathFinder, in pixels.
-		int m_EnableMultithreadedAI; //!< EXPERIMENTAL! Whether or not to enable multithreaded AI.
+		int m_EnableMultithreadedLua; //!< EXPERIMENTAL! Whether or not to enable multithreaded Lua scripts.
 		int m_AIUpdateInterval; //!< How often actor's AI should be updated, i.e. every n simulation updates.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.

@@ -14,7 +14,12 @@
       "program": "${workspaceFolder}/build/CortexCommand",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Release",
-      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "windows": {
+        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.exe",
+        "preLaunchTask": "msbuild (Final)",
+        "envFile": ""
+      }
     },
     {
       "name": "Debug (Release)",
@@ -26,7 +31,12 @@
       "program": "${workspaceFolder}/build/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Release)",
-      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "windows": {
+        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.release.exe",
+        "preLaunchTask": "msbuild (Debug Release)",
+        "envFile": ""
+      }
     },
     {
       "name": "Debug (Minimal)",
@@ -38,7 +48,12 @@
       "program": "${workspaceFolder}/build/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Minimal)",
-      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "windows": {
+        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.minimal.exe",
+        "preLaunchTask": "msbuild (Debug Minimal)",
+        "envFile": ""
+      }
     },
     {
       "name": "Debug (Full)",
@@ -50,7 +65,12 @@
       "program": "${workspaceFolder}/build/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Full)",
-      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env"
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "windows": {
+        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.full.exe",
+        "preLaunchTask": "msbuild (Debug Full)",
+        "envFile": ""
+      }
     }
   ]
 }

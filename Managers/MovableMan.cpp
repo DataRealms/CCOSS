@@ -1994,28 +1994,20 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
-        if (g_SettingsMan.GetEnableMultithreadedLua()) {
-            LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-                [&](LuaStateWrapper &luaState) {
-                    g_LuaMan.SetThreadLuaStateOverride(&luaState);
-                    for (Actor *actor : m_Actors) {
-                        if (actor->GetLuaState() == &luaState) {
-                            actor->GetController()->Update();
-                        }
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+            [&](LuaStateWrapper &luaState) {
+                g_LuaMan.SetThreadLuaStateOverride(&luaState);
+                for (Actor *actor : m_Actors) {
+                    if (actor->GetLuaState() == &luaState) {
+                        actor->GetController()->Update();
                     }
-                    g_LuaMan.SetThreadLuaStateOverride(nullptr);
-                });
-
-            for (Actor* actor : m_Actors) {
-                if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
-                    actor->GetController()->Update();
                 }
-            }
-        }
-        else
-        {
-            for (Actor* actor : m_Actors) {
+                g_LuaMan.SetThreadLuaStateOverride(nullptr);
+            });
+
+        for (Actor* actor : m_Actors) {
+            if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
                 actor->GetController()->Update();
             }
         }

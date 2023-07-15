@@ -1600,6 +1600,34 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
+void updateAllScripts(MovableObject* mo, LuaStateWrapper& luaState) {
+    if (mo->GetLuaState() == &luaState) {
+        mo->UpdateScripts();
+    }
+
+    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
+        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
+            Attachable* attachable = *attachablrItr;
+            ++attachablrItr;
+
+            if (attachable->GetLuaState() == &luaState) {
+                attachable->UpdateScripts();
+            }
+            updateAllScripts(attachable, luaState);
+        }
+
+        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
+            AEmitter* wound = *woundItr;
+            ++woundItr;
+
+            if (wound->GetLuaState() == &luaState) {
+                wound->UpdateScripts();
+            }
+            updateAllScripts(wound, luaState);
+        }
+    }
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1662,50 +1690,78 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator parIt;
     std::deque<MovableObject *>::iterator midIt;
 
+    // Update all scripts for all objects
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
-        // Actors
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+
+        // seq for now, until we add the option to enable threading for lua scripts
+        // todo - each lua state should keep a list of their owned instances
+        // Then we can also dynamically assign MOs to states with the least instances
+        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
+            [&](LuaStateWrapper& luaState) {
+                g_LuaMan.SetThreadLuaStateOverride(&luaState);
+
+                for (Actor* actor : m_Actors) {
+                    updateAllScripts(actor, luaState);
+                }
+
+                for (MovableObject* item : m_Items) {
+                    updateAllScripts(item, luaState);
+                }
+
+                for (MovableObject* particle : m_Particles) {
+                    updateAllScripts(particle, luaState);
+                }
+
+                g_LuaMan.SetThreadLuaStateOverride(nullptr);
+            });
+
+        for (Actor* actor : m_Actors) {
+            updateAllScripts(actor, g_LuaMan.GetMasterScriptState());
+        }
+
+        for (MovableObject* item : m_Items) {
+            updateAllScripts(item, g_LuaMan.GetMasterScriptState());
+        }
+
+        for (MovableObject* particle : m_Particles) {
+            updateAllScripts(particle, g_LuaMan.GetMasterScriptState());
+        }
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+    {
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
-        {
-            for (Actor *actor : m_Actors) {
-                actor->Update();
-                actor->UpdateScripts();
-                actor->ApplyImpulses();
-            }
+        for (Actor *actor : m_Actors) {
+            actor->Update();
+            actor->ApplyImpulses();
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
-        // Items
-        {
-            int count = 0;
-            int itemLimit = m_Items.size() - m_MaxDroppedItems;
-            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
-            {
-                (*iIt)->Update();
-                (*iIt)->UpdateScripts();
-                (*iIt)->ApplyImpulses();
-                if (count <= itemLimit)
-                {
-                    (*iIt)->SetToSettle(true);
-                }
+        int count = 0;
+        int itemLimit = m_Items.size() - m_MaxDroppedItems;
+        for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
+            (*iIt)->Update();
+            (*iIt)->ApplyImpulses();
+            if (count <= itemLimit) {
+                (*iIt)->SetToSettle(true);
             }
         }
 
-        // Particles
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        {
-            for (MovableObject* particle : m_Particles) {
-                particle->Update();
-                particle->UpdateScripts();
-                particle->ApplyImpulses();
-                particle->RestDetection();
-                // Copy particles that are at rest to the terrain and mark them for deletion.
-                if (particle->IsAtRest()) {
-                    particle->SetToSettle(true);
-                }
+        for (MovableObject* particle : m_Particles) {
+            particle->Update();
+            particle->ApplyImpulses();
+            particle->RestDetection();
+            // Copy particles that are at rest to the terrain and mark them for deletion.
+            if (particle->IsAtRest()) {
+                particle->SetToSettle(true);
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
+
 
     ///////////////////////////////////////////////////
     // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
@@ -1994,28 +2050,20 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
-        if (g_SettingsMan.GetEnableMultithreadedAI()) {
-            LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-            std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-                [&](LuaStateWrapper &luaState) {
-                    g_LuaMan.SetThreadLuaStateOverride(&luaState);
-                    for (Actor *actor : m_Actors) {
-                        if (actor->GetLuaState() == &luaState) {
-                            actor->GetController()->Update();
-                        }
+        LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
+        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
+            [&](LuaStateWrapper &luaState) {
+                g_LuaMan.SetThreadLuaStateOverride(&luaState);
+                for (Actor *actor : m_Actors) {
+                    if (actor->GetLuaState() == &luaState) {
+                        actor->GetController()->Update();
                     }
-                    g_LuaMan.SetThreadLuaStateOverride(nullptr);
-                });
-
-            for (Actor* actor : m_Actors) {
-                if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
-                    actor->GetController()->Update();
                 }
-            }
-        }
-        else
-        {
-            for (Actor* actor : m_Actors) {
+                g_LuaMan.SetThreadLuaStateOverride(nullptr);
+            });
+
+        for (Actor* actor : m_Actors) {
+            if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
                 actor->GetController()->Update();
             }
         }

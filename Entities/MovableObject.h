@@ -1525,7 +1525,7 @@ enum MOType
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int UpdateScripts();
+	virtual int UpdateScripts();
 
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.

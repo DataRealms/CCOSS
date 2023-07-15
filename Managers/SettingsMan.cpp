@@ -51,7 +51,7 @@ namespace RTE {
 		m_DisableFactionBuyMenuThemes = false;
 		m_DisableFactionBuyMenuThemeCursors = false;
 		m_PathFinderGridNodeSize = c_PPM;
-		m_EnableMultithreadedAI = false;
+		m_EnableMultithreadedLua = false;
 		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;
@@ -210,8 +210,8 @@ namespace RTE {
 			reader >> m_DisableFactionBuyMenuThemeCursors;
 		} else if (propName == "PathFinderGridNodeSize") {
 			reader >> m_PathFinderGridNodeSize;
-		} else if (propName == "EnableMultithreadedAI") {
-			reader >> m_EnableMultithreadedAI;
+		} else if (propName == "EnableMultithreadedLua") {
+			reader >> m_EnableMultithreadedLua;
 		} else if (propName == "AIUpdateInterval") {
 			reader >> m_AIUpdateInterval;
 		} else if (propName == "EnableParticleSettling") {
@@ -416,7 +416,7 @@ namespace RTE {
 		writer.NewLineString("// Engine Settings - EXPERIMENTAL", false);
 		writer.NewLineString("// These settings are experimental! They may break mods, crash the game, corrupt saves or worse. Use at your own risk.", false);
 		writer.NewLine(false);
-		writer.NewPropertyWithValue("EnableMultithreadedAI", m_EnableMultithreadedAI);
+		writer.NewPropertyWithValue("EnableMultithreadedLua", m_EnableMultithreadedLua);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

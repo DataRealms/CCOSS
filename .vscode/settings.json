@@ -1,0 +1,10 @@
+{
+  "mesonbuild.buildFolder": "build",
+  "mesonbuild.configureOnOpen": true,
+  "mesonbuild.configureOptions": ["--buildtype=release"],
+  "mesonbuild.debugOptions": {
+    "Ddebug_type": "full",
+    "Db_lto": false,
+    "buildtype": "debug"
+  }
+}

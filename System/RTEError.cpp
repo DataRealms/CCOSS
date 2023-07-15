@@ -37,13 +37,11 @@ namespace RTE {
 				abortSaveMade = g_ActivityMan.SaveCurrentGame("AbortSave");
 			}
 
-			// Save out the screen bitmap, after making a copy of it, faster sometimes.
-			if (screen) {
-				int backbufferWidth = g_FrameMan.GetBackBuffer32()->w;
-				int backbufferHeight = g_FrameMan.GetBackBuffer32()->h;
-				BITMAP *abortScreenBuffer = create_bitmap(backbufferWidth, backbufferHeight);
-				blit(g_FrameMan.GetBackBuffer32(), abortScreenBuffer, 0, 0, 0, 0, backbufferWidth, backbufferHeight);
-				save_bmp("AbortScreen.bmp", abortScreenBuffer, nullptr);
+			if (BITMAP *backbuffer = g_FrameMan.GetBackBuffer32(); backbuffer) {
+				// Have to convert the 32bpp backbuffer to 24bpp otherwise the saved file is blank for reasons that don't matter.
+				BITMAP *abortScreenBuffer = create_bitmap_ex(24, backbuffer->w, backbuffer->h);
+				blit(backbuffer, abortScreenBuffer, 0, 0, 0, 0, backbuffer->w, backbuffer->h);
+				save_png("AbortScreen.png", abortScreenBuffer, nullptr);
 				destroy_bitmap(abortScreenBuffer);
 			}
 

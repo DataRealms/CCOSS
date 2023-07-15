@@ -82,6 +82,7 @@ void MovableObject::Clear()
     m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
     m_ThreadedLuaState = nullptr;
+    m_HasSinglethreadedScripts = false;
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
     m_pScreenEffect = 0;

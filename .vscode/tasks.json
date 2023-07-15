@@ -31,19 +31,19 @@
       "label": "msbuild (Debug Release)",
       "type": "process",
       "command": "msbuild",
-      "args": ["/m", "/p:Configuration=\"Debug Release\"", "RTEA.sln"]
+      "args": ["/m", "/p:Configuration=Debug Release", "RTEA.sln"]
     },
     {
       "label": "msbuild (Debug Minimal)",
       "type": "process",
       "command": "msbuild",
-      "args": ["/m", "/p:Configuration=\"Debug Minimal\"", "RTEA.sln"]
+      "args": ["/m", "/p:Configuration=Debug Minimal", "RTEA.sln"]
     },
     {
       "label": "msbuild (Debug Full)",
       "type": "process",
       "command": "msbuild",
-      "args": ["/m", "/p:Configuration=\"Debug Full\"", "RTEA.sln"]
+      "args": ["/m", "/p:Configuration=Debug Full", "RTEA.sln"]
     },
     {
       "label": "Setup Meson",

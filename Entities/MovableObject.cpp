@@ -130,6 +130,7 @@ LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scr
     }
 
     m_HasSinglethreadedScripts = true;
+    g_LuaMan.GetMasterScriptState().GetMutex().lock();
     return g_LuaMan.GetMasterScriptState();
 }
 

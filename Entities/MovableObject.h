@@ -215,6 +215,15 @@ enum MOType
     void EnableOrDisableAllScripts(bool enableScripts);
 
     /// <summary>
+    /// Enum of thread script types to run.
+    /// </summary>
+    enum class ThreadScriptsToRun {
+        SingleThreaded,
+        MultiThreaded,
+        Both
+    };
+
+    /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
     /// The first argument to the function will always be 'self'. If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
@@ -224,7 +233,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
 #pragma endregion
 
 
@@ -1515,17 +1524,12 @@ enum MOType
 
     void Draw(BITMAP* pTargetBitmap, const Vector& targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateScript
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject's Lua scripts. Supposed to be done every
-//                  frame after the rest of the hardcoded C++ update is done.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	virtual int UpdateScripts();
+    /// <summary>
+	/// Updates this MovableObject's Lua scripts.
+	/// </summary>
+    /// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int UpdateScripts(MovableObject::ThreadScriptsToRun scriptsToRun);
 
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.

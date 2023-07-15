@@ -1994,7 +1994,7 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
-        if (g_SettingsMan.GetEnableMultithreadedAI()) {
+        if (g_SettingsMan.GetEnableMultithreadedLua()) {
             LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
             std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
                 [&](LuaStateWrapper &luaState) {

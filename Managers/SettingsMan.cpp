@@ -44,6 +44,7 @@ namespace RTE {
 		m_ShowForeignItems = true;
 		m_ShowMetaScenes = false;
 
+		m_EnableMultithreadedLua = false;
 		m_DisableLuaJIT = false;
 		m_RecommendedMOIDCount = 512;
 		m_SimplifiedCollisionDetection = false;
@@ -51,7 +52,6 @@ namespace RTE {
 		m_DisableFactionBuyMenuThemes = false;
 		m_DisableFactionBuyMenuThemeCursors = false;
 		m_PathFinderGridNodeSize = c_PPM;
-		m_EnableMultithreadedLua = false;
 		m_AIUpdateInterval = 2;
 
 		m_SkipIntro = false;
@@ -398,6 +398,7 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
+		writer.NewPropertyWithValue("EnableMultithreadedLua", m_EnableMultithreadedLua);
 		writer.NewPropertyWithValue("DisableLuaJIT", m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
@@ -411,12 +412,12 @@ namespace RTE {
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
 		writer.NewPropertyWithValue("RealToSimCap", g_TimerMan.GetRealToSimCap());
 		
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Engine Settings - EXPERIMENTAL", false);
-		writer.NewLineString("// These settings are experimental! They may break mods, crash the game, corrupt saves or worse. Use at your own risk.", false);
-		writer.NewLine(false);
-		writer.NewPropertyWithValue("EnableMultithreadedLua", m_EnableMultithreadedLua);
+		// No experimental settings right now :)
+		//writer.NewLine(false, 2);
+		//writer.NewDivider(false);
+		//writer.NewLineString("// Engine Settings - EXPERIMENTAL", false);
+		//writer.NewLineString("// These settings are experimental! They may break mods, crash the game, corrupt saves or worse. Use at your own risk.", false);
+		//writer.NewLine(false);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

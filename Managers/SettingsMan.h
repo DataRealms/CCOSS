@@ -121,7 +121,7 @@ namespace RTE {
 		/// Returns whether or not any experimental settings are used.
 		/// </summary>
 		/// <returns>Whether or not any experimental settings are used.</returns>
-		bool GetAnyExperimentalSettingsEnabled() const { return m_EnableMultithreadedLua; }
+		bool GetAnyExperimentalSettingsEnabled() const { return false; }
 
 		/// <summary>
 		/// Returns whether or not multithreaded Lua is enabled.
@@ -547,6 +547,7 @@ namespace RTE {
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
+		int m_EnableMultithreadedLua; //!< Whether or not to enable multithreaded Lua scripts.
 		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()' seems to have no visible effect.
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
@@ -554,7 +555,6 @@ namespace RTE {
 		bool m_DisableFactionBuyMenuThemes; //!< Whether faction BuyMenu theme support is disabled.
 		bool m_DisableFactionBuyMenuThemeCursors; //!< Whether custom cursor support in faction BuyMenu themes is disabled.
 		int m_PathFinderGridNodeSize; //!< The grid size used by the PathFinder, in pixels.
-		int m_EnableMultithreadedLua; //!< EXPERIMENTAL! Whether or not to enable multithreaded Lua scripts.
 		int m_AIUpdateInterval; //!< How often actor's AI should be updated, i.e. every n simulation updates.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.

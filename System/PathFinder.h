@@ -127,8 +127,14 @@ namespace RTE {
 		/// <param name="end">End positions on the scene to find the path between.</param>
 		/// <param name="digStrength">What material strength the search is capable of digging through.</param>
 		/// <param name="callback">The callback function to be run when the path calculation is completed.</param>
-		/// <returns>A shared pointer to the volatile PathRequest to be used to track whehter the asynchrnous path calculation has been completed, and check its results.</returns>
+		/// <returns>A shared pointer to the volatile PathRequest to be used to track whether the asynchronous path calculation has been completed, and check its results.</returns>
 		std::shared_ptr<volatile PathRequest> CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback = nullptr);
+
+		// <summary>
+		/// Returns how many pathfinding requests are currently active.
+		/// </summary>
+		/// <returns>How many pathfinding requests are currently active.</returns>
+		int GetCurrentPathingRequests() const { return m_CurrentPathingRequests.load(); }
 
 		/// <summary>
 		/// Recalculates all the costs between all the PathNodes by tracing lines in the material layer and summing all the material strengths for each encountered pixel. Also resets the pather itself.

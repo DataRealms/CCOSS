@@ -1,0 +1,25 @@
+name: Continuous Integration
+
+on:
+  # Triggers the workflow for pushes to development, for pull request events, and for the merge queue
+  push:
+    branches: [development]
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  merge_group:
+    types: [checks_requested]
+
+  workflow_dispatch:
+
+# Cancel in-progress runs if newer changes to the same branch/PR are pushed.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  meson:
+    uses: ./.github/workflows/meson.yml
+    
+  msbuild:
+    uses: ./.github/workflows/msbuild.yml
+

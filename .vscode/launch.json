@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch (Release)",
+      "name": "meson Launch (Release)",
       "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
@@ -15,14 +15,18 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Release",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "meson",
+        "order": 1
+      },
       "windows": {
-        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.exe",
-        "preLaunchTask": "msbuild (Final)",
-        "envFile": ""
+        "presentation": {
+          "hidden": true
+        }
       }
     },
     {
-      "name": "Debug (Release)",
+      "name": "meson Debug (Release)",
       "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
@@ -32,14 +36,18 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Release)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "meson",
+        "order": 2
+      },
       "windows": {
-        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.release.exe",
-        "preLaunchTask": "msbuild (Debug Release)",
-        "envFile": ""
+        "presentation": {
+          "hidden": true
+        }
       }
     },
     {
-      "name": "Debug (Minimal)",
+      "name": "meson Debug (Minimal)",
       "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
@@ -49,14 +57,18 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Minimal)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "meson",
+        "order": 3
+      },
       "windows": {
-        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.minimal.exe",
-        "preLaunchTask": "msbuild (Debug Minimal)",
-        "envFile": ""
+        "presentation": {
+          "hidden": true
+        }
       }
     },
     {
-      "name": "Debug (Full)",
+      "name": "meson Debug (Full)",
       "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
@@ -66,10 +78,62 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "Build Debug (Full)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "meson",
+        "order": 4
+      },
       "windows": {
-        "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.full.exe",
-        "preLaunchTask": "msbuild (Debug Full)",
-        "envFile": ""
+        "presentation": {
+          "hidden": true
+        }
+      }
+    },
+    {
+      "name": "msbuild Launch (Release)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "msbuild (Final)",
+      "presentation": {
+        "group": "msbuild",
+        "order": 1
+      }
+    },
+    {
+      "name": "msbuild Debug (Release)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.release.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "msbuild (Debug Release)",
+      "presentation": {
+        "group": "msbuild",
+        "order": 2
+      }
+    },
+    {
+      "name": "msbuild Debug (Minimal)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.minimal.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "msbuild (Debug Minimal)",
+      "presentation": {
+        "group": "msbuild",
+        "order": 3
+      }
+    },
+    {
+      "name": "msbuild Debug (Full)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.debug.full.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "msbuild (Debug Full)",
+      "presentation": {
+        "group": "msbuild",
+        "order": 4
       }
     }
   ]

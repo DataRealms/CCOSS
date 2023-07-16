@@ -1,24 +1,51 @@
 name: Windows Build
 
 on:
-  push:
-    branches:
-      - master
-      - development
-
+  # Triggers the workflow when manually dispatched
   workflow_dispatch:
+    inputs:
+      upload_artefacts:
+        description: "Upload build artefacts"
+        type: boolean
+        required: false
+        default: false
+      build_configuration:
+        description: "Build Configuration"
+        type: choice
+        required: false
+        default: "Final"
+        options:
+          - "Final"
+          - "Debug Release"
+          - "Debug Minimal"
+          - "Debug Full"
+
+  # Triggers the workflow when called by a top-level workflow
+  workflow_call:
+    inputs:
+      upload_artefacts:
+        type: boolean
+        required: false
+        default: false
+      build_configuration: # "Final" | "Debug Release" | "Debug Minimal" | "Debug Full"
+        type: string
+        required: false
+        default: "Final"
 
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: RTEA.sln
-
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: "Final"
+  NAME_MAPPING: |
+    {
+      "Final": "Cortex Command.exe",
+      "Debug Release": "Cortex Command.debug.release.exe",
+      "Debug Minimal": "Cortex Command.debug.minimal.exe",
+      "Debug Full": "Cortex Command.debug.full.exe"
+    }
 
 jobs:
   build:
+    name: Windows Build
     runs-on: windows-latest
 
     steps:
@@ -31,11 +58,19 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration="${{env.BUILD_CONFIGURATION}}" ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration="${{inputs.build_configuration}}" ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Upload Artifact2
+    - name: Determine executable name
+      id: executable_name
+      if: ${{inputs.upload_artefacts}}
+      run: |
+        echo "EXECUTABLE_NAME=${{ fromJson(env.NAME_MAPPING)[inputs.build_configuration] }}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Upload Artifact
+      if: ${{inputs.upload_artefacts}}
       uses: actions/upload-artifact@v3
       with:
-        name: Cortex Command.exe
-        path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/Cortex Command x64.exe
-        if-no-files-found: warn
+        name: ${{ steps.executable_name.outputs.EXECUTABLE_NAME }}
+        path: D:/a/Cortex-Command-Community-Project-Source/Cortex-Command-Community-Project-Data/${{ steps.executable_name.outputs.EXECUTABLE_NAME }}
+        if-no-files-found: error

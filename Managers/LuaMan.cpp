@@ -218,6 +218,10 @@ namespace RTE {
 			"\n"
 			// Override "dofile" to be able to account for Data/ or Mods/ directory.
 			"OriginalDoFile = dofile; dofile = function(filePath) filePath = PresetMan:GetFullModulePath(filePath); if filePath ~= '' then return OriginalDoFile(filePath); end end;"
+			// Internal helper functions to add callbacks for async pathing requests
+			"_AsyncPathCallbacks = {};"
+			"_AddAsyncPathCallback = function(id, callback) _AsyncPathCallbacks[id] = callback; end\n"
+			"_TriggerAsyncPathCallback = function(id, param) if _AsyncPathCallbacks[id] ~= nil then _AsyncPathCallbacks[id](param); _AsyncPathCallbacks[id] = nil; end end\n"
 		);
 	}
 
@@ -289,6 +293,13 @@ namespace RTE {
 
 	void LuaMan::SetThreadLuaStateOverride(LuaStateWrapper * luaState) {
 		s_luaStateOverride = luaState;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	thread_local LuaStateWrapper* s_currentLuaState = nullptr;
+	LuaStateWrapper* LuaMan::GetThreadCurrentLuaState() const {
+		return s_currentLuaState;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -457,8 +468,9 @@ namespace RTE {
 		}
 		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities(); "; }
 
-		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		// Lock here, even though we also lock in RunScriptString(), to ensure that the temp entity vector isn't stomped by separate threads.
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
 
 		scriptString << functionName + "(";
 		if (!selfObjectName.empty()) { scriptString << selfObjectName; }
@@ -496,6 +508,7 @@ namespace RTE {
 		int error = 0;
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		// Load the script string onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
@@ -521,6 +534,7 @@ namespace RTE {
 		int status = 0;
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		functionObject->GetLuabindObject()->push(m_State);
@@ -584,6 +598,7 @@ namespace RTE {
 		int error = 0;
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		SetLuaPath(fullScriptPath);
@@ -611,6 +626,7 @@ namespace RTE {
 		}
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
 
 		for (const std::string &functionName : functionNamesToLookFor) {
 			luabind::object functionObject = luabind::globals(m_State)[functionName];

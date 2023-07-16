@@ -69,6 +69,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="filePath">The path to the file to load and run.</param>
 		void SetLuaPath(const std::string &filePath);
+
+		/// <summary>
+		/// Gets this LuaStateWrapper's internal lua state.
+		/// </summary>
+		/// <returns>This LuaStateWrapper's internal lua state.</returns>
+		lua_State* GetLuaState() { return m_State; };
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -292,7 +298,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the current thread lua state override that new objects created will be assigned to.
 		/// </summary>
-		/// <param name="luaState">The current lua state to force objects to be assigned to.</returns>
+		/// <returns>The current lua state to force objects to be assigned to.</returns>
 		LuaStateWrapper * GetThreadLuaStateOverride() const;
 
 		/// <summary>
@@ -301,6 +307,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="luaState">The lua state to force objects to be assigned to.</returns>
 		void SetThreadLuaStateOverride(LuaStateWrapper* luaState);
+
+		/// <summary>
+		/// Gets the current thread lua state that is running.
+		/// </summary>
+		/// <returns>The current lua state that is running.</returns>
+		LuaStateWrapper* GetThreadCurrentLuaState() const;
 
 		/// <summary>
 		/// Returns a free threaded script states to assign a movableobject to.

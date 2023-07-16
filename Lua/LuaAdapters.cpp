@@ -291,17 +291,23 @@ namespace RTE {
 	void LuaAdaptersScene::CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callbackParam, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
 		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
 		
-		// >:(
-		// So, we're copying into a newed ptr and passing ownership down through these lambdas instead of copying.
-		// That's because - for some god-knows-why reason - capturing the callback (by value) into the lambdas would eventually fuck up the lua state and cause random crashes elsewhere
-		// Even if we did literally nothing with it except capture it into a no-op lambda.
-		// Doing this seems to fix it. And, well, turns 3 copies into 1. So I guess that's good.
-		// Anyways, touch this at your peril. It's scary shit.
-		luabind::object *callback = new luabind::object(callbackParam);
+		// So, luabind::object is a weak reference, holding just a stack and a position in the stack
+		// This means it's unsafe to store on the C++ side if we do basically anything with the lua state before using it
+		// As such, we need to store this function somewhere safely within our Lua state for us to access later when we need it
+		// Note that also, the callbackParam's interpreter is actually different from our Lua state.
+		// It looks like Luabind constructs temporary interpreters and really doesn't like if you destroy these luabind objects
+		// In any case, it's extremely unsafe to use! For example capturing the callback by value into the lambdas causes random crashes
+		// Even if we did literally nothing with it except capture it into a no-op lambda
+		LuaStateWrapper* luaState = g_LuaMan.GetThreadCurrentLuaState();
+		static int currentCallbackId = 0;
+		int thisCallbackId = currentCallbackId++;
+		if (luabind::type(callbackParam) == LUA_TFUNCTION && callbackParam.is_valid()) {
+			luabind::call_function<void>(luaState->GetLuaState(), "_AddAsyncPathCallback", thisCallbackId, callbackParam);
+		}
 
-		auto callLuaCallback = [callback, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
+		auto callLuaCallback = [luaState, thisCallbackId, movePathToGround](std::shared_ptr<volatile PathRequest> pathRequestVol) {
 			// This callback is called from the async pathing thread, so we need to further delay this logic into the main thread (via AddLuaScriptCallback)
-			g_LuaMan.AddLuaScriptCallback([callback, movePathToGround, pathRequestVol]() {
+			g_LuaMan.AddLuaScriptCallback([luaState, thisCallbackId, movePathToGround, pathRequestVol]() {
 				PathRequest pathRequest = const_cast<PathRequest &>(*pathRequestVol); // erh, to work with luabind etc
 				if (movePathToGround) {
 					for (Vector &scenePathPoint : pathRequest.path) {
@@ -309,13 +315,7 @@ namespace RTE {
 					}
 				}
 			
-				if (callback && luabind::type(*callback) == LUA_TFUNCTION && callback->is_valid()) {
-					lua_pushcfunction(callback->interpreter(), &AddFileAndLineToError);
-					luabind::call_function<void>(*callback, pathRequest);
-					lua_pop(callback->interpreter(), 1);
-				}
-
-				delete callback;
+				luabind::call_function<void>(luaState->GetLuaState(), "_TriggerAsyncPathCallback", thisCallbackId, pathRequest);
 			});
 		};
 

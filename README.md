@@ -108,23 +108,6 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
-## Debugging with VS Code
-
-This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/).
-
-**Requirements:**
-
-- All the dependencies listed above
-- The [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) editor extension
-
-- The [`lldb`](https://lldb.llvm.org/) debugger *(macOS only*)
-
-These launch configurations are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options).
-
-All configurations will run pre-launch tasks to configure Meson and build using the ninja backend before launching the game.
-
-These tasks are also configured to run the `meson setup` command on editor startup. This will automatically execute Step 4 of the [Build](#Building) section each time the repository is opened as a workspace.
-
 ## Installing Dependencies
 
 **macOS additional dependencies:**  
@@ -142,6 +125,7 @@ These tasks are also configured to run the `meson setup` command on editor start
 `sudo python3 -m pip install meson`
 
 **Fedora:**  
+
 `# dnf install allegro-loadpng-devel allegro-devel libsdl2-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel tbb-devel lz4-devel libpng-devel lua-devel gcc gcc-c++`  
 
 ## Troubleshooting
@@ -158,6 +142,26 @@ These tasks are also configured to run the `meson setup` command on editor start
 - (optional) Visual Studio for the Developer Consoles since setup otherwise may be unnecessarily hard
 
 ***
+## Debugging with VS Code
+
+This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/) on any of the supported platforms.
+
+#### Requirements
+- [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack) extension (all platforms)
+- **Windows**
+  - [msbuild command line tools](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2022) (installed either via Visual Studio or manually)
+
+- **Linux & macOS**
+  - [All the dependencies listed above](#dependencies)
+  - The [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) editor extension
+  - The [`lldb`](https://lldb.llvm.org/) debugger *(macOS only*)
+
+These launch configurations are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options).
+
+Note that Windows / Unix & macOS users should use the launch configurations in the `msbuild` and `meson` groups respectively. 
+
+All configurations will run pre-launch tasks to build the game using the supported backend before launching.
+
 
 # More Information
 

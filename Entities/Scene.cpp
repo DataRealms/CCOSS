@@ -2983,6 +2983,13 @@ void Scene::ResetPathFinding() {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Scene::BlockUntilAllPathingRequestsComplete() {
+	for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+		while (GetPathFinder(static_cast<Activity::Teams>(team))->GetCurrentPathingRequests() != 0) {};
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdatePathFinding

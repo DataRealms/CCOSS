@@ -239,14 +239,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
-		if (m_CurrentPathingRequests.load() != 0) {
-			// Don't update yet, wait until all pathing requests are complete
-			// TODO: this can indefinitely block updates if pathing requests are made every frame. Figure out a solution for this
-			// Either force-complete pathing requests occasionally, or delay starting new pathing requests if we've not updated in a while
-			std::vector<int> nodeVec;
-			return nodeVec;
-		}
-		
 		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {

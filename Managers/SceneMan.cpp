@@ -137,6 +137,8 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
 	g_PostProcessMan.ClearScenePostEffects();
 
 	if (m_pCurrentScene) {
+        // Ensure all async pathing requests are complete
+        m_pCurrentScene->BlockUntilAllPathingRequestsComplete();
 		delete m_pCurrentScene;
 		m_pCurrentScene = nullptr;
 	}

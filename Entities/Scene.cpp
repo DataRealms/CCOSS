@@ -2981,6 +2981,13 @@ void Scene::ResetPathFinding() {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Scene::BlockUntilAllPathingRequestsComplete() {
+	for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+		while (GetPathFinder(static_cast<Activity::Teams>(team))->GetCurrentPathingRequests() != 0) {};
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdatePathFinding
@@ -2992,6 +2999,15 @@ void Scene::UpdatePathFinding()
 {
     constexpr int nodeUpdatesPerCall = 100;
     constexpr int maxUnupdatedMaterialAreas = 1000;
+
+    // If any pathing requests are active, don't update things yet, wait till they're finished
+	// TODO: this can indefinitely block updates if pathing requests are made every frame. Figure out a solution for this
+	// Either force-complete pathing requests occasionally, or delay starting new pathing requests if we've not updated in a while
+    for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+		if (GetPathFinder(static_cast<Activity::Teams>(team))->GetCurrentPathingRequests() != 0) {
+            return;
+        };
+	}
 
     int nodesToUpdate = nodeUpdatesPerCall / g_ActivityMan.GetActivity()->GetTeamCount();
     if (m_pTerrain->GetUpdatedMaterialAreas().size() > maxUnupdatedMaterialAreas) {

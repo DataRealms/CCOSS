@@ -608,7 +608,7 @@ bool Actor::HasObjectInGroup(std::string groupName) const
 
 void Actor::SetTeam(int team)
 {
-    SceneObject::SetTeam(team);
+	MovableObject::SetTeam(team);
 
     // Change the Team Icon to display
     m_pTeamIcon = 0;

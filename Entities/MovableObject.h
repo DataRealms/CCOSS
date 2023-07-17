@@ -544,6 +544,11 @@ enum MOType
 
     bool GetsHitByMOs() const { return m_GetsHitByMOs; }
 
+	/// <summary>
+	/// Sets the team of this MovableObject.
+	/// </summary>
+	/// <param name="team">The new team to assign.</returns>
+	void SetTeam(int team) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIgnoresTeamHits

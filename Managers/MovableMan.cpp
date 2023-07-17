@@ -833,7 +833,6 @@ bool MovableMan::AddMO(MovableObject *movableObjectToAdd) {
 
 void MovableMan::AddActor(Actor *actorToAdd) {
 	if (actorToAdd) {
-		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(actorToAdd->GetTeam());
 		actorToAdd->SetAsAddedToMovableMan();
 		actorToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
@@ -848,6 +847,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
         }
 
         m_AddedActors.push_back(actorToAdd);
+		// This will call SetTeam and subsequently force the team as active.
 		AddActorToTeamRoster(actorToAdd);
     }
 }

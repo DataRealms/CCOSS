@@ -349,35 +349,14 @@ namespace RTE {
 			scriptFile.getline(rawLine, 512);
 			std::string line = rawLine;
 
-			if (line.find("--[[FORCE_SINGLETHREADED]]--", 0) != std::string::npos) {
-				m_ScriptThreadSafetyMap.insert({scriptPath, false});
-				return false;
-			}
-			
-			// Figure out if any illegal functions are being used
-			if (!inBlockComment) {
-				commentPos = line.find("--[[", 0);
-				inBlockComment = commentPos != std::string::npos;
-			}
-			if (inBlockComment) {
-				commentPos = line.find("]]", commentPos == std::string::npos ? 0 : commentPos);
-				inBlockComment = commentPos != std::string::npos;
-			}
-			if (!inBlockComment) {
-				commentPos = line.find("--", 0);
-
-				// TODO - allow messing with attachables in a thread-safe manner, because it's done so often :)
-				for (const char* illegalFunction : { "GibThis", "AddAttachable", "RemoveAttachable", "AddInventoryItem", "RemoveInventoryItem", "AddWound", "RemoveWounds" }) {
-					if (std::string::size_type foundTextPos = line.find(illegalFunction); foundTextPos != std::string::npos && foundTextPos < commentPos) {
-						m_ScriptThreadSafetyMap.insert({scriptPath, false});
-						return false;
-					}
-				}
+			if (line.find("--[[MULTITHREAD]]--", 0) != std::string::npos) {
+				m_ScriptThreadSafetyMap.insert({scriptPath, true});
+				return true;
 			}
 		}
 
-		m_ScriptThreadSafetyMap.insert({scriptPath, true});
-		return true;
+		m_ScriptThreadSafetyMap.insert({scriptPath, false});
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

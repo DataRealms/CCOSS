@@ -1064,7 +1064,7 @@ enum MOType
 //                  MovableObject and affect its path next Update(). In N or kg * m/s^2.
 //                  A Vector with the offset, in METERS, of where the force is being
 //                  applied relative to the center of this MovableObject.
-// Return value:    None.
+// Return value:    None.A
 
     void AddForce(const Vector &force, const Vector &offset = Vector())
         { m_Forces.push_back(std::make_pair(force, offset)); }

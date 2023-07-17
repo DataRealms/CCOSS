@@ -1,7 +1,9 @@
 #include "Attachable.h"
+
 #include "AtomGroup.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "PerformanceMan.h"
 #include "AEmitter.h"
 #include "Actor.h"
 
@@ -398,6 +400,17 @@ namespace RTE {
 
 		if (m_Parent && m_InheritsFrame) {
 			SetFrame(m_Parent->GetFrame());
+		}
+
+		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
+		// We run our single-threaded scripts here, so that single-threaded behaviour is unchanged from prior to the multithreaded lua implementation
+		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
+				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, ThreadScriptsToRun::SingleThreaded);
+			}
+			UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 		}
 
 		m_PreUpdateHasRunThisFrame = false;

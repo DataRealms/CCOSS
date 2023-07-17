@@ -1593,9 +1593,9 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
-void updateAllScripts(MovableObject* mo, LuaStateWrapper* luaState, MovableObject::ThreadScriptsToRun scriptsToRun) {
+void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
     if (!luaState || mo->GetLuaState() == luaState) {
-        mo->UpdateScripts(scriptsToRun);
+        mo->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
     }
 
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
@@ -1604,9 +1604,9 @@ void updateAllScripts(MovableObject* mo, LuaStateWrapper* luaState, MovableObjec
             ++attachablrItr;
 
             if (!luaState || attachable->GetLuaState() == luaState) {
-                attachable->UpdateScripts(scriptsToRun);
+                attachable->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
             }
-            updateAllScripts(attachable, luaState, scriptsToRun);
+            updateMultiThreadedScripts(attachable, luaState);
         }
 
         for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
@@ -1614,9 +1614,9 @@ void updateAllScripts(MovableObject* mo, LuaStateWrapper* luaState, MovableObjec
             ++woundItr;
 
             if (!luaState || wound->GetLuaState() == luaState) {
-                wound->UpdateScripts(scriptsToRun);
+                wound->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
             }
-            updateAllScripts(wound, luaState, scriptsToRun);
+            updateMultiThreadedScripts(wound, luaState);
         }
     }
 };
@@ -1692,31 +1692,19 @@ void MovableMan::Update()
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
                 for (Actor* actor : m_Actors) {
-                    updateAllScripts(actor, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
+                    updateMultiThreadedScripts(actor, &luaState);
                 }
 
                 for (MovableObject* item : m_Items) {
-                    updateAllScripts(item, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
+                    updateMultiThreadedScripts(item, &luaState);
                 }
 
                 for (MovableObject* particle : m_Particles) {
-                    updateAllScripts(particle, &luaState, MovableObject::ThreadScriptsToRun::MultiThreaded);
+                    updateMultiThreadedScripts(particle, &luaState);
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
-
-        for (Actor* actor : m_Actors) {
-            updateAllScripts(actor, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
-        }
-
-        for (MovableObject* item : m_Items) {
-            updateAllScripts(item, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
-        }
-
-        for (MovableObject* particle : m_Particles) {
-            updateAllScripts(particle, nullptr, MovableObject::ThreadScriptsToRun::SingleThreaded);
-        }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
@@ -1724,6 +1712,11 @@ void MovableMan::Update()
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         for (Actor *actor : m_Actors) {
             actor->Update();
+
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            actor->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
             actor->ApplyImpulses();
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
@@ -1732,6 +1725,11 @@ void MovableMan::Update()
         int itemLimit = m_Items.size() - m_MaxDroppedItems;
         for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
             (*iIt)->Update();
+
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            (*iIt)->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
             (*iIt)->ApplyImpulses();
             if (count <= itemLimit) {
                 (*iIt)->SetToSettle(true);
@@ -1741,6 +1739,11 @@ void MovableMan::Update()
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         for (MovableObject* particle : m_Particles) {
             particle->Update();
+
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            particle->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
             particle->ApplyImpulses();
             particle->RestDetection();
             // Copy particles that are at rest to the terrain and mark them for deletion.

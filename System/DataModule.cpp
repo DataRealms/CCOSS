@@ -174,6 +174,8 @@ namespace RTE {
 				versionText = "4.1.0";
 			} else if (versionText == "Pre-Release 5.0") {
 				versionText = "5.0.0";
+			} else if (versionText == "Pre-Release 5.1") {
+				versionText = "5.1.0";
 			}
 
 			try {

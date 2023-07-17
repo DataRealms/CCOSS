@@ -30,6 +30,7 @@
     </Filter>
     <Filter Include="System\Semver200">
       <UniqueIdentifier>{60f9b310-81f7-4bf6-a829-c893dc59537a}</UniqueIdentifier>
+    </Filter>
     <Filter Include="GUI\Wrappers">
       <UniqueIdentifier>{14ff3fdb-4366-4bed-8b6e-ddcf72987b81}</UniqueIdentifier>
     </Filter>
@@ -1108,7 +1109,7 @@
     </ClCompile>
     <ClCompile Include="Managers\WindowMan.cpp">
       <Filter>Managers</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="System\Semver200\Semver200_comparator.cpp">
       <Filter>System\Semver200</Filter>
     </ClCompile>

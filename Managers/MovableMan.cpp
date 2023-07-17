@@ -28,6 +28,7 @@
 #include "HeldDevice.h"
 #include "ADoor.h"
 #include "Atom.h"
+#include "Scene.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
 #include "SettingsMan.h"
@@ -264,14 +265,20 @@ void MovableMan::UnregisterObject(MovableObject * mo)
     m_KnownObjects.erase(mo->GetUniqueID());
 }
 
-const std::vector<MovableObject *> &MovableMan::GetMOsInBox(const Box &box, int ignoreTeam) const
-{
-    return g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam); 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInBox(const Box &box, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInBox(box, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
 }
 
-const std::vector<MovableObject *> &MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam) const
-{
-    return g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &centre, float radius, int ignoreTeam, bool getsHitByMOsOnly) const {
+    std::vector<MovableObject *> *vectorForLua = new std::vector<MovableObject *>();
+    *vectorForLua = std::move(g_SceneMan.GetMOIDGrid().GetMOsInRadius(centre, radius, ignoreTeam, getsHitByMOsOnly));
+    return vectorForLua;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

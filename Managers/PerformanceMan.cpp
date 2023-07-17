@@ -36,9 +36,6 @@ namespace RTE {
 	void PerformanceMan::Initialize() {
 		m_SimUpdateTimer = std::make_unique<Timer>();
 
-		m_IntermediateDrawBitmap = create_bitmap_ex(8, 280, 380);
-		m_ColorConversionBitmap = create_bitmap_ex(32, 280, 380);
-
 		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
 			for (int i = 0; i < c_MaxSamples; ++i) {
 				m_PerfData[counter][i] = 0;

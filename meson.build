@@ -12,7 +12,6 @@ if host_machine.system() in ['linux','darwin']
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
-    dependency('tbb'),
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
     dependency('tbb'),
   ]

@@ -1489,17 +1489,15 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
-	if (saveFullData || sceneObjectToSave->GetTeam() != Activity::Teams::NoTeam) {
-		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
-	}
-	if (!isChildAttachable && (saveFullData || sceneObjectToSave->GetPlacedByPlayer() != Players::NoPlayer)) {
+	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
+	if (!isChildAttachable) {
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
 	}
 	if (saveFullData) {
 		writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
 	}
 
-	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); saveFullData && deploymentToSave && deploymentToSave->GetID() != 0) {
+	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
@@ -1623,9 +1621,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
+		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 		if (saveFullData) {
-			writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
-			writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 			writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 			writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
 
@@ -3075,7 +3073,6 @@ int Scene::GetScenePathSize() const {
 std::list<Vector>& Scene::GetScenePath() {
     return s_ScenePath;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Lock

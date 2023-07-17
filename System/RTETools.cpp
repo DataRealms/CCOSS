@@ -17,7 +17,14 @@ namespace RTE {
 			// Biggest prime in a int64_t, because we want all bits to potentially be set (so let us overflow).
 			const uint64_t hugePrime = 18446744073709551557;
 
-		g_RandomGenerator.Seed(seed);
+			uint64_t seedResult = 0;
+			for (char c : seedString) {
+				seedResult += static_cast<uint64_t>(c) * hugePrime;
+			}
+			return static_cast<uint32_t>(seedResult);
+		}();
+
+		g_RandomGenerator.Seed(constSeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

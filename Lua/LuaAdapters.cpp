@@ -272,16 +272,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaAdaptersScene::CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team) {
+		std::list<Vector>& threadScenePath = luaSelfObject->GetScenePath();
 		team = std::clamp(team, Activity::Teams::NoTeam, Activity::Teams::TeamFour);
-		luaSelfObject->CalculatePath(start, end, luaSelfObject->m_ScenePath, digStrength, team);
-		if (!luaSelfObject->m_ScenePath.empty()) {
+		luaSelfObject->CalculatePath(start, end, threadScenePath, digStrength, team);
+		if (!threadScenePath.empty()) {
 			if (movePathToGround) {
-				for (Vector &scenePathPoint : luaSelfObject->m_ScenePath) {
+				for (Vector &scenePathPoint : threadScenePath) {
 					scenePathPoint = g_SceneMan.MovePointToGround(scenePathPoint, 20, 15);
 				}
 			}
 
-			return static_cast<int>(luaSelfObject->m_ScenePath.size());
+			return static_cast<int>(threadScenePath.size());
 		}
 		return -1;
 	}

@@ -101,7 +101,7 @@ namespace RTE {
 		/// Sets the a new list of Atoms that make up the group.
 		/// </summary>
 		/// <param name="newAtoms">List of Atoms that make up the group.</param>
-		void SetAtomList(const std::list<Atom *> &newAtoms);
+		void SetAtomList(const std::vector<Atom *> &newAtoms);
 
 		/// <summary>
 		/// Gets the current number of Atoms that make up the group.
@@ -407,6 +407,10 @@ namespace RTE {
 		float m_MomentOfInertia; //!< Moment of Inertia for this AtomGroup.
 
 		std::vector<MOID> m_IgnoreMOIDs; //!< List of MOIDs this AtomGroup will ignore collisions with.
+		
+		AreaDistributionType m_AreaDistributionType; //!< How this AtomGroup will distribute energy when it collides with something.
+		
+		float m_AreaDistributionSurfaceAreaMultiplier; //!< A multiplier for the AtomGroup's surface area, which affects how much it digs into terrain. 0.5 would halve the surface area so it would dig into terrain twice as much, 2.0 would make it dig into terrain half as much.
 
 	private:
 

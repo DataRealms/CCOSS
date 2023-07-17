@@ -50,7 +50,8 @@ namespace RTE {
 		//set_pcall_callback(&AddFileAndLineToError); // NOTE: this seems to do nothing because retrieving the error from the lua stack wasn't done correctly. The current error handling works just fine but might look into doing this properly sometime later.
 
 		// Register all relevant bindings to the state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
-		luabind::module(m_State)[luabind::class_<LuaStateWrapper>("LuaManager")
+		luabind::module(m_State)[
+			luabind::class_<LuaStateWrapper>("LuaManager")
 				.property("TempEntity", &LuaStateWrapper::GetTempEntity)
 				.def("TempEntities", &LuaStateWrapper::GetTempEntityVector, luabind::return_stl_iterator)
 				.def("SelectRand", &LuaStateWrapper::SelectRand)
@@ -201,9 +202,6 @@ namespace RTE {
 		m_RandomGenerator.Seed(seed);
 
 		luaL_dostring(m_State,
-			// Add package path to the defaults.
-			"package.path = package.path .. \";Base.rte/?.lua\";"
-			"\n"
 			// Add cls() as a shortcut to ConsoleMan:Clear().
 			"cls = function() ConsoleMan:Clear(); end"
 			"\n"
@@ -438,6 +436,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaStateWrapper::SetLuaPath(const std::string &filePath) {
+		const std::string moduleName = g_PresetMan.GetModuleNameFromPath(filePath);
+		const std::string moduleFolder = g_PresetMan.IsModuleOfficial(moduleName) ? System::GetDataDirectory() : System::GetModDirectory();
+		const std::string scriptPath = moduleFolder + moduleName + "/?.lua";
+
+		lua_getglobal(m_State, "package");
+		lua_getfield(m_State, -1, "path"); // get field "path" from table at top of stack (-1).
+		std::string currentPath = lua_tostring(m_State, -1); // grab path string from top of stack.
+
+		// check if scriptPath is already in there, if not add it.
+		if (currentPath.find(scriptPath) == std::string::npos) {
+			currentPath.append(";" + scriptPath);
+		}
+
+		lua_pop(m_State, 1); // get rid of the string on the stack we just pushed previously.
+		lua_pushstring(m_State, currentPath.c_str()); // push the new one.
+		lua_setfield(m_State, -2, "path"); // set the field "path" in table at -2 with value at top of stack.
+		lua_pop(m_State, 1); // get rid of package table from top of stack.
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaStateWrapper::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
@@ -562,12 +582,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaStateWrapper::RunScriptFile(const std::string &filePath, bool consoleErrors) {
-		if (filePath.empty()) {
+		const std::string fullScriptPath = g_PresetMan.GetFullModulePath(filePath);
+		if (fullScriptPath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
 			return -1;
 		}
 
-		if (!System::PathExistsCaseSensitive(filePath)) {
+		if (!System::PathExistsCaseSensitive(fullScriptPath)) {
 			m_LastError = "Script file: " + filePath + " doesn't exist!";
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
@@ -582,8 +603,9 @@ namespace RTE {
 		s_currentLuaState = this;
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
+		SetLuaPath(fullScriptPath);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (luaL_loadfile(m_State, filePath.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
+		if (luaL_loadfile(m_State, fullScriptPath.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_State, -1);
 			lua_pop(m_State, 1);
 			if (consoleErrors) {

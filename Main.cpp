@@ -393,7 +393,10 @@ int main(int argc, char **argv) {
 			if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 		}
 
-		if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+		if (!g_ActivityMan.Initialize()) {
+			RunMenuLoop();
+		}
+
 		RunGameLoop();
 	}
 

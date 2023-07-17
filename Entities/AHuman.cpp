@@ -1007,7 +1007,8 @@ bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &
 		return false;
 	}
 
-	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
+	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); 
+        heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
         return true;
     }
 

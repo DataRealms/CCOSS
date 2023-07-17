@@ -766,10 +766,14 @@ float MovableObject::GetAltitude(int max, int accuracy)
     return g_SceneMan.FindAltitude(m_Pos, max, accuracy);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MovableObject::AddAbsForce(const Vector &force, const Vector &absPos)
 {
     m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
 {
@@ -779,6 +783,8 @@ void MovableObject::AddAbsImpulseForce(const Vector &impulse, const Vector &absP
 
 		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::RestDetection() {
 	// Translational settling detection.
@@ -833,6 +839,16 @@ void MovableObject::SetHitWhatTerrMaterial(unsigned char matID)
     m_TerrainMatHit = matID;
     m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
     RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Vector MovableObject::GetTotalForce() {
+	Vector totalForceVector;
+	for (const auto &[force, forceOffset] : m_Forces) {
+		totalForceVector += force;
+	}
+	return totalForceVector;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

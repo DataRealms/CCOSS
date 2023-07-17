@@ -2,7 +2,7 @@
 
 #include "FrameMan.h"
 #include "SceneMan.h"
-#include "Entity.h"
+#include "ConsoleMan.h"
 #include "MOSprite.h"
 
 namespace RTE {

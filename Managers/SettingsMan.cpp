@@ -46,7 +46,7 @@ namespace RTE {
 
 		m_EnableMultithreadedLua = false;
 		m_DisableLuaJIT = false;
-		m_RecommendedMOIDCount = 240;
+		m_RecommendedMOIDCount = 512;
 		m_SimplifiedCollisionDetection = false;
 		m_SceneBackgroundAutoScaleMode = 1;
 		m_DisableFactionBuyMenuThemes = false;

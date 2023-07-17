@@ -4,8 +4,6 @@
 #include "Scene.h"
 #include "SceneMan.h"
 
-#include <atomic>
-
 namespace RTE {
 
 	// One pathfinder per thread, lazily initialized. Shouldn't access this directly, use GetPather() instead.

@@ -1807,6 +1807,11 @@ enum MOType
     /// <returns>Our lua state. Can potentially be nullptr.</returns>
     LuaStateWrapper* GetLuaState() { return m_ThreadedLuaState; }
 
+	/// <summary>
+	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
+	/// </summary>
+	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

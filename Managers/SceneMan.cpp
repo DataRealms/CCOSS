@@ -47,6 +47,8 @@ std::vector<std::pair<int, BITMAP *>> SceneMan::m_IntermediateSettlingBitmaps;
 // Stored as a thread-local instead of in the class, because multithreaded Lua scripts will interfere otherwise
 thread_local Vector s_LastRayHitPos;
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void SceneMan::Clear()
 {
     m_DefaultSceneName = "Tutorial Bunker";

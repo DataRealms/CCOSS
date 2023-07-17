@@ -188,6 +188,7 @@ namespace RTE {
 		/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
 		/// </summary>
 		/// <param name="inputFloat">The input float to round.</param>
+		/// <param name="precision">The precision to round to, i.e. the number of digits after the decimal points.</param>
 		/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
 		/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
 		std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
@@ -245,7 +246,7 @@ namespace RTE {
 		/// <param name="width">Width of the box.</param>
 		/// <param name="height">Height of the box.</param>
 		/// <returns>True if point is inside box bounds.</returns>
-		bool WithinBox(Vector &point, Vector &boxPos, float width, float height);
+		bool WithinBox(const Vector &point, const Vector &boxPos, float width, float height);
 
 		/// <summary>
 		/// Tells whether a point is within a specified box.
@@ -256,7 +257,7 @@ namespace RTE {
 		/// <param name="right">Position of box right plane (X end).</param>
 		/// <param name="bottom">Position of box bottom plane (Y end).</param>
 		/// <returns>True if point is inside box bounds.</returns>
-		bool WithinBox(Vector &point, float left, float top, float right, float bottom);
+		bool WithinBox(const Vector &point, float left, float top, float right, float bottom);
 	#pragma endregion
 
 	#pragma region Conversion
@@ -310,10 +311,8 @@ namespace RTE {
 		/// <summary>
 		/// Returns the sign of the given input value.
 		/// </summary>
-		/// <returns>
-		/// The sign as an integer -1, 0 or +1.
-		/// </returns>
-		template <typename Type> int Sign(const Type& value) {
+		/// <returns>The sign as an integer -1, 0 or +1.</returns>
+		template <typename Type> int Sign(const Type &value) {
 			return (Type(0) < value) - (Type(0) > value);
 		}
 	#pragma endregion

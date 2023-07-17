@@ -208,7 +208,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AtomGroup::SetAtomList(const std::list<Atom *> &newAtoms) {
+	void AtomGroup::SetAtomList(const std::vector<Atom *> &newAtoms) {
 		for (const Atom *atom : m_Atoms) {
 			delete atom;
 		}
@@ -364,10 +364,15 @@ namespace RTE {
 
 		HitData hitData;
 
-		std::unordered_map<MOID, std::vector<Atom *>> hitMOAtoms;
-		std::vector<Atom *> hitTerrAtoms;
-		std::vector<Atom *> penetratingAtoms;
-		std::vector<Atom *> hitResponseAtoms;
+		// Thread locals for performance (avoid memory allocs)
+		thread_local std::unordered_map<MOID, std::vector<Atom *>> hitMOAtoms;
+		hitMOAtoms.clear();
+		thread_local std::vector<Atom *> hitTerrAtoms;
+		hitTerrAtoms.clear();
+		thread_local std::vector<Atom *> penetratingAtoms;
+		penetratingAtoms.clear();
+		thread_local std::vector<Atom *> hitResponseAtoms;
+		hitResponseAtoms.clear();
 
 		// Lock all bitmaps involved outside the loop - only relevant for video bitmaps so disabled at the moment.
 		//if (!scenePreLocked) { g_SceneMan.LockScene(); }
@@ -489,13 +494,7 @@ namespace RTE {
 								MovableObject *moCollidedWith = g_MovableMan.GetMOFromID(tempMOID);
 								if (moCollidedWith && moCollidedWith->HitWhatMOID() == g_NoMOID) { moCollidedWith->SetHitWhatMOID(m_OwnerMOSR->m_MOID); }
 
-								// See if we already have another Atom hitting this MO in this step. If not, then create a new list unique for that MO's ID and insert into the map of MO-hitting Atoms.
-								if (!(hitMOAtoms.count(tempMOID))) {
-									hitMOAtoms.insert({ tempMOID, std::vector<Atom*>{ atom } });
-								} else {
-									// If another Atom of this group has already hit this same MO during this step, go ahead and add the new Atom to the corresponding map for that MOID.
-									hitMOAtoms.at(tempMOID).push_back(atom);
-								}
+								hitMOAtoms[tempMOID].push_back(atom);
 
 								// Add the hit MO to the ignore list of ignored MOIDs
 								//AddMOIDToIgnore(tempMOID);

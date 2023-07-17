@@ -13,6 +13,7 @@
 
 #include "SceneEditor.h"
 
+#include "WindowMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"

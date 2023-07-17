@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+</details>
+
+<details><summary><b>Changed</b></summary>
+</details>
+
+<details><summary><b>Fixed</b></summary>
+</details>
+
+<details><summary><b>Removed</b></summary>
+</details>
+
+***
+
+## [0.1.0 pre-release 5.0][0.1.0-pre5.0] - 2023/06/17
+
+<details><summary><b>Added</b></summary>
 
 - New INI `HDFirearm` property `LegacyCompatibilityRoundsAlwaysFireUnflipped`. This is used to make guns fire their projectiles unflipped, like they used to in old game versions, and should only be turned on for `HDFirearms` in old mods that need it.
 
@@ -100,6 +116,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	The skin and background color are also applied to the `ObjectPicker` (scene object placer) for visual consistency.
 
 - New `Settings.ini` property `DisableFactionBuyMenuThemes = 0/1` which will cause custom faction theme definitions in all modules to be ignored and the default theme to be used instead.
+
+- New `Settings.ini` property `DisableFactionBuyMenuThemeCursors = 0/1` which will cause custom faction theme cursor definitions in all modules to be ignored and the default cursors to be used instead.
 
 - New `Settings.ini` and `SceneMan` Lua (R/W) property `ScrapCompactingHeight` which determines the maximum height of a column of scrap terrain to collapse when the bottom pixel is knocked loose. 0 means no columns of terrain are ever collapsed, much like in old builds of CC.
 
@@ -392,6 +410,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	A new `GlobalScript` has been added that will automatically save the game every three minutes. To turn it on, enable the Autosaving `GlobalScript` in the main menu mod manager's Global Scripts section.  
 	To load games saved by this script, open the console and enter the command `ActivityMan:LoadGame("Autosave")`, or use the `Ctrl + F9` shortcut.
 	
+- New hardcoded `MovableObject` function `OnGameSave(self)` that gets run for each `MovableObject` with it when the game is saved. This can be used in tandem with custom values (for `MOSRotatings` and child classes) to store data, which can be read during `Create` when the game is loaded.
+	
 - New Lua `AEmitter` properties:  
 	**TotalParticlesPerMinute** (R/O) - The rate at which all of the `Emission`s of this `AEmitter` combined, emit their particles.  
 	**TotalBurstSize** (R/O) - The number of particles that will be emitted by all the `Emission`s of this `AEmitter` combined, in one shot when a burst is triggered.  
@@ -474,7 +494,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	Shift-clicking an item (or Shift + Fire in keyboard-only) in the cart will now empty the entire cart.  
 	Items in the cart will be indented to signify what actor's inventory they belong to.  
 	Middle-clicking (or pressing the Pickup key) on an item will duplicate it. This also duplicates an actor's inventory.  
-	You can now reorganize the cart by click-dragging, or by holding the item selection key and inputting up/down.
+	You can now reorganize the cart by click-dragging. For kbd-only you can do this by holding the sharp aim key and pressing up/down.
 
 - Added to Lua enum `ControlState` the state `RELEASE_FACEBUTTON`.
 
@@ -610,6 +630,12 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `MovableObject` Lua (R) property `HasEverBeenAddedToMovableMan` that tells you whether or not the `MovableObject` has ever been added to `MovableMan`.
 
 - Added alternate version of `Scene` Lua function `CalculatePath(startPos, endPos, movePathToGround, digStrength, team)` that works as the previous one, but lets you specify the team to calculate the path for, allowing you to ignore doors on your team.
+
+- Added `Controller` Lua function `IsKeyboardOnlyControlled` that tells you whether the `Controller` is being controlled by keyboard only. Previously the only way to do this was to check that it's not mouse controlled and not gamepad controlled.
+
+- Added `Controller` control state `PIE_MENU_OPENED` that is true for the first Update in which the `PieMenu` is opened.
+
+- Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
 </details>
 
@@ -842,6 +868,8 @@ As such, the `Index.ini` property `SupportedGameVersion` must now be a valid sem
 	Bursts during downtime from burst spacing are now less punishing, scaling according to half of the burst size.
 
 - New `Activity` Lua function `activity:SetPlayerHadBrain(player, whetherOrNotPlayerHadBrain)`, which sets whether or not the given player had a brain. Probably mostly useful for dealing with loading a game with multiple players, where one player is dead and you have to sort out brain assignment.
+
+- Changed `LuaMan:FileOpen` access modes so it only allows `"r", "r+", "w", "w+", "a", "a+"`, i.e. specifying type (text, binary) is not supported. See [this reference page](https://cplusplus.com/reference/cstdio/fopen) for details on the access modes.
 
 </details>
 
@@ -2103,3 +2131,4 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
 [0.1.0-pre4.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre4.0
+[0.1.0-pre5.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre5.0

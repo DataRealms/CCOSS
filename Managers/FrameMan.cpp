@@ -62,9 +62,9 @@ namespace RTE {
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_ColorTablePruneTimer.Reset();
-		m_GUIScreen = nullptr;
-		m_LargeFont = nullptr;
-		m_SmallFont = nullptr;
+		m_GUIScreens.fill(nullptr);
+		m_LargeFonts.fill(nullptr);
+		m_SmallFonts.fill(nullptr);
 		m_TextBlinkTimer.Reset();
 
 		for (int screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
@@ -89,7 +89,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Initialize() {
-		set_color_depth(m_BPP);
+		set_color_depth(c_BPP);
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
 
@@ -108,6 +108,9 @@ namespace RTE {
 		m_ScreenDumpNamePlaceholder = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(24, 1, 1));
 		clear_bitmap(m_ScreenDumpNamePlaceholder.get());
 
+		// Use fastest compression in save_png().
+		_png_compression_level = 1;
+
 		return 0;
 	}
 
@@ -122,10 +125,10 @@ namespace RTE {
 		ClearBackBuffer8();
 
 		// Create the post-processing buffer, it'll be used for glow effects etc
-		m_BackBuffer32 = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(32, resX, resY));
+		m_BackBuffer32 = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(c_BPP, resX, resY));
 		ClearBackBuffer32();
 
-		m_OverlayBitmap32 = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(32, resX, resY));
+		m_OverlayBitmap32 = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(c_BPP, resX, resY));
 		clear_to_color(m_OverlayBitmap32.get(), 0);
 
 		// Create all the network 8bpp back buffers
@@ -187,10 +190,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Destroy() {
-		delete m_GUIScreen;
-		delete m_LargeFont;
-		delete m_SmallFont;
-
+		for (const GUIScreen *guiScreen : m_GUIScreens) {
+			delete guiScreen;
+		}
+		for (const GUIFont *guiFont : m_LargeFonts) {
+			delete guiFont;
+		}
+		for (const GUIFont *guiFont : m_SmallFonts) {
+			delete guiFont;
+		}
 		Clear();
 	}
 
@@ -326,7 +334,7 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string FrameMan::SplitStringToFitWidth(const std::string &stringToSplit, int widthLimit, bool useSmallFont) {
-		GUIFont *fontToUse = GetFont(useSmallFont);
+		GUIFont *fontToUse = GetFont(useSmallFont, false);
 		auto SplitSingleLineAsNeeded = [this, &widthLimit, &fontToUse](std::string &lineToSplitAsNeeded) {
 			int numberOfScreenWidthsForText = static_cast<int>(std::ceil(static_cast<float>(fontToUse->CalculateWidth(lineToSplitAsNeeded)) / static_cast<float>(widthLimit)));
 			if (numberOfScreenWidthsForText > 1) {
@@ -550,12 +558,12 @@ namespace RTE {
 			case ScenePreviewDump:
 			case WorldDump:
 				if (!m_WorldDumpBuffer || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
-					m_WorldDumpBuffer = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(32, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight()));
+					m_WorldDumpBuffer = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(c_BPP, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight()));
 				}
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
 
-					BITMAP *scenePreviewDumpBuffer = create_bitmap_ex(32, c_ScenePreviewWidth, c_ScenePreviewHeight);
+					BITMAP *scenePreviewDumpBuffer = create_bitmap_ex(c_BPP, c_ScenePreviewWidth, c_ScenePreviewHeight);
 					blit(m_ScenePreviewDumpGradient.get(), scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer.get(), scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
@@ -714,21 +722,39 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	GUIFont * FrameMan::GetFont(bool isSmall) {
-		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8.get()); }
+	GUIFont * FrameMan::GetFont(bool isSmall, bool trueColor) {
+		size_t colorIndex = trueColor ? 1 : 0;
+
+		if (!m_GUIScreens[colorIndex]) {
+			m_GUIScreens[colorIndex] = new AllegroScreen(trueColor ? m_BackBuffer32.get() : m_BackBuffer8.get());
+		}
 
 		if (isSmall) {
-			if (!m_SmallFont) {
-				m_SmallFont = new GUIFont("SmallFont");
-				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontSmall.png");
+			if (!m_SmallFonts[colorIndex]) {
+				std::string fontName = "SmallFont";
+				std::string fontPath = "Base.rte/GUIs/Skins/FontSmall.png";
+
+				if (trueColor) {
+					fontName = "SmallFont32";
+					fontPath = "Base.rte/GUIs/Skins/Menus/FontSmall.png";
+				}
+				m_SmallFonts[colorIndex] = new GUIFont(fontName);
+				m_SmallFonts[colorIndex]->Load(m_GUIScreens[colorIndex], fontPath);
 			}
-			return m_SmallFont;
+			return m_SmallFonts[colorIndex];
 		}
-		if (!m_LargeFont) {
-			m_LargeFont = new GUIFont("FatFont");
-			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontLarge.png");
+		if (!m_LargeFonts[colorIndex]) {
+			std::string fontName = "FatFont";
+			std::string fontPath = "Base.rte/GUIs/Skins/FontLarge.png";
+
+			if (trueColor) {
+				fontName = "FatFont32";
+				fontPath = "Base.rte/GUIs/Skins/Menus/FontLarge.png";
+			}
+			m_LargeFonts[colorIndex] = new GUIFont(fontName);
+			m_LargeFonts[colorIndex]->Load(m_GUIScreens[colorIndex], fontPath);
 		}
-		return m_LargeFont;
+		return m_LargeFonts[colorIndex];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

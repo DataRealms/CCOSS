@@ -363,6 +363,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">The player to reset the message timer for.</param>
 		void ResetMessageTimer(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MessageTimer[player].Reset(); } }
+
+		/// <summary>
+		/// Gets a pointer to the GUI controller of the specified player.
+		/// </summary>
+		/// <param name="player">Which player to get the Controller of.</param>
+		/// <returns>A pointer to the player's Controller. Ownership is NOT transferred!</returns>
+		Controller * GetPlayerController(int player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? &m_PlayerController[player] : nullptr; }
 #pragma endregion
 
 #pragma region Team Handling
@@ -629,7 +636,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to get the controlled actor of.</param>
 		/// <returns>A pointer to the controlled Actor. Ownership is NOT transferred! 0 If no actor is currently controlled by this player.</returns>
-		Actor * GetControlledActor(int player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_ControlledActor[player] : 0; }
+		Actor * GetControlledActor(int player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_ControlledActor[player] : nullptr; }
 
 		/// <summary>
 		/// Makes the player's ControlledActor the leader of any squad it is a member of.

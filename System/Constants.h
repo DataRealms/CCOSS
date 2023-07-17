@@ -11,7 +11,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr const char *c_VersionString = "4.1.0";
+	static constexpr const char *c_VersionString = "5.1.0";
 #pragma endregion
 
 #pragma region Userdata Constants

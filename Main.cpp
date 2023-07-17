@@ -59,10 +59,10 @@ namespace RTE {
 		g_NetworkServer.Initialize();
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
-		g_PerformanceMan.Initialize();
 		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
+		g_PerformanceMan.Initialize();
 
 		if (g_AudioMan.Initialize()) { g_GUISound.Initialize(); }
 
@@ -95,6 +95,7 @@ namespace RTE {
 		g_AudioMan.Destroy();
 		g_PresetMan.Destroy();
 		g_UInputMan.Destroy();
+		g_PostProcessMan.Destroy();
 		g_FrameMan.Destroy();
 		g_TimerMan.Destroy();
 		g_LuaMan.Destroy();
@@ -164,9 +165,13 @@ namespace RTE {
 			switch (sdlEvent.type) {
 				case SDL_QUIT:
 					System::SetQuit(true);
-					break;
+					return;
 				case SDL_WINDOWEVENT:
-					g_WindowMan.HandleWindowEvent(sdlEvent);
+					if (sdlEvent.window.event == SDL_WINDOWEVENT_CLOSE) {
+						System::SetQuit(true);
+						return;
+					}
+					g_WindowMan.QueueWindowEvent(sdlEvent);
 					break;
 				case SDL_KEYUP:
 				case SDL_KEYDOWN:

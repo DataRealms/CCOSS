@@ -126,6 +126,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool Controller::IsKeyboardOnlyControlled() const {
+		return m_Player != Players::NoPlayer && g_UInputMan.GetControlScheme(m_Player)->GetDevice() == InputDevice::DEVICE_KEYB_ONLY;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool Controller::IsGamepadControlled() const {
 		bool isGamepadControlled = false;
 		if (m_Player != Players::NoPlayer) {
@@ -350,12 +356,22 @@ namespace RTE {
 
 		// PIE MENU ACTIVE
 		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
+			if (m_ControlledActor && m_ControlledActor->GetPieMenu()->IsInNormalAnimationMode() && !m_ControlledActor->GetPieMenu()->IsVisible()) {
+				m_ControlStates[ControlState::PIE_MENU_OPENED] = true;
+			}
 			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
 			// Make sure that firing and aiming are ignored while the pie menu is open, since it consumes those inputs.
 			m_ControlStates[ControlState::WEAPON_FIRE] = false;
 			m_ControlStates[ControlState::AIM_UP] = false;
 			m_ControlStates[ControlState::AIM_DOWN] = false;
-		} 
+			
+			if (IsKeyboardOnlyControlled()) {
+				m_ControlStates[ControlState::MOVE_RIGHT] = false;
+				m_ControlStates[ControlState::MOVE_LEFT] = false;
+				m_ControlStates[ControlState::MOVE_UP] = false;
+				m_ControlStates[ControlState::MOVE_DOWN] = false;
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

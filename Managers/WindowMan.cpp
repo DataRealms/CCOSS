@@ -15,13 +15,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Clear() {
+		m_EventQueue.clear();
+		m_FocusEventsDispatchedByMovingBetweenWindows = false;
+		m_FocusEventsDispatchedByDisplaySwitchIn = false;
+
 		m_PrimaryTexture.reset();
 		m_PrimaryRenderer.reset();
 		m_PrimaryWindow.reset();
 		ClearMultiDisplayData();
 
 		m_AnyWindowHasFocus = false;
-		m_FocusLostDueToMovingBetweenGameWindows = false;
 		m_ResolutionChanged = false;
 
 		m_NumDisplays = 0;
@@ -506,53 +509,89 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::DisplaySwitchIn() const {
+	void WindowMan::DisplaySwitchIn(SDL_Window *windowThatShouldTakeInputFocus) const {
 		g_UInputMan.DisableMouseMoving(false);
+		g_UInputMan.DisableKeys(false);
+
 		if (!m_MultiDisplayWindows.empty()) {
-			SDL_RaiseWindow(m_PrimaryWindow.get());
-			for (const std::shared_ptr<SDL_Window> &window : m_MultiDisplayWindows) {
+			for (const auto &window : m_MultiDisplayWindows) {
 				SDL_RaiseWindow(window.get());
 			}
+			SDL_RaiseWindow(windowThatShouldTakeInputFocus);
+			SDL_SetWindowInputFocus(windowThatShouldTakeInputFocus);
+		} else {
+			SDL_RaiseWindow(m_PrimaryWindow.get());
 		}
+
+		SDL_ShowCursor(SDL_DISABLE);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::DisplaySwitchOut() const {
 		g_UInputMan.DisableMouseMoving(true);
+		g_UInputMan.DisableKeys(true);
+
+		SDL_ShowCursor(SDL_ENABLE);
+		// Sometimes the cursor will not be visible after disabling relative mode. Setting it to nullptr forces it to redraw, though this doesn't always work either.
+		SDL_SetCursor(nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::HandleWindowEvent(const SDL_Event &windowEvent) {
-		switch (windowEvent.window.event) {
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				if (!m_FocusLostDueToMovingBetweenGameWindows) {
-					DisplaySwitchIn();
-				}
-				m_AnyWindowHasFocus = true;
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				m_AnyWindowHasFocus = false;
-				m_FocusLostDueToMovingBetweenGameWindows = FullyCoversAllDisplays();
-				DisplaySwitchOut();
-				break;
-			case SDL_WINDOWEVENT_ENTER:
-				if (m_AnyWindowHasFocus && FullyCoversAllDisplays()) {
-					SDL_RaiseWindow(SDL_GetWindowFromID(windowEvent.window.windowID));
-					SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowEvent.window.windowID));
-					m_AnyWindowHasFocus = true;
-				}
-				break;
-			default:
-				break;
-		}
+	void WindowMan::QueueWindowEvent(const SDL_Event &windowEvent) {
+		m_EventQueue.emplace_back(windowEvent);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Update() {
-		m_FocusLostDueToMovingBetweenGameWindows = false;
+		// Some bullshit we have to deal with to correctly focus windows in multi-display fullscreen so mouse binding/unbinding works correctly. Not relevant for single window.
+		// This is SDL's fault for not having handling to raise a window so it's top-most without taking focus of it.
+		// Don't process any focus events this update if either of these has been set in the previous one.
+		// Having two flags is a bit redundant but better be safe than recursively raising windows and taking focus and pretty much locking up your whole shit so the only thing you can do about it is sign out to terminate this.
+		// Clearing the queue here is just us not handling the events on our end. Whatever they are and do and wherever they propagate to is handled by SDL_PollEvent earlier.
+		if (m_FocusEventsDispatchedByDisplaySwitchIn || m_FocusEventsDispatchedByMovingBetweenWindows) {
+			m_EventQueue.clear();
+
+			m_FocusEventsDispatchedByDisplaySwitchIn = false;
+			m_FocusEventsDispatchedByMovingBetweenWindows = false;
+			return;
+		}
+
+		SDL_Event windowEvent;
+		for (std::vector<SDL_Event>::const_iterator eventIterator = m_EventQueue.begin(); eventIterator != m_EventQueue.end(); eventIterator++) {
+			windowEvent = *eventIterator;
+			int windowID = windowEvent.window.windowID;
+
+			switch (windowEvent.window.event) {
+				case SDL_WINDOWEVENT_ENTER:
+					if (SDL_GetWindowID(SDL_GetMouseFocus()) > 0 && m_AnyWindowHasFocus && FullyCoversAllDisplays()) {
+						for (const auto &window : m_MultiDisplayWindows) {
+							SDL_RaiseWindow(window.get());
+						}
+						SDL_RaiseWindow(SDL_GetWindowFromID(windowID));
+						SDL_SetWindowInputFocus(SDL_GetWindowFromID(windowID));
+						m_AnyWindowHasFocus = true;
+						m_FocusEventsDispatchedByMovingBetweenWindows = true;
+					}
+					break;
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					DisplaySwitchIn(SDL_GetWindowFromID(windowID));
+					m_AnyWindowHasFocus = true;
+					m_FocusEventsDispatchedByDisplaySwitchIn = true;
+					break;
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					DisplaySwitchOut();
+					m_AnyWindowHasFocus = false;
+					m_FocusEventsDispatchedByDisplaySwitchIn = false;
+					m_FocusEventsDispatchedByMovingBetweenWindows = false;
+					break;
+				default:
+					break;
+			}
+		}
+		m_EventQueue.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -570,7 +609,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() const {
-		static constexpr int bytesPerPixel = FrameMan::m_BPP / 8;
+		static constexpr int bytesPerPixel = FrameMan::c_BPP / 8;
 
 		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
 

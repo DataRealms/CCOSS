@@ -10,6 +10,10 @@
 
 #define g_UInputMan UInputMan::Instance()
 
+extern "C" {
+	struct SDL_Rect;
+}
+
 namespace RTE {
 
 	class Icon;
@@ -411,20 +415,12 @@ namespace RTE {
 		/// <summary>
 		/// Forces the mouse within a box on the screen.
 		/// </summary>
-		/// <param name="x">X value of the top left corner of the screen box to keep the mouse within, in screen coordinates.</param>
-		/// <param name="y">Y value of the top left corner of the screen box to keep the mouse within, in screen coordinates.</param>
+		/// <param name="x">X value of the top left corner of the screen box to keep the mouse within, relative to the top left corner of the player's screen.</param>
+		/// <param name="y">Y value of the top left corner of the screen box to keep the mouse within, relative to the top left corner of the player's screen.</param>
 		/// <param name="width">The width of the box.</param>
 		/// <param name="height">The height of the box.</param>
 		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
-		void ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer = -1) const;
-
-		/// <summary>
-		/// Forces the mouse within a specific player's screen area.
-		/// Player 1 will always be in the upper-left corner, Player 3 will always be in the lower-left corner, Player 4 will always be in the lower-right quadrant.
-		/// Player 2 will either be in the lower-left corner or the upper-right corner depending on vertical/horizontal splitting.
-		/// </summary>
-		/// <param name="whichPlayer">Which player's screen to constrain the mouse to. Only the player with actual control over the mouse will be affected.</param>
-		void ForceMouseWithinPlayerScreen(int whichPlayer) const;
+		void ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer = Players::NoPlayer) const;
 #pragma endregion
 
 #pragma region Joystick Handling
@@ -689,6 +685,7 @@ namespace RTE {
 
 		bool m_TrapMousePos; //!< Whether the mouse is trapped in the middle of the screen each update or not.
 		float m_MouseTrapRadius; //!< The radius (in pixels) of the circle trapping the mouse for analog mouse data.
+		SDL_Rect m_PlayerScreenMouseBounds; //!< Rect with the position and dimensions of the player screen that the mouse is bound to, when bounding is enabled.
 
 		InputDevice m_LastDeviceWhichControlledGUICursor; //!< Indicates which device controlled the cursor last time.
 
@@ -714,6 +711,16 @@ namespace RTE {
 		static constexpr double c_GamepadAxisLimit = 32767.0; //!< Maximum axis value as defined by SDL (int16 max).
 		static constexpr int c_AxisDigitalPressedThreshold = 8192; //!< Digital Axis threshold value as defined by allegro.
 		static constexpr int c_AxisDigitalReleasedThreshold = c_AxisDigitalPressedThreshold - 100; //!< Digital Axis release threshold, to debounce values.
+
+#pragma region Mouse Handling
+		/// <summary>
+		/// Forces the mouse within a specific player's screen area.
+		/// Player 1 will always be in the upper-left corner, Player 3 will always be in the lower-left corner, Player 4 will always be in the lower-right quadrant.
+		/// Player 2 will either be in the lower-left corner or the upper-right corner depending on vertical/horizontal splitting.
+		/// </summary>
+		/// <param name="whichPlayer">Which player's screen to constrain the mouse to. Only the player with actual control over the mouse will be affected.</param>
+		void ForceMouseWithinPlayerScreen(bool force, int whichPlayer);
+#pragma endregion
 
 #pragma region Input State Handling
 		/// <summary>

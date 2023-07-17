@@ -1146,11 +1146,18 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 
 				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
 				gibParticleClone->SetHFlipped(m_HFlipped);
-				Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
+				Vector gibVelocity = Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F);
+				
 				// TODO: Figure out how much the magnitude of an offset should affect spread
 				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
-
-				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() > 0 ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				// Determine the primary direction of the gib particles.
+				if (gibSettingsObject.InheritsVelocity() > 0 && !impactImpulse.IsZero()) {
+					gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle());
+				} else if (!rotatedGibOffset.IsZero()) {
+					gibVelocity.RadRotate(rotatedGibOffset.GetAbsRadAngle());
+				} else {
+					gibVelocity.RadRotate(m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				}
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
@@ -2037,6 +2044,18 @@ void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
 		wound->m_PreUpdateHasRunThisFrame = false;
 		wound->UpdatePositionAndJointPositionBasedOnOffsets();
 		wound->CorrectAttachableAndWoundPositionsAndRotations();
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::OnGameSave() {
+	MovableObject::OnGameSave();
+	for (AEmitter *wound : m_Wounds) {
+		wound->OnGameSave();
+	}
+	for (Attachable *attachable : m_Attachables) {
+		attachable->OnGameSave();
 	}
 }
 

@@ -452,13 +452,9 @@ void Scene::Clear()
     m_AutoDesigned = true;
     m_TotalInvestment = 0;
     m_pTerrain = 0;
-	m_NoTeamPathFinder.reset();
-    for (std::unique_ptr<PathFinder> &pathFinder : m_PathFinders) {
+    for (std::unique_ptr<PathFinder> &pathFinder : m_pPathFinders) {
         pathFinder.reset();
     }
-	for (std::unique_ptr<PathFinder> &defaultDigStrengthPathFinder : m_DefaultDigStrengthPathfinders) {
-		defaultDigStrengthPathFinder.reset();
-	}
     m_PathfindingUpdated = false;
     m_PartialPathUpdateTimer.Reset();
 
@@ -937,12 +933,8 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
 		unsigned int numberOfBlocksToAllocate = 4000;
 
-		m_NoTeamPathFinder = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
-		for (int i = 0; i < m_PathFinders.size(); ++i) {
-			m_PathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
-		}
-		for (int i = 0; i < m_DefaultDigStrengthPathfinders.size(); ++i) {
-			m_DefaultDigStrengthPathfinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+        for (int i = 0; i < m_pPathFinders.size(); ++i) {
+            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
         }
         ResetPathFinding();
     }
@@ -1498,15 +1490,17 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
-	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
-	if (!isChildAttachable) {
+	if (saveFullData || sceneObjectToSave->GetTeam() != Activity::Teams::NoTeam) {
+		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
+	}
+	if (!isChildAttachable && (saveFullData || sceneObjectToSave->GetPlacedByPlayer() != Players::NoPlayer)) {
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
 	}
 	if (saveFullData) {
 		writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
 	}
 
-	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
+	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); saveFullData && deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
@@ -1630,9 +1624,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
-		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
-		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 		if (saveFullData) {
+			writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
+			writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 			writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 			writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
 
@@ -2986,7 +2980,6 @@ void Scene::ResetPathFinding() {
 	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 		g_MovableMan.OverrideMaterialDoors(true, team);
 		GetPathFinder(static_cast<Activity::Teams>(team))->RecalculateAllCosts();
-		GetPathFinder(static_cast<Activity::Teams>(team), c_PathFindingDefaultDigStrength)->RecalculateAllCosts();
 		g_MovableMan.OverrideMaterialDoors(false, team);
 	}
 }
@@ -3022,7 +3015,6 @@ void Scene::UpdatePathFinding()
             g_MovableMan.OverrideMaterialDoors(true, team);
 
             GetPathFinder(static_cast<Activity::Teams>(team))->UpdateNodeList(updatedNodes);
-            GetPathFinder(static_cast<Activity::Teams>(team), c_PathFindingDefaultDigStrength)->UpdateNodeList(updatedNodes);
 
             // Place back the material representation of all doors of this team so they are as we found them.
             g_MovableMan.OverrideMaterialDoors(false, team);
@@ -3043,7 +3035,7 @@ void Scene::UpdatePathFinding()
 float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength, Activity::Teams team) {
     float totalCostResult = -1;
 
-    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team, digStrength)) {
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
         int result = pathFinder->CalculatePath(start, end, pathResult, totalCostResult, digStrength);
 
         // It's ok if start and end nodes happen to be the same, the exact pixel locations are added at the front and end of the result regardless
@@ -3126,14 +3118,9 @@ void Scene::Update()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<PathFinder>& Scene::GetPathFinder(Activity::Teams team, float digStrength) {
-	if (team == Activity::Teams::NoTeam) {
-		return m_NoTeamPathFinder;
-	} else if (std::abs(digStrength - c_PathFindingDefaultDigStrength) < 1.0F) {
-		return m_DefaultDigStrengthPathfinders[team];
-	} else {
-		return m_PathFinders[static_cast<int>(team)];
-	}
+std::unique_ptr<PathFinder>& Scene::GetPathFinder(Activity::Teams team) {
+	// Note - we use + 1 when getting pathfinders by index, because our shared NoTeam pathfinder occupies index 0, and the rest come after that.
+	return m_pPathFinders[static_cast<int>(team) + 1];
 }
 
 } // namespace RTE

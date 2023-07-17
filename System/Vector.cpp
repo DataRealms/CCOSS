@@ -9,14 +9,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Vector::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "X") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("X", {
 			reader >> m_X;
-		} else if (propName == "Y") {
+		}); MatchProperty("Y", {
 			reader >> m_Y;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

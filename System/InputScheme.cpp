@@ -37,72 +37,73 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int InputScheme::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Device") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("Device", {
 			SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "Preset") {
+		}); MatchProperty("Preset", {
 			SetPreset(static_cast<InputPreset>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "LeftUp") {
+		}); MatchProperty("LeftUp", {
 			reader >> m_InputMappings[InputElements::INPUT_L_UP];
-		} else if (propName == "LeftDown") {
+		}); MatchProperty("LeftDown", {
 			reader >> m_InputMappings[InputElements::INPUT_L_DOWN];
-		} else if (propName == "LeftLeft") {
+		}); MatchProperty("LeftLeft", {
 			reader >> m_InputMappings[InputElements::INPUT_L_LEFT];
-		} else if (propName == "LeftRight") {
+		}); MatchProperty("LeftRight", {
 			reader >> m_InputMappings[InputElements::INPUT_L_RIGHT];
-		} else if (propName == "Fire") {
+		}); MatchProperty("Fire", {
 			reader >> m_InputMappings[InputElements::INPUT_FIRE];
-		} else if (propName == "Aim") {
+		}); MatchProperty("Aim", {
 			reader >> m_InputMappings[InputElements::INPUT_AIM];
-		} else if (propName == "AimUp") {
+		}); MatchProperty("AimUp", {
 			reader >> m_InputMappings[InputElements::INPUT_AIM_UP];
-		} else if (propName == "AimDown") {
+		}); MatchProperty("AimDown", {
 			reader >> m_InputMappings[InputElements::INPUT_AIM_DOWN];
-		} else if (propName == "AimLeft") {
+		}); MatchProperty("AimLeft", {
 			reader >> m_InputMappings[InputElements::INPUT_AIM_LEFT];
-		} else if (propName == "AimRight") {
+		}); MatchProperty("AimRight", {
 			reader >> m_InputMappings[InputElements::INPUT_AIM_RIGHT];
-		} else if (propName == "PieMenu") {
+		}); MatchProperty("PieMenu", {
 			reader >> m_InputMappings[InputElements::INPUT_PIEMENU];
-		} else if (propName == "Jump") {
+		}); MatchProperty("Jump", {
 			reader >> m_InputMappings[InputElements::INPUT_JUMP];
-		} else if (propName == "Crouch") {
+		}); MatchProperty("Crouch", {
 			reader >> m_InputMappings[InputElements::INPUT_CROUCH];
-		} else if (propName == "Next") {
+		}); MatchProperty("Next", {
 			reader >> m_InputMappings[InputElements::INPUT_NEXT];
-		} else if (propName == "Prev") {
+		}); MatchProperty("Prev", {
 			reader >> m_InputMappings[InputElements::INPUT_PREV];
-		} else if (propName == "WeaponChangeNext") {
+		}); MatchProperty("WeaponChangeNext", {
 			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT];
-		} else if (propName == "WeaponChangePrev") {
+		}); MatchProperty("WeaponChangePrev", {
 			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV];
-		} else if (propName == "WeaponPickup") {
+		}); MatchProperty("WeaponPickup", {
 			reader >> m_InputMappings[InputElements::INPUT_WEAPON_PICKUP];
-		} else if (propName == "WeaponDrop") {
+		}); MatchProperty("WeaponDrop", {
 			reader >> m_InputMappings[InputElements::INPUT_WEAPON_DROP];
-		} else if (propName == "WeaponReload") {
+		}); MatchProperty("WeaponReload", {
 			reader >> m_InputMappings[InputElements::INPUT_WEAPON_RELOAD];
-		} else if (propName == "Start") {
+		}); MatchProperty("Start", {
 			reader >> m_InputMappings[InputElements::INPUT_START];
-		} else if (propName == "Back") {
+		}); MatchProperty("Back", {
 			reader >> m_InputMappings[InputElements::INPUT_BACK];
-		} else if (propName == "RightUp") {
+		}); MatchProperty("RightUp", {
 			reader >> m_InputMappings[InputElements::INPUT_R_UP];
-		} else if (propName == "RightDown") {
+		}); MatchProperty("RightDown", {
 			reader >> m_InputMappings[InputElements::INPUT_R_DOWN];
-		} else if (propName == "RightLeft") {
+		}); MatchProperty("RightLeft", {
 			reader >> m_InputMappings[InputElements::INPUT_R_LEFT];
-		} else if (propName == "RightRight") {
+		}); MatchProperty("RightRight", {
 			reader >> m_InputMappings[InputElements::INPUT_R_RIGHT];
-		} else if (propName == "JoystickDeadzoneType") {
+		}); MatchProperty("JoystickDeadzoneType", {
 			SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "JoystickDeadzone") {
+		}); MatchProperty("JoystickDeadzone", {
 			reader >> m_JoystickDeadzone;
-		} else if (propName == "DigitalAimSpeed") {
+		}); MatchProperty("DigitalAimSpeed", {
 			reader >> m_DigitalAimSpeed;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -268,7 +268,9 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 
 int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AddMaterial")
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
+
+    MatchProperty("AddMaterial",
     {
         // Get this before reading Object, since if it's the last one in its datafile, the stream will show the parent file instead
         std::string objectFilePath = reader.GetCurrentFilePath();
@@ -315,11 +317,9 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
                 break;
             }
         }
-    }
-    else
-        return Serializable::ReadProperty(propName, reader);
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

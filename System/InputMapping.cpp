@@ -32,22 +32,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int InputMapping::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "KeyMap") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("KeyMap", {
 			reader >> m_KeyMap;
-		} else if (propName == "MouseButtonMap") {
+		}); MatchProperty("MouseButtonMap", {
 			reader >> m_MouseButtonMap;
-		} else if (propName == "JoyButtonMap") {
+		}); MatchProperty("JoyButtonMap", {
 			reader >> m_JoyButtonMap;
-		} else if (propName == "AxisMap") {
+		}); MatchProperty("AxisMap", {
 			reader >> m_AxisMap;
 			m_DirectionMapped = true;
-		} else if (propName == "DirectionMap") {
+		}); MatchProperty("DirectionMap", {
 			reader >> m_DirectionMap;
 			m_DirectionMapped = true;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

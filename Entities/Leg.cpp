@@ -78,25 +78,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Foot") {
+		StartPropertyList(return Attachable::ReadProperty(propName, reader));
+		
+		MatchProperty("Foot", {
 			SetFoot(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-		} else if (propName == "ContractedOffset") {
+		}); MatchProperty("ContractedOffset", {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();
-		} else if (propName == "ExtendedOffset") {
+		}); MatchProperty("ExtendedOffset", {
 			reader >> m_ExtendedOffset;
 			m_MaxExtension = m_ExtendedOffset.GetMagnitude();
-		} else if (propName == "IdleOffset") {
+		}); MatchProperty("IdleOffset", {
 			reader >> m_IdleOffset;
-		} else if (propName == "WillIdle") {
+		}); MatchProperty("WillIdle", {
 			reader >> m_WillIdle;
-		} else if (propName == "MoveSpeed") {
+		}); MatchProperty("MoveSpeed", {
 			reader >> m_MoveSpeed;
-		} else {
-			return Attachable::ReadProperty(propName, reader);
-		}
+		});
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

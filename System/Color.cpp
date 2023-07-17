@@ -28,18 +28,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Color::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Index") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("Index", {
 			SetRGBWithIndex(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "R") {
+		}); MatchProperty("R", {
 			SetR(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "G") {
+		}); MatchProperty("G", {
 			SetG(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "B") {
+		}); MatchProperty("B", {
 			SetB(std::stoi(reader.ReadPropValue()));
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

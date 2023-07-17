@@ -62,54 +62,55 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Material::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Index") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Index", {
 			// TODO: Check for index collisions here
 			reader >> m_Index;
-		} else if (propName == "Priority") {
+		}); MatchProperty("Priority", {
 			reader >> m_Priority;
-		} else if (propName == "Piling") {
+		}); MatchProperty("Piling", {
 			reader >> m_Piling;
-		} else if (propName == "Integrity" || propName == "StructuralIntegrity") {
+		}); MatchForwards("Integrity") MatchProperty("StructuralIntegrity", {
 			reader >> m_Integrity;
 			m_Integrity = (m_Integrity == -1.0F) ? std::numeric_limits<float>::max() : m_Integrity;
-		} else if (propName == "Restitution" || propName == "Bounce") {
+		}); MatchForwards("Restitution") MatchProperty("Bounce", {
 			reader >> m_Restitution;
-		} else if (propName == "Friction") {
+		}); MatchProperty("Friction", {
 			reader >> m_Friction;
-		} else if (propName == "Stickiness") {
+		}); MatchProperty("Stickiness", {
 			reader >> m_Stickiness;
-		} else if (propName == "DensityKGPerVolumeL") {
+		}); MatchProperty("DensityKGPerVolumeL", {
 			reader >> m_VolumeDensity;
 			// Overrides the pixel density
 			m_PixelDensity = m_VolumeDensity * c_LPP;
-		} else if (propName == "DensityKGPerPixel") {
+		}); MatchProperty("DensityKGPerPixel", {
 			reader >> m_PixelDensity;
 			// Overrides the volume density
 			m_VolumeDensity = m_PixelDensity * c_PPL;
-		} else if (propName == "GibImpulseLimitPerVolumeL") {
+		}); MatchProperty("GibImpulseLimitPerVolumeL", {
 			reader >> m_GibImpulseLimitPerLiter;
-		} else if (propName == "GibWoundLimitPerVolumeL") {
+		}); MatchProperty("GibWoundLimitPerVolumeL", {
 			reader >> m_GibWoundLimitPerLiter;
-		} else if (propName == "SettleMaterial") {
+		}); MatchProperty("SettleMaterial", {
 			reader >> m_SettleMaterialIndex;
-		} else if (propName == "SpawnMaterial" || propName == "TransformsInto") {
+		}); MatchForwards("SpawnMaterial") MatchProperty("TransformsInto", {
 			reader >> m_SpawnMaterialIndex;
-		} else if (propName == "IsScrap") {
+		}); MatchProperty("IsScrap", {
 			reader >> m_IsScrap;
-		} else if (propName == "Color") {
+		}); MatchProperty("Color", {
 			reader >> m_Color;
-		} else if (propName == "UseOwnColor") {
+		}); MatchProperty("UseOwnColor", {
 			reader >> m_UseOwnColor;
-		} else if (propName == "FGTextureFile") {
+		}); MatchProperty("FGTextureFile", {
 			reader >> m_FGTextureFile;
 			m_TerrainFGTexture = m_FGTextureFile.GetAsBitmap();
-		} else if (propName == "BGTextureFile") {
+		}); MatchProperty("BGTextureFile", {
 			reader >> m_BGTextureFile;
 			m_TerrainBGTexture = m_BGTextureFile.GetAsBitmap();
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

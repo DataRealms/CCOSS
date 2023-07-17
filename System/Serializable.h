@@ -4,6 +4,10 @@
 #include "Reader.h"
 #include "Writer.h"
 
+#include <functional>
+#include <string>
+#include <unordered_map>
+
 namespace RTE {
 
 	/// <summary>
@@ -27,6 +31,39 @@ namespace RTE {
 		/// </summary>
 		#define SerializableClassNameGetter \
 			const std::string & GetClassName() const override { return c_ClassName; }
+
+		#define StartPropertyList(failureCase) \
+			static std::unordered_map<std::string, int> sm_Properties; \
+			static bool sm_Initialized = false; \
+			int jmpAddress = sm_Initialized ? -1 : -2; \
+			if (sm_Initialized) { \
+				auto itr = sm_Properties.find(std::string(propName)); \
+				if (itr == sm_Properties.end()) { \
+					failureCase; \
+				} else { \
+					jmpAddress = itr->second; \
+				} \
+			} \
+			switch (jmpAddress) { \
+				case -1: break; \
+				case -2:
+
+			#define MatchForwards(propertyName) \
+				sm_Properties[propertyName] = __COUNTER__ + 1; \
+				case __COUNTER__:
+
+			#define MatchProperty(propertyName,matchedFunction) \
+				sm_Properties[propertyName] = __COUNTER__ + 1; \
+				case __COUNTER__: if (sm_Initialized) { { matchedFunction }; break; };
+
+		#define EndPropertyList } \
+			if (!sm_Initialized) { \
+				sm_Initialized = true; \
+				/* This was the initialization pass, now properly read the value by calling ourselves again */ \
+				return ReadProperty(propName, reader); \
+			} \
+			return 0;
+
 #pragma endregion
 
 #pragma region Creation

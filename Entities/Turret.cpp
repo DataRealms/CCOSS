@@ -41,17 +41,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "MountedDevice") {
+		StartPropertyList(return Attachable::ReadProperty(propName, reader));
+		
+		MatchProperty("MountedDevice", {
 			SetFirstMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
-		} else if (propName == "AddMountedDevice") {
+		}); MatchProperty("AddMountedDevice", {
 			AddMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
-		} else if (propName == "MountedDeviceRotationOffset") {
+		}); MatchProperty("MountedDeviceRotationOffset", {
 			reader >> m_MountedDeviceRotationOffset;
-		} else {
-			return Attachable::ReadProperty(propName, reader);
-		}
-
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

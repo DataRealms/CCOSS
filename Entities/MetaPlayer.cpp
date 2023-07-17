@@ -57,39 +57,40 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MetaPlayer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Name") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Name", {
 			reader >> m_Name;
-		} else if (propName == "Team") {
+		}); MatchProperty("Team", {
 			reader >> m_Team;
-		} else if (propName == "Human") {
+		}); MatchProperty("Human", {
 			reader >> m_Human;
-		} else if (propName == "InGamePlayer") {
+		}); MatchProperty("InGamePlayer", {
 			reader >> m_InGamePlayer;
-		} else if (propName == "Aggressiveness") {
+		}); MatchProperty("Aggressiveness", {
 			reader >> m_Aggressiveness;
-		} else if (propName == "GameOverRound") {
+		}); MatchProperty("GameOverRound", {
 			reader >> m_GameOverRound;
 		// Need to match the name to the index
-		} else if (propName == "NativeTechModule") {
+		}); MatchProperty("NativeTechModule", {
 			m_NativeTechModule = g_PresetMan.GetModuleID(reader.ReadPropValue());
 			// Default to no native tech if the one we're looking for couldn't be found
 			if (m_NativeTechModule < 0) { m_NativeTechModule = 0; }
-		} else if (propName == "NativeCostMultiplier") {
+		}); MatchProperty("NativeCostMultiplier", {
 			reader >> m_NativeCostMult;
-		} else if (propName == "ForeignCostMultiplier") {
+		}); MatchProperty("ForeignCostMultiplier", {
 			reader >> m_ForeignCostMult;
-		} else if (propName == "BrainPool") {
+		}); MatchProperty("BrainPool", {
 			reader >> m_BrainPool;
-		} else if (propName == "Funds") {
+		}); MatchProperty("Funds", {
 			reader >> m_Funds;
-		} else if (propName == "OffensiveBudget") {
+		}); MatchProperty("OffensiveBudget", {
 			reader >> m_OffensiveBudget;
-		} else if (propName == "OffensiveTarget") {
+		}); MatchProperty("OffensiveTarget", {
 			reader >> m_OffensiveTarget;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

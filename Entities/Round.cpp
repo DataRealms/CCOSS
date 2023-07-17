@@ -68,35 +68,36 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Round::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Particle") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Particle", {
 			m_Particle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_Particle, "Stream suggests allocating an unallocable type in Round::Create!");
-		} else if (propName == "ParticleCount") {
+		}); MatchProperty("ParticleCount", {
 			reader >> m_ParticleCount;
-		} else if (propName == "FireVelocity") {
+		}); MatchProperty("FireVelocity", {
 			reader >> m_FireVel;
-		} else if (propName == "InheritsFirerVelocity") {
+		}); MatchProperty("InheritsFirerVelocity", {
 			reader >> m_InheritsFirerVelocity;
-		} else if (propName == "Separation") {
+		}); MatchProperty("Separation", {
 			reader >> m_Separation;
-		} else if (propName == "LifeVariation") {
+		}); MatchProperty("LifeVariation", {
 			reader >> m_LifeVariation;
-		} else if (propName == "Shell") {
+		}); MatchProperty("Shell", {
 			m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		} else if (propName == "ShellVelocity") {
+		}); MatchProperty("ShellVelocity", {
 			reader >> m_ShellVel;
-		} else if (propName == "FireSound") {
+		}); MatchProperty("FireSound", {
 			reader >> m_FireSound;
-		} else if (propName == "AILifeTime") {
+		}); MatchProperty("AILifeTime", {
 			reader >> m_AILifeTime;
-		} else if (propName == "AIFireVel") {
+		}); MatchProperty("AIFireVel", {
 			reader >> m_AIFireVel;
-		} else if (propName == "AIPenetration") {
+		}); MatchProperty("AIPenetration", {
 			reader >> m_AIPenetration;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

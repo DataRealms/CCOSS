@@ -165,17 +165,19 @@ int MOSprite::Create(const MOSprite &reference)
 //                  false is returned, and the reader's position is untouched.
 
 int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
-	if (propName == "SpriteFile") {
+	StartPropertyList(return MovableObject::ReadProperty(propName, reader));
+    
+    MatchProperty("SpriteFile", {
 		reader >> m_SpriteFile;
-	} else if (propName == "IconFile") {
+	}); MatchProperty("IconFile", {
 		reader >> m_IconFile;
 		m_GraphicalIcon = m_IconFile.GetAsBitmap();
-	} else if (propName == "FrameCount") {
+	}); MatchProperty("FrameCount", {
 		reader >> m_FrameCount;
 		m_aSprite.reserve(m_FrameCount);
-	} else if (propName == "SpriteOffset")
-        reader >> m_SpriteOffset;
-    else if (propName == "SpriteAnimMode")
+	}); MatchProperty("SpriteOffset",
+        reader >> m_SpriteOffset; );
+    MatchProperty("SpriteAnimMode",
     {
 //        string mode;
 //        reader >> mode;
@@ -194,25 +196,23 @@ int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
         else
             Abort
 */
-    }
-    else if (propName == "SpriteAnimDuration")
-        reader >> m_SpriteAnimDuration;
-    else if (propName == "HFlipped")
-        reader >> m_HFlipped;
-    else if (propName == "Rotation")
-        reader >> m_Rotation;
-    else if (propName == "AngularVel")
-        reader >> m_AngularVel;
-    else if (propName == "SettleMaterialDisabled")
-        reader >> m_SettleMaterialDisabled;
-    else if (propName == "EntryWound")
-        m_pEntryWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
-    else if (propName == "ExitWound")
-        m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
-    else
-        return MovableObject::ReadProperty(propName, reader);
+    });
+    MatchProperty("SpriteAnimDuration",
+        reader >> m_SpriteAnimDuration; );
+    MatchProperty("HFlipped",
+        reader >> m_HFlipped; );
+    MatchProperty("Rotation",
+        reader >> m_Rotation; );
+    MatchProperty("AngularVel",
+        reader >> m_AngularVel; );
+    MatchProperty("SettleMaterialDisabled",
+        reader >> m_SettleMaterialDisabled; );
+    MatchProperty("EntryWound",
+        m_pEntryWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); );
+    MatchProperty("ExitWound",
+        m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); );
 
-    return 0;
+    EndPropertyList;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

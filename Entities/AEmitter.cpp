@@ -114,72 +114,72 @@ int AEmitter::Create(const AEmitter &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "AddEmission") {
+    StartPropertyList(return Attachable::ReadProperty(propName, reader));
+    
+    MatchProperty("AddEmission", {
         Emission * emission = new Emission();
         reader >> *emission;
         m_EmissionList.push_back(emission);
-    } else if (propName == "EmissionSound") {
+    }); MatchProperty("EmissionSound", {
 		m_EmissionSound = new SoundContainer;
         reader >> m_EmissionSound;
-    } else if (propName == "BurstSound") {
+    }); MatchProperty("BurstSound", {
 		m_BurstSound = new SoundContainer;
         reader >> m_BurstSound;
-    } else if (propName == "EndSound") {
+    }); MatchProperty("EndSound", {
 		m_EndSound = new SoundContainer;
         reader >> m_EndSound;
-    } else if (propName == "EmissionEnabled") {
+    }); MatchProperty("EmissionEnabled", {
         reader >> m_EmitEnabled;
-    } else if (propName == "EmissionCount") {
+    }); MatchProperty("EmissionCount", {
         reader >> m_EmitCount;
-    } else if (propName == "EmissionCountLimit") {
+    }); MatchProperty("EmissionCountLimit", {
         reader >> m_EmitCountLimit;
-    } else if (propName == "ParticlesPerMinute") {
+    }); MatchProperty("ParticlesPerMinute", {
         float ppm;
         reader >> ppm;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
         for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm / static_cast<float>(m_EmissionList.size()); }
-    } else if (propName == "NegativeThrottleMultiplier") {
+    }); MatchProperty("NegativeThrottleMultiplier", {
         reader >> m_NegativeThrottleMultiplier;
-    } else if (propName == "PositiveThrottleMultiplier") {
+    }); MatchProperty("PositiveThrottleMultiplier", {
         reader >> m_PositiveThrottleMultiplier;
-    } else if (propName == "Throttle") {
+    }); MatchProperty("Throttle", {
         reader >> m_Throttle;
-    } else if (propName == "EmissionsIgnoreThis") {
+    }); MatchProperty("EmissionsIgnoreThis", {
         reader >> m_EmissionsIgnoreThis;
-    } else if (propName == "BurstSize") {
+    }); MatchProperty("BurstSize", {
         int burstSize;
         reader >> burstSize;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
         for (Emission *emission : m_EmissionList) { emission->m_BurstSize = std::ceil(static_cast<float>(burstSize) / static_cast<float>(m_EmissionList.size())); }
-    } else if (propName == "BurstScale") {
+    }); MatchProperty("BurstScale", {
         reader >> m_BurstScale;
-    } else if (propName == "BurstDamage") {
+    }); MatchProperty("BurstDamage", {
         reader >> m_BurstDamage;
-    } else if (propName == "EmitterDamageMultiplier") {
+    }); MatchProperty("EmitterDamageMultiplier", {
 		reader >> m_EmitterDamageMultiplier;
-    } else if (propName == "BurstSpacing") {
+    }); MatchProperty("BurstSpacing", {
         reader >> m_BurstSpacing;
-    } else if (propName == "BurstTriggered") {
+    }); MatchProperty("BurstTriggered", {
         reader >> m_BurstTriggered;
-    } else if (propName == "EmissionAngle") {
+    }); MatchProperty("EmissionAngle", {
         reader >> m_EmitAngle;
-    } else if (propName == "EmissionOffset") {
+    }); MatchProperty("EmissionOffset", {
         reader >> m_EmissionOffset;
-    } else if (propName == "EmissionDamage") {
+    }); MatchProperty("EmissionDamage", {
         reader >> m_EmitDamage;
-    } else if (propName == "Flash") {
+    }); MatchProperty("Flash", {
         SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "FlashScale") {
+    }); MatchProperty("FlashScale", {
         reader >> m_FlashScale;
-    } else if (propName == "FlashOnlyOnBurst") {
+    }); MatchProperty("FlashOnlyOnBurst", {
         reader >> m_FlashOnlyOnBurst;
-    } else if (propName == "LoudnessOnEmit") {
+    }); MatchProperty("LoudnessOnEmit", {
         reader >> m_LoudnessOnEmit;
-    } else {
-        return Attachable::ReadProperty(propName, reader);
-    }
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

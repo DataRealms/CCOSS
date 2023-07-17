@@ -54,26 +54,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ThrownDevice::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "ActivationSound") {
+		StartPropertyList(return HeldDevice::ReadProperty(propName, reader));
+		
+		MatchProperty("ActivationSound", {
 			reader >> m_ActivationSound;
-		} else if (propName == "StartThrowOffset") {
+		}); MatchProperty("StartThrowOffset", {
 			reader >> m_StartThrowOffset;
-		} else if (propName == "EndThrowOffset") {
+		}); MatchProperty("EndThrowOffset", {
 			reader >> m_EndThrowOffset;
-		} else if (propName == "MinThrowVel") {
+		}); MatchProperty("MinThrowVel", {
 			reader >> m_MinThrowVel;
-		} else if (propName == "MaxThrowVel") {
+		}); MatchProperty("MaxThrowVel", {
 			reader >> m_MaxThrowVel;
-		} else if (propName == "TriggerDelay") {
+		}); MatchProperty("TriggerDelay", {
 			reader >> m_TriggerDelay;
-		} else if (propName == "ActivatesWhenReleased") {
+		}); MatchProperty("ActivatesWhenReleased", {
 			reader >> m_ActivatesWhenReleased;
-		} else if (propName == "StrikerLever") {
+		}); MatchProperty("StrikerLever", {
 			m_StrikerLever = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		} else {
-			return HeldDevice::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

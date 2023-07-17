@@ -9,14 +9,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GenericSavedData::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "StringValues") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("StringValues", {
 			reader >> m_SavedStrings;
-		} else if (propName == "NumberValues") {
+		}); MatchProperty("NumberValues", {
 			reader >> m_SavedNumbers;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -62,40 +62,41 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int TerrainDebris::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "DebrisFile") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("DebrisFile", {
 			reader >> m_DebrisFile;
-		} else if (propName == "DebrisPieceCount") {
+		}); MatchProperty("DebrisPieceCount", {
 			reader >> m_BitmapCount;
 			m_Bitmaps.reserve(m_BitmapCount);
-		} else if (propName == "DebrisMaterial") {
+		}); MatchProperty("DebrisMaterial", {
 			reader >> m_Material;
-		} else if (propName == "TargetMaterial") {
+		}); MatchProperty("TargetMaterial", {
 			reader >> m_TargetMaterial;
-		} else if (propName == "DebrisPlacementMode") {
+		}); MatchProperty("DebrisPlacementMode", {
 			m_DebrisPlacementMode = static_cast<DebrisPlacementMode>(std::stoi(reader.ReadPropValue()));
 			if (m_DebrisPlacementMode < DebrisPlacementMode::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementMode::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid TerrainDebris placement mode!"); }
-		} else if (propName == "OnlyBuried") {
+		}); MatchProperty("OnlyBuried", {
 			reader >> m_OnlyBuried;
-		} else if (propName == "MinDepth") {
+		}); MatchProperty("MinDepth", {
 			reader >> m_MinDepth;
-		} else if (propName == "MaxDepth") {
+		}); MatchProperty("MaxDepth", {
 			reader >> m_MaxDepth;
-		} else if (propName == "MinRotation") {
+		}); MatchProperty("MinRotation", {
 			reader >> m_MinRotation;
-		} else if (propName == "MaxRotation") {
+		}); MatchProperty("MaxRotation", {
 			reader >> m_MaxRotation;
-		} else if (propName == "CanHFlip") {
+		}); MatchProperty("CanHFlip", {
 			reader >> m_CanHFlip;
-		} else if (propName == "CanVFlip") {
+		}); MatchProperty("CanVFlip", {
 			reader >> m_CanVFlip;
-		} else if (propName == "FlipChance") {
+		}); MatchProperty("FlipChance", {
 			reader >> m_FlipChance;
-		} else if (propName == "DensityPerMeter") {
+		}); MatchProperty("DensityPerMeter", {
 			reader >> m_Density;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

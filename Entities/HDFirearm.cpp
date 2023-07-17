@@ -174,95 +174,95 @@ int HDFirearm::Create(const HDFirearm &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "Magazine") {
+    StartPropertyList(return HeldDevice::ReadProperty(propName, reader));
+    
+    MatchProperty("Magazine", {
         SetMagazine(dynamic_cast<Magazine *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "Flash") {
+    }); MatchProperty("Flash", {
         SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "PreFireSound") {
+    }); MatchProperty("PreFireSound", {
 		m_PreFireSound = new SoundContainer;
 		reader >> m_PreFireSound;
-	} else if (propName == "FireSound") {
+	}); MatchProperty("FireSound", {
 		m_FireSound = new SoundContainer;
 		reader >> m_FireSound;
-	} else if (propName == "FireEchoSound") {
+	}); MatchProperty("FireEchoSound", {
 		m_FireEchoSound = new SoundContainer;
 		reader >> m_FireEchoSound;
 		m_FireEchoSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
-    } else if (propName == "ActiveSound") {
+    }); MatchProperty("ActiveSound", {
 		m_ActiveSound = new SoundContainer;
 		reader >> m_ActiveSound;
-	} else if (propName == "DeactivationSound") {
+	}); MatchProperty("DeactivationSound", {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-    } else if (propName == "EmptySound") {
+    }); MatchProperty("EmptySound", {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
-	} else if (propName == "ReloadStartSound") {
+	}); MatchProperty("ReloadStartSound", {
 		m_ReloadStartSound = new SoundContainer;
 		reader >> m_ReloadStartSound;
-	} else if (propName == "ReloadEndSound") {
+	}); MatchProperty("ReloadEndSound", {
 		m_ReloadEndSound = new SoundContainer;
 		reader >> m_ReloadEndSound;
-	} else if (propName == "RateOfFire") {
+	}); MatchProperty("RateOfFire", {
         reader >> m_RateOfFire;
-    } else if (propName == "ActivationDelay") {
+    }); MatchProperty("ActivationDelay", {
         reader >> m_ActivationDelay;
-    } else if (propName == "DeactivationDelay") {
+    }); MatchProperty("DeactivationDelay", {
         reader >> m_DeactivationDelay;
-	} else if (propName == "BaseReloadTime" || propName == "ReloadTime") {
+	}); MatchForwards("BaseReloadTime") MatchProperty("ReloadTime", {
 		reader >> m_BaseReloadTime;
-    } else if (propName == "FullAuto") {
+    }); MatchProperty("FullAuto", {
         reader >> m_FullAuto;
-    } else if (propName == "FireIgnoresThis") {
+    }); MatchProperty("FireIgnoresThis", {
         reader >> m_FireIgnoresThis;
-    } else if (propName == "Reloadable") {
+    }); MatchProperty("Reloadable", {
         reader >> m_Reloadable;
-	} else if (propName == "DualReloadable") {
+	}); MatchProperty("DualReloadable", {
 		reader >> m_DualReloadable;
-	} else if (propName == "OneHandedReloadTimeMultiplier") {
+	}); MatchProperty("OneHandedReloadTimeMultiplier", {
 		reader >> m_OneHandedReloadTimeMultiplier;
-	} else if (propName == "ReloadAngle") {
+	}); MatchProperty("ReloadAngle", {
 		reader >> m_ReloadAngle;
-	} else if (propName == "OneHandedReloadAngle") {
+	}); MatchProperty("OneHandedReloadAngle", {
 		reader >> m_OneHandedReloadAngle;
-    } else if (propName == "RecoilTransmission") {
+    }); MatchProperty("RecoilTransmission", {
         reader >> m_JointStiffness;
-    } else if (propName == "IsAnimatedManually") {
+    }); MatchProperty("IsAnimatedManually", {
 		reader >> m_IsAnimatedManually;
-    } else if (propName == "ShakeRange") {
+    }); MatchProperty("ShakeRange", {
         reader >> m_ShakeRange;
         m_ShakeRange /= 2;
-    } else if (propName == "SharpShakeRange") {
+    }); MatchProperty("SharpShakeRange", {
         reader >> m_SharpShakeRange;
         m_SharpShakeRange /= 2;
-    } else if (propName == "NoSupportFactor") {
+    }); MatchProperty("NoSupportFactor", {
         reader >> m_NoSupportFactor;
-    } else if (propName == "ParticleSpreadRange") {
+    }); MatchProperty("ParticleSpreadRange", {
         reader >> m_ParticleSpreadRange;
         m_ParticleSpreadRange /= 2;
-	} else if (propName == "ShellEjectAngle") {
+	}); MatchProperty("ShellEjectAngle", {
 		reader >> m_ShellEjectAngle;
-    } else if (propName == "ShellSpreadRange") {
+    }); MatchProperty("ShellSpreadRange", {
         reader >> m_ShellSpreadRange;
         m_ShellSpreadRange /= 2;
-    } else if (propName == "ShellAngVelRange") {
+    }); MatchProperty("ShellAngVelRange", {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
-	} else if (propName == "ShellVelVariation") {
+	}); MatchProperty("ShellVelVariation", {
 		reader >> m_ShellVelVariation;
-    } else if (propName == "RecoilScreenShakeAmount") {
+    }); MatchProperty("RecoilScreenShakeAmount", {
 		reader >> m_RecoilScreenShakeAmount;
-    } else if (propName == "MuzzleOffset") {
+    }); MatchProperty("MuzzleOffset", {
         reader >> m_MuzzleOff;
-	} else if (propName == "EjectionOffset") {
+	}); MatchProperty("EjectionOffset", {
 		reader >> m_EjectOff;
-	} else if (propName == "LegacyCompatibilityRoundsAlwaysFireUnflipped") {
+	}); MatchProperty("LegacyCompatibilityRoundsAlwaysFireUnflipped", {
 		reader >> m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
-    } else {
-        return HeldDevice::ReadProperty(propName, reader);
-    }
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

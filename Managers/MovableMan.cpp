@@ -95,20 +95,20 @@ int MovableMan::Initialize()
 
 int MovableMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AddEffect")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddAmmo")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddDevice")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddActor")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "SplashRatio")
-        reader >> m_SplashRatio;
-    else
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
+    
+    MatchProperty("AddEffect",
+        g_PresetMan.GetEntityPreset(reader); );
+    MatchProperty("AddAmmo",
+        g_PresetMan.GetEntityPreset(reader); );
+    MatchProperty("AddDevice",
+        g_PresetMan.GetEntityPreset(reader); );
+    MatchProperty("AddActor",
+        g_PresetMan.GetEntityPreset(reader); );
+    MatchProperty("SplashRatio",
+        reader >> m_SplashRatio; );
+    
+    EndPropertyList;
 }
 
 

@@ -43,18 +43,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "SoundSelectionCycleMode") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("SoundSelectionCycleMode", {
 			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
-		} else if (propName == "AddSound") {
+		}); MatchProperty("AddSound", {
 			AddSoundData(ReadAndGetSoundData(reader));
-		} else if (propName == "AddSoundSet") {
+		}); MatchProperty("AddSoundSet", {
 			SoundSet soundSetToAdd;
 			reader >> soundSetToAdd;
 			AddSoundSet(soundSetToAdd);
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

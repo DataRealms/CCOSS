@@ -54,20 +54,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MetaSave::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "SavePath") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("SavePath", {
 			reader >> m_SavePath;
-		} else if (propName == "PlayerCount") {
+		}); MatchProperty("PlayerCount", {
 			reader >> m_PlayerCount;
-		} else if (propName == "Difficulty") {
+		}); MatchProperty("Difficulty", {
 			reader >> m_Difficulty;
-		} else if (propName == "RoundCount") {
+		}); MatchProperty("RoundCount", {
 			reader >> m_RoundCount;
-		} else if (propName == "SiteCount") {
+		}); MatchProperty("SiteCount", {
 			reader >> m_SiteCount;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

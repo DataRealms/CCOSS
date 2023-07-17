@@ -89,26 +89,26 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "MaxLength") {
+		StartPropertyList(return Attachable::ReadProperty(propName, reader));
+		
+		MatchProperty("MaxLength", {
 			reader >> m_MaxLength;
-		} else if (propName == "MoveSpeed") {
+		}); MatchProperty("MoveSpeed", {
 			reader >> m_MoveSpeed;
-		} else if (propName == "HandIdleOffset" || propName == "IdleOffset") {
+		}); MatchForwards("HandIdleOffset") MatchProperty("IdleOffset", {
 			reader >> m_HandIdleOffset;
-		} else if (propName == "HandSprite" || propName == "Hand") {
+		}); MatchForwards("HandSprite") MatchProperty("Hand", {
 			reader >> m_HandSpriteFile;
 			m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
-		} else if (propName == "GripStrength") {
+		}); MatchProperty("GripStrength", {
 			reader >> m_GripStrength;
-		} else if (propName == "ThrowStrength") {
+		}); MatchProperty("ThrowStrength", {
 			reader >> m_ThrowStrength;
-		} else if (propName == "HeldDevice") {
+		}); MatchProperty("HeldDevice", {
 			SetHeldDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
-		} else {
-			return Attachable::ReadProperty(propName, reader);
-		}
+		});
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

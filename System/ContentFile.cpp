@@ -62,12 +62,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "FilePath" || propName == "Path") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchForwards("FilePath") MatchProperty("Path", {
 			SetDataPath(reader.ReadPropValue());
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

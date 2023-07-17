@@ -116,7 +116,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int AtomGroup::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Material") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Material", {
 			Material mat;
 			mat.Reset();
 			reader >> mat;
@@ -127,19 +129,19 @@ namespace RTE {
 				m_Material = g_SceneMan.GetMaterialFromID(g_MaterialAir);
 				RTEAssert(m_Material, "Failed to find matching Material preset \"" + mat.GetPresetName() + "\" or even fall back to \"Air\" " + GetFormattedReaderPosition() + ".\nAborting!");
 			}
-		} else if (propName == "AutoGenerate") {
+		}); MatchProperty("AutoGenerate", {
 			reader >> m_AutoGenerate;
-		} else if (propName == "Resolution") {
+		}); MatchProperty("Resolution", {
 			reader >> m_Resolution;
-		} else if (propName == "Depth") {
+		}); MatchProperty("Depth", {
 			reader >> m_Depth;
-		} else if (propName == "AddAtom") {
+		}); MatchProperty("AddAtom", {
 			Atom *atom = new Atom;
 			reader >> *atom;
 			m_Atoms.push_back(atom);
-		} else if (propName == "JointOffset") {
+		}); MatchProperty("JointOffset", {
 			reader >> m_JointOffset;
-		} else if (propName == "AreaDistributionType") {
+		}); MatchProperty("AreaDistributionType", {
 			std::string areaDistributionTypeString = reader.ReadPropValue();
 			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
 			if (itr != c_AreaDistributionTypeMap.end()) {
@@ -151,12 +153,11 @@ namespace RTE {
 					reader.ReportError("AreaDistributionType " + areaDistributionTypeString + " is invalid.");
 				}
 			}
-		} else if (propName == "AreaDistributionSurfaceAreaMultiplier") {
+		}); MatchProperty("AreaDistributionSurfaceAreaMultiplier", {
 			reader >> m_AreaDistributionSurfaceAreaMultiplier;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

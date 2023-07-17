@@ -60,16 +60,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Box::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Corner") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("Corner", {
 			reader >> m_Corner;
-		} else if (propName == "Width") {
+		}); MatchProperty("Width", {
 			reader >> m_Width;
-		} else if (propName == "Height") {
+		}); MatchProperty("Height", {
 			reader >> m_Height;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -114,33 +114,33 @@ int ACDropShip::Create(const ACDropShip &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "RThruster" || propName == "RightThruster" || propName == "RightEngine") {
+    StartPropertyList(return ACraft::ReadProperty(propName, reader));
+    
+    MatchForwards("RThruster") MatchForwards("RightThruster") MatchProperty("RightEngine", {
         SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LThruster" || propName == "LeftThruster" || propName == "LeftEngine") {
+    }); MatchForwards("LThruster") MatchForwards("LeftThruster") MatchProperty("LeftEngine", {
         SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "URThruster" || propName == "UpRightThruster") {
+    }); MatchForwards("URThruster") MatchProperty("UpRightThruster", {
         SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
+    }); MatchForwards("ULThruster") MatchProperty("UpLeftThruster", {
         SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RHatchDoor" || propName == "RightHatchDoor") {
+    }); MatchForwards("RHatchDoor") MatchProperty("RightHatchDoor", {
         SetRightHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LHatchDoor" || propName == "LeftHatchDoor") {
+    }); MatchForwards("LHatchDoor") MatchProperty("LeftHatchDoor", {
         SetLeftHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "HatchDoorSwingRange") {
+    }); MatchProperty("HatchDoorSwingRange", {
         reader >> m_HatchSwingRange;
-    } else if (propName == "AutoStabilize") {
+    }); MatchProperty("AutoStabilize", {
         reader >> m_AutoStabilize;
-    } else if (propName == "MaxEngineAngle") {
+    }); MatchProperty("MaxEngineAngle", {
         reader >> m_MaxEngineAngle;
-	} else if (propName == "LateralControlSpeed") {
+	}); MatchProperty("LateralControlSpeed", {
 		reader >> m_LateralControlSpeed;
-	} else if (propName == "HoverHeightModifier") {
+	}); MatchProperty("HoverHeightModifier", {
 		reader >> m_HoverHeightModifier;
-    } else {
-        return ACraft::ReadProperty(propName, reader);
-    }
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

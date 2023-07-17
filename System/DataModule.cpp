@@ -121,11 +121,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int DataModule::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "ModuleName") {
+		StartPropertyList(if (!g_PresetMan.GetEntityPreset(reader)) { reader.ReportError("Could not understand Preset type!"); })
+		
+		MatchProperty("ModuleName", {
 			reader >> m_FriendlyName;
-		} else if (propName == "Author") {
+		}); MatchProperty("Author", {
 			reader >> m_Author;
-		} else if (propName == "Description") {
+		}); MatchProperty("Description", {
 			std::string descriptionValue = reader.ReadPropValue();
 			if (descriptionValue == "MultiLineText") {
 				m_Description.clear();
@@ -138,36 +140,36 @@ namespace RTE {
 			} else {
 				m_Description = descriptionValue;
 			}
-		} else if (propName == "IsFaction") {
+		}); MatchProperty("IsFaction", {
 			reader >> m_IsFaction;
 			if (m_IsMerchant) { m_IsFaction = false; }
-		} else if (propName == "IsMerchant") {
+		}); MatchProperty("IsMerchant", {
 			reader >> m_IsMerchant;
 			if (m_IsMerchant) { m_IsFaction = false; }
-		} else if (propName == "SupportedGameVersion") {
+		}); MatchProperty("SupportedGameVersion", {
 			reader >> m_SupportedGameVersion;
-		} else if (propName == "Version") {
+		}); MatchProperty("Version", {
 			reader >> m_Version;
-		} else if (propName == "ScanFolderContents") {
+		}); MatchProperty("ScanFolderContents", {
 			reader >> m_ScanFolderContents;
-		} else if (propName == "IgnoreMissingItems") {
+		}); MatchProperty("IgnoreMissingItems", {
 			reader >> m_IgnoreMissingItems;
-		} else if (propName == "CrabToHumanSpawnRatio") {
+		}); MatchProperty("CrabToHumanSpawnRatio", {
 			reader >> m_CrabToHumanSpawnRatio;
-		} else if (propName == "ScriptPath") {
+		}); MatchProperty("ScriptPath", {
 			reader >> m_ScriptPath;
 			LoadScripts();
-		} else if (propName == "Require") {
+		}); MatchProperty("Require", {
 			// Check for required dependencies if we're not load properties
 			std::string requiredModule;
 			reader >> requiredModule;
 			if (!reader.GetSkipIncludes() && g_PresetMan.GetModuleID(requiredModule) == -1) {
 				reader.ReportError("\"" + m_FileName + "\" requires \"" + requiredModule + "\" in order to load!\n");
 			}
-		} else if (propName == "IconFile") {
+		}); MatchProperty("IconFile", {
 			reader >> m_IconFile;
 			m_Icon = m_IconFile.GetAsBitmap();
-		} else if (propName == "FactionBuyMenuTheme") {
+		}); MatchProperty("FactionBuyMenuTheme", {
 			if (reader.ReadPropValue() == "BuyMenuTheme") {
 				while (reader.NextProperty()) {
 					std::string themePropName = reader.ReadPropName();
@@ -184,13 +186,11 @@ namespace RTE {
 					}
 				}
 			}
-		} else if (propName == "AddMaterial") {
+		}); MatchProperty("AddMaterial", {
 			return g_SceneMan.ReadProperty(propName, reader);
-		} else {
-			// Try to read in the preset and add it to the PresetMan in one go, and report if fail
-			if (!g_PresetMan.GetEntityPreset(reader)) { reader.ReportError("Could not understand Preset type!"); }
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

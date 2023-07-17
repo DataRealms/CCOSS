@@ -101,200 +101,202 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SettingsMan::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "PaletteFile") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("PaletteFile", {
 			reader >> g_FrameMan.m_PaletteFile;
-		} else if (propName == "ResolutionX") {
+		}); MatchProperty("ResolutionX", {
 			reader >> g_WindowMan.m_ResX;
-		} else if (propName == "ResolutionY") {
+		}); MatchProperty("ResolutionY", {
 			reader >> g_WindowMan.m_ResY;
-		} else if (propName == "ResolutionMultiplier") {
+		}); MatchProperty("ResolutionMultiplier", {
 			reader >> g_WindowMan.m_ResMultiplier;
-		} else if (propName == "EnableVSync") {
+		}); MatchProperty("EnableVSync", {
 			reader >> g_WindowMan.m_EnableVSync;
-		} else if (propName == "IgnoreMultiDisplays") {
+		}); MatchProperty("IgnoreMultiDisplays", {
 			reader >> g_WindowMan.m_IgnoreMultiDisplays;
-		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
+		}); MatchProperty("TwoPlayerSplitscreenVertSplit", {
 			reader >> g_FrameMan.m_TwoPlayerVSplit;
-		} else if (propName == "MasterVolume") {
+		}); MatchProperty("MasterVolume", {
 			g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		} else if (propName == "MuteMaster") {
+		}); MatchProperty("MuteMaster", {
 			reader >> g_AudioMan.m_MuteMaster;
-		} else if (propName == "MusicVolume") {
+		}); MatchProperty("MusicVolume", {
 			g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		} else if (propName == "MuteMusic") {
+		}); MatchProperty("MuteMusic", {
 			reader >> g_AudioMan.m_MuteMusic;
-		} else if (propName == "SoundVolume") {
+		}); MatchProperty("SoundVolume", {
 			g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		} else if (propName == "MuteSounds") {
+		}); MatchProperty("MuteSounds", {
 			reader >> g_AudioMan.m_MuteSounds;
-		} else if (propName == "SoundPanningEffectStrength") {
+		}); MatchProperty("SoundPanningEffectStrength", {
 			reader >> g_AudioMan.m_SoundPanningEffectStrength;
 
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		} else if (propName == "ListenerZOffset") {
+		}); MatchProperty("ListenerZOffset", {
 			reader >> g_AudioMan.m_ListenerZOffset;
-		} else if (propName == "MinimumDistanceForPanning") {
+		}); MatchProperty("MinimumDistanceForPanning", {
 			reader >> g_AudioMan.m_MinimumDistanceForPanning;
 		//////////////////////////////////////////////////
 
-		} else if (propName == "ShowForeignItems") {
+		}); MatchProperty("ShowForeignItems", {
 			reader >> m_ShowForeignItems;
-		} else if (propName == "FlashOnBrainDamage") {
+		}); MatchProperty("FlashOnBrainDamage", {
 			reader >> m_FlashOnBrainDamage;
-		} else if (propName == "BlipOnRevealUnseen") {
+		}); MatchProperty("BlipOnRevealUnseen", {
 			reader >> m_BlipOnRevealUnseen;
-		} else if (propName == "MaxUnheldItems") {
+		}); MatchProperty("MaxUnheldItems", {
 			reader >> g_MovableMan.m_MaxDroppedItems;
-		} else if (propName == "UnheldItemsHUDDisplayRange") {
+		}); MatchProperty("UnheldItemsHUDDisplayRange", {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
-		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
+		}); MatchProperty("AlwaysDisplayUnheldItemsInStrategicMode", {
 			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
-		} else if (propName == "SubPieMenuHoverOpenDelay") {
+		}); MatchProperty("SubPieMenuHoverOpenDelay", {
 			reader >> m_SubPieMenuHoverOpenDelay;
-		} else if (propName == "EndlessMode") {
+		}); MatchProperty("EndlessMode", {
 			reader >> m_EndlessMetaGameMode;
-		} else if (propName == "EnableCrabBombs") {
+		}); MatchProperty("EnableCrabBombs", {
 			reader >> m_EnableCrabBombs;
-		} else if (propName == "CrabBombThreshold") {
+		}); MatchProperty("CrabBombThreshold", {
 			reader >> m_CrabBombThreshold;
-		} else if (propName == "ShowEnemyHUD") {
+		}); MatchProperty("ShowEnemyHUD", {
 			reader >> m_ShowEnemyHUD;
-		} else if (propName == "SmartBuyMenuNavigation") {
+		}); MatchProperty("SmartBuyMenuNavigation", {
 			reader >> m_EnableSmartBuyMenuNavigation;
-		} else if (propName == "ScrapCompactingHeight") {
+		}); MatchProperty("ScrapCompactingHeight", {
 			reader >> g_SceneMan.m_ScrapCompactingHeight;
-		} else if (propName == "AutomaticGoldDeposit") {
+		}); MatchProperty("AutomaticGoldDeposit", {
 			reader >> m_AutomaticGoldDeposit;
-		} else if (propName == "ScreenShakeStrength") {
+		}); MatchProperty("ScreenShakeStrength", {
 			reader >> g_CameraMan.m_ScreenShakeStrength;
-		} else if (propName == "ScreenShakeDecay") {
+		}); MatchProperty("ScreenShakeDecay", {
 			reader >> g_CameraMan.m_ScreenShakeDecay;
-		} else if (propName == "MaxScreenShakeTime") {
+		}); MatchProperty("MaxScreenShakeTime", {
 			reader >> g_CameraMan.m_MaxScreenShakeTime;
-		} else if (propName == "DefaultShakePerUnitOfGibEnergy") {
+		}); MatchProperty("DefaultShakePerUnitOfGibEnergy", {
 			reader >> g_CameraMan.m_DefaultShakePerUnitOfGibEnergy;
-		} else if (propName == "DefaultShakePerUnitOfRecoilEnergy") {
+		}); MatchProperty("DefaultShakePerUnitOfRecoilEnergy", {
 			reader >> g_CameraMan.m_DefaultShakePerUnitOfRecoilEnergy;
-		} else if (propName == "DefaultShakeFromRecoilMaximum") {
+		}); MatchProperty("DefaultShakeFromRecoilMaximum", {
 			reader >> g_CameraMan.m_DefaultShakeFromRecoilMaximum;
-		} else if (propName == "LaunchIntoActivity") {
+		}); MatchProperty("LaunchIntoActivity", {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
-		} else if (propName == "DefaultActivityType") {
+		}); MatchProperty("DefaultActivityType", {
 			reader >> g_ActivityMan.m_DefaultActivityType;
-		} else if (propName == "DefaultActivityName") {
+		}); MatchProperty("DefaultActivityName", {
 			reader >> g_ActivityMan.m_DefaultActivityName;
-		} else if (propName == "DefaultSceneName") {
+		}); MatchProperty("DefaultSceneName", {
 			reader >> g_SceneMan.m_DefaultSceneName;
-		} else if (propName == "DisableLuaJIT") {
+		}); MatchProperty("DisableLuaJIT", {
 			reader >> g_LuaMan.m_DisableLuaJIT;
-		} else if (propName == "RecommendedMOIDCount") {
+		}); MatchProperty("RecommendedMOIDCount", {
 			reader >> m_RecommendedMOIDCount;
-		} else if (propName == "SimplifiedCollisionDetection") {
+		}); MatchProperty("SimplifiedCollisionDetection", {
 			reader >> m_SimplifiedCollisionDetection;
-		} else if (propName == "SceneBackgroundAutoScaleMode") {
+		}); MatchProperty("SceneBackgroundAutoScaleMode", {
 			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "DisableFactionBuyMenuThemes") {
+		}); MatchProperty("DisableFactionBuyMenuThemes", {
 			reader >> m_DisableFactionBuyMenuThemes;
-		} else if (propName == "DisableFactionBuyMenuThemeCursors") {
+		}); MatchProperty("DisableFactionBuyMenuThemeCursors", {
 			reader >> m_DisableFactionBuyMenuThemeCursors;
-		} else if (propName == "PathFinderGridNodeSize") {
+		}); MatchProperty("PathFinderGridNodeSize", {
 			reader >> m_PathFinderGridNodeSize;
-		} else if (propName == "AIUpdateInterval") {
+		}); MatchProperty("AIUpdateInterval", {
 			reader >> m_AIUpdateInterval;
-		} else if (propName == "EnableParticleSettling") {
+		}); MatchProperty("EnableParticleSettling", {
 			reader >> g_MovableMan.m_SettlingEnabled;
-		} else if (propName == "EnableMOSubtraction") {
+		}); MatchProperty("EnableMOSubtraction", {
 			reader >> g_MovableMan.m_MOSubtractionEnabled;
-		} else if (propName == "DeltaTime") {
+		}); MatchProperty("DeltaTime", {
 			g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue()));
-		} else if (propName == "RealToSimCap") {
+		}); MatchProperty("RealToSimCap", {
 			g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue()));
-		} else if (propName == "AllowSavingToBase") {
+		}); MatchProperty("AllowSavingToBase", {
 			reader >> m_AllowSavingToBase;
-		} else if (propName == "ShowMetaScenes") {
+		}); MatchProperty("ShowMetaScenes", {
 			reader >> m_ShowMetaScenes;
-		} else if (propName == "SkipIntro") {
+		}); MatchProperty("SkipIntro", {
 			reader >> m_SkipIntro;
-		} else if (propName == "ShowToolTips") {
+		}); MatchProperty("ShowToolTips", {
 			reader >> m_ShowToolTips;
-		} else if (propName == "CaseSensitiveFilePaths") {
+		}); MatchProperty("CaseSensitiveFilePaths", {
 			System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "DisableLoadingScreenProgressReport") {
+		}); MatchProperty("DisableLoadingScreenProgressReport", {
 			reader >> m_DisableLoadingScreenProgressReport;
-		} else if (propName == "LoadingScreenProgressReportPrecision") {
+		}); MatchProperty("LoadingScreenProgressReportPrecision", {
 			reader >> m_LoadingScreenProgressReportPrecision;
-		} else if (propName == "ConsoleScreenRatio") {
+		}); MatchProperty("ConsoleScreenRatio", {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
-		} else if (propName == "ConsoleUseMonospaceFont") {
+		}); MatchProperty("ConsoleUseMonospaceFont", {
 			reader >> g_ConsoleMan.m_ConsoleUseMonospaceFont;
-		} else if (propName == "AdvancedPerformanceStats") {
+		}); MatchProperty("AdvancedPerformanceStats", {
 			reader >> g_PerformanceMan.m_AdvancedPerfStats;
-		} else if (propName == "MenuTransitionDurationMultiplier") {
+		}); MatchProperty("MenuTransitionDurationMultiplier", {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
-		} else if (propName == "DrawAtomGroupVisualizations") {
+		}); MatchProperty("DrawAtomGroupVisualizations", {
 			reader >> m_DrawAtomGroupVisualizations;
-		} else if (propName == "DrawHandAndFootGroupVisualizations") {
+		}); MatchProperty("DrawHandAndFootGroupVisualizations", {
 			reader >> m_DrawHandAndFootGroupVisualizations;
-		} else if (propName == "DrawLimbPathVisualizations") {
+		}); MatchProperty("DrawLimbPathVisualizations", {
 			reader >> m_DrawLimbPathVisualizations;
-		} else if (propName == "DrawRaycastVisualizations") {
+		}); MatchProperty("DrawRaycastVisualizations", {
 			reader >> g_SceneMan.m_DrawRayCastVisualizations;
-		} else if (propName == "DrawPixelCheckVisualizations") {
+		}); MatchProperty("DrawPixelCheckVisualizations", {
 			reader >> g_SceneMan.m_DrawPixelCheckVisualizations;
-		} else if (propName == "PrintDebugInfo") {
+		}); MatchProperty("PrintDebugInfo", {
 			reader >> m_PrintDebugInfo;
-		} else if (propName == "MeasureModuleLoadTime") {
+		}); MatchProperty("MeasureModuleLoadTime", {
 			reader >> m_MeasureModuleLoadTime;
-		} else if (propName == "PlayerNetworkName") {
+		}); MatchProperty("PlayerNetworkName", {
 			reader >> m_PlayerNetworkName;
-		} else if (propName == "NetworkServerName") {
+		}); MatchProperty("NetworkServerName", {
 			reader >> m_NetworkServerAddress;
-		} else if (propName == "UseNATService") {
+		}); MatchProperty("UseNATService", {
 			reader >> g_NetworkServer.m_UseNATService;
-		} else if (propName == "NATServiceAddress") {
+		}); MatchProperty("NATServiceAddress", {
 			reader >> m_NATServiceAddress;
-		} else if (propName == "NATServerName") {
+		}); MatchProperty("NATServerName", {
 			reader >> m_NATServerName;
-		} else if (propName == "NATServerPassword") {
+		}); MatchProperty("NATServerPassword", {
 			reader >> m_NATServerPassword;
-		} else if (propName == "UseExperimentalMultiplayerSpeedBoosts") {
+		}); MatchProperty("UseExperimentalMultiplayerSpeedBoosts", {
 			reader >> m_UseExperimentalMultiplayerSpeedBoosts;
-		} else if (propName == "ClientInputFps") {
+		}); MatchProperty("ClientInputFps", {
 			reader >> g_NetworkClient.m_ClientInputFps;
-		} else if (propName == "ServerTransmitAsBoxes") {
+		}); MatchProperty("ServerTransmitAsBoxes", {
 			reader >> g_NetworkServer.m_TransmitAsBoxes;
-		} else if (propName == "ServerBoxWidth") {
+		}); MatchProperty("ServerBoxWidth", {
 			reader >> g_NetworkServer.m_BoxWidth;
-		} else if (propName == "ServerBoxHeight") {
+		}); MatchProperty("ServerBoxHeight", {
 			reader >> g_NetworkServer.m_BoxHeight;
-		} else if (propName == "ServerUseHighCompression") {
+		}); MatchProperty("ServerUseHighCompression", {
 			reader >> g_NetworkServer.m_UseHighCompression;
-		} else if (propName == "ServerUseFastCompression") {
+		}); MatchProperty("ServerUseFastCompression", {
 			reader >> g_NetworkServer.m_UseFastCompression;
-		} else if (propName == "ServerUseDeltaCompression") {
+		}); MatchProperty("ServerUseDeltaCompression", {
 			reader >> g_NetworkServer.m_UseDeltaCompression;
-		} else if (propName == "ServerHighCompressionLevel") {
+		}); MatchProperty("ServerHighCompressionLevel", {
 			reader >> g_NetworkServer.m_HighCompressionLevel;
-		} else if (propName == "ServerFastAccelerationFactor") {
+		}); MatchProperty("ServerFastAccelerationFactor", {
 			reader >> g_NetworkServer.m_FastAccelerationFactor;
-		} else if (propName == "ServerUseInterlacing") {
+		}); MatchProperty("ServerUseInterlacing", {
 			reader >> g_NetworkServer.m_UseInterlacing;
-		} else if (propName == "ServerEncodingFps") {
+		}); MatchProperty("ServerEncodingFps", {
 			reader >> g_NetworkServer.m_EncodingFps;
-		} else if (propName == "ServerSleepWhenIdle") {
+		}); MatchProperty("ServerSleepWhenIdle", {
 			reader >> g_NetworkServer.m_SleepWhenIdle;
-		} else if (propName == "ServerSimSleepWhenIdle") {
+		}); MatchProperty("ServerSimSleepWhenIdle", {
 			reader >> g_NetworkServer.m_SimSleepWhenIdle;
-		} else if (propName == "VisibleAssemblyGroup") {
+		}); MatchProperty("VisibleAssemblyGroup", {
 			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
-		} else if (propName == "DisableMod") {
+		}); MatchProperty("DisableMod", {
 			m_DisabledMods.try_emplace(reader.ReadPropValue(), true);
-		} else if (propName == "EnableGlobalScript") {
+		}); MatchProperty("EnableGlobalScript", {
 			m_EnabledGlobalScripts.try_emplace(reader.ReadPropValue(), true);
-		} else if (propName == "MouseSensitivity") {
+		}); MatchProperty("MouseSensitivity", {
 			reader >> g_UInputMan.m_MouseSensitivity;
-		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
+		}); MatchForwards("Player1Scheme") MatchForwards("Player2Scheme") MatchForwards("Player3Scheme") MatchProperty("Player4Scheme", {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
@@ -303,10 +305,9 @@ namespace RTE {
 					break;
 				}
 			}
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

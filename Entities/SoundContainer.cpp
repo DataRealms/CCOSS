@@ -61,17 +61,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "SpecialBehaviour_TopLevelSoundSet") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("SpecialBehaviour_TopLevelSoundSet", {
 			reader >> m_TopLevelSoundSet;
-		} else if (propName == "AddSound") {
+		}); MatchProperty("AddSound", {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
-		} else if (propName == "AddSoundSet") {
+		}); MatchProperty("AddSoundSet", {
 			SoundSet soundSetToAdd;
 			reader >> soundSetToAdd;
 			m_TopLevelSoundSet.AddSoundSet(soundSetToAdd);
-		} else if (propName == "SoundSelectionCycleMode" || propName == "CycleMode") {
+		}); MatchForwards("SoundSelectionCycleMode") MatchProperty("CycleMode", {
 			m_TopLevelSoundSet.SetSoundSelectionCycleMode(SoundSet::ReadSoundSelectionCycleMode(reader));
-		} else if (propName == "SoundOverlapMode") {
+		}); MatchProperty("SoundOverlapMode", {
 			std::string soundOverlapModeString = reader.ReadPropValue();
 			if (c_SoundOverlapModeMap.find(soundOverlapModeString) != c_SoundOverlapModeMap.end()) {
 				m_SoundOverlapMode = c_SoundOverlapModeMap.find(soundOverlapModeString)->second;
@@ -82,30 +84,28 @@ namespace RTE {
 					reader.ReportError("Cycle mode " + soundOverlapModeString + " is invalid.");
 				}
 			}
-		} else if (propName == "Immobile") {
+		}); MatchProperty("Immobile", {
 			reader >> m_Immobile;
-		} else if (propName == "AttenuationStartDistance") {
+		}); MatchProperty("AttenuationStartDistance", {
 			reader >> m_AttenuationStartDistance;
-		} else if (propName == "LoopSetting") {
+		}); MatchProperty("LoopSetting", {
 			reader >> m_Loops;
-		} else if (propName == "Priority") {
+		}); MatchProperty("Priority", {
 			reader >> m_Priority;
 			if (m_Priority < 0 || m_Priority > 256) { reader.ReportError("SoundContainer priority must be between 256 (lowest priority) and 0 (highest priority)."); }
-		} else if (propName == "AffectedByGlobalPitch") {
+		}); MatchProperty("AffectedByGlobalPitch", {
 			reader >> m_AffectedByGlobalPitch;
-		} else if (propName == "Position") {
+		}); MatchProperty("Position", {
 			reader >> m_Pos;
-		} else if (propName == "Volume") {
+		}); MatchProperty("Volume", {
 			reader >> m_Volume;
-		} else if (propName == "Pitch") {
+		}); MatchProperty("Pitch", {
 			reader >> m_Pitch;
-		} else if (propName == "PitchVariation") {
+		}); MatchProperty("PitchVariation", {
 			reader >> m_PitchVariation;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
+		});
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

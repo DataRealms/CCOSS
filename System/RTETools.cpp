@@ -1,4 +1,5 @@
 #include "RTETools.h"
+
 #include "Vector.h"
 
 namespace RTE {
@@ -197,5 +198,22 @@ namespace RTE {
 			}
 			return RoundFloatToPrecision((roundingBuffer / precisionMagnitude), precision);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// From https://stackoverflow.com/a/66764681, under license https://creativecommons.org/licenses/by-sa/4.0/. Minor modifications
+	uint64_t Hash(const std::string &text) {
+		constexpr uint64_t fnv_prime = 1099511628211ULL;
+		constexpr uint64_t fnv_offset_basis = 14695981039346656037ULL;
+		
+		uint64_t hash = fnv_offset_basis;
+		
+		for(auto c: text) {
+			hash ^= c;
+			hash *= fnv_prime;
+		}
+
+		return hash;
 	}
 }

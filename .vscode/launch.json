@@ -20,7 +20,7 @@
         "order": 1
       },
       "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand.exe",
+        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.exe",
         "presentation": {
           "hidden": true
         }
@@ -45,12 +45,12 @@
         "presentation": {
           "hidden": true
         },
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand.debug.release.exe",
+        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.release.exe",
       }
     },
     {
       "name": "meson Debug (Minimal)",
-      "type": "cppdbg",
+      "type": "cppvsdbg",
       "osx": {
         "MIMode": "lldb"
       },
@@ -64,7 +64,7 @@
         "order": 3
       },
       "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand.debug.minimal.exe",
+        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.minimal.exe",
         "presentation": {
           "hidden": true
         }
@@ -86,7 +86,7 @@
         "order": 4
       },
       "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand.debug.full.exe",
+        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.full.exe",
         "presentation": {
           "hidden": true
         }

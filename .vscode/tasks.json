@@ -27,6 +27,9 @@
       "problemMatcher": ["$meson-gcc"],
       "command": "meson",
       "args": ["setup", "${config:mesonbuild.buildFolder}"],
+      "windows" : {
+        "args": ["setup", "${config:mesonbuild.buildFolder}", "--vsenv"],
+      },
       "osx": {
         "options": {
           "env": {
@@ -48,7 +51,15 @@
         "-Ddebug_type=release",
         "-Db_lto=false",
         "${config:mesonbuild.buildFolder}"
-      ]
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=release",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
     },
     {
       "label": "Configure Debug (Minimal)",
@@ -61,7 +72,16 @@
         "-Ddebug_type=minimal",
         "-Db_lto=false",
         "${config:mesonbuild.buildFolder}"
-      ]
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=minimal",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
+
     },
     {
       "label": "Configure Debug (Full)",
@@ -74,7 +94,15 @@
         "-Ddebug_type=full",
         "-Db_lto=false",
         "${config:mesonbuild.buildFolder}"
-      ]
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=full",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
     },
     {
       "label": "Configure Release",
@@ -87,7 +115,14 @@
         "-Ddebug_type=release",
         "-Db_lto=true",
         "${config:mesonbuild.buildFolder}"
-      ]
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=release",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
     },
     {
       "type": "meson",

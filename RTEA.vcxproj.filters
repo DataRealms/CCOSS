@@ -28,6 +28,9 @@
     <Filter Include="Lua">
       <UniqueIdentifier>{ac503e37-087b-40b8-b1b8-427ab55a4f9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\Semver200">
+      <UniqueIdentifier>{60f9b310-81f7-4bf6-a829-c893dc59537a}</UniqueIdentifier>
+    </Filter>
     <Filter Include="GUI\Wrappers">
       <UniqueIdentifier>{14ff3fdb-4366-4bed-8b6e-ddcf72987b81}</UniqueIdentifier>
     </Filter>
@@ -567,6 +570,15 @@
     <ClInclude Include="Resources\Credits.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="System\Semver200\semver200.h">
+      <Filter>System\Semver200</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Semver200\version.h">
+      <Filter>System\Semver200</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GameVersion.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1098,6 +1110,15 @@
     <ClCompile Include="Managers\WindowMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="System\Semver200\Semver200_comparator.cpp">
+      <Filter>System\Semver200</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Semver200\Semver200_modifier.cpp">
+      <Filter>System\Semver200</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Semver200\Semver200_parser.cpp">
+      <Filter>System\Semver200</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">
@@ -1111,5 +1132,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="System\Semver200\version.inl">
+      <Filter>System\Semver200</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -91,7 +91,7 @@ namespace RTE {
 		/// <summary>
 		/// Set whether this reader should skip included files.
 		/// </summary>
-		/// <param name="skip>To make reader skip included files pass true, pass false otherwise.</param>
+		/// <param name="skip">To make reader skip included files pass true, pass false otherwise.</param>
 		void SetSkipIncludes(bool skip) { m_SkipIncludes = skip; };
 #pragma endregion
 

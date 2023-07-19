@@ -1,7 +1,6 @@
 #ifndef _RTECONSTANTS_
 #define _RTECONSTANTS_
 
-
 namespace RTE {
 
 #pragma region Type Definitions

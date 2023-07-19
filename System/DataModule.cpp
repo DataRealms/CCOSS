@@ -167,7 +167,7 @@ namespace RTE {
 			reader >> versionText;
 			try {
 				m_SupportedGameVersion = version::Semver200_version(versionText);
-			} catch (version::Parse_error) {
+			} catch (version::Parse_error &) {
 				reader.ReportError("Couldn't parse the supported game version from the value provided: \"" + versionText + "\"!\nThe supported game version must be a valid semantic version number.\n");
 			}
 		} else if (propName == "Version") {

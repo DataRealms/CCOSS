@@ -83,8 +83,8 @@ elif compiler.get_argument_syntax()== 'msvc'
   elfname = 'Cortex Command'
   extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1', '-bigobj']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
-  if host_machine.cpu_family() == 'x64'
-    elfname += ' x64'
+  if host_machine.cpu_family() == 'x86'
+    elfname += ' x86'
   endif
   preprocessor_flags += ['-D_CRT_SECURE_NO_DEPRECATE', '-D_WINDOWS', '-DWIN32', '-DWIN32_LEAN_AND_MEAN']
   link_args+=['-ignore:4099', '-ignore:4217']
@@ -93,6 +93,7 @@ elif compiler.get_argument_syntax()== 'msvc'
     elfname+='.debug'
     debug_type = get_option('debug_type')
     if debug_type == 'release'
+      elfname+='.release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
       elfname += '.minimal'

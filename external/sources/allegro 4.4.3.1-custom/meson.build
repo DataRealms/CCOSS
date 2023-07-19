@@ -83,14 +83,26 @@ if compiler.get_argument_syntax() == 'gcc'
   c_args = ['-Wno-deprecated-declarations']
 else
 endif
-
-allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
 allegro_args = ['-DALLEGRO_NO_COMPATIBILITY']
 
-loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
+if not get_option('use_prebuilt_libraries') or host_machine.system() in ['darwin', 'linux']
+  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
+  loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
+else 
+  allegro = []
+  loadpng = []
+  if get_option('debug')
+    allegro_lib = compiler.find_library('allegro-debug', dirs: meson.current_source_dir()/'_Bin')
+    loadpng_lib = compiler.find_library('loadpng-debug', dirs:meson.current_source_dir()/'_Bin')
+  else
+    allegro_lib = compiler.find_library('allegro-release', dirs: meson.current_source_dir()/'_Bin')
+    loadpng_lib = compiler.find_library('loadpng-release', dirs: meson.current_source_dir()/'_Bin')
+  endif
+endif
 
-allegro_dep = declare_dependency(link_with: allegro, include_directories: allegro_include, compile_args: allegro_args + c_args)
-loadpng_dep = declare_dependency(link_with: loadpng, include_directories: loadpng_include)
+
+allegro_dep = declare_dependency(link_with: allegro, dependencies: allegro_lib, include_directories: allegro_include, compile_args: allegro_args + c_args)
+loadpng_dep = declare_dependency(link_with: loadpng, dependencies: loadpng_lib, include_directories: loadpng_include)
 
 meson.override_dependency('allegro', allegro_dep)
 meson.override_dependency('loadpng', loadpng_dep)

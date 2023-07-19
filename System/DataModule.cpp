@@ -494,25 +494,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::CheckSupportedGameVersion() const {
-		if (*m_SupportedGameVersion != c_GameVersion) {
-			static const std::string contactAuthor = "Please contact the mod author or ask for help in the CCCP discord server.";
+		static const std::string contactAuthor = "Please contact the mod author or ask for help in the CCCP discord server.";
 
-			RTEAssert(*m_SupportedGameVersion != version::Semver200_version(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\n" + contactAuthor);
+		RTEAssert(m_SupportedGameVersion, m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\n" + contactAuthor);
 
-			bool modulePrereleaseVersionMismatch = !m_SupportedGameVersion->prerelease().empty();
-			bool moduleBuildVersionMismatch = !m_SupportedGameVersion->build().empty();
-			RTEAssert(!modulePrereleaseVersionMismatch && !moduleBuildVersionMismatch, m_FileName + " was developed for pre-release build of Cortex Command v" + m_SupportedGameVersion->str() + ", this game version (v" + c_GameVersion.str() + ") is incompatible.\n\nMods developed on a pre-release must match the game version exactly.\n" + contactAuthor);
+		bool modulePrereleaseVersionMismatch = !m_SupportedGameVersion->prerelease().empty();
+		bool moduleBuildVersionMismatch = !m_SupportedGameVersion->build().empty();
+		RTEAssert(!modulePrereleaseVersionMismatch && !moduleBuildVersionMismatch, m_FileName + " was developed for pre-release build of Cortex Command v" + m_SupportedGameVersion->str() + ", this game version (v" + c_GameVersion.str() + ") is incompatible.\n\nMods developed on a pre-release must match the game version exactly.\n" + contactAuthor);
 
-			bool gamePrereleaseVersionMismatch = !c_GameVersion.prerelease().empty();
-			bool gameBuildVersionMismatch = !c_GameVersion.build().empty();
-			RTEAssert(!gamePrereleaseVersionMismatch && !gameBuildVersionMismatch, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", this pre-release version of the game (v" + c_GameVersion.str() + ") may not support it.\n\nMods must match the game version exactly to use pre-release builds.\n" + contactAuthor);
+		bool gamePrereleaseVersionMismatch = !c_GameVersion.prerelease().empty();
+		bool gameBuildVersionMismatch = !c_GameVersion.build().empty();
+		RTEAssert(!gamePrereleaseVersionMismatch && !gameBuildVersionMismatch, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", this pre-release version of the game (v" + c_GameVersion.str() + ") may not support it.\n\nMods must match the game version exactly to use pre-release builds.\n" + contactAuthor);
 
-			// Game engine is the same major version as the Module
-			bool majorVersionMatch = c_GameVersion.major() == m_SupportedGameVersion->major();
-			// Game engine is at least the minor version the Module requires (allow patch mismatch)
-			bool minorVersionInRange = m_SupportedGameVersion->inc_minor() <= c_GameVersion.inc_minor();
+		// Game engine is the same major version as the Module
+		bool majorVersionMatch = c_GameVersion.major() == m_SupportedGameVersion->major();
+		// Game engine is at least the minor version the Module requires (allow patch mismatch)
+		bool minorVersionInRange = m_SupportedGameVersion->inc_minor() <= c_GameVersion.inc_minor();
 
-			RTEAssert(majorVersionMatch && minorVersionInRange, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", so this version of Cortex Command (v" + c_GameVersion.str() + ") may not support it.\n" + contactAuthor);
-		}
+		RTEAssert(majorVersionMatch && minorVersionInRange, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", so this version of Cortex Command (v" + c_GameVersion.str() + ") may not support it.\n" + contactAuthor);
 	}
 }

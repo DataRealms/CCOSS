@@ -4,6 +4,7 @@
 #include "LuaMan.h"
 #include "GameVersion.h"
 
+#include <System/Semver200/semver200.h>
 
 namespace RTE {
 
@@ -17,7 +18,7 @@ namespace RTE {
 		m_FriendlyName.clear();
 		m_Author.clear();
 		m_Description.clear();
-		m_SupportedGameVersion = version::Semver200_version();
+		m_SupportedGameVersion = nullptr;
 		m_Version = 1;
 		m_ModuleID = -1;
 		m_IconFile.Reset();
@@ -93,6 +94,7 @@ namespace RTE {
 		for (const PresetEntry &preset : m_PresetList){
 			delete preset.m_EntityPreset;
 		}
+		delete m_SupportedGameVersion;
 		Clear();
 	}
 
@@ -145,10 +147,13 @@ namespace RTE {
 		} else if (propName == "SupportedGameVersion") {
 			std::string versionText;
 			reader >> versionText;
-			try {
-				m_SupportedGameVersion = version::Semver200_version(versionText);
-			} catch (version::Parse_error &) {
-				reader.ReportError("Couldn't parse the supported game version from the value provided: \"" + versionText + "\"!\nThe supported game version must be a valid semantic version number.\n");
+			// TODO: Need to proceed reading the includes after ReadModuleProperties so we don't read the properties again when fully creating.
+			if (!m_SupportedGameVersion) {
+				try {
+					m_SupportedGameVersion = new version::Semver200_version(versionText);
+				} catch (version::Parse_error &) {
+					reader.ReportError("Couldn't parse the supported game version from the value provided: \"" + versionText + "\"!\nThe supported game version must be a valid semantic version number.\n");
+				}
 			}
 		} else if (propName == "Version") {
 			reader >> m_Version;
@@ -208,7 +213,7 @@ namespace RTE {
 			writer.NewPropertyWithValue("Author", m_Author);
 			writer.NewPropertyWithValue("Description", m_Description);
 			writer.NewPropertyWithValue("IsFaction", m_IsFaction);
-			writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion.str());
+			writer.NewPropertyWithValue("SupportedGameVersion", m_SupportedGameVersion->str());
 			writer.NewPropertyWithValue("Version", m_Version);
 			writer.NewPropertyWithValue("IconFile", m_IconFile);
 
@@ -489,25 +494,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::CheckSupportedGameVersion() const {
-		if (m_SupportedGameVersion != c_GameVersion) {
+		if (*m_SupportedGameVersion != c_GameVersion) {
 			static const std::string contactAuthor = "Please contact the mod author or ask for help in the CCCP discord server.";
 
-			RTEAssert(m_SupportedGameVersion != version::Semver200_version(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\n" + contactAuthor);
+			RTEAssert(*m_SupportedGameVersion != version::Semver200_version(), m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\n" + contactAuthor);
 
-			bool modulePrereleaseVersionMismatch = !m_SupportedGameVersion.prerelease().empty();
-			bool moduleBuildVersionMismatch = !m_SupportedGameVersion.build().empty();
-			RTEAssert(!modulePrereleaseVersionMismatch && !moduleBuildVersionMismatch, m_FileName + " was developed for pre-release build of Cortex Command v" + m_SupportedGameVersion.str() + ", this game version (v" + c_GameVersion.str() + ") is incompatible.\n\nMods developed on a pre-release must match the game version exactly.\n" + contactAuthor);
+			bool modulePrereleaseVersionMismatch = !m_SupportedGameVersion->prerelease().empty();
+			bool moduleBuildVersionMismatch = !m_SupportedGameVersion->build().empty();
+			RTEAssert(!modulePrereleaseVersionMismatch && !moduleBuildVersionMismatch, m_FileName + " was developed for pre-release build of Cortex Command v" + m_SupportedGameVersion->str() + ", this game version (v" + c_GameVersion.str() + ") is incompatible.\n\nMods developed on a pre-release must match the game version exactly.\n" + contactAuthor);
 
 			bool gamePrereleaseVersionMismatch = !c_GameVersion.prerelease().empty();
 			bool gameBuildVersionMismatch = !c_GameVersion.build().empty();
-			RTEAssert(!gamePrereleaseVersionMismatch && !gameBuildVersionMismatch, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion.str() + ", this pre-release version of the game (v" + c_GameVersion.str() + ") may not support it.\n\nMods must match the game version exactly to use pre-release builds.\n" + contactAuthor);
+			RTEAssert(!gamePrereleaseVersionMismatch && !gameBuildVersionMismatch, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", this pre-release version of the game (v" + c_GameVersion.str() + ") may not support it.\n\nMods must match the game version exactly to use pre-release builds.\n" + contactAuthor);
 
 			// Game engine is the same major version as the Module
-			bool majorVersionMatch = c_GameVersion.major() == m_SupportedGameVersion.major();
+			bool majorVersionMatch = c_GameVersion.major() == m_SupportedGameVersion->major();
 			// Game engine is at least the minor version the Module requires (allow patch mismatch)
-			bool minorVersionInRange = m_SupportedGameVersion.inc_minor() <= c_GameVersion.inc_minor();
+			bool minorVersionInRange = m_SupportedGameVersion->inc_minor() <= c_GameVersion.inc_minor();
 
-			RTEAssert(majorVersionMatch && minorVersionInRange, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion.str() + ", so this version of Cortex Command (v" + c_GameVersion.str() + ") may not support it.\n" + contactAuthor);
+			RTEAssert(majorVersionMatch && minorVersionInRange, m_FileName + " was developed for Cortex Command v" + m_SupportedGameVersion->str() + ", so this version of Cortex Command (v" + c_GameVersion.str() + ") may not support it.\n" + contactAuthor);
 		}
 	}
 }

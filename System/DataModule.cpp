@@ -53,7 +53,6 @@ namespace RTE {
 
 		// If the module is a mod, read only its `index.ini` to validate its SupportedGameVersion.
 		if (m_ModuleID >= g_PresetMan.GetOfficialModuleCount() && !m_IsUserdata && ReadModuleProperties(moduleName, progressCallback) >= 0) {
-			if (progressCallback) { progressCallback(m_FileName + " " + static_cast<char>(-43) + " reading index:", true); }
 			CheckSupportedGameVersion();
 		}
 

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _RTEGAMEVERSION_
 #define _RTEGAMEVERSION_
 

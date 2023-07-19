@@ -84,10 +84,12 @@ if compiler.get_argument_syntax() == 'gcc'
 else
 endif
 allegro_args = ['-DALLEGRO_NO_COMPATIBILITY']
+allegro_lib = []
+loadpng_lib = []
 
 if not get_option('use_prebuilt_libraries') or host_machine.system() in ['darwin', 'linux']
-  allegro_lib = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
-  loadpng_lib = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
+  allegro = static_library('allegro', sources: allegro_sources, include_directories: allegro_include, c_args: [c_args, allegro_defines])
+  loadpng = static_library('loadpng', sources: loadpng_sources, dependencies: loadpng_dependencies, include_directories: allegro_include)
 else 
   allegro = []
   loadpng = []

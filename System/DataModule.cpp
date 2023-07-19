@@ -165,19 +165,6 @@ namespace RTE {
 		} else if (propName == "SupportedGameVersion") {
 			std::string versionText;
 			reader >> versionText;
-
-			// Compatibility handling, should only include the most recent release
-			// TODO: Remove this once versioning standard has been updated. 
-			if (versionText == "Pre-Release 4.0") {
-				versionText = "4.0.0";
-			} else if (versionText == "Pre-Release 4.1") {
-				versionText = "4.1.0";
-			} else if (versionText == "Pre-Release 5.0") {
-				versionText = "5.0.0";
-			} else if (versionText == "Pre-Release 5.1") {
-				versionText = "5.1.0";
-			}
-
 			try {
 				m_SupportedGameVersion = version::Semver200_version(versionText);
 			} catch (version::Parse_error) {

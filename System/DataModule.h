@@ -357,6 +357,11 @@ namespace RTE {
 
 #pragma region INI Handling
 		/// <summary>
+		/// Checks the module's supported game version against the current game version to ensure compatibility.
+		/// </summary>
+		void CheckSupportedGameVersion() const;
+
+		/// <summary>
 		/// If ScanFolderContents is enabled in this DataModule's Index.ini, looks for any ini files in the top-level directory of the module and reads all of them in alphabetical order.
 		/// </summary>
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>

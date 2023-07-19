@@ -67,15 +67,7 @@ namespace version {
 	template<typename Parser, typename Comparator, typename Modifier>
 	const std::string Basic_version<Parser, Comparator, Modifier>::str() const {
 		std::stringstream buffer;
-		buffer << ver_.major << "." << ver_.minor << "." << ver_.patch;
-		std::string prl = prerelease();
-		if (!prl.empty()) {
-			buffer << "-" << prl;
-		}
-		std::string bld = build();
-		if (!bld.empty()) {
-			buffer << "+" << bld;
-		}
+		buffer << *this;
 		return buffer.str();
 	}
 

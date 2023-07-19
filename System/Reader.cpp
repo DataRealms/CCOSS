@@ -49,8 +49,8 @@ namespace RTE {
 
 		m_CanFail = failOK;
 
-		m_Stream = std::make_unique<std::ifstream>(fileName);
-		if (!m_CanFail) { RTEAssert(System::PathExistsCaseSensitive(fileName) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!"); }
+		m_Stream = std::make_unique<std::ifstream>(m_FilePath);
+		if (!m_CanFail) { RTEAssert(System::PathExistsCaseSensitive(m_FilePath) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!"); }
 
 		m_OverwriteExisting = overwrites;
 

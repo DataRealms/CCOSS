@@ -148,6 +148,7 @@ deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep]
 #### Sources Setup ####
 pch = meson.current_source_dir()/'System/StandardIncludes.h'
 sources = []
+source_libs = []
 source_inc_dirs = include_directories(
   '.',
   'Activities',
@@ -173,7 +174,7 @@ subdir('Resources')
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:[external_libs, lua_bindings, luaman], objects:[external_objects], dependencies:deps,                                # Link options
+  link_with:[external_libs, source_libs], objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options

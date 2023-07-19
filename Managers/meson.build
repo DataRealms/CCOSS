@@ -34,3 +34,4 @@ error('Unsupported compiler')
 endif
 
 luaman = static_library('LuaMan', 'LuaMan.cpp', dependencies:deps + luabind_dep, include_directories: [source_inc_dirs, external_inc_dirs], cpp_args: luaman_cpp_args, cpp_pch:pch, override_options: defaults_override)
+source_libs += luaman

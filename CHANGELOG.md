@@ -888,6 +888,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
 
+- Fixed immobile `SoundContainers` not pausing and resuming when you pause/resume an `Activity`.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

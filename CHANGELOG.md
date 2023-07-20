@@ -637,6 +637,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
+- Added `LuaMan` Lua function `FileExists`, which lets you check whether a specified file exists. Like with `FileOpen`, the file must be inside a folder ending in `.rte`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

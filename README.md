@@ -125,7 +125,6 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 `sudo python3 -m pip install meson`
 
 **Fedora:**  
-
 `# dnf install allegro-loadpng-devel allegro-devel libsdl2-devel lua-devel boost-devel meson ninja-build flac-devel luajit-devel minizip-compat-devel tbb-devel lz4-devel libpng-devel lua-devel gcc gcc-c++`  
 
 ## Troubleshooting

@@ -9,10 +9,6 @@
 #include <sys/stat.h>
 #endif
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
-
 namespace RTE {
 
 	bool System::s_Quit = false;

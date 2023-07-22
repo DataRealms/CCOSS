@@ -313,7 +313,7 @@ void GUIControlManager::Draw(GUIScreen *pScreen) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GUIControlManager::DrawMouse() {
+void GUIControlManager::DrawMouse(GUIScreen *guiScreen) {
 	int MouseX;
 	int MouseY;
 	m_Input->GetMousePosition(&MouseX, &MouseY);
@@ -321,17 +321,17 @@ void GUIControlManager::DrawMouse() {
 	switch (m_CursorType) {
 		// Pointer
 		case Pointer:
-			m_Skin->DrawMouse(0, MouseX, MouseY);
+			m_Skin->DrawMouse(0, MouseX, MouseY, guiScreen);
 			break;
 
 			// Text
 		case Text:
-			m_Skin->DrawMouse(1, MouseX, MouseY);
+			m_Skin->DrawMouse(1, MouseX, MouseY, guiScreen);
 			break;
 
 			// Horizontal Resize
 		case HorSize:
-			m_Skin->DrawMouse(2, MouseX, MouseY);
+			m_Skin->DrawMouse(2, MouseX, MouseY, guiScreen);
 			break;
 		default:
 			break;

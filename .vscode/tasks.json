@@ -1,0 +1,162 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "meson Build Release",
+      "dependsOn": ["Configure Release", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "meson Build Debug (Release)",
+      "dependsOn": ["Configure Debug (Release)", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "meson Build Debug (Minimal)",
+      "dependsOn": ["Configure Debug (Minimal)", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "meson Build Debug (Full)",
+      "dependsOn": ["Configure Debug (Full)", "Meson: Build all targets"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "Setup Meson",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "args": ["setup", "${config:mesonbuild.buildFolder}"],
+      "windows": {
+        "args": ["setup", "${config:mesonbuild.buildFolder}", "--vsenv"]
+      },
+      "osx": {
+        "options": {
+          "env": {
+            "CC": "gcc-12",
+            "CXX": "g++-12",
+            "CXX_LD": "g++-12"
+          }
+        }
+      }
+    },
+    {
+      "label": "Configure Debug (Release)",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "hide": true,
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=release",
+        "-Db_lto=false",
+        "${config:mesonbuild.buildFolder}"
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=release",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
+    },
+    {
+      "label": "Configure Debug (Minimal)",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "hide": true,
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=minimal",
+        "-Db_lto=false",
+        "${config:mesonbuild.buildFolder}"
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=minimal",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
+    },
+    {
+      "label": "Configure Debug (Full)",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "hide": true,
+      "args": [
+        "configure",
+        "--buildtype=debug",
+        "-Ddebug_type=full",
+        "-Db_lto=false",
+        "${config:mesonbuild.buildFolder}"
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=debug",
+          "-Ddebug_type=full",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
+    },
+    {
+      "label": "Configure Release",
+      "type": "process",
+      "problemMatcher": ["$meson-gcc"],
+      "command": "meson",
+      "hide": true,
+      "args": [
+        "configure",
+        "--buildtype=release",
+        "-Ddebug_type=release",
+        "-Db_lto=true",
+        "${config:mesonbuild.buildFolder}"
+      ],
+      "windows": {
+        "args": [
+          "configure",
+          "--buildtype=release",
+          "${config:mesonbuild.buildFolder}"
+        ]
+      }
+    },
+    {
+      "type": "meson",
+      "hide": true,
+      "mode": "build",
+      "problemMatcher": ["$meson-gcc"],
+      "group": "build"
+    },
+    {
+      "label": "msbuild (Final)",
+      "type": "process",
+      "command": "msbuild",
+      "args": ["/m", "/p:Configuration=Final", "RTEA.sln"]
+    },
+    {
+      "label": "msbuild (Debug Release)",
+      "type": "process",
+      "command": "msbuild",
+      "args": ["/m", "/p:Configuration=Debug Release", "RTEA.sln"]
+    },
+    {
+      "label": "msbuild (Debug Minimal)",
+      "type": "process",
+      "command": "msbuild",
+      "args": ["/m", "/p:Configuration=Debug Minimal", "RTEA.sln"]
+    },
+    {
+      "label": "msbuild (Debug Full)",
+      "type": "process",
+      "command": "msbuild",
+      "args": ["/m", "/p:Configuration=Debug Full", "RTEA.sln"]
+    }
+  ]
+}

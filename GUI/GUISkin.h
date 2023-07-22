@@ -122,13 +122,14 @@ public:
     GUIFont * GetFont(const std::string &Name);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawMouse
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the mouse onto the screen.
-// Arguments:       Mouse image ID, Position.
-
-    void DrawMouse(int Image, int X, int Y);
+    /// <summary>
+    /// Draws the mouse onto the screen.
+    /// </summary>
+    /// <param name="Image">Mouse image ID.</param>
+    /// <param name="X">Horizontal position on the screen.</param>
+    /// <param name="Y">Vertical position on the screen.</param>
+	/// <param name="pScreen">The GUIScreen to draw to, overriding the one passed in on construction.</param>
+    void DrawMouse(int Image, int X, int Y, GUIScreen *guiScreenOverride = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +151,7 @@ public:
 //                  An optional target color depth that will determine what format the color
 //                  should be converted to. If this is 0, then the current video color depth
 //                  will be used as target.
-    
+
     unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
 
 

@@ -494,6 +494,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::CheckSupportedGameVersion() const {
+		if (*m_SupportedGameVersion == c_GameVersion) {
+			return;
+		}
+
 		static const std::string contactAuthor = "Please contact the mod author or ask for help in the CCCP discord server.";
 
 		RTEAssert(m_SupportedGameVersion, m_FileName + " does not specify a supported Cortex Command version, so it is not compatible with this version of Cortex Command (" + c_GameVersion.str() + ").\n\n" + contactAuthor);

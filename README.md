@@ -158,7 +158,7 @@ This repository includes launch configurations to automatically build and debug 
   - The [meson editor extension](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) 
   - Run the provided `Setup Meson` task, found via the command palette -> `Tasks: Run Task`
   - Windows:
-    - [Visual Studio (2022) C++ Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022) [`MSVC v143`], available on the system `PATH`
+    - [Visual Studio (2022) C++ Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022) (`MSVC v143`)
     - The `fmod.dll` library must be copied to the **Data Repository** (as above)
   - Linux:
     - [All the dependencies listed above](#dependencies)

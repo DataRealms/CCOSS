@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "meson Launch (Release)",
+      "name": "meson Launch",
       "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
@@ -16,14 +16,7 @@
       "preLaunchTask": "meson Build Release",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
-        "group": "meson",
-        "order": 1
-      },
-      "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.exe",
-        "presentation": {
-          "hidden": true
-        }
+        "group": "unix",
       }
     },
     {
@@ -38,19 +31,12 @@
       "preLaunchTask": "meson Build Debug (Release)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
-        "group": "meson",
-        "order": 2
-      },
-      "windows": {
-        "presentation": {
-          "hidden": true
-        },
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.release.exe"
+        "group": "unix",
       }
     },
     {
       "name": "meson Debug (Minimal)",
-      "type": "cppvsdbg",
+      "type": "cppdbg",
       "osx": {
         "MIMode": "lldb"
       },
@@ -60,14 +46,7 @@
       "preLaunchTask": "meson Build Debug (Minimal)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
-        "group": "meson",
-        "order": 3
-      },
-      "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.minimal.exe",
-        "presentation": {
-          "hidden": true
-        }
+        "group": "unix",
       }
     },
     {
@@ -82,26 +61,26 @@
       "preLaunchTask": "meson Build Debug (Full)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
-        "group": "meson",
-        "order": 4
-      },
-      "windows": {
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.full.exe",
-        "presentation": {
-          "hidden": true
-        }
+        "group": "unix",
       }
     },
+
+
+
+
+
+
+
+
     {
-      "name": "msbuild Launch (Release)",
+      "name": "msbuild Launch",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/../Cortex-Command-Community-Project-Data/Cortex Command.exe",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "msbuild (Final)",
       "presentation": {
-        "group": "msbuild",
-        "order": 1
+        "group": "windows",
       }
     },
     {
@@ -112,8 +91,7 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "msbuild (Debug Release)",
       "presentation": {
-        "group": "msbuild",
-        "order": 2
+        "group": "windows",
       }
     },
     {
@@ -124,8 +102,7 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "msbuild (Debug Minimal)",
       "presentation": {
-        "group": "msbuild",
-        "order": 3
+        "group": "windows",
       }
     },
     {
@@ -136,9 +113,60 @@
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
       "preLaunchTask": "msbuild (Debug Full)",
       "presentation": {
-        "group": "msbuild",
-        "order": 4
+        "group": "windows",
       }
-    }
+    },
+
+
+    {
+      "name": "meson Launch [Windows]",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "meson Build Release",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "windows",
+      },
+    },
+    {
+      "name": "meson Debug (Release) [Windows]",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.release.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "meson Build Debug (Release)",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "windows",
+      }
+    },
+    {
+      "name": "meson Debug (Minimal) [Windows]",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.minimal.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "meson Build Debug (Minimal)",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "windows",
+      }
+    },
+    {
+      "name": "meson Debug (Full) [Windows]",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.full.exe",
+      "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
+      "preLaunchTask": "meson Build Debug (Full)",
+      "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
+      "presentation": {
+        "group": "windows",
+      }
+    },
+
+
   ]
 }

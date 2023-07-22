@@ -13,7 +13,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
-      "preLaunchTask": "Build Release",
+      "preLaunchTask": "meson Build Release",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
         "group": "meson",
@@ -35,7 +35,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
-      "preLaunchTask": "Build Debug (Release)",
+      "preLaunchTask": "meson Build Debug (Release)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
         "group": "meson",
@@ -45,7 +45,7 @@
         "presentation": {
           "hidden": true
         },
-        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.release.exe",
+        "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/Cortex Command.debug.release.exe"
       }
     },
     {
@@ -57,7 +57,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
-      "preLaunchTask": "Build Debug (Minimal)",
+      "preLaunchTask": "meson Build Debug (Minimal)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
         "group": "meson",
@@ -79,7 +79,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/CortexCommand_debug",
       "cwd": "${workspaceFolder}/../Cortex-Command-Community-Project-Data",
-      "preLaunchTask": "Build Debug (Full)",
+      "preLaunchTask": "meson Build Debug (Full)",
       "envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/meson-vscode.env",
       "presentation": {
         "group": "meson",

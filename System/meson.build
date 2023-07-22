@@ -1,6 +1,9 @@
 sources += files(
 'MicroPather/micropather.cpp',
 #'glad/gl.c',
+'Semver200/Semver200_comparator.cpp',
+'Semver200/Semver200_modifier.cpp',
+'Semver200/Semver200_parser.cpp',
 'StandardIncludes.cpp',
 'Atom.cpp',
 'ContentFile.cpp',

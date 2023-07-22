@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Unofficial modules (mods) now use [Semantic Versioning](https://semver.org/) to check which version of the game they target.  
+	As such, the `Index.ini` property `SupportedGameVersion` must now be a valid semantic version number. The game version has also been updated to match this standard.  
+
+	The `SupportedGameVersion` version number must be of the form `X.Y.z`, where:  
+
+	`X` matches the major version of the game,  
+	`Y` is the minimum minor version of the game the mod requires,  
+	`z` is the patch number, which is currently not enforced.  
+
+  Mods published for any development builds must match that development version exactly.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>

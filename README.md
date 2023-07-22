@@ -144,21 +144,30 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ***
 ## Debugging with VS Code
 
-This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/) on any of the supported platforms.
+This repository includes launch configurations to automatically build and debug the game using [VS Code](https://code.visualstudio.com/) on any of the supported platforms using one of the two supported build systems.
 
-#### Requirements
-- [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack) extension (all platforms)
-- **Windows**
-  - [msbuild command line tools](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2022) (installed either via Visual Studio or manually)
+### Requirements
+- [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack) extension (all platforms) 
 
-- **Linux & macOS**
-  - [All the dependencies listed above](#dependencies)
-  - The [Meson](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) editor extension
-  - The [`lldb`](https://lldb.llvm.org/) debugger *(macOS only*)
+#### msbuild *(Windows only)*
+  - [msbuild command line tools](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2022) (available [here](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022)), available on system `PATH`
+  - The `fmod.dll` library must be copied to the **Data Repository** (as above)
+  
+#### meson *(All platforms)*
+  - meson, [as above](#dependencies), available on the system `PATH`
+  - The [meson editor extension](https://marketplace.visualstudio.com/items?itemName=mesonbuild.mesonbuild) 
+  - Run the provided `Setup Meson` task, found via the command palette -> `Tasks: Run Task`
+  - Windows:
+    - [Visual Studio (2022) C++ Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022) [`MSVC v143`], available on the system `PATH`
+    - The `fmod.dll` library must be copied to the **Data Repository** (as above)
+  - Linux:
+    - [All the dependencies listed above](#dependencies)
+  - macOS:
+    - [All the dependencies listed above](#dependencies)
+    - The [`lldb`](https://lldb.llvm.org/) debugger 
 
-These launch configurations are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options).
 
-Note that Windows / Unix & macOS users should use the launch configurations in the `msbuild` and `meson` groups respectively. 
+These launch configurations are accessible via the [Run and Debug](https://code.visualstudio.com/docs/editor/debugging#_run-and-debug-view) view, and provide profiles to build and run the game in Release mode or any of the [3 Debug modes](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options). 
 
 All configurations will run pre-launch tasks to build the game using the supported backend before launching.
 

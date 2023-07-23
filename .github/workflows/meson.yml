@@ -163,7 +163,7 @@ jobs:
       
       - name: Setup Meson
         run: |
-          meson setup --vsenv --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build --vsenv 
 
       - name: Build
         run: |

@@ -6,7 +6,7 @@ lib_include_dir = include_directories('include')
 
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
-if host_machine.cpu_family() = 'x86_64'
+if host_machine.cpu_family() == 'x86_64'
 	lib = cc.find_library(libname, dirs:  meson.current_source_dir()/'_Bin', required: False)
 	if not lib.found()
 		lib = cxx.find_library(libname, dirs:  meson.current_source_dir()/'_Bin')

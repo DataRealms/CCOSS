@@ -2,9 +2,11 @@ project('libpng', ['c', 'cpp'])
 
 
 libname = 'png16-static' #filename without extension or lib prefix
+lib_include_dir = include_directories('include')
+
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
-if host_machine.arch() = 'x86_64'
+if host_machine.cpu_family() == 'x86_64'
 	lib = cc.find_library(libname, dirs:  meson.current_source_dir()/'_Bin', required: False)
 	if not lib.found()
 		lib = cxx.find_library(libname, dirs:  meson.current_source_dir()/'_Bin')
@@ -16,6 +18,6 @@ else
 	endif
 endif
 
-lib_dep = declare_dependency(link_with: lib)
+lib_dep = declare_dependency(link_with: lib, include_directories: lib_include_dir)
 
 meson.override_dependency(meson.project_name(), lib_dep)

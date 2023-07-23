@@ -1,0 +1,27 @@
+
+name: Master Build
+
+on:
+  # Triggers the workflow for pushes to master
+  push:
+    branches: [master]
+
+  workflow_dispatch:
+
+# Cancel in-progress runs if newer changes to the same branch/PR are pushed.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Build the game on all platforms and store build artefacts of both jobs
+jobs:
+  meson:
+    uses: ./.github/workflows/meson.yml
+    with: 
+        upload_artefacts: true
+
+  msbuild:
+    uses: ./.github/workflows/msbuild.yml
+    with:
+        upload_artefacts: true
+

@@ -821,7 +821,7 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 	/// Gets whether this HDFirearm is ready to be fired.
 	/// </summary>
 	/// <returns>Whether this HDFirearm is ready to pop another Round.</returns>
-	bool CanFire() const { return m_ActivationTimer.IsPastSimMS(GetMSPerRound()); }
+	bool CanFire() const { return m_LastFireTmr.IsPastSimMS(GetMSPerRound()); }
 
 	/// <summary>
 	/// Gets whether this HDFirearm is halfway to be fired. Used for evenly spacing out dual-wielded fire.

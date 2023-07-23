@@ -167,9 +167,13 @@ namespace RTE {
 			switch (sdlEvent.type) {
 				case SDL_QUIT:
 					System::SetQuit(true);
-					break;
+					return;
 				case SDL_WINDOWEVENT:
-					g_WindowMan.HandleWindowEvent(sdlEvent);
+					if (sdlEvent.window.event == SDL_WINDOWEVENT_CLOSE) {
+						System::SetQuit(true);
+						return;
+					}
+					g_WindowMan.QueueWindowEvent(sdlEvent);
 					break;
 				case SDL_KEYUP:
 				case SDL_KEYDOWN:

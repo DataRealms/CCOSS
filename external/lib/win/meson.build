@@ -20,4 +20,4 @@ message('using x86 libs')
     lz4 = declare_dependency(dependencies: compiler.find_library('lz4_debug_static', dirs: meson.current_source_dir()/'x86'))
   endif
 endif
-deps += [fmod, lz4, libpng, zlib]
+deps += [fmod, lz4]

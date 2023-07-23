@@ -2,7 +2,7 @@ project('minizip', ['c', 'cpp'])
 
 
 libname = 'minizip' #filename without extension or lib prefix
-lib_include_dir = include_directories('include')
+lib_include_dir = include_directories('include', 'src')
 
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')

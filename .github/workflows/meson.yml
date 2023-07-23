@@ -145,3 +145,36 @@ jobs:
             build/CortexCommand
             build/CortexCommand_debug
           if-no-files-found: error
+
+  build-windows:
+    runs-on: windows
+    name: Windows Build
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+
+      - name: Install meson
+        run: |
+          pip install meson==${{env.MESON_VERSION}}
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+      
+      - name: Setup Meson
+        run: |
+          meson setup --vsenv --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
+
+      - name: Build
+        run: |
+          meson compile -C build
+
+      # - name: Artifact Deploy
+      #   if: ${{inputs.upload_artefacts}}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: CortexCommand (macOS)
+      #     path: |
+      #       build/CortexCommand
+      #       build/CortexCommand_debug
+      #     if-no-files-found: error

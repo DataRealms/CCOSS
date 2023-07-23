@@ -147,7 +147,7 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    runs-on: windows
+    runs-on: windows-latest
     name: Windows Build
 
     steps:

@@ -150,8 +150,8 @@ namespace RTE {
 
 		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini";
 
-		if (!System::PathExistsCaseSensitive(saveFilePath)) {
-			RTEError::ShowMessageBox("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
+		if (!std::filesystem::exists(saveFilePath)) {
+			RTEError::ShowMessageBox("Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
 			return false;
 		}
 

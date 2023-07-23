@@ -479,6 +479,9 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
     if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
     BITMAP *pTMatBitmap = m_pCurrentScene->GetTerrain()->GetMaterialBitmap();
+	if (pTMatBitmap == nullptr) {
+		return g_MaterialAir;
+	}
 
     // If it's still below or to the sides out of bounds after
     // what is supposed to be wrapped, shit is out of bounds.

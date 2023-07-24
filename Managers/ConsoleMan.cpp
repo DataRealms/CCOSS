@@ -239,7 +239,7 @@ namespace RTE {
 			"F9 - Load latest quick-save\n"
 			"CTRL + F9 - Load latest auto-save\n"
 			"F10 - Clear Console log\n"
-			"F12 - Make a single screenshot\n"
+			"F12 - Make a single screenshot"
 		);
 	}
 

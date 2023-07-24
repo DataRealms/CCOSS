@@ -33,7 +33,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a PauseMenuGUI object in system memory and makes it ready for use.
+		/// Constructor method used to instantiate a PauseMenuGUI object in system memory and make it ready for use.
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this PauseMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this PauseMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
@@ -67,9 +67,9 @@ namespace RTE {
 		void StoreFrameForUseAsBackdrop();
 
 		/// <summary>
-		/// Updates the MainMenuGUI state.
+		/// Updates the PauseMenuGUI state.
 		/// </summary>
-		/// <returns>The result of the MainMenuGUI input and event update. See MainMenuUpdateResult enumeration.</returns>
+		/// <returns>The result of the PauseMenuGUI input and event update. See PauseMenuUpdateResult enumeration.</returns>
 		PauseMenuUpdateResult Update();
 
 		/// <summary>

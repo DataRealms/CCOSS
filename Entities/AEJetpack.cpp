@@ -11,12 +11,13 @@ namespace RTE {
 
 	void AEJetpack::Clear() {
 		m_JetpackType = JetpackType::Standard;
-		m_JetTimeTotal = 0.0;
-        m_JetTimeLeft = 0.0;
+		m_JetTimeTotal = 0.0F;
+        m_JetTimeLeft = 0.0F;
+		m_JetThrustBonusMultiplier = 1.0F;
         m_JetReplenishRate = 1.0F;
         m_JetAngleRange = 0.25F;
 		m_CanAdjustAngleWhileFiring = true;
-		m_AdjustThrottleForWeight = true;
+		m_AdjustsThrottleForWeight = true;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +46,7 @@ namespace RTE {
         m_JetReplenishRate = reference.m_JetReplenishRate;
         m_JetAngleRange = reference.m_JetAngleRange;
 		m_CanAdjustAngleWhileFiring = reference.m_CanAdjustAngleWhileFiring;
-		m_AdjustThrottleForWeight = reference.m_AdjustThrottleForWeight;
+		m_AdjustsThrottleForWeight = reference.m_AdjustsThrottleForWeight;
 
 		return 0;
     }
@@ -72,8 +73,8 @@ namespace RTE {
             reader >> m_JetAngleRange; 
         } else if (propName == "CanAdjustAngleWhileFiring") {
             reader >> m_CanAdjustAngleWhileFiring; 
-		} else if (propName == "AdjustThrottleForWeight") {
-            reader >> m_AdjustThrottleForWeight; 
+		} else if (propName == "AdjustsThrottleForWeight") {
+            reader >> m_AdjustsThrottleForWeight; 
         } else {
 			return AEmitter::ReadProperty(propName, reader);
 		}
@@ -100,7 +101,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("JumpReplenishRate", m_JetReplenishRate);
 		writer.NewPropertyWithValue("JumpAngleRange", m_JetAngleRange);
 		writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", m_CanAdjustAngleWhileFiring);
-		writer.NewPropertyWithValue("AdjustThrottleForWeight", m_AdjustThrottleForWeight);
+		writer.NewPropertyWithValue("AdjustsThrottleForWeight", m_AdjustsThrottleForWeight);
 
 		return 0;
 	}
@@ -116,7 +117,7 @@ namespace RTE {
 		}
 
 		float fuelUseMultiplier = 1.0F;
-		if (m_AdjustThrottleForWeight) {
+		if (m_AdjustsThrottleForWeight) {
 			// Adjust force based on weight, so we have greater thrust with a heavier inventory (but spend fuel faster)
 			float thrustAdjustment = parentActor.GetMass() / parentActor.GetBaseMass();
 			float adjustedThrottle = GetScaledThrottle(0.0F, thrustAdjustment);

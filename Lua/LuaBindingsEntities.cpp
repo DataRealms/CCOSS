@@ -413,7 +413,8 @@ namespace RTE {
 		.def("EstimateImpulse", &AEmitter::EstimateImpulse)
 		.def("TriggerBurst", &AEmitter::TriggerBurst)
 		.def("IsSetToBurst", &AEmitter::IsSetToBurst)
-		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst);
+		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
+		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,6 +428,7 @@ namespace RTE {
 		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
 		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange)
 		.property("CanAdjustAngleWhileFiring", &AEJetpack::GetCanAdjustAngleWhileFiring, &AEJetpack::SetCanAdjustAngleWhileFiring)
+		.property("AdjustsThrottleForWeight", &AEJetpack::GetAdjustsThrottleForWeight, &AEJetpack::SetAdjustsThrottleForWeight)
 
 		.enum_("JetpackType")[
 			luabind::value("Standard", AEJetpack::Standard),

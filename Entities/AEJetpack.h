@@ -151,16 +151,29 @@ namespace RTE
         /// <param name="newValue">The new value for whether the angle of this jetpack can adjust while firing.</param>
         void SetCanAdjustAngleWhileFiring(bool newValue) { m_CanAdjustAngleWhileFiring = newValue; }
 
+        /// <summary>
+        /// Returns whether this jetpack adjusts it's throttle to balance for extra weight.
+        /// </summary>
+        /// <returns>Whether this jetpack adjusts it's throttle to balance for extra weight.</returns>
+        bool GetAdjustsThrottleForWeight() const { return m_AdjustsThrottleForWeight; }
+
+        /// <summary>
+        /// Sets whether this jetpack adjusts it's throttle to balance for extra weight.
+        /// </summary>
+        /// <param name="newValue">The new value for whether this jetpack adjusts it's throttle to balance for extra weight.</param>
+        void SetAdjustsThrottleForWeight(bool newValue) { m_AdjustsThrottleForWeight = newValue; }
+
     protected:
         static Entity::ClassInfo m_sClass;
 
         JetpackType m_JetpackType; //!< The type of jetpack
         float m_JetTimeTotal; //!< The max total time, in ms, that the jetpack can be used without pause
         float m_JetTimeLeft; //!< How much time left the jetpack can go, in ms
+        float m_JetThrustBonusMultiplier; //!< A multiplier bonus to our produced thrust, which doesn't cost extra fuel. Used for AI buffs.
         float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
         bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
-        bool m_AdjustThrottleForWeight; //!< Whether or not the jetpack throttle auto-adjusts for weight, at the cost of fuel usage.
+        bool m_AdjustsThrottleForWeight; //!< Whether or not the jetpack throttle auto-adjusts for weight, at the cost of fuel usage.
 
     private:
         /// <summary>

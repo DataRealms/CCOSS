@@ -192,9 +192,9 @@ namespace RTE {
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!
 
-		float fuelUsage = g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(GetTotalBurstSize(), 2)) * (CanTriggerBurst() ? 1.0F : 0.5F); // burst fuel
-		fuelUsage += g_TimerMan.GetDeltaTimeMS() * fuelUseMultiplier; // emit fuel (adjusted by throttle, whereas bursts are not throttle-adjusted)
-		m_JetTimeLeft -= fuelUsage * fuelUseMultiplier;
+		float fuelUsage = g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(GetTotalBurstSize(), 2)) * (CanTriggerBurst() ? 1.0F : 0.5F) * fuelUseMultiplier; // burst fuel
+		fuelUsage += g_TimerMan.GetDeltaTimeMS() * fuelUseMultiplier; // emit fuel
+		m_JetTimeLeft -= fuelUsage;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

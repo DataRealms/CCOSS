@@ -134,7 +134,7 @@ void Actor::Clear() {
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
-    m_BaseMass = 0.0F;
+    m_BaseMass = std::numeric_limits<float>::infinity();
 
     m_DamageMultiplier = 1.0F;
 
@@ -531,6 +531,20 @@ float Actor::GetInventoryMass() const {
         inventoryMass += inventoryItem->GetMass();
     }
     return inventoryMass;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Actor::GetBaseMass() {
+    if (m_BaseMass == std::numeric_limits<float>::infinity()) {
+        if (const Actor* presetActor = static_cast<const Actor*>(GetPreset())) {
+            m_BaseMass = presetActor->GetMass();
+        } else {
+            m_BaseMass = GetMass();
+        }
+    }
+
+    return m_BaseMass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

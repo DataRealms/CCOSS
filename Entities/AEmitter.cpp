@@ -505,7 +505,7 @@ void AEmitter::Update()
 				float scale = 1.0F;
                 // Add extra emissions if bursting.
 				if (m_BurstTriggered) {
-					emissionCount += (*eItr)->GetBurstSize() * throttleFactor;
+					emissionCount += (*eItr)->GetBurstSize() * std::floor(throttleFactor);
 					scale = m_BurstScale;
 				}
 				emissionCountTotal += emissionCount;

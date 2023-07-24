@@ -173,7 +173,7 @@ ClassInfoGetters;
     /// Gets the mass that this actor had upon spawning, i.e with ini-defined inventory, gold and holding no items
     /// </summary>
     /// <returns>The base mass of this Actor, in Kilograms (kg).</returns>
-    float GetBaseMass() const { return m_BaseMass; }
+    float GetBaseMass();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

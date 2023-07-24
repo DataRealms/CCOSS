@@ -376,10 +376,12 @@ int AEmitter::GetTotalBurstSize() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
-    // Convert throttle from range { -1.0 (min force) -> 1.0 (max force) } to { 0.0 (zero force) to 1.0 (max force) }, and then multiply
-    // TODO - this needs fixing for situation where negative/positive multipliers are differently scaled. Gets tricky when crossing the zero point.
-    float linearThrottle = LERP(-1.0F, 1.0F, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, throttle);
-    return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0F, 1.0F, linearThrottle * multiplier);
+    // TODO - this doesn't work perfectly and gives a very slightly different result than it should. Figure out the fuckiness here
+    float throttleFactor = 1.0F - std::abs(throttle) + (throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(throttle);
+    throttleFactor *= multiplier;
+    throttleFactor -= 1.0F;
+    float divisor = throttleFactor < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier;
+    return throttleFactor / divisor;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

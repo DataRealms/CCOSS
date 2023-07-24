@@ -1008,20 +1008,6 @@ void MovableObject::PostTravel()
 	m_DistanceTravelled += m_Vel.GetMagnitude() * c_PPM * g_TimerMan.GetDeltaTimeSecs();
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure v. method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame. This also
-//                  applies and clear the accumulated impulse forces (impulses), and the
-//                  transferred forces of MOs attached to this.
-
-void MovableObject::Update()
-{
-    return;
-}
-*/
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Update() {
@@ -1060,6 +1046,15 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 
 	if (status >= 0) {
 		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, { }, { }, scriptsToRun);
+
+        // Perform our synced updates to let multithreaded scripts do anything that interacts with stuff in a non-const way
+        // In a single-threaded script, this is identical to Update()
+        // TODO - in future, enforce that everything in Update() is const, so non-const actions must be performed in SyncedUpdate
+        // This would require a bunch of Lua binding fuckery, but eventually maybe it'd be possible.
+        // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
+        if (status >= 0 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, { }, { }, scriptsToRun);
+        }
 	}
 
 	return status;

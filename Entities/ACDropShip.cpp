@@ -516,7 +516,7 @@ void ACDropShip::Update()
 
 			m_pRThruster->EnableEmission(m_Status == STABLE);
 			m_pRThruster->SetThrottle(rightThrottle);
-			m_pRThruster->SetFlashScale((rightThrottle + 1.5f) / 2.0f);
+			m_pRThruster->SetFlashScale((m_pRThruster->GetThrottle() + 1.5f) / 2.0f);
 			// Engines are noisy! Make AI aware of them
 			m_pRThruster->AlarmOnEmit(m_Team);
 		}
@@ -540,7 +540,7 @@ void ACDropShip::Update()
 
 			m_pLThruster->EnableEmission(m_Status == STABLE);
 			m_pLThruster->SetThrottle(leftThrottle);
-			m_pLThruster->SetFlashScale((leftThrottle + 1.5f) / 2.0F);
+			m_pLThruster->SetFlashScale((m_pLThruster->GetThrottle() + 1.5f) / 2.0F);
 			// Engines are noisy! Make AI aware of them
 			m_pLThruster->AlarmOnEmit(m_Team);
 		}

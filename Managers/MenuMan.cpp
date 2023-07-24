@@ -122,7 +122,7 @@ namespace RTE {
 					// If we're in the editors or in online multiplayer then return to main menu instead of scenario menu.
 					m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 				} else {
-					if (g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
+					if (activity->IsOver() || g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
 						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
 					} else {
 						m_PauseMenu->StoreFrameForUseAsBackdrop();

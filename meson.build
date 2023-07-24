@@ -1,11 +1,11 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'b_lto=true'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'b_lto=true', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
 deps=[]
 if host_machine.system() in ['linux','darwin']
   deps = [
-    dependency('sdl2'),
+    dependency(['sdl2']),
     dependency('flac'),
     dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
@@ -15,6 +15,18 @@ if host_machine.system() in ['linux','darwin']
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
     dependency('tbb'),
   ]
+elif host_machine.system() == 'windows'
+  sdl2 = subproject('SDL2-2.26.3')
+  sdl2_dep = dependency('sdl2')
+  luajit = subproject('LuaJIT-2.1')
+  luajit_dep = dependency('luajit')
+  zlib = subproject('zlib-ng-2.1.3')
+  zlib_dep = dependency('zlib')
+  minizip = subproject('minizip-ng-4.0.0')
+  minizip_dep = dependency('minizip')
+  libpng = subproject('libpng-1.6.40')
+  libpng_dep = dependency('libpng')
+  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep]
 endif
 
 elfname = 'CortexCommand'
@@ -23,6 +35,7 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
+override_options = []
 suffix=''
 
 if compiler.get_id() == 'clang'
@@ -53,9 +66,6 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
     if get_option('sane_warnings')
       extra_args += ['-Wno-sign-compare', '-Wno-non-virtual-dtor', '-Wno-parentheses', '-Wno-overloaded-virtual', '-Wno-unused-variable', '-Wno-unused-function']
-      if compiler.get_id() == 'clang'
-        extra_args += ['-Wno-inconsistent-missing-override', '-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR']
-      endif
     endif
 
     debug_type = get_option('debug_type')
@@ -75,12 +85,12 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   endif
 elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
-message('cl detected')
+  message('cl detected')
   elfname = 'Cortex Command'
-  extra_args += ['-permissive-', '-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
+  extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1', '-bigobj']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
-  if host_machine.cpu_family() == 'x64'
-    elfname += ' x64'
+  if host_machine.cpu_family() == 'x86'
+    elfname += ' x86'
   endif
   preprocessor_flags += ['-D_CRT_SECURE_NO_DEPRECATE', '-D_WINDOWS', '-DWIN32', '-DWIN32_LEAN_AND_MEAN']
   link_args+=['-ignore:4099', '-ignore:4217']
@@ -89,6 +99,7 @@ message('cl detected')
     elfname+='.debug'
     debug_type = get_option('debug_type')
     if debug_type == 'release'
+      elfname+='.release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
       elfname += '.minimal'
@@ -123,10 +134,29 @@ else
   conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
+#### Platform Common External Libraries ####
+external_objects = []
+external_libs = []
+subdir('external')
+
+boost_dep = declare_dependency(include_directories: include_directories('external/include/common/boost_1_75'))
+meson.override_dependency('boost-175', boost_dep)
+install_rpath = prefix/get_option('fmod_dir')
+allegro_proj = subproject('allegro 4.4.3.1-custom')
+allegro_dep = dependency('allegro')
+loadpng_dep = dependency('loadpng')
+luabind_proj = subproject('luabind-0.7.1')
+luabind_dep = dependency('luabind')
+raknet_proj = subproject('RakNet')
+raknet_dep = dependency('RakNet')
+deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep]
+
 #### Sources Setup ####
-pch = 'System/StandardIncludes.h'
+pch = meson.current_source_dir()/'System/StandardIncludes.h'
 sources = []
+source_libs = []
 source_inc_dirs = include_directories(
+  '.',
   'Activities',
   'Entities',
   'GUI',
@@ -146,32 +176,16 @@ subdir('Menus')
 subdir('System')
 subdir('Resources')
 
-#### External Libraries ####
-external_objects = []
-external_libs = []
-subdir('external')
-
-boost_dep = declare_dependency(include_directories: include_directories('external/include/common/boost_1_75'))
-meson.override_dependency('boost-175', boost_dep)
-install_rpath = prefix/get_option('fmod_dir')
-allegro_proj = subproject('allegro 4.4.3.1-custom')
-allegro_dep = dependency('allegro')
-loadpng_dep = dependency('loadpng')
-luabind_proj = subproject('luabind-0.7.1')
-luabind_dep = dependency('luabind')
-raknet_proj = subproject('RakNet')
-raknet_dep = dependency('RakNet')
-deps += [allegro_dep, loadpng_dep, luabind_dep, raknet_dep]
 
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
+  link_with:[external_libs, source_libs], objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir'),
-  win_subsystem:'windows' # Windows mark as GUI app
+  win_subsystem:'windows', # Windows mark as GUI app
 )
 
 if get_option('debug') and get_option('b_lto')

@@ -6,3 +6,4 @@ option('fmod_dir', type:'string', value:'lib/CortexCommand/', description: 'Wher
 option('install_data', type: 'boolean', value: true, description: 'Whether to install the data repo.')
 option('install_runner', type: 'boolean', value: true, description: 'Whether to install the runner script.')
 option('sane_warnings', type: 'boolean', value: false, description: 'Disable certain warnings, that are reasonably safe to ignore, though we should fix them at some point.')
+option('use_prebuilt_libraries', type: 'boolean', value: true, description: 'On windows use the prebuilt libraries')

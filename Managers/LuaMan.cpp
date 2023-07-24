@@ -60,6 +60,7 @@ namespace RTE {
 				.def("NormalRand", &LuaStateWrapper::NormalRand)
 				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
 				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
+				.def("FileExists", &LuaMan::FileExists)
 				.def("FileOpen", &LuaMan::FileOpen)
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
@@ -794,6 +795,17 @@ namespace RTE {
 			if (directoryEntry.is_regular_file()) { filePaths.emplace_back(directoryEntry.path().filename().generic_string()); }
 		}
 		return filePaths;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool LuaMan::FileExists(const std::string &fileName) {
+		std::string fullPath = System::GetWorkingDirectory() + g_PresetMan.GetFullModulePath(fileName);
+		if ((fullPath.find("..") == std::string::npos) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
+			return std::filesystem::exists(fullPath);
+		}
+
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

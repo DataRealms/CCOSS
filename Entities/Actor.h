@@ -603,16 +603,6 @@ ClassInfoGetters;
     /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
     virtual bool HandlePieCommand(PieSlice::SliceType pieSliceType) { return false; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the AI states for this.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetAI() { m_AIMode; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAIMode
@@ -1147,18 +1137,7 @@ ClassInfoGetters;
 // Return value:    Whether there was an AI Update function defined for this in its script,
 //                  and if it was executed successfully.
 
-	bool UpdateAIScripted();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void UpdateAI();
+	bool UpdateAIScripted(ThreadScriptsToRun scriptsToRun);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1614,25 +1593,6 @@ protected:
     bool m_UpdateMovePath;
     // The minimum range to consider having reached a move target is considered
     float m_MoveProximityLimit;
-    // Whether the AI is trying to progress to the right, left, or stand still
-    LateralMoveState m_LateralMoveState;
-    // Timer for how long to keep going before switching directions when moving along a path
-    Timer m_MoveOvershootTimer;
-    // Whether the AI is in the process of proceeding, backstepping to get out of being stuck, or jumping over stuff
-    ObstacleState m_ObstacleState;
-    // Teammate is in the way of whatever we are doing; stop until he moves
-    TeamBlockState m_TeamBlockState;
-    // Times how long after an obstruction is cleared to start proceeding again
-    Timer m_BlockTimer;
-    // The closest the actor has ever come to the current waypoint it's going for, squared. Used to checking if we shuold re-update the movepath
-    // It's useful for when the path seems to be broken or unreachable
-    float m_BestTargetProximitySqr;
-    // Timer used to check on larger movement progress toward the goal
-    Timer m_ProgressTimer;
-    // Timer used to time how long we've been stuck in the same spot.
-    Timer m_StuckTimer;
-    // Timer for measuring interval between height checks
-    Timer m_FallTimer;
 
 	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
 	bool m_Mechanical; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.

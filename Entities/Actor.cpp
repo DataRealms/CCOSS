@@ -127,15 +127,6 @@ void Actor::Clear() {
     m_MovePath.clear();
     m_UpdateMovePath = true;
     m_MoveProximityLimit = 100.0F;
-    m_LateralMoveState = LAT_STILL;
-    m_MoveOvershootTimer.Reset();
-    m_ObstacleState = PROCEEDING;
-    m_TeamBlockState = NOTBLOCKED;
-    m_BlockTimer.Reset();
-    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
-    m_ProgressTimer.Reset();
-    m_StuckTimer.Reset();
-    m_FallTimer.Reset();
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
 
     m_DamageMultiplier = 1.0F;
@@ -293,9 +284,6 @@ int Actor::Create(const Actor &reference)
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
-    m_LateralMoveState = reference.m_LateralMoveState;
-    m_ObstacleState = reference.m_ObstacleState;
-    m_TeamBlockState = reference.m_TeamBlockState;
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
@@ -646,10 +634,6 @@ void Actor::SetControllerMode(Controller::InputMode newMode, int newPlayer)
     m_Controller.SetPlayer(newPlayer);
 
 	RunScriptedFunctionInAppropriateScripts("OnControllerInputModeChange", false, false, {}, {std::to_string(previousControllerMode), std::to_string(previousControllingPlayer) });
-
-
-    // So the AI doesn't jerk around
-    m_StuckTimer.Reset();
 
     m_NewControlTmr.Reset();
 }
@@ -1276,87 +1260,12 @@ float Actor::EstimateDigStrength() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Actor::UpdateAIScripted() {
+bool Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
     if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.at("UpdateAI").empty()) {
         return false;
     }
 
-	int status = 0;
-	if (!ObjectScriptsInitialized()) {
-		status = InitializeObjectScripts();
-	}
-	if (status >= 0) {
-		status = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true);
-	}
-
-    return status >= 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
-
-void Actor::UpdateAI()
-{
-    if (m_AIMode == AIMODE_GOTO)
-    {
-        // Update the current MoveTarget with the position of the valid MO we're pursuing, if any
-        if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        {
-            if (!m_MovePath.empty())
-                *(m_MovePath.rbegin()) = m_pMOMoveTarget->GetPos();
-            m_MoveTarget = m_pMOMoveTarget->GetPos();
-            m_MoveVector = g_SceneMan.ShortestDistance(m_Pos, m_MoveTarget);
-        }
-        else
-        {
-            // This guy we were following just vanished, so start going to the next waypoint, if any
-            if (m_pMOMoveTarget)
-            {
-                m_MovePath.clear();
-                m_pMOMoveTarget = 0;
-
-            // We're out of waypoints after last MO we were following died, so stop going anywhere
-// Nevermind, this is actually desirable
-//            if (m_Waypoints.empty())
-//            {
-//                m_MoveTarget = m_PrevPathTarget = m_Pos;
-//                m_AIMode = AIMODE_SENTRY;
-//            }
-//            else
-                UpdateMovePath();
-            }
-            m_pMOMoveTarget = 0;
-        }
-
-        // Weedle out any MO's we have waypoints to that aren't valid anymore
-        std::list<std::pair<Vector, const MovableObject *> >::iterator eraseItr;
-        for (auto itr = m_Waypoints.begin(); itr != m_Waypoints.end();)
-        {
-            // Check to see that an MO we're going after still exists
-            if ((*itr).second && !g_MovableMan.ValidMO((*itr).second))
-            {
-                // NOT VALID MO anymore, so remove the waypoint
-                // Need to do this swicheroo se we don't invalidate the iterating itr
-                eraseItr = itr;
-                ++itr;
-                // Now it's safe to erase this, will not invalidate itr, sicne it has moved on immediately above
-                m_Waypoints.erase(eraseItr);
-            }
-            // It is 0 or still exists, so update the corresponding waypoint to its location
-            else
-            {
-                // Update the waypoint position to be the position of the MO it is bound to
-                if ((*itr).second)
-                    (*itr).first = (*itr).second->GetPos();
-                // Manually iterate the itr, because we're doing erasing switcheroo above
-                ++itr;
-            }
-        }
-    }
+    return RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun) >= 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1394,13 +1303,6 @@ void Actor::OnNewMovePath() {
         // Nowhere to gooooo
         m_MoveTarget = m_PrevPathTarget = m_Pos;
     }
-
-    m_StuckTimer.Reset();
-    m_ProgressTimer.Reset();
-    m_BestTargetProximitySqr = std::numeric_limits<float>::infinity();
-
-    // Don't let the guy walk in the wrong dir for a while if path requires him to start walking in opposite dir from where he's facing
-    m_MoveOvershootTimer.SetElapsedSimTimeMS(1000);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1426,22 +1328,9 @@ void Actor::Update()
     // Update the viewpoint to be at least what the position is
     m_ViewPoint = m_Pos;
 
-    // Update the best progress made, if we're any closer to the currently pursued waypoint
-    float sqrTargetProximity = ((!m_MovePath.empty() ? m_MovePath.back() : m_MoveTarget) - m_Pos).GetSqrMagnitude();
-    // Reset the timer if we've made progress as the crow flies
-    if (sqrTargetProximity < m_BestTargetProximitySqr)
-    {
-        m_BestTargetProximitySqr = sqrTargetProximity;
-        m_ProgressTimer.Reset();
-    }
-
     // "See" the location and surroundings of this actor on the unseen map
     if (m_Status != Actor::INACTIVE)
         Look(45 * m_Perceptiveness, g_FrameMan.GetPlayerScreenWidth() * 0.51 * m_Perceptiveness);
-
-    // Kill certain actors who haven't made any progress toward a goal in very long
-//    if (m_Controller.GetInputMode() == Controller::CIM_AI && !m_MovePath.empty() && m_PinStrength <= 0 && m_ObstacleState == PROCEEDING && m_ProgressTimer.IsPastSimMS(10000))
-//        GibThis();
 
 	//Check if the MO we're following still exists, and if not, then clear the destination
     if (m_pMOMoveTarget && !g_MovableMan.ValidMO(m_pMOMoveTarget))
@@ -1845,38 +1734,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 */
         }
     }
-
-    // AI mode state debugging
-#ifdef DEBUG_BUILD
-    AllegroBitmap bitmapInt(pTargetBitmap);
-
-    // Obstacle state
-    if (m_ObstacleState == PROCEEDING)
-        std::snprintf(str, sizeof(str), "PROCEEDING");
-    else if (m_ObstacleState == BACKSTEPPING)
-        std::snprintf(str, sizeof(str), "BACKSTEPPING");
-    else if (m_ObstacleState == JUMPING)
-        std::snprintf(str, sizeof(str), "JUMPING");
-    else if (m_ObstacleState == SOFTLANDING)
-        std::snprintf(str, sizeof(str), "SOFTLANDING");
-    else
-        std::snprintf(str, sizeof(str), "DIGPAUSING");
-    pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Team Block State
-    if (m_TeamBlockState == BLOCKED)
-        std::snprintf(str, sizeof(str), "BLOCKED");
-    else if (m_TeamBlockState == IGNORINGBLOCK)
-        std::snprintf(str, sizeof(str), "IGNORINGBLOCK");
-    else if (m_TeamBlockState == FOLLOWWAIT)
-        std::snprintf(str, sizeof(str), "FOLLOWWAIT");
-    else
-        std::snprintf(str, sizeof(str), "NOTBLOCKED");
-    pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-#endif
 
     // Don't proceed to draw all the secret stuff below if this screen is for a player on the other team!
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)

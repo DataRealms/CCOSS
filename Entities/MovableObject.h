@@ -215,15 +215,6 @@ enum MOType
     void EnableOrDisableAllScripts(bool enableScripts);
 
     /// <summary>
-    /// Enum of thread script types to run.
-    /// </summary>
-    enum class ThreadScriptsToRun {
-        SingleThreaded,
-        MultiThreaded,
-        Both
-    };
-
-    /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
     /// The first argument to the function will always be 'self'. If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
@@ -1529,7 +1520,7 @@ enum MOType
 	/// </summary>
     /// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int UpdateScripts(MovableObject::ThreadScriptsToRun scriptsToRun);
+	virtual int UpdateScripts(ThreadScriptsToRun scriptsToRun);
 
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.

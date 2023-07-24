@@ -349,7 +349,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Attachable::UpdateScripts(MovableObject::ThreadScriptsToRun scriptsToRun) {
+	int Attachable::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 		if (m_Parent && !m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
 			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, scriptsToRun);
 		}

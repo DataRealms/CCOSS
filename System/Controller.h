@@ -316,6 +316,12 @@ namespace RTE {
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
+		/// <param name="scriptsToRun">Whether to update single-threaded, multi-threaded, or both types of AI scripts.</param>
+		void UpdateAI(ThreadScriptsToRun scriptsToRun);
+
+		/// <summary>
+		/// Updates this Controller. Supposed to be done every frame.
+		/// </summary>
 		void Update();
 #pragma endregion
 
@@ -398,10 +404,7 @@ namespace RTE {
 		/// </summary>
 		void GetInputFromPlayer();
 
-		/// <summary>
-		/// Requests and applies input from the AI.
-		/// </summary>
-		void GetInputFromAI();
+		bool ShouldUpdateAIThisFrame() const;
 #pragma endregion
 
 		/// <summary>

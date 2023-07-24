@@ -457,7 +457,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int UpdateScripts(MovableObject::ThreadScriptsToRun scriptsToRun) override;
+		int UpdateScripts(ThreadScriptsToRun scriptsToRun) override;
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.

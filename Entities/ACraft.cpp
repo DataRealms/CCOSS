@@ -564,7 +564,6 @@ bool ACraft::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
         } else {
             return Actor::HandlePieCommand(pieSliceIndex);
         }
-        m_StuckTimer.Reset();
     }
     return false;
 }

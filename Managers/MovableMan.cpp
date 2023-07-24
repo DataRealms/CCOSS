@@ -1602,7 +1602,7 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
 
 void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
     if (!luaState || mo->GetLuaState() == luaState) {
-        mo->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
+        mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
     }
 
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
@@ -1611,7 +1611,7 @@ void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
             ++attachablrItr;
 
             if (!luaState || attachable->GetLuaState() == luaState) {
-                attachable->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
+                attachable->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
             }
             updateMultiThreadedScripts(attachable, luaState);
         }
@@ -1621,7 +1621,7 @@ void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
             ++woundItr;
 
             if (!luaState || wound->GetLuaState() == luaState) {
-                wound->UpdateScripts(MovableObject::ThreadScriptsToRun::MultiThreaded);
+                wound->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
             }
             updateMultiThreadedScripts(wound, luaState);
         }
@@ -1721,7 +1721,7 @@ void MovableMan::Update()
             actor->Update();
 
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            actor->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
             actor->ApplyImpulses();
@@ -1734,7 +1734,7 @@ void MovableMan::Update()
             (*iIt)->Update();
 
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            (*iIt)->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
             (*iIt)->ApplyImpulses();
@@ -1748,7 +1748,7 @@ void MovableMan::Update()
             particle->Update();
 
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            particle->UpdateScripts(MovableObject::ThreadScriptsToRun::SingleThreaded);
+            particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
             g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
             particle->ApplyImpulses();
@@ -2049,23 +2049,22 @@ void MovableMan::UpdateControllers()
 {
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
+        for (Actor* actor : m_Actors) {
+            actor->GetController()->Update();
+            actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);
+        }
+
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
             [&](LuaStateWrapper &luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
                 for (Actor *actor : m_Actors) {
                     if (actor->GetLuaState() == &luaState) {
-                        actor->GetController()->Update();
+                        actor->GetController()->UpdateAI(ThreadScriptsToRun::MultiThreaded);
                     }
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
-
-        for (Actor* actor : m_Actors) {
-            if (actor->GetLuaState() == nullptr || actor->GetLuaState() == &g_LuaMan.GetMasterScriptState()) {
-                actor->GetController()->Update();
-            }
-        }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

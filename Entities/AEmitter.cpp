@@ -376,12 +376,16 @@ int AEmitter::GetTotalBurstSize() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
-    // TODO - this doesn't work perfectly and gives a very slightly different result than it should. Figure out the fuckiness here
     float throttleFactor = 1.0F - std::abs(throttle) + (throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(throttle);
     throttleFactor *= multiplier;
     throttleFactor -= 1.0F;
-    float divisor = throttleFactor < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier;
-    return throttleFactor / divisor;
+    if (throttleFactor >= 0.0F) {
+        return (throttleFactor / (m_PositiveThrottleMultiplier - 1.0F));
+    } else {
+        return (throttleFactor / (m_NegativeThrottleMultiplier - 1.0F)) * -1.0F;
+    }
+
+    //std::unreachable();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

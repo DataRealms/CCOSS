@@ -204,15 +204,13 @@ namespace RTE {
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
 
-		if (g_SceneMan.GetScene()) {
-			for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-				if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.GetFloorIntX(), scenePostEffect.m_Pos.GetFloorIntY(), team); }
+		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.GetFloorIntX(), scenePostEffect.m_Pos.GetFloorIntY(), team); }
 
-				if (WithinBox(scenePostEffect.m_Pos, boxPos, static_cast<float>(boxWidth), static_cast<float>(boxHeight)) && !unseen) {
-					found = true;
-					postEffectPosRelativeToBox = scenePostEffect.m_Pos - boxPos;
-					effectsList.push_back(PostEffect(postEffectPosRelativeToBox, scenePostEffect.m_Bitmap, scenePostEffect.m_BitmapHash, scenePostEffect.m_Strength, scenePostEffect.m_Angle));
-				}
+			if (WithinBox(scenePostEffect.m_Pos, boxPos, static_cast<float>(boxWidth), static_cast<float>(boxHeight)) && !unseen) {
+				found = true;
+				postEffectPosRelativeToBox = scenePostEffect.m_Pos - boxPos;
+				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, scenePostEffect.m_Bitmap, scenePostEffect.m_BitmapHash, scenePostEffect.m_Strength, scenePostEffect.m_Angle));
 			}
 		}
 		return found;

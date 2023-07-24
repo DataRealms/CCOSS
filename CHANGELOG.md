@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Unofficial modules (mods) now use [Semantic Versioning](https://semver.org/) to check which version of the game they target.  
+	As such, the `Index.ini` property `SupportedGameVersion` must now be a valid semantic version number. The game version has also been updated to match this standard.  
+
+	The `SupportedGameVersion` version number must be of the form `X.Y.z`, where:  
+
+	`X` matches the major version of the game,  
+	`Y` is the minimum minor version of the game the mod requires,  
+	`z` is the patch number, which is currently not enforced.  
+
+  Mods published for any development builds must match that development version exactly.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -637,8 +649,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
 
-- Added `LuaMan` Lua function `FileExists`, which lets you check whether a specified file exists. Like with `FileOpen`, the file must be inside a folder ending in `.rte`.
-
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -887,8 +897,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 - Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
-
-- Fixed immobile `SoundContainers` not pausing and resuming when you pause/resume an `Activity`.
 
 </details>
 

@@ -621,7 +621,6 @@
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
-    <ClInclude Include="System\GameVersion.h" />
     <ClInclude Include="System\GenericSavedData.h" />
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
@@ -630,8 +629,6 @@
     <ClInclude Include="System\Gamepad.h" />
     <ClInclude Include="Menus\InventoryMenuGUI.h" />
     <ClInclude Include="System\PieQuadrant.h" />
-    <ClInclude Include="System\Semver200\semver200.h" />
-    <ClInclude Include="System\Semver200\version.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -857,9 +854,6 @@
     <ClCompile Include="System\InputScheme.cpp" />
     <ClCompile Include="System\GraphicalPrimitive.cpp" />
     <ClCompile Include="System\PieQuadrant.cpp" />
-    <ClCompile Include="System\Semver200\Semver200_comparator.cpp" />
-    <ClCompile Include="System\Semver200\Semver200_modifier.cpp" />
-    <ClCompile Include="System\Semver200\Semver200_parser.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
     <ClCompile Include="System\SpatialPartitionGrid.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
@@ -993,7 +987,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="System\Semver200\version.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

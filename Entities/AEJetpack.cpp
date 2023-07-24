@@ -16,6 +16,7 @@ namespace RTE {
         m_JetReplenishRate = 1.0F;
         m_JetAngleRange = 0.25F;
 		m_CanAdjustAngleWhileFiring = true;
+		m_AdjustThrottleForWeight = true;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ namespace RTE {
         m_JetReplenishRate = reference.m_JetReplenishRate;
         m_JetAngleRange = reference.m_JetAngleRange;
 		m_CanAdjustAngleWhileFiring = reference.m_CanAdjustAngleWhileFiring;
+		m_AdjustThrottleForWeight = reference.m_AdjustThrottleForWeight;
 
 		return 0;
     }
@@ -70,6 +72,8 @@ namespace RTE {
             reader >> m_JetAngleRange; 
         } else if (propName == "CanAdjustAngleWhileFiring") {
             reader >> m_CanAdjustAngleWhileFiring; 
+		} else if (propName == "AdjustThrottleForWeight") {
+            reader >> m_AdjustThrottleForWeight; 
         } else {
 			return AEmitter::ReadProperty(propName, reader);
 		}
@@ -96,6 +100,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("JumpReplenishRate", m_JetReplenishRate);
 		writer.NewPropertyWithValue("JumpAngleRange", m_JetAngleRange);
 		writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", m_CanAdjustAngleWhileFiring);
+		writer.NewPropertyWithValue("AdjustThrottleForWeight", m_AdjustThrottleForWeight);
 
 		return 0;
 	}
@@ -105,34 +110,54 @@ namespace RTE {
     void AEJetpack::UpdateBurstState(Actor &parentActor) {
         const Controller &controller = *parentActor.GetController();
 
-        if (m_JetTimeTotal > 0.0F) {
+		if (parentActor.GetStatus() == Actor::INACTIVE) {
+			Recharge(parentActor);
+			return;
+		}
+
+		float fuelUseMultiplier = 1.0F;
+		if (m_AdjustThrottleForWeight) {
+			// Adjust force based on weight, so we have greater thrust with a heavier inventory (but spend fuel faster)
+			float thrustAdjustment = parentActor.GetMass() / parentActor.GetBaseMass();
+			float adjustedThrottle = GetScaledThrottle(0.0F, thrustAdjustment);
+			SetThrottle(adjustedThrottle);
+			fuelUseMultiplier = GetThrottleFactor();
+		} else {
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = GetJetTimeRatio();
-			SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+			SetThrottle((jetTimeRatio * 2.0F) - 1.0F);
 		}
 
 		bool wasEmittingLastFrame = IsEmitting();
 
-		switch (m_JetpackType)
-		{
-		case JetpackType::Standard:
-			if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && parentActor.GetStatus() != Actor::INACTIVE) {
-				Burst(parentActor);
-			} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && parentActor.GetStatus() != Actor::INACTIVE) {
-				Thrust(parentActor);
-			} else {
-				Recharge(parentActor);
+		// We don't want the jetpack to rapidly toggle on/off at zero fuel if the player is holding down the jetpack button
+		// So enforce a minimum time we must be able to thrust for (in ms)
+		const float minimumTimeToBeginThrusting = 250.0f * fuelUseMultiplier;
+		if (m_JetTimeLeft > minimumTimeToBeginThrusting || wasEmittingLastFrame || IsFullyFueled()) {
+			switch (m_JetpackType)
+			{
+			case JetpackType::Standard:
+				if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && IsFullyFueled()) {
+					Burst(parentActor, fuelUseMultiplier);
+				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel()) {
+					Thrust(parentActor, fuelUseMultiplier);
+				} else {
+					Recharge(parentActor);
+				}
+				break;
+
+			case JetpackType::JumpPack:
+				if (wasEmittingLastFrame && !IsOutOfFuel()) {
+					Thrust(parentActor, fuelUseMultiplier);
+				} else if (controller.IsState(BODY_JUMPSTART) && IsFullyFueled()) {
+					Burst(parentActor, fuelUseMultiplier);
+				} else {
+					Recharge(parentActor);
+				}
+				break;
 			}
-			break;
-		case JetpackType::JumpPack:
-			if (wasEmittingLastFrame && !IsOutOfFuel()) {
-				Thrust(parentActor);
-			} else if (controller.IsState(BODY_JUMPSTART) && IsFullyFueled()) {
-				Burst(parentActor);
-			} else {
-				Recharge(parentActor);
-			}
-			break;
+		} else {
+			Recharge(parentActor);
 		}
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;
@@ -160,21 +185,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AEJetpack::Burst(Actor& parentActor) {
-		parentActor.ForceDeepCheck(true); // This is to make sure we get loose from being stuck. In future, it'd be better to try to move the actor out. Deepchecks are a bad solution
+	void AEJetpack::Burst(Actor& parentActor, float fuelUseMultiplier) {
+		parentActor.SetMovementState(Actor::JUMP);
+		
 		TriggerBurst();
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!
-		m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(GetTotalBurstSize(), 2)) * (CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
+
+		float fuelUsage = g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(GetTotalBurstSize(), 2)) * (CanTriggerBurst() ? 1.0F : 0.5F); // burst fuel
+		fuelUsage += g_TimerMan.GetDeltaTimeMS() * fuelUseMultiplier; // emit fuel (adjusted by throttle, whereas bursts are not throttle-adjusted)
+		m_JetTimeLeft -= fuelUsage * fuelUseMultiplier;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AEJetpack::Thrust(Actor& parentActor) {
+	void AEJetpack::Thrust(Actor& parentActor, float fuelUseMultiplier) {
+		parentActor.SetMovementState(Actor::JUMP);
+
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!
-		m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
-		parentActor.SetMovementState(Actor::JUMP);
+
+		float fuelUsage = g_TimerMan.GetDeltaTimeMS() * fuelUseMultiplier;
+		m_JetTimeLeft -= fuelUsage;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

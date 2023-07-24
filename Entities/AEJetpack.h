@@ -160,21 +160,27 @@ namespace RTE
         float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
         bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
+        bool m_AdjustThrottleForWeight; //!< Whether or not the jetpack throttle auto-adjusts for weight, at the cost of fuel usage.
 
     private:
         /// <summary>
         /// The logic to run when bursting.
         /// </summary>
-        void Burst(Actor& parentActor);
+        /// <param name="parentActor">The parent actor using this jetpack.</param>
+        /// <param name="fuelUseMultiplier">The multiplier to fuel usage rate.</param>
+        void Burst(Actor& parentActor, float fuelUseMultiplier);
 
         /// <summary>
         /// The logic to run when thrusting.
         /// </summary>
-        void Thrust(Actor& parentActor);
+        /// <param name="parentActor">The parent actor using this jetpack.</param>
+        /// <param name="fuelUseMultiplier">The multiplier to fuel usage rate.</param>
+        void Thrust(Actor& parentActor, float fuelUseMultiplier);
 
         /// <summary>
         /// The logic to run when recharging.
         /// </summary>
+        /// <param name="parentActor">The parent actor using this jetpack.</param>
         void Recharge(Actor& parentActor);
 
     	/// <summary>

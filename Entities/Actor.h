@@ -169,6 +169,12 @@ ClassInfoGetters;
     /// <returns>The mass of this Actor, its inventory and all its Attachables and wounds in Kilograms (kg).</returns>
     float GetMass() const override { return MOSRotating::GetMass() + GetInventoryMass() + (m_GoldCarried * g_SceneMan.GetKgPerOz()); }
 
+    /// <summary>
+    /// Gets the mass that this actor had upon spawning, i.e with ini-defined inventory, gold and holding no items
+    /// </summary>
+    /// <returns>The base mass of this Actor, in Kilograms (kg).</returns>
+    float GetBaseMass() const { return m_BaseMass; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetController
@@ -1559,6 +1565,8 @@ protected:
     int m_PassengerSlots;
     // Most actors can walk through stuff that's soft enough, so we start with a base penetration amount
     float m_AIBaseDigStrength;
+    // The mass that this actor had upon spawning, i.e with no inventory, no gold and holding no items
+    float m_BaseMass;
 
     ////////////////////
     // AI States

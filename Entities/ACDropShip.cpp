@@ -494,9 +494,7 @@ void ACDropShip::Update()
 		float throttle = (targetYVel + m_Vel.m_Y + trimming) / throttleRange;
 
         // Adjust trim based on weight. Dropships hover nicely at zero weight, but tend to drop when they have a large inventory
-        float totalMass = GetMass();
-        float emptyMass = totalMass - GetInventoryMass();
-        float massAdjustment = totalMass / emptyMass;
+        float massAdjustment = GetMass() / GetBaseMass();
 
 		// Right main thruster
 		if (m_pRThruster && m_pRThruster->IsAttached())
@@ -530,9 +528,9 @@ void ACDropShip::Update()
 			if (m_pRThruster && m_pRThruster->IsAttached())
 			{
                 if (m_Rotation.GetRadAngle() > c_SixteenthPI) {
-                    leftThrottle = -0.8f;
-                } else if (m_Rotation.GetRadAngle() < -c_SixteenthPI) {
                     leftThrottle = 0.8f;
+                } else if (m_Rotation.GetRadAngle() < -c_SixteenthPI) {
+                    leftThrottle = -0.8f;
                 }
 			}
 

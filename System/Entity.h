@@ -299,6 +299,12 @@ namespace RTE {
 		void SetModuleID(int whichModule) { m_DefinedInModule = whichModule; }
 
 		/// <summary>
+		/// Gets this Entity's data preset.
+		/// </summary>
+		/// <returns>This Entity's data preset.</returns>
+		const Entity * GetPreset() const;
+
+		/// <summary>
 		/// Gets the name of this Entity's data Preset.
 		/// </summary>
 		/// <returns>A string reference with the instance name of this Entity.</returns>

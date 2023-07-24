@@ -134,6 +134,7 @@ void Actor::Clear() {
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
+    m_BaseMass = 0.0F;
 
     m_DamageMultiplier = 1.0F;
 
@@ -153,13 +154,14 @@ void Actor::Clear() {
 
 int Actor::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (MOSRotating::Create() < 0) {
         return -1;
+    }
 
     // Set MO Type.
     m_MOType = MovableObject::TypeActor;
 
-    // Default to an interesitng AI controller mode
+    // Default to an interesting AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
     m_UpdateMovePath = true;
@@ -170,9 +172,14 @@ int Actor::Create()
     // Sets up the team icon
     SetTeam(m_Team);
 
-	// All brain actors by default avoid hitting each other ont he same team
-	if (IsInGroup("Brains"))
+    if (const Actor *presetActor = static_cast<const Actor *>(GetPreset())) {
+        m_BaseMass = presetActor->GetMass();
+    }
+
+	// All brain actors by default avoid hitting each other on the same team
+	if (IsInGroup("Brains")) {
 		m_IgnoresTeamHits = true;
+    }
 
 	if (!m_PieMenu) {
 		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
@@ -293,6 +300,8 @@ int Actor::Create(const Actor &reference)
     m_LateralMoveState = reference.m_LateralMoveState;
     m_ObstacleState = reference.m_ObstacleState;
     m_TeamBlockState = reference.m_TeamBlockState;
+    m_AIBaseDigStrength = reference.m_AIBaseDigStrength;
+    m_BaseMass = reference.m_BaseMass;
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;

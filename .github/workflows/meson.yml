@@ -205,6 +205,11 @@ jobs:
           meson setup --backend vs --vsenv build
         shell: cmd
 
+      - run: where gcc
+
+      - run: get-command gcc
+        shell: powershell
+        
       - name: Configure Meson
         run: meson configure --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
         shell: cmd

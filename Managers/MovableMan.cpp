@@ -65,7 +65,7 @@ void MovableMan::Clear()
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
     m_SplashRatio = 0.75;
-    m_MaxDroppedItems = 25;
+	m_MaxDroppedItems = 100;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
 }

@@ -169,7 +169,7 @@ jobs:
       
       - run: choco uninstall -y mingw
       
-      - run: echo %PATH
+      - run: echo %PATH%
         shell: cmd
 
       - run: set

@@ -202,7 +202,7 @@ jobs:
         
       - name: Setup Meson
         run: |
-          meson setup --vsenv build
+          meson setup --backend vs --vsenv build
         shell: cmd
 
       - name: Configure Meson

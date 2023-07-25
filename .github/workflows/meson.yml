@@ -207,7 +207,7 @@ jobs:
         
       - name: Setup Meson
         run: |
-          meson setup --backend vs --vsenv build
+          meson setup --vsenv build
         shell: cmd
 
       # - run: where gcc

@@ -33,6 +33,7 @@ namespace RTE {
 			ScenarioFadeIn,
 			MetaGameMenu,
 			MetaGameFadeIn,
+			PauseMenu,
 			ScrollingFadeIn,
 			ScrollingFadeOut,
 			ScrollingFadeOutQuit,

@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+
+- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -25,6 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed music resuming from incorrect position when unpausing.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

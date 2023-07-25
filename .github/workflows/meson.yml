@@ -200,13 +200,16 @@ jobs:
       - name: Setup Meson
         run: |
           meson setup --vsenv build
+        shell: cmd
 
       - name: Configure Meson
         run: meson configure --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
+        shell: cmd
 
       - name: Build
         run: |
           meson compile -C build
+        shell: cmd
 
       # - name: Artifact Deploy
       #   if: ${{inputs.upload_artefacts}}

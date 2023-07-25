@@ -149,80 +149,22 @@ jobs:
   build-windows:
     runs-on: windows-latest
     name: Windows Build
-
+    
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-
-      - name: Install meson
+      
+      - name: Install Dependencies
         run: |
-          pip install meson==${{env.MESON_VERSION}}
-
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1
+          pip install meson
       
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
-
-      # - run: echo %PATH%
-      #   shell: cmd
-      
-      # - run: set PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%
-      #   shell: cmd
-      
-      # - run: echo %PATH%
-      #   shell: cmd
-
-      # - run: where gcc
-
-      # - run: get-command gcc
-      #   shell: powershell
-
-      # - run: choco uninstall -y mingw
-      #   shell: cmd
-      
-      # - run: where gcc
-
-      # - run: get-command gcc
-      #   shell: powershell
-
-      # - run: |
-      #     set PATH=%PATH:C:\Strawberry\c\bin;=%
-      #     set PATH=%PATH:C:\Strawberry\perl\site\bin;=%
-      #     set PATH=%PATH:C:\Strawberry\perl\bin;=%
-      #   shell: cmd
-      
-      # - run: echo %PATH%
-      #   shell: cmd
-
-      # - run: where gcc
-
-      # - run: get-command gcc
-      #   shell: powershell
-
-      # - run: rm -rf C:\Strawberry
-      #   shell: bash
-        
-      - name: Setup Meson
+      - name: Setup
         run: |
-          meson setup --vsenv build
-        shell: cmd
-
-      # - run: where gcc
-
-      # - run: get-command gcc
-      #   shell: powershell
-        
-      - name: Configure Meson
-        run: meson configure --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
-        shell: cmd
-
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} --vsenv build
+      
       - name: Build
         run: |
-          meson compile -C build
-        shell: cmd
+          meson compile -Cbuild
 
       # - name: Artifact Deploy
       #   if: ${{inputs.upload_artefacts}}

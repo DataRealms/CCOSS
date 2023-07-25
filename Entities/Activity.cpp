@@ -806,8 +806,9 @@ void Activity::Clear() {
 		float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
 
 		std::string craftText = "Returned craft";
-		if (!orbitedCraft->IsInventoryEmpty()) { craftText += " + cargo"; }
-
+		if (!orbitedCraft->IsInventoryEmpty()) { 
+			craftText += " + cargo";
+		}
 		if (totalValue > 0.0F) {
 			m_TeamFunds[orbitedCraftTeam] += totalValue;
 			std::snprintf(messageString, sizeof(messageString), "%s added %.0f oz to funds!", craftText.c_str(), totalValue);
@@ -816,10 +817,10 @@ void Activity::Clear() {
 			if (m_IsActive[player]) {
 				if (brainOnBoard && orbitedCraft == GetPlayerBrain(static_cast<Players>(player))) {
 					m_BrainEvacuated[player] = true;
-					g_FrameMan.ClearScreenText(ScreenOfPlayer(ScreenOfPlayer(static_cast<Players>(player))));
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
 					g_FrameMan.SetScreenText("YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!", ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
 				} else if (m_Team[player] == orbitedCraftTeam && totalValue > 0.0F) {
-					g_FrameMan.ClearScreenText(ScreenOfPlayer(ScreenOfPlayer(static_cast<Players>(player))));
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
 					g_FrameMan.SetScreenText(messageString, ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
 					m_MessageTimer[player].Reset();
 				}

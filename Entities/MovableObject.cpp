@@ -695,7 +695,7 @@ MovableObject::MovableObject(const MovableObject &reference):
 
 void MovableObject::SetTeam(int team) {
 	SceneObject::SetTeam(team);
-	if (g_ActivityMan.GetActivity()) { g_ActivityMan.GetActivity()->ForceSetTeamAsActive(team); }
+	if (Activity *activity = g_ActivityMan.GetActivity()) { activity->ForceSetTeamAsActive(team); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

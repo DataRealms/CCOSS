@@ -3582,20 +3582,20 @@ void AHuman::Update()
 			}
 			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
-            if (m_StrideSound) {
-                m_StrideSound->SetPosition(m_Pos);
-                if (m_StrideSound->GetLoopSetting() < 0) {
-                    if (!m_StrideSound->IsBeingPlayed()) { m_StrideSound->Play(); }
-                } else if (restarted && !climbing) {
-                    m_StrideSound->Play();
-                }
-            }
+			if (m_StrideSound) {
+				m_StrideSound->SetPosition(m_Pos);
+				if (m_StrideSound->GetLoopSetting() < 0) {
+					if (!m_StrideSound->IsBeingPlayed()) { m_StrideSound->Play(); }
+				} else if (restarted && !climbing) {
+					m_StrideSound->Play();
+				}
+			}
 			if (restarted) {
 				if (climbing) {
-                    m_WalkAngle[FGROUND] = Matrix();
-                    m_WalkAngle[BGROUND] = Matrix();
+					m_WalkAngle[FGROUND] = Matrix();
+					m_WalkAngle[BGROUND] = Matrix();
 				} else {
-                    RunScriptedFunctionInAppropriateScripts("OnStride");
+					RunScriptedFunctionInAppropriateScripts("OnStride");
 				}
 			}
 

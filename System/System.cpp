@@ -2,13 +2,11 @@
 #include "unzip.h"
 #include "boost/functional/hash.hpp"
 
-#if _LINUX_OR_MACOSX_
+#ifdef _WIN32
+#include "Windows.h"
+#elif defined _LINUX_OR_MACOSX_
 #include <unistd.h>
 #include <sys/stat.h>
-#endif
-
-#ifdef WIN32
-#include <Windows.h>
 #endif
 
 namespace RTE {

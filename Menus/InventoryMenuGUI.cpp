@@ -1301,7 +1301,10 @@ namespace RTE {
 		};
 
 		if (m_GUISelectedItem->EquippedItemIndex > -1) {
-			LaunchInventoryItem(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->RemoveAttachable(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->GetHeldDevice()));
+			Attachable *itemToLaunch = dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->RemoveAttachable(dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent())->GetHeldDevice());
+			if (itemToLaunch) {
+				LaunchInventoryItem(itemToLaunch);
+			}
 		} else {
 			LaunchInventoryItem(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
 		}

@@ -72,13 +72,13 @@ namespace RTE {
 		}
 
 		Scene *scene = g_SceneMan.GetScene();
-		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
+		GAScripted *activity = dynamic_cast<GAScripted *>(GetActivity());
 
 		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
 			g_ConsoleMan.PrintString("ERROR: Cannot save when there's no game running, or the game is finished!");
 			return false;
 		}
-		if (!g_ActivityMan.GetActivityAllowsSaving()) {
+		if (!GetActivityAllowsSaving()) {
 			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
@@ -185,7 +185,7 @@ namespace RTE {
 		// However, saving a game you've already saved will end up with its OriginalScenePresetName set to the filename, which will screw up restarting the Activity, so we set its PresetName here.
 		scene->SetPresetName(originalScenePresetName);
 		// For starting Activity, we need to directly clone the Activity we want to start.
-		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
+		StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
 		// When this method exits, our Scene object will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 

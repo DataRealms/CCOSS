@@ -171,10 +171,32 @@ jobs:
         shell: cmd
 
       - run: where gcc
+
       - run: get-command gcc
         shell: powershell
 
+      - run: choco uninstall -y mingw64
+        shell: cmd
+      
+      - run: where gcc
 
+      - run: get-command gcc
+        shell: powershell
+
+      - run: |
+          set PATH=%PATH:C:\Strawberry\c\bin;=%
+          set PATH=%PATH:C:\Strawberry\perl\site\bin;=%
+          set PATH=%PATH:C:\Strawberry\perl\bin;=%
+        shell: cmd
+      
+      - run: echo %PATH%
+        shell: cmd
+
+      - run: where gcc
+
+      - run: get-command gcc
+        shell: powershell
+        
       - name: Setup Meson
         run: |
           meson setup --vsenv build

@@ -333,7 +333,7 @@ namespace RTE {
 
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
-		g_AudioMan.PauseAllMobileSounds(false);
+		g_AudioMan.PauseAllSounds(false);
 
 		return error;
 	}
@@ -389,7 +389,7 @@ namespace RTE {
 		m_InActivity = !pause;
 		m_ResumingActivityFromPauseMenu = false;
 		m_SkipPauseMenuWhenPausingActivity = skipPauseMenu;
-		g_AudioMan.PauseAllMobileSounds(pause);
+		g_AudioMan.PauseAllSounds(pause);
 		g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 	}
 

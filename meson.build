@@ -20,7 +20,13 @@ elif host_machine.system() == 'windows'
   sdl2_dep = dependency('sdl2')
   luajit = subproject('LuaJIT-2.1')
   luajit_dep = dependency('luajit')
-  deps += [sdl2_dep, luajit_dep]
+  zlib = subproject('zlib-ng-2.1.3')
+  zlib_dep = dependency('zlib')
+  minizip = subproject('minizip-ng-4.0.0')
+  minizip_dep = dependency('minizip')
+  libpng = subproject('libpng-1.6.40')
+  libpng_dep = dependency('libpng')
+  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep]
 endif
 
 elfname = 'CortexCommand'
@@ -128,7 +134,7 @@ else
   conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
-#### External Libraries ####
+#### Platform Common External Libraries ####
 external_objects = []
 external_libs = []
 subdir('external')

@@ -174,9 +174,6 @@ jobs:
 
       - run: get-command gcc
         shell: powershell
-
-      - run: choco uninstall -y mingw64
-        shell: cmd
       
       - run: where gcc
 
@@ -196,7 +193,7 @@ jobs:
 
       - run: get-command gcc
         shell: powershell
-        
+
       - name: Setup Meson
         run: |
           meson setup --vsenv build

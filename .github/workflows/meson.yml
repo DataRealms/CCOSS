@@ -161,54 +161,59 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
       
-      - run: echo %PATH%
-        shell: cmd
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      # - run: echo %PATH%
+      #   shell: cmd
       
-      - run: set PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%
-        shell: cmd
+      # - run: set PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%
+      #   shell: cmd
       
-      - run: echo %PATH%
-        shell: cmd
+      # - run: echo %PATH%
+      #   shell: cmd
 
-      - run: where gcc
+      # - run: where gcc
 
-      - run: get-command gcc
-        shell: powershell
+      # - run: get-command gcc
+      #   shell: powershell
 
-      - run: choco uninstall -y mingw
-        shell: cmd
+      # - run: choco uninstall -y mingw
+      #   shell: cmd
       
-      - run: where gcc
+      # - run: where gcc
 
-      - run: get-command gcc
-        shell: powershell
+      # - run: get-command gcc
+      #   shell: powershell
 
-      - run: |
-          set PATH=%PATH:C:\Strawberry\c\bin;=%
-          set PATH=%PATH:C:\Strawberry\perl\site\bin;=%
-          set PATH=%PATH:C:\Strawberry\perl\bin;=%
-        shell: cmd
+      # - run: |
+      #     set PATH=%PATH:C:\Strawberry\c\bin;=%
+      #     set PATH=%PATH:C:\Strawberry\perl\site\bin;=%
+      #     set PATH=%PATH:C:\Strawberry\perl\bin;=%
+      #   shell: cmd
       
-      - run: echo %PATH%
-        shell: cmd
+      # - run: echo %PATH%
+      #   shell: cmd
 
-      - run: where gcc
+      # - run: where gcc
 
-      - run: get-command gcc
-        shell: powershell
+      # - run: get-command gcc
+      #   shell: powershell
 
-      - run: rm -rf C:\Strawberry
-        shell: bash
+      # - run: rm -rf C:\Strawberry
+      #   shell: bash
         
       - name: Setup Meson
         run: |
           meson setup --backend vs --vsenv build
         shell: cmd
 
-      - run: where gcc
+      # - run: where gcc
 
-      - run: get-command gcc
-        shell: powershell
+      # - run: get-command gcc
+      #   shell: powershell
         
       - name: Configure Meson
         run: meson configure --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build

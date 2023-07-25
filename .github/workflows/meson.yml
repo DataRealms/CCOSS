@@ -161,23 +161,26 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
       
-      - run: echo %PATH
-        shell: cmd
-
-      - run: set
+      - run: echo %PATH%
         shell: cmd
       
-      - run: choco uninstall -y mingw
+      - run: set PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%
+        shell: cmd
       
       - run: echo %PATH%
         shell: cmd
 
-      - run: set
-        shell: cmd
+      - run: where gcc
+      - run: get-command gcc
+        shell: powershell
+
 
       - name: Setup Meson
         run: |
-          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build --vsenv 
+          meson setup --vsenv build
+
+      - name: Configure Meson
+        run: meson configure --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
 
       - name: Build
         run: |

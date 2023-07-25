@@ -570,6 +570,9 @@
     <ClInclude Include="Resources\Credits.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\PauseMenuGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
     <ClInclude Include="System\Semver200\semver200.h">
       <Filter>System\Semver200</Filter>
     </ClInclude>
@@ -1109,6 +1112,9 @@
     </ClCompile>
     <ClCompile Include="Managers\WindowMan.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\PauseMenuGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="System\Semver200\Semver200_comparator.cpp">
       <Filter>System\Semver200</Filter>

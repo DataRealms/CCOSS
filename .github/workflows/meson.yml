@@ -165,13 +165,3 @@ jobs:
       - name: Build
         run: |
           meson compile -Cbuild
-
-      # - name: Artifact Deploy
-      #   if: ${{inputs.upload_artefacts}}
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: CortexCommand (macOS)
-      #     path: |
-      #       build/CortexCommand
-      #       build/CortexCommand_debug
-      #     if-no-files-found: error

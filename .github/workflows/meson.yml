@@ -145,3 +145,23 @@ jobs:
             build/CortexCommand
             build/CortexCommand_debug
           if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-latest
+    name: Windows Build
+    
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      
+      - name: Install Dependencies
+        run: |
+          pip install meson
+      
+      - name: Setup
+        run: |
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} --vsenv build
+      
+      - name: Build
+        run: |
+          meson compile -Cbuild

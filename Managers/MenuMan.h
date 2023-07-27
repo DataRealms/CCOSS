@@ -13,6 +13,7 @@ namespace RTE {
 	class TitleScreen;
 	class MainMenuGUI;
 	class ScenarioGUI;
+	class PauseMenuGUI;
 
 	/// <summary>
 	/// The singleton manager responsible for handling all the out-of-game menu screens (main menu, scenario menu, etc.).
@@ -39,15 +40,12 @@ namespace RTE {
 		void Reinitialize();
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// Gets the TitleScreen of this MenuMan.
-		/// </summary>
-		/// <returns>Pointer to the TitleScreen object of this MenuMan. Ownership is NOT transferred!</returns>
-		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
-#pragma endregion
-
 #pragma region Concrete Methods
+		/// <summary>
+		/// Sets the appropriate TitleScreen transition before entering the menu loop.
+		/// </summary>
+		void HandleTransitionIntoMenuLoop();
+
 		/// <summary>
 		/// Updates the MenuMan state.
 		/// </summary>
@@ -69,7 +67,8 @@ namespace RTE {
 			MenusDisabled,
 			MainMenuActive,
 			ScenarioMenuActive,
-			MetaGameMenuActive
+			MetaGameMenuActive,
+			PauseMenuActive,
 		};
 
 		ActiveMenu m_ActiveMenu; //!< The currently active menu screen that is being updated and drawn. See ActiveMenu enumeration.
@@ -81,6 +80,7 @@ namespace RTE {
 		std::unique_ptr<TitleScreen> m_TitleScreen; //!< The title screen.
 		std::unique_ptr<MainMenuGUI> m_MainMenu; //!< The main menu screen.
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!< The scenario menu screen.
+		std::unique_ptr<PauseMenuGUI> m_PauseMenu; //!< The game pause menu screen.
 
 #pragma region Updates
 		/// <summary>
@@ -104,6 +104,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the program was set to be terminated by the user through the MetaGame menu screen.</returns>
 		bool UpdateMetaGameMenu() const;
+
+		/// <summary>
+		/// Updates the pause menu screen and handles the update results.
+		/// </summary>
+		void UpdatePauseMenu() const;
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

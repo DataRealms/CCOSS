@@ -40,6 +40,8 @@ namespace RTE {
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
+		m_ResumingActivityFromPauseMenu = false;
+		m_SkipPauseMenuWhenPausingActivity = false;
 		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
 		m_LaunchIntoActivity = false;
@@ -70,13 +72,13 @@ namespace RTE {
 		}
 
 		Scene *scene = g_SceneMan.GetScene();
-		GAScripted *activity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
+		GAScripted *activity = dynamic_cast<GAScripted *>(GetActivity());
 
 		if (!scene || !activity || (activity && activity->GetActivityState() == Activity::ActivityState::Over)) {
 			g_ConsoleMan.PrintString("ERROR: Cannot save when there's no game running, or the game is finished!");
 			return false;
 		}
-		if (!g_ActivityMan.GetActivityAllowsSaving()) {
+		if (!GetActivityAllowsSaving()) {
 			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
 			return false;
 		}
@@ -145,16 +147,19 @@ namespace RTE {
 			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
+
+		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini";
+
+		if (!std::filesystem::exists(saveFilePath)) {
+			RTEError::ShowMessageBox("Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
+			return false;
+		}
+
+		Reader reader(saveFilePath, true, nullptr, false);
 		m_IsLoading = true;
 
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
-
-		Reader reader(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini", true, nullptr, true);
-		if (!reader.ReaderOK()) {
-			RTEError::ShowMessageBox("ERROR: Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");
-			return false;
-		}
 
 		std::string originalScenePresetName = fileName;
 		bool placeObjectsIfSceneIsRestarted = true;
@@ -180,7 +185,7 @@ namespace RTE {
 		// However, saving a game you've already saved will end up with its OriginalScenePresetName set to the filename, which will screw up restarting the Activity, so we set its PresetName here.
 		scene->SetPresetName(originalScenePresetName);
 		// For starting Activity, we need to directly clone the Activity we want to start.
-		g_ActivityMan.StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
+		StartActivity(dynamic_cast<GAScripted*>(activity->Clone()));
 		// When this method exits, our Scene object will be destroyed, which will cause problems if you try to restart it. To avoid this, set the Scene to load to the preset object with the same name.
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
@@ -328,7 +333,7 @@ namespace RTE {
 
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
-		g_AudioMan.PauseAllMobileSounds(false);
+		g_AudioMan.PauseAllSounds(false);
 
 		return error;
 	}
@@ -355,34 +360,37 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::PauseActivity(bool pause) {
-		if (!m_Activity || (pause && m_Activity->IsPaused()) || (!pause && !m_Activity->IsPaused())) {
+	void ActivityMan::PauseActivity(bool pause, bool skipPauseMenu) {
+		if (!m_Activity) {
+			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
 			return;
 		}
 
-		if (m_Activity) {
-			if (pause) {
-				m_LastMusicPath = g_AudioMan.GetMusicPath();
-				m_LastMusicPos = g_AudioMan.GetMusicPosition();
-			} else {
-				if (!m_LastMusicPath.empty() && m_LastMusicPos > 0) {
-					g_AudioMan.ClearMusicQueue();
-					g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
-					g_AudioMan.SetMusicPosition(m_LastMusicPos);
-					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
-					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
-				}
-			}
-
-			m_Activity->SetPaused(pause);
-			m_InActivity = !pause;
-			g_AudioMan.PauseAllMobileSounds(pause);
-			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
-		} else {
-			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
+		if (pause == m_Activity->IsPaused()) {
+			return;
 		}
+
+		if (pause) {
+			m_LastMusicPath = g_AudioMan.GetMusicPath();
+			m_LastMusicPos = g_AudioMan.GetMusicPosition();
+		} else {
+			if (!m_ResumingActivityFromPauseMenu && (!m_LastMusicPath.empty() && m_LastMusicPos > 0)) {
+				g_AudioMan.ClearMusicQueue();
+				g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
+				g_AudioMan.SetMusicPosition(m_LastMusicPos);
+				g_AudioMan.QueueSilence(30);
+				g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
+				g_AudioMan.QueueSilence(30);
+				g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
+			}
+		}
+
+		m_Activity->SetPaused(pause);
+		m_InActivity = !pause;
+		m_ResumingActivityFromPauseMenu = false;
+		m_SkipPauseMenuWhenPausingActivity = skipPauseMenu;
+		g_AudioMan.PauseAllSounds(pause);
+		g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,9 +399,6 @@ namespace RTE {
 		if (GetActivity()->GetActivityState() != Activity::NotStarted) {
 			m_InActivity = true;
 			m_ActivityNeedsResume = false;
-
-			g_FrameMan.ClearBackBuffer32();
-			g_WindowMan.UploadFrame();
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
@@ -405,9 +410,6 @@ namespace RTE {
 	bool ActivityMan::RestartActivity() {
 		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
-
-		g_FrameMan.ClearBackBuffer32();
-		g_WindowMan.UploadFrame();
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();

@@ -28,7 +28,8 @@ namespace RTE {
 			screen.ScrollSpeed = 0.1F;
 			screen.ScrollTimer.Reset();
 			screen.ScreenOcclusion.Reset();
-			screen.TargetWrapped = false;
+			screen.TargetXWrapped = false;
+			screen.TargetYWrapped = false;
 			screen.SeamCrossCount[Axes::X] = 0;
 			screen.SeamCrossCount[Axes::Y] = 0;
 			screen.ScreenShakeMagnitude = 0.0F;
@@ -70,22 +71,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CameraMan::SetScrollTarget(const Vector &targetCenter, float speed, bool targetWrapped, int screenId) {
+	void CameraMan::SetScrollTarget(const Vector &targetCenter, float speed, int screenId) {
 		Screen &screen = m_Screens[screenId];
+
 		// See if it would make sense to automatically wrap.
-		if (!targetWrapped) {
-			const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
-			bool distanceGreaterThanHalfSceneWidthOrHeight = terrain->WrapsX() && (std::fabs(targetCenter.GetX() - screen.ScrollTarget.GetX()) > static_cast<float>(terrain->GetBitmap()->w / 2));
-			distanceGreaterThanHalfSceneWidthOrHeight = distanceGreaterThanHalfSceneWidthOrHeight || (terrain->WrapsY() && (std::fabs(targetCenter.GetY() - screen.ScrollTarget.GetY()) > static_cast<float>(terrain->GetBitmap()->h / 2)));
-			if (distanceGreaterThanHalfSceneWidthOrHeight) {
-				targetWrapped = true;
-			}
-		}
+		const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
+		float targetXWrapped = terrain->WrapsX() && (std::fabs(targetCenter.GetX() - screen.ScrollTarget.GetX()) > static_cast<float>(terrain->GetBitmap()->w / 2));
+		float targetYWrapped = terrain->WrapsY() && (std::fabs(targetCenter.GetY() - screen.ScrollTarget.GetY()) > static_cast<float>(terrain->GetBitmap()->h / 2));
+
 		screen.ScrollTarget.SetXY(targetCenter.GetX(), targetCenter.GetY());
 		screen.ScrollSpeed = speed;
 
 		// Don't override a set wrapping, it will be reset to false upon a drawn frame.
-		screen.TargetWrapped = screen.TargetWrapped || targetWrapped;
+		screen.TargetXWrapped = screen.TargetXWrapped || targetXWrapped;
+		screen.TargetYWrapped = screen.TargetYWrapped || targetYWrapped;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,19 +217,23 @@ namespace RTE {
 
 		if (g_TimerMan.DrawnSimUpdate()) {
 			// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
-			if (screen.TargetWrapped) {
+			if (screen.TargetXWrapped) {
 				if (terrain->WrapsX()) {
 					int wrappingScrollDirection = (screen.ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
 					screen.Offset.SetX(screen.Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
 					screen.SeamCrossCount[Axes::X] += wrappingScrollDirection;
 				}
+				screen.TargetXWrapped = false;
+			}
+
+			if (screen.TargetYWrapped) {
 				if (terrain->WrapsY()) {
 					int wrappingScrollDirection = (screen.ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
 					screen.Offset.SetY(screen.Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
 					screen.SeamCrossCount[Axes::Y] += wrappingScrollDirection;
 				}
+				screen.TargetYWrapped = false;
 			}
-			screen.TargetWrapped = false;
 		}
 
 		Vector oldOffset(screen.Offset);

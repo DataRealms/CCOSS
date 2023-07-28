@@ -125,9 +125,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetCenter">The new target vector in Scene coordinates.</param>
 		/// <param name="speed">The normalized speed at screen the view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.</param>
-		/// <param name="targetWrapped">Whether the target was wrapped around the scene this frame or not.</param>
 		/// <param name="screenId">Which screen you want to set the scroll offset of.</param>
-		void SetScrollTarget(const Vector &targetCenter, float speed = 0.1F, bool targetWrapped = false, int screenId = 0);
+		void SetScrollTarget(const Vector &targetCenter, float speed = 0.1F, int screenId = 0);
 
 		/// <summary>
 		/// Calculates a scalar of how distant a certain point in the world is from the currently closest scroll target of all active screens.
@@ -259,7 +258,9 @@ namespace RTE {
 			Timer ScrollTimer; //!< Scroll timer for making scrolling work framerate independently.
 			float ScrollSpeed = 0; //!< The normalized speed the screen's view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.
 
-			bool TargetWrapped = false; //!< Whether the ScrollTarget got wrapped around the world this frame or not.
+			bool TargetXWrapped = false; //!< Whether the ScrollTarget got x wrapped around the world this frame or not.
+			bool TargetYWrapped = false; //!< Whether the ScrollTarget got y wrapped around the world this frame or not.
+
 			std::array<int, 2> SeamCrossCount = { 0, 0 }; //!< Keeps track of how many times and in screen directions the wrapping seam has been crossed. This is used for keeping the background layers' scroll from jumping when wrapping around. X and Y.
 
 			Vector ScreenOcclusion; //!< The amount a screen is occluded or covered by GUI, etc.

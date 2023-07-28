@@ -25,9 +25,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   Mods published for any development builds must match that development version exactly.
 
+
+- `CameraMan::SetScrollTarget()` function has had the `targetWrapped` parameter removed, as it's not necessary. The camera will always focus taking the shortest path regardless now. The new full function signature is `CameraMan::SetScrollTarget(target, speed, screenId)`, where speed defaults to 0.1 and screenId defaults to 0.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Camera wrapping now works correctly on scenes which are both X and Y wrapped.
+
 
 - Fixed music resuming from incorrect position when unpausing.
 
@@ -844,7 +850,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	GetScreenOcclusion(screenId);
 	SetScreenOcclusion(occlusionVector, screenId);
 	GetScrollTarget(screenId);
-	SetScrollTarget(targetPosition, screenId);
+	SetScrollTarget(targetPosition, speed, screenId);
 	TargetDistanceScalar(point);
 	CheckOffset(screenId);
 	SetScroll(center, screenId);

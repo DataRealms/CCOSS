@@ -84,7 +84,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32_WINNT=_WIN32_WINNT_WIN7;WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -106,7 +106,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32_WINNT=_WIN32_WINNT_WIN7;WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -126,7 +126,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;NDEBUG;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32_WINNT=_WIN32_WINNT_WIN7;WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;NDEBUG;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
@@ -148,7 +148,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;NDEBUG;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32_WINNT=_WIN32_WINNT_WIN7;WIN32;_WINDOWS;MZ_COMPAT;ZLIB_COMPAT;NDEBUG;HAVE_STDINT_H;HAVE_INTTYPES_H;NO_FSEEKO;HAVE_ZLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;MZ_ZIP_NO_CRYPTO;MZ_ZIP_NO_ENCRYPTION</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>

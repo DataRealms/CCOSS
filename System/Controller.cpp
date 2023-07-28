@@ -245,7 +245,7 @@ namespace RTE {
 
     void Controller::Override(const Controller &otherController)
     {
-		RTEAssert(otherController.m_ControlledActor == m_controlledActor, "Overriding a controller with a mismatched controlled actor!");
+		RTEAssert(otherController.m_ControlledActor == m_ControlledActor, "Overriding a controller with a mismatched controlled actor!");
 		*this = otherController;
     }
 

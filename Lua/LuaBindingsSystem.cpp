@@ -58,6 +58,7 @@ namespace RTE {
 		.def("IsGamepadControlled", &Controller::IsGamepadControlled)
 		.def("SetState", &Controller::SetState)
 		.def("IsState", &Controller::IsState)
+		.def("Override", &Controller::Override)
 
 		.enum_("ControlState")[
 			luabind::value("PRIMARY_ACTION", ControlState::PRIMARY_ACTION),

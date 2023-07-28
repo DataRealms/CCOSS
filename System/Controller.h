@@ -334,6 +334,15 @@ namespace RTE {
 		Controller & operator=(const Controller &rhs);
 #pragma endregion
 
+#pragma region Misc
+		/// <summary>
+		/// Overrides this actor's controller, setting it to match another controller. This is useful for multithreaded AI (where the Lua script can have it's own controller), or for telling multiple Actors to all do exactly the same thing.
+		/// This is exposed to Lua API to be clear, whereas ownership relies on operator overloading is rather temperamental :)
+		/// </summary>
+		/// <param="otherControllerr">The other controller's state to copy. Ownership is not transferred</returns>
+		void Override(const Controller& otherController);
+#pragma endregion
+
 	protected:
 
 		static constexpr int m_ReleaseDelay = 250; //!< The delay between releasing a menu button and activating the regular controls, to avoid accidental input.

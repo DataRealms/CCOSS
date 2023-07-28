@@ -14,7 +14,7 @@ namespace RTE {
 		/// <summary>
 		/// Store the current working directory and create any missing subdirectories.
 		/// </summary>
-		/// <param name="thisExePathAndName">The path and name of this executable from main's argv[0].</param>
+		/// <param name="thisExePathAndName">The path and name of this executable.</param>
 		static void Initialize(const char *thisExePathAndName);
 #pragma endregion
 

@@ -390,6 +390,8 @@ int main(int argc, char **argv) {
 		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
 	}
 
+	// argv[0] actually unreliable for exe path and name, because of course, why would it be, why would anything be simple and make sense.
+	// Just use it anyway until some dumb edge case pops up and it becomes a problem.
 	System::Initialize(argv[0]);
 	SeedRNG();
 

@@ -10,6 +10,7 @@
 #ifdef _WIN32
 #include "Windows.h"
 #include "DbgHelp.h"
+#include "RTEStackTrace.h"
 #endif
 
 namespace RTE {
@@ -113,7 +114,9 @@ namespace RTE {
 
 		exceptionDescription << getExceptionDescriptionFromCode(exceptionCode) << " at address 0x" << std::uppercase << std::hex << exceptionAddress << ".\n\n" << getSymbolNameFromAddress(processHandle, exceptionAddress) << std::endl;
 
-		RTEError::UnhandledExceptionFunc(exceptionDescription.str());
+		RTEStackTrace stackTrace;
+
+		RTEError::UnhandledExceptionFunc(exceptionDescription.str(), stackTrace.GetCallStackAsString(processHandle, exceptPtr->ContextRecord));
 		return EXCEPTION_EXECUTE_HANDLER;
 #endif
 	}
@@ -224,7 +227,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEError::UnhandledExceptionFunc(const std::string &description) {
+	void RTEError::UnhandledExceptionFunc(const std::string &description, const std::string &callstack) {
 		s_CurrentlyAborting = true;
 
 		std::string exceptionMessage = "Runtime Error due to unhandled exception!\n\n" + description;
@@ -254,8 +257,16 @@ namespace RTE {
 		}
 
 		g_ConsoleMan.PrintString(exceptionMessage);
+
+		std::string consoleSaveMsg;
+		if (!callstack.empty()) {
+			g_ConsoleMan.PrintString(callstack);
+			consoleSaveMsg = "\nThe console and callstack have been dumped to 'AbortLog.txt'.";
+		} else {
+			consoleSaveMsg = "\nThe console has been dumped to 'AbortLog.txt'.";
+		}
 		if (g_ConsoleMan.SaveAllText("AbortLog.txt")) {
-			exceptionMessage += "\nThe console has been dumped to 'AbortLog.txt'.";
+			exceptionMessage += consoleSaveMsg;
 		}
 		System::PrintToCLI(exceptionMessage);
 
@@ -291,8 +302,26 @@ namespace RTE {
 			}
 
 			g_ConsoleMan.PrintString(abortMessage);
+
+			std::string callstack = "";
+
+			// This is being stupid and loops through this whole method to infinity and beyond in debug builds.
+			// This is a problem but we can live with it because it's not supposed to run in debug builds anyway.
+#if defined (_WIN32) && defined (RELEASE_BUILD)
+			RTEStackTrace stackTrace;
+			callstack += ("\n\n" + stackTrace.GetCallStackAsString());
+#endif
+
+			std::string consoleSaveMsg;
+			if (!callstack.empty()) {
+				g_ConsoleMan.PrintString(callstack);
+				consoleSaveMsg = "\nThe console and callstack have been dumped to 'AbortLog.txt'.";
+			} else {
+				consoleSaveMsg = "\nThe console has been dumped to 'AbortLog.txt'.";
+			}
+
 			if (g_ConsoleMan.SaveAllText("AbortLog.txt")) {
-				abortMessage += "\nThe console has been dumped to 'AbortLog.txt'.";
+				abortMessage += consoleSaveMsg;
 			}
 			System::PrintToCLI(abortMessage);
 

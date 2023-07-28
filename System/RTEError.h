@@ -46,7 +46,9 @@ namespace RTE {
 		/// <summary>
 		/// Abort on unhandled exception function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
 		/// </summary>
-		[[noreturn]] static void UnhandledExceptionFunc(const std::string &description);
+		/// <param name="description">Message explaining the exception.</param>
+		/// <param name="callstack">The call stack in string form.</param>
+		[[noreturn]] static void UnhandledExceptionFunc(const std::string &description, const std::string &callstack = "");
 
 		/// <summary>
 		/// Abort on Error function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.

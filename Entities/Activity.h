@@ -134,12 +134,6 @@ namespace RTE {
 		void SetActivityState(ActivityState newState) { m_ActivityState = newState; }
 
 		/// <summary>
-		/// Gets whether or not this Activity can be saved.
-		/// </summary>
-		/// <returns>Whether or not this Activity can be saved.</returns>
-		virtual bool ActivityCanBeSaved() const { return false; }
-
-		/// <summary>
 		/// Indicates whether the Activity is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the Activity is running or not.</returns>
@@ -685,6 +679,24 @@ namespace RTE {
 
 #pragma region Save and Load Handling
 		/// <summary>
+		/// Gets whether or not this Activity can be saved by the user. For this to be true, the Scene must not be MetagameInternal, and the AllowsUserSaving flag must not be disabled.
+		/// </summary>
+		/// <returns>Whether or not this Activity can be saved.</returns>
+		bool CanBeUserSaved() const;
+
+		/// <summary>
+		/// Gets whether or not this Activity allows the player to manually save.
+		/// </summary>
+		/// <returns>Whether or not this Activity allows the player to manually save.</returns>
+		bool GetAllowsUserSaving() const { return m_AllowsUserSaving; }
+
+		/// <summary>
+		/// Sets whether or not this Activity can be manually saved be the player.
+		/// </summary>
+		/// <param name="allowsUserSaving">Whether or not this Activity can be manually saved be the player.</param>
+		void SetAllowsUserSaving(bool allowsUserSaving) { m_AllowsUserSaving = allowsUserSaving; }
+
+		/// <summary>
 		/// Saves a string which will be stored in our ini.
 		/// </summary>
 		/// <param name="key">The key of the saved string.</param>
@@ -717,6 +729,8 @@ namespace RTE {
 
 		ActivityState m_ActivityState; //!< Current state of this Activity.
 		bool m_Paused; //!< Whether this Activity is paused or not.
+
+		bool m_AllowsUserSaving; //!< Whether or not the current Activity can be saved by the user.
 
 		std::string m_Description; //!< User-friendly description of what this Activity is all about.
 		std::string m_SceneName; //!< The name of the Scene in which this Activity takes place.

@@ -34,7 +34,6 @@ namespace RTE {
 		m_DefaultActivityName = "Tutorial Mission";
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
-		m_ActivityAllowsSaving = false;
 		m_ActiveSavingThreadCount = 0;
 		m_IsLoading = false;
 		m_InActivity = false;
@@ -76,10 +75,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: Cannot save when there's no game running, or the game is finished!");
 			return false;
 		}
-		if (!g_ActivityMan.GetActivityAllowsSaving()) {
-			RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Support Saving!\n\nMake sure it's a scripted activity, and that it has an OnSave function.\nNote that multiplayer and conquest games cannot be saved like this.");
-			return false;
-		}
+
 		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
 			// This print is actually pointless because game will abort if it fails to save layer bitmaps. It stays here for now because in reality the game doesn't properly abort if the layer bitmaps fail to save. It is what it is.
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
@@ -297,8 +293,6 @@ namespace RTE {
 
 		// Stop all music played by the current activity. It will be re-started by the new Activity.
 		g_AudioMan.StopMusic();
-
-		m_ActivityAllowsSaving = false;
 
 		m_StartActivity.reset(activity);
 		m_Activity.reset(dynamic_cast<Activity *>(m_StartActivity->Clone()));

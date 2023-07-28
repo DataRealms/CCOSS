@@ -33,7 +33,7 @@ namespace RTE {
 		if (!System::IsInExternalModuleValidationMode()) {
 			// Attempt to save the game itself, so the player can hopefully resume where they were.
 			bool abortSaveMade = false;
-			if (g_ActivityMan.GetActivityAllowsSaving()) {
+			if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->CanBeUserSaved()) {
 				abortSaveMade = g_ActivityMan.SaveCurrentGame("AbortSave");
 			}
 

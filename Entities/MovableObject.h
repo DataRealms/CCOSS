@@ -1275,19 +1275,6 @@ enum MOType
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-// Arguments:       The other MO hit. Ownership is not transferred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this hit.
-
-    virtual bool OnMOHit(MovableObject *pOtherMO);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Pure v. method:  OnBounce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Defines what should happen when this MovableObject hits and then

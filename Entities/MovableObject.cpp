@@ -746,11 +746,7 @@ bool MovableObject::OnMOHit(HitData &hd)
     if (hd.RootBody[HITOR] != hd.RootBody[HITEE] && (hd.Body[HITOR] == this || hd.Body[HITEE] == this)) {
         RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.Body[hd.Body[HITOR] == this ? HITEE : HITOR], hd.RootBody[hd.Body[HITOR] == this ? HITEE : HITOR]});
     }
-    return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.RootBody[hd.RootBody[HITOR] == this ? HITEE : HITOR]);
-}
-
-bool MovableObject::OnMOHit(MovableObject *pOtherMO) {
-	return false;
+	return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = false;
 }
 
 void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {

@@ -1465,12 +1465,6 @@ namespace RTE {
 		if (!intersectedMO) {
 			return false;
 		}
-		if (m_OwnerMOSR->OnMOHit(intersectedMO)) {
-			return false;
-		}
-		if (intersectedMO->OnMOHit(m_OwnerMOSR->GetRootParent())) {
-			return false;
-		}
 
 		std::list<Atom *> intersectingAtoms;
 

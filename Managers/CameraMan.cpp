@@ -75,7 +75,7 @@ namespace RTE {
 		Screen &screen = m_Screens[screenId];
 
 		// See if it would make sense to automatically wrap.
-		const SLTerrain* terrain = g_SceneMan.GetScene()->GetTerrain();
+		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
 		float targetXWrapped = terrain->WrapsX() && (std::fabs(targetCenter.GetX() - screen.ScrollTarget.GetX()) > static_cast<float>(terrain->GetBitmap()->w / 2));
 		float targetYWrapped = terrain->WrapsY() && (std::fabs(targetCenter.GetY() - screen.ScrollTarget.GetY()) > static_cast<float>(terrain->GetBitmap()->h / 2));
 

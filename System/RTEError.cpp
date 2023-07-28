@@ -119,7 +119,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RTEError::SetExceptionHandler() {
+	void RTEError::SetExceptionHandlers() {
 #ifdef _WIN32
 #ifndef TARGET_MACHINE_X86
 		SetUnhandledExceptionFilter(RTEWindowsExceptionHandler);

@@ -361,11 +361,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
+/// Self-invoking lambda that installs exception handlers before Main is executed.
+/// </summary>
+static const bool RTESetExceptionHandlers = []() {
+	RTEError::SetExceptionHandlers();
+	return true;
+}();
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
-	RTEError::SetExceptionHandler();
-
 	install_allegro(SYSTEM_NONE, &errno, std::atexit);
 	loadpng_init();
 

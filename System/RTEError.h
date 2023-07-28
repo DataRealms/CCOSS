@@ -33,9 +33,9 @@ namespace RTE {
 		static std::source_location s_LastIgnoredAssertLocation; //!< The last ignored assert call site.
 
 		/// <summary>
-		/// Sets a custom handler for C++ and (possibly) OS exceptions.
+		/// Sets custom handlers for C++ and platform specific exceptions.
 		/// </summary>
-		static void SetExceptionHandler();
+		static void SetExceptionHandlers();
 
 		/// <summary>
 		/// Pops up a message box dialog in the OS. For debug purposes mostly.

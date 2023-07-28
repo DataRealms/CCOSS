@@ -23,7 +23,9 @@ namespace RTE {
 
 #ifdef _WIN32
 	/// <summary>
-	/// Custom exception handler for Windows exceptions.
+	/// Custom exception handler for Windows SEH.
+	/// Unfortunately this also intercepts any C++ exceptions and turns them into SE bullshit, meaning we can't get and rethrow the current C++ exception to get what() from it.
+	/// Even if we "translate" SE exceptions to C++ exceptions it's still ass and doesn't really work, so this is what it is and it is good enough.
 	/// </summary>
 	/// <param name="exceptPtr">Struct containing information about the exception. This will be provided by the OS exception handler.</param>
 	static LONG WINAPI RTEWindowsExceptionHandler([[maybe_unused]] EXCEPTION_POINTERS *exceptPtr) {
@@ -120,15 +122,33 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void RTEError::SetExceptionHandlers() {
+		// Basic handling for C++ exceptions. Doesn't give us much meaningful information.
+		[[maybe_unused]] static const terminate_handler terminateHandler = []() {
+			std::exception_ptr currentException = std::current_exception();
+
+			if (currentException) {
+				try {
+					std::rethrow_exception(currentException);
+				} catch (const std::bad_exception &exception) {
+					RTEError::UnhandledExceptionFunc("Unable to get exception description because: " + std::string(exception.what()) + ".\n");
+				} catch (const std::exception &exception) {
+					RTEError::UnhandledExceptionFunc(std::string(exception.what()) + ".\n");
+				}
+			} else {
+				RTEError::UnhandledExceptionFunc("Terminate was called without an exception.\nMay god have mercy on us all.");
+			}
+		};
+
 #ifdef _WIN32
 #ifndef TARGET_MACHINE_X86
 		SetUnhandledExceptionFilter(RTEWindowsExceptionHandler);
+#else
+		// This only works for C++ exceptions and doesn't catch and access violations and such, or provide much meaningful info.
+		std::set_terminate(terminateHandler);
 #endif
 #else
-		// TODO: Deal with other systems.
-		//std::set_terminate([]() {
-		//	AbortFunc(s_LastIgnoredAssertDescription, s_LastIgnoredAssertLocation);
-		//});
+		// TODO: Deal with segfaults and such on other systems. Probably need to use Unix signal junk to get any meaningful information. Good luck and godspeed to whoever deals with this.
+		std::set_terminate(terminateHandler);
 #endif
 	}
 

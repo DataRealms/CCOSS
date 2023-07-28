@@ -1,4 +1,5 @@
 sources += files(
+'Base64/base64.cpp',
 'MicroPather/micropather.cpp',
 #'glad/gl.c',
 'StandardIncludes.cpp',

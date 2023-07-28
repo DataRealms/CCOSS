@@ -701,26 +701,26 @@ namespace RTE {
 		/// </summary>
 		/// <param name="key">The key of the saved string.</param>
 		/// <param name="value">The string to save.</param>
-		void SaveString(const std::string &key, const std::string &value) { m_SavedValues.m_SavedStrings.m_Data[key] = value; };
+		void SaveString(const std::string &key, const std::string &value) { m_SavedValues.SaveString(key, value); };
 
 		/// <summary>
 		/// Loads and returns a previously saved string.
 		/// </summary>
 		/// <param name="key">The key of the string to load.</param>
-		const std::string & LoadString(const std::string &key) { return m_SavedValues.m_SavedStrings.m_Data[key]; };
+		const std::string & LoadString(const std::string &key) { return m_SavedValues.LoadString(key); };
 
 		/// <summary>
 		/// Saves a number which will be stored in our ini.
 		/// </summary>
 		/// <param name="key">The key of the saved number.</param>
 		/// <param name="value">The number to save.</param>
-		void SaveNumber(const std::string &key, float value) { m_SavedValues.m_SavedNumbers.m_Data[key] = value; };
+		void SaveNumber(const std::string &key, float value) { m_SavedValues.SaveNumber(key, value); };
 
 		/// <summary>
 		/// Loads and returns a previously saved number.
 		/// </summary>
 		/// <param name="key">The key of the string to load.</param>
-		float LoadNumber(const std::string &key) { return m_SavedValues.m_SavedNumbers.m_Data[key]; };
+		float LoadNumber(const std::string &key) { return m_SavedValues.LoadNumber(key); };
 #pragma endregion
 
 	protected:

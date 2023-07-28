@@ -28,7 +28,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
+		/// <param name="createForPauseMenu">Whether this SettingsGUI is part of PauseMenuGUI and should have a slightly different layout.</param>
+		SettingsGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool createForPauseMenu = false);
 #pragma endregion
 
 #pragma region Getters
@@ -37,14 +38,14 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box. Ownership is NOT transferred!</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
+#pragma endregion
 
+#pragma region Concrete Methods
 		/// <summary>
 		/// Closes the currently active GUICollectionBox that acts as a dialog box by hiding it. If the active dialog box is a sub-menu, disables it.
 		/// </summary>
 		void CloseActiveDialogBox() const;
-#pragma endregion
 
-#pragma region Concrete Methods
 		/// <summary>
 		/// Sets the currently active settings menu screen again to refresh it. This is used in case textboxes were left empty or focused on settings screen exit via back button or esc.
 		/// </summary>

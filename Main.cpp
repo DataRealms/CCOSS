@@ -28,7 +28,9 @@
 
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
+#include "PauseMenuGUI.h"
 #include "TitleScreen.h"
+#include "LoadingScreen.h"
 
 #include "MenuMan.h"
 #include "ConsoleMan.h"
@@ -220,6 +222,7 @@ namespace RTE {
 				g_MenuMan.Reinitialize();
 				g_ConsoleMan.Destroy();
 				g_ConsoleMan.Initialize();
+				g_LoadingScreen.CreateLoadingSplash();
 				g_WindowMan.CompleteResolutionChange();
 			}
 
@@ -245,7 +248,16 @@ namespace RTE {
 		}
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
+		if (g_ActivityMan.ActivitySetToRestart()) {
+			g_LoadingScreen.DrawLoadingSplash();
+			g_WindowMan.UploadFrame();
+			if (!g_ActivityMan.RestartActivity()) {
+				// This doesn't work.
+				// Somewhat related to https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/472
+				// Deal with later.
+				// g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+			}
+		}
 
 		long long updateStartTime = 0;
 		long long updateTotalTime = 0;
@@ -297,21 +309,18 @@ namespace RTE {
 
 				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
-					if (g_MetaMan.GameInProgress()) {
-						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
-					} else if (!g_ActivityMan.ActivitySetToRestart()) {
-						const Activity *activity = g_ActivityMan.GetActivity();
-						// If we edited something then return to main menu instead of scenario menu.
-						if (activity && activity->GetPresetName() == "None") {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
-						} else {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
-						}
+
+					if (!g_ActivityMan.ActivitySetToRestart()) {
+						g_MenuMan.HandleTransitionIntoMenuLoop();
+						RunMenuLoop();
 					}
-					if (!g_ActivityMan.ActivitySetToRestart()) { RunMenuLoop(); }
 				}
-				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
-					break;
+				if (g_ActivityMan.ActivitySetToRestart()) {
+					g_LoadingScreen.DrawLoadingSplash();
+					g_WindowMan.UploadFrame();
+					if (!g_ActivityMan.RestartActivity()) {
+						break;
+					}
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {
 					g_ActivityMan.ResumeActivity();

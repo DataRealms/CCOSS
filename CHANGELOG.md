@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
-- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable experimental support for multithreaded Lua and AI. Please note that this is in a testing phase and is likely to cause bugs, especially with mods.
+- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
+
+- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to on.
 
 - Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
 	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  
@@ -51,6 +53,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed music resuming from incorrect position when unpausing.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

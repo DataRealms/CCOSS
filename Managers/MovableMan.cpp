@@ -2051,7 +2051,6 @@ void MovableMan::UpdateControllers()
     {
         for (Actor* actor : m_Actors) {
             actor->GetController()->Update();
-            actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);
         }
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
@@ -2065,6 +2064,10 @@ void MovableMan::UpdateControllers()
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
+
+        for (Actor* actor : m_Actors) {
+            actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);
+        }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);
 }

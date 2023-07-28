@@ -1260,12 +1260,12 @@ float Actor::EstimateDigStrength() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
-    if (m_AllLoadedScripts.empty() || m_FunctionsAndScripts.at("UpdateAI").empty()) {
-        return false;
+void Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
+    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun);
+    if (scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
+        // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates
+         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, ThreadScriptsToRun::MultiThreaded); // This isn't a typo!
     }
-
-    return RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun) >= 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

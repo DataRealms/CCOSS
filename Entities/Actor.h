@@ -76,7 +76,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnControllerInputModeChange");
+AddScriptFunctionNames(MOSRotating, "UpdateAI", "SyncedUpdateAI", "OnControllerInputModeChange");
 SerializableOverrideMethods;
 ClassInfoGetters;
 
@@ -1137,7 +1137,7 @@ ClassInfoGetters;
 // Return value:    Whether there was an AI Update function defined for this in its script,
 //                  and if it was executed successfully.
 
-	bool UpdateAIScripted(ThreadScriptsToRun scriptsToRun);
+	void UpdateAIScripted(ThreadScriptsToRun scriptsToRun);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

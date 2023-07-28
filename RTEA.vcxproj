@@ -636,6 +636,7 @@
     <ClInclude Include="System\Semver200\semver200.h" />
     <ClInclude Include="System\Semver200\version.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
+    <ClInclude Include="System\StackWalker\StackWalker.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -866,6 +867,7 @@
     <ClCompile Include="System\Semver200\Semver200_parser.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
     <ClCompile Include="System\SpatialPartitionGrid.cpp" />
+    <ClCompile Include="System\StackWalker\StackWalker.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>

@@ -34,6 +34,9 @@
     <Filter Include="GUI\Wrappers">
       <UniqueIdentifier>{14ff3fdb-4366-4bed-8b6e-ddcf72987b81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\StackWalker">
+      <UniqueIdentifier>{a8668dc1-51c5-418d-91bf-7ee92f008cb1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -582,6 +585,9 @@
     <ClInclude Include="System\GameVersion.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\StackWalker\StackWalker.h">
+      <Filter>System\StackWalker</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1124,6 +1130,9 @@
     </ClCompile>
     <ClCompile Include="System\Semver200\Semver200_parser.cpp">
       <Filter>System\Semver200</Filter>
+    </ClCompile>
+    <ClCompile Include="System\StackWalker\StackWalker.cpp">
+      <Filter>System\StackWalker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

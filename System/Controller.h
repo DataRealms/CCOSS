@@ -336,10 +336,10 @@ namespace RTE {
 
 #pragma region Misc
 		/// <summary>
-		/// Overrides this actor's controller, setting it to match another controller. This is useful for multithreaded AI (where the Lua script can have it's own controller), or for telling multiple Actors to all do exactly the same thing.
+		/// Overrides this controller, setting it to match another controller. This is useful for multithreading, where the Lua script can use a copied controller in a multi-threaded context, before overriding the controller in a single-threaded context.
 		/// This is exposed to Lua API to be clear, whereas ownership relies on operator overloading is rather temperamental :)
 		/// </summary>
-		/// <param="otherControllerr">The other controller's state to copy. Ownership is not transferred</returns>
+		/// <param="otherController">The other controller's state to copy. Ownership is not transferred</returns>
 		void Override(const Controller& otherController);
 #pragma endregion
 

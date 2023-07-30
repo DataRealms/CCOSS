@@ -7,7 +7,7 @@
 #include "loadpng.h"
 
 #ifdef _WIN32
-#define DebuggerBreak __debugbreak()
+#define DebuggerBreak IsDebuggerPresent() ? __debugbreak() : std::abort();
 #else
 #define DebuggerBreak std::abort()
 #endif

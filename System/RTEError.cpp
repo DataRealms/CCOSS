@@ -79,7 +79,7 @@ namespace RTE {
 		};
 
 		// Attempts to get a symbol name from the exception address.
-		static auto getSymbolNameFromAddress = [](HANDLE64 &procHandle, const size_t &exceptAddr) {
+		static auto getSymbolNameFromAddress = [](HANDLE &procHandle, const size_t &exceptAddr) {
 			if (SymInitialize(procHandle, nullptr, TRUE)) {
 				SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
 
@@ -100,7 +100,7 @@ namespace RTE {
 			return "Unable to get symbol name at address.\nSymbol Handler failed to initialize " + (error.empty() ? "for reasons unknown to man." : "because\n\n" + error);
 		};
 
-		HANDLE64 processHandle = GetCurrentProcess();
+		HANDLE processHandle = GetCurrentProcess();
 
 		std::stringstream exceptionDescription;
 		DWORD exceptionCode = exceptPtr->ExceptionRecord->ExceptionCode;

@@ -305,9 +305,7 @@ namespace RTE {
 
 			std::string callstack = "";
 
-			// This is being stupid and loops through this whole method to infinity and beyond in debug builds.
-			// This is a problem but we can live with it because it's not supposed to run in debug builds anyway.
-#if defined (_WIN32) && defined (RELEASE_BUILD)
+#ifdef _WIN32
 			RTEStackTrace stackTrace;
 			callstack += ("\n\n" + stackTrace.GetCallStackAsString());
 #endif

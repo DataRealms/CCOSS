@@ -126,7 +126,7 @@ namespace RTE {
 
 	void RTEError::SetExceptionHandlers() {
 		// Basic handling for C++ exceptions. Doesn't give us much meaningful information.
-		[[maybe_unused]] static const terminate_handler terminateHandler = []() {
+		[[maybe_unused]] static const std::terminate_handler terminateHandler = []() {
 			std::exception_ptr currentException = std::current_exception();
 
 			if (currentException) {

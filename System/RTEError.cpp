@@ -330,7 +330,7 @@ namespace RTE {
 
 			if (ShowAbortMessageBox(abortMessage)) {
 				// Enable restarting in release builds only.
-				// Once this exits the debugger is detached and there doesn't seem to be a way to programatically re-attach it to the new instance.
+				// Once this exits the debugger is detached and while there does seem to be a way to programatically re-attach it to the new instance (at least in Windows), it is so incredibly ass and I cannot even begin to can.
 				// This will prevent your day from being ruined when your breakpoints don't trigger during a meltdown because you launched a new instance and didn't realize you're not attached to it.
 #ifdef RELEASE_BUILD
 #ifdef _WIN32

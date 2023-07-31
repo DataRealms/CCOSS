@@ -88,7 +88,7 @@ elif compiler.get_argument_syntax()== 'msvc'
   message('cl detected')
   elfname = 'Cortex Command'
   extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1', '-bigobj']
-  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
+  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib', 'dbghelp.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x86'
     elfname += ' x86'
   endif

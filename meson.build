@@ -42,7 +42,7 @@ if compiler.get_id() == 'clang'
   error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
 endif
 
-if host_machine.system() == 'darwin' and get_option('optimization') == 3
+if host_machine.system() == 'darwin' and get_option('optimization') == '3'
   error('Optimization level 3 is currently unsupported on macos.')
 endif
 

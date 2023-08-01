@@ -1,4 +1,4 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'b_lto=true', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'optimization=2', 'b_lto=true', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
@@ -42,6 +42,10 @@ if compiler.get_id() == 'clang'
   error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
 endif
 
+if host_machine.system() == 'darwin' and get_option('optimization') == 3
+  error('Optimization level 3 is currently unsupported on macos.')
+endif
+
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
   message('gcc detected')
@@ -70,7 +74,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
-      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+      preprocessor_flags += ['-DRELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
       preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'

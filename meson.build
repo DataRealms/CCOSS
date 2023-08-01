@@ -1,4 +1,4 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'optimization=2', 'b_lto=true', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
@@ -42,8 +42,12 @@ if compiler.get_id() == 'clang'
   error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
 endif
 
-if host_machine.system() == 'darwin' and get_option('optimization') == '3'
-  error('Optimization level 3 is currently unsupported on macos.')
+if host_machine.system() == 'darwin' and get_option('b_lto')
+  error('LTO is currently unsupported on macos. Please disable with meson configure -Db_lto=false')
+endif
+
+if get_option('debug') and get_option('b_lto')
+  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
 endif
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
@@ -192,9 +196,6 @@ cccpelf = executable(
   win_subsystem:'windows', # Windows mark as GUI app
 )
 
-if get_option('debug') and get_option('b_lto')
-  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
-endif
 
 #### Installing #####
 base_exclude_files = [

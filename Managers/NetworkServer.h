@@ -276,7 +276,7 @@ namespace RTE {
 
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
-		std::vector<MsgInput> m_InputMessages[c_MaxClients]; //!<
+		std::vector<MsgInput> m_InputMessages[c_MaxClients]; //!< Message Queue for received input events to be processed this frame.
 
 		unsigned char m_SceneID; //!<
 

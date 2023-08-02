@@ -1823,8 +1823,7 @@ namespace RTE {
 		if (processInput) {
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (!m_InputMessages[player].empty()) {
-					MsgInput msg = m_InputMessages[player].front();
-					for (auto &msg: m_InputMessages[player]) {
+					for (const MsgInput &msg: m_InputMessages[player]) {
 						ProcessInputMsg(player, msg);
 					}
 					m_InputMessages[player].clear();

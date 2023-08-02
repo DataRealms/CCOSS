@@ -538,7 +538,7 @@ namespace RTE {
 				skip = false;
 			}
 
-			if (!skip) { m_InputMessages[player].push(msg); }
+			if (!skip) { m_InputMessages[player].push_back(msg); }
 		}
 	}
 
@@ -596,9 +596,7 @@ namespace RTE {
 
 	void NetworkServer::ClearInputMessages(short player) {
 		if (player >= 0 && player < c_MaxClients) {
-			while (!m_InputMessages[player].empty()) {
-				m_InputMessages[player].pop();
-			}
+			m_InputMessages[player].clear();
 		}
 	}
 
@@ -1826,8 +1824,10 @@ namespace RTE {
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (!m_InputMessages[player].empty()) {
 					MsgInput msg = m_InputMessages[player].front();
-					m_InputMessages[player].pop();
-					ProcessInputMsg(player, msg);
+					for (auto &msg: m_InputMessages[player]) {
+						ProcessInputMsg(player, msg);
+					}
+					m_InputMessages[player].clear();
 				}
 			}
 

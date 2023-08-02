@@ -570,7 +570,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">The player to set for.</param>
 		/// <param name="input">The new position of the mouse.</param>
-		void SetNetworkMouseMovement(int player, const Vector &input) { m_NetworkAccumulatedRawMouseMovement[player] = input; }
+		void SetNetworkMouseMovement(int player, const Vector &input) { m_NetworkAccumulatedRawMouseMovement[player] += input; }
 
 		/// <summary>
 		/// Sets whether an input element is held by a player during network multiplayer.

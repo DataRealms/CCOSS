@@ -91,7 +91,7 @@ namespace RTE {
 
 				if (SymFromAddr(procHandle, exceptAddr, nullptr, symbolInfo)) {
 					std::string symbolName = symbolInfo->Name;
-					return "The symbol name at this address is " + (symbolName.empty() ? "empty for reasons unknown to man." : "'" + symbolName + "'.");
+					return "The symbol name at this address is" + (symbolName.empty() ? " empty for reasons unknown to man." : ": \"" + symbolName + "\"");
 				} else {
 					return "Unable to get symbol name at address because:\n\n" + getLastWinErrorAsString();
 				}
@@ -112,7 +112,10 @@ namespace RTE {
 			return EXCEPTION_CONTINUE_EXECUTION;
 		}
 
-		exceptionDescription << getExceptionDescriptionFromCode(exceptionCode) << " at address 0x" << std::uppercase << std::hex << exceptionAddress << ".\n\n" << getSymbolNameFromAddress(processHandle, exceptionAddress) << std::endl;
+		std::string symbolNameAtAddress = getSymbolNameFromAddress(processHandle, exceptionAddress);
+		RTEError::FormatFunctionSignature(symbolNameAtAddress);
+
+		exceptionDescription << getExceptionDescriptionFromCode(exceptionCode) << " at address 0x" << std::uppercase << std::hex << exceptionAddress << ".\n\n" << symbolNameAtAddress << std::endl;
 
 		RTEStackTrace stackTrace;
 
@@ -291,6 +294,7 @@ namespace RTE {
 
 			std::string lineNum = std::to_string(srcLocation.line());
 			std::string funcName = srcLocation.function_name();
+			FormatFunctionSignature(funcName);
 
 			std::string abortMessage = "Runtime Error in file '" + fileName + "', line " + lineNum + ",\nin function '" + funcName + "'\nbecause:\n\n" + description + "\n";
 
@@ -405,5 +409,29 @@ namespace RTE {
 			success = g_ActivityMan.SaveCurrentGame("AbortSave");
 		}
 		return success;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void RTEError::FormatFunctionSignature(std::string &symbolName) {
+		// TODO: Expand this with more dumb signatures, or make something that makes more sense.
+		static const std::array<std::pair<std::regex, std::string>, 3> stlSigs {{
+			{std::regex("( >)"), ">"},
+			{std::regex("(std::basic_string<char,std::char_traits<char>,std::allocator<char>>)"), "std::string"},
+			{std::regex("(class ?std::basic_string<char,struct ?std::char_traits<char>,class ?std::allocator<char>>)"), "std::string"}
+		}};
+		for (const auto &[fullSig, simpleSig] : stlSigs) {
+			symbolName = std::regex_replace(symbolName, fullSig, simpleSig);
+		}
+		for (size_t pos = 0;;) {
+			pos += 100;
+			if (pos < symbolName.size()) {
+				if (size_t lastCommaPos = symbolName.find_last_of(',', pos); lastCommaPos != std::string::npos) {
+					symbolName.insert(lastCommaPos + 1, "\n");
+				}
+			} else {
+				break;
+			}
+		}
 	}
 }

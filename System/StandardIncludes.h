@@ -84,6 +84,7 @@
 #include <atomic>
 #include <execution>
 #include <source_location>
+#include <regex>
 
 namespace std {
 

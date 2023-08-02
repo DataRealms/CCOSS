@@ -64,6 +64,12 @@ namespace RTE {
 		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
 		static void AssertFunc(const std::string &description, const std::source_location &srcLocation);
 
+		/// <summary>
+		/// Formats function signatures so they're slightly more sane.
+		/// </summary>
+		/// <param name="funcSig">Reference to the function signature to format.</param>
+		static void FormatFunctionSignature(std::string &funcSig);
+
 	private:
 
 		/// <summary>

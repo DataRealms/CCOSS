@@ -544,8 +544,8 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 			if (Attachable *attachableToDetach = GetNearestDetachableAttachableToOffset(parentOffsetToSet); attachableToDetach && m_DetachAttachablesBeforeGibbingFromWounds) {
 				RemoveAttachable(attachableToDetach, true, true);
 			} else {
+				MOSprite::ApplyImpulses(); // Makes gibs inherit the impulse when the object is gibbed by wounds
 				// TODO: Don't hardcode the blast strength!
-                MOSprite::ApplyImpulses(); // Makes gibs inherit the impulse when the object is gibbed by wounds
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
 				delete woundToAdd;
 				return;

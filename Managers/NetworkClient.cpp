@@ -238,7 +238,6 @@ namespace RTE {
 			m_MouseButtonReleasedState[i] = -1;
 		}
 		if (m_MouseWheelMoved != 0) {
-			std::cout << "Client wheel moved" << m_MouseWheelMoved << std::endl;
 			msg.MouseWheelMoved = m_MouseWheelMoved;
 			m_MouseWheelMoved = 0;
 		} else {

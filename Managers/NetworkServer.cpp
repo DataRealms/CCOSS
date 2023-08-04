@@ -1737,7 +1737,10 @@ namespace RTE {
 			double compressionRatio = (m_DataUncompressedTotal[i] > 0) ? static_cast<double>(m_DataSentTotal[i]) / static_cast<double>(m_DataUncompressedTotal[i]) : 0;
 			double emptyRatio = (m_EmptyBlocks[i] > 0) ? static_cast<double>(m_FullBlocks[i]) / static_cast<double>(m_EmptyBlocks[i]) : 0;
 
-			std::string playerName = IsPlayerConnected(i) ? GetPlayerName(i) : "- NO PLAYER -";
+			std::string playerName = " - NO PLAYER - ";
+			if (IsPlayerConnected(i)) {
+				playerName = GetPlayerName(i);
+			}
 
 			// Jesus christ
 			std::snprintf(buf, sizeof(buf),
@@ -1747,18 +1750,18 @@ namespace RTE {
 				"R : % .2f\n"
 				"Full Blck %lu (%.1f Kb)\n"
 				"Empty Blck %lu (%.1f Kb)\n"
-				"Frame Kb : % lu\n"
-				"Glow Kb : % lu\n"
-				"Sound Kb : % lu\n"
-				"Scene Kb : % lu\n"
-				"Frames sent : % uK\n"
-				"Frame skipped : % uK\n"
-				"Blocks full : % uK\n"
-				"Blocks empty : % uK\n"
+				"Frame Kb : %lu\n"
+				"Glow Kb : %lu\n"
+				"Sound Kb : %lu\n"
+				"Scene Kb : %lu\n"
+				"Frames sent : %uK\n"
+				"Frame skipped : %uK\n"
+				"Blocks full : %uK\n"
+				"Blocks empty : %uK\n"
 				"Blk Ratio : % .2f\n"
 				"Frames ms : % d\n"
 				"Send ms % d\n"
-				"Total Data % lu MB",
+				"Total Data %lu MB",
 
 				(i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
 				(i < c_MaxClients) ? m_Ping[i] : 0,

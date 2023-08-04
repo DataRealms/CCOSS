@@ -376,6 +376,10 @@ int main(int argc, char **argv) {
 
 	HandleMainArgs(argc, argv);
 
+	if (g_NetworkServer.IsServerModeEnabled()) {
+		SDL_ShowCursor(SDL_ENABLE);
+	}
+
 	g_PresetMan.LoadAllDataModules();
 
 	if (!System::IsInExternalModuleValidationMode()) {

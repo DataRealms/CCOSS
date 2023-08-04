@@ -370,7 +370,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
-		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+		if (!IsInMultiplayerMode() && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			m_TrapMousePos = trap;
 			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(trap));
 		}

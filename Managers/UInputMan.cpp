@@ -986,34 +986,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::UpdateNetworkMouseMovement() {
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			if (!m_NetworkAccumulatedRawMouseMovement[player].IsZero()) {
-				// TODO: Figure out why we're multiplying by 3 here. Possibly related to mouse sensitivity.
-				m_NetworkAnalogMoveData[player].m_X += m_NetworkAccumulatedRawMouseMovement[player].m_X * 3;
-				m_NetworkAnalogMoveData[player].m_Y += m_NetworkAccumulatedRawMouseMovement[player].m_Y * 3;
-				m_NetworkAnalogMoveData[player].CapMagnitude(m_MouseTrapRadius);
-			}
-			m_NetworkAccumulatedRawMouseMovement[player].Reset();
-
-			// Clear mouse events and inputs as they should've been already processed during by recipients.
-			// This is important so mouse readings are correct, e.g. to ensure events don't trigger multiple times on a single press.
-			for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
-				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
-					m_NetworkInputElementState[player][element][inputState] = false;
-				}
-				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
-					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
-				}
-			}
-
-			// Reset mouse wheel state to stop over-wheeling
-			m_NetworkMouseWheelState[player] = 0;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void UInputMan::UpdateMouseInput() {
 		// Detect and store mouse movement input, translated to analog stick emulation
 		int mousePlayer = MouseUsedByPlayer();
@@ -1039,8 +1011,9 @@ namespace RTE {
 			}
 		}
 	}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 	void UInputMan::UpdateJoystickAxis(std::vector<Gamepad>::iterator device, int axis, int value) {
 		if (device != s_PrevJoystickStates.end()) {
@@ -1183,8 +1156,49 @@ namespace RTE {
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void UInputMan::UpdateNetworkMouseMovement() {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+			if (!m_NetworkAccumulatedRawMouseMovement[player].IsZero()) {
+				// TODO: Figure out why we're multiplying by 3 here. Possibly related to mouse sensitivity.
+				m_NetworkAnalogMoveData[player].m_X += m_NetworkAccumulatedRawMouseMovement[player].m_X * 3;
+				m_NetworkAnalogMoveData[player].m_Y += m_NetworkAccumulatedRawMouseMovement[player].m_Y * 3;
+				m_NetworkAnalogMoveData[player].CapMagnitude(m_MouseTrapRadius);
+			}
+			m_NetworkAccumulatedRawMouseMovement[player].Reset();
+
+			// Clear mouse events and inputs as they should've been already processed during by recipients.
+			// This is important so mouse readings are correct, e.g. to ensure events don't trigger multiple times on a single press.
+			for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
+				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+					m_NetworkInputElementState[player][element][inputState] = false;
+				}
+				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
+					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
+				}
+			}
+
+			// Reset mouse wheel state to stop over-wheeling
+			m_NetworkMouseWheelState[player] = 0;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void UInputMan::SetNetworkInputElementState(int player, int element, InputState whichState, bool newState) {
+		if (element >= InputElements::INPUT_L_UP && element < InputElements::INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			m_NetworkInputElementState[player][element][whichState] |= newState;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void UInputMan::SetNetworkMouseButtonState(int player, int whichButton, InputState whichState, bool newState) {
+		if (whichButton >= MouseButtons::MOUSE_LEFT && whichButton < MouseButtons::MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+			m_NetworkMouseButtonState[player][whichButton][whichState] |= newState;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void UInputMan::StoreInputEventsForNextUpdate() {
 		// Store pressed and released events to be picked by NetworkClient during its update. These will be cleared after update so we don't care about false but we store the result regardless.
 		for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
@@ -1193,4 +1207,8 @@ namespace RTE {
 			}
 		}
 	}
+
+
+
+
 }

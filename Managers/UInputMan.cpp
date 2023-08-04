@@ -12,9 +12,6 @@
 #include "NetworkServer.h"
 
 #include "SDL.h"
-
-#include "imgui/imgui.h"
-
 namespace RTE {
 
 	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_PrevKeyStates;

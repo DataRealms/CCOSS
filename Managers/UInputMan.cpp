@@ -13,6 +13,8 @@
 
 #include "SDL.h"
 
+#include "imgui/imgui.h"
+
 namespace RTE {
 
 	std::array<uint8_t, SDL_NUM_SCANCODES> UInputMan::s_PrevKeyStates;
@@ -67,10 +69,11 @@ namespace RTE {
 
 			for (int inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
 				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
-					m_NetworkInputElementState[player][element][inputState] = false;
+					m_NetworkServerChangedInputElementState[player][element] = false;
+					m_NetworkServerPreviousInputElementState[player][element] = false;
 				}
 				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
-					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
+					m_NetworkServerChangedMouseButtonState[player][mouseButton] = false;
 				}
 			}
 			m_NetworkAccumulatedRawMouseMovement[player].Reset();
@@ -570,7 +573,7 @@ namespace RTE {
 
 	bool UInputMan::GetInputElementState(int whichPlayer, int whichElement, InputState whichState) {
 		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
-			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementState[whichPlayer][whichElement][whichState] : false;
+			return GetNetworkInputElementState(whichPlayer, whichElement, whichState);
 		}
 		bool elementState = false;
 		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
@@ -587,6 +590,22 @@ namespace RTE {
 			if (!elementState && element->JoyDirMapped()) { elementState = GetJoystickDirectionState(whichJoy, element->GetAxis(), element->GetDirection(), whichState); }
 		}
 		return elementState;
+	}
+
+	bool UInputMan::GetNetworkInputElementState(int whichPlayer, int whichElement, InputState whichState) {
+		if (!m_TrapMousePosPerPlayer[whichPlayer] || whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount || whichState < 0 || whichState > InputState::InputStateCount) {
+			return false;
+		}
+		switch (whichState) {
+			case InputState::Held:
+				return m_NetworkServerPreviousInputElementState[whichPlayer][whichElement];
+			case InputState::Pressed:
+				return m_NetworkServerPreviousInputElementState[whichPlayer][whichElement] && m_NetworkServerChangedInputElementState[whichPlayer][whichElement];
+			case InputState::Released:
+				return (!m_NetworkServerPreviousInputElementState[whichPlayer][whichElement]) && m_NetworkServerChangedInputElementState[whichPlayer][whichElement];
+			default:
+				return false;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -637,13 +656,13 @@ namespace RTE {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
 				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-					if (m_NetworkMouseButtonState[player][whichButton][whichState]) {
-						return m_NetworkMouseButtonState[player][whichButton][whichState];
+					if (m_NetworkServerChangedMouseButtonState[player][whichButton]) {
+						return m_NetworkServerChangedMouseButtonState[player][whichButton];
 					}
 				}
-				return m_NetworkMouseButtonState[Players::PlayerOne][whichButton][whichState];
+				return m_NetworkServerChangedMouseButtonState[Players::PlayerOne][whichButton];
 			} else {
-				return m_NetworkMouseButtonState[whichPlayer][whichButton][whichState];
+				return m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
 			}
 		}
 
@@ -739,6 +758,11 @@ namespace RTE {
 			std::fill(gamepad.m_Axis.begin(), gamepad.m_Axis.end(), 0);
 			std::fill(gamepad.m_DigitalAxis.begin(), gamepad.m_DigitalAxis.end(), 0);
 		}
+
+		if (IsInMultiplayerMode()) {
+			ClearNetworkChangedState();
+		}
+
 		m_TextInput.clear();
 		m_MouseWheelChange = 0;
 		m_RawMouseMovement.Reset();
@@ -789,7 +813,7 @@ namespace RTE {
 					s_CurrentMouseButtonStates[inputEvent.button.button] = static_cast<bool>(inputEvent.button.state);
 					break;
 				case SDL_MOUSEWHEEL:
-					m_MouseWheelChange = inputEvent.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? inputEvent.wheel.y : -inputEvent.wheel.y;
+					m_MouseWheelChange += inputEvent.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? inputEvent.wheel.y : -inputEvent.wheel.y;
 					break;
 				case SDL_CONTROLLERAXISMOTION:
 				case SDL_JOYAXISMOTION:
@@ -1168,33 +1192,36 @@ namespace RTE {
 			}
 			m_NetworkAccumulatedRawMouseMovement[player].Reset();
 
-			// Clear mouse events and inputs as they should've been already processed during by recipients.
-			// This is important so mouse readings are correct, e.g. to ensure events don't trigger multiple times on a single press.
-			for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
-				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
-					m_NetworkInputElementState[player][element][inputState] = false;
-				}
-				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
-					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
-				}
-			}
 
 			// Reset mouse wheel state to stop over-wheeling
 			m_NetworkMouseWheelState[player] = 0;
 		}
 	}
 
+	void UInputMan::ClearNetworkChangedState() {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+					m_NetworkServerChangedInputElementState[player][element] = false;
+				}
+				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
+					m_NetworkServerChangedMouseButtonState[player][mouseButton] = false;
+				}
+				m_NetworkMouseWheelState[player] = 0;
+			}
+	}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	void UInputMan::SetNetworkInputElementState(int player, int element, InputState whichState, bool newState) {
+	void UInputMan::SetNetworkInputElementState(int player, int element, bool newState) {
 		if (element >= InputElements::INPUT_L_UP && element < InputElements::INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
-			m_NetworkInputElementState[player][element][whichState] |= newState;
+			m_NetworkServerChangedInputElementState[player][element] = (newState != m_NetworkServerPreviousInputElementState[player][element]);
+			m_NetworkServerPreviousInputElementState[player][element] = newState;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void UInputMan::SetNetworkMouseButtonState(int player, int whichButton, InputState whichState, bool newState) {
 		if (whichButton >= MouseButtons::MOUSE_LEFT && whichButton < MouseButtons::MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
-			m_NetworkMouseButtonState[player][whichButton][whichState] |= newState;
+			m_NetworkServerChangedMouseButtonState[player][whichButton] = (newState != m_NetworkServerPreviousMouseButtonState[player][whichButton]);
+			m_NetworkServerPreviousMouseButtonState[player][whichButton] = newState;
 		}
 	}
 

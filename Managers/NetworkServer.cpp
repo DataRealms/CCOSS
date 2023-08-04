@@ -500,18 +500,14 @@ namespace RTE {
 			msg.MouseX = m->MouseX;
 			msg.MouseY = m->MouseY;
 			for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
-				msg.MouseButtonPressed[i] = m->MouseButtonPressed[i];
-				msg.MouseButtonReleased[i] = m->MouseButtonReleased[i];
-				msg.MouseButtonHeld[i] = m->MouseButtonHeld[i];
+				msg.MouseButtonState[i] = m->MouseButtonState[i];
 			}
 			msg.ResetActivityVote = m->ResetActivityVote;
 			msg.RestartActivityVote = m->RestartActivityVote;
 
 			msg.MouseWheelMoved = m->MouseWheelMoved;
 
-			msg.InputElementPressed = m->InputElementPressed;
-			msg.InputElementReleased = m->InputElementReleased;
-			msg.InputElementHeld = m->InputElementHeld;
+			msg.InputElementState = m->InputElementState;
 
 			bool skip = true;
 
@@ -522,18 +518,14 @@ namespace RTE {
 				if (msg.MouseY != lastmsg.MouseY) { skip = false; }
 
 				for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
-					if (msg.MouseButtonPressed[i] != lastmsg.MouseButtonPressed[i]) { skip = false; }
-					if (msg.MouseButtonReleased[i] != lastmsg.MouseButtonReleased[i]) { skip = false; }
-					if (msg.MouseButtonHeld[i] != lastmsg.MouseButtonHeld[i]) { skip = false; }
+					if (msg.MouseButtonState[i] != lastmsg.MouseButtonState[i]) { skip = false; }
 				}
 				if (msg.ResetActivityVote != lastmsg.ResetActivityVote) { skip = false; }
 				if (msg.RestartActivityVote != lastmsg.RestartActivityVote) { skip = false; }
 
 				if (msg.MouseWheelMoved != lastmsg.MouseWheelMoved) { skip = false; }
 
-				if (msg.InputElementPressed != lastmsg.InputElementPressed) { skip = false; }
-				if (msg.InputElementReleased != lastmsg.InputElementReleased) { skip = false; }
-				if (msg.InputElementHeld != lastmsg.InputElementHeld) { skip = false; }
+				if (msg.InputElementState != lastmsg.InputElementState) { skip = false; }
 			} else {
 				skip = false;
 			}
@@ -551,19 +543,13 @@ namespace RTE {
 			input.m_Y = msg.MouseY;
 			g_UInputMan.SetNetworkMouseMovement(player, input);
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_LEFT, msg.MouseButtonHeld[MOUSE_LEFT]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_LEFT, msg.MouseButtonPressed[MOUSE_LEFT]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_LEFT, msg.MouseButtonReleased[MOUSE_LEFT]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_LEFT, msg.MouseButtonState[MOUSE_LEFT]);
 
-			m_MouseState1[player] = (msg.MouseButtonPressed[MOUSE_LEFT] || msg.MouseButtonHeld[MOUSE_LEFT]) ? 1 : 0;
+			m_MouseState1[player] = (msg.MouseButtonState[MOUSE_LEFT]) ? 1 : 0;
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_RIGHT, msg.MouseButtonHeld[MOUSE_RIGHT]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_RIGHT, msg.MouseButtonPressed[MOUSE_RIGHT]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_RIGHT, msg.MouseButtonReleased[MOUSE_RIGHT]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_RIGHT, msg.MouseButtonState[MOUSE_RIGHT]);
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_MIDDLE, msg.MouseButtonHeld[MOUSE_MIDDLE]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_MIDDLE, msg.MouseButtonPressed[MOUSE_MIDDLE]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_MIDDLE, msg.MouseButtonReleased[MOUSE_MIDDLE]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_MIDDLE, msg.MouseButtonState[MOUSE_MIDDLE]);
 
 			GUIInput::SetNetworkMouseButton(player, m_MouseState1[player], m_MouseState2[player], m_MouseState3[player]);
 
@@ -573,11 +559,9 @@ namespace RTE {
 
 			// Store element states as bit flags
 			for (int i = 0; i < INPUT_COUNT; i++) {
-				bool val = (msg.InputElementHeld & bitMask) > 0;
+				bool val = (msg.InputElementState & bitMask) > 0;
 
-				g_UInputMan.SetNetworkInputElementHeldState(player, i, val);
-				g_UInputMan.SetNetworkInputElementPressedState(player, i, (msg.InputElementPressed & bitMask) > 0);
-				g_UInputMan.SetNetworkInputElementReleasedState(player, i, (msg.InputElementReleased & bitMask) > 0);
+				g_UInputMan.SetNetworkInputElementState(player, i, val);
 
 				bitMask <<= 1;
 			}

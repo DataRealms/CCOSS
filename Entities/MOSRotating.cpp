@@ -545,7 +545,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
-                MOSprite::ApplyImpulses(); // Makes gibs inherit the impulse when the object is gibbed by wounds
+                MOSprite::ApplyImpulses(GetMaterial()->GetRestitution()/2); // Makes gibs inherit the impulse when the object is gibbed by wounds
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
 				delete woundToAdd;
 				return;
@@ -1225,7 +1225,7 @@ void MOSRotating::ApplyForces() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MOSRotating::ApplyImpulses() {
+void MOSRotating::ApplyImpulses(float velScalar) {
 	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
 		if (!impulseForceOffset.IsZero()) { m_AngularVel += impulseForceOffset.GetPerpendicular().Dot(impulseForceVector) / m_pAtomGroup->GetMomentOfInertia(); }
 	}
@@ -1238,19 +1238,20 @@ void MOSRotating::ApplyImpulses() {
 	}
 	averagedImpulseForceOffset /= static_cast<float>(m_ImpulseForces.size());
 
-    MOSprite::ApplyImpulses(); // Ensure velocity is updated before gibs are generated
-
 	if (m_GibImpulseLimit > 0) {
 		float impulseLimit = m_GibImpulseLimit;
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-			DetachAttachablesFromImpulse(totalImpulse);
+            MOSprite::ApplyImpulses(GetMaterial()->GetRestitution()); // Ensure velocity is updated before gibs are generated
+			//DetachAttachablesFromImpulse(totalImpulse);
 			// Use the remainder of the impulses left over from detaching to gib the parent object.
 			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }
 		}
 	}
+
+    MOSprite::ApplyImpulses(); // Ensure velocity is updated before gibs are generated
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -239,7 +239,7 @@ namespace RTE {
 		if (gibImpulseLimitValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			m_ImpulseForces.push_back(std::pair<Vector, Vector> {-totalImpulseForce, Vector()});
-			MOSprite::ApplyImpulses(); // Makes gibs inherit the velocity of the attached attachable when gibbed by violence
+			MOSprite::ApplyImpulses(GetMaterial()->GetRestitution()); // Makes gibs inherit the velocity of the attached attachable when gibbed by violence
 			GibThis();
 			return false;
 		} else if (jointStrengthValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {

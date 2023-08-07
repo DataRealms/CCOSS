@@ -667,7 +667,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
             {
                 // PASSING OWNERSHIP INTO the Add* ones - we are clearing out this list!
 				if (Actor *actor = dynamic_cast<Actor *>(pMO)) {
-                    bool shouldPlace = placeUnits || dynamic_cast<ADoor *>(actor);
+                    bool shouldPlace = placeUnits || actor->IsInGroup("Bunker Systems");
 
                     // Because we don't save/load all data yet and do a bit of a hack with scene loading, we can potentially save a dead actor that still technically exists.
                     // If we find one of these, just skip them!

@@ -46,7 +46,7 @@ namespace RTE {
 		/// This also clears the accumulator, to avoid the case where the sim may update while paused when behind schedule.
 		/// </summary>
 		/// <param name="pause">Whether the sim should be paused or not.</param>
-		void PauseSim(bool pause = false) { m_SimPaused = pause; m_SimAccumulator = 0.0F; }
+		void PauseSim(bool pause = false) { m_SimPaused = pause; if(pause) m_SimAccumulator = 0.0F; }
 
 		/// <summary>
 		/// Tells whether there is enough sim time accumulated to do at least one physics update.

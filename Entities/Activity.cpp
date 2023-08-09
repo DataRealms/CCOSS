@@ -333,7 +333,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
-		g_AudioMan.FinishAllLoopingSounds();
+		g_AudioMan.FinishIngameLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
